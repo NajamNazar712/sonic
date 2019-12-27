@@ -249,7 +249,12 @@ class AdminReportsEmailController extends Controller
             else{
                 $avg_revenue[$month_average->origin_id] = 0;
             }
-            $avg_shipment[$month_average->origin_id] = $month_average->shipment_count / $weekdays_count;
+            if($weekdays_count != 0){
+                $avg_shipment[$month_average->origin_id] = $month_average->shipment_count / $weekdays_count;
+            }
+            else{
+                $avg_shipment[$month_average->origin_id] = 0;
+            }
             $month_speed[$month_average->origin_id] = $avg_shipment[$month_average->origin_id] * $total_month_weekdays_count;
             $total_shipments = $total_shipments + $month_average->shipment_count;
         }

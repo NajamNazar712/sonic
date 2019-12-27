@@ -221,6 +221,9 @@ class ShipperCRMController extends Controller
             }
         }
         else{
+            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                $shipment_ids = explode(',', $request->input('shipment_ids'));
+            }
             if(!empty($shipment_ids)){
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
@@ -228,14 +231,24 @@ class ShipperCRMController extends Controller
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         if($is_shipment){
                             if($is_shipment->case_nature_id != $nature_id){
-                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                }
+                                else{
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                }
                             }else{
 
                                 $present_shipments[] = $shipment->tracking_number;
                                 $flag = true;
                             }
                         }else{
-                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                            }
+                            else{
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            }
                         }
                     }
 

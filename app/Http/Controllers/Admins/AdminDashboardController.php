@@ -12,6 +12,7 @@ use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
+use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CityHistory;
@@ -48,6 +49,7 @@ use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Support\Facades\DB;
@@ -112,6 +114,7 @@ use App\Http\Models\RateStatus;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
@@ -1080,7 +1083,8 @@ class AdminDashboardController extends Controller
 
     }
     public function blockAccountsList(){
-        return view('admin.accounts.block_accounts_list');
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
+        return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson]);
     }
     public function UserStatus(Request $request){
 //        return $request;
@@ -1249,7 +1253,7 @@ class AdminDashboardController extends Controller
             $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $packaging_sizes = array();
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             if(count($packaging_material_types) > 0){
 
@@ -1296,7 +1300,7 @@ class AdminDashboardController extends Controller
         $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
         $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
         $storage_types = WmsStorageType::all()->where('status', 1);
-        $invoicing_cycles = InvoicingCycle::all();
+        $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
         $packaging_charges = array();
         if(count($packaging) > 0){
 
@@ -1340,17 +1344,37 @@ if(session('department_id') == 7){
             $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
             $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+            $packaging_sizes = array();
+            if(count($packaging_material_types) > 0){
 
+                foreach($packaging_material_types as $type){
+                    $packaging_sizes[$type->id] = $type->sizes;
+                }
+            }
+            
             $packaging_charges = array();
             if(count($packaging) > 0){
 
                 foreach($packaging as $charge){
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
+            }
+
+            $existing = 0;
+            if(session('department_id') == 7){
+                if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
+                    return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes]);
+                }
+                else{
+                    return view('admin.access_denied');
+                }
+            }
+            else{
+                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes]);
             }
 
         }
@@ -1374,7 +1398,7 @@ if(session('department_id') == 7){
             $e_wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
             $e_wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
             $e_storage_types = WmsStorageType::all()->where('status', 1);
-            $e_invoicing_cycles = InvoicingCycle::all();
+            $e_invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $e_discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_rate_status = $user['rate_status'];
             $e_packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
@@ -1408,9 +1432,15 @@ if(session('department_id') == 7){
             $wms_labelling_charges = WmsPendingLabellingCharge::where('user_id', $id)->first();
             $wms_storage_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $packaging_charges = array();
+            $packaging_sizes = array();
+            if(count($packaging_material_types) > 0){
 
+                foreach($packaging_material_types as $type){
+                    $packaging_sizes[$type->id] = $type->sizes;
+                }
+            }
             if(count($packaging) > 0){
 
                 foreach($packaging as $charge){
@@ -1420,32 +1450,19 @@ if(session('department_id') == 7){
             $existing = 1;
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
-                    return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing]);
+                    return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes]);
                 }
                 else{
                     return view('admin.access_denied');
                 }
             }
             else{
-                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types]);
+                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes]);
             }
         }
         else {
             return redirect(route('admin.accounts.pending'));
         }
-        $existing = 0;
-        if(session('department_id') == 7){
-            if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
-                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing]);
-            }
-            else{
-                return view('admin.access_denied');
-            }
-        }
-        else{
-            return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing]);
-        }
-
     }
 
     public function editRates(Request $request, $id){
@@ -2936,7 +2953,7 @@ if(session('department_id') == 7){
                 if($wms_user_info->exists()){
                     $wms_user_info = $wms_user_info->first();
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                    $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+                    $wms_user_info->invoicing_date = 1;
                     $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
@@ -2946,7 +2963,7 @@ if(session('department_id') == 7){
                     $wms_user_info->user_id = $id;
                     $wms_user_info->warehousing = 1;
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                    $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+                    $wms_user_info->invoicing_date = 1;
                     $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
@@ -2997,6 +3014,7 @@ if(session('department_id') == 7){
                         $ptype = new WmsPackingCharge();
                         $ptype->user_id = $id;
                         $ptype->packing_type_id = $packing;
+                        $ptype->packing_size_id = $request->packing_size[$key];
                         $ptype->charges = $request->packing_charges[$key];
                         $ptype->save();
                     }
@@ -4120,7 +4138,7 @@ if(session('department_id') == 7){
             $wms_user_info->user_id = $id;
             $wms_user_info->warehousing = 1;
             $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-            $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+            $wms_user_info->invoicing_date = 1;
             $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
             $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
             $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
@@ -4153,6 +4171,7 @@ if(session('department_id') == 7){
                     $ptype = new WmsPendingPackingCharge();
                     $ptype->user_id = $id;
                     $ptype->packing_type_id = $packing;
+                    $ptype->packing_size_id = $request->packing_size[$key];
                     $ptype->charges = $request->packing_charges[$key];
                     $ptype->save();
                 }
@@ -4623,7 +4642,7 @@ if(session('department_id') == 7){
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
                     $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
-                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->invoicing_date = 1;
                     $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
@@ -4658,6 +4677,7 @@ if(session('department_id') == 7){
                         $history_packing_charge = new WmsHistoryPackingCharge();
                         $history_packing_charge->user_id = $id;
                         $history_packing_charge->packing_type_id = $packing_charges['packing_type_id'];
+                        $history_packing_charge->packing_size_id = $packing_charges['packing_size_id'];
                         $history_packing_charge->charges = $packing_charges['charges'];
                         $history_packing_charge->save();
                     }
@@ -4905,7 +4925,7 @@ if(session('department_id') == 7){
                         ]);
                     }
                 }
-                if($pendinginsurance = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
                         InsuranceCharge::create([
                             'user_id' => $id,
@@ -5129,7 +5149,7 @@ if(session('department_id') == 7){
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
                     $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
-                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->invoicing_date = 1;
                     $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
@@ -5164,6 +5184,7 @@ if(session('department_id') == 7){
                         $history_packing_charge = new WmsPackingCharge();
                         $history_packing_charge->user_id = $id;
                         $history_packing_charge->packing_type_id = $packing_charges['packing_type_id'];
+                        $history_packing_charge->packing_size_id = $packing_charges['packing_size_id'];
                         $history_packing_charge->charges = $packing_charges['charges'];
                         $history_packing_charge->save();
                     }
@@ -6273,7 +6294,7 @@ if(session('department_id') == 7){
             $wms_user_info->user_id = $id;
             $wms_user_info->warehousing = 1;
             $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-            $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+            $wms_user_info->invoicing_date = 1;
             $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
             $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
             $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
@@ -6306,6 +6327,7 @@ if(session('department_id') == 7){
                     $ptype = new WmsPackingCharge();
                     $ptype->user_id = $id;
                     $ptype->packing_type_id = $packing;
+                    $ptype->packing_size_id = $request->packing_size[$key];
                     $ptype->charges = $request->packing_charges[$key];
                     $ptype->save();
                 }
@@ -6327,7 +6349,7 @@ if(session('department_id') == 7){
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
 
-    public function activeAccountListAjax(){		
+    public function activeAccountListAjax(Request $request){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
            ->leftjoin('products as p','p.id','=','users.product_id')
            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
@@ -6340,7 +6362,7 @@ if(session('department_id') == 7){
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6350,6 +6372,10 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+
+        if($sale_persons = $request->get('sale_persons')){
+            $users = $users->whereIn('ad.id', $sale_persons);
         }
 
         return Datatables::of($users)
@@ -6383,6 +6409,20 @@ if(session('department_id') == 7){
                     return "Disable";
                 }
             })
+            ->editColumn('documents_status',function ($users){
+                if($users->documents_status == 0){
+                    return "Incomplete";
+                }
+                elseif($users->documents_status == 1){
+                    return "Pending for Approval";
+                }
+                elseif($users->documents_status == 2){
+                    return "Approved";
+                }
+                elseif($users->documents_status == 3){
+                    return "Rejected";
+                }
+            })
             ->editColumn('rejected_reason',function ($users){
                 if($users->rejected_reason != null && $users->rate_status==2){
                     return $users->rejected_reason;
@@ -6408,6 +6448,13 @@ if(session('department_id') == 7){
                 }
             })
             ->addColumn("action", function ($result) {
+                if(in_array($result->id, session('tagged_shippers'))){
+                    $multiple_sale_check = true;
+                }
+                else{
+                    $multiple_sale_check = false;
+                }
+
                 $sale_check= SalePersonTag::where('user_id',$result->id)->first();
                 $dropdown = '
                   <div class="btn-group">
@@ -6465,11 +6512,12 @@ if(session('department_id') == 7){
 
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if(!$merged->exists()){
-                    if(session('role_id') == 1 || session('role_id') == 4 || (($sale_check) && ($sale_check->user_id == Auth::id()) || in_array(241, session('permissions'))))
+                    if(session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions'))))
                     {
                         $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                     }
                 }
+                $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
                 $dropdown .= '
                     </div>
                   </div>
@@ -6482,7 +6530,7 @@ if(session('department_id') == 7){
     }
 
 
-    public function pendingAccountListAjax(){
+    public function pendingAccountListAjax(Request $request){
 
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products','products.id','=','users.product_id')
@@ -6494,7 +6542,7 @@ if(session('department_id') == 7){
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6503,6 +6551,9 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+        if($sale_persons = $request->get('sale_persons')){
+            $users = $users->whereIn('ad.id', $sale_persons);
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
@@ -6532,6 +6583,20 @@ if(session('department_id') == 7){
                     return "Requested";
                 }
             })
+            ->editColumn('documents_status',function ($users){
+                if($users->documents_status == 0){
+                    return "Incomplete";
+                }
+                elseif($users->documents_status == 1){
+                    return "Pending for Approval";
+                }
+                elseif($users->documents_status == 2){
+                    return "Approved";
+                }
+                elseif($users->documents_status == 3){
+                    return "Rejected";
+                }
+            })
             ->editColumn('status', function ($users) {
                 return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
             })
@@ -6555,6 +6620,12 @@ if(session('department_id') == 7){
                 }
             })
             ->addColumn("action", function ($result) {
+                if(in_array($result->id, session('tagged_shippers'))){
+                    $multiple_sale_check = true;
+                }
+                else{
+                    $multiple_sale_check = false;
+                }
                 $sale_check= SalePersonTag::where('user_id',$result->id)->first();
                 $dropdown = '
                   <div class="btn-group">
@@ -6623,7 +6694,7 @@ if(session('department_id') == 7){
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if($sale_check != null) {
                     if (!$merged->exists()) {
-                        if (session('role_id') == 1 || session('role_id') == 4 || (($sale_check->user_id == Auth::id()) || in_array(241, session('permissions')))) {
+                        if (session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions')))) {
                             $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }
@@ -6633,6 +6704,7 @@ if(session('department_id') == 7){
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
                     }
                 }
+                $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
 
                 $dropdown .= '
                     </div>
@@ -6644,9 +6716,14 @@ if(session('department_id') == 7){
             ->make(true);
 
     }
-    public function blockAccountListAjax(){
+    public function blockAccountListAjax(Request $request){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason'])->where('blacklist',1);
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'users.id')
+                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
+                    ->where('spt.status','=',0);
+            })
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason','ad.name as admin_tag_id'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6655,6 +6732,9 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+        if($sale_persons = $request->get('sale_persons')){
+            $users = $users->whereIn('ad.id', $sale_persons);
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
@@ -6713,7 +6793,8 @@ if(session('department_id') == 7){
         $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
         $reference = Reference::where('id', $user->reference_id)->first();
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference]);
+        $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration]);
     }
 
 
@@ -7844,6 +7925,178 @@ if(session('department_id') == 7){
         }else{
             return response()->json(['status' => 0, 'error' => 'Warehousing already deactivated!']);
         }
+    }
+
+    public function update_profile_password(Request $request){
+        return view('admin.profile.change_password');
+    }
+
+    public function update_profile_password_submit(Request $request){
+        $request->validate([
+            'password' => 'required|string|min:6',
+        ]);
+        if($request->password == $request->confirm_password){
+            Admin::where('id',Auth::id())->update(['password' => Hash::make($request->password), 'updated_by' => Auth::id()]);
+            return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+        }
+        else{
+            return redirect()->back()->with(['error'=>"The password and confirmation password do not match!"]);
+        }
+    }
+
+    public function userDocuments($id){
+        $documents = UserDocumentAttachment::where('user_id', $id)->first();
+        $user = User::find($id);
+        return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status]);
+    }
+
+    public function viewUserDocuments($id, $check, $pdf){
+        if($pdf == 1){
+            $pdf_image = 'pdf';
+        }
+        else{
+            $pdf_image = 'png';
+        }
+        $url = Storage::url('users_attached_documents/' . $id . '/'. $check . $id .'.' . $pdf_image);
+
+        return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
+    }
+    public function approveDocuments($id, $approve, $reason){
+        $user = User::find($id);
+        if($approve == 1){
+            $user->documents_status = 2;
+            $user->save();
+            return redirect()->back()->with(['success' => 'Files approved successfully']);
+        }
+        else if($approve == 0){
+            $user->documents_status = 3;
+            $user->documents_status_reason = $reason;
+            $user->save();
+            return redirect()->back()->with(['success' => 'Files rejected successfully']);
+        }
+        else{
+            return redirect()->back()->with(['error' => 'Something went wrong']);
+        }
+
+    }
+    public function uploadDocuments(Request $request){
+        $validation = [
+            'filled_and_signed_pdf' => 'mimes:pdf|max:5120',
+            'signed_acknowledgement_pdf' => 'mimes:pdf|max:5120',
+            'cnic_front_image' => 'mimes:png,jpeg,jpg|max:2048',
+            'cnic_back_image' => 'mimes:png,jpeg,jpg|max:2048',
+            'blank_cheque_image' => 'mimes:png,jpeg,jpg|max:2048',
+        ];
+        $validate = Validator::make($request->all(), $validation);
+
+        if ($validate->fails()) {
+            return redirect()->back()->with(['errors' => $validate->errors()]);
+        }
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if($user_attachment){
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->filled_and_signed_pdf = $filename;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            if ($request->hasFile('cnic_front_image')) {
+                $filename = 'cnic_front_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_front_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->cnic_front_image = $filename;
+            }
+            if ($request->hasFile('cnic_back_image')) {
+                $filename = 'cnic_back_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_back_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->cnic_back_image = $filename;
+            }
+            if ($request->hasFile('blank_cheque_image')) {
+                $filename = 'blank_cheque_image_' . $request->user_id . '.png';
+                $file = $request->file('blank_cheque_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->blank_cheque_image = $filename;
+            }
+            $user_attachment->save();
+
+            $user_attachment_status = User::find($request->user_id);
+            if($user_attachment->filled_and_signed_pdf != null && $user_attachment->signed_acknowledgement_pdf != null  && $user_attachment->cnic_front_image != null  && $user_attachment->cnic_back_image != null  && $user_attachment->blank_cheque_image != null){
+                $user_attachment_status->documents_status = 1;
+            }
+            else{
+                $user_attachment_status->documents_status = 0;
+            }
+            $user_attachment_status->save();
+        }
+        else{
+            $document_status = true;
+            $new_user_attachment = new UserDocumentAttachment();
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->filled_and_signed_pdf = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('cnic_front_image')) {
+                $filename = 'cnic_front_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_front_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->cnic_front_image = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('cnic_back_image')) {
+                $filename = 'cnic_back_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_back_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->cnic_back_image = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('blank_cheque_image')) {
+                $filename = 'blank_cheque_image_' . $request->user_id . '.png';
+                $file = $request->file('blank_cheque_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->blank_cheque_image = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            $new_user_attachment->user_id = $request->user_id;
+            $new_user_attachment->save();
+
+            $user_attachment_status = User::find($request->user_id);
+            if($document_status == true){
+                $user_attachment_status->documents_status = 1;
+            }
+            else{
+                $user_attachment_status->documents_status = 0;
+            }
+            $user_attachment_status->save();
+        }
+
+        return redirect()->back()->with(['success' => 'Files uploaded successfully']);
     }
 }
 

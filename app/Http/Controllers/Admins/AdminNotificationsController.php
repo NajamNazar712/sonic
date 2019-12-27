@@ -271,6 +271,12 @@ class AdminNotificationsController extends Controller
         else if ($id == 49) {
             $details['fields'] = ['date', 'link', 'preview'];
         }
+        else if ($id == 50) {
+            $details['fields'] = ['status', 'contact_person', 'rider', 'rider_phone', 'vendor', 'shipper_name'];
+        }
+        else if ($id == 51) {
+            $details['fields'] = ['status', 'contact_person', 'rider', 'rider_phone', 'vendor', 'shipper_name'];
+        }
         return $details;
     }
 

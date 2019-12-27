@@ -39,6 +39,12 @@ class UserManagementController extends Controller
         ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub')
         ->where('ar.id', '!=', 1);
 
+        if (session('role_id') != 1) {
+            $users = $users
+                ->where(function ($sub_query) {
+                    $sub_query->where('ad.id', session('department_id'));
+                });
+        }
         $datatables = Datatables::of($users)
         ->editColumn('role', function($user) {
             return $user->role . ' - ' . $user->department;
@@ -148,7 +154,12 @@ class UserManagementController extends Controller
     }
 
     public function user_add_index() {
-        $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+        if (session('role_id') != 1) {
+            $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
+        }
+        else{
+            $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+        }
         $hubs = City::where('hub', 1)->where('status', 1)->get();
 
         return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs]);
@@ -182,7 +193,12 @@ class UserManagementController extends Controller
     }
 
     public function user_update_index($id) {
-        $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+        if (session('role_id') != 1) {
+            $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
+        }
+        else{
+            $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+        }
         $hubs = City::where('hub', 1)->where('status', 1)->get();
         $user = Admin::find($id);
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();

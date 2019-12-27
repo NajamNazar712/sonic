@@ -72,8 +72,6 @@
             @endif
             <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Requests</span></a></li>
 
-            <li class=" nav-item"><a href="https://form.jotform.me/83261529672462" target="_blank"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-file-o"></i>Claims Form</span></a></li>
-
             @if (session('user_type') == 1)
                 <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-users"></i>Substitute Accounts</span></a></li>
             @endif

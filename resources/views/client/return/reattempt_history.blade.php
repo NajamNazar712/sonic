@@ -25,6 +25,7 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Current Status</th>
                         <th class="border-primary border-darken-1">Current Status Date</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Re-Attempt Requested Date</th>
                     </tr>
                     </thead>
@@ -126,6 +127,7 @@
                             head.push('Collection Amount');
                             head.push('Current Status');
                             head.push('Current Status Date');
+                            head.push('Remarks');
                             head.push('Re-attempt Requested Date');
 
                             $.each(result.data, function(index, values) {
@@ -143,6 +145,7 @@
                                 row.push(values.amount)
                                 row.push(values.current_status);
                                 row.push(values.current_status_date);
+                                row.push(values.current_remarks);
                                 row.push(values.reattempt_status_date);
 
                                 body.push(row);
@@ -174,7 +177,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('cod.return.reattempt_history.list') }}',
-                order: [[11, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number'},
@@ -187,6 +190,7 @@
                     {data: 'amount', name: 's.amount', class: 'align-middle amount'},
                     {data: 'current_status', name: 'current_status', class: 'align-middle current_status'},
                     {data: 'current_status_date', name: 'sj.created_at', class: 'align-middle current_status_date'},
+                    {data: 'current_remarks', name: 'sj.remarks', class: 'align-middle current_remarks'},
                     {data: 'reattempt_status_date', name: 'shipments_journey.created_at', class: 'align-middle reattempt_status_date'},
 
                 ],

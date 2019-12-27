@@ -14,6 +14,22 @@
                         @include('admin.inc.messages')
 
                     </div>
+                    @if (session('role_id') == 1 || in_array(276, session('permissions')))
+                        <div id="search_form" class="row mb-2 justify-content-center">
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="search_admins[]" id="search_admins" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($sale_name as $admin)
+                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-2">
+                                <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                            </div>
+                        </div>
+                    @endif
 
                     <div class="card-content">
                         <div class="card-body card-dashboard">
@@ -37,6 +53,8 @@
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
                                         <th class="border-primary border-darken-1">Rates Approved By</th>
+                                        <th class="border-primary border-darken-1">Documents Status</th>
+                                        <th class="border-primary border-darken-1">Documents Rejection Reason</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -82,16 +100,24 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script>
     $(document).ready(function() {
 
+        $('#search_admins').select2({
+            width:'100%',
+            placeholder:"Select Sale Persons",
+            allowClear:true,
+            dropdownParent:$('#search_form')
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -100,6 +126,7 @@
                     url: '{{ route('admin.accounts.pending.ajax') }}',
                     data: {
                         'page': 'all',
+                        'sale_persons': $('#search_admins').val(),
                     },
                     success: function (result) {
                         head = [];
@@ -121,6 +148,8 @@
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
                         head.push('Rates Approved By');
+                        head.push('Documents Status');
+                        head.push('Documents Rejection Reason');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -142,6 +171,8 @@
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
                             row.push(values.rates_authorized_by);
+                            row.push(values.documents_status);
+                            row.push(values.documents_rejection_reason);
 
                             body.push(row);
                         });
@@ -176,7 +207,12 @@
             serverSide: true,
             rowId: 'id',
             order: [[1, 'desc']],
-            ajax: '{{ route('admin.accounts.pending.ajax') }}',
+            ajax: {
+                url: '{{ route('admin.accounts.pending.ajax') }}',
+                data: function (d) {
+                    d.sale_persons = $('#search_admins').val();
+                }
+            },
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
@@ -195,6 +231,8 @@
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
                 {data: 'rates_authorized_by', name: 'rabb.name', class: 'align-middle rates_authorized_by'},
+                {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status', orderable: false, searchable: false},
+                {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {
@@ -211,6 +249,12 @@
                     '<option value="0">Request Received</option>' +
                     '<option value="1">Rates Added</option>' +
                     '<option value="2">Pending For Activation</option>' +
+                    '</select>';
+                var documents_drop_select = '<select name="documents_status_select" id="documents_status_select" class="select2 form-control">' +
+                    '<option value="0">Incomplete</option>' +
+                    '<option value="1">Pending for Approval</option>' +
+                    '<option value="2">Approved</option>' +
+                    '<option value="3">Rejected</option>' +
                     '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
 
@@ -230,6 +274,11 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
+                    }else if($(header).is('.documents_status')){
+                        $(documents_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -240,6 +289,12 @@
                             current.val(column.search());
                         }
                     }
+                });
+                $("#documents_status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
@@ -267,6 +322,9 @@
                 });
                 this.api().table().columns.adjust();
             }
+        });
+        $('#search_filter_btn').on('click',function () {
+            table.draw();
         });
        $('body').on('click','button.active_account',function () {
            var id = $(this).parents('tr').attr('id');
