@@ -8027,6 +8027,7 @@ if(session('department_id') == 7){
             else{
                 $document_status = false;
             }
+            $new_user_attachment->user_id = $id;
             $new_user_attachment->save();
 
             $user_attachment_status = User::find($request->user_id);
