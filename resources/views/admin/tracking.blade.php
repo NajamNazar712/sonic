@@ -206,7 +206,7 @@
                                     </div>
                                     <div class="col-8">
                                         <fieldset class="form-group">
-                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Product Cost">
+                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
                                     <div class="col-8 text-left">
