@@ -175,6 +175,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('adjusted_shipments', 'Shippers\ShipperFinanceController@payments_adjusted_shipments')->name('adjusted_shipments');
             Route::post('details_print', 'Shippers\ShipperFinanceController@payments_details_print')->name('details_print');
             Route::get('export_to_excel', 'Shippers\ShipperFinanceController@payments_export_to_excel')->name('export_to_excel');
+
+            Route::prefix('reconcile_through_receiving_sheet')->name('reconcile_through_receiving_sheet.')->group(function () {
+                Route::get('', 'Shippers\ShipperFinanceController@payments_reconcile_through_receiving_sheet_index')->name('index');
+                Route::get('list', 'Shippers\ShipperFinanceController@payments_reconcile_through_receiving_sheet_list')->name('list');
+            });
         });
     });
 
@@ -213,6 +218,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     //user profile
     Route::get('/profile','Shippers\ShipperDashboardController@userProfile')->name('edit.profile');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
+    Route::post('update/profile/password','Shippers\ShipperDashboardController@update_profile_password')->name('update.profile.password');
     Route::get('getpickups','Shippers\ShipperDashboardController@getPickups')->name('get.pickups');
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
@@ -291,6 +297,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
 
+    Route::get('update/profile/password','Admins\AdminDashboardController@update_profile_password')->name('update.profile.password');
+    Route::post('update/profile/password/submit','Admins\AdminDashboardController@update_profile_password_submit')->name('update.profile.password.submit');
+
+
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('', 'Admins\OrderManagementController@index')->name('index');
         Route::get('list', 'Admins\OrderManagementController@orders_list')->name('list');
@@ -320,6 +330,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
         Route::post('edit/emails','Admins\AdminDashboardController@edit_notification_emails')->name('edit.emails');
         Route::post('add/emails','Admins\AdminDashboardController@add_notification_emails')->name('add.emails');
+        Route::get('/{id}/documents','Admins\AdminDashboardController@userDocuments')->name('documents');
+        Route::get('/{id}/{check}/{pdf}/documents','Admins\AdminDashboardController@viewUserDocuments')->name('documents.view');
+        Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
+        Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
 
 
         Route::prefix('sister_account')->name('sister_account.')->group(function(){
@@ -1372,6 +1386,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@crm_reopen_count_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@crm_reopen_count_submit')->name('update');
         });
+
+        Route::prefix('multiple_sale_tagging')->name('multiple_sale_tagging.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@multiple_sale_tagging_index')->name('index');
+            Route::post('list', 'Admins\GlobalSettingsController@multiple_sale_tagging_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@multiple_sale_tagging_submit')->name('submit');
+            Route::post('assign_admin/view', 'Admins\GlobalSettingsController@multiple_sale_tagging_assign_view')->name('assign_admin.view');
+            Route::post('assign_admin/submit', 'Admins\GlobalSettingsController@multiple_sale_tagging_assign_submit')->name('assign_admin.submit');
+            Route::post('assign_admin/view_assigned', 'Admins\GlobalSettingsController@multiple_sale_tagging_assign_view_assigned')->name('assign_admin.view_assigned');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
@@ -1436,6 +1459,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('update/{id}')->name('update.')->group(function() {
             Route::get('', 'Admins\AdminCRMController@crm_update_index')->name('index');
             Route::post('', 'Admins\AdminCRMController@crm_update_store')->name('store');
+        });
+        Route::post('bulk_valid_invalid', 'Admins\AdminCRMController@bulk_valid_invalid')->name('bulk_valid_invalid');
+        Route::prefix('claim')->name('claim.')->group(function(){
+            Route::get('product_image/{id}', 'Admins\AdminCRMController@product_image')->name('product_image');
+            Route::get('invoice_image/{id}', 'Admins\AdminCRMController@invoice_image')->name('invoice_image');
         });
     });
 

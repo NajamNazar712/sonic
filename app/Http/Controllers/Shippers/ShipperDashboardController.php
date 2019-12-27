@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BookingType;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -27,6 +28,7 @@ use App\Http\Models\City;
 use Auth;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
@@ -55,8 +57,9 @@ class ShipperDashboardController extends Controller
         $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
 
-      return view('client.dashboard')->with(['cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests]);
+      return view('client.dashboard')->with(['cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
     public function orders_list(Request $request) {
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -316,7 +319,8 @@ class ShipperDashboardController extends Controller
         $email_ids = implode(',', $email_ids);
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $reference = Reference::where('id', $user->reference_id)->first();
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference]);
+        $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration]);
     }
 
     public function getPickups(Request $request) {
@@ -479,6 +483,26 @@ class ShipperDashboardController extends Controller
 
 
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
+    }
+
+    public function update_profile_password(Request $request)
+    {
+        if (session('user_type') == 1) {
+                $request->validate([
+                    'password' => 'required|string|min:6',
+                ]);
+                if($request->password == $request->confirm_password){
+                    User::where('id', session('user_id'))->update(['password' => Hash::make($request->password), 'updated_by_type' => 0, 'updated_by_id' => session('user_id')]);
+                    return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+                }
+                else{
+                    return redirect()->back()->with(['error'=>"The password and confirmation password do not match"]);
+                }
+            }
+        else{
+            return redirect()->back()->with(['error'=>"You are not allowed to change password"]);
+        }
+
     }
 
 

@@ -12,6 +12,7 @@ use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
+use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CityHistory;
@@ -48,6 +49,7 @@ use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Support\Facades\DB;
@@ -112,6 +114,7 @@ use App\Http\Models\RateStatus;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
@@ -137,10 +140,11 @@ class AdminDashboardController extends Controller
         $stats['total'] = Shipment::whereBetween('created_at',[$thirtyDays,$today]);
         $stats['booked'] = Shipment::where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['canceled'] = Shipment::where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['arrived'] = Shipment::where('shipper_status_id',2)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['in_transit'] = Shipment::where('shipper_status_id',3)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['pending'] = Shipment::whereIn('shipper_status_id',[4, 5,6,7,8,9,10,11,12,13,15,18,19,49])->whereBetween('created_at',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
             $stats['total'] = $stats['total']->where(function($query) {
@@ -156,7 +160,9 @@ class AdminDashboardController extends Controller
                 })->orWhereHas('consignee_city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 });
-            });$stats['canceled'] = $stats['canceled']->where(function($query) {
+            });
+
+            $stats['canceled'] = $stats['canceled']->where(function($query) {
                 $query->whereHas('pickup_address.city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 })->orWhereHas('consignee_city', function ($sub_query) {
@@ -164,7 +170,15 @@ class AdminDashboardController extends Controller
                 });
             });
 
-            $stats['received'] = $stats['received']->where(function($query) {
+            $stats['arrived'] = $stats['arrived']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+
+            $stats['in_transit'] = $stats['in_transit']->where(function($query) {
                 $query->whereHas('pickup_address.city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 })->orWhereHas('consignee_city', function ($sub_query) {
@@ -200,7 +214,8 @@ class AdminDashboardController extends Controller
         $stats['total'] = number_format($stats['total']->count());
         $stats['booked'] = number_format($stats['booked']->count());
         $stats['canceled'] = number_format($stats['canceled']->count());
-        $stats['received'] = number_format($stats['received']->count());
+        $stats['arrived'] = number_format($stats['arrived']->count());
+        $stats['in_transit'] = number_format($stats['in_transit']->count());
         $stats['delivered'] = number_format($stats['delivered']->count());
         $stats['return'] = number_format($stats['return']->count());
         $stats['pending'] = number_format($stats['pending']->count());
@@ -370,10 +385,11 @@ class AdminDashboardController extends Controller
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
                 $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination, 'shipper_status_id' => 1]);
-                $received = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id', 17);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-                $pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                $pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                 $return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
 
                 if (session('role_id') != 1) {
@@ -385,13 +401,22 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $received = $received->where(function($query) {
+                    $arrived = $arrived->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
+
+                    $in_transit = $in_transit->where(function($query) {
+                        $query->whereHas('pickup_address.city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        })->orWhereHas('consignee_city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        });
+                    });
+
                     $canceled = $canceled->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
@@ -426,7 +451,8 @@ class AdminDashboardController extends Controller
                 }
 
                 $graph['booked'][] = $booked->count();
-                $graph['received'][] = $received->count();
+                $graph['arrived'][] = $arrived->count();
+                $graph['in_transit'][] = $in_transit->count();
                 $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
                 $graph['pending'][] = $pending->count();
@@ -438,10 +464,11 @@ class AdminDashboardController extends Controller
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
                 $booked = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id',1);
-                $received = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [2, 3, 4]);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 17);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-                $pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                $pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                 $return = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
 
                 if (session('role_id') != 1) {
@@ -453,13 +480,22 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $received = $received->where(function($query) {
+                    $arrived = $arrived->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
+
+                    $in_transit = $in_transit->where(function($query) {
+                        $query->whereHas('pickup_address.city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        })->orWhereHas('consignee_city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        });
+                    });
+
                     $canceled = $canceled->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
@@ -494,7 +530,8 @@ class AdminDashboardController extends Controller
                 }
 
                 $graph['booked'][] = $booked->count();
-                $graph['received'][] = $received->count();
+                $graph['arrived'][] = $arrived->count();
+                $graph['in_transit'][] = $in_transit->count();
                 $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
                 $graph['pending'][] = $pending->count();
@@ -506,10 +543,11 @@ class AdminDashboardController extends Controller
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
                 $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id',1);
-                $received = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id', 17);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-                $pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                $pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                 $return = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
 
                 if (session('role_id') != 1) {
@@ -521,13 +559,22 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $received = $received->where(function($query) {
+                    $arrived = $arrived->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
+
+                    $in_transit = $in_transit->where(function($query) {
+                        $query->whereHas('pickup_address.city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        })->orWhereHas('consignee_city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        });
+                    });
+
                     $canceled = $canceled->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
@@ -562,7 +609,8 @@ class AdminDashboardController extends Controller
                 }
 
                 $graph['booked'][] = $booked->count();
-                $graph['received'][] = $received->count();
+                $graph['arrived'][] = $arrived->count();
+                $graph['in_transit'][] = $in_transit->count();
                 $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
                 $graph['pending'][] = $pending->count();
@@ -574,10 +622,11 @@ class AdminDashboardController extends Controller
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
                 $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
-                $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [2, 3, 4]);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 17);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-                $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                 $return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
 
                 if (session('role_id') != 1) {
@@ -589,13 +638,22 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $received = $received->where(function($query) {
+                    $arrived = $arrived->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
+
+                    $in_transit = $in_transit->where(function($query) {
+                        $query->whereHas('pickup_address.city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        })->orWhereHas('consignee_city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        });
+                    });
+
                     $canceled = $canceled->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
@@ -630,8 +688,9 @@ class AdminDashboardController extends Controller
                 }
 
                 $graph['booked'][] = $booked->count();
-                $graph['received'][] = $received->count();
-                $graph['canceled'][] = $received->count();
+                $graph['arrived'][] = $arrived->count();
+                $graph['in_transit'][] = $in_transit->count();
+                $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
                 $graph['pending'][] = $pending->count();
                 $graph['return'][] = $return->count();
@@ -1030,7 +1089,8 @@ class AdminDashboardController extends Controller
 
     }
     public function blockAccountsList(){
-        return view('admin.accounts.block_accounts_list');
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
+        return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson]);
     }
     public function UserStatus(Request $request){
 //        return $request;
@@ -6295,7 +6355,7 @@ if(session('department_id') == 7){
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
 
-    public function activeAccountListAjax(){		
+    public function activeAccountListAjax(Request $request){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
            ->leftjoin('products as p','p.id','=','users.product_id')
            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
@@ -6308,7 +6368,7 @@ if(session('department_id') == 7){
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6318,6 +6378,10 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+
+        if($sale_persons = $request->get('sale_persons')){
+            $users = $users->whereIn('ad.id', $sale_persons);
         }
 
         return Datatables::of($users)
@@ -6351,6 +6415,20 @@ if(session('department_id') == 7){
                     return "Disable";
                 }
             })
+            ->editColumn('documents_status',function ($users){
+                if($users->documents_status == 0){
+                    return "Incomplete";
+                }
+                elseif($users->documents_status == 1){
+                    return "Pending for Approval";
+                }
+                elseif($users->documents_status == 2){
+                    return "Approved";
+                }
+                elseif($users->documents_status == 3){
+                    return "Rejected";
+                }
+            })
             ->editColumn('rejected_reason',function ($users){
                 if($users->rejected_reason != null && $users->rate_status==2){
                     return $users->rejected_reason;
@@ -6376,6 +6454,13 @@ if(session('department_id') == 7){
                 }
             })
             ->addColumn("action", function ($result) {
+                if(in_array($result->id, session('tagged_shippers'))){
+                    $multiple_sale_check = true;
+                }
+                else{
+                    $multiple_sale_check = false;
+                }
+
                 $sale_check= SalePersonTag::where('user_id',$result->id)->first();
                 $dropdown = '
                   <div class="btn-group">
@@ -6433,11 +6518,12 @@ if(session('department_id') == 7){
 
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if(!$merged->exists()){
-                    if(session('role_id') == 1 || session('role_id') == 4 || (($sale_check) && ($sale_check->user_id == Auth::id()) || in_array(241, session('permissions'))))
+                    if(session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions'))))
                     {
                         $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                     }
                 }
+                $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
                 $dropdown .= '
                     </div>
                   </div>
@@ -6450,7 +6536,7 @@ if(session('department_id') == 7){
     }
 
 
-    public function pendingAccountListAjax(){
+    public function pendingAccountListAjax(Request $request){
 
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products','products.id','=','users.product_id')
@@ -6462,7 +6548,7 @@ if(session('department_id') == 7){
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6471,6 +6557,9 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+        if($sale_persons = $request->get('sale_persons')){
+            $users = $users->whereIn('ad.id', $sale_persons);
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
@@ -6500,6 +6589,20 @@ if(session('department_id') == 7){
                     return "Requested";
                 }
             })
+            ->editColumn('documents_status',function ($users){
+                if($users->documents_status == 0){
+                    return "Incomplete";
+                }
+                elseif($users->documents_status == 1){
+                    return "Pending for Approval";
+                }
+                elseif($users->documents_status == 2){
+                    return "Approved";
+                }
+                elseif($users->documents_status == 3){
+                    return "Rejected";
+                }
+            })
             ->editColumn('status', function ($users) {
                 return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
             })
@@ -6523,6 +6626,12 @@ if(session('department_id') == 7){
                 }
             })
             ->addColumn("action", function ($result) {
+                if(in_array($result->id, session('tagged_shippers'))){
+                    $multiple_sale_check = true;
+                }
+                else{
+                    $multiple_sale_check = false;
+                }
                 $sale_check= SalePersonTag::where('user_id',$result->id)->first();
                 $dropdown = '
                   <div class="btn-group">
@@ -6591,7 +6700,7 @@ if(session('department_id') == 7){
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if($sale_check != null) {
                     if (!$merged->exists()) {
-                        if (session('role_id') == 1 || session('role_id') == 4 || (($sale_check->user_id == Auth::id()) || in_array(241, session('permissions')))) {
+                        if (session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions')))) {
                             $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }
@@ -6601,6 +6710,7 @@ if(session('department_id') == 7){
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
                     }
                 }
+                $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
 
                 $dropdown .= '
                     </div>
@@ -6612,9 +6722,14 @@ if(session('department_id') == 7){
             ->make(true);
 
     }
-    public function blockAccountListAjax(){
+    public function blockAccountListAjax(Request $request){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason'])->where('blacklist',1);
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'users.id')
+                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
+                    ->where('spt.status','=',0);
+            })
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason','ad.name as admin_tag_id'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6623,6 +6738,9 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+        if($sale_persons = $request->get('sale_persons')){
+            $users = $users->whereIn('ad.id', $sale_persons);
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
@@ -6681,7 +6799,8 @@ if(session('department_id') == 7){
         $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
         $reference = Reference::where('id', $user->reference_id)->first();
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference]);
+        $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration]);
     }
 
 
@@ -7812,6 +7931,178 @@ if(session('department_id') == 7){
         }else{
             return response()->json(['status' => 0, 'error' => 'Warehousing already deactivated!']);
         }
+    }
+
+    public function update_profile_password(Request $request){
+        return view('admin.profile.change_password');
+    }
+
+    public function update_profile_password_submit(Request $request){
+        $request->validate([
+            'password' => 'required|string|min:6',
+        ]);
+        if($request->password == $request->confirm_password){
+            Admin::where('id',Auth::id())->update(['password' => Hash::make($request->password), 'updated_by' => Auth::id()]);
+            return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+        }
+        else{
+            return redirect()->back()->with(['error'=>"The password and confirmation password do not match!"]);
+        }
+    }
+
+    public function userDocuments($id){
+        $documents = UserDocumentAttachment::where('user_id', $id)->first();
+        $user = User::find($id);
+        return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status]);
+    }
+
+    public function viewUserDocuments($id, $check, $pdf){
+        if($pdf == 1){
+            $pdf_image = 'pdf';
+        }
+        else{
+            $pdf_image = 'png';
+        }
+        $url = Storage::url('users_attached_documents/' . $id . '/'. $check . $id .'.' . $pdf_image);
+
+        return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
+    }
+    public function approveDocuments($id, $approve, $reason){
+        $user = User::find($id);
+        if($approve == 1){
+            $user->documents_status = 2;
+            $user->save();
+            return redirect()->back()->with(['success' => 'Files approved successfully']);
+        }
+        else if($approve == 0){
+            $user->documents_status = 3;
+            $user->documents_status_reason = $reason;
+            $user->save();
+            return redirect()->back()->with(['success' => 'Files rejected successfully']);
+        }
+        else{
+            return redirect()->back()->with(['error' => 'Something went wrong']);
+        }
+
+    }
+    public function uploadDocuments(Request $request){
+        $validation = [
+            'filled_and_signed_pdf' => 'mimes:pdf|max:5120',
+            'signed_acknowledgement_pdf' => 'mimes:pdf|max:5120',
+            'cnic_front_image' => 'mimes:png,jpeg,jpg|max:2048',
+            'cnic_back_image' => 'mimes:png,jpeg,jpg|max:2048',
+            'blank_cheque_image' => 'mimes:png,jpeg,jpg|max:2048',
+        ];
+        $validate = Validator::make($request->all(), $validation);
+
+        if ($validate->fails()) {
+            return redirect()->back()->with(['errors' => $validate->errors()]);
+        }
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if($user_attachment){
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->filled_and_signed_pdf = $filename;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            if ($request->hasFile('cnic_front_image')) {
+                $filename = 'cnic_front_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_front_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->cnic_front_image = $filename;
+            }
+            if ($request->hasFile('cnic_back_image')) {
+                $filename = 'cnic_back_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_back_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->cnic_back_image = $filename;
+            }
+            if ($request->hasFile('blank_cheque_image')) {
+                $filename = 'blank_cheque_image_' . $request->user_id . '.png';
+                $file = $request->file('blank_cheque_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->blank_cheque_image = $filename;
+            }
+            $user_attachment->save();
+
+            $user_attachment_status = User::find($request->user_id);
+            if($user_attachment->filled_and_signed_pdf != null && $user_attachment->signed_acknowledgement_pdf != null  && $user_attachment->cnic_front_image != null  && $user_attachment->cnic_back_image != null  && $user_attachment->blank_cheque_image != null){
+                $user_attachment_status->documents_status = 1;
+            }
+            else{
+                $user_attachment_status->documents_status = 0;
+            }
+            $user_attachment_status->save();
+        }
+        else{
+            $document_status = true;
+            $new_user_attachment = new UserDocumentAttachment();
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->filled_and_signed_pdf = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('cnic_front_image')) {
+                $filename = 'cnic_front_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_front_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->cnic_front_image = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('cnic_back_image')) {
+                $filename = 'cnic_back_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_back_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->cnic_back_image = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('blank_cheque_image')) {
+                $filename = 'blank_cheque_image_' . $request->user_id . '.png';
+                $file = $request->file('blank_cheque_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->blank_cheque_image = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            $new_user_attachment->user_id = $request->user_id;
+            $new_user_attachment->save();
+
+            $user_attachment_status = User::find($request->user_id);
+            if($document_status == true){
+                $user_attachment_status->documents_status = 1;
+            }
+            else{
+                $user_attachment_status->documents_status = 0;
+            }
+            $user_attachment_status->save();
+        }
+
+        return redirect()->back()->with(['success' => 'Files uploaded successfully']);
     }
 }
 

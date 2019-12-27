@@ -41,6 +41,8 @@ use App\Http\Models\Admin\Module;
 use App\Http\Models\Admin\ModulePermission;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use phpDocumentor\Reflection\Types\Null_;
 use Yajra\Datatables\Datatables;
 
 class AdminCRMController extends Controller
@@ -59,7 +61,6 @@ class AdminCRMController extends Controller
         $description = $request->description;
         $flag = false;
         $present_shipments = array();
-        
         if ($request->has('payment_request')) {
             if($request->payment_request == 1){
                 $payment_id = $request->payment_id;
@@ -83,7 +84,13 @@ class AdminCRMController extends Controller
         }
         else{
             if ($request->has('shipment_ids')) {
-                $shipment_ids = $request->shipment_ids;
+
+                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                    $shipment_ids = explode(',', $request->input('shipment_ids'));
+                }
+                else{
+                    $shipment_ids = $request->shipment_ids;
+                }
                 if(!empty($shipment_ids)){
                     foreach ($shipment_ids as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
@@ -91,13 +98,23 @@ class AdminCRMController extends Controller
                             $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                             if($is_shipment){
                                 if($is_shipment->case_nature_id != $nature_id){
-                                    CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                    if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                        CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                    }
+                                    else{
+                                        CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                    }
                                 }else{
                                     $present_shipments[] = $shipment->tracking_number;
                                     $flag = true;
                                 }
                             }else{
-                                CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                    CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                }
+                                else{
+                                    CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                }
                             }
                         }
                     }
@@ -1776,5 +1793,75 @@ class AdminCRMController extends Controller
         else{
             return ['status' => 1, 'error' => 'Tracking Number: ' . $request->tracking_number . ' doesn\'t exists'];
         }
+    }
+    public function bulk_valid_invalid(Request $request){
+        foreach ($request->crm_request_ids as $crm_request_id)
+        {
+            $crm_request = CrmRequest::find($crm_request_id);
+            if ($crm_request->agent_id != null) {
+                if (session('role_id') == 1 || session('role_id') == 6 || $crm_request->agent_id == Auth::id() || in_array(184, session('permissions')))
+                    {
+                    if ($crm_request->status_id == 1 || $crm_request->status_id == 5) {
+                        if($request->valid == 1){
+                            CrmRequest::where('id', $crm_request->id)->update([
+                                'status_id' => 2,
+                            ]);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 6,
+                                'agent_id' => Auth::id()
+                            ]);
+                            NotificationsController::send(41, $crm_request->id);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 2,
+                                'agent_id' => Auth::id()
+                            ]);
+                        }
+                        elseif ($request->valid == 0){
+                            CrmRequest::where('id', $crm_request->id)->update([
+                                'status_id' => 4,
+                            ]);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 7,
+                                'agent_id' => Auth::id()
+                            ]);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 4,
+                                'agent_id' => Auth::id()
+                            ]);
+
+                            CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+                        }
+                    }
+                }
+            }
+            else{
+                return ['status' => 0, 'error' => 'Agent is not Assigned yet'];
+            }
+        }
+        if($request->valid == 1){
+            return ['status' => 1, 'success' => 'Request(s) has been marked as Valid'];
+        }
+        elseif ($request->valid == 0){
+            return ['status' => 1, 'success' => 'Request(s) has been marked as In-Valid'];
+        }
+        else{
+            return ['status' => 0, 'error' => 'Something went wrong'];
+        }
+    }
+
+    public function product_image($id){
+        $url = Storage::url('crm_claims/claim_product_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+
+    public function invoice_image($id){
+        $url = Storage::url('crm_claims/claim_invoice_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
     }
 }

@@ -9,6 +9,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class CRMController extends Controller
 {
@@ -16,7 +17,7 @@ class CRMController extends Controller
     //launched_by = 1 => Shipper
     //launched_by = 2 => Substitute Shipper
 
-    static public function add($case_nature_id, $case_nature_type_id = NULL, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $shipper_id = NULL, $agent_id = NULL,$description){
+    static public function add($case_nature_id, $case_nature_type_id = NULL, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $shipper_id = NULL, $agent_id = NULL,$description = NULL, $product_cost = NULL, $product_picture = NULL, $invoice_picture = NULL){
         $crm_request = new CrmRequest();
         $crm_request->case_nature_id = $case_nature_id;
         $crm_request->case_nature_type_id = $case_nature_type_id;
@@ -28,8 +29,28 @@ class CRMController extends Controller
         $crm_request->shipper_id = $shipper_id;
         $crm_request->agent_id = $agent_id;
         $crm_request->description = $description;
-
+        $crm_request->product_cost = $product_cost;
         $crm_request->save();
+        if($product_picture != null){
+            $filename = 'claim_product_' . $crm_request->id . '.png';
+            $file = $product_picture;
+            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+            $crm_request->product_picture = $filename;
+        }
+        else{
+            $crm_request->product_picture = $product_picture;
+        }
+        if($invoice_picture != null){
+            $filename = 'claim_invoice_' . $crm_request->id . '.png';
+            $file = $invoice_picture;
+            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+            $crm_request->invoice_picture = $filename;
+        }
+        else{
+            $crm_request->invoice_picture = $invoice_picture;
+        }
+        $crm_request->save();
+
 
         $id = $crm_request->id;
 

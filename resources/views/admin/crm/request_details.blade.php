@@ -347,6 +347,14 @@
                                                         </div>
                                                     </form>
                                                 </section>
+                                            <div class="row justify-content-center mt-1">
+                                                <div class="col-2">
+                                                    <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_image', ['id' => $crm_details->id])}}" target="_blank">View Product</a></button>
+                                                </div>
+                                                <div class="col-2">
+                                                    <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>
+                                                </div>
+                                            </div>
                                             @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))) || ($sale_person && $sale_person->admin_id == Auth::id()))
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">
@@ -383,6 +391,14 @@
                                                         </div>
                                                     </form>
                                                 </section>
+                                                <div class="row justify-content-center mt-1">
+                                                    <div class="col-2">
+                                                        <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_image', ['id' => $crm_details->id])}}" target="_blank">View Product</a></button>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>
+                                                    </div>
+                                                </div>
                                             @endif
 
                                         </div>
