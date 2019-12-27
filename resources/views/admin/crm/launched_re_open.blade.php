@@ -356,7 +356,7 @@
                         }
                     },{
                         text: 'In-Valid',
-                        className: 'btn btn-primary in_valid',
+                        className: 'btn btn-danger in_valid',
                         enabled: false,
                         action: function (e, dt, node, config) {
                                 swal({
