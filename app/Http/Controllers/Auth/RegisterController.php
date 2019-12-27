@@ -149,11 +149,11 @@ class RegisterController extends Controller
                 'billing_person_phone' => 'required|string|max:255',
                 'billing_person_email' => 'required|string|email|max:255',
                 'billing_address' => 'required|string|max:255',
-                'filled_and_signed_pdf' => 'mimes:pdf | max:5120',
-                'signed_acknowledgement_pdf' => 'mimes:pdf,jpg | max:5120',
-                'cnic_front_image' => 'mimes:png,jpeg,jpg | max:2048',
-                'cnic_back_image' => 'mimes:png,jpeg,jpg | max:2048',
-                'blank_cheque_image' => 'mimes:png,jpeg,jpg | max:2048',
+                'filled_and_signed_pdf' => 'mimes:pdf',
+                'signed_acknowledgement_pdf' => 'mimes:pdf',
+                'cnic_front_image' => 'mimes:png,jpeg,jpg|max:2048',
+                'cnic_back_image' => 'mimes:png,jpeg,jpg|max:2048',
+                'blank_cheque_image' => 'mimes:png,jpeg,jpg|max:2048',
                 'g-recaptcha-response' => 'required|captcha'
             ]);
         }

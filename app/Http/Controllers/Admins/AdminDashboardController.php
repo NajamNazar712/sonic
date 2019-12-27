@@ -7923,19 +7923,14 @@ if(session('department_id') == 7){
 
     }
     public function uploadDocuments(Request $request){
-        $messages = [
-            'return_note_image.required' => 'No Image file selected!.',
-            'return_note_image.mimes' => 'Image file not supported!.',
-            'return_note_image.size' => 'Image file size exceded!.',
-        ];
         $validation = [
-            'filled_and_signed_pdf' => 'mimes:pdf | max:5120',
-            'signed_acknowledgement_pdf' => 'mimes:pdf,jpg | max:5120',
-            'cnic_front_image' => 'mimes:png,jpeg,jpg | max:2048',
-            'cnic_back_image' => 'mimes:png,jpeg,jpg | max:2048',
-            'blank_cheque_image' => 'mimes:png,jpeg,jpg | max:2048'
+            'filled_and_signed_pdf' => 'mimes:pdf|max:5120',
+            'signed_acknowledgement_pdf' => 'mimes:pdf|max:5120',
+            'cnic_front_image' => 'mimes:png,jpeg,jpg|max:2048',
+            'cnic_back_image' => 'mimes:png,jpeg,jpg|max:2048',
+            'blank_cheque_image' => 'mimes:png,jpeg,jpg|max:2048',
         ];
-        $validate = Validator::make($request->all(), $validation, $messages);
+        $validate = Validator::make($request->all(), $validation);
 
         if ($validate->fails()) {
             return redirect()->back()->with(['errors' => $validate->errors()]);
