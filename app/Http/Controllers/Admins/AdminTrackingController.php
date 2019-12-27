@@ -263,7 +263,7 @@ class AdminTrackingController extends Controller
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['old_amount'] = number_format($journey->old_amount);
                             $journey_details['new_amount'] = number_format($journey->new_amount);
-                            $journey_details['new_amount'] = $journey->remarks;
+                            $journey_details['remarks'] = $journey->remarks;
                             $journey_details['user'] = $journey->admin->name;
 
                             $details['amount_history'][] = $journey_details;
