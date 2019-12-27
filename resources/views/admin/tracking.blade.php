@@ -739,6 +739,7 @@
                                     shipment += '<th><strong>Date / Time</strong></th>';
                                     shipment += '<th><strong>Old Amount</strong></th>';
                                     shipment += '<th><strong>New Amount</strong></th>';
+                                    shipment += '<th><strong>Remarks</strong></th>';
                                     shipment += '<th><strong>User</strong></th>';
                                     shipment += '</tr>';
                                     shipment += '</thead>';
@@ -749,6 +750,7 @@
                                         shipment += '<td>' + history.date_time + '</td>';
                                         shipment += '<td>' + history.old_amount + '</td>';
                                         shipment += '<td>' + history.new_amount + '</td>';
+                                        shipment += '<td>' + history.remarks + '</td>';
                                         shipment += '<td>' + history.user + '</td>';
                                         shipment += '</tr>';
                                     });

@@ -1838,6 +1838,9 @@ class AdminCRMController extends Controller
                     }
                 }
             }
+            else{
+                return ['status' => 0, 'error' => 'Agent is not Assigned yet'];
+            }
         }
         if($request->valid == 1){
             return ['status' => 1, 'success' => 'Request(s) has been marked as Valid'];
