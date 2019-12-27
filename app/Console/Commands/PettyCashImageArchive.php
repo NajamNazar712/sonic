@@ -18,7 +18,7 @@ class PettyCashImageArchive extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Archive petty cash statement images archive';
 
     /**
      * Create a new command instance.
