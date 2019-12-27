@@ -52,6 +52,8 @@
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
+                                        <th class="border-primary border-darken-1">Documents Status</th>
+                                        <th class="border-primary border-darken-1">Documents Rejection Reason</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -145,6 +147,8 @@
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
                         head.push('Account Disable Remarks');
+                        head.push('Documents Status');
+                        head.push('Documents Rejection Reason');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -170,6 +174,8 @@
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
                             row.push(values.disable_remarks);
+                            row.push(values.documents_status);
+                            row.push(values.documents_rejection_reason);
 
                             body.push(row);
                         });
@@ -231,6 +237,8 @@
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
+                {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status', orderable: false, searchable: false},
+                {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -246,6 +254,12 @@
                 var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                     '<option value="3">Enable</option>' +
                     '<option value="4">Disable</option>' +
+                    '</select>';
+                var documents_drop_select = '<select name="documents_status_select" id="documents_status_select" class="select2 form-control">' +
+                    '<option value="0">Incomplete</option>' +
+                    '<option value="1">Pending for Approval</option>' +
+                    '<option value="2">Approved</option>' +
+                    '<option value="3">Rejected</option>' +
                     '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
 
@@ -265,6 +279,11 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
+                    }else if($(header).is('.documents_status')){
+                        $(documents_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -276,7 +295,13 @@
                         }
                     }
                 });
-                $("#status_select").prepend('<option value="" selected></option>').select2({
+                $("#documents_status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $("#documents_status").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
                     width:'100%',
                     containerCssClass: 'select-xs',

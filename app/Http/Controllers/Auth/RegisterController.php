@@ -14,10 +14,12 @@ use App\Http\Models\Reference;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
+use App\http\Models\UserDocumentAttachment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use App\Http\Models\Product;
@@ -106,6 +108,11 @@ class RegisterController extends Controller
                 'account_title'=>'required|string|max:255',
                 'iban_no'=>'required|string|max:255',
                 'cycle_of_payment'=>'required|string|max:255',
+                'filled_and_signed_pdf' => 'mimes:pdf | max:5120',
+                'signed_acknowledgement_pdf' => 'mimes:pdf,jpg | max:5120',
+                'cnic_front_image' => 'mimes:png,jpeg,jpg | max:2048',
+                'cnic_back_image' => 'mimes:png,jpeg,jpg | max:2048',
+                'blank_cheque_image' => 'mimes:png,jpeg,jpg | max:2048',
                 'g-recaptcha-response' => 'required|captcha'
             ]);
         }else{
@@ -142,6 +149,11 @@ class RegisterController extends Controller
                 'billing_person_phone' => 'required|string|max:255',
                 'billing_person_email' => 'required|string|email|max:255',
                 'billing_address' => 'required|string|max:255',
+                'filled_and_signed_pdf' => 'mimes:pdf | max:5120',
+                'signed_acknowledgement_pdf' => 'mimes:pdf,jpg | max:5120',
+                'cnic_front_image' => 'mimes:png,jpeg,jpg | max:2048',
+                'cnic_back_image' => 'mimes:png,jpeg,jpg | max:2048',
+                'blank_cheque_image' => 'mimes:png,jpeg,jpg | max:2048',
                 'g-recaptcha-response' => 'required|captcha'
             ]);
         }
@@ -159,7 +171,64 @@ class RegisterController extends Controller
         event(new Registered($user = $this->create($request->all())));
 
         //$this->guard()->login($user);
+        $document_status = true;
+        $user_attachment = new UserDocumentAttachment();
+        $user_attachment->user_id = $user->id;
+        if ($request->hasFile('filled_and_signed_pdf')) {
+            $filename = 'filled_and_signed_pdf_' . $user->id . '.pdf';
+            $file = $request->file('filled_and_signed_pdf');
+            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
+            $user_attachment->filled_and_signed_pdf = $filename;
+        }
+        else{
+            $document_status = false;
+        }
+        if ($request->hasFile('signed_acknowledgement_pdf')) {
+            $filename = 'signed_acknowledgement_pdf_' . $user->id . '.pdf';
+            $file = $request->file('signed_acknowledgement_pdf');
+            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
+            $user_attachment->signed_acknowledgement_pdf = $filename;
+        }
+        else{
+            $document_status = false;
+        }
+        if ($request->hasFile('cnic_front_image')) {
+            $filename = 'cnic_front_image_' . $user->id . '.png';
+            $file = $request->file('cnic_front_image');
+            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
+            $user_attachment->cnic_front_image = $filename;
+        }
+        else{
+            $document_status = false;
+        }
+        if ($request->hasFile('cnic_back_image')) {
+            $filename = 'cnic_back_image_' . $user->id . '.png';
+            $file = $request->file('cnic_back_image');
+            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
+            $user_attachment->cnic_back_image = $filename;
+        }
+        else{
+            $document_status = false;
+        }
+        if ($request->hasFile('blank_cheque_image')) {
+            $filename = 'blank_cheque_image_' . $user->id . '.png';
+            $file = $request->file('blank_cheque_image');
+            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
+            $user_attachment->blank_cheque_image = $filename;
+        }
+        else{
+            $document_status = false;
+        }
+        $user_attachment->save();
 
+        $user_attachment_status = User::find($user->id);
+        if($document_status == true){
+            $user_attachment_status->documents_status = 1;
+        }
+        else{
+            $user_attachment_status->documents_status = 0;
+        }
+        $user_attachment_status->save();
         return $this->registered($request, $user)
             ?: redirect($this->redirectPath());
     }
@@ -195,6 +264,8 @@ class RegisterController extends Controller
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
+
+
         if($data['sale_person']){
             $sale_person = new SalePersonTag();
             $sale_person->admin_id = $data['sale_person'];

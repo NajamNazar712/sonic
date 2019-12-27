@@ -49,6 +49,7 @@ use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Support\Facades\DB;
@@ -113,6 +114,7 @@ use App\Http\Models\RateStatus;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
@@ -6304,7 +6306,7 @@ if(session('department_id') == 7){
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6349,6 +6351,20 @@ if(session('department_id') == 7){
                     return "Enable";
                 }else{
                     return "Disable";
+                }
+            })
+            ->editColumn('documents_status',function ($users){
+                if($users->documents_status == 0){
+                    return "Incomplete";
+                }
+                elseif($users->documents_status == 1){
+                    return "Pending for Approval";
+                }
+                elseif($users->documents_status == 2){
+                    return "Approved";
+                }
+                elseif($users->documents_status == 3){
+                    return "Rejected";
                 }
             })
             ->editColumn('rejected_reason',function ($users){
@@ -6469,7 +6485,7 @@ if(session('department_id') == 7){
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6508,6 +6524,20 @@ if(session('department_id') == 7){
                 }
                 else if($users->rate_status == 0 && $users->status==1) {
                     return "Requested";
+                }
+            })
+            ->editColumn('documents_status',function ($users){
+                if($users->documents_status == 0){
+                    return "Incomplete";
+                }
+                elseif($users->documents_status == 1){
+                    return "Pending for Approval";
+                }
+                elseif($users->documents_status == 2){
+                    return "Approved";
+                }
+                elseif($users->documents_status == 3){
+                    return "Rejected";
                 }
             })
             ->editColumn('status', function ($users) {
@@ -6617,6 +6647,7 @@ if(session('department_id') == 7){
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
                     }
                 }
+                $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
 
                 $dropdown .= '
                     </div>
@@ -7854,6 +7885,165 @@ if(session('department_id') == 7){
         else{
             return redirect()->back()->with(['error'=>"The password and confirmation password do not match!"]);
         }
+    }
+
+    public function userDocuments($id){
+        $documents = UserDocumentAttachment::where('user_id', $id)->first();
+        $user = User::find($id);
+        return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status]);
+    }
+
+    public function viewUserDocuments($id, $check, $pdf){
+        if($pdf == 1){
+            $pdf_image = 'pdf';
+        }
+        else{
+            $pdf_image = 'png';
+        }
+        $url = Storage::url('users_attached_documents/' . $id . '/'. $check . $id .'.' . $pdf_image);
+
+        return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
+    }
+    public function approveDocuments($id, $approve, $reason){
+        $user = User::find($id);
+        if($approve == 1){
+            $user->documents_status = 2;
+            $user->save();
+            return redirect()->back()->with(['success' => 'Files approved successfully']);
+        }
+        else if($approve == 0){
+            $user->documents_status = 3;
+            $user->documents_status_reason = $reason;
+            $user->save();
+            return redirect()->back()->with(['success' => 'Files rejected successfully']);
+        }
+        else{
+            return redirect()->back()->with(['error' => 'Something went wrong']);
+        }
+
+    }
+    public function uploadDocuments(Request $request){
+        $messages = [
+            'return_note_image.required' => 'No Image file selected!.',
+            'return_note_image.mimes' => 'Image file not supported!.',
+            'return_note_image.size' => 'Image file size exceded!.',
+        ];
+        $validation = [
+            'filled_and_signed_pdf' => 'mimes:pdf | max:5120',
+            'signed_acknowledgement_pdf' => 'mimes:pdf,jpg | max:5120',
+            'cnic_front_image' => 'mimes:png,jpeg,jpg | max:2048',
+            'cnic_back_image' => 'mimes:png,jpeg,jpg | max:2048',
+            'blank_cheque_image' => 'mimes:png,jpeg,jpg | max:2048'
+        ];
+        $validate = Validator::make($request->all(), $validation, $messages);
+
+        if ($validate->fails()) {
+            return redirect()->back()->with(['errors' => $validate->errors()]);
+        }
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if($user_attachment){
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->filled_and_signed_pdf = $filename;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            if ($request->hasFile('cnic_front_image')) {
+                $filename = 'cnic_front_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_front_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->cnic_front_image = $filename;
+            }
+            if ($request->hasFile('cnic_back_image')) {
+                $filename = 'cnic_back_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_back_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->cnic_back_image = $filename;
+            }
+            if ($request->hasFile('blank_cheque_image')) {
+                $filename = 'blank_cheque_image_' . $request->user_id . '.png';
+                $file = $request->file('blank_cheque_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->blank_cheque_image = $filename;
+            }
+            $user_attachment->save();
+
+            $user_attachment_status = User::find($request->user_id);
+            if($user_attachment->filled_and_signed_pdf != null && $user_attachment->signed_acknowledgement_pdf != null  && $user_attachment->cnic_front_image != null  && $user_attachment->cnic_back_image != null  && $user_attachment->blank_cheque_image != null){
+                $user_attachment_status->documents_status = 1;
+            }
+            else{
+                $user_attachment_status->documents_status = 0;
+            }
+            $user_attachment_status->save();
+        }
+        else{
+            $document_status = true;
+            $new_user_attachment = new UserDocumentAttachment();
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->filled_and_signed_pdf = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('cnic_front_image')) {
+                $filename = 'cnic_front_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_front_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->cnic_front_image = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('cnic_back_image')) {
+                $filename = 'cnic_back_image_' . $request->user_id . '.png';
+                $file = $request->file('cnic_back_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->cnic_back_image = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            if ($request->hasFile('blank_cheque_image')) {
+                $filename = 'blank_cheque_image_' . $request->user_id . '.png';
+                $file = $request->file('blank_cheque_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->blank_cheque_image = $filename;
+            }
+            else{
+                $document_status = false;
+            }
+            $new_user_attachment->save();
+
+            $user_attachment_status = User::find($request->user_id);
+            if($document_status == true){
+                $user_attachment_status->documents_status = 1;
+            }
+            else{
+                $user_attachment_status->documents_status = 0;
+            }
+            $user_attachment_status->save();
+        }
+
+        return redirect()->back()->with(['success' => 'Files uploaded successfully']);
     }
 }
 

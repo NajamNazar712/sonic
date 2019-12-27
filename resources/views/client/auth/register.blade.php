@@ -79,7 +79,7 @@
                             </div>
                             <div class="card-content">
                                 <div class="card-body">
-                                    <form id="registership" action="{{route('cod.register.submit')}}" method="post" class="steps-validation wizard-circle">
+                                    <form id="registership" action="{{route('cod.register.submit')}}" method="post" class="steps-validation wizard-circle" enctype="multipart/form-data">
                                         <!-- Step 1 -->
                                         @csrf
                                         @method('post')
@@ -580,8 +580,46 @@
 
                                             </div>
 
+                                        </fieldset><!-- Step 4 -->
+                                        <h6>Documents Attachment</h6>
+                                        <fieldset>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="filled_and_signed_image">
+                                                            Pdf of filled and signed document:
+                                                        </label>
+                                                        <input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="signed_acknowledgement_image">
+                                                            Pdf of signed Acknowledgement form:
+                                                        </label>
+                                                        <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf" id="signed_acknowledgement_pdf">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="cnic_front_image">
+                                                            Picture of CNIC (Front):
+                                                        </label>
+                                                        <input class="form-control form-control-sm" type="file" name="cnic_front_image" id="cnic_front_image">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="cnic_back_image">
+                                                            Picture of CNIC (Back):
+                                                        </label>
+                                                        <input class="form-control form-control-sm" type="file" name="cnic_back_image" id="cnic_back_image">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="blank_cheque_image">
+                                                            Picture of Blank cheque:
+                                                        </label>
+                                                        <input class="form-control form-control-sm" type="file" name="blank_cheque_image" id="blank_cheque_image">
+                                                    </div>
+                                                </div>
+
+                                            </div>
                                         </fieldset>
-                                        <!-- Step 4 -->
+                                        <!-- Step 5 -->
                                         <h6>Login Information</h6>
                                         <fieldset>
                                             <div class="row">

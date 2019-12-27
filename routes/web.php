@@ -325,6 +325,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
         Route::post('edit/emails','Admins\AdminDashboardController@edit_notification_emails')->name('edit.emails');
         Route::post('add/emails','Admins\AdminDashboardController@add_notification_emails')->name('add.emails');
+        Route::get('/{id}/documents','Admins\AdminDashboardController@userDocuments')->name('documents');
+        Route::get('/{id}/{check}/{pdf}/documents','Admins\AdminDashboardController@viewUserDocuments')->name('documents.view');
+        Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
+        Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
 
 
         Route::prefix('sister_account')->name('sister_account.')->group(function(){
