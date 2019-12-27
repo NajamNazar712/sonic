@@ -258,6 +258,15 @@
 
 	<script>
 		$(document).ready(function() {
+            $('#claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
             $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Case Nature",

@@ -369,7 +369,15 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
+            $('#claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
             var booking_from_date = $('#booking_from_date').pickadate({
                 firstDay: 1,
                 clear: '',
