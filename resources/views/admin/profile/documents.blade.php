@@ -66,16 +66,16 @@
                                 </table>
                             </div>
                         </div>
-                        @if(session('role_id') == 1 || in_array(257, session('permissions')) || in_array(258, session('permissions')))
+                        @if(session('role_id') == 1 || in_array(277, session('permissions')) || in_array(278, session('permissions')))
                             <div class="row justify-content-center mt-4">
                                 @if($document_status == 0 || $document_status == 3)
-                                    @if(session('role_id') == 1 || in_array(257, session('permissions')))
+                                    @if(session('role_id') == 1 || in_array(277, session('permissions')))
                                         <div class="mr-1">
                                             <button type="button" class="btn btn-outline-primary mr-1 edit">Edit</button>
                                         </div>
                                     @endif
                                 @elseif($document_status == 1)
-                                    @if(session('role_id') == 1 || in_array(258, session('permissions')))
+                                    @if(session('role_id') == 1 || in_array(278, session('permissions')))
                                         <div class="mr-1">
                                             <button type="button" class="btn btn-success approve">Approve</button>
                                         </div>
