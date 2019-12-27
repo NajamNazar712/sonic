@@ -6461,6 +6461,7 @@ if(session('department_id') == 7){
                         $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                     }
                 }
+                $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
                 $dropdown .= '
                     </div>
                   </div>
