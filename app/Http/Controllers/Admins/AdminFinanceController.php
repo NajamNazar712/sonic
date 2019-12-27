@@ -159,7 +159,14 @@ class AdminFinanceController extends Controller
                     return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
 
                 } else if($station_deposit_note->deposit_slip != null) {
+                    $now = Carbon::now();
+                    if($now->diffInDays($station_deposit_note->created_at) > 1){
                     return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $station_deposit_note->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
+                    }else{
+                        $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/'.$station_deposit_note->deposit_slip, now()->addMinutes(5));
+                    return '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
                 }else{
                     return '-';
                 }

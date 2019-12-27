@@ -3148,11 +3148,18 @@ class DeliveryController extends Controller
                 return $query->where('station_deposit_notes.id', '=', $keyword);
             })
             ->addColumn('deposit_slip', function ($sdn) {
+                $now = Carbon::now();
                 if ($sdn->deposit_slip == null && $sdn->deposit_slip_status == 1) {
                     return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
 
                 } else if($sdn->deposit_slip != null) {
+                    if($now->diffInDays($sdn->created_at) < 1){
                     return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $sdn->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }else{
+                        $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/'.$sdn->deposit_slip, now()->addMinutes(5));
+                    return '<a class="btn btn-sm btn-outline-info align-middle" href="'.$img.'" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
+                    }
                 }else{
                     return '-';
                 }
@@ -4796,11 +4803,17 @@ class DeliveryController extends Controller
             $slips = StationDepositNoteSlip::where('station_deposit_note_id', $sdn_id)->get();
             if(count($slips) > 0){
                 $sorted_array = array();
+                $now = Carbon::now();
                 foreach ($slips as $slip) {
                     $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
                     $sorted_array[$slip->id]['amount'] = $slip->amount;
-                    $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    if($now->diffInDays($slip->created_at) > 1){
+                        $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/'.$slip->image, now()->addMinutes(5));
+                        $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="'.$img.'" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }else{    
+                        $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
                 }
 
                 return ['status' => 0, 'slips' => $sorted_array];
@@ -4861,7 +4874,7 @@ class DeliveryController extends Controller
             if (is_file($file)) {
                 $created = date("F d Y H:i:s.",filemtime($file));
                 $file_name = pathinfo($file);
-                if($now->diffInDays($created) > 30){
+                if($now->diffInDays($created) > 1){
                     Storage::disk('s3')->put( 'station_deposit_notes/'.$file_name['basename'], file_get_contents($file));
                     File::delete($file);
                 }
