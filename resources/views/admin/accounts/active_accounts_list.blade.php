@@ -301,7 +301,7 @@
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
-                $("#documents_status").prepend('<option value="" selected></option>').select2({
+                $("#status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
                     width:'100%',
                     containerCssClass: 'select-xs',
