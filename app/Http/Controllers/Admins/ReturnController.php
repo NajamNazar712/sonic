@@ -2247,7 +2247,10 @@ class ReturnController extends Controller
                 $file_name = pathinfo($file);
                if($now->diffInDays($created) > 1){
                    Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
-                   File::delete($file);
+                   $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
+                   if($exists){
+                        File::delete($file);
+                   }
                }
             }
         }
