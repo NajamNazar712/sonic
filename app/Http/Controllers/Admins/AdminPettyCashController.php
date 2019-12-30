@@ -1366,7 +1366,9 @@ class AdminPettyCashController extends Controller
            $file_name = pathinfo($file);
            if($now->diffInDays($created) > 1){
                Storage::disk('s3')->put( 'petty_cash_statement_images/'.$file_name['basename'], file_get_contents($file));
-               File::delete($file);
+               if(Storage::disk('s3')->exists('petty_cash_statement_images/'.$file_name['basename'])){
+                    File::delete($file);
+               }
            }
         }
     }
