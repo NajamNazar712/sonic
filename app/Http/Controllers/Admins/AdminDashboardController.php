@@ -22,6 +22,8 @@ use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\Operataions\OperationForecast;
 
+use App\Http\Models\PendingPayment;
+use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Reference;
 use App\Http\Models\Operataions\OperationForecastShipments;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
@@ -1158,13 +1160,44 @@ class AdminDashboardController extends Controller
         if($user->exists()){
             $user = $user->first();
             if($status == 'block'){
-                if($user->blacklist == 0){
-                    $user->blacklist = 1;
-                    $user->blacklist_reason = $reason;
-                    $user->save();
-                    return response()->json(['status'=>1,'success'=>"User added to the blacklist!"]);
-                }else{
-                    return response()->json(['status'=>0,'error'=>"User is already in blacklist!"]);
+                $negative_balance_status = false;
+                $merged_account = MergedSisterAccount::where('user_id', $user_id);
+                if ($merged_account->exists()) {
+                    $merged_account = $merged_account->first();
+                    $merged_accounts = MergedSisterAccount::where('merged_head_id', $merged_account->merged_head_id)->get();
+                    foreach ($merged_accounts as $merge_account) {
+                        $pending_payment_shipper = PendingPayment::where('user_id', $merge_account->user_id);
+                        if ($pending_payment_shipper->exists()) {
+                            $pending_payment_shipper = $pending_payment_shipper->first();
+                            $payable = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipper->id)->sum('payable');
+                            if ($payable < 0) {
+                                $negative_balance_status = true;
+                            }
+                        }
+                    }
+                }
+                else{
+                    $pending_payment_shipper = PendingPayment::where('user_id', $user_id);
+                    if ($pending_payment_shipper->exists()) {
+                        $pending_payment_shipper = $pending_payment_shipper->first();
+                        $payable = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipper->id)->sum('payable');
+                        if ($payable < 0) {
+                            $negative_balance_status = true;
+                        }
+                    }
+                }
+                if($negative_balance_status == false){
+                    if($user->blacklist == 0){
+                        $user->blacklist = 1;
+                        $user->blacklist_reason = $reason;
+                        $user->save();
+                        return response()->json(['status'=>1,'success'=>"User added to the blacklist!"]);
+                    }else{
+                        return response()->json(['status'=>0,'error'=>"User is already in blacklist!"]);
+                    }
+                }
+                else{
+                    return response()->json(['status'=>0,'error'=>"Negative balance found!"]);
                 }
             }else if($status == 'unblock'){
                 if($user->blacklist == 1){
