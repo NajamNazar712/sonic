@@ -505,7 +505,7 @@
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
-                }$('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
+                }
             });
             $('#search_filter_btn').on('click',function () {
                 table.draw();
