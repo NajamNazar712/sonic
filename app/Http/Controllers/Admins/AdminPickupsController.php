@@ -1933,12 +1933,16 @@ class AdminPickupsController extends Controller
             ShipmentsPickupJourneyController::add($shipment->id, 5, Auth::id(), $pickup_note->id);
           }
         }
+        $vendor = $pickup_request->pickup_address->vendor;
+      if($vendor != null){
+            NotificationsController::send(50, $pickup_note->id, $pickup_request_id);
+            NotificationsController::send(51, $pickup_note->id, $pickup_request_id);
+        }
 
         if ($completed) {
           $pickup_note->status_id = 4;
           $pickup_note->updated_by = Auth::id();
           $pickup_note->save();
-
           return ['status' => 0, 'success' => 'Pickup has been marked Done & Pickup Note has been Completed', 'complete' => TRUE];
         }
         else {
@@ -1975,6 +1979,11 @@ class AdminPickupsController extends Controller
             break;
           }
         }
+          $vendor = $pickup_request->pickup_address->vendor;
+          if($vendor != null){
+              NotificationsController::send(50, $pickup_note->id, $pickup_request_id);
+              NotificationsController::send(51, $pickup_note->id, $pickup_request_id);
+          }
 
         if ($completed) {
           $pickup_note->status_id = 4;

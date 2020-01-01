@@ -800,6 +800,11 @@
                                                         </li>
                                                     @endif
 
+                                                    @if (session('role_id') == 1 || in_array(85, session('permissions')))
+                                                        <li><a class="menu-item" href="{{ route('admin.settings.multiple_sale_tagging.index') }}">Multiple Sale Tagging</a>
+                                                        </li>
+                                                    @endif
+
 
                                                 </ul>
                                             </li>

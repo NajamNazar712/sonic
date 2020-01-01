@@ -17,13 +17,15 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-								<div class="form-group">
-									<input type="text" name="tracking_numbers" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
-								</div>
+							<form id="search_form" class="mb-1 justify-content-center" novalidate="novalidate">
+								<div class="row justify-content-center">
+									<div class="form-group col-3">
+										<input type="text" name="tracking_numbers" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+									</div>
 
-								<div class="form-group ml-1">
-									<button type="submit" name="search" class="btn btn-primary search" value="Search">Search</button>
+									<div class="form-group ml-1">
+										<button type="submit" name="search" class="btn btn-primary search" value="Search">Search</button>
+									</div>
 								</div>
 							</form>
 
@@ -31,17 +33,20 @@
 							</div>
 
 							@if (session('role_id') == 1 || in_array(58, session('permissions')))
-								<form id="change_amount_form" class="form-inline mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_amount.store') }}" novalidate="novalidate">
+								<form id="change_amount_form" class="mb-1 mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_amount.store') }}" novalidate="novalidate">
 									{{ csrf_field() }}
 
 									<input type="hidden" name="shipment_id" class="shipment_id">
-
-									<div class="form-group">
-										<input type="text" name="amount" class="form-control amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">
-									</div>
-
-									<div class="form-group ml-1">
-										<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
+									<div class="row justify-content-center">
+										<div class="form-group">
+											<input type="text" name="amount" class="form-control amount" id="amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">
+										</div>
+										<div class="form-group ml-1">
+											<textarea name="remarks" class="form-control remarks" id="remarks" rows="1" placeholder="Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+										</div>
+										<div class="form-group ml-1">
+											<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
+										</div>
 									</div>
 								</form>
 							@endif
@@ -80,7 +85,7 @@
 				errorClass: 'danger',
 				successClass: 'success',
 				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('form'));
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
 					$(form).find('button.search').prop('disabled', true);
@@ -232,7 +237,7 @@
 					errorClass: 'danger',
 					successClass: 'success',
 					errorPlacement: function(error, element) {
-						error.addClass('w-100').appendTo(element.parents('form'));
+						error.addClass('w-100').appendTo(element.parents('.form-group'));
 					}
 				});
 			@endif

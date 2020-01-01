@@ -112,36 +112,36 @@ class ShipperReturnController extends Controller
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
 
 
-                    $dropdown = "
+                $dropdown = "
                         <div class='btn-group'>
                             <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
-                            if($result->shipper_status_id != 52){
-                                $dropdown .= $confirm_button;
-                                $dropdown .= $reattempt_button;
-                            }
-                        
-
-                        if (($result->shipper_status_id == 12 || $result->shipper_status_id == 52) && $result->journey_shipper_status_id != 53 && $result->pickup == 1 && $result->intercepted == 0) {
-                            $dropdown .= $intercept;
-                        }
-
-                        if($result->reason_id == 12){
-                            $dropdown .= $self_collection_button;
-                        }
+                if($result->shipper_status_id != 52){
+                    $dropdown .= $confirm_button;
+                    $dropdown .= $reattempt_button;
+                }
 
 
-                    $dropdown .= "
+                if (($result->shipper_status_id == 12 || $result->shipper_status_id == 52) && $result->journey_shipper_status_id != 53 && $result->pickup == 1 && $result->intercepted == 0) {
+                    $dropdown .= $intercept;
+                }
+
+                if($result->reason_id == 12){
+                    $dropdown .= $self_collection_button;
+                }
+
+
+                $dropdown .= "
                             </div>
                         </div>
                     ";
 
-                    return $dropdown;
+                return $dropdown;
 
             })
             ->make(true);
     }
-public function return_reattempt_nsa(Request $request){
+    public function return_reattempt_nsa(Request $request){
         $shipment_ids = $request->shipment_ids;
         if($request->single == 1){
             $shipment = Shipment::where('id', $shipment_ids)->first();
@@ -192,7 +192,7 @@ public function return_reattempt_nsa(Request $request){
             }
         }
     }
-public function change_status_to_self_collection(Request $request){
+    public function change_status_to_self_collection(Request $request){
         $shipmentId = $request->shipment_id;
         $remark = $request->remark;
         if($shipmentId){
@@ -211,35 +211,35 @@ public function change_status_to_self_collection(Request $request){
     }
 
     public function return_marked_single_status(Request $request){
-            $parcel = Shipment::find($request->shipment_id);
-            if($parcel){
-                if(($parcel->shipper_status_id != 20) && ($parcel->shipper_status_id != 52)){
-                    if (!$parcel->packaging_material_request) {
-                        Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                        $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
-                        ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
+        $parcel = Shipment::find($request->shipment_id);
+        if($parcel){
+            if(($parcel->shipper_status_id != 20) && ($parcel->shipper_status_id != 52)){
+                if (!$parcel->packaging_material_request) {
+                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+                    $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
+                    ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
 
 
 //                NotificationsController::send(15, 0, $request->shipment_id);
 //                NotificationsController::send(16, 0, $request->shipment_id);
 
-                        ShipmentChargesController::return($request->shipment_id);
+                    ShipmentChargesController::return($request->shipment_id);
 
-                        AdminFinanceController::add_payment($request->shipment_id, 1);
-                    }
-                    else {
-                        Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
-                        $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
-                        ShipmentsJourneyController::add($request->shipment_id, 17, 17, $shipment_history->status_reason_id, NULL, session('user_id'),NULL);
-
-
-//                NotificationsController::send(15, 0, $request->shipment_id);
-//                NotificationsController::send(16, 0, $request->shipment_id);
-                    }
-
-                    return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
+                    AdminFinanceController::add_payment($request->shipment_id, 1);
                 }
-                return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+                else {
+                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
+                    $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
+                    ShipmentsJourneyController::add($request->shipment_id, 17, 17, $shipment_history->status_reason_id, NULL, session('user_id'),NULL);
+
+
+//                NotificationsController::send(15, 0, $request->shipment_id);
+//                NotificationsController::send(16, 0, $request->shipment_id);
+                }
+
+                return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
+            }
+            return ['status'=>0,'error'=>"Something went wrong, try again later!"];
         }
         return ['status'=>0,'error'=>"Something went wrong, try again later!"];
 
@@ -247,38 +247,38 @@ public function change_status_to_self_collection(Request $request){
 
     public function return_marked_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
         $shipment_ids = $request->shipment_ids;
-            if($shipment_ids){
-                foreach ($shipment_ids as $shipment){
-                    $parcel = Shipment::find($shipment);
+        if($shipment_ids){
+            foreach ($shipment_ids as $shipment){
+                $parcel = Shipment::find($shipment);
 
-                    if(($parcel->shipper_status_id != 20)  && ($parcel->shipper_status_id != 52)){
+                if(($parcel->shipper_status_id != 20)  && ($parcel->shipper_status_id != 52)){
 
-                        $remark_inp = "remark.$shipment";
+                    $remark_inp = "remark.$shipment";
 
-                        $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
-                        if (!$parcel->packaging_material_request) {
+                    $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
+                    if (!$parcel->packaging_material_request) {
 
-                            $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
-                            Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                            ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
+                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
+                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+                        ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
 
 //                    NotificationsController::send(15, 0, $shipment);
 //                    NotificationsController::send(16, 0, $shipment);
 
-                            ShipmentChargesController::return($shipment);
+                        ShipmentChargesController::return($shipment);
 
-                            AdminFinanceController::add_payment($shipment, 1);
-                        }
-                        else {
-                            $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
-                            Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
-                            ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
+                        AdminFinanceController::add_payment($shipment, 1);
+                    }
+                    else {
+                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
+                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
+                        ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
 
-                        }
                     }
                 }
-                return response()->json(['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"]);
             }
+            return response()->json(['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"]);
+        }
     }
 
     public function return_reattempt_status(Request $request){
@@ -357,7 +357,7 @@ public function change_status_to_self_collection(Request $request){
                     ->where('sj.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = s.id)'));
             })
-            ->select('s.tracking_number as tracking_number','s.tracking_number as tracking','u.name as shipper','oc.name as origin','dc.name as destination','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as current_status','sj.created_at as current_status_date','shipments_journey.created_at as reattempt_status_date')
+            ->select('s.tracking_number as tracking_number','s.tracking_number as tracking','u.name as shipper','oc.name as origin','dc.name as destination','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as current_status','sj.created_at as current_status_date','shipments_journey.created_at as reattempt_status_date','sj.remarks as current_remarks')
             ->where('shipments_journey.shipper_status_id', 52)
             ->where('s.user_id', session('user_id'));
         return Datatables::of($shipments_journey)

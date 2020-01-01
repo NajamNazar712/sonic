@@ -9,6 +9,10 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\BookingType;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipmentPaymentStatus;
+use App\Http\Models\ReceivingSheetShipment;
 
 use Auth;
 use DB;
@@ -759,5 +763,82 @@ class ShipperFinanceController extends Controller
         header('Cache-Control: max-age=0');
 
         $writer->save('php://output');
+    }
+
+    public function payments_reconcile_through_receiving_sheet_index() {
+      $service_types = BookingType::whereNotIn('id', [3, 4])->select('id', 'booking_type')->get();
+      $shipment_statuses = ShipmentStatus::select('id', 'name')->get();
+      $shipment_payment_statuses = ShipmentPaymentStatus::select('id', 'name')->get();
+
+      return view('client.finance.payments.reconcile_through_receiving_sheet.index')->with(['service_types' => $service_types, 'shipment_statuses' => $shipment_statuses, 'shipment_payment_statuses' => $shipment_payment_statuses]);
+    }
+
+    public function payments_reconcile_through_receiving_sheet_list(Request $request) {
+      $tracking_route = route('cod.tracking.index');
+
+      $shipments = ReceivingSheetShipment::join('shipments as s', 'receiving_sheet_shipments.shipment_id', 's.id')
+      ->join('receiving_sheets as rs', 'receiving_sheet_shipments.receiving_sheet_id', 'rs.id')
+      ->join('booking_types as bt', 's.booking_type_id', 'bt.id')
+      ->join('cities as c', 's.consignee_city_id', 'c.id')
+      ->join('shipments_journey as sj', function ($join) {
+        $join->on('sj.shipment_id', '=', 's.id')
+          ->where('sj.id', '=',
+            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1)'));
+      })
+      ->join('shipment_status as ss', 'sj.consignee_status_id', 'ss.id')
+      ->leftJoin('shipment_payment_status as sps', 's.payment_status_id', 'sps.id')
+      ->leftJoin('done_payment_shipments as dps', 's.id', 'dps.shipment_id')
+      ->select('s.id', 's.tracking_number', 's.order_id', 'bt.booking_type as service_type', 's.consignee_name', 's.consignee_phone_number_1', 's.consignee_phone_number_2', 's.created_at', 'c.name as destination', 's.actual_weight', 'ss.name as shipment_status', 'sps.name as shipment_payment_status', DB::raw('IF(s.tracking_number IS NULL, NULL, IFNULL(GROUP_CONCAT(dps.done_payment_id SEPARATOR ", "), NULL)) AS payment_ids'));
+
+      $shipments = $shipments->where(function ($query) {
+        $query->where('rs.user_id', session('user_id'))
+          ->orwhereIn('rs.user_id', session('sister_users'));
+      });
+
+      if ($receiving_sheet_id = $request->receiving_sheet_id) {
+        $shipments = $shipments->where('receiving_sheet_shipments.receiving_sheet_id', $request->receiving_sheet_id);
+      }
+      else {
+        $shipments = $shipments->where('receiving_sheet_shipments.receiving_sheet_id', 0);
+      }
+
+      $shipments = $shipments->groupBy('s.id');
+
+      $datatables = Datatables::of($shipments)
+      ->editColumn('tracking_number', function($shipment) use ($tracking_route) {
+        return '<u><a href="' . $tracking_route . '?tracking_number=' . $shipment->tracking_number . '" target="_blank">' . $shipment->tracking_number . '</a></u>';
+      })
+      ->addColumn('consignee_phone', function ($shipment) {
+          $consignee_phone = $shipment->consignee_phone_number_1;
+
+          if ($shipment->consignee_phone_number_2) {
+            $consignee_phone .= ' | ' . $shipment->consignee_phone_number_2;
+          }
+
+          return $consignee_phone;
+      })
+      ->filterColumn('consignee_phone', function ($query, $keyword) {
+        $keyword = strtolower($keyword);
+
+        if ($keyword != '') {
+            $query->where('s.consignee_phone_number_1', 'like', '%' . $keyword . '%')->orWhere('s.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+        }
+        else {
+            $query->whereRaw('false');
+        }
+      })
+      ->orderColumn('consignee_phone', 's.consignee_phone_number_1 $1, s.consignee_phone_number_2 $1')
+      ->filterColumn('payment_ids', function ($query, $keyword) {
+        $keyword = strtolower($keyword);
+
+        if ($keyword != '') {
+          $query->where('dps.done_payment_id', '=', $keyword);
+        }
+        else {
+          $query->whereRaw('false');
+        }
+      });
+
+      return $datatables->make(true);
     }
 }

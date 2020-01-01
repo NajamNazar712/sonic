@@ -9,14 +9,25 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-
-                        @include('admin.inc.messages')
-
-                    </div>
-
+                    @include('admin.inc.messages')
                     <div class="card-content">
                         <div class="card-body card-dashboard">
+                            @if (session('role_id') == 1 || in_array(276, session('permissions')))
+                            <div id="search_form" class="row mb-2 justify-content-center">
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_admins[]" id="search_admins" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($sale_name as $admin)
+                                                <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
+                            </div>
+                            @endif
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3">
                                 <thead>
                                     <tr class="bg-primary white">
@@ -41,6 +52,8 @@
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
+                                        <th class="border-primary border-darken-1">Documents Status</th>
+                                        <th class="border-primary border-darken-1">Documents Rejection Reason</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -78,6 +91,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
 
 
@@ -87,10 +101,18 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
     $(document).ready(function() {
+
+        $('#search_admins').select2({
+            width:'100%',
+            placeholder:"Select Sale Persons",
+            allowClear:true,
+            dropdownParent:$('#search_form')
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -99,6 +121,7 @@
                     url: '{{ route('admin.accounts.active.ajax') }}',
                     data: {
                         'page': 'all',
+                        'sale_persons': $('#search_admins').val(),
                     },
                     success: function (result) {
                         head = [];
@@ -124,6 +147,8 @@
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
                         head.push('Account Disable Remarks');
+                        head.push('Documents Status');
+                        head.push('Documents Rejection Reason');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -149,6 +174,8 @@
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
                             row.push(values.disable_remarks);
+                            row.push(values.documents_status);
+                            row.push(values.documents_rejection_reason);
 
                             body.push(row);
                         });
@@ -182,7 +209,12 @@
             serverSide: true,
             rowId: 'id',
             order: [[1, 'desc']],
-            ajax: '{{ route('admin.accounts.active.ajax') }}',
+            ajax: {
+               url: '{{ route('admin.accounts.active.ajax') }}',
+               data: function (d) {
+                   d.sale_persons = $('#search_admins').val();
+               }
+           },
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
@@ -205,6 +237,8 @@
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
+                {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
+                {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -220,6 +254,12 @@
                 var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                     '<option value="3">Enable</option>' +
                     '<option value="4">Disable</option>' +
+                    '</select>';
+                var documents_drop_select = '<select name="documents_status_select" id="documents_status_select" class="select2 form-control">' +
+                    '<option value="0">Incomplete</option>' +
+                    '<option value="1">Pending for Approval</option>' +
+                    '<option value="2">Approved</option>' +
+                    '<option value="3">Rejected</option>' +
                     '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
 
@@ -239,6 +279,11 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
+                    }else if($(header).is('.documents_status')){
+                        $(documents_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -249,6 +294,12 @@
                             current.val(column.search());
                         }
                     }
+                });
+                $("#documents_status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
@@ -276,6 +327,10 @@
                 });
                 this.api().table().columns.adjust();
             }
+        });
+
+        $('#search_filter_btn').on('click',function () {
+            table.draw();
         });
         $('body').on('change','.blacklist_reason',function() {
             $(this).val($(this).val().trim());

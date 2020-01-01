@@ -233,6 +233,39 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="claims d-none" id="request_claims">
+                                <input type="hidden" name="shipment_ids" id="shipment_ids">
+                                <input type="hidden" name="case_nature_id" id="case_nature_id">
+                                <input type="hidden" name="complaint_id" id="complaint_id">
+                                <div class="row justify-content-center">
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2">
+                                                @foreach($case_nature_type_claims as $claim)
+                                                    <option value="{{$claim->id}}">{{$claim->type}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Product Cost">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-8 text-left">
+                                        <fieldset class="form-group">
+                                            <label for="product_picture"><b>Product Picture:</b></label>
+                                            <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-8 text-left">
+                                        <fieldset class="form-group">
+                                            <label for="invoice_picture"><b>Invoice Picture:</b></label>
+                                            <input class="form-control form-control-sm" type="file" name="invoice_picture" id="invoice_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row justify-content-center">
                                 <div class="col-3">
                                     <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
@@ -325,6 +358,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
@@ -336,7 +370,15 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
+            $('#claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
             var booking_from_date = $('#booking_from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -1093,11 +1135,13 @@
                     $('#request_complaints').removeClass('d-none');
                     $('#request_feedback').addClass('d-none');
                     $('#AddNewRequest').removeClass('d-none');
+                    $('#request_claims').addClass('d-none');
                 }else if(id === 2){
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').removeClass('d-none');
                     $('#request_feedback').addClass('d-none');
                     $('#AddNewRequest').removeClass('d-none');
+                    $('#request_claims').addClass('d-none');
 
                 }
                 else if(id === 3){
@@ -1105,12 +1149,21 @@
                     $('#request_service').addClass('d-none');
                     $('#request_feedback').removeClass('d-none');
                     $('#AddNewRequest').removeClass('d-none');
+                    $('#request_claims').addClass('d-none');
 
+                }
+                else if(id === 4){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                    $('#request_feedback').addClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
+                    $('#request_claims').removeClass('d-none');
                 }else{
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').addClass('d-none');
                     $('#request_feedback').addClass('d-none');
                     $('#AddNewRequest').addClass('d-none');
+                    $('#request_claims').addClass('d-none');
 
                 }
             });
@@ -1139,6 +1192,12 @@
                     // Maximum exceeded
                     this.value = this.value.substring(0, max_char_request);
                 }
+            });
+            $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Claim Type",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
             });
             $('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
@@ -1194,6 +1253,105 @@
                                     'shipment_ids': selected_rows,
                                     'description' : feedback_description
                                 }
+                            })
+                                .done(function(data) {
+                                    if(data.status){
+                                        if(data.flag){
+                                            var html = '';
+
+                                            $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                                html += tracking_number + '<br/>';
+                                            });
+
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                            content = document.createElement('div');
+                                            content.innerHTML = html;
+
+                                            swal({
+                                                title: 'Request / Complaint Already Lodged!',
+                                                content: content,
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Close',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            });
+                                        }else{
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+
+                                    table.button('.print').disable();
+                                    table.button('.cancel').disable();
+
+                                    selected_rows = [];
+
+                                    table.rows().deselect();
+
+                                    table.draw('false');
+
+                                    $('#AddRequestModal').modal('hide');
+                                    $('#AddNewRequest').attr('disabled',false);
+                                });
+                        }
+                    }
+                    else if(case_nature_id === 4)
+                    {
+                        var nature_flag = true;
+                        var case_nature_claim_id = $('#case_nature_claim').val();
+                        var product_cost = $('#claim_product_cost').val();
+                        var check_product_picture = $('#product_picture').val();
+                        var check_invoice_picture = $('#invoice_picture').val();
+                        $('#shipment_ids').val(selected_rows);
+                        $('#case_nature_id').val(case_nature_id);
+                        $('#complaint_id').val(case_nature_claim_id);
+                        var formData = new FormData($('#add_request_form')[0]);
+                        if(!case_nature_claim_id){
+                            nature_flag = false;
+                            var error = "Please select Claim type!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        if(!check_product_picture){
+                            nature_flag = false;
+                            var error = "Please attach Product Picture!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        if(!product_cost){
+                            nature_flag = false;
+                            var error = "Please enter Product Cost!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        if(!check_invoice_picture){
+                            nature_flag = false;
+                            var error = "Please attach Invoice Picture!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        if(nature_flag){
+                            $('#AddNewRequest').attr('disabled',true);
+                            $.ajax({
+                                url: '{!! route('cod.crm.request.add') !!}',
+                                method: 'POST',
+                                enctype: 'multipart/form-data',
+                                data: formData,
+                                dataType: 'json',
+                                processData: false,
+                                contentType: false,
                             })
                                 .done(function(data) {
                                     if(data.status){
@@ -1340,6 +1498,10 @@
                 $('#request_complaints').addClass('d-none');
                 $('#request_service').addClass('d-none');
                 $('#request_feedback').addClass('d-none');
+                $('#request_claims').addClass('d-none');
+                $('#case_nature_claim').val('').trigger('change');
+                $('#claim_channel').val('').trigger('change');
+                $('#claim_product_cost').val('');
             });
 
             $('#add_feedback_form').bind('submit', function (e) {

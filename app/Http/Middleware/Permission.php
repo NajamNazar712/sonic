@@ -598,6 +598,8 @@ class Permission
             'finance.payments.adjusted_shipments' => 5,
             'finance.payments.details_print' => 5,
             'finance.payments.export_to_excel' => 5,
+            'finance.payments.reconcile_through_receiving_sheet.index' => 5,
+            'finance.payments.reconcile_through_receiving_sheet.list' => 5,
 
             'dispute.index' => 6,
             'dispute.list' => 6,
