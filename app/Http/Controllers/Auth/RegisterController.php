@@ -108,11 +108,11 @@ class RegisterController extends Controller
                 'account_title'=>'required|string|max:255',
                 'iban_no'=>'required|string|max:255',
                 'cycle_of_payment'=>'required|string|max:255',
-                'filled_and_signed_pdf' => 'mimes:pdf | max:5120',
-                'signed_acknowledgement_pdf' => 'mimes:pdf,jpg | max:5120',
-                'cnic_front_image' => 'mimes:png,jpeg,jpg | max:2048',
-                'cnic_back_image' => 'mimes:png,jpeg,jpg | max:2048',
-                'blank_cheque_image' => 'mimes:png,jpeg,jpg | max:2048',
+                'filled_and_signed_pdf' => 'mimes:pdf',
+                'signed_acknowledgement_pdf' => 'mimes:pdf',
+                'cnic_front_image' => 'mimes:png,jpeg,jpg',
+                'cnic_back_image' => 'mimes:png,jpeg,jpg',
+                'blank_cheque_image' => 'mimes:png,jpeg,jpg',
                 'g-recaptcha-response' => 'required|captcha'
             ]);
         }else{
