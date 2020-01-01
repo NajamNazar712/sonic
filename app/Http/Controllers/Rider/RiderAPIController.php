@@ -310,7 +310,7 @@ class RiderAPIController extends Controller {
     public function pickup_summary(Request $request) {
         $rider_id = $request->rider_id;
 
-        $pickup_note = PickupNote::where('rider_id', $rider_id)->where('status_id', 2);
+        $pickup_note = PickupNote::where('rider_id', $rider_id)->where('status_id', 3);
 
         if ($pickup_note->exists()) {
             $pickup_note = $pickup_note->latest('id')->first();
