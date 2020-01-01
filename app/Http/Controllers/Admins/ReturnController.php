@@ -2108,13 +2108,22 @@ class ReturnController extends Controller
                 $now = Carbon::now();
                 if($deliveries->image == null){
                     return "-";
-                }else if ($now->diffInDays($deliveries->updated_at) < 1){
-                    $img = asset('uploads/return_notes/' . $deliveries->image);
-                    return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
+                }else {
+                    $url = 'uploads/return_notes/' . $deliveries->image;
+                    
+                    if(file_exists($url)){
+                         $img = asset('uploads/return_notes/' . $deliveries->image);
+                        return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
+                    }else{
+                        $exists = Storage::disk('s3')->exists('return_note_images/'.$deliveries->image);
+                        if($exists){
+                            $img = Storage::disk('s3')->temporaryUrl('return_note_images/'.$deliveries->image, now()->addMinutes(5));
+                            return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
+                        }else{
+                            return "-";
+                        }
+                    }
 
-                } else {
-                    $img = Storage::disk('s3')->temporaryUrl('return_note_images/'.$deliveries->image, now()->addMinutes(5));
-                    return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
                 }
 
             })
@@ -2238,7 +2247,10 @@ class ReturnController extends Controller
                 $file_name = pathinfo($file);
                if($now->diffInDays($created) > 1){
                    Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
-                   File::delete($file);
+                   $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
+                   if($exists){
+                        File::delete($file);
+                   }
                }
             }
         }
