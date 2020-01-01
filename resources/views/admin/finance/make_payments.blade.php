@@ -499,7 +499,7 @@
 				rowId: 'id',
 				order: [[6, 'desc']],
 				columns: [
-					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
@@ -529,6 +529,10 @@
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
+					if (data.documents_status == 2) {
+                        $('td:eq(0)', row).addClass('select-checkbox');
+                    }
+
 					var info = table.page.info();
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
