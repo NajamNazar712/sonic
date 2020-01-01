@@ -533,6 +533,9 @@ class Permission
             'settings.crm_reopen.index' => 274,
             'settings.crm_reopen.update' => 274,
 
+            'settings.multiple_sale_tagging.index' => 279,
+            'settings.multiple_sale_tagging.list' => 279,
+
 
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
