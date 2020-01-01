@@ -1609,9 +1609,11 @@ class ReturnController extends Controller
            $return_note_details = ReturnNote::find($request->return_note_id);
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id', $shipment)->first();
+                $shipment_remark = "remarks.$shipment";
+                $received_or_refused_by = "received_or_refused_by.$shipment";
                 if(!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id','>', $request->return_note_id)->where('shipment_id', $shipment)->exists()) {
                     if ($parcel->booking_type_id == 1 || $parcel->booking_type_id == 4 || $parcel->booking_type_id == 5) {
-                        ShipmentsJourneyController::add($shipment, 25, 25, NULL, ($request->has('remarks') ? $request->remarks[$shipment] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has('received_or_refused_by') ? $request->received_or_refused_by[$shipment] : null));
+                        ShipmentsJourneyController::add($shipment, 25, 25, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment] : null));
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
@@ -1656,19 +1658,19 @@ class ReturnController extends Controller
                         }
 
                     } else if ($parcel->booking_type_id == 2) {
-                        ShipmentsJourneyController::add($shipment, 31, 31, NULL, ($request->has('remarks') ? $request->remarks[$shipment] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has('received_or_refused_by') ? $request->received_or_refused_by[$shipment] : null));
+                        ShipmentsJourneyController::add($shipment, 31, 31, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment] : null));
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 31, 'consignee_status_id' => 31]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
                     } else if ($parcel->booking_type_id == 3) {
-                        ShipmentsJourneyController::add($shipment, 38, 38, NULL, NULL, NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has('received_or_refused_by') ? $request->received_or_refused_by[$shipment] : null));
+                        ShipmentsJourneyController::add($shipment, 38, 38, NULL, NULL, NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment] : null));
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 38, 'consignee_status_id' => 38]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
                     } else {
-                        ShipmentsJourneyController::add($shipment, 25, 25, NULL, ($request->has('remarks') ? $request->remarks[$shipment] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has('received_or_refused_by') ? $request->received_or_refused_by[$shipment] : null));
+                        ShipmentsJourneyController::add($shipment, 25, 25, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment] : null));
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
@@ -1706,20 +1708,22 @@ class ReturnController extends Controller
             if($shipment_status == 25){
                 foreach ($shipment_ids as $shipment_id) {
                     $parcel = Shipment::where('id', $shipment_id)->first();
+                    $shipment_remark = "remarks.$shipment_id";
+                    $received_or_refused_by = "received_or_refused_by.$shipment_id";
                     if(!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id','>', $request->return_note_id)->where('shipment_id', $shipment_id)->exists()) {
 
                         if ($parcel->booking_type_id == 2) {
-                            ShipmentsJourneyController::add($shipment_id, 31, 31, NULL, ($request->has('remarks') ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has('received_or_refused_by') ? $request->received_or_refused_by[$shipment_id] : null));
+                            ShipmentsJourneyController::add($shipment_id, 31, 31, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
 
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 31, 'consignee_status_id' => 31]);
 
                         } else if ($parcel->booking_type_id == 3) {
-                            ShipmentsJourneyController::add($shipment_id, 38, 38, NULL, NULL, NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has('received_or_refused_by') ? $request->received_or_refused_by[$shipment_id] : null));
+                            ShipmentsJourneyController::add($shipment_id, 38, 38, NULL, NULL, NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
 
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 38, 'consignee_status_id' => 38]);
 
                         } else {
-                            ShipmentsJourneyController::add($shipment_id, 25, 25, NULL, ($request->has('remarks') ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has('received_or_refused_by') ? $request->received_or_refused_by[$shipment_id] : null));
+                            ShipmentsJourneyController::add($shipment_id, 25, 25, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
 
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
 
