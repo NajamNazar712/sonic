@@ -39,6 +39,7 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Jobs\ProcessShipmentBooking;
 
 use Auth;
+use Session;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -152,9 +153,9 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function __construct() {
-        $this->middleware('auth:web,substitute_users')->except(['print_air_waybill', 'print_air_waybill_custom_size', 'corporate_invoice']);
+        $this->middleware('auth:web,substitute_users')->except(['print_air_waybill', 'corporate_invoice']);
 
-        $this->middleware('auth:admin,web,substitute_users')->only(['print_air_waybill', 'print_air_waybill_custom_size', 'corporate_invoice']);
+        $this->middleware('auth:admin,web,substitute_users')->only(['print_air_waybill', 'corporate_invoice']);
 
         $this->middleware('Permission');
     }
@@ -564,7 +565,7 @@ class ShipperShipmentBookController extends Controller
                         $shipment_ids[$i] = $id;
                         $i++;
 
-                        if ($shipment->user_id != 2842) {
+                        if (!ShipperAirWaybillSettings::where('user_id', $shipment->user_id)->where('type', 2)->exists()) {
                             $sticker = FALSE;
                         }
                     }
@@ -1227,13 +1228,20 @@ class ShipperShipmentBookController extends Controller
         }
 
         if ($user_type) {
-            if ($request->sticker) {
-                $shipment_ids = Shipment::whereIn('id', $request->ids)->orderBy('order_id', 'ASC')->orderBy('id', 'ASC')->pluck('id')->toArray();
+            $air_waybill_type = Session::get('air_waybill_type', 1);
 
-                return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids);
+            if ($air_waybill_type != 3) {
+                if ($request->sticker) {
+                    $shipment_ids = Shipment::whereIn('id', $request->ids)->orderBy('order_id', 'ASC')->orderBy('id', 'ASC')->pluck('id')->toArray();
+
+                    return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids);
+                }
+                else {
+                    return $this->air_waybill($user_type, $user_id, $request->ids);
+                }
             }
             else {
-                return $this->air_waybill($user_type, $user_id, $request->ids);
+                return $this->air_waybill_sticker_barcode($user_type, $user_id, $request->ids);
             }
         }
     }
@@ -2828,5 +2836,142 @@ class ShipperShipmentBookController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ));
+    }
+
+    public static function air_waybill_sticker_barcode($user_type, $user_id, $shipment_ids) {
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $html = '<!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+                <title>Air Waybill Sticker Barcode</title>
+                <style type="text/css">
+                  * {
+                    -webkit-print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                  }
+                  body {
+                    background: none !important;
+                    color: #000 !important;
+                  }
+                  .pwrapper {margin: auto; page-break-inside: avoid;}
+                  .logo {margin-bottom:10px;}
+                  .logo img {margin-bottom:2.5px; filter: brightness(0);}
+                  .logo span {font-size: 8px;}
+                  .barcode span {font-size: 12px;}
+                  @media print {
+                   html, body {min-width:auto!important; min-height:auto!important;}
+                   @page {margin:0 !important; size: landscape;}
+                   .pwrapper {margin: auto; page-break-inside: avoid;}
+                   .logo span {font-size: 8px;}
+                   .barcode span {font-size: 12px;}
+                  }
+                </style>
+              </head>
+              <body>
+        ';
+
+        $barcodes = '';
+
+        foreach ($shipment_ids as $shipment_id) {
+            $shipment = Shipment::find($shipment_id);
+
+            $barcodes .= '
+                <div class="text-center pwrapper p-1">
+                    <div class="logo">
+                        <img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto">
+                        <span class="d-block">UAN: 0213-877-22-22</span>
+                    </div>
+                    <div class="barcode">
+                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 75)) . '" class="img-fluid mx-auto d-block h-auto">
+                        <span class="d-block"><strong>* ' . implode(' ', str_split(str_replace('-', '', ltrim($shipment->consignee_phone_number_1, '0')))) . ' *</strong></span>
+                    </div>
+                </div>
+            ';
+        }
+
+        $html .= $barcodes;
+
+        $html .= '
+                <script>
+                  window.onload = function() {
+                    window.print();
+                  }
+                </script>
+              </body>
+            </html>
+        ';
+
+        return $html;
+    }
+
+    public function shipments_list_index(Request $request) {
+      return view('client.shipment.list');
+    }
+
+    public function shipments_list_store(Request $request) {
+        if (isset($request->consignee_phone_number) && !empty($request->consignee_phone_number)) {
+            $consignee_phone_number = '0' . substr_replace($request->consignee_phone_number, '-', 3, 0);
+
+            $shipment = Shipment::where('user_id', session('user_id'))->where('consignee_phone_number_1', $consignee_phone_number);
+
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+
+                $shipment_array = array();
+
+                $shipment_array['id'] = $shipment->id;
+                $shipment_array['tracking_number'] = $shipment->tracking_number;
+                $shipment_array['consignee_name'] = $shipment->consignee_name;
+                $shipment_array['consignee_phone_number'] = $request->consignee_phone_number;
+
+                return ['status' => 0, 'success' => 'Shipment(s) found', 'shipment' => $shipment_array];
+            }
+            else {
+                return ['status' => 1, 'error' => 'No Shipment with entered Consignee Phone Number(s) found'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Consignee Phone Number entered'];
+        }
+    }
+
+    public function shipments_verify_index(Request $request) {
+        return view('client.shipment.verify');
+    }
+
+    public function shipments_verify_store(Request $request) {
+        if (isset($request->tracking_number) && !empty($request->tracking_number) && isset($request->consignee_phone_number) && !empty($request->consignee_phone_number)) {
+            $shipment = Shipment::where('user_id', session('user_id'))->where('tracking_number', $request->tracking_number);
+
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+
+                $consignee_phone_number = str_replace('-', '', ltrim($shipment->consignee_phone_number_1, '0'));
+
+                if ($consignee_phone_number == $request->consignee_phone_number) {
+                    $shipment_array = array();
+
+                    $shipment_array['id'] = $shipment->id;
+                    $shipment_array['tracking_number'] = $shipment->tracking_number;
+                    $shipment_array['consignee_name'] = $shipment->consignee_name;
+                    $shipment_array['consignee_phone_number'] = $consignee_phone_number;
+
+                    return ['status' => 0, 'success' => 'Tracking Number and Consignee Phone Number match', 'shipment' => $shipment_array];
+                }
+                else {
+                    return ['status' => 1, 'error' => 'Tracking Number and Consignee Phone Number does not match'];
+                }
+            }
+            else {
+                return ['status' => 1, 'error' => 'No Shipment with entered Tracking Number found'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Tracking Number and/or Consignee Phone Number entered'];
+        }
     }
 }
