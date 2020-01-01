@@ -20,6 +20,7 @@ use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
+use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -339,7 +340,7 @@ class OrderManagementController extends Controller
                 if ($shipment && ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2) && !$shipment->packaging_material_request) {
                     $valid_ids[] = $shipment_id;
 
-                    if ($shipment->user_id != 2842) {
+                    if (!ShipperAirWaybillSettings::where('user_id', $shipment->user_id)->where('type', 2)->exists()) {
                         $sticker = FALSE;
                     }
                 }

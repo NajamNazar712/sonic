@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\SubstituteUserPermission;
 use App\Http\Models\PackagingCharge;
+use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 
 class LoginController extends Controller
 {
@@ -104,6 +105,17 @@ class LoginController extends Controller
                 if (PackagingCharge::where('user_id', $user->id)->exists()) {
                     $packaging_charges_check = TRUE;
                 }
+
+                $air_waybill_settings = ShipperAirWaybillSettings::where('user_id', $user->id);
+
+                if ($air_waybill_settings->exists()) {
+                    $air_waybill_settings = $air_waybill_settings->first();
+
+                    session(['air_waybill_type' => $air_waybill_settings->type]);
+                }
+                else {
+                    session(['air_waybill_type' => 1]);
+                }
             }
         }
         else {
@@ -131,6 +143,17 @@ class LoginController extends Controller
 
                 if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
                     $packaging_charges_check = TRUE;
+                }
+
+                $air_waybill_settings = ShipperAirWaybillSettings::where('user_id', $user->user_id);
+
+                if ($air_waybill_settings->exists()) {
+                    $air_waybill_settings = $air_waybill_settings->first();
+
+                    session(['air_waybill_type' => $air_waybill_settings->type]);
+                }
+                else {
+                    session(['air_waybill_type' => 1]);
                 }
             }
         }

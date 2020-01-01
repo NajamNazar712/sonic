@@ -102,6 +102,16 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
 
         Route::resource('receiving_sheet_history', 'Shippers\ShipperReceivingSheetHistoryController');
+
+        Route::prefix('list')->name('list.')->group(function () {
+            Route::get('', 'Shippers\ShipperShipmentBookController@shipments_list_index')->name('index');
+            Route::post('', 'Shippers\ShipperShipmentBookController@shipments_list_store')->name('store');
+        });
+
+        Route::prefix('verify')->name('verify.')->group(function () {
+            Route::get('', 'Shippers\ShipperShipmentBookController@shipments_verify_index')->name('index');
+            Route::post('', 'Shippers\ShipperShipmentBookController@shipments_verify_store')->name('store');
+        });
     });
 
     Route::prefix('dispute')->name('dispute.')->group(function (){

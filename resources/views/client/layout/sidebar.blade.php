@@ -30,8 +30,13 @@
                         @endif
                             </ul>
                         </li>
-                        <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
 
+                        @if (Session::has('air_waybill_type') && session('air_waybill_type') == 3)
+                            <li class=" nav-item"><a href="{{ route('cod.shipment.list.index') }}"><span class="menu-title" data-i18n="nav.dash.main">List</span></a></li>
+                            <li class=" nav-item"><a href="{{ route('cod.shipment.verify.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Verify</span></a></li>
+                        @endif
+
+                        <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
                     </ul>
                 </li>
             @endif
