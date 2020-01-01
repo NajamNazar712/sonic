@@ -31,6 +31,7 @@
 										<th class="border-primary border-darken-1">Contact No(s).</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">City</th>
+										<th class="border-primary border-darken-1">Last Rider</th>
 										<th class="border-primary border-darken-1">Booking(s)</th>
 										<th class="border-primary border-darken-1">Pending Booking(s)</th>
 										<th class="border-primary border-darken-1">Total Estimated Weight (kg)</th>
@@ -373,6 +374,7 @@
 					{data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
 					{data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
 					{data: 'city', name: 'ci.name', class: 'align-middle city'},
+					{data: 'rider', name: 'r.name', class: 'align-middle rider'},
 					{data: 'bookings_link', name: 'pickup_requests.bookings', class: 'align-middle bookings_link text-center'},
 					{data: 'pending_bookings_link', name: 'pickup_requests.pending_bookings', class: 'align-middle pending_bookings_link'},
 					{data: 'total_estimated_weight', name: 'pickup_requests.total_estimated_weight', class: 'align-middle total_estimated_weight'},
