@@ -6513,17 +6513,17 @@ if(session('department_id') == 7){
 
                 if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
-                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
 
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if(!$merged->exists()){
                     if(session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions'))))
                     {
-                        $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                     }
                 }
-                $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
+                $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
                 $dropdown .= '
                     </div>
                   </div>
@@ -6695,13 +6695,13 @@ if(session('department_id') == 7){
 
                 if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
-                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if($sale_check != null) {
                     if (!$merged->exists()) {
                         if (session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions')))) {
-                            $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }
                 }
@@ -6710,7 +6710,7 @@ if(session('department_id') == 7){
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
                     }
                 }
-                $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
+                $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
 
                 $dropdown .= '
                     </div>
@@ -6767,7 +6767,7 @@ if(session('department_id') == 7){
 
                 if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
-                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
                 if (session('role_id') == 1 || in_array(244, session('permissions'))) {
                     if($result->status > 0){
@@ -7817,7 +7817,7 @@ if(session('department_id') == 7){
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.edit.index', ['id' => $users->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Sister Account</div></button>';
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.edit.index', ['id' => $users->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Sister Account</div></button>';
                     $dropdown .= '<button type="button" class="dropdown-item mapping"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mapping</div></button>';
 
 
