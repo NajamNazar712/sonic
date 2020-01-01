@@ -7971,6 +7971,7 @@ if(session('department_id') == 7){
         $user = User::find($id);
         if($approve == 1){
             $user->documents_status = 2;
+            $user->documents_status_reason = null;
             $user->save();
             return redirect()->back()->with(['success' => 'Files approved successfully']);
         }

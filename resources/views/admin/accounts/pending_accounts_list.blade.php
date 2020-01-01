@@ -231,7 +231,7 @@
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
                 {data: 'rates_authorized_by', name: 'rabb.name', class: 'align-middle rates_authorized_by'},
-                {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status', orderable: false, searchable: false},
+                {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
