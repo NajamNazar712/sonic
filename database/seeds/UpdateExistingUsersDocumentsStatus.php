@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use \App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\User;
 
 class UpdateExistingUsersDocumentsStatus extends Seeder
 {
