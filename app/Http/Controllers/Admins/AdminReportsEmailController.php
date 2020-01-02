@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
@@ -357,5 +358,95 @@ class AdminReportsEmailController extends Controller
         $writer->save($file_name);
 
         return url('/').'/'.$file_name_without_path;
+    }
+
+    static public function daily_fake_status($date){
+        $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 00:00:00');
+        $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 23:59:59');
+        $rider_data_array = array();
+//        $rider_data_array[] = array();
+        $delivery_notes = DeliveryNote::leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->select('delivery_notes.rider_id', 'r.name as rider_name', 'delivery_notes.hub_id', 'delivery_notes.shipments_count', 'delivery_notes.delivered_shipments' , DB::raw('(select count(delivery_note_shipments.shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1 and delivery_note_shipments.fake_status_updated_at between "'. $date_from .'" and "'. $date_to .'") as fake_status_count'))
+            ->whereBetween('delivery_notes.updated_at', [$date_from,$date_to])
+            ->groupBy('delivery_notes.id')->get();
+        $riders_data = array();
+        $hubs = array();
+        foreach ($delivery_notes as $delivery_note){
+            if(array_key_exists($delivery_note->hub_id, $riders_data)){
+                if (array_key_exists($delivery_note->rider_id, $riders_data[$delivery_note->hub_id])) {
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_count'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_count'] + 1;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['total_shipments'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['total_shipments'] + $delivery_note->shipments_count;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['undelivered_shipments'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['undelivered_shipments'] + ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['fake_status_shipments'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['fake_status_shipments'] + $delivery_note->fake_status_count;
+                }
+                else{
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['name'] = $delivery_note->rider_name;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_count'] = 1;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['total_shipments'] = $delivery_note->shipments_count;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['undelivered_shipments'] = ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['fake_status_shipments'] = $delivery_note->fake_status_count;
+                }
+            }
+            else{
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['name'] = $delivery_note->rider_name;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_count'] = 1;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['total_shipments'] = $delivery_note->shipments_count;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['undelivered_shipments'] = ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['fake_status_shipments'] = $delivery_note->fake_status_count;
+            }
+        }
+        foreach ($riders_data as $index => $first_rider_data){
+            $total[$index]['delivery_note_count'] = 0;
+            $total[$index]['total_shipments'] = 0;
+            $total[$index]['undelivered_shipments'] = 0;
+            $total[$index]['fake_status_shipments'] = 0;
+        }
+        foreach ($riders_data as $index => $first_rider_data){
+            $rider_data_array[$index]['header'] = ['Rider Name', 'Count of Delivery Note No.', 'Sum of Total Shipments', 'Sum of Undelivered Shipments', 'Sum of Shipments Marked With Fake Status'];
+            foreach($riders_data[$index] as $new_index => $rider_data) {
+                $total[$index]['delivery_note_count'] = $total[$index]['delivery_note_count'] + $rider_data['delivery_note_count'];
+                $total[$index]['total_shipments'] = $total[$index]['total_shipments'] + $rider_data['total_shipments'];
+                $total[$index]['undelivered_shipments'] = $total[$index]['undelivered_shipments'] + $rider_data['undelivered_shipments'];
+                $total[$index]['fake_status_shipments'] = $total[$index]['fake_status_shipments'] + $rider_data['fake_status_shipments'];
+
+                $rider_data_array[$index][] = ['Rider Name' => $rider_data['name'], 'Count of Delivery Note No.' => $rider_data['delivery_note_count'], 'Sum of Total Shipments' => $rider_data['total_shipments'], 'Sum of Undelivered Shipments' => $rider_data['undelivered_shipments'], 'Sum of Shipments Marked With Fake Status' => $rider_data['fake_status_shipments']];
+            }
+            $hubs[] = $index;
+        }
+
+//        SalePersonNumbers::truncate();
+        foreach ($hubs as $hub) {
+            $hub_name = City::find($hub);
+            $rider_data_array[$hub][] = ['Rider Name' => '', 'Count of Delivery Note No.' => '', 'Sum of Total Shipments' => '', 'Sum of Undelivered Shipments' => '', 'Sum of Shipments Marked With Fake Status' => ''];
+            $rider_data_array[$hub][] = ['Rider Name' => $hub_name->name, 'Count of Delivery Note No.' => $total[$hub]['delivery_note_count'], 'Sum of Total Shipments' => $total[$hub]['total_shipments'], 'Sum of Undelivered Shipments' => $total[$hub]['undelivered_shipments'], 'Sum of Shipments Marked With Fake Status' => $total[$hub]['fake_status_shipments']];
+
+
+            $cell_st =[
+                'font' =>['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(40);
+
+            $sheet->fromArray($rider_data_array[$hub],NULL,'A2',true);
+            $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
+            $sheet->setTitle('Fake Status Report');
+            $writer = new Xlsx($spreadsheet);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="daily_fake_status_report.xlsx"');
+            header('Cache-Control: max-age=0');
+            $date_file_name = Carbon::parse($date)->format('Y_m_d');
+
+            $file_name_without_path = "reports/daily_fake_status_report_". strtolower($hub_name->name) ."_".$date_file_name.".xlsx";
+            $file_name = public_path() . "/reports/daily_fake_status_report_". strtolower($hub_name->name) ."_".$date_file_name.".xlsx";
+            $writer->save($file_name);
+        }
+
+//        return url('/').'/'.$file_name_without_path;
+//        dd($total);
     }
 }
