@@ -180,7 +180,7 @@
 
 									UnblockPagePermanently();
 
-									$('#consignee_phone_number_search_form #consignee_phone_number-error').delete();
+									$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
 
 									$('#consignee_phone_number_search_form button.add').prop('disabled', false);
 
@@ -189,7 +189,7 @@
 									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 								else {
-									$('#consignee_phone_number_search_form #consignee_phone_number-error').delete();
+									$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
 
 									$('#consignee_phone_number_search_form button.add').prop('disabled', false);
 
@@ -203,7 +203,7 @@
 								}
 							}
 							else {
-								$('#consignee_phone_number_search_form #consignee_phone_number-error').delete();
+								$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
 
 								$('#consignee_phone_number_search_form button.add').prop('disabled', false);
 
@@ -218,7 +218,7 @@
 						});
 					}
 					else {
-						$('#consignee_phone_number_search_form #consignee_phone_number-error').delete();
+						$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
 
 						$('#consignee_phone_number_search_form button.add').prop('disabled', false);
 
