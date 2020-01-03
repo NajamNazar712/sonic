@@ -496,13 +496,11 @@ class AdminReportsEmailController extends Controller
         $hub_count = 0;
         $hub_style = array();
         foreach ($zones_data as $zone_data){
+//            dd($zones_data);
             $count[$zone_data->id]++;
             if(array_key_exists($zone_data->id, $zone_data_array)) {
-                $hub_count++;
                 $zone_data_array[$zone_data->id][] = ['Row Label' => $zone_data->hub_name, 'Tracking Number(s)' => ''];
-                $hub_data_array[] = ['Row Label' => $zone_data->hub_name, 'Tracking Number(s)' => ''];
                 $style[$zone_data->id][] = $count[$zone_data->id];
-                $hub_style[] = $hub_count;
 
                 $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                     ->select('s.tracking_number as tracking_number')
@@ -511,21 +509,14 @@ class AdminReportsEmailController extends Controller
                     ->get();
                 foreach($delivery_note_shipments as $delivery_note_shipment) {
                     $count[$zone_data->id]++;
-                    $hub_count++;
-
                     $zone_data_array[$zone_data->id][] = ['Row Label' => '', 'Tracking Number(s)' => strval($delivery_note_shipment->tracking_number)];
-                    $hub_data_array[] = ['Row Label' => '', 'Tracking Number(s)' => strval($delivery_note_shipment->tracking_number)];
                 }
 
             }
             else{
-                $hub_count++;
                 $zone_data_array[$zone_data->id]['header'] = ['Row Label', 'Tracking Number(s)'];
                 $zone_data_array[$zone_data->id][] = ['Row Label' => $zone_data->hub_name, 'Tracking Number(s)' => ''];
-                $hub_data_array['header'] = ['Row Label', 'Tracking Number(s)'];
-                $hub_data_array[] = ['Row Label' => $zone_data->hub_name, 'Tracking Number(s)' => ''];
                 $style[$zone_data->id][] = $count[$zone_data->id];
-                $hub_style[] = $hub_count;
 
                 $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                     ->select('s.tracking_number as tracking_number')
@@ -534,10 +525,8 @@ class AdminReportsEmailController extends Controller
                     ->get();
                 foreach($delivery_note_shipments as $delivery_note_shipment) {
                     $count[$zone_data->id]++;
-                    $hub_count++;
 
                     $zone_data_array[$zone_data->id][] = ['Row Label' => '', 'Tracking Number(s)' => strval($delivery_note_shipment->tracking_number)];
-                    $hub_data_array[] = ['Row Label' => '', 'Tracking Number(s)' => strval($delivery_note_shipment->tracking_number)];
                 }
             }
         }
@@ -584,6 +573,31 @@ class AdminReportsEmailController extends Controller
                 $writer->save($file_name);
                 $response = url('/').'/'.$file_name_without_path;
 //                NotificationsController::send(54,$zone->id,$response);
+            }
+        }
+
+        $overall_datas = Zone::leftjoin('cities as c', 'c.zone_id', '=', 'zones.id')
+            ->join('daily_fake_statuses as dfs', 'dfs.hub_id', '=', 'c.id')
+            ->select('zones.id as id', 'c.id as hub_id', 'zones.name as zone_name', 'c.name as hub_name', DB::raw('sum(dfs.total_delivery_notes) as total_delivery_notes'), DB::raw('sum(dfs.total_shipments) as total_shipments'), DB::raw('sum(dfs.total_undelivered_shipments) as total_undelivered_shipments'), DB::raw('sum(dfs.total_fake_status_shipments) as total_fake_status_shipments'), 'dfs.delivery_note_id as delivery_note_id')->groupBy('dfs.delivery_note_id')->orderBy('hub_id', 'asc')->get();
+        $hub_count = 0;
+        $hub_style = array();
+        $input_hubs = array();
+        $hub_data_array['header'] = ['Row Label', 'Tracking Number(s)'];
+        foreach ($overall_datas as $overall_data){
+            if (!in_array($overall_data->hub_id, $input_hubs)){
+                $hub_count++;
+                $hub_data_array[] = ['Row Label' => $overall_data->hub_name, 'Tracking Number(s)' => ''];
+                $hub_style[] = $hub_count;
+                $input_hubs[] = $overall_data->hub_id;
+            }
+            $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+                ->select('s.tracking_number as tracking_number')
+                ->where('delivery_note_id', $overall_data->delivery_note_id)
+                ->groupBy('s.id')
+                ->get();
+            foreach($delivery_note_shipments as $delivery_note_shipment) {
+                $hub_count++;
+                $hub_data_array[] = ['Row Label' => '', 'Tracking Number(s)' => strval($delivery_note_shipment->tracking_number)];
             }
         }
 
