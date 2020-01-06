@@ -426,12 +426,12 @@ class AdminReportsEmailController extends Controller
             $rider_data_array[$index]['header'] = ['Row Label', 'Tracking Number(s)'];
             foreach($riders_data[$index] as $new_index => $new_rider_data) {
                 foreach($new_rider_data as $latest_index => $rider_data) {
-                    $rider_count[$index]++;
-                    if(!in_array($rider_data['id'], $rider_inputs)){
+                    if(!in_array($rider_data['rider_id'], $rider_inputs)){
+                        $rider_count[$index]++;
                         $rider_data_array[$index][] = ['Row Label' => $rider_data['name']];
-                        $rider_inputs[] = $rider_data['id'];
+                        $rider_inputs[] = $rider_data['rider_id'];
+                        $rider_style[$index][] = $rider_count[$index];
                     }
-                    $rider_style[$index][] = $rider_count[$index];
                     $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                         ->select('s.tracking_number as tracking_number')
                         ->where('delivery_note_id', $rider_data['delivery_note_id'])
