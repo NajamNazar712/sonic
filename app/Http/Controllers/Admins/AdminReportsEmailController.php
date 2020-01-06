@@ -418,6 +418,7 @@ class AdminReportsEmailController extends Controller
                 $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                     ->select('s.tracking_number as tracking_number')
                     ->where('delivery_note_id', $rider_data['delivery_note_id'])
+                    ->where('delivery_note_shipments.fake_status', 1)
                     ->groupBy('s.id')
                     ->get();
                 foreach($delivery_note_shipments as $delivery_note_shipment) {
@@ -505,6 +506,7 @@ class AdminReportsEmailController extends Controller
                 $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                     ->select('s.tracking_number as tracking_number')
                     ->where('delivery_note_id', $zone_data->delivery_note_id)
+                    ->where('delivery_note_shipments.fake_status', 1)
                     ->groupBy('s.id')
                     ->get();
                 foreach($delivery_note_shipments as $delivery_note_shipment) {
@@ -521,6 +523,7 @@ class AdminReportsEmailController extends Controller
                 $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                     ->select('s.tracking_number as tracking_number')
                     ->where('delivery_note_id', $zone_data->delivery_note_id)
+                    ->where('delivery_note_shipments.fake_status', 1)
                     ->groupBy('s.id')
                     ->get();
                 foreach($delivery_note_shipments as $delivery_note_shipment) {
@@ -593,6 +596,7 @@ class AdminReportsEmailController extends Controller
             $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                 ->select('s.tracking_number as tracking_number')
                 ->where('delivery_note_id', $overall_data->delivery_note_id)
+                ->where('delivery_note_shipments.fake_status', 1)
                 ->groupBy('s.id')
                 ->get();
             foreach($delivery_note_shipments as $delivery_note_shipment) {
