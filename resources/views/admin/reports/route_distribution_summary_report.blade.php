@@ -156,6 +156,13 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var shipments_count = 0;
+            var delivered_shipments = 0;
+            var delivered_shipments_per = 0;
+            var undelivered_shipments = 0;
+            var undelivered_shipments_per = 0;
+            var confirmation_pending_shipments = 0;
+            var confirmation_pending_shipments_per = 0;
 
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Zone',
@@ -231,6 +238,7 @@
                         },
                         success: function (result) {
                             head = [];
+                            footer = [];
 
                             head.push('S.No');
                             head.push('Rider Name');
@@ -257,12 +265,22 @@
 
                                 body.push(row);
                             });
+
+                            footer.push('-');
+                            footer.push('Total');
+                            footer.push(shipments_count.toFixed(2));
+                            footer.push(delivered_shipments.toFixed(2));
+                            footer.push(delivered_shipments_per.toFixed(2));
+                            footer.push(undelivered_shipments.toFixed(2));
+                            footer.push(undelivered_shipments_per.toFixed(2));
+                            footer.push(confirmation_pending_shipments.toFixed(2));
+                            footer.push(confirmation_pending_shipments_per.toFixed(2));
                         },
                         async: false
                     });
                     UnblockPagePermanently();
 
-                    return {body: body, header: head};
+                    return {body: body, header: head, footer: footer};
                 }
             } );
 
@@ -275,6 +293,7 @@
                         extend: 'excelHtml5',
                         title: 'Route Distribution Summary Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
+                        footer: true
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -317,13 +336,6 @@
                 },
                 footerCallback: function(row, data, start, end, display) {
                     var api = this.api();
-                    var shipments_count = 0;
-                    var delivered_shipments = 0;
-                    var delivered_shipments_per = 0;
-                    var undelivered_shipments = 0;
-                    var undelivered_shipments_per = 0;
-                    var confirmation_pending_shipments = 0;
-                    var confirmation_pending_shipments_per = 0;
                     api.columns('.courier_name', {
                         page: 'current'
                     }).every(function() {
