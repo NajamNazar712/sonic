@@ -372,69 +372,85 @@ class AdminReportsEmailController extends Controller
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->select('delivery_notes.id', 'c.zone_id as zone_id', 'delivery_notes.rider_id', 'r.name as rider_name', 'delivery_notes.hub_id', 'delivery_notes.shipments_count', 'delivery_notes.delivered_shipments' , DB::raw('(select count(delivery_note_shipments.shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1 and delivery_note_shipments.fake_status_updated_at between "'. $date_from .'" and "'. $date_to .'") as fake_status_count'))
             ->whereBetween('delivery_notes.updated_at', [$date_from,$date_to])
+            ->whereBetween('dns.fake_status_updated_at', [$date_from,$date_to])
             ->groupBy('delivery_notes.id')->get();
         $riders_data = array();
         $hubs = array();
         foreach ($delivery_notes as $delivery_note){
             if(array_key_exists($delivery_note->hub_id, $riders_data)){
                 if (array_key_exists($delivery_note->rider_id, $riders_data[$delivery_note->hub_id])) {
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_count'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_count'] + 1;
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['total_shipments'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['total_shipments'] + $delivery_note->shipments_count;
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['undelivered_shipments'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['undelivered_shipments'] + ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['fake_status_shipments'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['fake_status_shipments'] + $delivery_note->fake_status_count;
+                    if (array_key_exists($delivery_note->id, $riders_data[$delivery_note->hub_id][$delivery_note->rider_id])) {
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['delivery_note_count'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['delivery_note_count'] + 1;
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['total_shipments'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['total_shipments'] + $delivery_note->shipments_count;
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['undelivered_shipments'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['undelivered_shipments'] + ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['fake_status_shipments'] = $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['fake_status_shipments'] + $delivery_note->fake_status_count;
+                    }
+                    else{
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['zone_id'] = $delivery_note->zone_id;
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['delivery_note_id'] = $delivery_note->id;
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['rider_id'] = $delivery_note->rider_id;
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['name'] = $delivery_note->rider_name;
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['delivery_note_count'] = 1;
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['total_shipments'] = $delivery_note->shipments_count;
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['undelivered_shipments'] = ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
+                        $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['fake_status_shipments'] = $delivery_note->fake_status_count;
+                    }
                 }
                 else{
-                    $rider_count[$delivery_note->hub_id] = 0;
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['zone_id'] = $delivery_note->zone_id;
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_id'] = $delivery_note->id;
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['rider_id'] = $delivery_note->rider_id;
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['name'] = $delivery_note->rider_name;
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_count'] = 1;
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['total_shipments'] = $delivery_note->shipments_count;
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['undelivered_shipments'] = ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
-                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['fake_status_shipments'] = $delivery_note->fake_status_count;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['zone_id'] = $delivery_note->zone_id;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['delivery_note_id'] = $delivery_note->id;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['rider_id'] = $delivery_note->rider_id;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['name'] = $delivery_note->rider_name;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['delivery_note_count'] = 1;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['total_shipments'] = $delivery_note->shipments_count;
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['undelivered_shipments'] = ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
+                    $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['fake_status_shipments'] = $delivery_note->fake_status_count;
                 }
             }
             else{
                 $rider_count[$delivery_note->hub_id] = 0;
-                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['zone_id'] = $delivery_note->zone_id;
-                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_id'] = $delivery_note->id;
-                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['rider_id'] = $delivery_note->rider_id;
-                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['name'] = $delivery_note->rider_name;
-                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['delivery_note_count'] = 1;
-                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['total_shipments'] = $delivery_note->shipments_count;
-                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['undelivered_shipments'] = ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
-                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id]['fake_status_shipments'] = $delivery_note->fake_status_count;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['zone_id'] = $delivery_note->zone_id;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['delivery_note_id'] = $delivery_note->id;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['rider_id'] = $delivery_note->rider_id;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['name'] = $delivery_note->rider_name;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['delivery_note_count'] = 1;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['total_shipments'] = $delivery_note->shipments_count;
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['undelivered_shipments'] = ($delivery_note->shipments_count - $delivery_note->delivered_shipments);
+                $riders_data[$delivery_note->hub_id][$delivery_note->rider_id][$delivery_note->id]['fake_status_shipments'] = $delivery_note->fake_status_count;
             }
         }
         DailyFakeStatus::truncate();
         $rider_style = array();
         foreach ($riders_data as $index => $first_rider_data){
             $rider_data_array[$index]['header'] = ['Row Label', 'Tracking Number(s)'];
-            foreach($riders_data[$index] as $new_index => $rider_data) {
-                $rider_count[$index]++;
-                $rider_data_array[$index][] = ['Row Label' => $rider_data['name']];
-                $rider_style[$index][] = $rider_count[$index];
-                $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
-                    ->select('s.tracking_number as tracking_number')
-                    ->where('delivery_note_id', $rider_data['delivery_note_id'])
-                    ->where('delivery_note_shipments.fake_status', 1)
-                    ->groupBy('s.id')
-                    ->get();
-                foreach($delivery_note_shipments as $delivery_note_shipment) {
+            foreach($riders_data[$index] as $new_index => $new_rider_data) {
+                foreach($new_rider_data as $latest_index => $rider_data) {
                     $rider_count[$index]++;
-                    $rider_data_array[$index][] = ['Row Label' => '', 'Tracking Number(s)' => strval($delivery_note_shipment->tracking_number)];
+                    $rider_data_array[$index][] = ['Row Label' => $rider_data['name']];
+                    $rider_style[$index][] = $rider_count[$index];
+                    $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+                        ->select('s.tracking_number as tracking_number')
+                        ->where('delivery_note_id', $rider_data['delivery_note_id'])
+                        ->where('delivery_note_shipments.fake_status', 1)
+                        ->whereNotNull('delivery_note_shipments.fake_status_updated_at')
+                        ->whereBetween('delivery_note_shipments.fake_status_updated_at', [$date_from,$date_to])
+                        ->groupBy('s.id')
+                        ->get();
+                    foreach($delivery_note_shipments as $delivery_note_shipment) {
+                        $rider_count[$index]++;
+                        $rider_data_array[$index][] = ['Row Label' => '', 'Tracking Number(s)' => strval($delivery_note_shipment->tracking_number)];
+                    }
+                    $daily_fake_status = new DailyFakeStatus();
+                    $daily_fake_status->zone_id = $rider_data['zone_id'];
+                    $daily_fake_status->delivery_note_id = $rider_data['delivery_note_id'];
+                    $daily_fake_status->hub_id = $index;
+                    $daily_fake_status->rider_id = $rider_data['rider_id'];
+                    $daily_fake_status->total_delivery_notes = $rider_data['delivery_note_count'];
+                    $daily_fake_status->total_shipments = $rider_data['total_shipments'];
+                    $daily_fake_status->total_undelivered_shipments = $rider_data['undelivered_shipments'];
+                    $daily_fake_status->total_fake_status_shipments = $rider_data['fake_status_shipments'];
+                    $daily_fake_status->save();
                 }
-                $daily_fake_status = new DailyFakeStatus();
-                $daily_fake_status->zone_id = $rider_data['zone_id'];
-                $daily_fake_status->delivery_note_id = $rider_data['delivery_note_id'];
-                $daily_fake_status->hub_id = $index;
-                $daily_fake_status->rider_id = $rider_data['rider_id'];
-                $daily_fake_status->total_delivery_notes = $rider_data['delivery_note_count'];
-                $daily_fake_status->total_shipments = $rider_data['total_shipments'];
-                $daily_fake_status->total_undelivered_shipments = $rider_data['undelivered_shipments'];
-                $daily_fake_status->total_fake_status_shipments = $rider_data['fake_status_shipments'];
-                $daily_fake_status->save();
             }
             $hubs[] = $index;
         }
@@ -507,6 +523,8 @@ class AdminReportsEmailController extends Controller
                     ->select('s.tracking_number as tracking_number')
                     ->where('delivery_note_id', $zone_data->delivery_note_id)
                     ->where('delivery_note_shipments.fake_status', 1)
+                    ->whereNotNull('delivery_note_shipments.fake_status_updated_at')
+                    ->whereBetween('delivery_note_shipments.fake_status_updated_at', [$date_from,$date_to])
                     ->groupBy('s.id')
                     ->get();
                 foreach($delivery_note_shipments as $delivery_note_shipment) {
@@ -524,6 +542,8 @@ class AdminReportsEmailController extends Controller
                     ->select('s.tracking_number as tracking_number')
                     ->where('delivery_note_id', $zone_data->delivery_note_id)
                     ->where('delivery_note_shipments.fake_status', 1)
+                    ->whereNotNull('delivery_note_shipments.fake_status_updated_at')
+                    ->whereBetween('delivery_note_shipments.fake_status_updated_at', [$date_from,$date_to])
                     ->groupBy('s.id')
                     ->get();
                 foreach($delivery_note_shipments as $delivery_note_shipment) {
@@ -597,6 +617,8 @@ class AdminReportsEmailController extends Controller
                 ->select('s.tracking_number as tracking_number')
                 ->where('delivery_note_id', $overall_data->delivery_note_id)
                 ->where('delivery_note_shipments.fake_status', 1)
+                ->whereNotNull('delivery_note_shipments.fake_status_updated_at')
+                ->whereBetween('delivery_note_shipments.fake_status_updated_at', [$date_from,$date_to])
                 ->groupBy('s.id')
                 ->get();
             foreach($delivery_note_shipments as $delivery_note_shipment) {
