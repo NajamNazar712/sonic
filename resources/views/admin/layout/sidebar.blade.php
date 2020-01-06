@@ -620,6 +620,10 @@
                         @if (session('role_id') == 1 || in_array(275, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.delivered_shipment.index') }}">Delivered Shipment</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(275, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.route_distribution.index') }}">Route Distribution Summary</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

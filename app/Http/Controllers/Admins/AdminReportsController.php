@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\City;
@@ -5756,6 +5757,58 @@ use Yajra\Datatables\Datatables;
             }
             if($station = $request->get('search_station')){
                 $datatables = $datatables->where('c.id', '=', $station);
+            }
+            return $datatables->make(true);
+        }
+
+
+        public function route_distribution_index(){
+            $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
+            $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
+            $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
+            $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+            return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders]);
+        }
+        public function route_distribution_list(Request $request){
+            $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
+                ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+                ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
+                ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+                ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
+                ->leftJoin('shipments as ds', function ($join){
+                    $join->on('ds.id', '=', 'dns.shipment_id')
+                        ->where('ds.shipper_status_id', 14);
+                })
+                ->leftJoin('shipments as uds', function ($join){
+                    $join->on('uds.id', '=', 'dns.shipment_id')
+                        ->where('uds.shipper_status_id', '!=', 14);
+                })
+                ->leftJoin('shipments as cps', function ($join){
+                    $join->on('cps.id', '=', 'dns.shipment_id')
+                        ->where('cps.shipper_status_id', 12);
+                })
+                ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('ROUND((count(ds.id)/count(s.id))*100, 2) as delivered_shipments_per'), DB::raw('count(uds.id) as undelivered_shipments'), DB::raw('ROUND((count(uds.id)/count(s.id))*100, 2) as undelivered_shipments_per'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('ROUND((count(cps.id)/count(s.id))*100, 2) as confirmation_pending_shipments_per'))
+                ->groupBy('r.id');
+
+
+            $datatables = Datatables::of($route_distribution_summary);
+
+            if($rider = $request->get('search_rider')){
+                $datatables = $datatables->where('r.id', '=', $rider);
+            }
+            if($hub = $request->get('search_hub')){
+                $datatables = $datatables->where('c.hub_id', '=', $hub);
+            }
+            if($zone = $request->get('search_zone')){
+                $datatables = $datatables->where('c.zone_id', '=', $zone);
+            }
+            if($destination = $request->get('search_destination')){
+                $datatables = $datatables->where('c.id', '=', $destination);
+            }
+            if ($request->get('search_from') && $request->get('search_to')) {
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+                $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
             }
             return $datatables->make(true);
         }

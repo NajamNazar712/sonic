@@ -1243,6 +1243,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@delivered_shipment_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@delivered_shipment_list')->name('list');
         });
+        Route::prefix('route_distribution')->name('route_distribution.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@route_distribution_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@route_distribution_list')->name('list');
+        });
     });
 
     //Reports end
