@@ -421,12 +421,16 @@ class AdminReportsEmailController extends Controller
         }
         DailyFakeStatus::truncate();
         $rider_style = array();
+        $rider_inputs = array();
         foreach ($riders_data as $index => $first_rider_data){
             $rider_data_array[$index]['header'] = ['Row Label', 'Tracking Number(s)'];
             foreach($riders_data[$index] as $new_index => $new_rider_data) {
                 foreach($new_rider_data as $latest_index => $rider_data) {
                     $rider_count[$index]++;
-                    $rider_data_array[$index][] = ['Row Label' => $rider_data['name']];
+                    if(!in_array($rider_data['id'], $rider_inputs)){
+                        $rider_data_array[$index][] = ['Row Label' => $rider_data['name']];
+                        $rider_inputs[] = $rider_data['id'];
+                    }
                     $rider_style[$index][] = $rider_count[$index];
                     $delivery_note_shipments = DeliveryNoteShipment::leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                         ->select('s.tracking_number as tracking_number')
