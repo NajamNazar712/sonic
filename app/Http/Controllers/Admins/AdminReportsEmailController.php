@@ -595,7 +595,7 @@ class AdminReportsEmailController extends Controller
                 $file_name = public_path() . "/reports/daily_fake_status_report_" . strtolower($zone->name) . "_" . $date_file_name . ".xlsx";
                 $writer->save($file_name);
                 $response = url('/').'/'.$file_name_without_path;
-//                NotificationsController::send(54,$zone->id,$response);
+                NotificationsController::send(54,$zone->id,$response);
             }
         }
 
@@ -668,6 +668,6 @@ class AdminReportsEmailController extends Controller
         $writer->save($file_name);
 
         $response = url('/').'/'.$file_name_without_path;
-        NotificationsController::send(55,$date,$response);
+//        NotificationsController::send(55,$date,$response);
     }
 }
