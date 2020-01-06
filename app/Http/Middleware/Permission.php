@@ -383,6 +383,8 @@ class Permission
             'reports.daily_visit.list' => 264,
             'reports.delivered_shipment.index' => 275,
             'reports.delivered_shipment.list' => 275,
+            'reports.route_distribution.index' => 300,
+            'reports.route_distribution.list' => 300,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

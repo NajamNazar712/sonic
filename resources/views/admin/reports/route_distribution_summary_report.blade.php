@@ -297,6 +297,7 @@
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                autoWidth:false,
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
