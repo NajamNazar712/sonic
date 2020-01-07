@@ -74,22 +74,24 @@
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                    <thead>
-                    <tr role="row" class="bg-primary white">
+                <div id="datatable_wrapper">
+                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
 
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Rider Name</th>
-                        <th class="border-primary border-darken-1">Total Out For Delivery</th>
-                        <th class="border-primary border-darken-1">Delivered</th>
-                        <th class="border-primary border-darken-1">Delivered %</th>
-                        <th class="border-primary border-darken-1">Undelivered</th>
-                        <th class="border-primary border-darken-1">Undelivered %</th>
-                        <th class="border-primary border-darken-1">Confirmation Pending</th>
-                        <th class="border-primary border-darken-1">Confirmation Pending %</th>
-                    </tr>
-                    </thead>
-                </table>
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Total Out For Delivery</th>
+                            <th class="border-primary border-darken-1">Delivered</th>
+                            <th class="border-primary border-darken-1">Delivered %</th>
+                            <th class="border-primary border-darken-1">Undelivered</th>
+                            <th class="border-primary border-darken-1">Undelivered %</th>
+                            <th class="border-primary border-darken-1">Confirmation Pending</th>
+                            <th class="border-primary border-darken-1">Confirmation Pending %</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -156,6 +158,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#datatable_wrapper').hide();
             var shipments_count = 0;
             var delivered_shipments = 0;
             var delivered_shipments_per = 0;
@@ -412,6 +415,7 @@
             });
 
             $('#search_filter_btn').on('click',function () {
+                $('#datatable_wrapper').show();
                 table.draw();
             });
 

@@ -1247,6 +1247,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@route_distribution_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@route_distribution_list')->name('list');
         });
+        Route::prefix('destination_delivery_received')->name('destination_delivery_received.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@destination_delivery_received_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@destination_delivery_received_list')->name('list');
+        });
     });
 
     //Reports end

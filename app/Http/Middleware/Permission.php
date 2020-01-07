@@ -385,6 +385,8 @@ class Permission
             'reports.delivered_shipment.list' => 275,
             'reports.route_distribution.index' => 300,
             'reports.route_distribution.list' => 300,
+            'reports.destination_delivery_received.index' => 300,
+            'reports.destination_delivery_received.list' => 300,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

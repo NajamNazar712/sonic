@@ -5761,9 +5761,8 @@ use Yajra\Datatables\Datatables;
             return $datatables->make(true);
         }
 
-
         public function route_distribution_index(){
-            $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
+            $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
             $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
             $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
             $riders = DB::connection('reports')->table('riders')->get(['id','name']);
@@ -5809,6 +5808,169 @@ use Yajra\Datatables\Datatables;
                 $from = $request->get('search_from');
                 $to = $request->get('search_to');
                 $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
+            }
+            return $datatables->make(true);
+        }
+        public function destination_delivery_received_index(){
+            $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
+            $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
+            $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
+            return view('admin.reports.arrived_at_destination_out_for_delivery_and_received_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones]);
+        }
+        public function destination_delivery_received_list(Request $request){
+            if ($request->get('search_from') && $request->get('search_to')) {
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+            }
+            else{
+                $from = null;
+                $to = null;
+            }
+            if($type = $request->get('shipment_type')){
+                if($type == 2){
+                    $route_distribution_summary = DB::connection('reports')->table('cities')
+                        ->leftjoin('user_shipping_infos as usi', 'usi.city_id', '=', 'cities.id')
+                        ->leftjoin('shipments as s', 's.pickup_address_id', '=', 'usi.id')
+                        ->leftJoin('shipments_journey as bsj', function ($join) use($from,$to){
+                            $join->on('bsj.shipment_id', '=', 's.id')
+                                ->where('bsj.shipper_status_id', 20)
+                                ->whereBetween('bsj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as asj', function ($join) use($from,$to){
+                            $join->on('asj.shipment_id', '=', 's.id')
+                                ->whereIn('asj.shipper_status_id', [22, 27])
+                                ->whereBetween('asj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as isj', function ($join) use($from,$to){
+                            $join->on('isj.shipment_id', '=', 's.id')
+                                ->whereIn('isj.shipper_status_id', [21, 26])
+                                ->whereBetween('isj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as osj', function ($join) use($from,$to){
+                            $join->on('osj.shipment_id', '=', 's.id')
+                                ->whereIn('osj.shipper_status_id', [23,28])
+                                ->whereBetween('osj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as dsj', function ($join) use($from,$to){
+                            $join->on('dsj.shipment_id', '=', 's.id')
+                                ->whereIn('dsj.shipper_status_id', [25, 31])
+                                ->whereBetween('dsj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as usj', function ($join) use($from,$to){
+                            $join->on('usj.shipment_id', '=', 's.id')
+                                ->whereIn('usj.shipper_status_id', [24, 47, 48, 29])
+                                ->whereBetween('usj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as csj', function ($join) use($from,$to){
+                            $join->on('csj.shipment_id', '=', 's.id')
+                                ->where('csj.shipper_status_id', 12)
+                                ->whereBetween('csj.created_at', [null,null]);
+                        });
+
+                }
+                else{
+                    $route_distribution_summary = DB::connection('reports')->table('cities')
+                        ->leftjoin('shipments as s', 's.consignee_city_id', '=', 'cities.id')
+                        ->leftJoin('shipments_journey as bsj', function ($join) use($from,$to){
+                            $join->on('bsj.shipment_id', '=', 's.id')
+                                ->where('bsj.shipper_status_id', 1)
+                                ->whereBetween('bsj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as asj', function ($join) use($from,$to){
+                            $join->on('asj.shipment_id', '=', 's.id')
+                                ->whereIn('asj.shipper_status_id', [2, 4])
+                                ->whereBetween('asj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as isj', function ($join) use($from,$to){
+                            $join->on('isj.shipment_id', '=', 's.id')
+                                ->where('isj.shipper_status_id', 3)
+                                ->whereBetween('isj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as osj', function ($join) use($from,$to){
+                            $join->on('osj.shipment_id', '=', 's.id')
+                                ->where('osj.shipper_status_id', 5)
+                                ->whereBetween('osj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as dsj', function ($join) use($from,$to){
+                            $join->on('dsj.shipment_id', '=', 's.id')
+                                ->where('dsj.shipper_status_id', 14)
+                                ->whereBetween('dsj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as usj', function ($join) use($from,$to){
+                            $join->on('usj.shipment_id', '=', 's.id')
+                                ->where('usj.shipper_status_id', '<=', 14)
+                                ->whereNotIn('usj.shipper_status_id', [1])
+                                ->whereBetween('usj.created_at', [$from,$to]);
+                        })
+                        ->leftJoin('shipments_journey as csj', function ($join) use($from,$to){
+                            $join->on('csj.shipment_id', '=', 's.id')
+                                ->where('csj.shipper_status_id', 12)
+                                ->whereBetween('csj.created_at', [$from,$to]);
+                        });
+                }
+            }
+            else{
+                $route_distribution_summary = DB::connection('reports')->table('cities')
+                    ->leftjoin('shipments as s', 's.consignee_city_id', '=', 'cities.id')
+                    ->leftJoin('shipments_journey as bsj', function ($join) use($from,$to){
+                        $join->on('bsj.shipment_id', '=', 's.id')
+                            ->where('bsj.shipper_status_id', 1)
+                            ->whereBetween('bsj.created_at', [$from,$to]);
+                    })
+                    ->leftJoin('shipments_journey as asj', function ($join) use($from,$to){
+                        $join->on('asj.shipment_id', '=', 's.id')
+                            ->whereIn('asj.shipper_status_id', [2, 4])
+                            ->whereBetween('asj.created_at', [$from,$to]);
+                    })
+                    ->leftJoin('shipments_journey as isj', function ($join) use($from,$to){
+                        $join->on('isj.shipment_id', '=', 's.id')
+                            ->where('isj.shipper_status_id', 3)
+                            ->whereBetween('isj.created_at', [$from,$to]);
+                    })
+                    ->leftJoin('shipments_journey as osj', function ($join) use($from,$to){
+                        $join->on('osj.shipment_id', '=', 's.id')
+                            ->where('osj.shipper_status_id', 5)
+                            ->whereBetween('osj.created_at', [$from,$to]);
+                    })
+                    ->leftJoin('shipments_journey as dsj', function ($join) use($from,$to){
+                        $join->on('dsj.shipment_id', '=', 's.id')
+                            ->where('dsj.shipper_status_id', 14)
+                            ->whereBetween('dsj.created_at', [$from,$to]);
+                    })
+                    ->leftJoin('shipments_journey as usj', function ($join) use($from,$to){
+                        $join->on('usj.shipment_id', '=', 's.id')
+                            ->where('usj.shipper_status_id', '<=', 14)
+                            ->whereNotIn('usj.shipper_status_id', [1])
+                            ->whereBetween('usj.created_at', [$from,$to]);
+                    })
+                    ->leftJoin('shipments_journey as csj', function ($join) use($from,$to){
+                        $join->on('csj.shipment_id', '=', 's.id')
+                            ->where('csj.shipper_status_id', 12)
+                            ->whereBetween('csj.created_at', [$from,$to]);
+                    });
+            }
+            $route_distribution_summary = $route_distribution_summary
+                ->select('cities.name as hub_name', DB::raw('count(bsj.id) as booked'), DB::raw('count(asj.id) as arrived_at_destination'), DB::raw('count(isj.id) as in_transit'), DB::raw('(count(asj.id)-count(isj.id)) as pending_arrived_at_destination'), DB::raw('count(osj.id) as out_for_delivery'), DB::raw('count(dsj.id) as delivered_shipments'), DB::raw('ROUND((count(dsj.id)/count(bsj.id))*100, 2) as delivered_shipments_per'), DB::raw('count(usj.id) as undelivered_shipments'), DB::raw('ROUND((count(usj.id)/count(bsj.id))*100, 2) as undelivered_shipments_per'), DB::raw('count(csj.id) as confirmation_pending_shipments'), DB::raw('ROUND((count(csj.id)/count(bsj.id))*100, 2) as confirmation_pending_shipments_per'))
+                ->groupBy('cities.id');
+
+
+            $datatables = Datatables::of($route_distribution_summary)
+                ->editColumn('pending_arrived_at_destination', function ($request){
+                    if($request->pending_arrived_at_destination < 0){
+                        return 0;
+                    }
+                    else{
+                        return $request->pending_arrived_at_destination;
+                    }
+                });
+            if($hub = $request->get('search_hub')){
+                $datatables = $datatables->where('cities.id', '=', $hub);
+            }
+            if($zone = $request->get('search_zone')){
+                $datatables = $datatables->where('cities.zone_id', '=', $zone);
+            }
+            if($destination = $request->get('search_destination')){
+                $datatables = $datatables->where('cities.id', '=', $destination);
             }
             return $datatables->make(true);
         }
