@@ -74,15 +74,15 @@ class ShipperDashboardController extends Controller
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            ->leftJoin('shipments_journey', function ($join) {
-                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                    ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(sji.id) from shipments_journey as sji where sji.shipment_id = shipments.id and sji.verification = 1)'));
             })
-            ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
-            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->join('shipment_status as ss','ss.id','=','sj.shipper_status_id')
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id', 'shipments.booked_by as booked_by']);
+            ->select(['u.id as user_id', 'u.name as user_name', 'sj.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'sj.shipper_status_id as status_id', 'shipments.booked_by as booked_by']);
 //            ->where('shipments.user_id', session('user_id'))
 //            ->orwhereIn('shipments.user_id', session('sister_users'))
 //            ->groupBy('shipments.id');
