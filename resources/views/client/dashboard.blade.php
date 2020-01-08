@@ -650,7 +650,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[18, 'desc']],
+                order: [[16, 'desc']],
                 columns: [
                     {
                         data: 'id',
