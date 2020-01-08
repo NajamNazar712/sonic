@@ -564,7 +564,7 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                dom: '<"d-inline-block"><"pull-right"B>tipr',
                 buttons: [
                         @if (session('role_id') == 1 || in_array(139, session('permissions')))
                     {
@@ -728,8 +728,8 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[50, 100, 500], [50, 100, 500]],
-                pageLength: 50,
+                // lengthMenu: [[50, 100, 500], [50, 100, 500]],
+                pageLength: 10,
                 pagingType: 'full_numbers',
                 processing: true,
                 language: {
