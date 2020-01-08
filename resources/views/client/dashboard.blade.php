@@ -520,7 +520,7 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
-                dom: '<"d-inline-block"><"pull-right"B>tipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
@@ -633,7 +633,7 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                // lengthMenu: [[10, 50, 100, 500], [10, 50, 100, 500]],
+                lengthMenu: [[10], [10]],
                 pageLength: 10,
                 pagingType: 'full_numbers',
                 processing: true,
