@@ -694,7 +694,7 @@
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {
                         data: 'cancellation_remarks',
-                        name: 'sj.remarks',
+                        name: 'shipments_journey.remarks',
                         class: 'align-middle cancellation_remarks'
                     },
                     {
