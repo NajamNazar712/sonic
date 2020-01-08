@@ -77,7 +77,7 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
-                        DB::raw('(select max(sji.id) from shipments_journey as sji where sji.shipment_id = shipments.id and sji.verification = 1)'));
+                        DB::raw('(select max(sji.id) from shipments_journey as sji where sji.shipment_id = shipments.id and sji.verification = 1 and sji.user_id = shipments.user_id)'));
             })
             ->join('shipment_status as ss','ss.id','=','sj.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
