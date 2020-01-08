@@ -128,7 +128,7 @@ class RiderPickupsController extends Controller {
     	->join('users as u', 'pr.shipper_id', 'u.id')
     	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
     	->join('cities as c', 'usi.city_id', 'c.id')
-    	->select('rider_pickup_action_logs.id', 'rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'rider_pickup_action_logs.pickup_note_id', 'rider_pickup_action_logs.pickup_request_id','pn.created_at','pn.assigned_by_user_id','pn.city_id','pn.rider_id');
+    	->select('rider_pickup_action_logs.id', 'rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'rider_pickup_action_logs.pickup_note_id', 'rider_pickup_action_logs.pickup_request_id','pn.created_at','pn.assigned_by_user_id','pn.city_id as pickup_city_id','pn.rider_id');
 
     	$datatables = Datatables::of($rider_pickup_action_logs)
         ->editColumn('pickup_note_id', function ($rider_pickup_action_log) {
