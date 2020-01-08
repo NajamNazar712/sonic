@@ -64,8 +64,6 @@
                                         <th class="border-primary border-darken-1">Consignee Contact</th>
                                         <th class="border-primary border-darken-1">Consignee Address</th>
                                         <th class="border-primary border-darken-1">Collection Amount</th>
-                                        <th class="border-primary border-darken-1">Product Type</th>
-                                        <th class="border-primary border-darken-1">Product Description</th>
                                         <th class="border-primary border-darken-1">Booking Date</th>
                                         <th class="border-primary border-darken-1">Instructions</th>
                                         <th class="border-primary border-darken-1">Cancellation Remarks</th>
@@ -692,8 +690,6 @@
                         class: 'align-middle consignee_address'
                     },
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
-                    {data: 'product_description', name: 'si.description', class: 'align-middle product_description'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {
