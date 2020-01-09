@@ -4878,12 +4878,22 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('users as u', 'done_payments.user_id', '=', 'u.id')
                 ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(dps.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(dps.gst) as gst'), DB::connection('reports')->raw('SUM(dps.payable) as total_charges'))
             ->groupBy('done_payments.user_id');
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $gst->whereBetween('dps.created_at', [$from,$to]);
+            }
             $gst_corporate = DB::connection('reports')->table('invoices')->leftjoin('invoice_shipments as is','is.invoice_id', '=', 'invoices.id')
                 ->leftjoin('users as u', 'invoices.user_id', '=', 'u.id')
                 ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(is.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(is.gst) as gst'), DB::connection('reports')->raw('SUM(is.invoice_amount) as total_charges'))
                 ->union($gst)
                 ->where('u.account_type_id', 2)
                 ->groupBy('invoices.user_id');
+                if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                    $from = $request->get('search_date_from');
+                    $to = $request->get('search_date_to');
+                    $gst_corporate->whereBetween('is.created_at', [$from,$to]);
+                }
 
             $datatables = Datatables::of($gst_corporate)
                 ->editColumn('account_no', function ($gst) {
@@ -4906,11 +4916,6 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('gst', function ($gst) {
                     return number_format($gst->gst, 2);
                 });
-            if ($request->get('search_date_from') && $request->get('search_date_to')) {
-                $from = $request->get('search_date_from');
-                $to = $request->get('search_date_to');
-                $datatables->whereBetween('dps.created_at', [$from,$to]);
-            }
             return $datatables->make(true);
         }
 
