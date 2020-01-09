@@ -162,6 +162,37 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            @if (session('print'))
+            $.ajax({
+                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'ids[]': '{{ session('print') }}'
+                }
+            })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            @endif
+
+            
             // $('.reference_no').inputmask({
             //     'alias': 'integer',
             //     'allowMinus': false,
