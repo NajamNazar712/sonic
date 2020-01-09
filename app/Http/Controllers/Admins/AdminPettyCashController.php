@@ -1384,8 +1384,7 @@ class AdminPettyCashController extends Controller
     }
 
     public function create_shipment($petty_cash_statement_id){
-        // $user_id = 1690;
-        $user_id = 1060;
+        $user_id = 1690;
         $user = User::find($user_id);
         
         if($petty_cash_statement_id){
