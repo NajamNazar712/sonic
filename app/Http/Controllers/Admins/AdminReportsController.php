@@ -3599,7 +3599,8 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('admins as sub', 'sub.id', '=', 'petty_cash_statement_details.updated_by')
                 ->leftjoin('petty_cash_account_heads as pch', 'pch.id','=','petty_cash_statement_details.account_head_id')
                 ->leftjoin('petty_cash_account_titles as pct', 'pct.id','=','petty_cash_statement_details.account_title_id')
-                ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount');
+                ->leftjoin('shipments','shipments.id','=','pcs.shipment_id')
+                ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number');
     //            ->where('petty_cash_statements.status','<',3);
 
             if (session('role_id') != 1) {
@@ -3609,6 +3610,10 @@ use Yajra\Datatables\Datatables;
             $petty = Datatables::of($petty)
                 ->editColumn('statement_link', function ($petty){
                     return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
+                })
+                ->addColumn('petty_cash_statement_link', function ($petty){
+                    $route = route('admin.tracking.index');
+                    return "<u><a href='{$route}?tracking_number=$petty->tracking_number' class='tracking' target='_blank'>$petty->tracking_number</a></u>";
                 })
                 ->addColumn('entry_date',function($petty){
                     return Carbon::parse($petty->entry_date)->toDateString();
