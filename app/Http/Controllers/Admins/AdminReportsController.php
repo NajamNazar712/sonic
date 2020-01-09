@@ -3240,6 +3240,8 @@ use Yajra\Datatables\Datatables;
                                 $class = 'Class D';
                                 break;
                         }
+                    }else{
+                        $class = 'Local';
                     }
 
                     return $class;
@@ -4835,6 +4837,8 @@ use Yajra\Datatables\Datatables;
                                 $class = 'Class D';
                                 break;
                         }
+                    }else{
+                        $class = 'Local';
                     }
 
                     return $class;
