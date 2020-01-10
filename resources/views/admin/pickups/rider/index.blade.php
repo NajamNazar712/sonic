@@ -16,7 +16,55 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
+							<div id="search_form" class="row mb-2 justify-content-center">
 
+		                        <div class="col-4 ">
+
+		                            <div class="form-group input-group ml-1">
+		                                <div class="input-group-prepend">
+		                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+		                                <span class="la la-calendar-o"></span>
+		                            </span>
+		                                </div>
+
+		                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+		                            </div>
+		                        </div>
+		                        <div class="col-4 ">
+		                            <div class="form-group input-group ml-1">
+		                                <div class="input-group-prepend">
+		                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+		                                <span class="la la-calendar-o"></span>
+		                            </span>
+		                                </div>
+
+		                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+		                            </div>
+
+		                        </div>
+			                    <div class="col-2">
+			                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+			                    </div>
+			                </div>
+			                <div class="row justify-content-center">
+			                	<div class="col-4">
+			                		<table class="table table-bordered text-center">
+				                		<thead>
+				                			<tr>
+				                				<th>Picked</th>
+				                				<th>Not Picked</th>
+				                			</tr>
+				                		</thead>
+				                		<tbody>
+				                			<tr>
+				                				<td id="picked">0</td>
+				                				<td id="notpicked">0</td>
+				                			</tr>
+				                		</tbody>
+			                		</table>
+			                	</div>
+			                	
+			                </div>
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
@@ -71,14 +119,47 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
 
 @section('js')
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-
+	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 	<script>
 		$(document).ready(function() {
+
+			$('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var summary_flag = true;
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				buttons: [{
@@ -120,7 +201,11 @@
 					{data: 'pickup_note_id', name: 'rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
 					{data: 'pickup_request_id', name: 'rider_pickups.pickup_request_id', class: 'align-middle pickup_request_id'}
 				],
-				initComplete: function() {
+				initComplete: function(settings,json) {
+					if(json.data.length > 0){
+						$('#picked').text(json.data.pickup_picked);
+						$('#notpicked').text(json.data.pickup_not_picked);
+					}
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -183,6 +268,10 @@
                     this.api().table().columns.adjust();
 				}
 			});
+			
+			$('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
 
 			var route = '{!! route('admin.tracking.index') !!}';
 
