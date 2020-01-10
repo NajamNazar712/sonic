@@ -274,7 +274,7 @@ class AdminReportsEmailController extends Controller
         }
         $weekdays_count = count($dates);
         $weekdays_count = ($weekdays_count - ($week_holidays + 1));
-        $total_month_weekdays_count = count($total_dates) - ($holidays + 1);
+        $total_month_weekdays_count = count($total_dates) - ($holidays);
 
         $months_average = City::leftjoin('shipments_journey as sj', 'sj.city_id', '=', 'cities.id')
                 ->leftjoin('shipments as s', 's.id', '=', 'sj.shipment_id')
