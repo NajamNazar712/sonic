@@ -1666,19 +1666,19 @@ class AdminCRMController extends Controller
         }
         return ['status' => 0, 'success' => 'Request successfully tagged to ' . $name['name']];
     }
-   public function request_info(Request $request){
-       $request_id = $request->request_id;
-       $request_details = CrmRequest::find($request_id);
-       if($request_details){
-           $tracking_number = '';
-           if($request_details->shipment_id != null){
-               $tracking_number = Shipment::find($request_details->shipment_id)->tracking_number;
-           }
-           return ['status' => 1, 'details' => $request_details, 'tracking_number' => $tracking_number];
-       }else{
-           return ['status' => 0, 'error' => 'Request ID not found!'];
-       }
-   }
+   // public function request_info(Request $request){
+   //     $request_id = $request->request_id;
+   //     $request_details = CrmRequest::find($request_id);
+   //     if($request_details){
+   //         $tracking_number = '';
+   //         if($request_details->shipment_id != null){
+   //             $tracking_number = Shipment::find($request_details->shipment_id)->tracking_number;
+   //         }
+   //         return ['status' => 1, 'details' => $request_details, 'tracking_number' => $tracking_number];
+   //     }else{
+   //         return ['status' => 0, 'error' => 'Request ID not found!'];
+   //     }
+   // }
     public function bulk_admin_tag(Request $request){
         if(count($request->crm_request_ids) > 0){
             foreach($request->crm_request_ids as $crm_request_id){
