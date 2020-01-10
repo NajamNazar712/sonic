@@ -1078,12 +1078,12 @@ class AdminDashboardController extends Controller
         return view('admin.pending_booked_orders');
     }
     public function pendingAccountsList(){
-        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
         return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
     }
     public function activeAccountsList(){
-        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
         return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
 
