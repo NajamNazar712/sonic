@@ -202,6 +202,7 @@
 						@csrf
 						<input type="hidden" name="sdn_id" id="sdn_id"/>
 						<input type="hidden" name="deposit_rows" id="deposit_rows"/>
+						
 						<table class="table table-bordered datatable" id="edit_deposit_slip_table" style="z-index: 3;">
 							<thead>
 							<tr role="row" class="bg-primary white">
@@ -242,6 +243,22 @@
 					<form id="sdn_adjustment_add" class="form" action="{{route('admin.delivery.sdn.adjustment.add')}}" method="post">
 						@csrf
 						<input type="hidden" name="sdn_id" id="sdn_id_for_adjustment">
+						<div class="row">
+							<div class="col">
+								<div class="form-group">
+	                                <select name="petty_cash_select" class="select2" id="petty_cash_select">
+	                                    @foreach($petty_cash_list as $petty_cash)
+	                                    	<option value="{{$petty_cash->id}}">{{$petty_cash->id}}</option>
+	                                    @endforeach	
+	                                </select>
+	                            </div>
+							</div>
+							<div class="col">
+								<div class="form-group">
+									<textarea class="form-control" name="petty_cash_detail_rows" placeholder="Enter Petty cash statement rows"></textarea>
+								</div>
+							</div>
+						</div>
 						<table class="table table-bordered" style="z-index: 3;">
 							<thead>
 							<tr role="row" class="bg-primary white">
@@ -305,6 +322,13 @@
 
 	<script>
 		$(document).ready(function() {
+
+			$('#petty_cash_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Petty Cash Statement ID',
+                dropdownParent:$('#AddAdjustmentModal')
+			});
+
 			function print(id) {
 				$.ajax({
 					url: '{!! route('admin.delivery.sdn.print') !!}',

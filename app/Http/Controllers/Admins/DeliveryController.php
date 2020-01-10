@@ -3144,6 +3144,13 @@ class DeliveryController extends Controller
             ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
             })
+            ->addColumn('difference_amount', function($sdn){
+                $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
+                $difference_amount = 0;
+
+                $defference_amount = $sdn->sdn_amount - $deposit_adjustment_amount;
+                return number_format($defference_amount);
+            })
             ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
                 return $query->where('station_deposit_notes.id', '=', $keyword);
             })
@@ -4835,6 +4842,12 @@ class DeliveryController extends Controller
             $sdn->adjustment_amount = $request->adjustment_amount;
             $sdn->adjustment_date = $request->adjustment_date_formatted;
             $sdn->adjustment_ref = $request->adjustment_ref;
+            if($request->petty_cash_select != ''){
+                $sdn->petty_cash_statement_id = $request->petty_cash_select;
+            }
+            if($request->petty_cash_detail_rows != ''){
+                $sdn->petty_cash_statement_detail_ids = $request->petty_cash_detail_rows;
+            }
             $sdn->save();
 
             return redirect()->back()->with(['success' => 'Adjustment added successfully!']);

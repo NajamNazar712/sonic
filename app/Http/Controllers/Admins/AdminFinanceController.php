@@ -20,6 +20,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Models\Admin\PettyCashStatement;
 
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Notification;
@@ -101,8 +102,8 @@ class AdminFinanceController extends Controller
         $banks = BanksList::where('affiliate', 1)->get();
         $all_banks = BanksList::all();
         $hubs = City::orderBy('name')->where('hub', 1)->get();
-
-        return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks, 'hubs'=>$hubs, 'all_banks' => $all_banks]);
+        $petty_cash_list = PettyCashStatement::where('status',2)->select('id')->get();
+        return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks, 'hubs'=>$hubs, 'all_banks' => $all_banks, 'petty_cash_list' => $petty_cash_list]);
     }
 
     public function outstanding_sdn_list(Request $request) {
