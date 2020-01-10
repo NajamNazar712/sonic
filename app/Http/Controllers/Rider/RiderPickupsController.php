@@ -41,7 +41,7 @@ class RiderPickupsController extends Controller {
     	->join('users as u', 'pr.shipper_id', 'u.id')
     	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
     	->join('cities as c', 'usi.city_id', 'c.id')
-    	->select('rider_pickups.id', 'rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'rider_pickups.pickup_type', 'rider_pickups.start_location_latitude', 'rider_pickups.start_location_longitude', 'rider_pickups.actual_location_latitude', 'rider_pickups.actual_location_longitude', 'rider_pickups.distance_from_start_to_actual', 'rider_pickups.current_location_latitude', 'rider_pickups.current_location_longitude', 'rider_pickups.distance_from_current_to_actual', 'rider_pickups.shipments', 'pnpr.name as reason', 'rider_pickups.picture_path', 'rider_pickups.pickup_note_id', 'rider_pickups.pickup_request_id');
+    	->select('rider_pickups.id', 'rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'rider_pickups.pickup_type', 'rider_pickups.start_location_latitude', 'rider_pickups.start_location_longitude', 'rider_pickups.actual_location_latitude', 'rider_pickups.actual_location_longitude', 'rider_pickups.distance_from_start_to_actual', 'rider_pickups.current_location_latitude', 'rider_pickups.current_location_longitude', 'rider_pickups.distance_from_current_to_actual', 'rider_pickups.shipments', 'pnpr.name as reason', 'rider_pickups.picture_path', 'rider_pickups.pickup_note_id', 'rider_pickups.pickup_request_id',DB::raw('(SELECT COUNT(*) FROM `rider_pickups` AS `rp` where `rp`.`pickup_type` = 0) AS `pickup_not_picked`'),DB::raw('(SELECT COUNT(*) FROM `rider_pickups` AS `rp1` where `rp1`.`pickup_type` = 1) AS `pickup_picked`'));
 
         $datatables = Datatables::of($rider_pickups)
         ->editColumn('pickup_note_id', function ($rider_pickup) {
@@ -89,7 +89,11 @@ class RiderPickupsController extends Controller {
                 return '';
             }
 		});
-
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $pickup_note->whereBetween('pickup_notes.created_at', [$from,$to]);
+        }
     	return $datatables->make(true);
     }
 
