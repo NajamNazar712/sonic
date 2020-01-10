@@ -88,6 +88,62 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="tagModal" data-backdrop="static" tabindex="-1" role="dialog"
+             aria-labelledby="tagModal"
+             aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content ">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Tag</h4>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form id="tag_submit_form" method="post">
+                            @method('POST')
+                            @csrf
+                            <div class="row justify-content-center">
+                                <div class="col-11">
+                                    <fieldset class="form-group">
+                                        <input type="hidden" id="crm_request_ids" value="">
+                                        <input type="hidden" id="prev_status" name="prev_status"
+                                               value="">
+                                        <select name="tag_type" id="tag_type" class="form-control select2">
+                                            @foreach($types as $type)
+                                                <option value="{{$type->id}}"> {{$type->name}} </option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <div class="d-none" id="admin_tag_div">
+                                            <select name="tag_admin" id="tag_admin" class="form-control select2">
+                                                @foreach($admins as $admin)
+                                                    <option value="{{$admin->id}}"> {{$admin->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="d-none" id="department_tag_div">
+                                            <select name="tag_department" id="tag_department"
+                                                    class="form-control  select2">
+                                                @foreach($departments as $department)
+                                                    <option value="{{$department->id}}"> {{$department->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
+                        <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -194,6 +250,16 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    {
+                        text: 'Tag',
+                        className: 'btn btn-primary tag',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                $('#tagModal').modal('show');
+                            }
+                        }
+                    },
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
                     {
                         text: 'Assign Agent',
@@ -373,6 +439,7 @@
 
                                     table.button('.assign').enable();
                                     table.button('.close_request').enable();
+                                    table.button('.tag').enable();
                                 }
                             });
                         }
@@ -400,6 +467,7 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.assign').disable();
                                         table.button('.close_request').disable();
+                                        table.button('.tag').disable();
                                     }
                                 }
                             });
@@ -666,10 +734,12 @@
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
                     table.button('.close_request').enable();
+                    table.button('.tag').enable();
                 }
                 else {
                     table.button('.assign').disable();
                     table.button('.close_request').disable();
+                    table.button('.tag').disable();
                 }
             });
 
@@ -707,6 +777,110 @@
             $('#track_form').bind('submit',function (e) {
                 e.preventDefault();
                 table.draw();
+            });
+
+            $("#tag_admin").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select User",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            });
+
+            $("#tag_department").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Department",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            });
+
+            $("#tag_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Type",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if (id === 1) {
+                    $('#admin_tag_div').addClass('d-none');
+                    $('#department_tag_div').removeClass('d-none');
+                } else if (id === 2) {
+                    $('#department_tag_div').addClass('d-none');
+                    $('#admin_tag_div').removeClass('d-none');
+                } else {
+                    $('#admin_tag_div').addClass('d-none');
+                    $('#department_tag_div').addClass('d-none');
+                }
+            });
+            // $('#tag').on('click', function (e) {
+            //     e.preventDefault();
+            //     $('#tagModal').modal('show');
+            // });
+            $('#tagModal').on('hide.bs.modal', function (e) {
+                $('#tag_type').val('').trigger('change');
+                $('#admin_tag_div').addClass('d-none');
+                $('#department_tag_div').addClass('d-none');
+            });
+            $('#tag_adminSubmit').on('click', function () {
+                var type = parseInt($('#tag_type').val());
+                if (type === 1) {
+                    var tag = parseInt($('#tag_department').val());
+                }
+                else if (type === 2) {
+                    var tag = parseInt($('#tag_admin').val());
+                }
+                if (tag) {
+                    $('#tag_adminSubmit').attr('disabled', true);
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Request(s) are being tagged.',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    $.ajax({
+                        url: '{!! route('admin.crm.in_process.tag') !!}',
+                        method: 'POST',
+                        data: {
+                            'tagged_id': tag,
+                            'crm_request_ids[]': selected_rows,
+                            'crm_request_tagging_type_id': type,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 0) {
+                                $('#tagModal').modal('hide');
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            swal.close();
+                            $('#tag_adminSubmit').attr('disabled', false);
+                            selected_rows = [];
+
+                            table.rows().deselect();
+
+                            table.draw('false');
+                        });
+                }
+                else {
+                    if (type === 1) {
+                        var error = "Department Not Selected!";
+                    }
+                    else if (type === 2) {
+                        var error = "User Not Selected!";
+                    }
+                    else {
+                        error = "Type Not Selected!";
+                    }
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
             });
         });
     </script>

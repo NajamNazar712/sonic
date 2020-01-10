@@ -340,21 +340,6 @@ class AdminCRMController extends Controller
         }
     }
 
-//    public function get_request_info(Request $request){
-//        $request_id = $request->request_id;
-//        $request_details = CrmRequest::find($request_id);
-//        if($request_details){
-//            $tracking_number = '';
-//            if($request_details->shipment_id != null){
-//                $tracking_number = Shipment::find($request_details->shipment_id)->tracking_number;
-//            }
-//            return ['status' => 1, 'details' => $request_details, 'tracking_number' => $tracking_number];
-//        }else{
-//            return ['status' => 0, 'error' => 'Request ID not found!'];
-//        }
-//    }
-
-
     public function launched_re_open_index(){
         $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
@@ -643,7 +628,12 @@ class AdminCRMController extends Controller
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
-        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status]);
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
+            ->select('a.id as id', 'a.name as name')
+            ->whereNotIn('admin_roles.department_id', [1,3])->get();
+        $types = CrmRequestTaggingTypes::get();
+        $departments = AdminDepartment::whereNotIn('id', [1,3])->get();    
+        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments]);
     }
 
     public function in_process_list(Request $request){
@@ -1676,6 +1666,68 @@ class AdminCRMController extends Controller
         }
         return ['status' => 0, 'success' => 'Request successfully tagged to ' . $name['name']];
     }
+   public function request_info(Request $request){
+       $request_id = $request->request_id;
+       $request_details = CrmRequest::find($request_id);
+       if($request_details){
+           $tracking_number = '';
+           if($request_details->shipment_id != null){
+               $tracking_number = Shipment::find($request_details->shipment_id)->tracking_number;
+           }
+           return ['status' => 1, 'details' => $request_details, 'tracking_number' => $tracking_number];
+       }else{
+           return ['status' => 0, 'error' => 'Request ID not found!'];
+       }
+   }
+    public function bulk_admin_tag(Request $request){
+        if(count($request->crm_request_ids) > 0){
+            foreach($request->crm_request_ids as $crm_request_id){
+                $crm_request = CrmRequest::where('id', $crm_request_id)->first();
+                if($request->crm_request_tagging_type_id == 1){
+                    $name = AdminDepartment::where('id', $request->tagged_id)->first();
+                }
+                else if($request->crm_request_tagging_type_id == 2){
+                    $name = Admin::where('id', $request->tagged_id)->first();
+                }
+                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request_id)->first();
+                if(!empty($tagged_crm_request)){
+                    if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
+                        CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
+                            'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                            'tagged_id' => $request->tagged_id
+                        ]);
+
+                        CrmRequestTaggingHistory::create([
+                            'crm_request_id' => $crm_request_id,
+                            'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                            'tagged_id' => $request->tagged_id,
+                            'agent_id' => Auth::id()
+                        ]);
+
+                        NotificationsController::send(31,$crm_request_id);
+                    }
+                }
+                else{
+                    CrmRequestTagging::create([
+                        'crm_request_id' => $crm_request_id,
+                        'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                        'tagged_id' => $request->tagged_id
+                    ]);
+
+                    CrmRequestTaggingHistory::create([
+                        'crm_request_id' => $crm_request_id,
+                        'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                        'tagged_id' => $request->tagged_id,
+                        'agent_id' => Auth::id()
+                    ]);
+                    NotificationsController::send(31,$crm_request_id);
+                }
+            }
+            
+            return ['status' => 0, 'success' => 'Request(s) successfully tagged to ' . $name['name']];
+        }
+    }
+
     public function crm_index(){
         return view('admin.crm.index');
     }
