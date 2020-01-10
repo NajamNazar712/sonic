@@ -491,17 +491,25 @@ class AdminTrackingController extends Controller
 
                 return $dropdown;
             });
-        if($tracking = $request->get('search_tracking')){
-            $datatable->where('shipments.tracking_number', 'LIKE', '%'. $tracking . '%');
+        if($tracking = $request->get('search_tracking') || $shipper = $request->get('search_shipper') || $phone_no = $request->get('search_phone_no') || $order_id = $request->get('search_order_id')){
+            if($tracking = $request->get('search_tracking')){
+                $datatable->where('shipments.tracking_number', 'LIKE', '%'. $tracking . '%');
+            }
+            if($shipper = $request->get('search_shipper')){
+                $datatable->where('u.id', 'LIKE', '%'. $shipper . '%');
+            }
+            if($phone_no = $request->get('search_phone_no')){
+                $datatable->where('shipments.consignee_phone_number_1', 'LIKE', '%'. $phone_no . '%');
+            }
+            if($order_id = $request->get('search_order_id')){
+                $datatable->where('shipments.order_id', 'LIKE', '%'. $order_id . '%');
+            }
         }
-        if($shipper = $request->get('search_shipper')){
-            $datatable->where('u.id', 'LIKE', '%'. $shipper . '%');
-        }
-        if($phone_no = $request->get('search_phone_no')){
-            $datatable->where('shipments.consignee_phone_number_1', 'LIKE', '%'. $phone_no . '%');
-        }
-        if($order_id = $request->get('search_order_id')){
-            $datatable->where('shipments.order_id', 'LIKE', '%'. $order_id . '%');
+        else{
+                $datatable->where('shipments.tracking_number', null);
+                $datatable->where('u.id', null);
+                $datatable->where('shipments.consignee_phone_number_1', null);
+                $datatable->where('shipments.order_id', null);
         }
             return $datatable->make(true);
     }

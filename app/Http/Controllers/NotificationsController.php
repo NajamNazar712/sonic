@@ -8,6 +8,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
@@ -372,7 +373,7 @@ class NotificationsController extends Controller
 
               $bcc = array();
 
-              $general_admins = Admin::whereIn('role_id', [4, 3, 6])->where('status', 1);
+              $general_admins = Admin::whereIn('role_id', [6])->where('status', 1);
 
               if ($general_admins->exists()) {
                 $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
@@ -3673,6 +3674,247 @@ class NotificationsController extends Controller
                     $to = $pickup_request->pickup_address->phone;
                     self::sms($body, $to);
                 }
+            }
+
+            else if ($id == 53) {
+                $date = Carbon::yesterday()->format('Y-m-d');
+                if (strpos($subject, '[date]') !== FALSE) {
+                    $subject = str_replace('[date]', $date, $subject);
+                }
+
+                if (strpos($body, '[date]') !== FALSE) {
+                    $body = str_replace('[date]', $date, $body);
+                }
+
+                $link = '<a href="' . $reference_2_id . '" target="_blank">Tracking Number(s)</a>';
+
+                if (strpos($subject, '[link]') !== FALSE) {
+                    $subject = str_replace('[link]', $link, $subject);
+                }
+
+                if (strpos($body, '[link]') !== FALSE) {
+                    $body = str_replace('[link]', $link, $body);
+                }
+                $date = Carbon::today()->startOfDay()->toDateTimeString();
+                $date_end = Carbon::today()->endOfDay()->toDateTimeString();
+                $daily_fake_status_datas = DailyFakeStatus::whereBetween('created_at', [$date, $date_end])
+                    ->select('hub_id', 'rider_id', DB::raw('sum(total_delivery_notes) as total_delivery_notes'), DB::raw('sum(total_shipments) as total_shipments'), DB::raw('sum(total_undelivered_shipments) as total_undelivered_shipments'), DB::raw('sum(total_fake_status_shipments) as total_fake_status_shipments'))->where('hub_id', $reference_1_id)->orderBy('total_shipments', 'desc')->groupBy('rider_id')->get();
+                $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Row Labels.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Count of Delivery Note No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Sum of Total Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Sum of Undelivered Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Sum of Shipments Marked With Fake Status</strong></th></tr></thead><tbody>';
+                $total_delivery_notes = 0;
+                $total_shipments = 0;
+                $total_undelivered_shipments = 0;
+                $total_fake_status_shipments = 0;
+                foreach ($daily_fake_status_datas as $daily_fake_status_data) {
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $daily_fake_status_data->rider->name . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_delivery_notes) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_shipments) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_undelivered_shipments) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_fake_status_shipments) . '</td>';
+                    $html .= '</tr>';
+                    $total_delivery_notes = $total_delivery_notes + $daily_fake_status_data->total_delivery_notes;
+                    $total_shipments = $total_shipments + $daily_fake_status_data->total_shipments;
+                    $total_undelivered_shipments = $total_undelivered_shipments + $daily_fake_status_data->total_undelivered_shipments;
+                    $total_fake_status_shipments = $total_fake_status_shipments + $daily_fake_status_data->total_fake_status_shipments;
+                    $hub = $daily_fake_status_data->hub->name;
+                }
+                if (strpos($subject, '[hub]') !== FALSE) {
+                    $subject = str_replace('[hub]', $hub, $subject);
+                }
+                if (strpos($body, '[hub]') !== FALSE) {
+                    $body = str_replace('[hub]', $hub, $body);
+                }
+
+                $html .= '<tr>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . $hub . '</b></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_delivery_notes) . '</b></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_shipments) . '</b></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_undelivered_shipments) . '</b></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_fake_status_shipments) . '</b></td>';
+                $html .= '</tr>';
+
+                $html .= '</tr>';
+                $html .= '</tbody></table>';
+
+                if (strpos($body, '[preview]') !== FALSE) {
+                    $body = str_replace('[preview]', $html, $body);
+                }
+
+                $to = array();
+                $cc = array();
+
+                $admins = Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->whereIn('role_id', [10])->where('status', 1)->where('ah.hub_id', $reference_1_id);
+                $cc_admins = Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->whereIn('role_id', [9])->where('status', 1)->where('ah.hub_id', $reference_1_id);
+
+                if ($admins->exists()) {
+                    $to = array_merge($to, $admins->pluck('email')->toArray());
+                }
+                if ($cc_admins->exists()) {
+                    $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
+                }
+
+                self::email($subject, $body, $to, $cc);
+            }
+
+            else if ($id == 54) {
+                $date = Carbon::yesterday()->format('Y-m-d');
+                if (strpos($subject, '[date]') !== FALSE) {
+                    $subject = str_replace('[date]', $date, $subject);
+                }
+
+                if (strpos($body, '[date]') !== FALSE) {
+                    $body = str_replace('[date]', $date, $body);
+                }
+
+                $link = '<a href="' . $reference_2_id . '" target="_blank">Tracking Number(s)</a>';
+
+                if (strpos($subject, '[link]') !== FALSE) {
+                    $subject = str_replace('[link]', $link, $subject);
+                }
+
+                if (strpos($body, '[link]') !== FALSE) {
+                    $body = str_replace('[link]', $link, $body);
+                }
+                $date = Carbon::today()->startOfDay()->toDateTimeString();
+                $date_end = Carbon::today()->endOfDay()->toDateTimeString();
+                $daily_fake_status_data_zones = DailyFakeStatus::whereBetween('created_at', [$date, $date_end])
+                    ->select('hub_id', 'zone_id', 'rider_id', DB::raw('sum(total_delivery_notes) as total_delivery_notes'), DB::raw('sum(total_shipments) as total_shipments'), DB::raw('sum(total_undelivered_shipments) as total_undelivered_shipments'), DB::raw('sum(total_fake_status_shipments) as total_fake_status_shipments'))->where('zone_id', $reference_1_id)->orderBy('total_shipments', 'desc')->groupBy('hub_id')->get();
+                $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Row Labels.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Count of Delivery Note No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Sum of Total Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Sum of Undelivered Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Sum of Shipments Marked With Fake Status</strong></th></tr></thead><tbody>';
+
+                foreach ($daily_fake_status_data_zones as $daily_fake_status_data_zone) {
+                    $total_delivery_notes = 0;
+                    $total_shipments = 0;
+                    $total_undelivered_shipments = 0;
+                    $total_fake_status_shipments = 0;
+                    $daily_fake_status_datas = DailyFakeStatus::whereBetween('created_at', [$date, $date_end])
+                        ->select('zone_id', 'hub_id', 'rider_id', DB::raw('sum(total_delivery_notes) as total_delivery_notes'), DB::raw('sum(total_shipments) as total_shipments'), DB::raw('sum(total_undelivered_shipments) as total_undelivered_shipments'), DB::raw('sum(total_fake_status_shipments) as total_fake_status_shipments'))->where('hub_id', $daily_fake_status_data_zone->hub_id)->orderBy('total_shipments', 'desc')->groupBy('rider_id')->get();
+                    foreach ($daily_fake_status_datas as $daily_fake_status_data) {
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $daily_fake_status_data->rider->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_delivery_notes) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_shipments) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_undelivered_shipments) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_fake_status_shipments) . '</td>';
+                        $html .= '</tr>';
+                        $total_delivery_notes = $total_delivery_notes + $daily_fake_status_data->total_delivery_notes;
+                        $total_shipments = $total_shipments + $daily_fake_status_data->total_shipments;
+                        $total_undelivered_shipments = $total_undelivered_shipments + $daily_fake_status_data->total_undelivered_shipments;
+                        $total_fake_status_shipments = $total_fake_status_shipments + $daily_fake_status_data->total_fake_status_shipments;
+                        $hub = $daily_fake_status_data->hub->name;
+                    }
+
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . $hub . '</b></td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_delivery_notes) . '</b></td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_shipments) . '</b></td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_undelivered_shipments) . '</b></td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_fake_status_shipments) . '</b></td>';
+                    $html .= '</tr>';
+                    $zone = $daily_fake_status_data->zone->name;
+            }
+
+                $html .= '</tr>';
+                $html .= '</tbody></table>';
+
+
+                if (strpos($subject, '[zone]') !== FALSE) {
+                    $subject = str_replace('[zone]', $zone, $subject);
+                }
+                if (strpos($body, '[zone]') !== FALSE) {
+                    $body = str_replace('[zone]', $zone, $body);
+                }
+                if (strpos($body, '[preview]') !== FALSE) {
+                    $body = str_replace('[preview]', $html, $body);
+                }
+
+                $to = array();
+                $cc = array();
+
+                $admins =Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->leftjoin('cities as c', 'c.id', '=', 'ah.hub_id')->whereIn('role_id', [9])->where('admins.status', 1)->where('c.zone_id', $reference_1_id);
+                $cc_admins = Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->leftjoin('cities as c', 'c.id', '=', 'ah.hub_id')->whereIn('role_id', [8])->where('admins.status', 1)->where('c.zone_id', $reference_1_id);
+                if ($admins->exists()) {
+                    $to = array_merge($to, $admins->distinct('id')->pluck('email')->toArray());
+                }
+                if ($cc_admins->exists()) {
+                    $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
+                }
+
+                self::email($subject, $body, $to, $cc);
+            }
+
+            else if ($id == 55) {
+
+                $date = Carbon::yesterday()->format('Y-m-d');
+                if (strpos($subject, '[date]') !== FALSE) {
+                    $subject = str_replace('[date]', $date, $subject);
+                }
+
+                if (strpos($body, '[date]') !== FALSE) {
+                    $body = str_replace('[date]', $date, $body);
+                }
+
+                $link = '<a href="' . $reference_2_id . '" target="_blank">Tracking Number(s)</a>';
+
+                if (strpos($subject, '[link]') !== FALSE) {
+                    $subject = str_replace('[link]', $link, $subject);
+                }
+
+                if (strpos($body, '[link]') !== FALSE) {
+                    $body = str_replace('[link]', $link, $body);
+                }
+                $date = Carbon::today()->startOfDay()->toDateTimeString();
+                $date_end = Carbon::today()->endOfDay()->toDateTimeString();
+                $daily_fake_status_datas = DailyFakeStatus::whereBetween('created_at', [$date, $date_end])
+                    ->select('hub_id', 'zone_id', 'rider_id', DB::raw('sum(total_delivery_notes) as total_delivery_notes'), DB::raw('sum(total_shipments) as total_shipments'), DB::raw('sum(total_undelivered_shipments) as total_undelivered_shipments'), DB::raw('sum(total_fake_status_shipments) as total_fake_status_shipments'))->orderBy('total_shipments', 'desc')->groupBy('hub_id')->get();
+                $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Row Labels.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Count of Delivery Note No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Sum of Total Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Sum of Undelivered Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Sum of Shipments Marked With Fake Status</strong></th></tr></thead><tbody>';
+                $total_delivery_notes = 0;
+                $total_shipments = 0;
+                $total_undelivered_shipments = 0;
+                $total_fake_status_shipments = 0;
+
+                foreach ($daily_fake_status_datas as $daily_fake_status_data) {
+                    $hub = $daily_fake_status_data->hub->name;
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_delivery_notes) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_shipments) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_undelivered_shipments) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($daily_fake_status_data->total_fake_status_shipments) . '</td>';
+                    $html .= '</tr>';
+                    $total_delivery_notes = $total_delivery_notes + $daily_fake_status_data->total_delivery_notes;
+                    $total_shipments = $total_shipments + $daily_fake_status_data->total_shipments;
+                    $total_undelivered_shipments = $total_undelivered_shipments + $daily_fake_status_data->total_undelivered_shipments;
+                    $total_fake_status_shipments = $total_fake_status_shipments + $daily_fake_status_data->total_fake_status_shipments;
+                }
+                $html .= '<tr>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>Total</b></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_delivery_notes) . '</b></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_shipments) . '</b></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_undelivered_shipments) . '</b></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"><b>' . number_format($total_fake_status_shipments) . '</b></td>';
+                $html .= '</tr>';
+
+                $html .= '</tr>';
+                $html .= '</tbody></table>';
+                if (strpos($body, '[preview]') !== FALSE) {
+                    $body = str_replace('[preview]', $html, $body);
+                }
+
+                $to = array();
+                $cc = array();
+
+                $admins =Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->leftjoin('cities as c', 'c.id', '=', 'ah.hub_id')->whereIn('role_id', [2, 3, 4, 6])->where('admins.status', 1);
+
+
+            $cc_admins = Admin::whereIn('id', [8, 3]);
+            if ($admins->exists()) {
+                $to = array_merge($to, $admins->distinct('id')->pluck('email')->toArray());
+            }
+            if ($cc_admins->exists()) {
+                $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
+            }
+
+            self::email($subject, $body, $to, $cc);
             }
         }
       }

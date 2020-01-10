@@ -276,7 +276,18 @@ class AdminPickupsController extends Controller
           $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
           ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
           ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
-          ->select('pickup_requests.id','pickup_requests.id as pickup_request_id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date', 'usi.vendor')
+          ->leftJoin('pickup_requests as prp', function ($join) {
+            $join->on('prp.pickup_address_id', '=', 'pickup_requests.pickup_address_id')
+              ->whereIn('prp.status', [1, 2])
+              ->where('prp.id', '=', DB::raw('(select max(id) from pickup_requests where pickup_requests.pickup_address_id = pickup_requests.pickup_address_id and pickup_requests.status IN (1,2))'));
+          })
+          ->leftJoin('pickup_note_requests as pnr', function ($join) {
+            $join->on('pnr.pickup_request_id', '=', 'prp.id')
+              ->where('pnr.pickup_note_id', '=', DB::raw('(select max(pickup_note_id) from pickup_note_requests where pickup_note_requests.pickup_request_id = prp.id)'));
+          })
+          ->leftJoin('pickup_notes as pn', 'pn.id', '=', 'pnr.pickup_note_id')
+          ->leftJoin('riders as r', 'r.id', '=', 'pn.rider_id')
+          ->select('pickup_requests.id','pickup_requests.id as pickup_request_id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date', 'usi.vendor', 'r.name as rider')
           ->where('pickup_requests.status', 0);
 
           if (session('role_id') != 1) {
