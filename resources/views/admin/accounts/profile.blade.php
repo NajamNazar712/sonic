@@ -89,6 +89,12 @@
                                     <td><b>Product Type</b></td>
                                     <td>{{$product_name}}</td>
                                 </tr>
+                                @if($user->product_id == 24)
+                                    <tr>
+                                        <td><b>Product Name</b></td>
+                                        <td>{{$user->other_product_name}}</td>
+                                    </tr>
+                                @endif
                                 <tr>
                                     <td><b>City</b></td>
                                     <td>{{$user->city->name}}</td>
@@ -374,7 +380,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group row">
+                                <div class="row">
                                     <div class="form-group col-md-9">
                                         <label>Product Type</label>
                                         <span class="danger">*</span>
@@ -383,6 +389,17 @@
                                                 <option value="{{$single_product->id}}" {{ $user->product_id == $single_product->id ? 'selected' : '' }} >{{$single_product->product_name}}</option>
                                             @endforeach
                                         </select>
+                                    </div>
+                                </div>
+                                <div class="row {{ ($user->product_id != 24)? 'd-none':'' }}" id="product_name_div">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="form-group col-md-9">
+                                                <label>Product Name</label>
+                                                <span class="danger">*</span>
+                                                <input type="text" id="product_name" class="form-control border-primary" value="{{$user->other_product_name}}" name="product_name" data-msg-required="Product Name is required">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -691,6 +708,15 @@
 
             $('#product_id').select2({
                 width: '100%',
+            }).bind('select2:select', function(){
+                var product_id = $(this).val();
+                if(product_id == 24){
+                    $('#product_name_div').removeClass('d-none');
+                    $('#product_name').attr('data-rule-required', true);
+                }else{
+                    $('#product_name_div').addClass('d-none');
+                    $('#product_name').attr('data-rule-required', false);
+                }
             });
             $('#city_id').select2({
                 width: '100%',

@@ -6401,7 +6401,7 @@ if(session('department_id') == 7){
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6477,9 +6477,16 @@ if(session('department_id') == 7){
                     $query->whereRaw('false');
                 }
             })
+            ->editColumn('product_type', function($user){
+                if($user->product_type == 'Other'){
+                    return $user->other_product_name;
+                }else{
+                    return $user->product_type;
+                }
+            })
             ->filterColumn('product_type',function ($query,$keyword){
 
-                if ($keyword != '') {
+                if ($keyword != '' || $keyword != 24) {
                     $query->where('p.id',$keyword);
                 }
                 else {
@@ -6581,7 +6588,7 @@ if(session('department_id') == 7){
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6649,9 +6656,16 @@ if(session('department_id') == 7){
                     $query->whereRaw('false');
                 }
             })
+            ->editColumn('product_type', function($user){
+                if($user->product_type == 'Other'){
+                    return $user->other_product_name;
+                }else{
+                    return $user->product_type;
+                }
+            })
             ->filterColumn('product_type',function ($query,$keyword){
 
-                if ($keyword != '') {
+                if ($keyword != '' || $keyword != 24) {
                     $query->where('products.id',$keyword);
                 }
                 else {
@@ -6839,6 +6853,7 @@ if(session('department_id') == 7){
 
     public function updateProfile(Request $request)
     {
+        
         $user_id = $request->user_id;
 
         //1 for Admin, 0 for User
@@ -6857,7 +6872,7 @@ if(session('department_id') == 7){
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
                 'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
-                'url'=>$request->url,'product_id'=>$request->product_id]);
+                'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null]);
             AdminLogs::create([
                 'admin_id'=>Auth::id(),
                 'user_id'=>$user_id
