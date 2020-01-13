@@ -3916,6 +3916,72 @@ class NotificationsController extends Controller
 
             self::email($subject, $body, $to, $cc);
             }
+            else if ($id == 56){
+
+              $negative = DB::connection('reports')->table('pending_payment_shipments')->leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
+                ->leftjoin('users as u','u.id','=','s.user_id')
+                ->select('u.id as account_id','u.name as name', DB::raw('SUM(pending_payment_shipments.payable) as sum_payable'))
+                ->where('payable','<',0)->groupBy('u.id')->get();
+
+                if(count($negative) > 0){
+
+                  
+                  $filtered_data = array();
+                  $shipper_sales_person = SalePersonTag::all()->where('status', 0)->groupBy('admin_id');
+                  if(count($shipper_sales_person) > 0){
+                    foreach($shipper_sales_person as $sale_person_id => $sale_persons){
+                      $html = '<table><thead><tr>';
+                      if (strpos($body, '[account_id]') !== FALSE) {
+                        $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Account ID(s).</strong></th>';
+                      }
+                      if (strpos($body, '[shipper_name]') !== FALSE) {
+                        
+                        $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Shipper Name(s).</strong></th>';
+                      }
+                        $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Negative Balance.</strong></th>';
+                      
+                      $html .= '</tr></thead><tbody>';
+                      foreach($sale_persons as $sale_person){
+                          foreach ($negative as $data) {
+                            if($sale_person->user_id == $data->account_id){
+                                $html .= '<tr>';
+                                if (strpos($body, '[account_id]') !== FALSE) {
+                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data->account_id .'</td>';
+                                }
+                                if (strpos($body, '[shipper_name]') !== FALSE) {
+                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data->name .'</td>';
+                                }
+                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data->sum_payable .'</td>';
+                            }
+
+                          }
+                      }
+                      $html .= '</tr>';
+                      $html .= '</tbody></table>';
+                      $body = str_replace('[account_id]', '', $body);
+                      $body = str_replace('[shipper_name]', '', $body);
+
+                      if (strpos($body, '[preview]') !== FALSE) {
+                          $body = str_replace('[preview]', $html, $body);
+                      }
+
+                      $to = array();
+                      $cc = array();
+                      $sale_person_email = Admin::find($sale_person_id)->email;
+                      $to = array_merge($to, [$sale_person_email]);
+
+                      $cc_admins = Admin::whereIn('id', [12, 32, 13]);
+                      if($cc_admins->exists()){
+                        $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
+                      }
+                      self::email($subject, $body, $to, $cc);
+                      
+                    }
+                  }
+                
+                }
+                
+            }
         }
       }
     }
