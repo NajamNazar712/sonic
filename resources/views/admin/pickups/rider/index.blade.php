@@ -207,11 +207,17 @@
 					{data: 'pickup_note_id', name: 'rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
 					{data: 'pickup_request_id', name: 'rider_pickups.pickup_request_id', class: 'align-middle pickup_request_id'}
 				],
-				initComplete: function(settings,json) {
-					if(json.data.length > 0){
-						$('#picked').text(json.data[0].pickup_picked);
-						$('#notpicked').text(json.data[0].pickup_not_picked);
+				drawCallback: function (settings) {
+                    var api = new $.fn.dataTable.Api( settings );
+                    var data = api.rows( {page:'current'} ).data();
+                    if(data.length > 0){
+						$('#picked').text(data[0].pickup_picked);
+						$('#notpicked').text(data[0].pickup_not_picked);
 					}
+                    
+                },
+				initComplete: function(settings,json) {
+					
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
