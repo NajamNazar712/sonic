@@ -1405,6 +1405,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('assign_admin/submit', 'Admins\GlobalSettingsController@multiple_sale_tagging_assign_submit')->name('assign_admin.submit');
             Route::post('assign_admin/view_assigned', 'Admins\GlobalSettingsController@multiple_sale_tagging_assign_view_assigned')->name('assign_admin.view_assigned');
         });
+
+        Route::prefix('foc_account')->name('foc_account.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@foc_account_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
+        });
+
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

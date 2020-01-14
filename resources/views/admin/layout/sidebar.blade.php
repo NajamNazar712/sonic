@@ -641,6 +641,10 @@
                                         <li><a class="menu-item" href="{{ route('admin.packaging.types.index') }}">Packaging Types</a>
                                         </li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(302, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.foc_account.index') }}">FOC Accounts</a>
+                                        </li>
+                                    @endif
                                 </ul>
 
                             </li>

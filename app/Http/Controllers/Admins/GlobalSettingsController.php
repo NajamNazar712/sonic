@@ -864,7 +864,7 @@ class GlobalSettingsController extends Controller
 
                 $settings->type = 'return_note_restriction_bypass';
                 $settings->setting_value = 0;
-                $settings->text = $roles;
+               
             }
             $settings->text = $roles;
             $settings->save();
@@ -951,7 +951,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function weight_factor_update(Request $request){
-
+        
         $weight_factor = $request->weight_factor;
         if ($weight_factor != null) {
             if($request->has('all_shippers_checkbox')){
@@ -1471,5 +1471,43 @@ class GlobalSettingsController extends Controller
     public function multiple_sale_tagging_assign_view_assigned(Request $request) {
         $tagged_users = MultipleSaleTagging::leftjoin('admins as a', 'a.id', '=', 'multiple_sale_taggings.admin_id')->where('lead_id', $request->id)->select('a.name')->pluck('a.name')->toArray();
         return response()->json(['status' => 1, 'tagged_users' => $tagged_users]);
+    }
+
+    public function foc_account_index(){
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        $settings = GlobalSettings::where('type', 'foc_account_tag');
+        $foc_account_tags = array();
+        if($settings->exists()){
+            $settings = $settings->first();
+            $foc_account_tags = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.foc_account')->with(['shippers' => $shippers,'foc_account_tags' => $foc_account_tags]);
+    }
+
+    public function foc_account_store(Request $request){
+        if($request->has('shippers')){
+            if(count($request->shippers) > 0){
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'foc_account_tag');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                }
+                else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'foc_account_tag';
+                    $settings->setting_value = 0;
+                    
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+        return redirect()->back()->with('success', 'Settings Updated!');
+            
+        }else{
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
     }
 }
