@@ -5776,8 +5776,8 @@ use Yajra\Datatables\Datatables;
         }
 
         public function route_distribution_index(){
-            $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
-            $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
+            $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->where('status', 1)->get();
+            $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('status', 1)->get();
             $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
             $riders = DB::connection('reports')->table('riders')->get(['id','name']);
             return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders]);
@@ -5827,7 +5827,7 @@ use Yajra\Datatables\Datatables;
         }
         public function destination_delivery_received_index(){
             $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
-            $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
+            $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('status', 1)->get();
             $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
             return view('admin.reports.arrived_at_destination_out_for_delivery_and_received_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones]);
         }
