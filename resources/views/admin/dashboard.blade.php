@@ -557,13 +557,7 @@
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
-    <script>
-      !function() {
-      var t; if (t = window.botsify = window.botsify = window.botsify || [], !t.init) return t.invoked ? void (window.console && console.error && console.error("Botsify snippet included twice.")) : (
-      t.load =function(e){ var o,n;       o=document.createElement("script"); e.type="text/javscript"; o.async=!0; o.crossorigin="anonymous";
-      o.src="https://botsify.com/web-bot/script/frame/"+e+"/botsify.js";        n=document.getElementsByTagName("script")[0]; n.parentNode.insertBefore(o,n); });
-      }(); botsify.load('xa4bYrcBzeBSW0GKJBSnxCUUVO8bMljABHEHvELG');
-    </script>
+    
     <script type="text/javascript">
         $(document).ready(function () {
           
