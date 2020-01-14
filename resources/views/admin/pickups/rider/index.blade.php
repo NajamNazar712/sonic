@@ -177,7 +177,13 @@
 					processing: data_table_loader
 				},
 				serverSide: true,
-				ajax: '{{ route('admin.pickups.rider.list') }}',
+				ajax: {
+                    url: '{{ route('admin.pickups.rider.list') }}',
+                    data: function (d) {
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
+                },
 				rowId: 'id',
 				order: [[0, 'desc']],
 				columns: [
