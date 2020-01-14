@@ -92,7 +92,7 @@ class RiderPickupsController extends Controller {
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $pickup_note->whereBetween('rider_pickups.created_at', [$from,$to]);
+            $rider_pickups->whereBetween('rider_pickups.created_at', [$from,$to]);
         }
     	return $datatables->make(true);
     }
