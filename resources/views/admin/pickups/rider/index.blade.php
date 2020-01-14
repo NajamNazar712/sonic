@@ -209,8 +209,8 @@
 				],
 				initComplete: function(settings,json) {
 					if(json.data.length > 0){
-						$('#picked').text(json.data.pickup_picked);
-						$('#notpicked').text(json.data.pickup_not_picked);
+						$('#picked').text(json.data[0].pickup_picked);
+						$('#notpicked').text(json.data[0].pickup_not_picked);
 					}
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
