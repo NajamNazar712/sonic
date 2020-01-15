@@ -2902,7 +2902,7 @@ class ShipperShipmentBookController extends Controller
                     color: #000 !important;
                   }
                   .pwrapper {margin: auto; page-break-inside: avoid;}
-                  .logo {margin-bottom:10px;}
+                  .logo {margin-bottom:7px;}
                   .logo img {margin-bottom:2.5px; filter: brightness(0);}
                   .logo span {font-size: 8px;}
                   .barcode span {font-size: 12px;}
@@ -2927,11 +2927,12 @@ class ShipperShipmentBookController extends Controller
                 <div class="text-center pwrapper p-1">
                     <div class="logo">
                         <img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto">
-                        <span class="d-block">UAN: 0213-877-22-22</span>
+                        <span class="d-block">' . implode(' ', str_split(str_replace('-', '', ltrim($shipment->consignee_phone_number_1, '0')))) . '</span>
+                        <span class="d-block">'. $shipment->consignee_city->name .'</span>
                     </div>
                     <div class="barcode">
-                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 75)) . '" class="img-fluid mx-auto d-block h-auto">
-                        <span class="d-block"><strong>* ' . implode(' ', str_split(str_replace('-', '', ltrim($shipment->consignee_phone_number_1, '0')))) . ' *</strong></span>
+                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
+                        <span class="d-block"><strong>* ' . $shipment->tracking_number . ' *</strong></span>
                     </div>
                 </div>
             ';
