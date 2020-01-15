@@ -1037,6 +1037,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('good_receiving_note','Admins\AdminPackagingMaterialController@good_receiving_note')->name('good_receiving_note');
             Route::post('sizes','Admins\AdminPackagingMaterialController@packaging_request_sizes')->name('sizes');
             Route::post('remarks','Admins\AdminPackagingMaterialController@packaging_request_remarks')->name('remarks');
+            Route::get('pickup_address','Admins\AdminPackagingMaterialController@fetch_pickup_address')->name('pickup_address');
+            Route::post('submit','Admins\AdminPackagingMaterialController@packaging_request_submit')->name('submit');
+
         });
         Route::prefix('types')->name('types.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@types_index')->name('index');
