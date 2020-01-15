@@ -2902,7 +2902,7 @@ class ShipperShipmentBookController extends Controller
                     color: #000 !important;
                   }
                   .pwrapper {margin: auto; page-break-inside: avoid;}
-                  .logo {margin-bottom:10px;}
+                  .logo {margin-bottom:7px;}
                   .logo img {margin-bottom:2.5px; filter: brightness(0);}
                   .logo span {font-size: 8px;}
                   .barcode span {font-size: 12px;}
