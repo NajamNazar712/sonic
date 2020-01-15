@@ -2931,7 +2931,7 @@ class ShipperShipmentBookController extends Controller
                         <span class="d-block">'. $shipment->consignee_city->name .'</span>
                     </div>
                     <div class="barcode">
-                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 75)) . '" class="img-fluid mx-auto d-block h-auto">
+                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
                         <span class="d-block"><strong>* ' . $shipment->tracking_number . ' *</strong></span>
                     </div>
                 </div>
