@@ -63,13 +63,12 @@
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.cancelled_shipments.list') }}',
-                        data: {
-                            'page': 'all',
-                            'shipment_type': $('#shipment_type_search_form #shipment_type').val()
-                        },
+                        'data': params,
                         success: function (result) {
                             head = [];
 
@@ -84,7 +83,7 @@
                             head.push('Destination');
                             head.push('Consignee Name');
                             head.push('Consignee Contact');
-                            head.push('Consignee Address');
+                            head.push('Consignee Address');                 
                             head.push('Collection Amount');
                             head.push('Booking Date');
                             head.push('Instructions');
