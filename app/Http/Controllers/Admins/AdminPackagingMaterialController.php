@@ -24,6 +24,7 @@ use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\DiscountCharge;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Warehouse\Warehouse;
@@ -319,6 +320,7 @@ class AdminPackagingMaterialController extends Controller
             ->join('users as u','u.id','=','packaging_material_requests.user_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
             ->leftjoin('shipments as s', 's.tracking_number', '=', 'packaging_material_requests.tracking_number')
+            ->leftjoin('admins as rb','rb.id', '=', 'packaging_material_requests.requested_by')
 //            ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')
@@ -327,7 +329,7 @@ class AdminPackagingMaterialController extends Controller
             })
             ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status_id')
             ->leftjoin('packaging_material_request_details as pmrd', 'pmrd.packaging_material_request_id', '=', 'packaging_material_requests.id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks'])
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks','rb.name as requested_by'])
         ->groupBy('packaging_material_requests.id');
 
         if(session('department_id') == 7){
@@ -1603,7 +1605,7 @@ class AdminPackagingMaterialController extends Controller
 
     public function packaging_request_submit(Request $request){
 
-        $shipper_id = $request->shippers_select;
+        $user_id = $request->shippers_select;
         $packaging_type_ids = explode(",",$request->packaging_type_ids);
         $packaging_size_ids = explode(",",$request->packaging_size_ids);
         $packaging_quantities = explode(",",$request->packaging_quantities);
@@ -1611,7 +1613,7 @@ class AdminPackagingMaterialController extends Controller
         $total_charges = 0;
 
         foreach ($packaging_type_ids as $index => $packaging_type_id){
-            $charges = PackagingCharge::where('user_id', $shipper_id)->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
+            $charges = PackagingCharge::where('user_id', $user_id)->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
             if($charges != null){
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
             }else{
@@ -1644,7 +1646,7 @@ class AdminPackagingMaterialController extends Controller
             $user_address = UserShippingInfo::find($address_id);
         }
 
-        $user_id = $user_id;
+        
 
         if($request->mode_of_payment == 1) {
             if ($request->input('address_select') == 0) {
@@ -1656,7 +1658,8 @@ class AdminPackagingMaterialController extends Controller
                     'phone' => $request->new_pickup_phone_number,
                     'amount' => $total_charges,
                     'status_id' => 1,
-                    'packaging_payment_mode_id' => $request->mode_of_payment
+                    'packaging_payment_mode_id' => $request->mode_of_payment,
+                    'requested_by' => Auth::id()
                 ]);
             } else {
                 $result = PackagingMaterialRequest::create([
@@ -1667,8 +1670,8 @@ class AdminPackagingMaterialController extends Controller
                     'phone' => $user_address->phone,
                     'amount' => $total_charges,
                     'status_id' => 1,
-                    'packaging_payment_mode_id' => $request->mode_of_payment
-
+                    'packaging_payment_mode_id' => $request->mode_of_payment,
+                    'requested_by' => Auth::id()
                 ]);
             }
             if ($result) {
@@ -1703,7 +1706,8 @@ class AdminPackagingMaterialController extends Controller
                         'phone'=>$request->new_pickup_phone_number,
                         'amount'=>$total_charges,
                         'status_id'=>1,
-                        'packaging_payment_mode_id'=>$request->mode_of_payment
+                        'packaging_payment_mode_id'=>$request->mode_of_payment,
+                        'requested_by' => Auth::id()
                     ]);
                 }
                 else {
@@ -1715,7 +1719,8 @@ class AdminPackagingMaterialController extends Controller
                         'phone'=>$user_address->phone,
                         'amount'=>$total_charges,
                         'status_id'=>1,
-                        'packaging_payment_mode_id'=>$request->mode_of_payment
+                        'packaging_payment_mode_id'=>$request->mode_of_payment,
+                        'requested_by' => Auth::id()
                     ]);
                 }
                 if($result){

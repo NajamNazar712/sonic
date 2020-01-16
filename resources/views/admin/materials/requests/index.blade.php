@@ -28,6 +28,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Request Date Aging</th>
+                        <th class="border-primary border-darken-1">Requested By</th>
                         <th class="border-primary border-darken-1">Confirmed Date Aging</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -113,9 +114,7 @@
                                         <div class="col-md-12 col-lg-6">
                                             <div class="form-group">
                                                 <select name="address_select" id="address_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="Pickup address is required">
-                                                    <option value="0">New</option>
-                                                   
-                                                </select>
+                                                    </select>
                                             </div>
                                         </div>
                                     </div>
@@ -434,6 +433,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'remarks', name: 'sj.remarks', class: 'align-middle remarks_view'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
+                    {data: 'requested_by', name:'rb.name', class: 'align-middle requested_by'},
                     {data: 'confirmed_aging', class: 'align-middle confirmed_aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 
@@ -882,6 +882,8 @@
                 initDatatable();
             });
             $("#AddRequestModal").on('hidden.bs.modal', function(){
+                $('#shippers_select').val('').trigger('change');
+                $('#address_select').empty().trigger('change');
                 destroyDatatable();
                 $('#RequestMaterialBtn').attr('disabled', false);
             });
