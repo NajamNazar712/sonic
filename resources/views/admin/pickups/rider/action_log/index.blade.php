@@ -16,6 +16,67 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
+							<div id="search_form" class="row mb-2 justify-content-center">
+			                    <div class="col-4">
+			                        <fieldset class="form-group">
+			                            <input type="text" class="form-control" name="search_pn_no" id="search_pn_no" placeholder="Search Pickup Note Number">
+			                        </fieldset>
+			                    </div>
+			                    <div class="col-4">
+			                        <fieldset class="form-group">
+			                            <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
+			                                @foreach($admins as $admin)
+			                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
+			                                @endforeach
+			                            </select>
+			                        </fieldset>
+			                    </div>
+			                    <div class="col-4">
+			                        <fieldset class="form-group">
+			                            <select name="search_rider" id="search_rider" class="form-control select2">
+			                                @foreach($riders as $rider)
+			                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+			                                @endforeach
+			                            </select>
+			                        </fieldset>
+			                    </div>
+			                    <div class="col-4">
+			                        <fieldset class="form-group">
+			                            <select name="search_city" id="search_city" class="form-control select2">
+			                                @foreach($cities as $city)
+			                                    <option value="{{$city->id}}">{{$city->name}}</option>
+			                                @endforeach
+			                            </select>
+			                        </fieldset>
+			                    </div>
+			                   
+		                        <div class="col-4 ">
+
+		                            <div class="form-group input-group">
+		                                <div class="input-group-prepend">
+		                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+		                                <span class="la la-calendar-o"></span>
+		                            </span>
+		                                </div>
+
+		                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Assigned Date (From)">
+		                            </div>
+		                        </div>
+		                        <div class="col-4 ">
+		                            <div class="form-group input-group">
+		                                <div class="input-group-prepend">
+		                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+		                                <span class="la la-calendar-o"></span>
+		                            </span>
+		                                </div>
+		                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Assigned Date (To)">
+		                            </div>
+
+		                        </div>
+			                    <div class="col-2">
+			                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+			                    </div>
+			                </div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
@@ -41,14 +102,71 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
 
 @section('js')
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
-	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
+
+			$('#search_pn_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+            
+            $('#search_assigned_by').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Assigned By',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Rider',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search City',
+                width:'100%',
+                allowClear:true
+            });
+
+            $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				buttons: [{
@@ -66,7 +184,17 @@
                     processing: data_table_loader
                 },
 				serverSide: true,
-				ajax: '{{ route('admin.pickups.rider.action_log.list') }}',
+				ajax: {
+                    url: '{{ route('admin.pickups.rider.action_log.list') }}',
+                    data: function (d) {
+                        d.search_pn_no = $('#search_pn_no').val();
+                        d.search_rider = $('#search_rider').val();
+                        d.search_assigned_by = $('#search_assigned_by').val();
+                        d.search_city = $('#search_city').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
+                },
 				order: [[0, 'desc']],
 				columns: [
 					{data: 'logged_at', name: 'rider_pickup_action_logs.logged_at', class: 'align-middle logged_at'},
@@ -127,6 +255,9 @@
                     this.api().table().columns.adjust();
 				}
 			});
+			$('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
 		});
 	</script>
 @endsection

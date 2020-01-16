@@ -557,9 +557,10 @@
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
-
+    
     <script type="text/javascript">
         $(document).ready(function () {
+          
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,

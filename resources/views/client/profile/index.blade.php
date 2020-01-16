@@ -91,6 +91,12 @@
                                                 <td><b>Product Type</b></td>
                                                 <td>{{$product_name}}</td>
                                             </tr>
+                                            @if($user->product_id == 24)
+                                                <tr>
+                                                    <td><b>Product Name</b></td>
+                                                    <td>{{$user->other_product_name}}</td>
+                                                </tr>
+                                            @endif
                                             <tr>
                                                 <td><b>City</b></td>
                                                 <td>{{$user->city->name}}</td>

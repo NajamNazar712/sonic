@@ -51,6 +51,7 @@
                         <th class="border-primary border-darken-1">Adjustment Date</th>
                         <th class="border-primary border-darken-1">Adjustment Amount</th>
                         <th class="border-primary border-darken-1">Adjustment Reference</th>
+                        <th class="border-primary border-darken-1">Difference Amount</th>
                         <th class="border-primary border-darken-1">Deposit Slip</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -336,6 +337,7 @@
                             head.push('Adjustment Date');
                             head.push('Adjustment Amount');
                             head.push('Adjustment Reference');
+                            head.push('Defference Amount');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -355,6 +357,7 @@
                                 row.push(values.adjustment_date);
                                 row.push(values.adjustment_amount);
                                 row.push(values.adjustment_ref);
+                                row.push(values.difference_amount);
 
                                 body.push(row);
                             });
@@ -409,7 +412,8 @@
                     { data:'status' ,name: 'status', class: 'align-middle status'},
                     { data:'adjustment_date' ,name: 'station_deposit_notes.adjustment_date', class: 'align-middle adjustment_date'},
                     { data:'sdn_adjustment_amount' ,name: 'station_deposit_notes.adjustment_amount', class: 'align-middle adjustment_amount'},
-                    { data:'adjustment_ref' ,name: 'station_deposit_notes.adjustment_ref', class: 'align-middle adjustment_ref'},
+                    { data:'adjustment_ref' ,name: 'station_deposit_notes.adjustment_ref', class: 'align-middle adjustment_ref',orderable: false, searchable: false},
+                    { data:'difference_amount' ,name: 'difference_amount', class: 'align-middle difference_amount'},
                     { data:'deposit_slip' ,name: 'deposit_slip', class: 'align-middle deposit_slip',orderable: false, searchable: false},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
@@ -445,7 +449,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action') || $(header).is('.difference_amount')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))

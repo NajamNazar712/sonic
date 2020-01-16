@@ -93,8 +93,9 @@ class RegisterController extends Controller
                 'average_shipment_duration' => 'required',
                 'cnic'=>'required|string|max:255',
 				'url'=>'required|string|max:255',
-                'shipper_city'=>'required|string|max:255',
-                'shipper_product_type'=>'required|string|max:255',
+                'shipper_city'=>'required|int',
+                'shipper_product_type'=>'required|int',
+                'product_name' => 'required_if:shipper_product_type, ==, 24',
                 'shipping_city.*'=>'required|string|max:255',
                 'pickup_address.*'=>'required|string|max:255',
                 'shipping_poc.*'=>'required|string|max:255',
@@ -129,7 +130,8 @@ class RegisterController extends Controller
                 'cnic'=>'required|string|max:255',
 				'url'=>'required|string|max:255',
                 'shipper_city'=>'required|string|max:255',
-                'shipper_product_type'=>'required|string|max:255',
+                'shipper_product_type'=>'required|int',
+                'product_name' => 'required_if:shipper_product_type, ==, 24',
                 'shipping_city.*'=>'required|string|max:255',
                 'pickup_address.*'=>'required|string|max:255',
                 'shipping_poc.*'=>'required|string|max:255',
@@ -166,8 +168,8 @@ class RegisterController extends Controller
 //        $products = implode(',',$request->product_type);
 //
 //        return $request;
+        
         $this->validator($request->all())->validate();
-
         event(new Registered($user = $this->create($request->all())));
 
         //$this->guard()->login($user);
@@ -256,6 +258,7 @@ class RegisterController extends Controller
             'url' => $data['url'],
             'city_id'=>$data['shipper_city'],
             'product_id'=>$data['shipper_product_type'],
+            'other_product_name'=> (array_key_exists('product_name', $data))? $data['product_name']:null,
             'account_type_id' => $data['nature_of_account'],
             'average_shipments' => $data['average_shipment'],
             'average_shipment_duration_id' => $data['average_shipment_duration'],

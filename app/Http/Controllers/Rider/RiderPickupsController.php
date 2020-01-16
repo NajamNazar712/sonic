@@ -34,6 +34,19 @@ class RiderPickupsController extends Controller {
     }
 
     public function pickups_list(Request $request) {
+
+        
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `rider_pickups` AS `rp1` where `rp1`.`pickup_type` = 1 and `rp1`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_picked`');
+            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `rider_pickups` AS `rp` where `rp`.`pickup_type` = 0 and `rp`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_not_picked`');
+        }else{
+            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `rider_pickups` AS `rp1` where `rp1`.`pickup_type` = 1) AS `pickup_picked`');
+            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `rider_pickups` AS `rp` where `rp`.`pickup_type` = 0) AS `pickup_not_picked`');
+        }
+
+
     	$rider_pickups = RiderPickup::leftjoin('pickup_not_pick_reasons as pnpr', 'rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
     	->join('pickup_notes as pn', 'rider_pickups.pickup_note_id', 'pn.id')
     	->join('riders as r', 'pn.rider_id', 'r.id')
@@ -41,8 +54,8 @@ class RiderPickupsController extends Controller {
     	->join('users as u', 'pr.shipper_id', 'u.id')
     	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
     	->join('cities as c', 'usi.city_id', 'c.id')
-    	->select('rider_pickups.id', 'rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'rider_pickups.pickup_type', 'rider_pickups.start_location_latitude', 'rider_pickups.start_location_longitude', 'rider_pickups.actual_location_latitude', 'rider_pickups.actual_location_longitude', 'rider_pickups.distance_from_start_to_actual', 'rider_pickups.current_location_latitude', 'rider_pickups.current_location_longitude', 'rider_pickups.distance_from_current_to_actual', 'rider_pickups.shipments', 'pnpr.name as reason', 'rider_pickups.picture_path', 'rider_pickups.pickup_note_id', 'rider_pickups.pickup_request_id');
-
+    	->select('rider_pickups.id', 'rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'rider_pickups.pickup_type', 'rider_pickups.start_location_latitude', 'rider_pickups.start_location_longitude', 'rider_pickups.actual_location_latitude', 'rider_pickups.actual_location_longitude', 'rider_pickups.distance_from_start_to_actual', 'rider_pickups.current_location_latitude', 'rider_pickups.current_location_longitude', 'rider_pickups.distance_from_current_to_actual', 'rider_pickups.shipments', 'pnpr.name as reason', 'rider_pickups.picture_path', 'rider_pickups.pickup_note_id', 'rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked);
+        
         $datatables = Datatables::of($rider_pickups)
         ->editColumn('pickup_note_id', function ($rider_pickup) {
             return str_pad($rider_pickup->pickup_note_id, 6, '0', STR_PAD_LEFT);
@@ -89,7 +102,11 @@ class RiderPickupsController extends Controller {
                 return '';
             }
 		});
-
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rider_pickups->whereBetween('rider_pickups.created_at', [$from,$to]);
+        }
     	return $datatables->make(true);
     }
 
@@ -114,8 +131,10 @@ class RiderPickupsController extends Controller {
 
     public function pickups_action_log_index() {
         $pickup_actions = PickupAction::all();
-
-        return view('admin.pickups.rider.action_log.index')->with(['pickup_actions' => $pickup_actions]);
+        $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+        $admins = DB::connection('reports')->table('admins')->get(['id','name']);
+        $cities = DB::connection('reports')->table('cities')->get(['id','name']);
+        return view('admin.pickups.rider.action_log.index')->with(['pickup_actions' => $pickup_actions, 'riders'=>$riders,'admins'=>$admins,'cities'=>$cities]);
     }
 
     public function pickups_action_log_list(Request $request) {
@@ -126,7 +145,7 @@ class RiderPickupsController extends Controller {
     	->join('users as u', 'pr.shipper_id', 'u.id')
     	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
     	->join('cities as c', 'usi.city_id', 'c.id')
-    	->select('rider_pickup_action_logs.id', 'rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'rider_pickup_action_logs.pickup_note_id', 'rider_pickup_action_logs.pickup_request_id');
+    	->select('rider_pickup_action_logs.id', 'rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'rider_pickup_action_logs.pickup_note_id', 'rider_pickup_action_logs.pickup_request_id','pn.created_at','pn.assigned_by_user_id','pn.city_id as pickup_city_id','pn.rider_id');
 
     	$datatables = Datatables::of($rider_pickup_action_logs)
         ->editColumn('pickup_note_id', function ($rider_pickup_action_log) {
@@ -135,6 +154,24 @@ class RiderPickupsController extends Controller {
         ->editColumn('pickup_request_id', function ($rider_pickup_action_log) {
             return str_pad($rider_pickup_action_log->pickup_request_id, 6, '0', STR_PAD_LEFT);
         });
+
+        if($pn_no = $request->get('search_pn_no')){
+            $rider_pickup_action_logs->where('rider_pickup_action_logs.pickup_note_id','=',$pn_no);
+        }
+        if($assigned_by = $request->get('search_assigned_by')){
+            $rider_pickup_action_logs->where('pn.assigned_by_user_id','=',$assigned_by);
+        }
+        if($rider = $request->get('search_rider')){
+            $rider_pickup_action_logs->where('pn.rider_id','=',$rider);
+        }
+        if($city = $request->get('search_city')){
+            $rider_pickup_action_logs->where('pn.city_id','=',$city);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rider_pickup_action_logs->whereBetween('pn.created_at', [$from,$to]);
+        }
 
     	return $datatables->make(true);
     }

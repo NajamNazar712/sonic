@@ -519,7 +519,7 @@ class AdminReportsEmailController extends Controller
         $hub_style = array();
         $input_hubs = array();
         foreach ($zones_data as $zone_data){
-//            dd($zones_data);
+
             if(array_key_exists($zone_data->id, $zone_data_array)) {
                 if (!in_array($zone_data->hub_id, $input_hubs)){
                     $zone_data_array[$zone_data->id][] = ['Row Label' => $zone_data->hub_name, 'Tracking Number(s)' => ''];
@@ -682,4 +682,5 @@ class AdminReportsEmailController extends Controller
         $response = url('/').'/'.$file_name_without_path;
         NotificationsController::send(55,$date,$response);
     }
+
 }

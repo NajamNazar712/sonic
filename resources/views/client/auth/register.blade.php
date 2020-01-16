@@ -208,8 +208,21 @@
                                                             </select>
                                                         </div>
                                                     </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12 d-none" id="product_name_div">
+                                                            <div class="form-group">
+                                                                <label for="product_name">Product Name:
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <div>
+                                                                    <input type="text" class="form-control" value="{{ old('product_name') }}" name="product_name" placeholder="Product Name">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                                
+                                                </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -792,6 +805,16 @@
         $('select[name="shipper_product_type"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Product Type',
             // dropdownParent:$('#registership')
+        }).bind('select2:select', function(){
+            var product_type_id = $(this).val();
+            if(product_type_id == 24){
+                $('#product_name_div').removeClass('d-none');
+                $('#product_name').addClass('required');
+            }else{
+                $('#product_name_div').addClass('d-none');
+                $('#product_name').removeClass('required');
+
+            }
         });
         $('select[name="average_shipment_duration"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Duration',

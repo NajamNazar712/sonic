@@ -1256,6 +1256,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@delivered_shipment_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@delivered_shipment_list')->name('list');
         });
+        Route::prefix('route_distribution')->name('route_distribution.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@route_distribution_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@route_distribution_list')->name('list');
+        });
+        Route::prefix('destination_delivery_received')->name('destination_delivery_received.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@destination_delivery_received_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@destination_delivery_received_list')->name('list');
+        });
     });
 
     //Reports end
@@ -1452,6 +1460,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('in_process')->name('in_process.')->group(function(){
             Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');
             Route::get('list', 'Admins\AdminCRMController@in_process_list')->name('list');
+            Route::post('tag', 'Admins\AdminCRMController@bulk_admin_tag')->name('tag');
         });
         Route::prefix('resolved')->name('resolved.')->group(function(){
             Route::get('', 'Admins\AdminCRMController@resolved_index')->name('index');

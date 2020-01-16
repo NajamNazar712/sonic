@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
@@ -11,6 +12,10 @@ use App\Http\Models\Admin\PettyCashStatementDetail;
 use App\Http\Models\Admin\PettyCashStatementDetailDraft;
 use App\Http\Models\Admin\PettyCashStatementDraft;
 use App\Http\Models\City;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -74,11 +79,12 @@ class AdminPettyCashController extends Controller
                 $petty_cash->to = $request->select_date_to_formatted;
                 $petty_cash->created_by = Auth::id();
                 $petty_cash->save();
+                $petty_cash_statement_id = $petty_cash->id;
                 foreach ($selected_ids as $selected_id) {
                     $total_amount += $request->amount[$selected_id];
 
                     $petty_detail = new PettyCashStatementDetail();
-                    $petty_detail->petty_cash_statement_id = $petty_cash->id;
+                    $petty_detail->petty_cash_statement_id = $petty_cash_statement_id;
                     $petty_detail->account_head_id = $request->head[$selected_id];
                     $petty_detail->account_title_id = $request->title[$selected_id];
                     $petty_detail->hub_id = $request->hub[$selected_id];
@@ -90,7 +96,7 @@ class AdminPettyCashController extends Controller
                     $petty_detail->save();
 
                     if ($request->hasFile('upload_image' . $selected_id)) {
-                        $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.png';
+                        $filename = 'statement_' . $petty_cash_statement_id . '_detail_' . $petty_detail->id . '.png';
 
                         $file = $request->file('upload_image' . $selected_id);
 
@@ -101,8 +107,12 @@ class AdminPettyCashController extends Controller
                     }
 
                 }
-                PettyCashStatement::where('id', $petty_cash->id)->update(['total_amount' => $total_amount]);
-                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
+                PettyCashStatement::where('id', $petty_cash_statement_id)->update(['total_amount' => $total_amount]);
+
+                $shipment_id = $this->create_shipment($petty_cash->id);
+                $petty_cash->shipment_id = $shipment_id;
+                $petty_cash->save();
+                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created', 'print' => $shipment_id]);
 
             }else{
 
@@ -333,7 +343,8 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
-            ->select('petty_cash_statements.id as statement_id','petty_cash_statements.id as statement_link','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status','petty_cash_statements.total_amount')
+            ->leftjoin('shipments','shipments.id','=', 'petty_cash_statements.shipment_id')
+            ->select('petty_cash_statements.id as statement_id','petty_cash_statements.id as statement_link','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status','petty_cash_statements.total_amount','shipments.tracking_number')
         ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
@@ -343,6 +354,10 @@ class AdminPettyCashController extends Controller
         $petty = Datatables::of($petty)
             ->editColumn('statement_link', function ($petty){
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
+            })
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('total_amount', function($shipment){
                 return number_format($shipment->total_amount);
@@ -651,7 +666,8 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
-            ->select('petty_cash_statements.id as statement_id','petty_cash_statements.id as statement_link','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status','petty_cash_statements.total_amount')
+            ->leftjoin('shipments','shipments.id','=','petty_cash_statements.shipment_id')
+            ->select('petty_cash_statements.id as statement_id','petty_cash_statements.id as statement_link','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status','petty_cash_statements.total_amount','shipments.tracking_number')
             ->whereIn('petty_cash_statements.status',[3,4,5]);
 
         if (session('role_id') != 1) {
@@ -661,6 +677,10 @@ class AdminPettyCashController extends Controller
         $petty = Datatables::of($petty)
             ->editColumn('statement_link', function ($petty){
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
+            })
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('total_amount', function($shipment){
                 return number_format($shipment->total_amount);
@@ -1371,5 +1391,112 @@ class AdminPettyCashController extends Controller
                }
            }
         }
+    }
+
+    public function create_shipment($petty_cash_statement_id){
+        $user_id = 1690;
+        $user = User::find($user_id);
+        
+        if($petty_cash_statement_id){
+            $petty_cash_statement = PettyCashStatement::find($petty_cash_statement_id);
+            $city_id = $petty_cash_statement->hub_id;
+            $special_instructions = 'Petty Cash Statement # '.$petty_cash_statement_id;
+            $pickup = UserShippingInfo::where('user_id', $user_id)->where('city_id', $city_id);
+            $pickup_address_id = '';
+            if($pickup->exists()){
+                $pickup = $pickup->first();
+                $pickup_address_id = $pickup->id;
+            }else{
+                $poc = Auth::user()->name;
+                $poc_phone = Auth::user()->phone_number;
+                $poc_email = Auth::user()->email;
+                $city_name = $petty_cash_statement->hub->name;
+                $address = 'Trax office '.$city_name;
+               $pickup_address_id = $this->add_pickup_address($user_id, $address, $poc, $poc_phone, $poc_email, $city_id);
+            }
+
+            $shipment = $this->book($user_id, 1, $pickup_address_id,1,202, 'Fawad Ahmed Finance Manager', 'Trax Head Office Karachi', '0213-8772222',NULL, $user->email, NULL,0,Carbon::now(),$special_instructions,1,1,NULL,0,1,2,2);
+
+            $tracking_number = $this->generate_tracking_number($shipment->id, $city_id, 202);
+            $this->add_item($shipment->id, 24, $special_instructions,1, null,0,0);
+            ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $petty_cash_statement_id);
+            ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, NULL, Auth::id(), $petty_cash_statement_id);
+            return $shipment->id;
+        }
+    }
+    public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id) {
+
+        $user_shipping_info = new UserShippingInfo();
+
+        $user_shipping_info->user_id = $user_id;
+        $user_shipping_info->pickup_address = $address;
+        $user_shipping_info->poc = $person_of_contact;
+        $user_shipping_info->phone = $phone_number;
+        $user_shipping_info->email = $email_address;
+        $user_shipping_info->city_id = $city_id;
+
+        $user_shipping_info->save();
+
+        return $user_shipping_info->id;
+    }
+
+    private function book($user_id,$service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {
+        $shipment = new Shipment();
+
+        $shipment->user_id = $user_id;
+        $shipment->booking_type_id = $service_type_id;
+        $shipment->pickup_address_id = $pickup_address_id;
+        $shipment->information_display = $information_display;
+
+        $shipment->consignee_city_id = $consignee_city_id;
+        $shipment->consignee_name = $consignee_name;
+        $shipment->consignee_address = $consignee_address;
+        $shipment->consignee_phone_number_1 = $consignee_phone_number_1;
+        $shipment->consignee_phone_number_2 = $consignee_phone_number_2;
+        $shipment->consignee_email = $consignee_email_address;
+
+        $shipment->order_id = $order_id;
+        $shipment->package_type = $package_type;
+        $shipment->pickup_date = $pickup_date;
+        $shipment->special_instructions = $special_instructions;
+
+
+        $shipment->estimated_weight = $estimated_weight;
+        $shipment->shipping_mode_id = $shipping_mode_id;
+        $shipment->same_day_timing_id = $same_day_timing_id;
+
+        $shipment->amount = $amount;
+        $shipment->payment_mode_id = $payment_mode_id;
+        $shipment->shipper_status_id = $shipper_status_id;
+        $shipment->consignee_status_id = $consignee_status_id;
+
+        $shipment->save();
+
+        return $shipment;
+    }
+
+    private function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
+        $shipment_item = new ShipmentItem();
+
+        $shipment_item->shipment_id = $shipment_id;
+        $shipment_item->product_type_id = $product_type_id;
+        $shipment_item->description = $item_description;
+        $shipment_item->quantity = $item_quantity;
+        $shipment_item->price = $price;
+        $shipment_item->insurance = $insurance;
+        $shipment_item->type = $type;
+
+        $shipment_item->save();
+    }
+    private function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
+        $shipment = Shipment::find($shipment_id);
+
+        $tracking_number = $pickup_city_id . $consignee_city_id . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
+
+        $shipment->tracking_number = $tracking_number;
+
+        $shipment->save();
+
+        return $tracking_number;
     }
 }
