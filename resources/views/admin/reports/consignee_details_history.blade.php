@@ -169,15 +169,12 @@
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.consignee_details.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_tracking_no': $('#search_tracking_no').val(),
-                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
-                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
                             head.push('S. No.');

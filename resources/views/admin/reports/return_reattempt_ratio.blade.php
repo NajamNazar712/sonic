@@ -186,15 +186,12 @@
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.return_reattempt_ratio.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_city': $('#search_city').val(),
-                            'search_from': $('input[name="from_date_formatted"]').val(),
-                            'search_to': $('input[name="to_date_formatted"]').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

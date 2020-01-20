@@ -155,15 +155,12 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.account_activation.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_date_from': $('input[name="from_date_formatted"]').val(),
-                            'search_date_to': $('input[name="to_date_formatted"]').val(),
-
-                        },
+                        data: params,
                         success: function (result) {
 
                             head = [];

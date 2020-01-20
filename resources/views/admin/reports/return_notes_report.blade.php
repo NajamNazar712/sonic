@@ -272,21 +272,12 @@
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.return_note.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_rn_no': $('#search_rn_no').val(),
-                            'search_tracking': $('#search_tracking_no').val(),
-                            'search_rider': $('#search_rider').val(),
-                            'search_created_by': $('#search_created_by').val(),
-                            'search_submitted_by': $('#search_submitted_by').val(),
-                            'search_hub': $('#search_hub').val(),
-                            'search_submission': $('input[name="submission_date_formatted"]').val(),
-                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
-                            'search_date_to': $('input[name="search_date_to_formatted"]').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
                             head.push('S. No');

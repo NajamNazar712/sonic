@@ -122,13 +122,12 @@
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.multiple_payment_report.list') }}',
-                        data: {
-                            'page': 'all',
-                            'tracking_number': $('#tracking_number_search_form #search_tracking_number').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
                             head.push('S. No.');

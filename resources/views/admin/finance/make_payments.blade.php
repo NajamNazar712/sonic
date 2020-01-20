@@ -320,16 +320,12 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.finance.make_payments.list') }}',
-                        data: {
-                            'page': 'all',
-                            'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
-                            'positive_negative_filter': $('#positive_negative_filter_form select.positive_negative_filter').val(),
-                            'shipper_status': $('#shipper_status_form select.shipper_status').val(),
-                            'shipper_document_status': $('#shipper_document_status_form select.shipper_document_status').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

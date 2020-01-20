@@ -370,20 +370,6 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.completed_delivery_notes.list') }}',
                         data: params,
-                        // data: {
-                        //     'page': 'all',
-                        //     'search_dn_no': $('#search_dn_no').val(),
-                        //     'search_tracking': $('#search_tracking_no').val(),
-                        //     'search_rider': $('#search_rider').val(),
-                        //     'search_assigned_by': $('#search_assigned_by').val(),
-                        //     'search_updated_by': $('#search_updated_by').val(),
-                        //     'search_hub': $('#search_hub').val(),
-                        //     'search_submission': $('input[name="submission_date_formatted"]').val(),
-                        //     'search_date_from': $('input[name="search_date_from_formatted"]').val(),
-                        //     'search_date_to': $('input[name="search_date_to_formatted"]').val(),
-                        //     'update_date_from': $('input[name="update_date_from_formatted"]').val(),
-                        //     'update_date_to': $('input[name="update_date_to_formatted"]').val()
-                        // },
                         success: function (result) {
                             head = [];
 
