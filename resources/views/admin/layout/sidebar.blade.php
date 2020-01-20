@@ -799,7 +799,7 @@
                                             <li><a class="menu-item" href="{{route('admin.settings.ticker.index')}}">Ticker</a></li>
                                         @endif
 
-                                        @if (session('role_id') == 1 || count(array_intersect([81, 85], session('permissions'))) !== 0)
+                                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 279], session('permissions'))) !== 0)
                                             <li class=" nav-item"><a href="#"><span class="menu-title">User Management</span></a>
                                                 <ul class="menu-content">
                                                     @if (session('role_id') == 1 || in_array(81, session('permissions')))
@@ -830,7 +830,7 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([151, 175], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([151, 175, 269], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Reports</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(151, session('permissions')))
