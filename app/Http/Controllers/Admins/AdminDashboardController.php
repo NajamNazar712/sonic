@@ -8080,18 +8080,9 @@ if(session('department_id') == 7){
                 $user_attachment->blank_cheque_image = $filename;
             }
             $user_attachment->save();
-
-            $user_attachment_status = User::find($request->user_id);
-            if($user_attachment->filled_and_signed_pdf != null && $user_attachment->signed_acknowledgement_pdf != null  && $user_attachment->cnic_front_image != null  && $user_attachment->cnic_back_image != null  && $user_attachment->blank_cheque_image != null){
-                $user_attachment_status->documents_status = 1;
-            }
-            else{
-                $user_attachment_status->documents_status = 0;
-            }
-            $user_attachment_status->save();
         }
         else{
-            $document_status = true;
+            
             $new_user_attachment = new UserDocumentAttachment();
             if ($request->hasFile('filled_and_signed_pdf')) {
                 $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
@@ -8099,59 +8090,56 @@ if(session('department_id') == 7){
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->filled_and_signed_pdf = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             if ($request->hasFile('signed_acknowledgement_pdf')) {
                 $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->signed_acknowledgement_pdf = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             if ($request->hasFile('cnic_front_image')) {
                 $filename = 'cnic_front_image_' . $request->user_id . '.png';
                 $file = $request->file('cnic_front_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->cnic_front_image = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             if ($request->hasFile('cnic_back_image')) {
                 $filename = 'cnic_back_image_' . $request->user_id . '.png';
                 $file = $request->file('cnic_back_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->cnic_back_image = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             if ($request->hasFile('blank_cheque_image')) {
                 $filename = 'blank_cheque_image_' . $request->user_id . '.png';
                 $file = $request->file('blank_cheque_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->blank_cheque_image = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             $new_user_attachment->user_id = $request->user_id;
             $new_user_attachment->save();
 
-            $user_attachment_status = User::find($request->user_id);
-            if($document_status == true){
-                $user_attachment_status->documents_status = 1;
-            }
-            else{
-                $user_attachment_status->documents_status = 0;
-            }
-            $user_attachment_status->save();
+            
         }
 
         return redirect()->back()->with(['success' => 'Files uploaded successfully']);
+    }
+
+    public function userDocumentsConfirm(Request $request){
+        $user = User::find($request->user_id);
+        if($user){
+            $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+            if($user_attachment->filled_and_signed_pdf != null && $user_attachment->signed_acknowledgement_pdf != null  && $user_attachment->cnic_front_image != null  && $user_attachment->cnic_back_image != null  && $user_attachment->blank_cheque_image != null){
+                $user->documents_status = 1;
+                $user->save();
+            }
+            
+            return response()->json(['status' => 1,'success' => 'Files confirmed successfully']);
+        }
+        return response()->json(['error' => 'User not found!']);
     }
 }
 
