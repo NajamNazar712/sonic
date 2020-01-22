@@ -75,6 +75,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Last Rider Name</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Open Box</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -84,6 +85,7 @@
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
+                        <input type="hidden" name="open_box_ids" id="open_box_ids">
                         <input type="hidden" name="notification_ids" id="notification_ids">
                         <input type="hidden" name="rider_info_ids" id="rider_info_ids">
                         <input type="hidden" name="selected_rider_id" id="selected_rider_id">
@@ -314,6 +316,7 @@
                     {name: 'status', class: 'align-middle status', orderable: false},
                     {name: 'rider_name', class: 'align-middle rider_name', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
+                    {name: 'open_box', class: 'align-middle open_box', orderable: false},
                     {name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -379,8 +382,10 @@
                                 var rowNo = rowsCount;
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
+                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                var row = table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
+                                var row = table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,remove]).node().id = data.shId;
                                 table.draw(false);
                                 $('tr#'+row).attr('class',data.class);
                                 // table.rows(row).nodes().attr("class", data.class);
@@ -427,7 +432,9 @@
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                    var row = table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
+                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                    var row = table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,remove]).node().id = data.shId;
                                     table.draw(false);
                                     $('tr#'+row).attr('class',data.class);
                                     scan_sound(1);
@@ -551,8 +558,16 @@
                         }).then(function (confirm) {
                             if(confirm){
                                 blockPagePermanently();
+                                open_box_ids = [];
+                                table.rows().every(function(index) {
+                                    var node = $(this.node());
+                                    if(node.find('td.open_box input').is(':checked')){
+                                        open_box_ids.push(parseInt(node.attr('id')));
+                                    }
+                                });
                                 $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
                                 $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
                                 $('#create_delivery_note_form input#notification_ids').val(notification_ids);
                                 $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
                                 $('#create_delivery_note_form input#selected_rider_id').val(rider);

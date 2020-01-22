@@ -711,7 +711,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
             Route::post('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
-            Route::post('note/submit','Admins\ReturnController@return_create_note')->name('note.submit');
+            Route::post('note/submit','Admins\ReturnController@return_note_create')->name('note.submit');
         });
         Route::prefix('receive')->name('receive.')->group(function (){
             Route::get('','Admins\ReturnController@return_receive_deliveries_view')->name('index');

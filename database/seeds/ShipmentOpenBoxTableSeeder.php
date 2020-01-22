@@ -19,8 +19,10 @@ class ShipmentOpenBoxTableSeeder extends Seeder
             array('id' => 1, 'name' => 'Cargo Creation', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 2, 'name' => 'Cargo Receiving', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 3, 'name' => 'Delivery Note Creation', 'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('id' => 4, 'name' => 'Delivery Note Receiving', 'created_at' => $timestamp, 'updated_at' => $timestamp),
-
+            array('id' => 4, 'name' => 'Delivery Note Updation', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 5, 'name' => 'Delivery Note Verification', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 6, 'name' => 'Return Note Creation', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 7, 'name' => 'Return Note Updation', 'created_at' => $timestamp, 'updated_at' => $timestamp)
         ));
     }
 }

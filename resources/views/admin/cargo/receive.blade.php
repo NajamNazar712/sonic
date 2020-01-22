@@ -53,6 +53,7 @@
                                     <th class="border-primary border-darken-1">Amount</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Service Type</th>
+                                    <th class="border-primary border-darken-1">Open Box</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -65,6 +66,7 @@
                                 <input type="hidden" name="short_received" class="short_received">
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
+                                <input type="hidden" name="open_box_ids" class="open_box_ids">
 
                                 <div class="form-group ml-1">
                                     <button type="submit" name="receive" class="btn btn-primary receive" value="Confirm" disabled="disabled">Receive</button>
@@ -114,7 +116,8 @@
                     {name: 'consignee', class: 'align-middle consignee', orderable: false, searchable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false, searchable: false},
                     {name: 'shipping_mode', class: 'align-middle shipping_mode', orderable: false, searchable: false},
-                    {name: 'service_type', class: 'align-middle service_type', orderable: false, searchable: false}
+                    {name: 'service_type', class: 'align-middle service_type', orderable: false, searchable: false},
+                    {name: 'open_box', class: 'align-middle open_box', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     // var info = table.page.info();
@@ -164,7 +167,9 @@
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]);
+                                        var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.details.id+']">';
+
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type, open_box]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -204,6 +209,15 @@
                 var form = this;
 
                 $('#receive_form input.shipment_ids').val(shipment_ids);
+                open_box_ids = [];
+                table.rows().every(function(index) {
+                    var node = $(this.node());
+                    if(node.find('td.open_box input').is(':checked')){
+                        open_box_ids.push(parseInt(node.attr('id')));
+                    }
+                });
+                $('#receive_form input.open_box_ids').val(open_box_ids);
+
                 blockPagePermanently();
                 $.ajax({
                     url: '{!! route('admin.cargo.receive.short_received') !!}',
