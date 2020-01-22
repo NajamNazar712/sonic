@@ -251,6 +251,7 @@
                                                         method: 'POST',
                                                         data: {
                                                             'shipment_ids': selected_rows,
+                                                            'open_box_ids': open_box_ids,
                                                             'return_note_id': note_id,
                                                             'remarks': shipment_remarks_obj,
                                                             'received_or_refused_by': shipment_received_refused_obj,

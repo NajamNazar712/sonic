@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
-
+use App\Http\Controllers\NotificationsController;
 use Auth;
 use DB;
 
@@ -24,10 +24,13 @@ class ShipperAccountController extends Controller
             $active_users = User::where('status', 3)->where('created_at', '<', $date)->pluck('id')->toArray();
             $shipments = Shipment::where('created_at', '>', $date)->groupBy('user_id')->pluck('user_id')->toArray();
             $result = array_diff($active_users,$shipments);
+            
             if (count($result) > 0)
             {
                 foreach ($result as $status) {
                     User::where('id', $status)->Update(['status' => 4,'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                    NotificationsController::send(57, $status);
+                    NotificationsController::send(58, $status);
                 }
             }
         }
