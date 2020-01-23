@@ -975,7 +975,7 @@ class ShipperShipmentBookController extends Controller
                 }
                 else {
                     $table_start .= '
-                                <td rowspan="2" colspan="4" class="border twice-bottom twice-right"></td>
+                                <td colspan="4" class="border twice-bottom twice-right"></td>
                     ';
                 }
 
@@ -986,37 +986,33 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                 ';
 
-                if ($shipment->information_display == 1) {
-                    if ($type != 'pdf') {
-                        if ($shipment->booking_type_id != 4) {
-                            $table_start .= '
-                                <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                            ';
-                        }
-                        else {
-                            $table_start .= '
-                                <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                            ';
-                        }
+                if ($type != 'pdf') {
+                    if ($shipment->booking_type_id != 4) {
+                        $table_start .= '
+                            <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
+                            <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                        ';
                     }
                     else {
-                        if ($shipment->booking_type_id != 4) {
-                            $table_start .= '
-                                <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
-                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                            ';
-                        }
-                        else {
-                            $table_start .= '
-                                <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
-                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                            ';
-                        }
+                        $table_start .= '
+                            <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
+                            <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                        ';
                     }
                 }
                 else {
+                    if ($shipment->booking_type_id != 4) {
+                        $table_start .= '
+                            <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
+                            <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                        ';
+                    }
+                    else {
+                        $table_start .= '
+                            <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
+                            <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                        ';
+                    }
                 }
 
                 if ($type != 'pdf') {
