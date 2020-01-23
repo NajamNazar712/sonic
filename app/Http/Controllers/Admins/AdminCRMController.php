@@ -283,7 +283,14 @@ class AdminCRMController extends Controller
             $crm_tagging = $crm_tagging_details;
         }
         $crm_agent_history = CrmRequestAgentHistory::where('crm_request_id', $id)->get();
-        $crm_status_history = CrmRequestStatusHistory::where('crm_request_id', $id)->get();
+        $crm_request_ids = array();
+        if($crm_request->shipment_id){
+            $all_crm_request_ids_for_shipment = CrmRequest::where('shipment_id',$crm_request->shipment_id)->pluck('id')->toArray();
+            $crm_request_ids = $all_crm_request_ids_for_shipment;
+        }else{
+            $crm_request_ids = [$id];
+        }
+        $crm_status_history = CrmRequestStatusHistory::whereIn('crm_request_id', $crm_request_ids)->get();
         $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
