@@ -633,10 +633,10 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253,302], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228,302], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shippers</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(149, session('permissions')))
@@ -647,6 +647,10 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(214, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.packaging.types.index') }}">Packaging Types</a>
+                                        </li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(302, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.foc_account.index') }}">FOC Accounts</a>
                                         </li>
                                     @endif
                                 </ul>
@@ -768,7 +772,7 @@
                         @endif
 
 
-                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([237, 260], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([188, 237, 260, 274], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">CRM</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))
@@ -787,15 +791,15 @@
 
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Support</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152], session('permissions'))) !== 0)
+                                    @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279], session('permissions'))) !== 0)
                                         @if (session('role_id') == 1 || in_array(152, session('permissions')))
                                             <li><a class="menu-item" href="{{route('admin.settings.ticker.index')}}">Ticker</a></li>
                                         @endif
 
-                                        @if (session('role_id') == 1 || count(array_intersect([81, 85], session('permissions'))) !== 0)
+                                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 279], session('permissions'))) !== 0)
                                             <li class=" nav-item"><a href="#"><span class="menu-title">User Management</span></a>
                                                 <ul class="menu-content">
                                                     @if (session('role_id') == 1 || in_array(81, session('permissions')))
@@ -826,7 +830,7 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([151, 175], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([151, 175, 269], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Reports</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(151, session('permissions')))

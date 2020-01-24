@@ -2419,6 +2419,8 @@ class NotificationsController extends Controller
               if ($ceo) {
                   $to[] = $ceo->email;
               }
+              $extra_admins = ['asad@trax.pk','rahat.ali@trax.pk','muhammad.yousuf@trax.pk'];
+              $to = array_merge($to, $extra_admins);
 
               self::email($subject, $body, $to);
           }
@@ -3354,12 +3356,13 @@ class NotificationsController extends Controller
                if ($ceo) {
                    $to[] = $ceo->email;
                }
-               $sup_admin = Admin::find(7);
-
-               if ($sup_admin) {
-                   $to[] = $sup_admin->email;
-               }
-               $cc[] = 'asad@trax.pk';
+               
+               $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk'];
+               
+               $to = array_merge($to, $extra_admins);
+                   
+               
+               $cc = ['asad@trax.pk','syed.sharique@trax.pk'];
                self::email($subject, $body, $to, $cc);
 
             }
@@ -3442,6 +3445,11 @@ class NotificationsController extends Controller
                if ($ceo) {
                    $cc[] = $ceo->email;
                }
+               $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk','syed.sharique@trax.pk'];
+               
+               $cc = array_merge($cc, $extra_admins);
+
+              
 
                self::email($subject, $body, $to, $cc);
                 // $cc = array();
@@ -3535,7 +3543,10 @@ class NotificationsController extends Controller
                $ceo = Admin::find(8);
 
                $cc = array();
-               $cc = [$ceo->email, 'asad@trax.pk'];
+               $cc = [$ceo->email, 'asad@trax.pk','syed.sharique@trax.pk'];
+
+               $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk'];
+               $to = array_merge($to, $extra_admins);
 
                self::email($subject, $body, $to, $cc);
 

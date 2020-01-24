@@ -202,6 +202,35 @@
 									toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 								}
 							}
+							else if (data.status == 2) {
+								$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
+
+								scan_sound(2);
+
+								swal({
+									title: data.error,
+									icon: 'error',
+									buttons: {
+										confirm: {
+											text: 'OK',
+											value: true,
+											visible: true,
+											closeModal: true
+										}
+									},
+									closeOnClickOutside: false,
+									closeOnEsc: false,
+									dangerMode: true
+								}).then(function(confirm) {
+									if (confirm) {
+										$('#consignee_phone_number_search_form button.add').prop('disabled', false);
+
+										UnblockPagePermanently();
+
+										$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
+									}
+								});
+							}
 							else {
 								$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
 

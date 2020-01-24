@@ -540,7 +540,8 @@ class Permission
             'settings.multiple_sale_tagging.index' => 279,
             'settings.multiple_sale_tagging.list' => 279,
 
-
+            'settings.foc_account.index' => 302,
+            
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,

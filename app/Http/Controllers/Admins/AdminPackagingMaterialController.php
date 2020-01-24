@@ -24,6 +24,7 @@ use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\DiscountCharge;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Warehouse\Warehouse;
@@ -270,17 +271,56 @@ class AdminPackagingMaterialController extends Controller
         return response()->json(['status'=>1,'cities'=>$cities]);
 
     }
+
+    public function fetch_pickup_address(Request $request){
+        $shipper_id = $request->shipper_id;
+        $shipper = User::findOrFail($shipper_id);
+        if($shipper){
+            $pickup_data = array();
+            $pickup_address = $shipper->shipping;
+            foreach($pickup_address as $id => $pickup){
+                if($pickup->hidden == 0 && $pickup->status == 1){
+                    $pickup_data[$id]['pickup_address_id'] = $pickup->id;
+                    $pickup_data[$id]['pickup_address'] = $pickup->pickup_address;
+                }
+            }
+            return response()->json(['status' => 0, 'pickup_data' => $pickup_data]);
+        }
+    }
     
     public function request_index(Request $request){
+        $admin_id = Auth::id();
+        $tagged_shippers = array();
+        $all_shippers = array();
+        if(session('role_id') == 1){
+            $tagged_shippers = User::where('status',3)->pluck('id')->toArray();
+        }
+        else if (session('department_id') == 7){
+            $tagged_shippers = session('tagged_shippers');
+        }
+        
         $payment_mode = PackagingPaymentMode::all();
         $packaging_request_status = PackagingMaterialRequestStatus::select('id', 'name')->get();
-        return view('admin.materials.requests.index')->with(['payment_mode'=>$payment_mode, 'packaging_request_status' => $packaging_request_status]);
+        $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+        $cities = City::where('status',1)->orderBy('name')->get();
+        $foc_accounts = GlobalSettings::where('type','foc_account_tag');
+        $foc_shippers = array();
+        if($foc_accounts->exists()){
+            $foc_accounts = $foc_accounts->first();
+            $foc_account_ids = array_map('intval', explode(',', $foc_accounts->text));
+        }
+
+        $all_shippers = array_merge($tagged_shippers,$foc_account_ids);
+        $all_shippers = User::select('id','name')->whereIn('id', $all_shippers)->where('status', 3)->get();
+        
+        return view('admin.materials.requests.index')->with(['payment_mode'=>$payment_mode, 'packaging_request_status' => $packaging_request_status, 'packaging_material_types' => $packaging_material_types,'cities'=>$cities,'shippers' => $all_shippers]);
     }
     public function request_list(Request $request){
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
             ->join('users as u','u.id','=','packaging_material_requests.user_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
             ->leftjoin('shipments as s', 's.tracking_number', '=', 'packaging_material_requests.tracking_number')
+            ->leftjoin('admins as rb','rb.id', '=', 'packaging_material_requests.requested_by')
 //            ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')
@@ -289,7 +329,7 @@ class AdminPackagingMaterialController extends Controller
             })
             ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status_id')
             ->leftjoin('packaging_material_request_details as pmrd', 'pmrd.packaging_material_request_id', '=', 'packaging_material_requests.id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks'])
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks','rb.name as requested_by'])
         ->groupBy('packaging_material_requests.id');
 
         if(session('department_id') == 7){
@@ -1563,4 +1603,143 @@ class AdminPackagingMaterialController extends Controller
         return response()->json(['status' => 1, 'success' => 'Packaging request remarks updated successfully!']);
     }
 
+    public function packaging_request_submit(Request $request){
+
+        $user_id = $request->shippers_select;
+        $packaging_type_ids = explode(",",$request->packaging_type_ids);
+        $packaging_size_ids = explode(",",$request->packaging_size_ids);
+        $packaging_quantities = explode(",",$request->packaging_quantities);
+
+        $total_charges = 0;
+
+        foreach ($packaging_type_ids as $index => $packaging_type_id){
+            $charges = PackagingCharge::where('user_id', $user_id)->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
+            if($charges != null){
+                    $total_charges += $packaging_quantities[$index] * $charges->charges;
+            }else{
+                $charges = PackagingMaterialTypeSizes::find($packaging_size_ids[$index]);
+
+                $total_charges += $packaging_quantities[$index] * $charges->standard_charges;
+            }
+        }
+
+        $today = Carbon::today();
+
+        $discount = DiscountCharge::where('user_id', $user_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->whereNotNull('packaging');
+
+        if ($discount->exists()) {
+            $discount = $discount->orderBy('shipping_mode_id', 'ASC')->first();
+
+            $discount_packaging = $discount->packaging;
+
+            if (strpos($discount_packaging, '%') !== FALSE) {
+                $discount_packaging = (floatval(str_replace('%', '', $discount_packaging)) / 100) * $total_charges;
+                $total_charges -= $discount_packaging;
+            }
+            else {
+                $total_charges -= floatval($discount_packaging);
+            }
+        }
+        
+        if ($request->input('address_select') != 0) {
+            $address_id = $request->input('address_select');
+            $user_address = UserShippingInfo::find($address_id);
+        }
+
+        
+
+        if($request->mode_of_payment == 1) {
+            if ($request->input('address_select') == 0) {
+                $result = PackagingMaterialRequest::create([
+                    'user_id' => $user_id,
+                    'city_id' => $request->new_pickup_city,
+                    'address' => $request->new_pickup_address,
+                    'poc' => $request->new_pickup_person_of_contact,
+                    'phone' => $request->new_pickup_phone_number,
+                    'amount' => $total_charges,
+                    'status_id' => 1,
+                    'packaging_payment_mode_id' => $request->mode_of_payment,
+                    'requested_by' => Auth::id()
+                ]);
+            } else {
+                $result = PackagingMaterialRequest::create([
+                    'user_id' => $user_id,
+                    'city_id' => $user_address->city_id,
+                    'address' => $user_address->pickup_address,
+                    'poc' => $user_address->poc,
+                    'phone' => $user_address->phone,
+                    'amount' => $total_charges,
+                    'status_id' => 1,
+                    'packaging_payment_mode_id' => $request->mode_of_payment,
+                    'requested_by' => Auth::id()
+                ]);
+            }
+            if ($result) {
+                foreach ($packaging_type_ids as $index => $packaging_type_id) {
+                    PackagingMaterialRequestDetail::create([
+                        'packaging_material_request_id' => $result->id,
+                        'type_id' => $packaging_type_id,
+                        'type_size_id' => $packaging_size_ids[$index],
+                        'quantity' => $packaging_quantities[$index],
+                    ]);
+                }
+                return redirect()->back()->with('success', 'Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+            } else {
+                return redirect()->back()->with('error', 'Request not submitted!');
+            }
+        }
+        else{
+            if(PendingPayment::where('user_id', $user_id)->exists()){
+                $balance = PendingPayment::where('user_id', $user_id)->first()->pending_payment_shipments->sum('payable');
+
+            }else{
+                return redirect()->back()->with('error','Can\'t  Request material!');
+            }
+
+            if($total_charges <= $balance){
+                if ($request->input('address_select') == 0) {
+                    $result = PackagingMaterialRequest::create([
+                        'user_id'=>$user_id,
+                        'city_id'=>$request->new_pickup_city,
+                        'address'=>$request->new_pickup_address,
+                        'poc'=>$request->new_pickup_person_of_contact,
+                        'phone'=>$request->new_pickup_phone_number,
+                        'amount'=>$total_charges,
+                        'status_id'=>1,
+                        'packaging_payment_mode_id'=>$request->mode_of_payment,
+                        'requested_by' => Auth::id()
+                    ]);
+                }
+                else {
+                    $result = PackagingMaterialRequest::create([
+                        'user_id'=>$user_id,
+                        'city_id'=>$user_address->city_id,
+                        'address'=>$user_address->pickup_address,
+                        'poc'=>$user_address->poc,
+                        'phone'=>$user_address->phone,
+                        'amount'=>$total_charges,
+                        'status_id'=>1,
+                        'packaging_payment_mode_id'=>$request->mode_of_payment,
+                        'requested_by' => Auth::id()
+                    ]);
+                }
+                if($result){
+                    foreach ($packaging_type_ids as $index => $packaging_type_id){
+                        PackagingMaterialRequestDetail::create([
+                            'packaging_material_request_id' => $result->id,
+                            'type_id' => $packaging_type_id,
+                            'type_size_id' => $packaging_size_ids[$index],
+                            'quantity' => $packaging_quantities[$index],
+                        ]);
+                    }
+                    return redirect()->back()->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+                }else{
+                    return redirect()->back()->with('error','Request not submitted!');
+                }
+
+            }else{
+                return redirect()->back()->with('error','Not enough balance!');
+            }
+        }
+    }
 }

@@ -2775,40 +2775,42 @@ class AdminFinanceController extends Controller
                 foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
                     $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
-                    $done_payment_shipment = new DonePaymentShipment();
+                    if ($pending_payment_shipment) {
+                        $done_payment_shipment = new DonePaymentShipment();
 
-                    $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
-                    $done_payment_shipment->done_payment_id = $done_payment->id;
-                    $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
-                    $done_payment_shipment->type = $pending_payment_shipment->type;
-                    $done_payment_shipment->amount = $pending_payment_shipment->amount;
-                    $done_payment_shipment->charges = $pending_payment_shipment->charges;
-                    $done_payment_shipment->gst = $pending_payment_shipment->gst;
-                    $done_payment_shipment->payable = $pending_payment_shipment->payable;
+                        $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
+                        $done_payment_shipment->done_payment_id = $done_payment->id;
+                        $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
+                        $done_payment_shipment->type = $pending_payment_shipment->type;
+                        $done_payment_shipment->amount = $pending_payment_shipment->amount;
+                        $done_payment_shipment->charges = $pending_payment_shipment->charges;
+                        $done_payment_shipment->gst = $pending_payment_shipment->gst;
+                        $done_payment_shipment->payable = $pending_payment_shipment->payable;
 
-                    $done_payment_shipment->save();
+                        $done_payment_shipment->save();
 
-                    $pending_payment_shipment->delete();
+                        $pending_payment_shipment->delete();
 
-                    self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
+                        self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
-                    if ($done_payment_shipment->type == 0) {
-                        $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+                        if ($done_payment_shipment->type == 0) {
+                            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
-                        $shipment->payment_status_id = 1;
+                            $shipment->payment_status_id = 1;
 
-                        $shipment->save();
+                            $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
-                    }
-                    else if ($done_payment_shipment->type == 1) {
-                        $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+                            ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
+                        }
+                        else if ($done_payment_shipment->type == 1) {
+                            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
-                        $shipment->payment_status_id = 5;
+                            $shipment->payment_status_id = 5;
 
-                        $shipment->save();
+                            $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
+                            ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
+                        }
                     }
                 }
 
@@ -2843,52 +2845,54 @@ class AdminFinanceController extends Controller
                 foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
                     $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
-                    $total_shipments++;
+                    if ($pending_payment_shipment) {
+                        $total_shipments++;
 
-                    if ($pending_payment_shipment->type == 0) {
-                        $delivered_shipments++;
-                    }
-                    else if ($pending_payment_shipment->type == 1) {
-                        $returned_shipments++;
-                    }
-                    else {
-                        $adjusted_shipments++;
-                    }
+                        if ($pending_payment_shipment->type == 0) {
+                            $delivered_shipments++;
+                        }
+                        else if ($pending_payment_shipment->type == 1) {
+                            $returned_shipments++;
+                        }
+                        else {
+                            $adjusted_shipments++;
+                        }
 
-                    $done_payment_shipment = new DonePaymentShipment();
+                        $done_payment_shipment = new DonePaymentShipment();
 
-                    $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
-                    $done_payment_shipment->done_payment_id = $done_payment->id;
-                    $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
-                    $done_payment_shipment->type = $pending_payment_shipment->type;
-                    $done_payment_shipment->amount = $pending_payment_shipment->amount;
-                    $done_payment_shipment->charges = $pending_payment_shipment->charges;
-                    $done_payment_shipment->gst = $pending_payment_shipment->gst;
-                    $done_payment_shipment->payable = $pending_payment_shipment->payable;
+                        $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
+                        $done_payment_shipment->done_payment_id = $done_payment->id;
+                        $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
+                        $done_payment_shipment->type = $pending_payment_shipment->type;
+                        $done_payment_shipment->amount = $pending_payment_shipment->amount;
+                        $done_payment_shipment->charges = $pending_payment_shipment->charges;
+                        $done_payment_shipment->gst = $pending_payment_shipment->gst;
+                        $done_payment_shipment->payable = $pending_payment_shipment->payable;
 
-                    $done_payment_shipment->save();
+                        $done_payment_shipment->save();
 
-                    self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
+                        self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
-                    $pending_payment_shipment->delete();
+                        $pending_payment_shipment->delete();
 
-                    if ($done_payment_shipment->type == 1) {
-                        $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+                        if ($done_payment_shipment->type == 1) {
+                            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
-                        $shipment->payment_status_id = 5;
+                            $shipment->payment_status_id = 5;
 
-                        $shipment->save();
+                            $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
-                    }
-                    else {
-                        $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+                            ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
+                        }
+                        else {
+                            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
-                        $shipment->payment_status_id = 1;
+                            $shipment->payment_status_id = 1;
 
-                        $shipment->save();
+                            $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
+                            ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
+                        }
                     }
                 }
 

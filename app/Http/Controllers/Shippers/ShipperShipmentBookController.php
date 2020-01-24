@@ -2975,7 +2975,7 @@ class ShipperShipmentBookController extends Controller
                 return ['status' => 0, 'success' => 'Shipment(s) found', 'shipment' => $shipment_array];
             }
             else {
-                return ['status' => 1, 'error' => 'No Shipment with entered Consignee Phone Number(s) found'];
+                return ['status' => 2, 'error' => 'No Shipment found for ' . $request->consignee_phone_number];
             }
         }
         else {
