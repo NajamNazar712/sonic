@@ -52,9 +52,10 @@
 									<form id="shipper_document_status_form" class="mb-1 justify-content-center" novalidate="novalidate">
 									<div class="form-group">
 										<select name="shipper_document_status" class="select2 shipper_document_status">
-												<option value="0">All</option>
+												<option value="0">Pending</option>
 												<option value="1">Unverified</option>
 												<option value="2">Verified</option>
+												<option value="3">Rejected</option>
 										</select>
 									</div>
 									</form>
