@@ -4001,7 +4001,7 @@ class NotificationsController extends Controller
                   }
 
                   $to = array();
-                  
+                  $cc = array();
                   $sale_person_email = '';
                   $sale_person_id = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->select('admin_id')->first();
                   if($sale_person_id){
@@ -4010,16 +4010,16 @@ class NotificationsController extends Controller
                   $sale_head_email = Admin::where('role_id', 4)->select('email')->first();
 
                   if($sale_person_email != ''){
-                    $to[] = $sale_person_email;
+                    $cc[] = $sale_person_email;
                   }
 
                   if($sale_head_email){
-                    $to[] = $sale_head_email->email;
+                    $cc[] = $sale_head_email->email;
                   }
 
                   $to[] = $shipper->email;
 
-                  self::email($subject, $body, $to);
+                  self::email($subject, $body, $to, $cc);
               }
             }
             else if($id == 58){

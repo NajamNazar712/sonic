@@ -74,13 +74,13 @@
                                             <button type="button" class="btn btn-outline-primary mr-1 edit">Edit</button>
                                         </div>
                                     @endif
-                                    @if($document_status == 0)
+                                    
                                         @if($documents->filled_and_signed_pdf != null && $documents->signed_acknowledgement_pdf != null  && $documents->cnic_front_image != null  && $documents->cnic_back_image != null  && $documents->blank_cheque_image != null)
                                         <div class="mr-1">
                                                 <button type="button" class="btn btn-outline-success mr-1 confirm">Confirm</button>
                                         </div>
                                         @endif
-                                    @endif
+                                   
                                 @elseif($document_status == 1)
                                     @if(session('role_id') == 1 || in_array(278, session('permissions')))
                                         <div class="mr-1">
