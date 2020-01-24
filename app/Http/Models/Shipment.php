@@ -86,4 +86,7 @@ class Shipment extends Model
     public function amount_change_log() {
         return $this->hasMany('App\Http\Models\Admin\ChangeShipmentAmountLog')->orderBy('id', 'DESC');
     }
+    public function open_box_journey(){
+	    return $this->hasMany('App\Http\Models\ShipmentOpenBoxJourney')->orderBy('id', 'DESC');
+    }
 }

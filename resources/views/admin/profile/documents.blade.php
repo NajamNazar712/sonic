@@ -74,6 +74,13 @@
                                             <button type="button" class="btn btn-outline-primary mr-1 edit">Edit</button>
                                         </div>
                                     @endif
+                                    
+                                        @if($documents->filled_and_signed_pdf != null && $documents->signed_acknowledgement_pdf != null  && $documents->cnic_front_image != null  && $documents->cnic_back_image != null  && $documents->blank_cheque_image != null)
+                                        <div class="mr-1">
+                                                <button type="button" class="btn btn-outline-success mr-1 confirm">Confirm</button>
+                                        </div>
+                                        @endif
+                                   
                                 @elseif($document_status == 1)
                                     @if(session('role_id') == 1 || in_array(278, session('permissions')))
                                         <div class="mr-1">
@@ -195,6 +202,49 @@
                 $('#cnic_back_image').val('');
                 $('#blank_cheque_image').val('');
 
+            });
+            var user_id = {!! $id !!};
+            $('button.confirm').on('click', function(){
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to confirm all documents uploaded!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if(confirm){
+                        $.ajax({
+                                url: '{!! route('admin.accounts.documents.confirm') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'user_id': user_id
+                                }
+                            }).done(function(data){
+                                if(data.status){
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    window.location.reload();
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                    }
+                });
             });
 
             $( "#upload_documents_form" ).validate({

@@ -344,7 +344,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/{check}/{pdf}/documents','Admins\AdminDashboardController@viewUserDocuments')->name('documents.view');
         Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
         Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
-
+        Route::post('/documents/confirm', 'Admins\AdminDashboardController@userDocumentsConfirm')->name('documents.confirm');
 
         Route::prefix('sister_account')->name('sister_account.')->group(function(){
             Route::get('{id}/add/','Admins\AdminDashboardController@add_sister_account_view')->name('add.account');
@@ -711,7 +711,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
             Route::post('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
-            Route::post('note/submit','Admins\ReturnController@return_create_note')->name('note.submit');
+            Route::post('note/submit','Admins\ReturnController@return_note_create')->name('note.submit');
         });
         Route::prefix('receive')->name('receive.')->group(function (){
             Route::get('','Admins\ReturnController@return_receive_deliveries_view')->name('index');

@@ -7,6 +7,7 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
@@ -56,7 +57,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
-
+use App\Http\Models\Admin\SalePersonTag;
 class DeliveryController extends Controller
 {
 
@@ -391,6 +392,7 @@ class DeliveryController extends Controller
     }
     public function create_delivery_note(Request $request){
         $shipments = explode(',',$request->shipment_ids);
+        $open_box_ids = explode(',',$request->open_box_ids);
         $notifications = explode(',',$request->notification_ids);
         $rider_informations = explode(',',$request->rider_info_ids);
         if(Notification::where('id', 40)->where('status', 1)->exists()){
@@ -444,7 +446,16 @@ class DeliveryController extends Controller
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
-                    Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+                    $shipment_data = Shipment::find($shipment);
+                    $shipment_data->shipper_status_id = 5;
+                    $shipment_data->consignee_status_id = 5;
+                    if(in_array($shipment, $open_box_ids)){
+                        $shipment_data->open_box = 1;
+                        ShipmentOpenBoxJourneyController::add($shipment,3,Auth::id());
+                    }
+                    $shipment_data->save();
+
+                    // Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
 
                     $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment)->where('status','>', 0)->orderBy('delivery_note_id', 'desc');
 
@@ -1100,6 +1111,10 @@ class DeliveryController extends Controller
                 $attempt_counts = ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count();
                 return $attempt_counts;
             })
+            ->addColumn('open_box', function ($deliveries){
+                 $open_box_checkbox = '<input type="checkbox" class="open_box" name="open_box[' . $deliveries->shId . ']">';
+                     return $open_box_checkbox;
+            })
             ->addColumn('status', function ($deliveries) {
                 if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
                     $where = array(7, 8, 9, 15, 18, 56);
@@ -1180,8 +1195,12 @@ class DeliveryController extends Controller
 
     }
     public function receive_delivery_status_submit_all(Request $request){
+        $open_box_ids = array();
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
+        if($request->has('open_box_ids')){
+            $open_box_ids = $request->open_box_ids;
+        }
         $selected_status = $request->selected_status;
         $password = $request->password;
         $delivery_password = DeliveryNote::where('id', $delivery_note_id)->where('password', $password);
@@ -1203,7 +1222,13 @@ class DeliveryController extends Controller
                             $selected_reason = null;
                         }
                     }
-
+                    if(count($open_box_ids) > 0){
+                        if(in_array($shipment, $open_box_ids)){
+                            $shipment_details->open_box = 1;
+                            $shipment_details->save();
+                            ShipmentOpenBoxJourneyController::add($shipment,4,Auth::id());
+                        }
+                    }
                     $received_refused_by_name = "received_or_refused_by.$shipment";
                     if($selected_status == 7 || $selected_status == 18)
                     {
@@ -1386,8 +1411,12 @@ class DeliveryController extends Controller
     }
 
     public function receive_delivery_status_submit(Request $request)
-    {
+    {   
+        $open_box_ids = array();
         $shipments = explode(',', $request->shipment_ids);
+        
+        $open_box_ids = explode(',', $request->open_box_ids);
+        
         $delivery_note_id = $request->delivery_note_id;
         $password = $request->password;
         if(!DeliveryNote::where('id', $delivery_note_id)->where('password', $password)->exists()){
@@ -1398,6 +1427,13 @@ class DeliveryController extends Controller
                 $statusId = "reason_drop.$shipment";
                 $status_drop = "status_drop.$shipment";
                 $shipment_status = Shipment::where('id', $shipment)->first();
+                if(count($open_box_ids) > 0){
+                    if(in_array($shipment, $open_box_ids)){
+                        $shipment_status->open_box = 1;
+                        $shipment_status->save();
+                        ShipmentOpenBoxJourneyController::add($shipment,4,Auth::id());
+                    }
+                }
                 if ($request->has($status_drop) && $request->status_drop[$shipment] != null) {
                     if ($request->status_drop[$shipment] == 7 || $request->status_drop[$shipment] == 18) {
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
@@ -1482,7 +1518,7 @@ class DeliveryController extends Controller
             return redirect()->back()->with('error', 'Delivery note not found!');
         }
     }
-
+    //remove this function
     public function receive_delivery_status_delivered(Request $request)
     {
         if (!empty($request->shipment_ids)) {
@@ -1805,8 +1841,6 @@ class DeliveryController extends Controller
                     $where = array(7, 8, 9, 12, 15, 18, 20, 56);
                 }
 
-
-//                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
                 $drops = '';
@@ -1902,12 +1936,17 @@ class DeliveryController extends Controller
                 }
                 return '<input type="checkbox" name="fake_status[' . $deliveries->shId . ']" ' . $check . '>';
             })
+            ->addColumn('open_box', function ($deliveries){
+                 $open_box_checkbox = '<input type="checkbox" class="open_box" name="open_box[' . $deliveries->shId . ']">';
+                     return $open_box_checkbox;
+            })
             ->make(true);
     }
 
 
     public function receive_delivery_verify_status_submit(Request $request)
     {
+        
         $delivery_note_id = $request->delivery_note_id;
         $delivery_note = DeliveryNote::find($delivery_note_id);
         if($delivery_note) {
@@ -1928,6 +1967,7 @@ class DeliveryController extends Controller
             $return_status_array = array(21, 22, 23, 24, 25, 44, 47, 48);
             if ($delivery_note_id != '') {
                 foreach ($shipments as $shipment) {
+                    $shipment_details = Shipment::find($shipment);
                     $in_new_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '>', $delivery_note_id)->where('shipment_id', $shipment)->exists();
                     $shipper_status_details = Shipment::where('id', $shipment)->first();
                     if(!$shipper_status_details){
@@ -1937,6 +1977,7 @@ class DeliveryController extends Controller
                     $fake = "fake_status.$shipment";
                     $status_drop = "status_drop.$shipment";
                     $reasonId = "reason_drop.$shipment";
+                    $open_box_shipment = "open_box.$shipment";
                     $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
                     if($verify_fake){
                         if ($request->has($fake)) {
@@ -1948,6 +1989,18 @@ class DeliveryController extends Controller
                             $verify_fake->fake_status_updated_at = Carbon::now();
                             $verify_fake->save();
                         }
+                    }
+                    if($request->has($open_box_shipment)){
+                        
+                            $shipment_details->open_box = 1;
+                            $shipment_details->save();
+                            if($verification){
+                                ShipmentOpenBoxJourneyController::add($shipment, 5, Auth::id());
+                            }else{
+                                ShipmentOpenBoxJourneyController::add($shipment, 4, Auth::id());
+                            }
+                        
+                        
                     }
                     if (!$in_new_delivery_note) {
                         if (!in_array($shipper_status_details->shipper_status_id, $return_status_array)) {

@@ -446,19 +446,12 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('cod.reports.summary.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_user': $('#search_user').val(),
-                            'search_origin': $('#search_origin').val(),
-                            'search_destination': $('#search_destination').val(),
-                            'cards_filter': $('#cards_filter_input').val(),
-                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
-                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
-
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

@@ -79,14 +79,12 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.cargo.pending.list') }}',
-                        data: {
-                            'page': 'all',
-                            'shipment_type': $('#shipment_type_search_form #shipment_type').val(),
-                            'search_shipping_mode': $('#shipment_type_search_form #search_shipping_mode').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');

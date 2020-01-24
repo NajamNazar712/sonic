@@ -17,14 +17,17 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<div class="text-center">
-								<form id="tracking_number_search_form" class="d-inline-block form-inline mb-1 justify-content-center" novalidate="novalidate">
-									<div class="form-group">
+							<div class="row text-center">
+								<div class="col-3">
+									<form id="tracking_number_search_form" class="mb-1 justify-content-center" novalidate="novalidate">
+										<div class="form-group">
 										<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
-									</div>
-								</form>
-
-								<form id="positive_negative_filter_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
+										</div>
+									</form>
+								</div>		
+								
+								<div class="col-3">
+									<form id="positive_negative_filter_form" class="mb-1 justify-content-center" novalidate="novalidate">
 									<div class="form-group">
 										<select name="positive_negative_filter" class="select2 positive_negative_filter">
 											<option value="1">Positive</option>
@@ -32,8 +35,10 @@
 										</select>
 									</div>
 								</form>
-
-								<form id="shipper_status_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
+								</div>
+								
+								<div class="col-3">
+									<form id="shipper_status_form" class="mb-1 justify-content-center" novalidate="novalidate">
 									<div class="form-group">
 										<select name="shipper_status" class="select2 shipper_status">
 											@foreach($shipper_status as $id => $status)
@@ -41,7 +46,20 @@
 											@endforeach
 										</select>
 									</div>
-								</form>
+									</form>
+								</div>
+								<div class="col-3">
+									<form id="shipper_document_status_form" class="mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group">
+										<select name="shipper_document_status" class="select2 shipper_document_status">
+												<option value="0">All</option>
+												<option value="1">Unverified</option>
+												<option value="2">Verified</option>
+										</select>
+									</div>
+									</form>
+								</div>
+								
 							</div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -291,18 +309,23 @@
 				table.draw(false);
 			});
 
+			$('#shipper_document_status_form select.shipper_document_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Shipper Document Status',
+                width:'100%',
+                allowClear:true
+            }).bind('change', function() {
+				table.draw(false);
+			});
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.finance.make_payments.list') }}',
-                        data: {
-                            'page': 'all',
-                            'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
-                            'positive_negative_filter': $('#positive_negative_filter_form select.positive_negative_filter').val(),
-                            'shipper_status': $('#shipper_status_form select.shipper_status').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 
@@ -494,6 +517,7 @@
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
 						d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
 						d.shipper_status = $('#shipper_status_form select.shipper_status').val();
+						d.shipper_document_status = $('#shipper_document_status_form select.shipper_document_status').val();
 					}
 				},
 				rowId: 'id',

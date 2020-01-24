@@ -121,14 +121,12 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('cod.reports.qsr.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_from': $('input[name="from_date_formatted"]').val(),
-                            'search_to': $('input[name="to_date_formatted"]').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

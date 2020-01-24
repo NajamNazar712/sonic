@@ -215,16 +215,12 @@
                 if (this.context.length) {
                     blockPagePermanently();
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.cargo_returns_shipment.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_origin': $('#search_origin').val(),
-                            'search_destination': $('#search_destination').val(),
-                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
-                            'search_date_to': $('input[name="search_date_to_formatted"]').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

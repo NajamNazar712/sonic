@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
@@ -1115,15 +1116,14 @@ class ReturnController extends Controller
         }
     }
 
-    public function return_create_note(Request $request)
+    public function return_note_create(Request $request)
     {
         $trackings = explode(',', $request->shipment_ids);
-
+        $open_box_ids = explode(',',$request->open_box_ids);
         $rider = $request->rider_id;
         $route = $request->route_id;
         $hub_id = $request->hub_id;
         $admin = Auth::id();
-        //$errors_not_arrived = array();
         $return_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48, 60);
         $valid_shipments = array();
         $shipments_count = 0;
@@ -1141,25 +1141,29 @@ class ReturnController extends Controller
 
                 $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
                 if ($note) {
-                    foreach ($valid_shipments as $tracking) {
-                        $shipment = Shipment::where('id', $tracking);
+                    foreach ($valid_shipments as $shipment_id) {
+                        $shipment = Shipment::where('id', $shipment_id);
 
                         $shipment = $shipment->first();
 
-                        $old_return_note_id = ReturnNoteShipment::where('shipment_id', $tracking)->where('status','=', 1)->orderBy('return_note_id', 'desc');
+                        $old_return_note_id = ReturnNoteShipment::where('shipment_id', $shipment_id)->where('status','=', 1)->orderBy('return_note_id', 'desc');
 
                     if ($old_return_note_id->exists()) {
                         $old_return_note_id = $old_return_note_id->first();
 
                         if(ReturnNote::where('id', $old_return_note_id->return_note_id)->where('status',0)->exists()){
-                            $journey = ShipmentsJourney::where('shipment_id',$tracking)->latest()->first();
+                            $journey = ShipmentsJourney::where('shipment_id',$shipment_id)->latest()->first();
 
                             ShipmentsJourneyController::add($journey->shipment_id,57,NULL,$journey->status_reason_id,$journey->remarks,NULL,Auth::id(),$journey->reference_1_id,NULL,1,NULL);
 
                         }
                     }
+                    if(in_array($shipment_id, $open_box_ids)){
+                        $shipment->open_box = 1;
+                        ShipmentOpenBoxJourneyController::add($shipment_id, 6,Auth::id());
+                    }
                     if(in_array($shipment->booking_type_id, [1,4,5])){
-                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
                         $shipment->shipper_status_id = 23;
                         $shipment->consignee_status_id = 23;
                         $shipment->save();
@@ -1167,7 +1171,7 @@ class ReturnController extends Controller
                     }else
                     if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
-                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
                         $shipment->shipper_status_id = 28;
                         $shipment->consignee_status_id = 28;
                         $shipment->save();
@@ -1176,7 +1180,7 @@ class ReturnController extends Controller
 
                     } else if ($shipment->booking_type_id == 3) {//attempt failed and arrived at origin center
 
-                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
                         $shipment->shipper_status_id = 34;
                         $shipment->consignee_status_id = 34;
                         $shipment->save();
@@ -1184,7 +1188,7 @@ class ReturnController extends Controller
 
 
                     }else{
-                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
                         $shipment->shipper_status_id = 23;
                         $shipment->consignee_status_id = 23;
                         $shipment->save();
@@ -1515,6 +1519,10 @@ class ReturnController extends Controller
                     return '';
                 }
             })
+            ->addColumn('open_box', function ($deliveries){
+                 $open_box_checkbox = '<input type="checkbox" class="open_box" name="open_box[' . $deliveries->shId . ']">';
+                     return $open_box_checkbox;
+            })
             ->addColumn('action',function($deliveries){
                 $delivered_array = array(25,31,38);
                 if(in_array($deliveries->shipper_status_id,$delivered_array)) {
@@ -1546,9 +1554,11 @@ class ReturnController extends Controller
     }
 
     public function receive_return_status_submit(Request $request){
+        $open_box_ids = array();
         $new_return_note_shipments = NULL;
         $shipments_updated_flag = FALSE;
         $shipments = explode(',',$request->shipment_ids);
+        $open_box_ids = explode(',',$request->open_box_ids);
         $return_note_id = $request->return_note_id;
         $array_returned = array(25,31,38);
         $array_returned_status = array(24,29,35,47,48, 60);
@@ -1558,7 +1568,13 @@ class ReturnController extends Controller
                 $reasonId = "reason_drop.$shipment";
                 $parcel = Shipment::where('id', $shipment)->first();
                 if(!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id','>', $return_note_id)->where('shipment_id', $shipment)->exists()){
-
+                    if(count($open_box_ids) > 0){
+                        if(in_array($shipment, $open_box_ids)){
+                            $parcel->open_box = 1;
+                            $parcel->save();
+                            ShipmentOpenBoxJourneyController::add($shipment, 7, Auth::id());
+                        }
+                    }
                     if (!in_array($parcel->shipper_status_id, $array_returned)) {
                         if (in_array($request->status_drop[$shipment],$array_returned_status)) {
                             if($request->status_drop[$shipment] != $parcel->shipper_status_id){
@@ -1606,12 +1622,23 @@ class ReturnController extends Controller
 
     public function return_status_delivered(Request $request){
         if(!empty($request->shipment_ids)){
+            $open_box_ids = array();
+            if($request->has('open_box_ids')){
+                $open_box_ids = $request->open_box_ids;
+            }
            $return_note_details = ReturnNote::find($request->return_note_id);
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id', $shipment)->first();
                 $shipment_remark = "remarks.$shipment";
                 $received_or_refused_by = "received_or_refused_by.$shipment";
                 if(!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id','>', $request->return_note_id)->where('shipment_id', $shipment)->exists()) {
+                    if(count($open_box_ids) > 0){
+                        if(in_array($shipment, $open_box_ids)){
+                            $parcel->open_box = 1;
+                            $parcel->save();
+                            ShipmentOpenBoxJourneyController::add($shipment, 7,Auth::id());
+                        }
+                    }
                     if ($parcel->booking_type_id == 1 || $parcel->booking_type_id == 4 || $parcel->booking_type_id == 5) {
                         ShipmentsJourneyController::add($shipment, 25, 25, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment] : null));
 
@@ -1704,12 +1731,23 @@ class ReturnController extends Controller
         if(!empty($request->shipment_ids)){
             $shipment_ids = $request->shipment_ids;
             $shipment_status = $request->shipment_status;
+            $open_box_ids = array();
+            if($request->has('open_box_ids')){
+                $open_box_ids = $request->open_box_ids;
+            }
             $return_note_details = ReturnNote::find($request->return_note_id);
             if($shipment_status == 25){
                 foreach ($shipment_ids as $shipment_id) {
                     $parcel = Shipment::where('id', $shipment_id)->first();
                     $shipment_remark = "remarks.$shipment_id";
                     $received_or_refused_by = "received_or_refused_by.$shipment_id";
+                    if(count($open_box_ids) > 0){
+                        if(in_array($shipment_id, $open_box_ids)){
+                            $parcel->open_box = 1;
+                            $parcel->save();
+                            ShipmentOpenBoxJourneyController::add($shipment_id, 7,Auth::id());
+                        }
+                    }
                     if(!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id','>', $request->return_note_id)->where('shipment_id', $shipment_id)->exists()) {
 
                         if ($parcel->booking_type_id == 2) {
@@ -1750,10 +1788,20 @@ class ReturnController extends Controller
             else{
                 $remarks = $request->remarks;
                 foreach ($shipment_ids as $shipment_id) {
+                    $shipment = Shipment::find($shipment_id);
+                    $shipment->shipper_status_id = $shipment_status;
+                    $shipment->save();
                     ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, NULL, $remarks, NULL, Auth::id(), $request->return_note_id);
 
-                    Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipment_status]);
+                    
                     ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
+                    if(count($open_box_ids) > 0){
+                        if(in_array($shipment_id, $open_box_ids)){
+                            $shipment->open_box = 1;
+                            $shipment->save();
+                            ShipmentOpenBoxJourneyController::add($shipment_id, 7,Auth::id());
+                        }
+                    }
 
                 }
                 $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
