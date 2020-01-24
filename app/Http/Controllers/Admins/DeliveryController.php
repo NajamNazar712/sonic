@@ -1946,6 +1946,7 @@ class DeliveryController extends Controller
 
     public function receive_delivery_verify_status_submit(Request $request)
     {
+        
         $delivery_note_id = $request->delivery_note_id;
         $delivery_note = DeliveryNote::find($delivery_note_id);
         if($delivery_note) {
@@ -1966,6 +1967,7 @@ class DeliveryController extends Controller
             $return_status_array = array(21, 22, 23, 24, 25, 44, 47, 48);
             if ($delivery_note_id != '') {
                 foreach ($shipments as $shipment) {
+                    $shipment_details = Shipment::find($shipment);
                     $in_new_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '>', $delivery_note_id)->where('shipment_id', $shipment)->exists();
                     $shipper_status_details = Shipment::where('id', $shipment)->first();
                     if(!$shipper_status_details){
@@ -1989,13 +1991,16 @@ class DeliveryController extends Controller
                         }
                     }
                     if($request->has($open_box_shipment)){
-                        $shipment->open_box = 1;
-                        $shipment->save();
-                        if($verification){
-                            ShipmentOpenBoxJourneyController::add($shipment, 5, Auth::id());
-                        }else{
-                            ShipmentOpenBoxJourneyController::add($shipment, 4, Auth::id());
-                        }
+                        
+                            $shipment_details->open_box = 1;
+                            $shipment_details->save();
+                            if($verification){
+                                ShipmentOpenBoxJourneyController::add($shipment, 5, Auth::id());
+                            }else{
+                                ShipmentOpenBoxJourneyController::add($shipment, 4, Auth::id());
+                            }
+                        
+                        
                     }
                     if (!$in_new_delivery_note) {
                         if (!in_array($shipper_status_details->shipper_status_id, $return_status_array)) {
