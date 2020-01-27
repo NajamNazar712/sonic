@@ -2841,6 +2841,13 @@ class NotificationsController extends Controller
                 if (strpos($body, '[receiver_name]') !== FALSE) {
                     $body = str_replace('[receiver_name]', $shipment_journey->received_or_refused_by , $body);
                 }
+                if (strpos($body, '[order_id]') !== FALSE) {
+                  $body = str_replace('[order_id]', $shipment->order_id, $body);
+                }
+
+                if (strpos($body, '[status_date]') !== FALSE) {
+                  $body = str_replace('[status_date]', $shipment_journey->created_at, $body);
+                }
 
                 $to = $shipment->consignee_phone_number_1;
                 self::sms($body, $to);

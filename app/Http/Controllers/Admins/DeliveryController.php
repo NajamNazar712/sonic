@@ -1910,6 +1910,7 @@ class DeliveryController extends Controller
     {
         $delivery_note_id = $request->delivery_note_id;
         $delivery_note = DeliveryNote::find($delivery_note_id);
+        $zero_cod_shipments = array();
         if($delivery_note) {
 
             if ($delivery_note->status == 1) {
@@ -2059,7 +2060,7 @@ class DeliveryController extends Controller
                                             if ($verification == 1) {
                                                 if (in_array($request->status_drop[$shipment], [14, 16, 30, 36, 37])) {
                                                     $parcel = Shipment::find($shipment);
-
+                                                    
                                                     if ($parcel->booking_type_id == 2) {
                                                         ShipmentChargesController::replacement($shipment);
                                                     } else if ($parcel->booking_type_id == 3) {
@@ -2164,8 +2165,11 @@ class DeliveryController extends Controller
                                     } else {
                                         ShipmentsJourneyController::add($shipment, $shipper_status_details->shipper_status_id, $shipper_status_details->consignee_status_id, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                     }
+                                    // if($parcel->amount == 0){
+                                    //     NotificationsController::send(35, $parcel->id);
+                                    // }
                                     if($parcel->amount == 0){
-                                        NotificationsController::send(35, $parcel->id);
+                                        $zero_cod_shipments[] = $parcel->id;
                                     }
 
                                 }
@@ -2204,6 +2208,12 @@ class DeliveryController extends Controller
 
                     NotificationsController::send(13, $delivery_note_id);
                     NotificationsController::send(14, $delivery_note_id);
+                    if(!empty($zero_cod_shipments)){
+                        foreach ($zero_cod_shipments as $shipment_id) {
+                            NotificationsController::send(35, $shipment_id);
+                        }
+                    }
+
                     return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
                 } else {
                     $delivery_note_data = DeliveryNote::find($delivery_note_id);
