@@ -2234,6 +2234,12 @@
                                 </div>
                             </div>
 
+                            <div class="row mt-2 justify-content-center">
+                                <div class="col-5 form-group">
+                                    <textarea name="rate_remarks" id="rate_remarks" class="form-control" placeholder="Rate Remarks..." rows="3"></textarea>
+                                </div>
+                                
+                            </div>  
                             <div class="text-center mt-2">
                                 <div class="form-group">
 
@@ -2274,6 +2280,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('body').on('change', '#rate_remarks', function () {
+                $(this).val($(this).val().trim());
+            });
             $("#on_default").on('change', function(){
                 if($("#ol_default").is(":checked")){
                     $("#ol_default").trigger('click');

@@ -3527,7 +3527,45 @@
                                         
                                     </div>
                                  @endisset 
-                            
+                            @if(count($rate_remarks) > 0)
+                                <div class="row justify-content-center">
+                                    <div class="col-6">
+                                        <div class="card">
+                                            <div class="card-header mb-0 pb-0">
+                                                <h3 class="">Remarks</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <table class="table table-stripped table-bordered datatable" style="z-index: 3">
+                                                <thead>
+                                                    <tr class="bg-primary white">
+                                                        <th class="border-primary border-darken-1">Remarks</th>
+                                                        <th class="border-primary border-darken-1">Admin</th>
+                                                        <th class="border-primary border-darken-1">Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($rate_remarks as $remark)
+                                                        <tr>
+                                                            <td>{{$remark->remarks}}</td>
+                                                            <td>{{$remark->admin->name}}</td>
+                                                            <td>{{$remark->created_at}}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                            </div>
+                                        </div>
+                                    </div>  
+                                    
+                                </div>
+                            @endif
+
+                            <div class="row mt-2 justify-content-center">
+                                <div class="col-5 form-group">
+                                    <textarea name="rate_remarks" id="rate_remarks" class="form-control" placeholder="Rate Remarks..." rows="3"></textarea>
+                                </div>
+                                
+                            </div> 
 
                             <div class="text-center mt-2">
                                 <input type="hidden" name="authorize" id="authorize">
@@ -3613,6 +3651,10 @@
             o.style.height = (25+o.scrollHeight)+"px";
         }
         $(document).ready(function () {
+
+            $('body').on('change', '#rate_remarks', function () {
+                $(this).val($(this).val().trim());
+            });
 
                 $("#on_default").on('change', function () {
                     if ($("#ol_default").is(":checked")) {
