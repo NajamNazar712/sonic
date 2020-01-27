@@ -1093,7 +1093,8 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
 
-                $table_end .= '
+                if ($user_type != 4 && $type != 'pdf') {
+                    $table_end .= '
                               </tr>
                               <tr>
                                 <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
@@ -1103,7 +1104,21 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                             </tbody>
                         </table>
-                ';
+                    ';
+                }
+                else {
+                    $table_end .= '
+                              </tr>
+                              <tr>
+                                <td colspan="8" class="text-center border twice-top font-small"><em>Kindly do not give any addtional charges to the rider/courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
+                              </tr>
+                              <tr>
+                                <td colspan="8" class="text-center border twice-top font-small"><em>Trax Logistics has nothing to do with any item or content contained in this parcel/packet. We ship goods from one place to another. If you have a complaint about this, please contact the relevant online store.</em></td>
+                              </tr>
+                            </tbody>
+                        </table>
+                    ';
+                }
 
                 if ($shipment->booking_type_id != 4 && $shipment->charges_mode_id == 2 && $shipment->shipper_status_id == 1) {
                     $table_end .= '
@@ -1390,13 +1405,13 @@ class ShipperShipmentBookController extends Controller
             'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,500'],
+            'item_description' => ['required_if:service_type_id,1,2', 'between:0,1000'],
             'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,500'],
+            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
@@ -2530,13 +2545,13 @@ class ShipperShipmentBookController extends Controller
             'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,500'],
+            'item_description' => ['required_if:service_type_id,1,2', 'between:0,1000'],
             'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,500'],
+            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],

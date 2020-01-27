@@ -276,7 +276,7 @@
                                         </tr>
                                         <tr role="row">
                                             <td>Item Description</td>
-                                            <td class="text-center">500</td>
+                                            <td class="text-center">1000</td>
                                         </tr>
                                         <tr role="row">
                                             <td>Item Quantity</td>
