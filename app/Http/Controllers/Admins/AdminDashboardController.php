@@ -8030,7 +8030,7 @@ if(session('department_id') == 7){
         $documents = UserDocumentAttachment::where('user_id', $id)->first();
 
         $user = User::find($id);
-        if(!$documents){
+        if($documents == null){
             $documents = false;
         }
         return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status]);
