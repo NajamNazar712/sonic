@@ -449,6 +449,7 @@
                                                         <th>Status Name</th>
                                                         <th>Agent</th>
                                                         <th>Status Assigned Date</th>
+                                                        <th>Request ID</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -467,6 +468,7 @@
                                                                 @endif
                                                             @endif
                                                             <td>{{$status_history->created_at}}</td>
+                                                            <td>{{str_pad($status_history->crm_request_id, 6, '0', STR_PAD_LEFT)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     </tbody>

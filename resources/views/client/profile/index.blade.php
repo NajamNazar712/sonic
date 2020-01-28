@@ -32,10 +32,7 @@
                             </ul>
                             <div class="tab-content px-1 pt-1">
                                 <div role="tabpanel" class="tab-pane active" id="active" aria-labelledby="active-tab" aria-expanded="true">
-                                    {{--<p>Macaroon candy canes tootsie roll wafer lemon drops liquorice--}}
-                                    {{--jelly-o tootsie roll cake. Marzipan liquorice soufflé cotton--}}
-                                    {{--candy jelly cake jelly-o sugar plum marshmallow. Dessert--}}
-                                    {{--cotton candy macaroon chocolate sugar plum cake donut.</p>--}}
+                                    
                                     <div class="table-responsive">
                                         <br>
 

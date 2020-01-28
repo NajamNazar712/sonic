@@ -112,9 +112,12 @@
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.daily_visit.list') }}',
+                        data: params,
                         success: function (result) {
                             head = [];
                             head.push('S. No.');

@@ -271,12 +271,12 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = receiving_sheet_table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('cod.shipment.receiving_sheet_history.receiving_sheet_list') }}',
-                        data: {
-                            'page': 'all',
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');

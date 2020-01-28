@@ -173,7 +173,7 @@ class RegisterController extends Controller
         event(new Registered($user = $this->create($request->all())));
 
         //$this->guard()->login($user);
-        $document_status = true;
+        
         $user_attachment = new UserDocumentAttachment();
         $user_attachment->user_id = $user->id;
         if ($request->hasFile('filled_and_signed_pdf')) {
@@ -182,55 +182,38 @@ class RegisterController extends Controller
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->filled_and_signed_pdf = $filename;
         }
-        else{
-            $document_status = false;
-        }
+        
         if ($request->hasFile('signed_acknowledgement_pdf')) {
             $filename = 'signed_acknowledgement_pdf_' . $user->id . '.pdf';
             $file = $request->file('signed_acknowledgement_pdf');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->signed_acknowledgement_pdf = $filename;
         }
-        else{
-            $document_status = false;
-        }
+        
         if ($request->hasFile('cnic_front_image')) {
             $filename = 'cnic_front_image_' . $user->id . '.png';
             $file = $request->file('cnic_front_image');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->cnic_front_image = $filename;
         }
-        else{
-            $document_status = false;
-        }
+        
         if ($request->hasFile('cnic_back_image')) {
             $filename = 'cnic_back_image_' . $user->id . '.png';
             $file = $request->file('cnic_back_image');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->cnic_back_image = $filename;
         }
-        else{
-            $document_status = false;
-        }
+        
         if ($request->hasFile('blank_cheque_image')) {
             $filename = 'blank_cheque_image_' . $user->id . '.png';
             $file = $request->file('blank_cheque_image');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->blank_cheque_image = $filename;
         }
-        else{
-            $document_status = false;
-        }
+        
         $user_attachment->save();
 
-        $user_attachment_status = User::find($user->id);
-        if($document_status == true){
-            $user_attachment_status->documents_status = 1;
-        }
-        else{
-            $user_attachment_status->documents_status = 0;
-        }
-        $user_attachment_status->save();
+        
         return $this->registered($request, $user)
             ?: redirect($this->redirectPath());
     }

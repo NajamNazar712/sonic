@@ -63,6 +63,8 @@ class AdminTrackingController extends Controller
 
                     $details['tracking_number'] = $tracking_number;
 
+                    $details['open_box'] = $shipment->open_box;
+
                     $shipper = $shipment->user;
 
                     $sales_person = SalePersonTag::where('user_id', $shipper->id)->leftjoin('admins as a', 'a.id', '=', 'sale_person_tags.admin_id')->where('sale_person_tags.status', 0);
@@ -332,6 +334,19 @@ class AdminTrackingController extends Controller
                             $details['crm_requests'][] = $crm_request_journey;
                         }
 
+                    }
+
+                    $shipment_open_box_journey = $shipment->open_box_journey;
+                    if($shipment_open_box_journey){
+                        foreach ($shipment_open_box_journey as $journey) {
+                            $open_box_journey_details = array();
+
+                            $open_box_journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                            $open_box_journey_details['status'] = $journey->shipment_open_status->name;
+                            $open_box_journey_details['created_by'] = $journey->admin->name;
+
+                            $details['open_box_journey'][] = $open_box_journey_details;
+                        }
                     }
 
                     // $details['complain']['id'] = 10;

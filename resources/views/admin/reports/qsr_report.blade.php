@@ -267,21 +267,12 @@
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.qsr.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_shipper': $('#search_shipper').val(),
-                            'search_origin': $('#search_origin').val(),
-                            'search_destination': $('#search_destination').val(),
-                            'search_qsr': $('#search_qsr').val(),
-                            'search_hub': $('#search_hub').val(),
-                            'search_shipping_mode': $('#search_shippimg_modes').val(),
-                            'search_from': $('input[name="from_date_formatted"]').val(),
-                            'search_to': $('input[name="to_date_formatted"]').val(),
-                            'search_types': $('#search_types').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

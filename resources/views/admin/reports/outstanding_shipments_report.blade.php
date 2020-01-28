@@ -230,15 +230,12 @@
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.outstanding_shipments.list') }}',
-                        data:{
-                            'page': 'all',
-                            'search_recovery_status': $('#search_form #recovery_status_select').val(),
-                            'hub': $('#search_form #hub').val(),
-                            'delivery_date_from': $('#search_form input[name="delivery_date_from_formatted"]').val(),
-                            'delivery_date_to': $('#search_form input[name="delivery_date_to_formatted"]').val()
-                        },
+                        data:params,
                         success: function (result) {
                             head = [];
 

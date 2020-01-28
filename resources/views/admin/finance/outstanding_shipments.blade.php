@@ -263,17 +263,12 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.finance.outstanding_shipments.list') }}',
-                        data: {
-                            'page': 'all',
-                            'hub': $('#search_form #hub').val(),
-                            'recovery_status': $('#search_form #recovery_status_select').val(),
-                    		'service': $('#search_form #service').val(),
-                    		'delivery_date_from': $('#search_form input[name="delivery_date_from_formatted"]').val(),
-                    		'delivery_date_to': $('#search_form input[name="delivery_date_to_formatted"]').val(),
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

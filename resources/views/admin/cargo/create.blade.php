@@ -50,6 +50,7 @@
 										<th class="border-primary border-darken-1">Service Type</th>
 										<th class="border-primary border-darken-1">Destination</th>
 										<th class="border-primary border-darken-1">Amount</th>
+										<th class="border-primary border-darken-1">Open Box</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -72,6 +73,7 @@
 
 											<input type="hidden" name="shipment_ids" class="shipment_ids">
 
+											<input type="hidden" name="open_box_ids" class="open_box_ids">
 											<div class="modal-header">
 												<h4 class="modal-title" id="cargo_consignment_title">Cargo Consignment</h4>
 											</div>
@@ -228,7 +230,7 @@
 			@endif
 
 			var shipment_ids = [];
-
+			var open_box_ids = [];
 			var hub_id = 0;
 			var cargo_type = 0;
 			var shipping_mode_id = 0;
@@ -245,6 +247,7 @@
 					{name: 'service_type', class: 'align-middle service_type', orderable: false},
 					{name: 'destination', class: 'align-middle destination', orderable: false},
 					{name: 'amount', class: 'align-middle amount', orderable: false},
+					{name: 'open_box', class: 'align-middle open_box', orderable: false},
 					{name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -297,8 +300,9 @@
 
 								if (index === -1) {
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger cargo_remove"><i class="la la-close"></i></a>';
+                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.details.id+']">';
                                     var rowNo = table.rows().count();
-                                    table.row.add([rowNo+1, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount,remove]).node().id = data.details.id;
+                                    table.row.add([rowNo+1, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount, open_box,remove]).node().id = data.details.id;
 									table.draw(false);
                                     table.order([0, 'desc']).draw();
                                     shipment_ids.push(data.details.id);
@@ -350,6 +354,7 @@
 			});
 
 			$('#cargo_consignment_confirm').bind('click', function() {
+
 				if ($('#cargo_consignment form .junction_1').hasClass('select2-hidden-accessible')) {
 					$('#cargo_consignment form .junction_1').html('').select2('destroy');
 				}
@@ -380,10 +385,17 @@
 					}
 				})
 				.done(function(data) {
-
+					open_box_ids = [];
+					table.rows().every(function(index) {
+                    	var node = $(this.node());
+                    	if(node.find('td.open_box input').is(':checked')){
+                    		open_box_ids.push(parseInt(node.attr('id')));
+                    	}
+					});
 					$('#cargo_consignment form .cargo_type').val(cargo_type);
 					$('#cargo_consignment form .shipping_mode_id').val(shipping_mode_id);
 					$('#cargo_consignment form .shipment_ids').val(shipment_ids);
+					$('#cargo_consignment form .open_box_ids').val(open_box_ids);
 
 					$('#cargo_consignment form .origin_hub_id').val(data.origin.id);
 					$('#cargo_consignment form .origin').html(data.origin.name);

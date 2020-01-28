@@ -269,24 +269,16 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.crm.list') }}',
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
-                        data: {
-                            'page': 'all',
-                            'search_tracking_no': $('#search_tracking_no').val(),
-                            'search_destination': $('#search_destination').val(),
-                            'search_hub': $('#search_hub').val(),
-                            'search_agent': $('#search_agent').val(),
-                            'search_case_nature': $('#search_case_nature').val(),
-                            'search_shipper': $('#search_shipper').val(),
-                            'search_status': $('#search_status').val(),
-                            'search_from': $('input[name="from_date_formatted"]').val(),
-                            'search_to': $('input[name="to_date_formatted"]').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

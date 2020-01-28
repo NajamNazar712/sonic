@@ -25,6 +25,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\CargoConsignmentJunctionReceival;
+use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 
 use Auth;
 use DB;
@@ -459,7 +460,6 @@ class AdminCargoController extends Controller
     }
 
     public function create_consignment_details(Request $request) {
-
         $shipment = Shipment::find(current($request->shipment_ids));
 
         if ($shipment->shipper_status_id == 49) {
@@ -554,13 +554,14 @@ class AdminCargoController extends Controller
         $shipments_weight = 0;
 
         $shipment_ids = explode(',', $request->input('shipment_ids'));
-
+        $open_box_ids = explode(',', $request->input('open_box_ids'));
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
             if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49, 55])) {
                 $shipments++;
                 $shipments_weight += $shipment->actual_weight;
+                
             }
             else {
                 unset($shipment_ids[$key]);
@@ -655,6 +656,13 @@ class AdminCargoController extends Controller
                 $shipment->consignee_status_id = $consignee_status_id;
 
                 $shipment->save();
+
+
+                if(in_array($shipment_id, $open_box_ids)){
+                    $shipment->open_box = 1;
+                    $shipment->save();
+                    ShipmentOpenBoxJourneyController::add($shipment_id,1,Auth::id());
+                }
 
                 ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $cargo_consignment->id, $cargo_consignment->builty_number);
 
@@ -1400,6 +1408,9 @@ class AdminCargoController extends Controller
         $cargo_consignment_id = $request->cargo_consignment_id;
 
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
+        
+        $open_box_ids = array_unique(explode(',', $request->open_box_ids));
+
 
         $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
 
@@ -1453,6 +1464,12 @@ class AdminCargoController extends Controller
                 $shipment->consignee_status_id = $consignee_status_id;
 
                 $shipment->save();
+
+                if(in_array($shipment_id, $open_box_ids)){
+                    $shipment->open_box = 1;
+                    $shipment->save();
+                    ShipmentOpenBoxJourneyController::add($shipment_id,2,Auth::id());
+                }
 
                 ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
 
