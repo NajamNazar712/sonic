@@ -3060,7 +3060,8 @@ use Yajra\Datatables\Datatables;
                 })
                 ->leftjoin('shipment_items as si', function ($join) {
                     $join->on('si.shipment_id', '=', 'shipments.id')
-                        ->where('si.type','=',0);
+                        ->where('si.id', '=',
+                            DB::connection('reports')->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
                 })
                 ->leftjoin('sale_person_tags as spt', function ($join) {
                     $join->on('spt.user_id', '=', 'shipments.user_id')

@@ -52,7 +52,8 @@ class ShipperReportsController extends Controller
                 })
                 ->leftjoin('shipment_items as si', function ($join) {
                     $join->on('si.shipment_id', '=', 'shipments.id')
-                        ->where('si.type','=',0);
+                        ->where('si.id', '=',
+                            DB::connection('reports')->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
                 })
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
                 ->leftJoin('shipments_journey as dr', function ($join) {
