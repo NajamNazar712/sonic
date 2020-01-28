@@ -8028,8 +8028,12 @@ if(session('department_id') == 7){
 
     public function userDocuments($id){
         $documents = UserDocumentAttachment::where('user_id', $id)->first();
-        $user = User::find($id);
-        return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status]);
+        if($documents){
+            $user = User::find($id);
+            return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status]);
+        }else{
+            return redirect()->back()->with(['error' => 'Documents not found!']);
+        }
     }
 
     public function viewUserDocuments($id, $check, $pdf){
