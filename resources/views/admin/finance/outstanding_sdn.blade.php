@@ -202,6 +202,7 @@
 						@csrf
 						<input type="hidden" name="sdn_id" id="sdn_id"/>
 						<input type="hidden" name="deposit_rows" id="deposit_rows"/>
+						<input type="hidden" name="new_deposit_rows" id="new_deposit_rows"/>
 						
 						<table class="table table-bordered datatable" id="edit_deposit_slip_table" style="z-index: 3;">
 							<thead>
@@ -212,6 +213,7 @@
 								<th class="border-primary border-darken-1">Bank Name</th>
 								<th class="border-primary border-darken-1">Amount </th>
 								<th class="border-primary border-darken-1">Deposit Slip</th>
+								<th class="border-primary border-darken-1"></th>
 
 							</tr>
 							</thead>
@@ -253,11 +255,7 @@
 	                                </select>
 	                            </div>
 							</div>
-							<div class="col">
-								<div class="form-group">
-									<textarea class="form-control" name="petty_cash_detail_rows" placeholder="Enter Petty cash statement rows"></textarea>
-								</div>
-							</div>
+							
 						</div>
 						<table class="table table-bordered" style="z-index: 3;">
 							<thead>
@@ -851,6 +849,55 @@
                 return obj;
             });
 			var selected_deposit_ids = [];
+			var new_selected_deposit_ids = [];
+			var rows_count = 0;
+
+			function add_row() {
+                    rows_count++;
+                    var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="new_date['+rows_count+']" id="new_deposit_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>';
+                    var bank_select = '<select class="form-control hub_select select2" name="new_bank['+rows_count+']" data-rule-required="true" data-msg-required="Bank is required"></select>';
+                    var amount_input = '<input class="form-control form-control-sm amount" name="new_amount['+rows_count+']" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">';
+                    var deposit_slip = '<input class="form-control form-control-sm" type="file" name="new_deposit_slip_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Deposit Slip is required">';
+                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                    // deposit_table.row.add(0,1,2,3,4,5);
+                    edit_deposit_table.row.add([0, date_input,bank_select,amount_input,deposit_slip,remove]).node().id = rows_count;
+                    edit_deposit_table.draw(true);
+                    // $('#sdn_upload_table tbody').append(html);
+                    // $('#DepositSlipButton').attr('disabled', false);
+                    new_selected_deposit_ids.push(rows_count);
+                    $('select[name="new_bank['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data:banks_list,
+                        placeholder:'Select Bank',
+                        allowClear:true,
+                        width:'100%',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $('#new_deposit_date_' + rows_count).pickadate({
+                        firstDay: 1,
+                        today: '',
+                        clear: '',
+                        close: '',
+                        weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
+                        showMonthsShort: true,
+                        formatSubmit: 'yyyy-mm-dd 00:00:00',
+                        hiddenSuffix: '_formatted',
+                        onOpen: function() {
+                            // $('#deposit_date_' + rows_count+'_root').css('top', '-262px');
+                        },
+                    });
+                    $('input.amount').inputmask({
+                        'alias': 'decimal',
+                        'allowMinus': false,
+                        'allowPlus': false,
+                        'rightAlign': false,
+                        'digits': 2,
+                        'min': 0.00,
+                        'max': 10000000.00
+                    });
+                }
+
+
             var edit_deposit_table;
             $('#datatable tbody').on('click','.edit_deposit_slip', function(){
                 var sdn_id = $(this).parents('tr').attr('id');
@@ -870,7 +917,15 @@
 
 						    $('#EditDepositSlip').modal('show');
                             edit_deposit_table = $('#edit_deposit_slip_table').DataTable({
-                                dom: 'ltipr',
+                                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                                 buttons:[{
+			                        title: 'Add Row',
+			                        className: 'btn btn-primary mb-1',
+			                        text: '<i class="la la-plus"></i> Add Row',
+			                        action:function (e) {
+			                            add_row();
+			                        }
+			                    }],
                                 ordering:false,
                                 paging:false,
                                 columns: [
@@ -878,7 +933,9 @@
                                     {name: 'date', class: 'align-middle date date-col-width form-group'},
                                     {name: 'bank_name', class: 'align-middle bank_name form-group'},
                                     {name: 'amount', class: 'align-middle expense_amount form-group'},
-                                    {name: 'deposit_slip', class: 'align-middle deposit_slip form-group'}
+                                    {name: 'deposit_slip', class: 'align-middle deposit_slip form-group'},
+                        			{name: 'action', class: 'align-middle action'}
+
                                 ],
 
                                 rowCallback: function(row, data, index) {
@@ -894,14 +951,14 @@
                             });
                             var image_url = '{{asset('uploads/sdn/')}}';
                             $.each(data.slips, function (index, value) {
-
+                            	
                                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+index+']" id="deposit_date_' + index + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required" data-value="'+ value.date +'"></div>';
                                 var bank_select = '<select class="form-control hub_select select2" name="bank['+index+']" data-rule-required="true" data-msg-required="Bank is required"></select>';
                                 var amount_input = '<input class="form-control form-control-sm amount" name="amount['+index+']" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required" value="'+ value.amount +'">';
                                 var deposit_slip = '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href="'+ image_url +'/'+ value.image +'" target="_blank">View</a></button><input type="hidden" name="old_deposit_slip_'+ index +'" value="'+value.image+'">';
                                 deposit_slip += '<input class="form-control form-control-sm" type="file" name="deposit_slip_'+index+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
-
-                                edit_deposit_table.row.add([0, date_input,bank_select,amount_input,deposit_slip]).node().id = index;
+                                var remove = '';
+                                edit_deposit_table.row.add([0, date_input,bank_select,amount_input,deposit_slip, remove]).node().id = index;
                                 edit_deposit_table.draw(true);
 
                                 selected_deposit_ids.push(index);
@@ -945,6 +1002,7 @@
                 edit_deposit_table.clear();
                 edit_deposit_table.destroy();
                 selected_deposit_ids = [];
+                new_selected_deposit_ids = [];
             });
             $('#edit_deposit_slip_form').validate({
                 errorClass: 'danger',
@@ -977,16 +1035,25 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if (confirm) {
-
-
                             // $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
                             $('#deposit_rows').val(selected_deposit_ids);
+                            $('#new_deposit_rows').val(new_selected_deposit_ids);
                             // console.log($('#upload_image').val());
                             form.submit();
                         }
                     });
 
                 }
+            });
+            $('body').on('click', '#edit_deposit_slip_table td a.remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, new_selected_deposit_ids);
+
+                if (index !== -1) {
+                    new_selected_deposit_ids.splice(index, 1);
+                }
+                edit_deposit_table.row( $(this).parents('tr') ).remove().draw();
+                console.log(new_selected_deposit_ids);
             });
 
             $('#adjustment_date').pickadate({

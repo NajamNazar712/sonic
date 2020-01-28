@@ -609,7 +609,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments','Admins\DeliveryController@sdn_delivered_shipments')->name('shipments');
             Route::post('slip_view','Admins\DeliveryController@sdn_slip_view')->name('slip_view');
             Route::post('adjustment/add','Admins\DeliveryController@sdn_adjustment_add')->name('adjustment.add');
-
+            Route::get('petty_cash_detail','Admins\DeliveryController@sdn_petty_cash_detail')->name('petty_cash_detail');
         });
         Route::prefix('misroute')->name('misroute.')->group(function (){
             Route::get('','Admins\DeliveryController@misroute_index')->name('index');

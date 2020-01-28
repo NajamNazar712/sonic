@@ -102,7 +102,9 @@ class AdminFinanceController extends Controller
         $banks = BanksList::where('affiliate', 1)->get();
         $all_banks = BanksList::all();
         $hubs = City::orderBy('name')->where('hub', 1)->get();
-        $petty_cash_list = PettyCashStatement::where('status',2)->select('id')->get();
+        $petty_cash_ids = array();
+        $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
+        $petty_cash_list = PettyCashStatement::where('status','<',3)->whereNotIn('id',$petty_cash_ids)->select('id')->get();
         return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks, 'hubs'=>$hubs, 'all_banks' => $all_banks, 'petty_cash_list' => $petty_cash_list]);
     }
 
@@ -1056,6 +1058,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_sdn_edit_deposit_slip_submit(Request $request){
+        return $request;
         $sdn_id = $request->sdn_id;
         $deposit_ids = explode(',', $request->deposit_rows);
         $total_amount = 0;
