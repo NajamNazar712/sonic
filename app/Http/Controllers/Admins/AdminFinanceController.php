@@ -1058,7 +1058,6 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_sdn_edit_deposit_slip_submit(Request $request){
-        return $request;
         $sdn_id = $request->sdn_id;
         $deposit_ids = explode(',', $request->deposit_rows);
         $total_amount = 0;
@@ -1085,6 +1084,31 @@ class AdminFinanceController extends Controller
             $slip->save();
 
         }
+        $new_deposit_ids = explode(',', $request->new_deposit_rows);
+        if(count($new_deposit_ids) > 0){
+            foreach ($new_deposit_ids as $row) {
+                $total_amount += $request->new_amount[$row];
+                
+                $deposit_details = new StationDepositNoteSlip();
+                $deposit_details->station_deposit_note_id = $sdn_id;
+                $deposit_details->deposit_date = $request->new_date[$row];
+                $deposit_details->bank_id = $request->new_bank[$row];
+                $deposit_details->amount = $request->new_amount[$row];
+                $deposit_details->save();
+                $file_name = 'new_deposit_slip_'.$row;
+                $image = $request->file($file_name);
+                $extension = 'png';
+                $random = rand(1000, 100000);
+                $now = Carbon::now();
+                $time = $now->year . '_' . $now->month;
+                $slip = $time . $random . Auth::id() . '.' . $extension;
+                $image->move(public_path('uploads/sdn'), $slip);
+
+                $deposit_details->image = $slip;
+                $deposit_details->save();
+            }
+        }
+        
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();

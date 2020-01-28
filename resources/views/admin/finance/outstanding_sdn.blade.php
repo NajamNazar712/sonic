@@ -321,11 +321,7 @@
 	<script>
 		$(document).ready(function() {
 
-			$('#petty_cash_select').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Petty Cash Statement ID',
-                dropdownParent:$('#AddAdjustmentModal')
-			});
+			
 
 			function print(id) {
 				$.ajax({
@@ -1056,16 +1052,7 @@
                 console.log(new_selected_deposit_ids);
             });
 
-            $('#adjustment_date').pickadate({
-                firstDay: 1,
-                today: '',
-                clear: '',
-                close: '',
-                weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
-                showMonthsShort: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-            });
+            
             $('input.adjustment_amount').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -1076,6 +1063,44 @@
                 'max': 10000000.00
             });
 
+            var adjustment_date = $('#adjustment_date').pickadate({
+                firstDay: 1,
+                today: '',
+                clear: '',
+                close: '',
+                weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
+                showMonthsShort: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+            });
+
+            $('#petty_cash_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Petty Cash Statement ID',
+                dropdownParent:$('#AddAdjustmentModal')
+            }).bind('select2:select',function(){
+                var id = $(this).val();
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.sdn.petty_cash_detail') !!}',
+                        method: 'GET',
+                        data: {
+                            'petty_cash_id': id
+                        }
+                    }).done(function(data){
+                        if(data.status == 0){
+                                var d = new Date(data.details.date.date);
+                            
+                               adjustment_date.pickadate('picker').set({'select': d},{muted: true});
+                               $('#adjustment_amount').val(data.details.amount);
+                               $('#adjustment_ref').val(data.details.reference);
+                               
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            });
             $('body').on('change','#sdn_adjustment_add .adjustment_ref',function() {
                 $(this).val($(this).val().trim());
             });

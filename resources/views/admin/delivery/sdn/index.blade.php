@@ -924,8 +924,7 @@
                     }).done(function(data){
                         if(data.status == 0){
                                 var d = new Date(data.details.date.date);
-                                
-                               // adjustment_date.pickadate('picker').clear();
+                            
                                adjustment_date.pickadate('picker').set({'select': d},{muted: true});
                                $('#adjustment_amount').val(data.details.amount);
                                $('#adjustment_ref').val(data.details.reference);
