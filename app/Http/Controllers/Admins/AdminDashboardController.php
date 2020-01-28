@@ -6504,7 +6504,7 @@ if(session('department_id') == 7){
                     $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
                 })
                     ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
+                        $sub_query->where('users.phone2', 'like', '%' . $keyword . '%');
                     });
             })
             ->addColumn("action", function ($result) {
@@ -6668,7 +6668,7 @@ if(session('department_id') == 7){
                     $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
                 })
                     ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
+                        $sub_query->where('users.phone2', 'like', '%' . $keyword . '%');
                     });
             })
             ->editColumn('status', function ($users) {
