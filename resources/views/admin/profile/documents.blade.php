@@ -75,7 +75,7 @@
                                         </div>
                                     @endif
                                     
-                                        @if($documents->filled_and_signed_pdf != null && $documents->signed_acknowledgement_pdf != null  && $documents->cnic_front_image != null  && $documents->cnic_back_image != null  && $documents->blank_cheque_image != null)
+                                        @if($documents && $documents->filled_and_signed_pdf != null && $documents->signed_acknowledgement_pdf != null  && $documents->cnic_front_image != null  && $documents->cnic_back_image != null  && $documents->blank_cheque_image != null)
                                         <div class="mr-1">
                                                 <button type="button" class="btn btn-outline-success mr-1 confirm">Confirm</button>
                                         </div>
