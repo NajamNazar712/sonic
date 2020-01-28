@@ -128,6 +128,7 @@
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
+                        <th class="border-primary border-darken-1">Received/Refused By</th>
                     </tr>
                     </thead>
                 </table>
@@ -382,6 +383,7 @@
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
                             head.push('Delivered/Returned Date');
+                            head.push('Received/Refused By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -405,6 +407,7 @@
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
                                 row.push(values.delivered_or_returned);
+                                row.push(values.received_or_refused_by);
 
                                 body.push(row);
                             });
@@ -467,7 +470,8 @@
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
-                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
+                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
+                    { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

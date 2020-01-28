@@ -146,6 +146,7 @@
                         <th class="border-primary border-darken-1">Packing Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
+                        <th class="border-primary border-darken-1">Received/Refused By</th>
                         <th class="border-primary border-darken-1">Sales Person</th>
                     </tr>
                     </thead>
@@ -370,7 +371,8 @@
                             head.push('Estimated Charges');
                             head.push('Packing Charges');
                             head.push('Net Payable');
-                            head.push('Delivered / Returned Date');
+                            head.push('Delivered/Returned Date');
+                            head.push('Received/Refused By');
                             head.push('Sales Person');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -413,6 +415,7 @@
                                 row.push(values.packaging_charges);
                                 row.push(values.p_net_payable);
                                 row.push(values.delivered_or_returned);
+                                row.push(values.received_or_refused_by);
                                 row.push(values.sales_person);
 
                                 body.push(row);
@@ -501,7 +504,8 @@
                     { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges',sortable:false},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
-                    { data: 'sales_person' ,name: 'dr.created_at', class: 'align-middle sales_person'}
+                    { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
+                    { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
