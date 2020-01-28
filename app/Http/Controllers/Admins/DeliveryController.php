@@ -45,6 +45,7 @@ use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
+use App\Http\Models\Admin\PettyCashStatement;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -3152,10 +3153,26 @@ class DeliveryController extends Controller
         }
     }
 
+    public function sdn_petty_cash_detail(Request $request){
+        $petty_cash_id = $request->petty_cash_id;
+        if($petty_cash_id){
+            $petty_cash_details = PettyCashStatement::find($petty_cash_id);
+            $details = array();
+            $details['date'] = $petty_cash_details->created_at;
+            $details['amount'] = $petty_cash_details->total_amount;
+            $details['reference'] = $petty_cash_details->reference_no;
+
+            return response()->json(['status' => 0, 'details' => $details]);
+        }
+        return response()->json(['status' => 1,'error' => 'Petty Cash not found!']);
+    }
     public function sdn_view(Request $request)
     {
+        $petty_cash_ids = array();
+        $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
+        $petty_cash_list = PettyCashStatement::where('status','<',3)->whereNotIn('id',$petty_cash_ids)->select('id')->get();
         $banks = BanksList::where('affiliate', 1)->get();
-        return view('admin.delivery.sdn.index')->with(['banks' => $banks]);
+        return view('admin.delivery.sdn.index')->with(['banks' => $banks, 'petty_cash_list' => $petty_cash_list]);
     }
 
     public function sdn_list(Request $request)
@@ -4895,12 +4912,9 @@ class DeliveryController extends Controller
             $sdn->adjustment_amount = $request->adjustment_amount;
             $sdn->adjustment_date = $request->adjustment_date_formatted;
             $sdn->adjustment_ref = $request->adjustment_ref;
-            if($request->petty_cash_select != ''){
-                $sdn->petty_cash_statement_id = $request->petty_cash_select;
-            }
-            if($request->petty_cash_detail_rows != ''){
-                $sdn->petty_cash_statement_detail_ids = $request->petty_cash_detail_rows;
-            }
+            // if($request->petty_cash_select != ''){
+            $sdn->petty_cash_statement_id = $request->petty_cash_select;
+            // }
             $sdn->save();
 
             return redirect()->back()->with(['success' => 'Adjustment added successfully!']);

@@ -196,6 +196,18 @@
                     <form id="sdn_adjustment_add" class="form" action="{{route('admin.delivery.sdn.adjustment.add')}}" method="post">
                         @csrf
                         <input type="hidden" name="sdn_id" id="sdn_id_for_adjustment">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <select name="petty_cash_select" class="select2" id="petty_cash_select">
+                                        @foreach($petty_cash_list as $petty_cash)
+                                            <option value="{{$petty_cash->id}}">{{$petty_cash->id}}</option>
+                                        @endforeach 
+                                    </select>
+                                </div>
+                            </div>
+                            
+                        </div>
                         <table class="table table-bordered" style="z-index: 3;">
                             <thead>
                             <tr role="row" class="bg-primary white">
@@ -726,7 +738,7 @@
                         }
                     });
             }
-{{--            var banks_list = @json($banks);--}}
+
             var banks_list = $.map({!! $banks !!}, function (obj) {
                 obj.id = obj.id;
                 obj.text = obj.name;
@@ -885,6 +897,44 @@
                    });
                }
             });
+            var adjustment_date = $('#adjustment_date').pickadate({
+                firstDay: 1,
+                today: '',
+                clear: '',
+                close: '',
+                weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
+                showMonthsShort: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+            });
+
+            $('#petty_cash_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Petty Cash Statement ID',
+                dropdownParent:$('#AddAdjustmentModal')
+            }).bind('select2:select',function(){
+                var id = $(this).val();
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.sdn.petty_cash_detail') !!}',
+                        method: 'GET',
+                        data: {
+                            'petty_cash_id': id
+                        }
+                    }).done(function(data){
+                        if(data.status == 0){
+                                var d = new Date(data.details.date.date);
+                            
+                               adjustment_date.pickadate('picker').set({'select': d},{muted: true});
+                               $('#adjustment_amount').val(data.details.amount);
+                               $('#adjustment_ref').val(data.details.reference);
+                               
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            });
 
             $('#ViewDepositSlip').on('hidden.bs.modal', function () {
                 deposit_slip_table.clear();
@@ -896,16 +946,7 @@
                 selected_rows = [];
             });
 
-            $('#adjustment_date').pickadate({
-                firstDay: 1,
-                today: '',
-                clear: '',
-                close: '',
-                weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
-                showMonthsShort: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-            });
+            
             $('input.adjustment_amount').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -942,6 +983,7 @@
                 }
             });
             $('#AddAdjustmentModal').on('hidden.bs.modal', function () {
+                $('#petty_cash_select').val('').trigger('change');
                 sdn_form.resetForm()
             });
         });

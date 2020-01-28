@@ -102,7 +102,9 @@ class AdminFinanceController extends Controller
         $banks = BanksList::where('affiliate', 1)->get();
         $all_banks = BanksList::all();
         $hubs = City::orderBy('name')->where('hub', 1)->get();
-        $petty_cash_list = PettyCashStatement::where('status',2)->select('id')->get();
+        $petty_cash_ids = array();
+        $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
+        $petty_cash_list = PettyCashStatement::where('status','<',3)->whereNotIn('id',$petty_cash_ids)->select('id')->get();
         return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks, 'hubs'=>$hubs, 'all_banks' => $all_banks, 'petty_cash_list' => $petty_cash_list]);
     }
 
@@ -1082,6 +1084,31 @@ class AdminFinanceController extends Controller
             $slip->save();
 
         }
+        $new_deposit_ids = explode(',', $request->new_deposit_rows);
+        if(count($new_deposit_ids) > 0){
+            foreach ($new_deposit_ids as $row) {
+                $total_amount += $request->new_amount[$row];
+                
+                $deposit_details = new StationDepositNoteSlip();
+                $deposit_details->station_deposit_note_id = $sdn_id;
+                $deposit_details->deposit_date = $request->new_date[$row];
+                $deposit_details->bank_id = $request->new_bank[$row];
+                $deposit_details->amount = $request->new_amount[$row];
+                $deposit_details->save();
+                $file_name = 'new_deposit_slip_'.$row;
+                $image = $request->file($file_name);
+                $extension = 'png';
+                $random = rand(1000, 100000);
+                $now = Carbon::now();
+                $time = $now->year . '_' . $now->month;
+                $slip = $time . $random . Auth::id() . '.' . $extension;
+                $image->move(public_path('uploads/sdn'), $slip);
+
+                $deposit_details->image = $slip;
+                $deposit_details->save();
+            }
+        }
+        
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
