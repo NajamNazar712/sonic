@@ -7738,17 +7738,22 @@ if(session('department_id') == 7){
 
     public function rider_phone_unique(Request $request) {
         if ($request->filled('phone')) {
-            $rider = Rider::where('phone', $request->input('phone'));
-
-            if ($request->has('id')) {
-                $rider = $rider->where('id', '!=', $request->input('id'));
-            }
-
-            if (!$rider->exists()) {
+            if ($request->input('phone') == '0213-8772222') {
                 return 'true';
             }
             else {
-                return 'false';
+                $rider = Rider::where('phone', $request->input('phone'));
+
+                if ($request->has('id')) {
+                    $rider = $rider->where('id', '!=', $request->input('id'));
+                }
+
+                if (!$rider->exists()) {
+                    return 'true';
+                }
+                else {
+                    return 'false';
+                }
             }
         }
         else {
