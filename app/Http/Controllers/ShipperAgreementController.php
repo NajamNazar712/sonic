@@ -216,7 +216,7 @@ class ShipperAgreementController extends Controller
                                 <td colspan="1">' . $shipper->products->product_name . '</td>
                           </tr>
                           <tr>      
-                                <td colspan="1"><strong>Average Shipments</strong></td>
+                                <td colspan="1"><strong>Expected Average Shipments</strong></td>
                                 
                                 <td colspan="1">' . $shipper->average_shipments . '</td>
                           </tr>
