@@ -226,17 +226,17 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="average_shipment">Average Shipments:
+                                                        <label for="average_shipment">Expected Average Shipments:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                            <input type="text" class="form-control required" value="{{ old('average_shipment') }}" name="average_shipment" placeholder="Average Shipments">
+                                                            <input type="text" class="form-control required" value="{{ old('average_shipment') }}" name="average_shipment" placeholder="Expected Average Shipments">
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="average_shipment_duration">Average Shipment Duration:
+                                                        <label for="average_shipment_duration">Expected Average Shipment Duration:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
