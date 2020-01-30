@@ -392,7 +392,7 @@ class DeliveryController extends Controller
         return response()->json(['flag' => $flag , 'delivery_note' => $delivery_note_details]);
     }
     public function create_delivery_note(Request $request){
-
+        
         $shipments = explode(',',$request->shipment_ids);
         $open_box_ids = explode(',',$request->open_box_ids);
         $notifications = explode(',',$request->notification_ids);
@@ -401,6 +401,10 @@ class DeliveryController extends Controller
             $password = rand(10001,99999);
         }else{
             $password = NULL;
+        }
+        $order = false;
+        if($request->has('order_checkbox')){
+            $order = true;
         }
         $admin = Auth::id();
 
@@ -439,7 +443,8 @@ class DeliveryController extends Controller
                     'last_updated_at' => Carbon::now(),
                     'special_rider_name'=>$request->special_rider_name,
                     'special_rider_phone'=>$request->special_rider_phone,
-                    'special_rider' => 1
+                    'special_rider' => 1,
+                    'order' => $order
                 ]);
             }
             else{
@@ -451,18 +456,25 @@ class DeliveryController extends Controller
                     'admin_id' => $admin,
                     'total_cod_amount' => $total_cod_amount,
                     'password' => $password,
-                    'last_updated_at' => Carbon::now()
+                    'last_updated_at' => Carbon::now(),
+                    'ordering' => $order
                 ]);
             }
 
             if ($note) {
+                if (!$order) {  //Default
+                    sort($valid_shipments); //sort_valid_shipments;
+                }
+                $serial = 1;
                 foreach ($valid_shipments as $index => $shipment) {
                     DeliveryNoteShipment::create([
                         'delivery_note_id' => $note->id,
                         'shipment_id' => $shipment,
                         'notification' => $notifications[$index],
-                        'rider_information' => $rider_informations[$index]
+                        'rider_information' => $rider_informations[$index],
+                        'ordering' => $serial
                     ]);
+                    $serial++;
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
@@ -829,7 +841,7 @@ class DeliveryController extends Controller
         if ($delivery_note->exists()) {
             $total_shipments = 0;
             $total_cod_amount = 0;
-            $shipments = DeliveryNoteShipment::where('delivery_note_id', $request->id)->select('shipment_id')->orderBy('shipment_id')->get();
+            $shipments = DeliveryNoteShipment::where('delivery_note_id', $request->id)->select('shipment_id')->orderBy('ordering','asc','shipment_id','asc')->get();
 
             $shipment_details = '
                       <table class="table table-sm table-bordered border">
@@ -1079,8 +1091,9 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request'])
-            ->where('delivery_notes.id', $id);
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering'])
+            ->where('delivery_notes.id', $id)
+            ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -1852,8 +1865,9 @@ class DeliveryController extends Controller
                     ->where('rrb.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','rrb.received_or_refused_by'])
-            ->where('delivery_notes.id', $id);
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering'])
+            ->where('delivery_notes.id', $id)
+            ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
         return Datatables::of($deliveries)
             ->editColumn('tracking_number_link', function ($shipments) {

@@ -82,6 +82,16 @@
                 </table>
                 <form id="create_delivery_note_form" class="" method="post" action="{{ route('admin.delivery.note.create') }}">
                     <div class="row justify-content-center">
+                            <div class="col-2 text-center">
+                                <label class="font-medium-2 font-weight-bold block">Delivery Note Shipment(s) Order</label>
+                                <div class="form-group">
+                                    <label for="order_checkbox" class="font-medium-2 text-bold-600 mr-1">Default</label>
+                                    <input type="checkbox" name="order_checkbox" id="order_checkbox" class="switchery order_checkbox" data-color="info" data-size="sm" data-switchery="true">
+                                    <label for="order_checkbox" class="font-medium-2 text-bold-600 ml-1">Scanned</label>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="row justify-content-center">
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
@@ -92,6 +102,8 @@
                         <input type="hidden" name="selected_route_id" id="selected_route_id">
                         <input type="hidden" name="special_rider_name" id="special_rider_name">
                         <input type="hidden" name="special_rider_phone" id="special_rider_phone">
+
+
                         <div class="col-3">
                             <button type="submit" class="btn btn-primary btn-block ">Submit &amp; Print</button>
 
