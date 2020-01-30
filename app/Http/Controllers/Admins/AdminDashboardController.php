@@ -7657,6 +7657,7 @@ if(session('department_id') == 7){
             'route_id'=>$request->route_id,
             'rider_category_id'=>$request->rider_category,
             'status'=>1,
+            'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin)
         ]);
         if($rider){
@@ -7687,15 +7688,16 @@ if(session('department_id') == 7){
             return redirect()->back()
                 ->withErrors($validate);
         }
-        $rider = Rider::where('id',$id)->update([
-            'city_id'=>$request->city_id,
-            'name'=>$request->rider_name,
-            'phone'=>$request->phone,
-            'cnic'=>$request->cnic,
-            'address'=>$request->address,
-            'route_id'=>$request->route_id,
-            'rider_category_id'=>$request->rider_category
-        ]);
+        // $rider = Rider::where('id',$id)->update([
+        //     'city_id'=>$request->city_id,
+        //     'name'=>$request->rider_name,
+        //     'phone'=>$request->phone,
+        //     'cnic'=>$request->cnic,
+        //     'address'=>$request->address,
+        //     'route_id'=>$request->route_id,
+        //     'rider_category_id'=>$request->rider_category,
+        //     'special_rider' => ($request->has('special_rider_checkbox')? 1:0)
+        // ]);
 
         $rider = Rider::find($id);
 
@@ -7706,7 +7708,11 @@ if(session('department_id') == 7){
         $rider->address = $request->address;
         $rider->route_id = $request->route_id;
         $rider->rider_category_id = $request->rider_category;
-
+        if($request->has('special_rider_checkbox')){
+            $rider->special_rider = 1;
+        }else{
+            $rider->special_rider = 0;
+        }
         if($request->pin != '') {
             $rider->pin = bcrypt($request->pin);
         }

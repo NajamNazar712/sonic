@@ -808,15 +808,26 @@ class NotificationsController extends Controller
                 $body = str_replace('[' . $key . ']', $shipment[$field], $body);
               }
             }
-
-            if (strpos($body, '[rider]') !== FALSE) {
-                if ($delivery_note_shipment->rider_information) {
-                    $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
+            if($delivery_note->special_rider){
+                if (strpos($body, '[rider]') !== FALSE) {
+                    if ($delivery_note_shipment->rider_information) {
+                        $body = str_replace('[rider]', $delivery_note->special_rider_name . ' (' . $delivery_note->special_rider_phone . ')', $body);
+                    }
+                    else {
+                        $body = str_replace('[rider]', '', $body);
+                    }
                 }
-                else {
-                    $body = str_replace('[rider]', '', $body);
-                }
+            }else{
+              if (strpos($body, '[rider]') !== FALSE) {
+                  if ($delivery_note_shipment->rider_information) {
+                      $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
+                  }
+                  else {
+                      $body = str_replace('[rider]', '', $body);
+                  }
+              }
             }
+            
 
             if (strpos($body, '[company_name]') !== FALSE) {
               $body = str_replace('[company_name]', $shipper->name, $body);

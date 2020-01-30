@@ -14,7 +14,16 @@
 <form action="{{route('admin.management.rider.edit',['id'=>$rider_id])}}" method="post" class="mt-2" id="editRiderForm" novalidate="novalidate">
     @csrf
     @method('PUT')
-
+    <div class="row justify-content-center">
+        <div class="col-3">
+            <label class="font-medium-2 font-weight-bold block">Special Rider</label>
+            <div class="form-group">
+                <label for="all_shippers_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+                <input type="checkbox" name="special_rider_checkbox" id="special_rider_checkbox" class="switchery special_rider_checkbox" data-size="sm" data-switchery="true" {{ ($rider->special_rider)? 'checked':'' }}>
+                <label for="special_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+            </div>
+        </div>
+    </div>
     <div class="row mb-2">
         <div class="col">
             <fieldset class="form-group">
@@ -91,7 +100,8 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-
+        var elem = document.querySelector('.special_rider_checkbox');
+        var switchery = new Switchery(elem);
         $('.select2').select2({
             dropdownParent: $("#editRider")
         });
