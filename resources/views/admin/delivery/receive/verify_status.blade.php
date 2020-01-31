@@ -304,7 +304,7 @@
             var shipments = [];
             var status_array = [];
             $('#status_update_form').bind('submit', function(event) {
-
+                
                     var verify_form = this;
                     event.preventDefault();
                     var btn = $(document.activeElement).attr('id');
@@ -356,7 +356,9 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
-
+                                $(table.table().header()).find('input').val('');
+                                $(table.table().header()).find('select').val('').trigger('change.select2');
+                                table.columns().search('').draw();
                                 var shipment = $('#shipment_ids');
                                 var id = '';
                                 var count = table.data().count();
@@ -395,6 +397,9 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
+                                $(table.table().header()).find('input').val('');
+                                $(table.table().header()).find('select').val('').trigger('change.select2');
+                                table.columns().search('').draw();
                                 var shipment = $('#shipment_ids');
                                 var id = '';
                                 var count = table.data().count();
