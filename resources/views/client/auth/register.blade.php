@@ -445,19 +445,19 @@
                                         <!-- Step 3 -->
                                         <h6>Bank Information</h6>
                                         <fieldset>
-                                            <div class="row">
+                                            <div class="row position-relative vertical-scroll" id="bankInfo" style="height: 385px;overflow: auto;">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="bank_name">
                                                             Bank Name:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        {{--<input type="text" class="form-control required" value="{{ old('bank_name') }}"   name="bank_name">--}}
+                                                        
                                                         <div>
-                                                            <select name="bank_name" id="bank_name" class="select2 form-control required" style="width: 100%">
+                                                            <select name="bank_name[0]" id="bank_name" class="select2 form-control required" style="width: 100%">
 
                                                                 @foreach($banks as $bank)
-                                                                    <option value="{{$bank->id}}"  {{ old('bank_name') == $bank->id ? 'selected' : '' }} >{{$bank->name}}</option>
+                                                                    <option value="{{$bank->id}}"  {{ old('bank_name.0') == $bank->id ? 'selected' : '' }} >{{$bank->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -467,12 +467,12 @@
                                                             Branch Name:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('bank_branch') }}" name="bank_branch" placeholder="Branch Name*">
+                                                        <input type="text" class="form-control required" value="{{ old('bank_branch.0') }}" name="bank_branch[0]" placeholder="Branch Name*">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="account_name">Account Number:
                                                             <span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required" value="{{ old('account_no') }}" name="account_no" placeholder="Account Number*">
+                                                        <input type="text" class="form-control required" value="{{ old('account_no.0') }}" name="account_no[0]" placeholder="Account Number*">
                                                     </div>
                                                     <div class="form-group">
 
@@ -496,7 +496,7 @@
                                                             Account Title:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type='text' class="form-control required" value="{{ old('account_title') }}" name="account_title" placeholder="Account Title*">
+                                                        <input type='text' class="form-control required" value="{{ old('account_title.0') }}" name="account_title[0]" placeholder="Account Title*">
 
                                                     </div>
 
@@ -505,7 +505,7 @@
                                                             IBAN Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no') }}" name="iban_no">
+                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no.0') }}" name="iban_no[0]">
                                                     </div>
 
                                                         <div class="form-group">
@@ -514,17 +514,115 @@
                                                                 <span class="danger">*</span>
                                                             </label>
                                                             <div>
-                                                                <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
+                                                                <select name="bank_city[0]" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                     @foreach($all_cities as $bank_city)
-                                                                       <option value="{{$bank_city->id}}"  {{ old('bank_city') == $bank_city->id ? 'selected' : '' }} >{{$bank_city->name}}</option>
+                                                                       <option value="{{$bank_city->id}}"  {{ old('bank_city.0') == $bank_city->id ? 'selected' : '' }} >{{$bank_city->name}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
                                                         </div>
 
                                                 </div>
+                                                <div class="col-md-12">
+                                                    <div id="multiple_banks_section" >
+                                                @if (old('bank_name'))
+                                                    @php ($b = 1)
+                                                @else
+                                                    @php ($b = 0)
+                                                @endif
+                                                @while (old('bank_name.'.$b) != null)
+                                                        <div class="card nbank" id="">
+                                                            <div class="card-header">
+                                                                <h3 class="card-title">New Bank</h3>
+                                                                <div class="heading-elements">
+                                                                    <ul class="list-inline mb-0">
+                                                                        <li><a data-action="close"><i class="ft-x"></i></a></li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                                    <div class="card-body">
+                                                                        <div class="row">
+                                                                            <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="bank_name">
+                                                                                Bank Name:
+                                                                                <span class="danger">*</span>
+                                                                            </label>
+                                                                            
+                                                                            <div>
+                                                                                <select name="bank_name[]" class="select2 form-control required" style="width: 100%">
 
+                                                                                    @foreach($banks as $bank)
+                                                                                        <option value="{{$bank->id}}"  selected="{{ (collect(old('bank_name.'.$b))->contains($bank->id)) ? 'selected':'' }}">{{$bank->name}}</option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="bank_branch">
+                                                                                Branch Name:
+                                                                                <span class="danger">*</span>
+                                                                            </label>
+                                                                            <input type="text" class="form-control required" value="{{ old('bank_branch.'.$b) }}" name="bank_branch[]" placeholder="Branch Name*">
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="account_name">Account Number:
+                                                                                <span class="danger">*</span></label>
+                                                                            <input type="text" class="form-control required" value="{{ old('account_no.'.$b) }}" name="account_no[]" placeholder="Account Number*">
+                                                                        </div>
+
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="account_title">
+                                                                                Account Title:
+                                                                                <span class="danger">*</span>
+                                                                            </label>
+                                                                            <input type='text' class="form-control required" value="{{ old('account_title.'.$b) }}" name="account_title[]" placeholder="Account Title*">
+
+                                                                        </div>
+
+                                                                        <div class="form-group">
+                                                                            <label for="iban">
+                                                                                IBAN Number:
+                                                                                <span class="danger">*</span>
+                                                                            </label>
+                                                                            <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no.'.$b) }}" name="iban_no[]">
+                                                                        </div>
+
+                                                                            <div class="form-group">
+
+                                                                                <label for="bank_city">Bank City:
+                                                                                    <span class="danger">*</span>
+                                                                                </label>
+                                                                                <div>
+                                                                                    <select name="bank_city" id="bank_city[]" class="select2 form-control required" style="width: 100%">
+                                                                                        @foreach($all_cities as $bank_city)
+                                                                                           <option value="{{$bank_city->id}}"  {{ (collect(old('bank_city.'.$b))->contains($bank_city->id)) ? 'selected' : '' }} >{{$bank_city->name}}</option>
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                        </div>
+                                                @php ($b++)
+                                                @endwhile
+                                                
                                                 </div>
+                                                </div>
+                                                    
+                                            </div>
+                                            
+                                            <div class="row" id="more_banks_btn_div">
+                                                <div class="col-12">
+                                                        <button id="addMoreBanks" type="button" class="btn btn-primary btn-min-width mr-1 mb-1"><i class="la la-plus"></i>&nbsp; Add More Banks</button>
+                                                </div>
+                                                
+                                            </div>
                                             <div id="billing_information_div" class="row d-none">
                                                 <div class="col-md-6">
 
@@ -757,6 +855,11 @@
                $('#generation_date').removeClass('required');
            }
        });
+       //multiple banks
+       $('select[name="bank_name[]"]').prepend('<option value="" selected="selected"></option>').select2({
+           placeholder:'Select Bank',
+       });
+
 
        $('#bank_name').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank',
@@ -770,22 +873,20 @@
 
            if (this.value == 2) {
                $('#billing_information_div').removeClass('d-none');
+               $('#more_banks_btn_div').addClass('d-none');
            }
            else {
+
+               $('#more_banks_btn_div').removeClass('d-none');
                $('#billing_information_div').addClass('d-none');
            }
        });
-        {{--var generation_date = $('#generation_date').pickadate({--}}
-            {{--firstDay: 1,--}}
-            {{--clear: 'Clear',--}}
-            {{--max: '{{ Carbon\Carbon::now() }}',--}}
-            {{--format:'dd mmmm, yyyy',--}}
-            {{--selectYears: true,--}}
-            {{--selectMonths: true,--}}
-            {{--formatSubmit: 'yyyy-mm-dd 00:00:00',--}}
-            {{--hiddenSuffix: '_formatted'--}}
-        {{--});--}}
+        
        $('#bank_city').prepend('<option value="" selected="selected"></option>').select2({
+           placeholder:'Select Bank City',
+        
+       });
+       $('select[name="bank_city[]"]').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank City',
         
        });
@@ -853,9 +954,57 @@
             wheelPropagation: true
         });
         $('#shipInfo').perfectScrollbar('update');
+        $('#bankInfo').perfectScrollbar({
+            suppressScrollX : true,
+            theme: 'dark',
+            wheelPropagation: true
+        });
+        $('#bankInfo').perfectScrollbar('update');
+
+        var banks_count = parseInt('{{$b}}');
+        $('body').on('click', '#addMoreBanks',function(){
+            
+            $.get('new/bank', function(bView){
+                $('#multiple_banks_section').append(bView);
+            }).done(function(){
+                
+                var bcc = $('.card.nbank').length;
+                var bid = $('.card.nbank').eq(bcc-1);
+                var banking_div = banks_count + 1;
+                bid.attr('id','banking_'+banking_div);
+                $('#banking_'+banks_count+' h3.card-title' ).text('Bank '+banks_count);
+                var innerdivcount = banks_count + 1;
+                var temp_bank_name = $('#banking_'+banks_count+' select[name="temp_bank_name"]');
+                temp_bank_name.attr('name','bank_name['+innerdivcount+']');
+                var temp_bank_city = $('#banking_'+banks_count+' select[name="temp_bank_city"]');
+                temp_bank_city.attr('name','bank_city['+innerdivcount+']');
+                var temp_bank_branch = $('#banking_'+banks_count+' input[name="temp_bank_branch"]');
+                temp_bank_branch.attr('name','bank_branch['+innerdivcount+']');
+                var temp_account_no = $('#banking_'+banks_count+' input[name="temp_account_no"]');
+                temp_account_no.attr('name','account_no['+innerdivcount+']');
+                var temp_account_title = $('#banking_'+banks_count+' input[name="temp_account_title"]');
+                temp_account_title.attr('name','account_title['+innerdivcount+']');
+                var temp_iban_no = $('#banking_'+banks_count+' input[name="temp_iban_no"]');
+                temp_iban_no.attr('name','iban_no['+innerdivcount+']');
+                $('#bankInfo').stop().animate({
+                  scrollTop: $('#bankInfo')[0].scrollHeight
+                }, 2000);
+                $('#banking_' + banks_count + ' .select2').select2({
+                });
+
+                $('#banking_' + banks_count + ' a[data-action="close"]').on('click',function(){
+                    $(this).closest('.card').remove();
+                    $('#bankInfo').perfectScrollbar('update');
+                });
+                banks_count++;
+            });
+        });
 
 
-        var count = '{{$i}}';
+
+
+
+        var count = parseInt('{{$i}}');
         $('body').on('click','#addMoreAddress',function () {
             $.get( 'new/address', function( data ) {
                 $('#newAddress').append(data);
@@ -863,7 +1012,7 @@
             }).done(function() {
                 var cc = $('.card.naddress').length;
                 var nid = $('.card.naddress').eq(cc-1);
-
+                count++;
                 nid.attr('id','shipping_'+count);
                 $('#shipping_'+count+' h3.card-title' ).text('Address '+count);
                 //becasuse count is starting from 0 and 0 index is there by default for following values
@@ -891,11 +1040,11 @@
                 });
                 $('#shipping_' + count + ' a[data-action="close"]').on('click',function(){
                   //  $(this).closest('.card').removeClass().slideUp('fast'); // comenting this because display none will allow values to be posted
-                   $(this).closest('.card').remove();
-                $('#shipInfo').perfectScrollbar('update');
+                    $(this).closest('.card').remove();
+                    $('#shipInfo').perfectScrollbar('update');
 
                 });
-                count++;
+                
 
             });
 

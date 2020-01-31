@@ -344,6 +344,11 @@ class RegisterController extends Controller
         $cities = City::where('pickup',1)->get();
         return view('client.components.pickup_address')->with(['cities'=>$cities,'products'=>$products]);
     }
+    public function bankView(){
+        $banks = BanksList::all();
+        $city_list = City::where('status',1)->get();
+        return view('client.components.banks')->with(['banks'=>$banks,'all_cities'=>$city_list]);
+    }
     public function checkCompanyName(Request $request){
 
 //        dd($request);

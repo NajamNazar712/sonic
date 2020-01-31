@@ -34,6 +34,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('register');
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
+    Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
 
