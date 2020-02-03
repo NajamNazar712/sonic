@@ -1424,6 +1424,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        Route::prefix('minimum_chargeable_weight')->name('minimum_chargeable_weight.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
+        });
+
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
