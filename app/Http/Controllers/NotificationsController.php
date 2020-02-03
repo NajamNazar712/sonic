@@ -3990,6 +3990,56 @@ class NotificationsController extends Controller
                 }
                 
             }
+            else if($id == 57){
+              $shipper = User::find($reference_1_id);
+              if($shipper){
+                  if (strpos($subject, '[account_id]') !== FALSE) {
+                    $subject = str_replace('[account_id]', $shipper->id, $subject);
+                  }
+
+                  if (strpos($body, '[account_id]') !== FALSE) {
+                    $body = str_replace('[account_id]', $shipper->id, $body);
+                  }
+                  if (strpos($subject, '[shipper_name]') !== FALSE) {
+                    $subject = str_replace('[shipper_name]', $shipper->name, $subject);
+                  }
+
+                  if (strpos($body, '[shipper_name]') !== FALSE) {
+                    $body = str_replace('[shipper_name]', $shipper->name, $body);
+                  }
+
+                  $to = array();
+                  $cc = array();
+                  $sale_person_email = '';
+                  $sale_person_id = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->select('admin_id')->first();
+                  if($sale_person_id){
+                    $sale_person_email = Admin::find($sale_person_id->admin_id)->email;
+                  }
+                  $sale_head_email = Admin::where('role_id', 4)->select('email')->first();
+
+                  if($sale_person_email != ''){
+                    $cc[] = $sale_person_email;
+                  }
+
+                  if($sale_head_email){
+                    $cc[] = $sale_head_email->email;
+                  }
+
+                  $to[] = $shipper->email;
+
+                  self::email($subject, $body, $to, $cc);
+              }
+            }
+            else if($id == 58){
+                 $shipper = User::find($reference_1_id);
+                if($shipper){
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                      $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    $to = $shipper->phone;
+                    self::sms($body, $to);
+                }
+            }
         }
       }
     }

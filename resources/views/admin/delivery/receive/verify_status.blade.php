@@ -47,6 +47,7 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Service Type</th>
+                            <th class="border-primary border-darken-1">Open Box</th>
                         </tr>
                         </thead>
                     </table>
@@ -183,6 +184,7 @@
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'shipper',name: 'users.name', class: 'align-middle shipper'},
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
+                    {data:'open_box',name: 'open_box', class: 'align-middle text-center open_box',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -228,7 +230,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.call_verification') || $(header).is('.fake_status') || $(header).is('.received_or_refused_by')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.call_verification') || $(header).is('.fake_status') || $(header).is('.received_or_refused_by') || $(header).is('.open_box')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -302,7 +304,7 @@
             var shipments = [];
             var status_array = [];
             $('#status_update_form').bind('submit', function(event) {
-
+                
                     var verify_form = this;
                     event.preventDefault();
                     var btn = $(document.activeElement).attr('id');
@@ -354,7 +356,9 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
-
+                                $(table.table().header()).find('input').val('');
+                                $(table.table().header()).find('select').val('').trigger('change.select2');
+                                table.columns().search('').draw();
                                 var shipment = $('#shipment_ids');
                                 var id = '';
                                 var count = table.data().count();
@@ -393,6 +397,9 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
+                                $(table.table().header()).find('input').val('');
+                                $(table.table().header()).find('select').val('').trigger('change.select2');
+                                table.columns().search('').draw();
                                 var shipment = $('#shipment_ids');
                                 var id = '';
                                 var count = table.data().count();

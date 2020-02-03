@@ -341,22 +341,12 @@
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.cargo_received.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_cargo_no': $('#search_cargo_no').val(),
-                            'search_tracking': $('#search_tracking_no').val(),
-                            'search_origin': $('#search_origin').val(),
-                            'search_destination': $('#search_destination').val(),
-                            'search_shippimg_modes': $('#search_shippimg_modes').val(),
-                            'search_transit_date': $('input[name="transit_date_formatted"]').val(),
-                            'search_received_date': $('input[name="received_date_formatted"]').val(),
-                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
-                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
-                            'cargo_type': $('#cargo_type').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

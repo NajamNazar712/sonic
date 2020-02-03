@@ -15,6 +15,7 @@
                     <input type="hidden" value="{{$return_note_id}}" id="return_note" name="return_note_id">
                     <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
+                    <input type="hidden" name="open_box_ids" id="open_box_ids">
 
                     <div class="row justify-content-center">
                         <div class="col-4">
@@ -50,6 +51,7 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Collection Charges</th>
+                            <th class="border-primary border-darken-1">Open Box</th>
                             <th class="border-primary border-darken-1">Action</th>
                         </tr>
                         </thead>
@@ -155,7 +157,7 @@
                 width:'100%',
                 allowClear:true
             });
-
+            var open_box_ids = [];
             var selected_rows = [];
             var shipment_remarks_obj = {};
             var shipment_received_refused_obj = {};
@@ -249,6 +251,7 @@
                                                         method: 'POST',
                                                         data: {
                                                             'shipment_ids': selected_rows,
+                                                            'open_box_ids': open_box_ids,
                                                             'return_note_id': note_id,
                                                             'remarks': shipment_remarks_obj,
                                                             'received_or_refused_by': shipment_received_refused_obj,
@@ -391,6 +394,7 @@
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data:'charges',name: 'shipments.charges', class: 'align-middle charges'},
+                    {data:'open_box',name: 'open_box', class: 'align-middle text-center open_box',orderable: false, searchable: false},
                     {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -501,6 +505,19 @@
                 reason.val('').trigger("change");
                 $('.remarks input').val('');
             });
+
+            $('body').on('click', 'input.open_box', function(){
+                var open_box_id = $(this).parents('tr').attr('id');
+                var ob_index = $.inArray(open_box_id, open_box_ids);
+
+                if (ob_index === -1) {
+                    open_box_ids.push(open_box_id);
+                }
+                else {
+                    open_box_ids.splice(ob_index, 1);
+                }
+            });
+
             $('#status_update_form').on('keypress',function (e) {
                 if(e.which == 13) {
                     e.preventDefault();
@@ -534,12 +551,17 @@
                     dangerMode: true
                 }).then(function (confirm) {
                     if (confirm) {
+                        $(table.table().header()).find('input').val('');
+                        $(table.table().header()).find('select').val('').trigger('change.select2');
+                        table.columns().search('').draw();
                         var id = '';
                         var count = table.data().count();
                         for(var i = 0;i<count;i++){
                             id = table.row( i ).id();
                             shipments.push(id);
                         }
+                        var open_box_input = $('#open_box_ids');
+                        open_box_input.val(open_box_ids);
                         shipment.val(shipments);
                         this_form.submit();
                     }
@@ -642,6 +664,7 @@
                                                     method: 'POST',
                                                     data: {
                                                         'shipment_ids': selected_rows,
+                                                        'open_box_ids': open_box_ids,
                                                         'return_note_id': note_id,
                                                         'shipment_status':select_all_status,
                                                         'remarks': shipment_remarks_obj,
@@ -667,6 +690,7 @@
                                             method: 'POST',
                                             data: {
                                                 'shipment_ids': selected_rows,
+                                                'open_box_ids': open_box_ids,
                                                 'return_note_id': note_id,
                                                 'shipment_status':select_all_status,
                                                 'remarks': shipment_remarks_obj,
@@ -723,6 +747,7 @@
                                                 method: 'POST',
                                                 data: {
                                                     'shipment_ids': selected_rows,
+                                                    'open_box_ids': open_box_ids,
                                                     'return_note_id': note_id,
                                                     'shipment_status':select_all_status,
                                                     'remarks': shipment_remarks,
@@ -757,7 +782,7 @@
                 }
 
             });
-            {{--var return_note_status = {{$return_note_status}};--}}
+            
 
 
 

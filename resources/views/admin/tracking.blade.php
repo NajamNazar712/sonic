@@ -255,7 +255,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
+    <script src="https://kit.fontawesome.com/e7bc565afe.js" crossorigin="anonymous"></script>
 	<script>
 		$(document).ready(function() {
             $('#claim_product_cost').inputmask({
@@ -430,10 +430,13 @@
                             $.each(data.shipments, function (id, details) {
                                 // console.log(details.crm_requests);
                                 var shipment = '';
-
+                                var open_box_iocn = '';
+                                if(details.open_box){
+                                    open_box_iocn = '<span><i class="fas fa-box-open"></i></span>';
+                                }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '</div>';
+                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'</div>';
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 if ('complain' in details) {
@@ -831,6 +834,36 @@
                                         }
                                         shipment += '<td>' + crm_request.created_at + '</td>';
                                         shipment += '<td>' + crm_request.created_by + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
+
+                                if ('open_box_journey' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Open Box History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment += '<table class="table table-sm table-borderless datatable open_box_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>Created By</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.open_box_journey, function (index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + history.created_by + '</td>';
                                         shipment += '</tr>';
                                     });
 

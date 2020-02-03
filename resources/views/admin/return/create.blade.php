@@ -70,6 +70,7 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Open Box</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -79,6 +80,7 @@
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
+                        <input type="hidden" name="open_box_ids" id="open_box_ids">
                         <input type="hidden" name="rider_id" id="selected_rider_id">
                         <input type="hidden" name="route_id" id="selected_route_id">
                         <div class="col-3">
@@ -205,6 +207,7 @@
                     {name: 'amount', class: 'align-middle amount', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
                     {name: 'status', class: 'align-middle status', orderable: false},
+                    {name: 'open_box', class: 'align-middle open_box', orderable: false},
                     {name: 'action', class: 'align-middle action',orderable: false,searchable:false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -265,7 +268,9 @@
                             } else {
                                 var rowNo = table.rows().count();
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
-                                var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
+                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, open_box, remove]).node().id = data.shId;
                                 table.draw(false);
                                 $('tr#'+row).attr('class',data.class);
                                 scan_sound(1);
@@ -301,7 +306,9 @@
                                 } else {
                                     var rowNo = table.rows().count();
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
-                                    var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
+                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                    var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, open_box, remove]).node().id = data.shId;
                                     table.draw(false);
                                     $('tr#'+row).attr('class',data.class);
                                     scan_sound(1);
@@ -392,6 +399,14 @@
                         }).then(function (confirm) {
                             if (confirm) {
                                 blockPagePermanently();
+                                open_box_ids = [];
+                                table.rows().every(function(index) {
+                                    var node = $(this.node());
+                                    if(node.find('td.open_box input').is(':checked')){
+                                        open_box_ids.push(parseInt(node.attr('id')));
+                                    }
+                                });
+                                $('#create_return_note_form input#open_box_ids').val(open_box_ids);
                                 $('#create_return_note_form input#shipment_ids').val(shipment_ids);
                                 $('#create_return_note_form input#selected_rider_id').val(rider);
                                 $('#create_return_note_form input#selected_route_id').val(route);

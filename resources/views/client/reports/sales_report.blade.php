@@ -346,21 +346,12 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('cod.reports.sales.list') }}',
-                        data: {
-                            'page': 'all',
-                            'search_tracking': $('#search_tracking_no').val(),
-                            'search_origin': $('#search_origin').val(),
-                            'search_destination': $('#search_destination').val(),
-                            'search_status': $('#search_status').val(),
-                            'search_shipping_mode': $('#search_shipping_mode').val(),
-                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
-                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
-                            'dr_search_date_from': $('input[name="dr_search_date_from_formatted"]').val(),
-                            'dr_search_date_to': $('input[name="dr_search_date_to_formatted"]').val()
-                        },
+                        data: params,
                         success: function (result) {
                             head = [];
 

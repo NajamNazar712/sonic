@@ -16,6 +16,7 @@
                     <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
                     <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
+                    <input type="hidden" name="open_box_ids" id="open_box_ids">
                     <input type="hidden" name="password" id="password">
                     <div class="row justify-content-center">
                         <div class="col-12 mb-2">
@@ -62,6 +63,7 @@
                             <th class="border-primary border-darken-1">Current Status</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Attempts Count</th>
+                            <th class="border-primary border-darken-1">Open Box</th>
                             <th class="border-primary border-darken-1">Clear</th>
                         </tr>
                         </thead>
@@ -557,6 +559,7 @@
             var shipment_reason = [];
             var shipment_remarks = [];
             var selected_rows = [];
+            var open_box_ids = [];
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -585,7 +588,7 @@
                                         selected_rows.push(id);
                                     }
 
-                                    table.button('.delivered').enable();
+                                    
                                     $('#submit_selected_status').attr('disabled', false);
                                 }
                             });
@@ -613,9 +616,7 @@
 
                                 }
                             });
-                            if (selected_rows.length == 0) {
-                                table.button('.delivered').disable();
-                            }
+                            
                             $('#submit_selected_status').attr('disabled', true);
                         }
                     },
@@ -655,6 +656,7 @@
                     {data:'current_status',name: 'current_status', class: 'align-middle current_status'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
                     {data:'attempts' ,name: 'shipments.id', class: 'align-middle attempts'},
+                    {data:'open_box' ,name: 'open_box', class: 'align-middle test-center open_box',orderable: false, searchable: false},
                     {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -700,7 +702,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')|| $(header).is('.open_box')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -736,11 +738,11 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button('.delivered').enable();
+                    
                     $('#submit_selected_status').attr('disabled', false);
                 }
                 else {
-                    table.button('.delivered').disable();
+                    
                     $('#submit_selected_status').attr('disabled', true);
                 }
             });
@@ -780,6 +782,19 @@
                     }
                 });
             });
+
+            $('body').on('click', 'input.open_box', function(){
+                var open_box_id = $(this).parents('tr').attr('id');
+                var ob_index = $.inArray(open_box_id, open_box_ids);
+
+                if (ob_index === -1) {
+                    open_box_ids.push(open_box_id);
+                }
+                else {
+                    open_box_ids.splice(ob_index, 1);
+                }
+            });
+
             $('.iad_radio').on('click', function () {
                 var id = $(this).attr('id');
                 var status = $(this).attr('status');
@@ -1017,6 +1032,7 @@
                         if (confirm) {
 
                             var shipment = $('#shipment_ids');
+                            var open_box_input = $('#open_box_ids');
                             event.preventDefault();
                             var id = '';
                             var count = table.data().count();
@@ -1025,6 +1041,9 @@
                                 shipments.push(id);
                             }
                             shipment.val(shipments);
+                            open_box_input.val(open_box_ids);
+                            
+                            
                             blockPagePermanently();
                             this_form.submit();
                         }
@@ -1414,6 +1433,7 @@
             var shipment_received_refused_obj = {};
             var submit_all_status_flag = true;
             $('#submit_selected_status').on('click', function () {
+
                 var select_all_status = $('#select_all_status').val();
 
                 var delivery_note = $('#delivery_note').val();
@@ -1527,6 +1547,7 @@
                                         method: 'POST',
                                         data: {
                                             'shipment_ids': selected_rows,
+                                            'open_box_ids': open_box_ids,
                                             'selected_status': select_all_status,
                                             'selected_reason': select_all_reason,
                                             'delivery_note_id': delivery_note,

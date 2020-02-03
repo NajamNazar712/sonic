@@ -121,13 +121,12 @@
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
-
+                var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.pending.ajax') }}',
-                    data: {
-                        'page': 'all',
-                        'sale_persons': $('#search_admins').val(),
-                    },
+                    data: params,
                     success: function (result) {
                         head = [];
 
@@ -160,7 +159,7 @@
                             row.push(values.name);
                             row.push(values.city);
                             row.push(values.poc);
-                            row.push(values.phone);
+                            row.push(values.shipper_phone);
                             row.push(values.address);
                             row.push(values.email);
                             row.push(values.product_name);
@@ -220,7 +219,7 @@
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
-                {data: 'phone', name: 'phone', class: 'align-middle phone'},
+                {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle phone'},
                 {data: 'address', name: 'address', class: 'align-middle address'},
                 {data: 'email', name: 'email', class: 'align-middle email'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},

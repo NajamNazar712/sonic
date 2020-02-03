@@ -6401,7 +6401,7 @@ if(session('department_id') == 7){
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6492,6 +6492,20 @@ if(session('department_id') == 7){
                 else {
                     $query->whereRaw('false');
                 }
+            })
+            ->addColumn('shipper_phone', function($users){
+                $shipper_phone = '';
+                $shipper_phone .= $users->phone1;
+                $shipper_phone .= ($users->phone2) ? " / ".$users->phone2:'';
+                return $shipper_phone;
+            })
+            ->filterColumn('shipper_phone', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('users.phone2', 'like', '%' . $keyword . '%');
+                    });
             })
             ->addColumn("action", function ($result) {
                 if(in_array($result->id, session('tagged_shippers'))){
@@ -6588,7 +6602,7 @@ if(session('department_id') == 7){
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6642,6 +6656,20 @@ if(session('department_id') == 7){
                 elseif($users->documents_status == 3){
                     return "Rejected";
                 }
+            })
+            ->addColumn('shipper_phone', function($users){
+                $shipper_phone = '';
+                $shipper_phone .= $users->phone1;
+                $shipper_phone .= ($users->phone2) ? " / ".$users->phone2:'';
+                return $shipper_phone;
+            })
+            ->filterColumn('shipper_phone', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('users.phone2', 'like', '%' . $keyword . '%');
+                    });
             })
             ->editColumn('status', function ($users) {
                 return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
@@ -8000,7 +8028,11 @@ if(session('department_id') == 7){
 
     public function userDocuments($id){
         $documents = UserDocumentAttachment::where('user_id', $id)->first();
+
         $user = User::find($id);
+        if($documents == null){
+            $documents = false;
+        }
         return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status]);
     }
 
@@ -8080,18 +8112,9 @@ if(session('department_id') == 7){
                 $user_attachment->blank_cheque_image = $filename;
             }
             $user_attachment->save();
-
-            $user_attachment_status = User::find($request->user_id);
-            if($user_attachment->filled_and_signed_pdf != null && $user_attachment->signed_acknowledgement_pdf != null  && $user_attachment->cnic_front_image != null  && $user_attachment->cnic_back_image != null  && $user_attachment->blank_cheque_image != null){
-                $user_attachment_status->documents_status = 1;
-            }
-            else{
-                $user_attachment_status->documents_status = 0;
-            }
-            $user_attachment_status->save();
         }
         else{
-            $document_status = true;
+            
             $new_user_attachment = new UserDocumentAttachment();
             if ($request->hasFile('filled_and_signed_pdf')) {
                 $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
@@ -8099,59 +8122,56 @@ if(session('department_id') == 7){
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->filled_and_signed_pdf = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             if ($request->hasFile('signed_acknowledgement_pdf')) {
                 $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->signed_acknowledgement_pdf = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             if ($request->hasFile('cnic_front_image')) {
                 $filename = 'cnic_front_image_' . $request->user_id . '.png';
                 $file = $request->file('cnic_front_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->cnic_front_image = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             if ($request->hasFile('cnic_back_image')) {
                 $filename = 'cnic_back_image_' . $request->user_id . '.png';
                 $file = $request->file('cnic_back_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->cnic_back_image = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             if ($request->hasFile('blank_cheque_image')) {
                 $filename = 'blank_cheque_image_' . $request->user_id . '.png';
                 $file = $request->file('blank_cheque_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->blank_cheque_image = $filename;
             }
-            else{
-                $document_status = false;
-            }
+            
             $new_user_attachment->user_id = $request->user_id;
             $new_user_attachment->save();
 
-            $user_attachment_status = User::find($request->user_id);
-            if($document_status == true){
-                $user_attachment_status->documents_status = 1;
-            }
-            else{
-                $user_attachment_status->documents_status = 0;
-            }
-            $user_attachment_status->save();
+            
         }
 
         return redirect()->back()->with(['success' => 'Files uploaded successfully']);
+    }
+
+    public function userDocumentsConfirm(Request $request){
+        $user = User::find($request->user_id);
+        if($user){
+            $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+            if($user_attachment->filled_and_signed_pdf != null && $user_attachment->signed_acknowledgement_pdf != null  && $user_attachment->cnic_front_image != null  && $user_attachment->cnic_back_image != null  && $user_attachment->blank_cheque_image != null){
+                $user->documents_status = 1;
+                $user->save();
+            }
+            
+            return response()->json(['status' => 1,'success' => 'Files confirmed successfully']);
+        }
+        return response()->json(['error' => 'User not found!']);
     }
 }
 

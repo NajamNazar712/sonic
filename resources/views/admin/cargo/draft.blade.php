@@ -67,12 +67,12 @@
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
-
+                var params = table.ajax.params();
+                params.start = 0;
+                params.length = -1;
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.cargo.draft.list') }}',
-                    data: {
-                        'page': 'all',
-                    },
+                    data: params,
                     success: function (result) {
                         head = [];
                         head.push('S.No');
