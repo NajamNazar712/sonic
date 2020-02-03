@@ -653,7 +653,7 @@
                                         <li><a class="menu-item" href="{{ route('admin.settings.foc_account.index') }}">FOC Accounts</a>
                                         </li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(302, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(303, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.minimum_chargeable_weight.index') }}">Minimum Chargeable Weight</a>
                                         </li>
                                     @endif
