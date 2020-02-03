@@ -3523,11 +3523,6 @@ use Yajra\Datatables\Datatables;
 
         public function negative_balance_customers_index()
         {
-            $negative = DB::connection('reports')->table('pending_payment_shipments')->leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
-                ->leftjoin('users as u','u.id','=','s.user_id')
-                ->select('u.id as account_id','u.name as name', DB::raw('SUM(pending_payment_shipments.payable) as sum_payable'))
-                ->where('payable','<',0)->groupBy('u.id')->get();
-                return $negative;
             return view('admin.reports.invoice_for_negative_balance_customers');
 
         }
