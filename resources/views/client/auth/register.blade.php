@@ -454,7 +454,7 @@
                                                         </label>
                                                         
                                                         <div>
-                                                            <select name="bank_name[0]" id="bank_name" class="select2 form-control required" style="width: 100%">
+                                                            <select name="bank_name[]" id="bank_name" class="select2 form-control required" style="width: 100%">
 
                                                                 @foreach($banks as $bank)
                                                                     <option value="{{$bank->id}}"  {{ old('bank_name.0') == $bank->id ? 'selected' : '' }} >{{$bank->name}}</option>
@@ -467,12 +467,12 @@
                                                             Branch Name:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('bank_branch.0') }}" name="bank_branch[0]" placeholder="Branch Name*">
+                                                        <input type="text" class="form-control required" value="{{ old('bank_branch.0') }}" name="bank_branch[]" placeholder="Branch Name*">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="account_name">Account Number:
                                                             <span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required" value="{{ old('account_no.0') }}" name="account_no[0]" placeholder="Account Number*">
+                                                        <input type="text" class="form-control required" value="{{ old('account_no.0') }}" name="account_no[]" placeholder="Account Number*">
                                                     </div>
                                                     <div class="form-group">
 
@@ -496,7 +496,7 @@
                                                             Account Title:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type='text' class="form-control required" value="{{ old('account_title.0') }}" name="account_title[0]" placeholder="Account Title*">
+                                                        <input type='text' class="form-control required" value="{{ old('account_title.0') }}" name="account_title[]" placeholder="Account Title*">
 
                                                     </div>
 
@@ -505,7 +505,7 @@
                                                             IBAN Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no.0') }}" name="iban_no[0]">
+                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no.0') }}" name="iban_no[]">
                                                     </div>
 
                                                         <div class="form-group">
@@ -514,7 +514,7 @@
                                                                 <span class="danger">*</span>
                                                             </label>
                                                             <div>
-                                                                <select name="bank_city[0]" id="bank_city" class="select2 form-control required" style="width: 100%">
+                                                                <select name="bank_city[]" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                     @foreach($all_cities as $bank_city)
                                                                        <option value="{{$bank_city->id}}"  {{ old('bank_city.0') == $bank_city->id ? 'selected' : '' }} >{{$bank_city->name}}</option>
                                                                     @endforeach
@@ -967,32 +967,32 @@
             $.get('new/bank', function(bView){
                 $('#multiple_banks_section').append(bView);
             }).done(function(){
-                
                 var bcc = $('.card.nbank').length;
                 var bid = $('.card.nbank').eq(bcc-1);
                 var banking_div = banks_count + 1;
+                console.log(banking_div);
                 bid.attr('id','banking_'+banking_div);
-                $('#banking_'+banks_count+' h3.card-title' ).text('Bank '+banks_count);
+                $('#banking_'+banking_div+' h3.card-title' ).text('Bank '+banking_div);
                 var innerdivcount = banks_count + 1;
-                var temp_bank_name = $('#banking_'+banks_count+' select[name="temp_bank_name"]');
+                var temp_bank_name = $('#banking_'+banking_div+' select[name="temp_bank_name"]');
                 temp_bank_name.attr('name','bank_name['+innerdivcount+']');
-                var temp_bank_city = $('#banking_'+banks_count+' select[name="temp_bank_city"]');
+                var temp_bank_city = $('#banking_'+banking_div+' select[name="temp_bank_city"]');
                 temp_bank_city.attr('name','bank_city['+innerdivcount+']');
-                var temp_bank_branch = $('#banking_'+banks_count+' input[name="temp_bank_branch"]');
+                var temp_bank_branch = $('#banking_'+banking_div+' input[name="temp_bank_branch"]');
                 temp_bank_branch.attr('name','bank_branch['+innerdivcount+']');
-                var temp_account_no = $('#banking_'+banks_count+' input[name="temp_account_no"]');
+                var temp_account_no = $('#banking_'+banking_div+' input[name="temp_account_no"]');
                 temp_account_no.attr('name','account_no['+innerdivcount+']');
-                var temp_account_title = $('#banking_'+banks_count+' input[name="temp_account_title"]');
+                var temp_account_title = $('#banking_'+banking_div+' input[name="temp_account_title"]');
                 temp_account_title.attr('name','account_title['+innerdivcount+']');
-                var temp_iban_no = $('#banking_'+banks_count+' input[name="temp_iban_no"]');
+                var temp_iban_no = $('#banking_'+banking_div+' input[name="temp_iban_no"]');
                 temp_iban_no.attr('name','iban_no['+innerdivcount+']');
                 $('#bankInfo').stop().animate({
                   scrollTop: $('#bankInfo')[0].scrollHeight
                 }, 2000);
-                $('#banking_' + banks_count + ' .select2').select2({
+                $('#banking_' + banking_div + ' .select2').select2({
                 });
 
-                $('#banking_' + banks_count + ' a[data-action="close"]').on('click',function(){
+                $('#banking_' + banking_div + ' a[data-action="close"]').on('click',function(){
                     $(this).closest('.card').remove();
                     $('#bankInfo').perfectScrollbar('update');
                 });

@@ -102,12 +102,12 @@ class RegisterController extends Controller
                 'shipping_phone.*'=>'required|string|max:255',
                 'shipping_email.*'=>'required|string|max:255',
                 'product_type.*'=>'required|max:255',
-                'bank_city'=>'required|string|max:255',
-                'bank_name'=>'required|max:255',
-                'bank_branch'=>'required|string|max:255',
-                'account_no'=>'required|string|max:255',
-                'account_title'=>'required|string|max:255',
-                'iban_no'=>'required|string|max:255',
+                'bank_city.*'=>'required|string|max:255',
+                'bank_name.*'=>'required|max:255',
+                'bank_branch.*'=>'required|string|max:255',
+                'account_no.*'=>'required|string|max:255',
+                'account_title.*'=>'required|string|max:255',
+                'iban_no.*'=>'required|string|max:255',
                 'cycle_of_payment'=>'required|string|max:255',
                 'filled_and_signed_pdf' => 'mimes:pdf',
                 'signed_acknowledgement_pdf' => 'mimes:pdf',
@@ -164,7 +164,9 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-//        dd($request);
+
+        // return var_dump($request);exit();
+       // dd($request);
 //        $products = implode(',',$request->product_type);
 //
 //        return $request;
@@ -227,6 +229,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -287,43 +290,63 @@ class RegisterController extends Controller
             }
         }
 
-        if($data['nature_of_account'] == 1){
+        $default_bank = TRUE;
+        foreach($data['bank_name'] as $rowId => $bank){
+            if($data['nature_of_account'] == 1){
+                if($default_bank){
+                    UserBankInfo::create([
+                        'user_id'=>$newUser->id,
+                        'bank_name'=> $bank,
+                        'bank_branch'=>$data['bank_branch'][$rowId],
+                        'account_no'=>$data['account_no'][$rowId],
+                        'account_title'=>$data['account_title'][$rowId],
+                        'iban'=> strtoupper($data['iban_no'][$rowId]),
+                        'payment_cycle'=>$data['cycle_of_payment'],
+                        'city_id'=>$data['bank_city'][$rowId],
+                        'default_bank' => 1
+                    ]);
 
-            UserBankInfo::create([
-                'user_id'=>$newUser->id,
-                'bank_name'=>$data['bank_name'],
-                'bank_branch'=>$data['bank_branch'],
-                'account_no'=>$data['account_no'],
-                'account_title'=>$data['account_title'],
-                'iban'=>$data['iban_no'],
-                'payment_cycle'=>$data['cycle_of_payment'],
-                'city_id'=>$data['bank_city']
-            ]);
-        }else{
-            $generation_date = null;
-            if($data['cycle_of_invoicing'] == 2){
-                $generation_date = null;
+                    $default_bank = FALSE;
+                }else{
+                    UserBankInfo::create([
+                        'user_id'=>$newUser->id,
+                        'bank_name'=> $bank,
+                        'bank_branch'=>$data['bank_branch'][$rowId],
+                        'account_no'=>$data['account_no'][$rowId],
+                        'account_title'=>$data['account_title'][$rowId],
+                        'iban'=> strtoupper($data['iban_no'][$rowId]),
+                        'payment_cycle'=>$data['cycle_of_payment'],
+                        'city_id'=>$data['bank_city'][$rowId]
+                    ]);
+                }
+
             }else{
-                $generation_date = $data['generation_date'];
-            }
+                $generation_date = null;
+                if($data['cycle_of_invoicing'] == 2){
+                    $generation_date = null;
+                }else{
+                    $generation_date = $data['generation_date'];
+                }
 
-            UserBankInfo::create([
-                'user_id'=>$newUser->id,
-                'bank_name'=>$data['bank_name'],
-                'bank_branch'=>$data['bank_branch'],
-                'account_no'=>$data['account_no'],
-                'account_title'=>$data['account_title'],
-                'iban'=>$data['iban_no'],
-                'payment_cycle'=>$data['cycle_of_payment'],
-                'city_id'=>$data['bank_city'],
-                'invoicing_cycle_id' => $data['cycle_of_invoicing'],
-                'generation_date' => $generation_date,
-                'billing_person_name' => $data['billing_person_name'],
-                'billing_person_phone' => $data['billing_person_phone'],
-                'billing_person_email' => $data['billing_person_email'],
-                'billing_address' => $data['billing_address'],
-            ]);
+                UserBankInfo::create([
+                    'user_id'=>$newUser->id,
+                    'bank_name'=>$bank,
+                    'bank_branch'=>$data['bank_branch'][$rowId],
+                    'account_no'=>$data['account_no'][$rowId],
+                    'account_title'=>$data['account_title'][$rowId],
+                    'iban'=> strtoupper($data['iban_no'][$rowId]),
+                    'payment_cycle'=> $data['cycle_of_payment'],
+                    'city_id'=> $data['bank_city'][$rowId],
+                    'invoicing_cycle_id' => $data['cycle_of_invoicing'],
+                    'generation_date' => $generation_date,
+                    'billing_person_name' => $data['billing_person_name'],
+                    'billing_person_phone' => $data['billing_person_phone'],
+                    'billing_person_email' => $data['billing_person_email'],
+                    'billing_address' => $data['billing_address'],
+                ]);
+            }
         }
+        
 
         $token = uniqid(base64_encode(str_random(60)));
         $crf_terms_and_conditions = new CRFTermsConditions();
