@@ -2945,7 +2945,17 @@ class AdminFinanceController extends Controller
 
             $pending_payment = PendingPayment::find($pending_payment_id);
 
+            $user_bank_id = NULL;
+
+            $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
+
+            if($user_bank_id){
+               $user_bank_id = $user_bank_id->id;
+            }
+
             if ($total_shipments == $selected_shipments) {
+
+
                 $done_payment = new DonePayment();
 
                 $done_payment->user_id = $pending_payment->user_id;
@@ -2953,6 +2963,7 @@ class AdminFinanceController extends Controller
                 $done_payment->delivered_shipments = $pending_payment->delivered_shipments;
                 $done_payment->returned_shipments = $pending_payment->returned_shipments;
                 $done_payment->adjusted_shipments = $pending_payment->adjusted_shipments;
+                $done_payment->user_bank_info_id = $user_bank_id;
 
                 $settings = GlobalSettings::where('type', 'ibft_charges');
 
@@ -3094,7 +3105,7 @@ class AdminFinanceController extends Controller
                 $done_payment->delivered_shipments = $delivered_shipments;
                 $done_payment->returned_shipments = $returned_shipments;
                 $done_payment->adjusted_shipments = $adjusted_shipments;
-
+                $done_payment->user_bank_info_id = $user_bank_id;
                 $done_payment->save();
 
                 $pending_payment->total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->count();
@@ -3172,8 +3183,22 @@ class AdminFinanceController extends Controller
     public function done_payments_list(Request $request) {
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
-            ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
+            ->leftJoin('user_bank_infos as ubi', function ($join) {
+                $join->on('ubi.id', '=', 'done_payments.user_bank_info_id');
+            })
+            ->leftJoin('user_bank_infos as ubi_default', function ($join) {
+                $join->on('ubi_default.user_id', '=', 'u.id')
+                    ->where('ubi_default.default_bank',DB::raw(1));
+            })
+            ->leftJoin('banks_lists as ub', function ($join) {
+                $join->where(function($sub_query) {
+                    $sub_query->whereNotNull('done_payments.user_bank_info_id')
+                    ->where('ubi.bank_name', '=', 'ub.id');
+                })->orWhere(function($sub_query) {
+                    $sub_query->whereNull('done_payments.user_bank_info_id')
+                    ->where('ubi_default.bank_name', '=', 'ub.id');
+                });
+            })
             ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
             ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
@@ -3669,7 +3694,12 @@ class AdminFinanceController extends Controller
 
         $shipper = $done_payment->shipper;
 
-        $shipper_bank = $shipper->bank;
+        if($done_payment->user_bank_info_id == null){
+            $shipper_bank = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
+        }else{
+            $shipper_bank = UserBankInfo::find($done_payment->user_bank_info_id);
+        }
+
 
         $account_type_id = $shipper->account_type_id;
 
