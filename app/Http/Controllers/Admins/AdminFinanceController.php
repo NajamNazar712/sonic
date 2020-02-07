@@ -1263,7 +1263,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    public function outstanding_shipments_adjust_in_payment(Request $request) {
+    public function outstanding_shipments_bulk_adjust_in_payment(Request $request) {
         foreach ($request->shipments as $shipment_id){
             $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $request->dncc[$shipment_id]);
             if ($delivery_note_shipment->exists()) {
@@ -1400,7 +1400,7 @@ class AdminFinanceController extends Controller
         return ['status' => 0, 'success' => 'Shipment has been marked to be Adjusted in Payment'];
     }
 
-    public function outstanding_shipments_bulk_adjust_in_payment(Request $request) {
+    public function outstanding_shipments_adjust_in_payment(Request $request) {
         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $request->dncc);
 
         if ($delivery_note_shipment->exists()) {
