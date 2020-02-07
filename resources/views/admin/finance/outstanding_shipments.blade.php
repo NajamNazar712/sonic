@@ -498,7 +498,7 @@
                                             url: '{!! route('admin.finance.outstanding_shipments.bulk_adjust_in_payment') !!}',
                                             method: 'PUT',
                                             data: {
-                                                'shipment_id': selected_rows,
+                                                'shipment_ids': selected_rows,
                                                 'dncc': dncc,
                                                 '_token': '{{ csrf_token() }}'
                                             }
