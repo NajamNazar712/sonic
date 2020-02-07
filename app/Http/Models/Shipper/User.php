@@ -34,7 +34,7 @@ class User extends Authenticatable
     }
 
     public function bank(){
-        return $this->hasOne('App\Http\Models\Shipper\UserBankInfo');
+        return $this->hasMany('App\Http\Models\Shipper\UserBankInfo');
     }
     public function shipping(){
         return $this->hasMany('App\Http\Models\Shipper\UserShippingInfo');

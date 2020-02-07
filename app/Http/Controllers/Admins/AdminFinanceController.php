@@ -2347,7 +2347,10 @@ class AdminFinanceController extends Controller
     public function make_payments_list(Request $request) {
         $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->join('user_bank_infos as ubi', 'pending_payments.user_id', '=', 'ubi.user_id')
+            ->join('user_bank_infos as ubi', function ($join) {
+                $join->on('pending_payments.user_id', '=', 'ubi.user_id')
+                    ->where('ubi.default_bank', DB::raw(1));
+            })
             ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
             ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
             ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
@@ -2901,15 +2904,22 @@ class AdminFinanceController extends Controller
 
             $shipper = User::find($done_payment->user_id);
 
+            if($done_payment->user_bank_info_id == NULL) {
+                $shipper_bank = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
+            }
+            else {
+                $shipper_bank = UserBankInfo::find($done_payment->user_bank_info_id);
+            }
+
             $payable = number_format(ROUND((DonePaymentShipment::where('done_payment_id', $done_payment_id)->sum('payable') - $done_payment->ibft_charges), 0, PHP_ROUND_HALF_DOWN));
 
             $row = array();
 
             $row[] = str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
             $row[] = $shipper->name;
-            $row[] = $shipper->bank->account_title;
-            $row[] = $shipper->bank->iban;
-            $row[] = $shipper->bank->bank->name;
+            $row[] = $shipper_bank->account_title;
+            $row[] = $shipper_bank->iban;
+            $row[] = $shipper_bank->bank->name;
             $row[] = $payable;
 
             $details[] = $row;
@@ -4253,7 +4263,7 @@ class AdminFinanceController extends Controller
 
             $user_id = $user->id;
 
-            $user_banking_information = $user->bank;
+            $user_banking_information = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
 
             if ($user_banking_information->invoicing_cycle_id == 1) {
                 if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {

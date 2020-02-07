@@ -156,75 +156,77 @@
                     <div class="tab-pane" id="linkOpt" role="tabpanel" aria-labelledby="linkOpt-tab" aria-expanded="false">
                         <div class="table-responsive">
                             <br>
-                            <table class="table" style="font-size: 14px">
-                                <thead>
-                                <tr>
-                                    {{--<th>Firstname</th>--}}
-                                    {{--<th>Lastname</th>--}}
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td><b>Bank Name</b></td>
-                                    <td>{{$user->bank->bank->name}}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Bank Branch</b></td>
-                                    <td>{{$user->bank->bank_branch}}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Bank City</b></td>
-                                    <td>{{$user->bank->city->name}}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Account No.</b></td>
-                                    <td>{{$user->bank->account_no}}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Account Title</b></td>
-                                    <td>{{$user->bank->account_title}}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>IBAN Number</b></td>
-                                    <td>{{$user->bank->iban}}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Payment Cycle</b></td>
-                                    <td>{{ucfirst($user->bank->payment_cycle)}}</td>
-                                </tr>
-
-
-
-                                @if($user->account_type_id == 2)
+                            @foreach ($user->bank as $bank)
+                                <table class="table" style="font-size: 14px">
+                                    <thead>
                                     <tr>
-                                        <td><b>Invoicing Cycle</b></td>
-                                        <td>{{$user->bank->invoicing->name}}</td>
+                                        {{--<th>Firstname</th>--}}
+                                        {{--<th>Lastname</th>--}}
                                     </tr>
-                                    @if($user->bank->invoicing_cycle_id != 2)
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td><b>Bank Name</b></td>
+                                        <td>{{$bank->bank->name}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Bank Branch</b></td>
+                                        <td>{{$bank->bank_branch}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Bank City</b></td>
+                                        <td>{{$bank->city->name}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Account No.</b></td>
+                                        <td>{{$bank->account_no}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Account Title</b></td>
+                                        <td>{{$bank->account_title}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>IBAN Number</b></td>
+                                        <td>{{$bank->iban}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Payment Cycle</b></td>
+                                        <td>{{ucfirst($bank->payment_cycle)}}</td>
+                                    </tr>
+
+
+
+                                    @if($user->account_type_id == 2)
                                         <tr>
-                                            <td><b>Generation Date</b></td>
-                                            <td>{{$user->bank->generation_date}}</td>
+                                            <td><b>Invoicing Cycle</b></td>
+                                            <td>{{$bank->invoicing->name}}</td>
+                                        </tr>
+                                        @if($bank->invoicing_cycle_id != 2)
+                                            <tr>
+                                                <td><b>Generation Date</b></td>
+                                                <td>{{$bank->generation_date}}</td>
+                                            </tr>
+                                        @endif
+                                        <tr>
+                                            <td><b>Billing Person Name</b></td>
+                                            <td>{{$bank->billing_person_name}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Billing Person Phone</b></td>
+                                            <td>{{$bank->billing_person_phone}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Billing Person Email</b></td>
+                                            <td>{{$bank->billing_person_email}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Billing Address</b></td>
+                                            <td>{{$bank->billing_address}}</td>
                                         </tr>
                                     @endif
-                                    <tr>
-                                        <td><b>Billing Person Name</b></td>
-                                        <td>{{$user->bank->billing_person_name}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Billing Person Phone</b></td>
-                                        <td>{{$user->bank->billing_person_phone}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Billing Person Email</b></td>
-                                        <td>{{$user->bank->billing_person_email}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Billing Address</b></td>
-                                        <td>{{$user->bank->billing_address}}</td>
-                                    </tr>
-                                @endif
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            @endforeach
                         </div>
                         <br>
                         @if (session('role_id') == 1 || in_array(112, session('permissions')))
@@ -452,8 +454,8 @@
                 <form id="bank-form" class="form form-horizontal" style="display: none" method="post" action="{{route('admin.accounts.update.bank')}}">
                     @csrf
                     <div class="form-body">
-
                         <h4 class="form-section">Bank Info </h4>
+                        @foreach ($user->bank as $user_bank)
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group row">
@@ -462,7 +464,7 @@
                                         <span class="danger">*</span>
                                         <select name="bank_name" id="bank_name" data-rule-required="true" data-msg-required="Bank name is required" class="select2 form-control required" style="width: 100%">
                                             @foreach($banks as $bank)
-                                                <option value="{{$bank->id}}"  {{ $user->bank->bank_name == $bank->id ? 'selected' : '' }} >{{$bank->name}}</option>
+                                                <option value="{{$bank->id}}"  {{ $user_bank->bank_name == $bank->id ? 'selected' : '' }} >{{$bank->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -473,14 +475,14 @@
                                     <div class="form-group col-md-9">
                                         <label>Bank Branch</label>
                                         <span class="danger">*</span>
-                                        <input type="text" id="bank_branch" data-rule-maxlength="190" data-msg-maxlength="Bank Branch can be maximum 190 characters" class="form-control border-primary" data-rule-required="true" data-msg-required="Bank branch is required" value="{{$user->bank->bank_branch}}" name="bank_branch" required>
+                                        <input type="text" id="bank_branch" data-rule-maxlength="190" data-msg-maxlength="Bank Branch can be maximum 190 characters" class="form-control border-primary" data-rule-required="true" data-msg-required="Bank branch is required" value="{{$user_bank->bank_branch}}" name="bank_branch" required>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
                                         <label>Account Number</label>
                                         <span class="danger">*</span>
-                                        <input id="account_no" class="form-control border-primary" data-rule-maxlength="190" data-msg-maxlength="Account Number can be maximum 190 characters" type="text" value="{{$user->bank->account_no}}" data-rule-required="true" data-msg-required="Account Number is required" name="account_no"  required>
+                                        <input id="account_no" class="form-control border-primary" data-rule-maxlength="190" data-msg-maxlength="Account Number can be maximum 190 characters" type="text" value="{{$user_bank->account_no}}" data-rule-required="true" data-msg-required="Account Number is required" name="account_no"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -488,10 +490,10 @@
                                         <label>Payment Cycle</label>
                                         <span class="danger">*</span>
                                         <select name="payment_cycle" id="payment_cycle" data-rule-required="true" data-msg-required="Payment Cycle is required" class="select2 form-control required" style="width: 100%">
-                                            <option value="daily" {{ $user->bank->payment_cycle == 'daily' ? 'selected' : '' }}>Daily</option>
-                                            <option value="weekly" {{ $user->bank->payment_cycle == 'weekly' ? 'selected' : '' }}>Weekly</option>
-                                            <option value="fortnight" {{ $user->bank->payment_cycle == 'fortnight' ? 'selected' : '' }}>Fortnight</option>
-                                            <option value="monthly" {{ $user->bank->payment_cycle == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                                            <option value="daily" {{ $user_bank->payment_cycle == 'daily' ? 'selected' : '' }}>Daily</option>
+                                            <option value="weekly" {{ $user_bank->payment_cycle == 'weekly' ? 'selected' : '' }}>Weekly</option>
+                                            <option value="fortnight" {{ $user_bank->payment_cycle == 'fortnight' ? 'selected' : '' }}>Fortnight</option>
+                                            <option value="monthly" {{ $user_bank->payment_cycle == 'monthly' ? 'selected' : '' }}>Monthly</option>
                                         </select>
                                     </div>
                                 </div>
@@ -501,14 +503,14 @@
                                     <div class="form-group col-md-9">
                                         <label>Account Title</label>
                                         <span class="danger">*</span>
-                                        <input id="account_title" class="form-control border-primary" type="text" data-rule-maxlength="190" data-msg-maxlength="Account Title can be maximum 190 characters" value="{{$user->bank->account_title}}" data-rule-required="true" data-msg-required="Account Title is required" name="account_title"  required>
+                                        <input id="account_title" class="form-control border-primary" type="text" data-rule-maxlength="190" data-msg-maxlength="Account Title can be maximum 190 characters" value="{{$user_bank->account_title}}" data-rule-required="true" data-msg-required="Account Title is required" name="account_title"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
                                         <label>IBAN Number</label>
                                         <span class="danger">*</span>
-                                        <input id="iban" class="form-control border-primary" type="text" value="{{$user->bank->iban}}" data-rule-maxlength="190" data-msg-maxlength="IBAN Number can be maximum 190 characters" data-rule-required="true" data-msg-required="IBAN Number is required" name="iban" required>
+                                        <input id="iban" class="form-control border-primary" type="text" value="{{$user_bank->iban}}" data-rule-maxlength="190" data-msg-maxlength="IBAN Number can be maximum 190 characters" data-rule-required="true" data-msg-required="IBAN Number is required" name="iban" required>
                                         <input type="hidden" id="user_id" name="user_id" value="{{$user->id}}">
                                         {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
                                     </div>
@@ -519,7 +521,7 @@
                                         <span class="danger">*</span>
                                         <select name="bank_city" id="bank_city" data-rule-required="true" data-msg-required="Bank City is required" class="select2 form-control required" style="width: 100%">
                                             @foreach($all_cities as $bank_city)
-                                                <option value="{{$bank_city->id}}"  {{ $user->bank->city_id == $bank_city->id ? 'selected' : '' }}  >{{$bank_city->name}}</option>
+                                                <option value="{{$bank_city->id}}"  {{ $user_bank->city_id == $bank_city->id ? 'selected' : '' }}  >{{$bank_city->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -533,7 +535,7 @@
                                         <span class="danger">*</span>
                                         <select name="invoicing_cycle_id" id="invoicing_cycle" data-rule-required="true" data-msg-required="Invoicing Cycle is required" class="select2 form-control required">
                                             @foreach($invoicing_cycle as $cycle)
-                                            <option value="{{$cycle->id}}" {{ ($user->bank->invoicing_cycle_id != null)? $user->bank->invoicing_cycle_id:'' == $cycle->id ? 'selected' : '' }}>{{$cycle->name}}</option>
+                                            <option value="{{$cycle->id}}" {{ ($user_bank->invoicing_cycle_id != null)? $user_bank->invoicing_cycle_id:'' == $cycle->id ? 'selected' : '' }}>{{$cycle->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -549,7 +551,7 @@
                                         <div class="form-group col-md-9">
                                             <label>Billing Person Name</label>
                                             <span class="danger">*</span>
-                                            <input type="text" id="billing_person_name" data-rule-maxlength="190" data-msg-maxlength="Billing Person Name can be maximum 190 characters" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Person Name is required" value="{{$user->bank->billing_person_name}}" name="billing_person_name" required>
+                                            <input type="text" id="billing_person_name" data-rule-maxlength="190" data-msg-maxlength="Billing Person Name can be maximum 190 characters" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Person Name is required" value="{{$user_bank->billing_person_name}}" name="billing_person_name" required>
                                         </div>
                                     </div>
                                 </div>
@@ -558,7 +560,7 @@
                                         <div class="form-group col-md-9">
                                             <label>Billing Person Phone</label>
                                             <span class="danger">*</span>
-                                            <input type="text" id="billing_person_phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Person Phone is required" value="{{$user->bank->billing_person_phone}}" name="billing_person_phone" required>
+                                            <input type="text" id="billing_person_phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Person Phone is required" value="{{$user_bank->billing_person_phone}}" name="billing_person_phone" required>
                                         </div>
                                     </div>
                                 </div>
@@ -567,7 +569,7 @@
                                         <div class="form-group col-md-9">
                                             <label>Billing Person Email</label>
                                             <span class="danger">*</span>
-                                            <input type="email" id="billing_person_email" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Person Name is required" value="{{$user->bank->billing_person_email}}" name="billing_person_email" required>
+                                            <input type="email" id="billing_person_email" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Person Name is required" value="{{$user_bank->billing_person_email}}" name="billing_person_email" required>
                                         </div>
                                     </div>
                                 </div>
@@ -576,13 +578,14 @@
                                         <div class="form-group col-md-9">
                                             <label>Billing Address</label>
                                             <span class="danger">*</span>
-                                            <input type="text" id="billing_address" data-rule-maxlength="190" data-msg-maxlength="Billing Address can be maximum 190 characters" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Address is required" value="{{$user->bank->billing_address}}" name="billing_address" required>
+                                            <input type="text" id="billing_address" data-rule-maxlength="190" data-msg-maxlength="Billing Address can be maximum 190 characters" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Address is required" value="{{$user_bank->billing_address}}" name="billing_address" required>
                                         </div>
                                     </div>
                                 </div>
 
                             @endif
                         </div>
+                        @endforeach
                     </div>
                     <div class="form-actions right">
                         <button id="cancel-button-bank" type="button" class="btn btn-warning mr-1">
@@ -733,7 +736,7 @@
 
             var weekly = [1, 2, 3, 4, 5, 6, 7];
             var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
-            var cycle = '{!! $user->bank->invoicing_cycle_id !!}';
+            var cycle = '{!! $user->bank->first()->invoicing_cycle_id !!}';
             cycle = parseInt(cycle);
             $('#invoicing_cycle').select2({
                 width: '100%',
@@ -764,7 +767,7 @@
             // });
             function generation(id) {
 
-                var gdate = parseInt('{!! $user->bank->generation_date !!}');
+                var gdate = parseInt('{!! $user->bank->first()->generation_date !!}');
                 html = '<div class="form-group row"><div class="form-group col-md-9"><label>Generation Date</label><span class="danger">*</span><select name="generation_date" id="generation_date" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required"><option value=""></option></select></div></div>';
                 $('#generation_div').html(html);
                 if(id === 1){
@@ -811,9 +814,9 @@
                 $("#bank-form")[0].reset();
                 $("#bank-form").find(".danger").removeClass("danger");
                 $("#bank_name").val("{{$bank->id}}").trigger('change');
-                $("#payment_cycle").val("{{$user->bank->payment_cycle}}").trigger('change');
+                $("#payment_cycle").val("{{$user->bank->first()->payment_cycle}}").trigger('change');
                 $("#bank_city").val("{{$bank_city->id}}").trigger('change');
-                $("#payment_mode").val("{{$user->bank->payment_mode}}").trigger('change');
+                $("#payment_mode").val("{{$user->bank->first()->payment_mode}}").trigger('change');
                 $("#tabs").show();
                 generation(cycle)
             });
