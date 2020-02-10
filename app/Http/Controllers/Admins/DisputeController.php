@@ -275,6 +275,23 @@ class DisputeController extends Controller
         }
 
     }
+    public function bulk_resolve_dispute(Request $request){
+        foreach($request->ids as $request_id){
+            $dispute = Dispute::where('id', $request_id);
+            if($dispute->exists()){
+                $dispute->update(['status'=>2,'updated_by'=>Auth::id()]);
+                $admin = Auth::id();
+                $name = Admin::where('id',$admin)->select('name')->first();
+                DisputeComment::create([
+                    'dispute_id'=>$request_id,
+                    'comment'=>'Dispute resolved by '.$name->name,
+                    'admin_id'=>$admin
+                ]);
+            }
+        }
+        return response()->json(['status'=>1,'success'=>"Dispute resolved successfully!"]);
+
+    }
     public function update_dispute_view(Request $request){
         $dispute_id = $request->id;
         $dispute = Dispute::where('id',$dispute_id);
