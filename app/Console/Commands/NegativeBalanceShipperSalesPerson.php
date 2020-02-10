@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\Admin;
 use Illuminate\Console\Command;
 
 class NegativeBalanceShipperSalesPerson extends Command
@@ -37,6 +38,10 @@ class NegativeBalanceShipperSalesPerson extends Command
      */
     public function handle()
     {
-        NotificationsController::send(56, 0);
+    $sale_admins = Admin::leftjoin('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
+            ->where('ar.department_id', 7)->pluck('admins.id')->toArray();
+        foreach($sale_admins as $admin_id) {
+            NotificationsController::send(56, $admin_id);
+        }
     }
 }
