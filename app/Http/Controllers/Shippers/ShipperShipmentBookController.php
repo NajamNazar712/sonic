@@ -1035,8 +1035,7 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                                 <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
                                 <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
-                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Estimated Weight</strong></td>
-                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
+                                <td colspan="2" class="border twice-top twice-bottom twice-left" style="height: 20px;"></td>
                               </tr>
                               <tr>
                     ';
@@ -1066,8 +1065,7 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                                 <td rowspan="2" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
                                 <td rowspan="2" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
-                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Weight</strong></td>
-                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
+                                <td colspan="2" class="border twice-top twice-bottom twice-left" style="height: 32px;"></td>
                     ';
                 }
 
