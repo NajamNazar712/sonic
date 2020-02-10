@@ -198,6 +198,9 @@
             background-color: red;
             color:#fff;
         }
+        .yellowClass{
+            background-color: yellow;
+        }
 
     </style>
 @endsection
@@ -266,6 +269,8 @@
                             $(row).addClass('goldClass');
                         }else if(status === 20){
                             $(row).addClass('redClass');
+                        }else if(status === 54){
+                            $(row).addClass('yellowClass');
                         }
                     },
                     initComplete: function() {

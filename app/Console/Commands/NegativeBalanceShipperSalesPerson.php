@@ -39,7 +39,7 @@ class NegativeBalanceShipperSalesPerson extends Command
     public function handle()
     {
     $sale_admins = Admin::leftjoin('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
-            ->where('ar.department_id', 7)->pluck('admins.id')->toArray();
+            ->where('ar.department_id', 7)->where('status', 1)->pluck('admins.id')->toArray();
         foreach($sale_admins as $admin_id) {
             NotificationsController::send(56, $admin_id);
         }
