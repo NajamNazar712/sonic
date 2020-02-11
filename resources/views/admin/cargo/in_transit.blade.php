@@ -313,6 +313,51 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="modal fade" id="send_from_junction_modal" role="dialog" aria-labelledby="send_from_junction_modal" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="receive_at_link_title">Send from Junction</h4>
+
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="scan_send_seal_number_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+						<div class="form-group">
+							<input type="text" name="send_seal_number" class="form-control send_seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
+						</div>
+
+						<div class="form-group ml-1">
+							<button type="submit" name="send_add" class="btn btn-primary" value="Add">Scan</button>
+						</div>
+					</form>
+
+					<table class="table table-bordered datatable" id="send_from_junction_datatable" style="z-index: 3;">
+						<thead>
+						<tr role="row" class="bg-primary white">
+							<th class="border-primary border-darken-1">S. No.</th>
+							<th class="border-primary border-darken-1">Cargo No.</th>
+							<th class="border-primary border-darken-1">Origin</th>
+							<th class="border-primary border-darken-1">Destination</th>
+							<th class="border-primary border-darken-1">Seal No.</th>
+						</tr>
+						</thead>
+					</table>
+
+					<form id="send_from_junction_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate">
+
+						<div class="w-100"></div>
+
+						<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+						<button type="submit" name="send" class="btn btn-primary send">Send</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 @endsection
 
 @section('css')
@@ -448,45 +493,54 @@
 			} );
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				@if (session('role_id') == 1 || in_array(30, session('permissions')))
+				buttons: [
+					@if (session('role_id') == 1 || in_array(30, session('permissions')))
+						{
+							text: 'Update at Link',
+							className: 'btn btn-primary receive_at_link',
+							action: function (e, dt, node, config) {
+								$('#receive_at_link #scan_send_seal_number_form .seal_number').val('');
 
-				buttons: [{
-					text: 'Update at Link',
-					className: 'btn btn-primary receive_at_link',
-					action: function (e, dt, node, config) {
-						$('#receive_at_link #scan_seal_number_form .seal_number').val('');
+								receive_at_link_table.clear().draw();
 
-						receive_at_link_table.clear().draw();
+								cargo_consignment_ids = [];
 
-						cargo_consignment_ids = [];
+								$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', true);
 
-						$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', true);
+								if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
+									$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
+								}
 
-						if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
-							$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
+								$('#receive_at_link #receive_at_link_form .junction').hide();
+
+
+								$('#receive_at_link').modal('show');
+							}
 						}
+					@endif,
+					@if (session('role_id') == 1 || in_array(30, session('permissions')))
+						{
+							text: 'Send from Junction',
+							className: 'btn btn-primary send_from_junction',
+							action: function (e, dt, node, config) {
+								$('#send_from_junction_modal #scan_seal_number_form .send_seal_number').val('');
 
-						$('#receive_at_link #receive_at_link_form .junction').hide();
+								send_from_junction_datatable.clear().draw();
 
+								cargo_consignment_ids = [];
 
-						$('#receive_at_link').modal('show');
-					}
-				},
-					{
-						extend: 'excel',
-						title: 'Cargo In-transit',
-						className: 'btn btn-primary',
-						text: '<i class="la la-file-excel-o"></i> Excel',
-					},'reset'],
-				@else
-				buttons:[{
-					extend: 'excel',
-					title: 'Cargo In-transit',
-					className: 'btn btn-primary',
-					text: '<i class="la la-file-excel-o"></i> Excel',
-				},
-				'reset'],
-				@endif
+								$('#send_from_junction_modal #send_from_junction_form button.confirm').prop('disabled', true);
+
+								$('#send_from_junction_modal').modal('show');
+							}
+						}
+					@endif,
+						{
+							extend: 'excel',
+							title: 'Cargo In-transit',
+							className: 'btn btn-primary',
+							text: '<i class="la la-file-excel-o"></i> Excel',
+						},'reset'],
 				scrollX: true, scrollY: '500px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
@@ -752,6 +806,28 @@
 						}
 					});
 			@endif
+			@if (session('role_id') == 1 || in_array(30, session('permissions')))
+				var send_from_junction_datatable = $('#send_from_junction_datatable').DataTable({
+						dom: 'tr',
+						"autoWidth": false,
+						paging: false,
+						columns: [
+							{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+							{name: 'cargo_number', class: 'align-middle cargo_number'},
+							{name: 'origin', class: 'align-middle origin'},
+							{name: 'destination', class: 'align-middle destination'},
+							{name: 'seal_number', class: 'align-middle seal_number'}
+						],
+						rowCallback: function(row, data, index) {
+							var info = send_from_junction_datatable.page.info();
+
+							$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+						},
+						initComplete: function() {
+							this.api().table().columns.adjust();
+						}
+					});
+			@endif
 
 			@if (session('role_id') == 1 || in_array(31, session('permissions')))
 			$('#receive_form .cargo_number').inputmask({
@@ -816,6 +892,14 @@
 
 			@if (session('role_id') == 1 || in_array(30, session('permissions')))
 			$('#receive_at_link #scan_seal_number_form .seal_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+			@endif
+
+			@if (session('role_id') == 1 || in_array(30, session('permissions')))
+			$('#receive_at_link #scan_seal_number_form .send_seal_number').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
 				'allowPlus': false
@@ -959,6 +1043,85 @@
 							.done(function(data) {
 								if (data.status == 0) {
 									$('#receive_at_link').modal('hide');
+
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
+
+								table.draw();
+							});
+
+					return false;
+				}
+			});
+			@endif
+			@if (session('role_id') == 1 || in_array(30, session('permissions')))
+			$('#send_from_junction_modal #scan_send_seal_number_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('form'));
+				},
+				submitHandler: function(form) {
+					var seal_number = $(form).find('.send_seal_number').val();
+
+					if (send_from_junction_datatable.columns('.seal_number').data().eq(0).indexOf(parseInt(seal_number)) === -1) {
+						$.ajax({
+							url: '{!! route('admin.cargo.in_transit.send_details') !!}',
+							method: 'POST',
+							data: {
+								'seal_number': seal_number,
+								'_token': '{{ csrf_token() }}'
+							}
+						})
+								.done(function(data) {
+									$('#send_from_junction_modal #scan_send_seal_number_form .send_seal_number').val('');
+
+									if (data.status == 0) {
+										send_from_junction_datatable.row.add([0, data.details.cargo_number, data.details.origin, data.details.destination, data.details.seal_number]).node().id = data.details.cargo_number;
+										send_from_junction_datatable.draw(false);
+
+										cargo_consignment_ids.push(data.details.cargo_number);
+
+
+										$('#send_from_junction_modal #send_from_junction_form button.confirm').prop('disabled', false);
+
+										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									}
+									else {
+										toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+									}
+								});
+					}
+					else {
+						toastr.error('Cargo has been scanned already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					}
+
+					return false;
+				}
+			});
+
+			$('#send_from_junction_modal #send_from_junction_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').insertAfter(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+
+					$.ajax({
+						url: '{!! route('admin.cargo.in_transit.send_from_junction') !!}',
+						method: 'POST',
+						data: {
+							'cargo_consignment_ids': cargo_consignment_ids,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
+							.done(function(data) {
+								if (data.status == 0) {
+									$('#send_from_junction_modal').modal('hide');
 
 									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
@@ -1400,6 +1563,9 @@
 					});
 				}
 				@endif
+				else if ($(this).hasClass('send')) {
+					$('#send_from_junction_modal').modal('show');
+				}
 			});
 
 			$('#datatable tbody').on('click','tr td.cargo_number button.print',function () {

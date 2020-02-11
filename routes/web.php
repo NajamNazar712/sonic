@@ -773,6 +773,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\AdminCargoController@in_transit_shipments')->name('shipments');
             Route::post('short_received_shipments', 'Admins\AdminCargoController@in_transit_short_received_shipments')->name('short_received_shipments');
             Route::post('lost', 'Admins\AdminCargoController@in_transit_lost')->name('lost');
+            Route::post('send_details', 'Admins\AdminCargoController@send_from_junction')->name('send_details');
+            Route::post('send_from_junction', 'Admins\AdminCargoController@in_transit_send_from_junction')->name('send_from_junction');
         });
 
         Route::prefix('receive')->name('receive.')->group(function () {
