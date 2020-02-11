@@ -527,8 +527,8 @@ class DeliveryController extends Controller
 
     public function delivery_note_receive_index()
     {
-
-        return view('admin.delivery.receive.index');
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        return view('admin.delivery.receive.index')->with(['riders' => $riders]);
     }
 
     public function receive_deliveries_list(Request $request)
@@ -609,6 +609,7 @@ class DeliveryController extends Controller
                 $verify_statuses_button = '<a href="' . $verifyStatus . '" class="dropdown-item" data-target-id="' . $result->id . '"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
                 $print_temporary_dncc_button = '<a class="dropdown-item printTempDNCC"><i class="ft-printer primary"></i> Print Temporary DNCC</a>';
                 $print_undelivered_performa_button = '<a class="dropdown-item printUndeliveredDNCC"><i class="ft-printer primary"></i> Print Undelivered Performa</a>';
+                $reassign_rider_button = '<a class="dropdown-item reassign_rider"><i class="la la-edit primary"></i> Reassign Rider</a>';
 
                 if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -641,6 +642,11 @@ class DeliveryController extends Controller
 
                         $dropdown .= $print_undelivered_performa_button;
                     }
+//                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
+//                        if (!$updatedstatusCheck) {
+                            $dropdown .= $reassign_rider_button;
+//                        }
+//                    }
 
                     $dropdown .= '
                         </div>
@@ -5037,6 +5043,25 @@ class DeliveryController extends Controller
                     }
                 }
             }
+        }
+    }
+    static public function reassign_rider(Request $request){
+        $rider_id = $request->rider;
+        $delivery_note_id = $request->delivery_note_id;
+        $rider = Rider::leftjoin('cities as c', 'c.id', '=', 'riders.city_id')->select('c.hub_id as hub_id')->where('riders.id', $rider_id)->first();
+        $delivery_note = DeliveryNote::find($delivery_note_id);
+        if($delivery_note){
+            if($delivery_note->city_id == $rider->hub_id){
+                $delivery_note->rider_id = $rider;
+                $delivery_note->save();
+                return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Rider must be of same hub']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Delivery note does not exists']);
         }
     }
 }

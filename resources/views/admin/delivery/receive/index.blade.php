@@ -82,6 +82,40 @@
         </div>
     </div>
     <!--Shipments popup -->
+    <!--reassign popup -->
+    <div class="modal fade" id="reassign_modal" data-backdrop="static" role="dialog" aria-labelledby="reassign_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <form id="reassign_rider_form" class="form" nonvalidate="nonvalidate" >
+                <input type="hidden" id="delivery_note_id" value="">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="reassign_modal_title">Reassign Rider</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <select name="rider" id="riders" class="form-control select2">
+                                        @foreach($riders as $rider)
+                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="reassign_button" class="btn btn-primary">Reassign</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!--reassign popup -->
 
 @endsection
 
@@ -148,6 +182,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#riders').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider',
+                width:'100%',
+                allowClear:true
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -448,6 +487,13 @@
                     });
 
             });
+
+
+            $('body').on('click','.reassign_rider',function () {
+                var note_id = $(this).parents('tr').attr('id');
+                $('#delivery_note_id').val(note_id);
+                $('#reassign_modal').modal('show');
+            });
             // $('#scan_delivery_note').on('change', function () {
             //     var count = table.rows().count();
             //     if(count > 0){
@@ -471,6 +517,58 @@
                 {{--}--}}
             {{--});--}}
 
+
+            $('#reassign_button').on('click', function(){
+               var rider = $('#riders').val();
+                swal({
+                    text: 'Are you sure, you want to Reassign rider?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.delivery.receive.reassign_rider') !!}',
+                            method: 'post',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'rider': rider,
+                                'delivery_note_id': $('#delivery_note_id').val()
+                            }
+                        })
+                            .done(function(data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                                table.draw(true);
+                                $('#reassign_modal').modal('hide');
+                            });
+                    }
+                });
+            });
+            $('#reassign_modal').on('hide.bs.modal', function (e) {
+                $('#reassign_rider_form')[0].reset();
+                $('#riders').val('').trigger('change');
+                $('#delivery_note_id').val('');
+            });
 
         });
     </script>

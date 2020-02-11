@@ -588,6 +588,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('verify/status/submit','Admins\DeliveryController@receive_delivery_verify_status_submit')->name('verify.status.submit');
             Route::post('dncc/print','Admins\DeliveryController@dncc_print')->name('dncc.print');
             Route::post('undelivered/print','Admins\DeliveryController@dncc_undelivered_print')->name('undelivered.print');
+            Route::post('reassign_rider','Admins\DeliveryController@reassign_rider')->name('reassign_rider');
 
         });
         Route::prefix('completed')->name('completed.')->group(function(){
