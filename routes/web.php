@@ -891,9 +891,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@outstanding_shipments_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@outstanding_shipments_list')->name('list');
             Route::put('resolved', 'Admins\AdminFinanceController@outstanding_shipments_resolved')->name('resolved');
-            Route::put('bulk_resolved', 'Admins\AdminFinanceController@outstanding_shipments_bulk_resolved')->name('bulk_resolved');
+            Route::post('bulk_resolved', 'Admins\AdminFinanceController@outstanding_shipments_bulk_resolved')->name('bulk_resolved');
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
-            Route::put('bulk_adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_bulk_adjust_in_payment')->name('bulk_adjust_in_payment');
+            Route::post('bulk_adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_bulk_adjust_in_payment')->name('bulk_adjust_in_payment');
             Route::post('dncc/print', 'Admins\AdminFinanceController@outstanding_shipments_dncc_print')->name('dncc.print');
             Route::post('sdn/print', 'Admins\AdminFinanceController@outstanding_shipments_sdn_print')->name('sdn.print');
             Route::get('walk_in_index', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_index')->name('walk_in_index');
