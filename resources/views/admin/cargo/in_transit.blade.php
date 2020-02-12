@@ -91,7 +91,7 @@
 									<div class="modal-dialog modal-lg" role="document">
 										<div class="modal-content">
 											<div class="modal-header">
-												<h4 class="modal-title" id="receive_at_link_title">Receive at Link</h4>
+												<h4 class="modal-title" id="receive_at_link_title">Receive at Junction</h4>
 
 												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 													<span aria-hidden="true">×</span>
@@ -496,7 +496,7 @@
 				buttons: [
 					@if (session('role_id') == 1 || in_array(30, session('permissions')))
 						{
-							text: 'Update at Link',
+							text: 'Receive at Junction',
 							className: 'btn btn-primary receive_at_link',
 							action: function (e, dt, node, config) {
 								$('#receive_at_link #scan_send_seal_number_form .seal_number').val('');
