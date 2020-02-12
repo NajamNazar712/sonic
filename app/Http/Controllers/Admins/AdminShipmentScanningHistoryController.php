@@ -2,10 +2,73 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Models\ShipmentScanningScreenLocation;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Shipper\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class AdminShipmentScanningHistoryController extends Controller
 {
-    //
+    public function __construct() {
+        $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
+    }
+
+    public function index(){
+        return view('admin.scanning_history.index');
+    }
+    public function details(Request $request){
+
+        $tracking_number = $request->tracking_number;
+        $shipment = Shipment::where('tracking_number', $tracking_number);
+        $details = array();
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                    $scanning_histories = ShipmentScanningJourney::where('shipment_id', $shipment->id)->get();
+                    if(count($scanning_histories) > 0){
+                        foreach($scanning_histories as $index => $scanning_history){
+                            $screen_location = ShipmentScanningScreenLocation::where('id', $scanning_history->screen_location_id)->first();
+                            if($scanning_history->user_type == 1){
+                                $account_type = 'Admin';
+                                $admin = Admin::find($scanning_history->admin_id);
+                                $scanned_by = $admin->name;
+                            }
+                            elseif($scanning_history->user_type == 2){
+                                $account_type = 'Shipper';
+                                $user = User::find($scanning_history->user_id);
+                                $scanned_by = $user->name;
+                            }
+                            elseif($scanning_history->user_type == 3){
+                                $account_type = 'Substitute Shipper';
+                                $sub_user = SubstituteUser::find($scanning_history->substitute_user_id);
+                                $scanned_by = $sub_user->name;
+                            }
+                            else{
+                                $account_type = '-';
+                                $scanned_by = '-';
+                            }
+                            $details[$index]['screen_location'] = $screen_location->name;
+                            $details[$index]['account_type'] = $account_type;
+                            $details[$index]['scanned_by'] = $scanned_by;
+                            $details[$index]['scanned_at'] = Carbon::parse($scanning_history->created_at)->format('Y-m-d H:i:s');
+                        }
+                        $data['tracking_number'] = $shipment->tracking_number;
+                        $data['history'] = $details;
+                    }
+                    else {
+                        $data['empty'][] = $request->tracking_number;
+                    }
+            }
+            else {
+                $data['invalid'][] = $request->tracking_number;
+            }
+
+        return $data;
+    }
 }
