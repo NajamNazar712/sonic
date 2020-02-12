@@ -1264,8 +1264,8 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_bulk_adjust_in_payment(Request $request) {
-        foreach ($request->shipment_ids as $shipment_id){
-            $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $request->dncc[$shipment_id]);
+        foreach ($request->shipment_ids as $index => $shipment_id){
+            $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $request->dncc[$index]);
             if ($delivery_note_shipment->exists()) {
                 $delivery_note_shipment = $delivery_note_shipment->first();
 
@@ -1397,7 +1397,7 @@ class AdminFinanceController extends Controller
 
             }
         }
-        return ['status' => 0, 'success' => 'Shipment has been marked to be Adjusted in Payment'];
+        return ['status' => 0, 'success' => 'Shipments has been marked to be Adjusted in Payment'];
     }
 
     public function outstanding_shipments_adjust_in_payment(Request $request) {
@@ -5428,7 +5428,7 @@ class AdminFinanceController extends Controller
                 if(DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_ids[$shipment_id])->where('shipment_id', $shipment_id)->whereIn('status', [4,5,6,7])->exists()){
                     $tracking_number = Shipment::find($shipment_id)->tracking_number;
                     $filtered_shipments[$shipment_id] = $tracking_number;
-                    $filtered_dncc[$shipment_id] = $request->delivery_note_ids[$shipment_id];
+                    $filtered_dncc[$shipment_id] = $request->delivery_note_ids[$index];
                 }
             }
             if(count($filtered_shipments) > 0){
