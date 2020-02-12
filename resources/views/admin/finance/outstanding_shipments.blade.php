@@ -323,6 +323,7 @@
                 }
             } );
             var selected_rows = [];
+            var dncc = [];
 			var selected_delivery_note_ids = {};
             var filtered_rows = [];
             var filtered_delivery_notes = [];
@@ -333,7 +334,7 @@
                     {
                         text: 'Request Revert',
                         className: 'btn btn-primary revert_request',
-                        enabled: true,
+                        enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows.length > 0){
                                 table.rows().nodes().each(function(index) {
@@ -409,6 +410,116 @@
                         }
                     },
                     @endif
+                    @if (session('role_id') == 1 || in_array(55, session('permissions')))
+                    {
+                        text: 'Resolve',
+                        className: 'btn btn-primary bulk_resolved',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                swal({
+                                    title: 'Are you sure?',
+                                    text: 'You want to mark selected Tracking Numbers Resolved?',
+                                    icon: 'success',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('admin.finance.outstanding_shipments.bulk_resolved') !!}',
+                                            method: 'PUT',
+                                            data: {
+                                                'shipments': selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                            .done(function(data) {
+                                                if (data.status == 0) {
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                }
+                                                else {
+                                                    toastr.error('Something went wrong!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                }
+                                                table.draw(true);
+                                            });
+                                    }
+                                });
+							}
+
+                        }
+                    },
+                    @endif
+                    @if (session('role_id') == 1 || in_array(56, session('permissions')))
+                    {
+                        text: 'Adjust in payments',
+                        className: 'btn btn-primary bulk_adjust_in_payments',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                swal({
+                                    title: 'Are you sure?',
+                                    text: 'You want to Adjust selected Tracking Numbers in Payment?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('admin.finance.outstanding_shipments.bulk_adjust_in_payment') !!}',
+                                            method: 'PUT',
+                                            data: {
+                                                'shipment_ids': selected_rows,
+                                                'dncc': dncc,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                            .done(function(data) {
+                                                if (data.status == 0) {
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                }
+                                                else {
+                                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                }
+
+                                                table.draw(true);
+                                            });
+                                    }
+                                });
+							}
+
+                        }
+                    },
+                    @endif
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -423,14 +534,19 @@
                                     row.select();
 
                                     id = parseInt(row.id());
+                                    var dncc_no = parseInt(row.data().dncc);
 
                                     var index = $.inArray(id, selected_rows);
 
                                     if (index === -1) {
                                         selected_rows.push(id);
+                                        dncc[id] = dncc_no;
                                     }
+                                    console.log(dncc);
 
                                     table.button('.revert_request').enable();
+                                    table.button('.bulk_resolved').enable();
+                                    table.button('.bulk_adjust_in_payments').enable();
                                 }
                             });
                         }
@@ -453,12 +569,15 @@
 
                                     if (index !== -1) {
                                         selected_rows.splice(index, 1);
+                                        dncc.splice(id, 1);
                                     }
 
                                 }
                             });
                             if (selected_rows.length == 0) {
                                 table.button('.revert_request').disable();
+                                table.button('.bulk_resolved').disable();
+                                table.button('.bulk_adjust_in_payments').disable();
                             }
                         }
                     },
@@ -602,24 +721,31 @@
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
+                var dncc_no = parseInt($(this).parents('tr').attr('data-dncc'));
 
 
                 var index = $.inArray(id, selected_rows);
 
                 if (index === -1) {
                     selected_rows.push(id);
+                    dncc[id]= dncc_no;
 
                 }
                 else {
                     selected_rows.splice(index, 1);
+                    dncc.splice(id, 1);
 
                 }
 
                 if (selected_rows.length > 0) {
                     table.button('.revert_request').enable();
+                    table.button('.bulk_resolved').enable();
+                    table.button('.bulk_adjust_in_payments').enable();
                 }
                 else {
                     table.button('.revert_request').disable();
+                    table.button('.bulk_resolved').disable();
+                    table.button('.bulk_adjust_in_payments').disable();
                 }
             });
 

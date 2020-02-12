@@ -151,6 +151,26 @@
                                 <div class="tab-pane" id="linkOpt" role="tabpanel" aria-labelledby="linkOpt-tab" aria-expanded="false">
                                     <div class="table-responsive">
                                         <br>
+                                        <table class="table table-bordered datatable" id="bank_datatable" style="z-index: 3;">
+                                            <thead>
+                                            <tr role="row" class="bg-primary white">
+
+                                                <th class="border-primary border-darken-1">S.No</th>
+                                                <th class="border-primary border-darken-1">Bank Name</th>
+                                                <th class="border-primary border-darken-1">Bank Branch</th>
+                                                <th class="border-primary border-darken-1">Bank City</th>
+                                                <th class="border-primary border-darken-1">Account Number</th>
+                                                <th class="border-primary border-darken-1">Account Title</th>
+                                                <th class="border-primary border-darken-1">IBAN No.</th>
+                                                <th class="border-primary border-darken-1"></th>
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+
+
+                                    <!-- <div class="table-responsive">
+                                        <br>
                                         <table class="table" style="font-size: 14px">
                                             <thead>
                                             <tr>
@@ -218,7 +238,7 @@
                                             @endif
                                             </tbody>
                                         </table>
-                                    </div>
+                                    </div> -->
                                 </div>
                                 <div class="tab-pane" id="linkEmail" role="tabpanel" aria-labelledby="linkEmail-tab" aria-expanded="false">
                                     <div class="mt-2">
@@ -518,6 +538,56 @@
         </div>
     </div>
     {{--Add Email Modal--}}
+    <!-- default modal -->
+    <div class="modal fade text-left" id="DefaultBankModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DefaultBankModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Make Default Bank</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="default_bank_form" action="{{route('cod.default.bank')}}" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-5 text-center">
+                                    <div class="form-group">
+                                        <label for="default_type_checkbox" class="font-medium-2 text-bold-600 mr-1">Permanent</label>
+                                        <input type="checkbox" name="default_type_checkbox" id="default_type_checkbox" class="switchery default_type_checkbox" data-color="info" data-size="sm" data-switchery="true">
+                                        <label for="default_type_checkbox" class="font-medium-2 text-bold-600 ml-1">Temporary</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="bank_info_id" id="bank_info_id">
+                            <div class="row mb-2 d-none" id="day_select_div">
+                                <div class="col-12 form-group">
+                                    <select name="day_select" id="day_select" class="select2 form-control required" data-rule-required="true" data-msg-required="Day is required" style="width: 100%" required>
+                                    @for($i = 1; $i < 31; $i++)
+                                        <option value="{{$i}}">{{$i}}</option>
+                                    @endfor
+                                </select>
+                                </div>
+                                
+                            </div>
+
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="addEmails" type="submit" class="btn btn-primary btn-block">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- default modal -->
 
 @endsection
 
@@ -527,6 +597,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/selectize/selectize.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/switchery.min.css')}}">
 
     <style>
         .selectize-control .selectize-input {
@@ -550,6 +621,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/toggle/switchery.min.js')}}" type="text/javascript"></script>
 
 
 
@@ -1029,6 +1101,115 @@
                      }
                 });
 
+                var default_type_checkbox = document.querySelector('.switchery.default_type_checkbox');
+                var default_type_checkbox_init = new Switchery(default_type_checkbox);
+                $('.default_type_checkbox').on('change',function(){
+
+                    var dtc = document.querySelector('.switchery.default_type_checkbox');
+                    if (dtc.checked === true) {
+                        $('#day_select_div').removeClass('d-none');
+
+                    } else if (dtc.checked === false) {
+                        $('#day_select_div').addClass('d-none');
+                    }
+                });
+
+                $('#day_select').prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Day",
+                    width:'100%'
+                });
+        var btable = $('#bank_datatable').DataTable({
+                dom: 'ltipr',
+                scrollX: true, scrollY: '500px',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: true,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                ajax: '{{route('cod.get.banks',['user_id'=>$user->id])}}',
+                rowId: 'bank_row_id',
+                order:[1,'desc'],
+                columns: [
+                    {orderable: false,searchable: false,data: 'serial_number',  name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'bank_name', name: 'bl.name'},
+                    {data: 'bank_branch', name: 'user_bank_infos.bank_branch'},
+                    {data: 'city', name: 'c.name'},
+                    {data: 'account_no', name: 'user_bank_infos.account_no'},
+                    {data: 'account_title', name: 'user_bank_infos.account_title'},
+                    {data: 'iban',orderable: false, name: 'user_bank_infos.iban',class:'status'},
+                    {data: 'action',orderable: false, name: 'action',class:'action'}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = btable.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                            $(td).appendTo($(search));
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                    
+                    this.api().table().columns.adjust();
+                }
+            });
+            $('#linkOpt-tab').on('click', function () {
+                btable.columns.adjust().draw();
+            });
+            $('#bank_datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                if ($(this).hasClass('default')) {
+                    $('#bank_info_id').val(id);
+                    $('#DefaultBankModal').modal('show');
+
+                }
+
+
+            });
+            $( "#default_bank_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your default bank is being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                
+                    
+                }
+            });
 
         });
     </script>

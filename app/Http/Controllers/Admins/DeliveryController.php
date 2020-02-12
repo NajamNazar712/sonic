@@ -45,6 +45,7 @@ use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
+use App\Http\Models\Admin\PettyCashStatement;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -391,6 +392,7 @@ class DeliveryController extends Controller
         return response()->json(['flag' => $flag , 'delivery_note' => $delivery_note_details]);
     }
     public function create_delivery_note(Request $request){
+        
         $shipments = explode(',',$request->shipment_ids);
         $open_box_ids = explode(',',$request->open_box_ids);
         $notifications = explode(',',$request->notification_ids);
@@ -399,6 +401,10 @@ class DeliveryController extends Controller
             $password = rand(10001,99999);
         }else{
             $password = NULL;
+        }
+        $order = false;
+        if($request->has('order_checkbox')){
+            $order = true;
         }
         $admin = Auth::id();
 
@@ -424,25 +430,51 @@ class DeliveryController extends Controller
             }
         }
         if ($shipments_count != 0) {
-            $note = DeliveryNote::create([
-                'hub_id' => $request->hub_id,
-                'rider_id' => $request->selected_rider_id,
-                'route_id' => $request->selected_route_id,
-                'shipments_count' => $shipments_count,
-                'admin_id' => $admin,
-                'total_cod_amount' => $total_cod_amount,
-                'password' => $password,
-                'last_updated_at' => Carbon::now()
-            ]);
+            $rider = Rider::find($request->selected_rider_id);
+            if($rider->special_rider){
+                $note = DeliveryNote::create([
+                    'hub_id' => $request->hub_id,
+                    'rider_id' => $request->selected_rider_id,
+                    'route_id' => $request->selected_route_id,
+                    'shipments_count' => $shipments_count,
+                    'admin_id' => $admin,
+                    'total_cod_amount' => $total_cod_amount,
+                    'password' => $password,
+                    'last_updated_at' => Carbon::now(),
+                    'special_rider_name'=>$request->special_rider_name,
+                    'special_rider_phone'=>$request->special_rider_phone,
+                    'special_rider' => 1,
+                    'order' => $order
+                ]);
+            }
+            else{
+                $note = DeliveryNote::create([
+                    'hub_id' => $request->hub_id,
+                    'rider_id' => $request->selected_rider_id,
+                    'route_id' => $request->selected_route_id,
+                    'shipments_count' => $shipments_count,
+                    'admin_id' => $admin,
+                    'total_cod_amount' => $total_cod_amount,
+                    'password' => $password,
+                    'last_updated_at' => Carbon::now(),
+                    'ordering' => $order
+                ]);
+            }
 
             if ($note) {
+                if (!$order) {  //Default
+                    sort($valid_shipments); //sort_valid_shipments;
+                }
+                $serial = 1;
                 foreach ($valid_shipments as $index => $shipment) {
                     DeliveryNoteShipment::create([
                         'delivery_note_id' => $note->id,
                         'shipment_id' => $shipment,
                         'notification' => $notifications[$index],
-                        'rider_information' => $rider_informations[$index]
+                        'rider_information' => $rider_informations[$index],
+                        'ordering' => $serial
                     ]);
+                    $serial++;
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
@@ -506,7 +538,7 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone'])
             ->where('delivery_notes.status', 0);
 
         if (session('role_id') != 1) {
@@ -532,6 +564,13 @@ class DeliveryController extends Controller
                 }
                 else {
                     return 0;
+                }
+            })
+            ->editColumn('rider', function ($rider) {
+                if($rider->special_rider){
+                    return $rider->rider . ' (' . $rider->special_rider_name . ')';
+                }else{
+                    return $rider->rider;
                 }
             })
             ->editColumn('route', function ($rider) {
@@ -802,7 +841,7 @@ class DeliveryController extends Controller
         if ($delivery_note->exists()) {
             $total_shipments = 0;
             $total_cod_amount = 0;
-            $shipments = DeliveryNoteShipment::where('delivery_note_id', $request->id)->select('shipment_id')->orderBy('shipment_id')->get();
+            $shipments = DeliveryNoteShipment::where('delivery_note_id', $request->id)->select('shipment_id')->orderBy('ordering','asc','shipment_id','asc')->get();
 
             $shipment_details = '
                       <table class="table table-sm table-bordered border">
@@ -919,7 +958,12 @@ class DeliveryController extends Controller
             $delivery_note_details = DeliveryNote::where('id', $request->id)->first();
             $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
             $city_name = $delivery_note_details->hub->name;
-            $rider_name = $rider->name;
+            $delivery_note = $delivery_note->first();
+            if($delivery_note->special_rider){
+                $rider_name = $rider->name. ' ( '. $delivery_note->special_rider_name. ' )';
+            }else{
+                $rider_name = $rider->name;
+            }
             $category = $rider->rider_category->name;
             $route_name = $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )';
             $main_details = '
@@ -1047,8 +1091,9 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request'])
-            ->where('delivery_notes.id', $id);
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering'])
+            ->where('delivery_notes.id', $id)
+            ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -1820,8 +1865,9 @@ class DeliveryController extends Controller
                     ->where('rrb.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','rrb.received_or_refused_by'])
-            ->where('delivery_notes.id', $id);
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering'])
+            ->where('delivery_notes.id', $id)
+            ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
         return Datatables::of($deliveries)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -2858,7 +2904,7 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone'])
             ->where('delivery_notes.cash_collection_status', 0)
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
@@ -2899,6 +2945,13 @@ class DeliveryController extends Controller
                 }
                 else {
                     return 0;
+                }
+            })
+            ->editColumn('rider', function ($rider) {
+                if($rider->special_rider){
+                    return $rider->rider . ' (' . $rider->special_rider_name . ')';
+                }else{
+                    return $rider->rider;
                 }
             })
             ->editColumn('route', function ($rider) {
@@ -2993,7 +3046,7 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ccb', 'ccb.id', '=', 'delivery_notes.cash_collected_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone'])
             ->where('delivery_notes.cash_collection_status', 1)
             ->where('delivery_notes.dncc_status', 0);
 
@@ -3033,6 +3086,13 @@ class DeliveryController extends Controller
                 }
                 else {
                     return 0;
+                }
+            })
+            ->editColumn('rider', function ($rider) {
+                if($rider->special_rider){
+                    return $rider->rider . ' (' . $rider->special_rider_name . ')';
+                }else{
+                    return $rider->rider;
                 }
             })
             ->editColumn('route', function ($rider) {
@@ -3162,10 +3222,26 @@ class DeliveryController extends Controller
         }
     }
 
+    public function sdn_petty_cash_detail(Request $request){
+        $petty_cash_id = $request->petty_cash_id;
+        if($petty_cash_id){
+            $petty_cash_details = PettyCashStatement::find($petty_cash_id);
+            $details = array();
+            $details['date'] = $petty_cash_details->created_at;
+            $details['amount'] = $petty_cash_details->total_amount;
+            $details['reference'] = $petty_cash_details->reference_no;
+
+            return response()->json(['status' => 0, 'details' => $details]);
+        }
+        return response()->json(['status' => 1,'error' => 'Petty Cash not found!']);
+    }
     public function sdn_view(Request $request)
     {
+        $petty_cash_ids = array();
+        $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
+        $petty_cash_list = PettyCashStatement::where('status','<',3)->whereNotIn('id',$petty_cash_ids)->select('id')->get();
         $banks = BanksList::where('affiliate', 1)->get();
-        return view('admin.delivery.sdn.index')->with(['banks' => $banks]);
+        return view('admin.delivery.sdn.index')->with(['banks' => $banks, 'petty_cash_list' => $petty_cash_list]);
     }
 
     public function sdn_list(Request $request)
@@ -3174,7 +3250,7 @@ class DeliveryController extends Controller
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref']);
+            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted']);
 
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -3269,7 +3345,14 @@ class DeliveryController extends Controller
                 $dropdown .= $details_button;
 
                 if (session('role_id') == 1 || in_array(251, session('permissions'))) {
-                    $dropdown .= $adjustment_add_button;
+                    if(session('department_id') == 6) {
+                        if($result->adjusted == 0){
+                            $dropdown .= $adjustment_add_button;
+                        }
+                    }
+                    else{
+                        $dropdown .= $adjustment_add_button;
+                    }
                 }
 
                 if (($result->status == 0) && (session('role_id') == 1 || in_array(43, session('permissions')))) {
@@ -4053,7 +4136,7 @@ class DeliveryController extends Controller
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.pending_status','delivery_notes.cash_collection_status','delivery_notes.dncc_status','delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at']);
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.pending_status','delivery_notes.cash_collection_status','delivery_notes.dncc_status','delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone']);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -4120,6 +4203,13 @@ class DeliveryController extends Controller
                     $query->where('delivery_notes.status',1)->where('delivery_notes.cash_collection_status',0);
                 }else if($keyword == 5){
                     $query->where('delivery_notes.status',4);
+                }
+            })
+            ->editColumn('rider', function ($rider) {
+                if($rider->special_rider){
+                    return $rider->rider . ' (' . $rider->special_rider_name . ')';
+                }else{
+                    return $rider->rider;
                 }
             })
             ->editColumn('route', function ($rider) {
@@ -4905,12 +4995,10 @@ class DeliveryController extends Controller
             $sdn->adjustment_amount = $request->adjustment_amount;
             $sdn->adjustment_date = $request->adjustment_date_formatted;
             $sdn->adjustment_ref = $request->adjustment_ref;
-            if($request->petty_cash_select != ''){
-                $sdn->petty_cash_statement_id = $request->petty_cash_select;
-            }
-            if($request->petty_cash_detail_rows != ''){
-                $sdn->petty_cash_statement_detail_ids = $request->petty_cash_detail_rows;
-            }
+            $sdn->adjusted = 1;
+            // if($request->petty_cash_select != ''){
+            $sdn->petty_cash_statement_id = $request->petty_cash_select;
+            // }
             $sdn->save();
 
             return redirect()->back()->with(['success' => 'Adjustment added successfully!']);

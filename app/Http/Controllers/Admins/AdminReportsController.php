@@ -2624,7 +2624,7 @@ use Yajra\Datatables\Datatables;
                 ->join('admins','admins.id','=','delivery_notes.admin_id')
                 ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
                 ->leftjoin('admins as vb','vb.id','=','delivery_notes.verified_by')
-                ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at as created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.last_updated_at','vb.name as verified_by','delivery_notes.status_updated_at as status_updated','delivery_notes.status_verified_at as status_verified', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at'])
+                ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at as created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.last_updated_at','vb.name as verified_by','delivery_notes.status_updated_at as status_updated','delivery_notes.status_verified_at as status_verified', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone'])
                 ->where('delivery_notes.status',1)->groupBy('delivery_notes.id');
             if (session('role_id') != 1) {
                 $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -2637,6 +2637,13 @@ use Yajra\Datatables\Datatables;
             $datatable = Datatables::of($deliveries)
                 ->addColumn('aging_create_update',function ($deliveries){
                     return ($deliveries->created_at && $deliveries->updated_at)? Carbon::parse($deliveries->updated_at)->diffInDays($deliveries->created_at) :'-';
+                })
+                ->editColumn('rider', function ($rider) {
+                    if($rider->special_rider){
+                        return $rider->rider . ' (' . $rider->special_rider_name . ')';
+                    }else{
+                        return $rider->rider;
+                    }
                 })
                 ->editColumn('amount', function($shipment){
                     return number_format($shipment->amount);

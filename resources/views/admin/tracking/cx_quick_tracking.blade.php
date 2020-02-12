@@ -56,6 +56,7 @@
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">COD Amount</th>
                                         <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Status Datetime</th>
                                         <th class="border-primary border-darken-1">Shipper Name</th>
                                         <th class="border-primary border-darken-1">Consignee Name</th>
                                         <th class="border-primary border-darken-1">Consignee Phone Number</th>
@@ -522,6 +523,7 @@
                         {data: 'address', name: 'shipments.consignee_address', class: 'align-middle address'},
                         {data: 'cod_amount', name: 'shipments.amount', class: 'align-middle cod_amount'},
                         {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                        {data: 'created_at', name: 'sj.created_at', class: 'align-middle status_datetime'},
                         {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
                         {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                         {data: 'consignee_phone_no', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_no'},

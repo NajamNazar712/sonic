@@ -20,11 +20,12 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\BanksList;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\DisputeType;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\Shipment;
 use App\Http\Models\City;
-
+use App\Http\Models\UserDefaultBankDuration;
 use Auth;
 
 use Illuminate\Support\Facades\DB;
@@ -324,6 +325,37 @@ class ShipperDashboardController extends Controller
         return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration]);
     }
 
+    public function getBanks(Request $request){
+        $banks = UserBankInfo::join('cities as c','user_bank_infos.city_id','=','c.id')
+        ->leftJoin('banks_lists as bl','bl.id','=','user_bank_infos.bank_name')
+        ->select(['user_bank_infos.id as bank_row_id','user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title','user_bank_infos.iban','c.name as city','bl.name as bank_name','user_bank_infos.default_bank'])
+        ->where('user_id', session('user_id'));
+
+        return Datatables::of($banks)
+        ->addColumn('action', function ($bank) {
+            $dropdown = '
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+            ';
+            $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
+
+            if (!$bank->default_bank) {
+                $dropdown .= $default_button;
+            }else{
+                $dropdown = 'Default Address';
+            }
+            
+
+            $dropdown .= '
+                    </div>
+                </div>
+            ';
+
+            return $dropdown;
+        })->make(true);
+    }
+
     public function getPickups(Request $request) {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
         ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor'])
@@ -419,7 +451,65 @@ class ShipperDashboardController extends Controller
         }
     }
 
+    static public function clear_defaultBank(){
+        $today = Carbon::today();
+        $duration = UserDefaultBankDuration::where('day', $today);
+        if($duration->exists()){
+            $duration = $duration->get();
+            foreach ($duration as $key => $value) {
+                $old_bank = $value->last_default_bank_id;
+                if($old_bank){
+                    $user_id = $value->user_id;
+                    UserBankInfo::where('user_id', $user_id)->update(['default_bank' => 0]);
+                    $bank_info = UserBankInfo::find($old_bank);
+                    $bank_info->default_bank = 1;
+                    $bank_info->save();
+                    $value->delete();
+                }
+            }
+        }
+    }
 
+    public function updateDefaultBanks(Request $request){
+
+        $user_id = session('user_id');
+        $bank_info_id = $request->bank_info_id;
+        if($request->has('default_type_checkbox')){
+            $day = $request->day_select;
+            // $default_bank_duration = new UserDefaultBankDuration();
+            $today = Carbon::today();
+            $today->addDays($day);
+
+            $duration = UserDefaultBankDuration::where('user_id',$user_id);
+            if($duration->exists()){
+                $duration = $duration->first();
+                $duration->day = $today;
+                $duration->save();
+
+            }else{
+                $user_bank = UserBankInfo::where('user_id', $user_id)->where('default_bank',1)->first();
+
+                $default_bank_duration = new UserDefaultBankDuration();
+                $default_bank_duration->user_id = $user_id;
+                $default_bank_duration->last_default_bank_id = $user_bank->id;
+                $default_bank_duration->day = $today;
+                $default_bank_duration->save();
+            }
+            UserBankInfo::where('user_id', $user_id)->update(['default_bank' => 0]);
+            $user_bank = UserBankInfo::find($bank_info_id);
+            $user_bank->default_bank = 1;
+            $user_bank->save();
+
+        }else{
+            UserDefaultBankDuration::where('user_id', $user_id)->delete();
+            UserBankInfo::where('user_id', $user_id)->update(['default_bank' => 0]);
+            $user_bank = UserBankInfo::find($bank_info_id);
+            $user_bank->default_bank = 1;
+            $user_bank->save();
+
+        }
+        return redirect()->back()->with(['success' => 'Default Bank Successfully updated!']);
+    }
 
 
     public function addPickup(Request $request) {

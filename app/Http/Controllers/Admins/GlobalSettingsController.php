@@ -26,6 +26,7 @@ use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
+use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
@@ -1509,5 +1510,36 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'No shippers selected!');
         }
 
+    }
+    public function minimum_chargeable_weight_index(){
+        $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
+        $on = null;
+        $ol = null;
+        $det = null;
+        $same_day = null;
+        foreach($minimum_chargeable_weights as $minimum_chargeable_weight){
+            if($minimum_chargeable_weight->shipping_mode_id == 1){
+                $on = $minimum_chargeable_weight->weight;
+            }
+            elseif($minimum_chargeable_weight->shipping_mode_id == 2){
+                $ol = $minimum_chargeable_weight->weight;
+            }
+            elseif($minimum_chargeable_weight->shipping_mode_id == 3){
+                $det = $minimum_chargeable_weight->weight;
+            }
+            else{
+                $same_day = $minimum_chargeable_weight->weight;
+            }
+        }
+        return view('admin.settings.minimum_chargeable_weight')->with(['on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day]);
+    }
+
+    public function minimum_chargeable_weight_update(Request $request){
+        $on = MinimumChargeableWeightSetting::where('shipping_mode_id', 1)->update(['weight' => $request->on]);
+        $ol = MinimumChargeableWeightSetting::where('shipping_mode_id', 2)->update(['weight' => $request->ol]);
+        $detain = MinimumChargeableWeightSetting::where('shipping_mode_id', 3)->update(['weight' => $request->det]);
+        $same_day = MinimumChargeableWeightSetting::where('shipping_mode_id', 4)->update(['weight' => $request->same_day]);
+
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
 }

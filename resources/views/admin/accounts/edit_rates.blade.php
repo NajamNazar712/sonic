@@ -169,7 +169,7 @@
                                                     <input type="hidden" name="on_weight_record[{{$index}}]" value="{{$onweight->id}}">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->range_up != $onweight->range_up) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->range_up != $onweight->range_up) {{$e_weight[1][$index]->range_up}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_wa_range_up[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->range_up != $onweight->range_up) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->range_up != $onweight->range_up) {{$e_weight[1][$index]->range_up}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" @if($index == 0) data-rule-min="{{$on}}" data-msg-min="Minimum chargeable weight can not be less than {{$on}}" @endif name="on_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -923,7 +923,7 @@
                                                     <input type="hidden" name="ol_weight_record[{{$index}}]" value="{{$olweight->id}}">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->range_up != $olweight->range_up) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->range_up != $olweight->range_up) {{$e_weight[2][$index]->range_up}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_wa_range_up[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->range_up != $olweight->range_up) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->range_up != $olweight->range_up) {{$e_weight[2][$index]->range_up}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" @if($index == 0) data-rule-min="{{$ol}}" data-msg-min="Minimum chargeable weight can not be less than {{$ol}}" @endif name="ol_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -1676,7 +1676,7 @@
                                                     <input type="hidden" name="detain_weight_record[{{$index}}]" value="{{$detweight->id}}">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->range_up != $detweight->range_up) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->range_up != $detweight->range_up) {{$e_weight[3][$index]->range_up}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->range_up}}" name="detain_wa_range_up[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->range_up != $detweight->range_up) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->range_up != $detweight->range_up) {{$e_weight[3][$index]->range_up}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->range_up}}" @if($index == 0) data-rule-min="{{$det}}" data-msg-min="Minimum chargeable weight can not be less than {{$det}}" @endif name="detain_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -2430,7 +2430,7 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->range_up != $sameweight->range_up) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->range_up != $sameweight->range_up) {{$e_weight[4][$index]->range_up}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_up}}" name="sameday_wa_range_up[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->range_up != $sameweight->range_up) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->range_up != $sameweight->range_up) {{$e_weight[4][$index]->range_up}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_up}}" @if($index == 0) data-rule-min="{{$same_day}}" data-msg-min="Minimum chargeable weight can not be less than {{$same_day}}" @endif name="sameday_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -3527,7 +3527,45 @@
                                         
                                     </div>
                                  @endisset 
-                            
+                            @if(count($rate_remarks) > 0)
+                                <div class="row justify-content-center">
+                                    <div class="col-6">
+                                        <div class="card">
+                                            <div class="card-header mb-0 pb-0">
+                                                <h3 class="">Remarks</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <table class="table table-stripped table-bordered datatable" style="z-index: 3">
+                                                <thead>
+                                                    <tr class="bg-primary white">
+                                                        <th class="border-primary border-darken-1">Remarks</th>
+                                                        <th class="border-primary border-darken-1">Admin</th>
+                                                        <th class="border-primary border-darken-1">Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($rate_remarks as $remark)
+                                                        <tr>
+                                                            <td>{{$remark->remarks}}</td>
+                                                            <td>{{$remark->admin->name}}</td>
+                                                            <td>{{$remark->created_at}}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                            </div>
+                                        </div>
+                                    </div>  
+                                    
+                                </div>
+                            @endif
+
+                            <div class="row mt-2 justify-content-center">
+                                <div class="col-5 form-group">
+                                    <textarea name="rate_remarks" id="rate_remarks" class="form-control" placeholder="Rate Remarks..." rows="3"></textarea>
+                                </div>
+                                
+                            </div> 
 
                             <div class="text-center mt-2">
                                 <input type="hidden" name="authorize" id="authorize">
@@ -3613,6 +3651,10 @@
             o.style.height = (25+o.scrollHeight)+"px";
         }
         $(document).ready(function () {
+
+            $('body').on('change', '#rate_remarks', function () {
+                $(this).val($(this).val().trim());
+            });
 
                 $("#on_default").on('change', function () {
                     if ($("#ol_default").is(":checked")) {

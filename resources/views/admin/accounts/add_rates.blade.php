@@ -132,7 +132,7 @@
                                             <div class="row" id="on_weight_row0">
                                                 <div class="col text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="text" id="on_range_up{{$index}}" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_wa_range_up[{{$index}}]">
+                                                        <input type="text" id="on_range_up{{$index}}" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" @if($index == 0) data-rule-min="{{$on}}" data-msg-min="Minimum chargeable weight can not be less than {{$on}}" @endif name="on_wa_range_up[{{$index}}]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col text-center">
@@ -570,7 +570,7 @@
                                             <div class="row">
                                                 <div class="col text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="text" id="ol_range_up{{$index}}" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_wa_range_up[{{$index}}]">
+                                                        <input type="text" id="ol_range_up{{$index}}" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" @if($index == 0) data-rule-min="{{$ol}}" data-msg-min="Minimum chargeable weight can not be less than {{$ol}}" @endif name="ol_wa_range_up[{{$index}}]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col text-center">
@@ -1003,7 +1003,7 @@
                                             <div class="row">
                                                 <div class="col text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="text" id="detain_range_up{{$index}}" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->range_up}}" name="detain_wa_range_up[{{$index}}]">
+                                                        <input type="text" id="detain_range_up{{$index}}" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->range_up}}" @if($index == 0) data-rule-min="{{$det}}" data-msg-min="Minimum chargeable weight can not be less than {{$det}}" @endif name="detain_wa_range_up[{{$index}}]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col text-center">
@@ -1431,7 +1431,7 @@
                                             <div class="row">
                                                 <div class="col text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="text" id="sameday_range_up{{$index}}" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_up}}" name="sameday_wa_range_up[{{$index}}]">
+                                                        <input type="text" id="sameday_range_up{{$index}}" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_up}}" @if($index == 0) data-rule-min="{{$same_day}}" data-msg-min="Minimum chargeable weight can not be less than {{$same_day}}" @endif name="sameday_wa_range_up[{{$index}}]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col text-center">
@@ -1964,6 +1964,12 @@
                                         
                                     </div>
 
+                            <div class="row mt-2 justify-content-center">
+                                <div class="col-5 form-group">
+                                    <textarea name="rate_remarks" id="rate_remarks" class="form-control" placeholder="Rate Remarks..." rows="3"></textarea>
+                                </div>
+                                
+                            </div>        
                             <div class="text-center mt-2">
                                 <div class="form-group">
 
@@ -2004,6 +2010,10 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            
+            $('body').on('change', '#rate_remarks', function () {
+                $(this).val($(this).val().trim());
+            });
             $("#on_default").on('change', function(){
                 if($("#ol_default").is(":checked")){
                     $("#ol_default").trigger('click');

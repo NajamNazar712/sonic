@@ -33,7 +33,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\HubWiseSplitEmail',
         '\App\Console\Commands\PettyCashImageArchive',
         '\App\Console\Commands\DailyFakeStatusReportEmail',
-        '\App\Console\Commands\NegativeBalanceShipperSalesPerson'
+        '\App\Console\Commands\NegativeBalanceShipperSalesPerson',
+        '\App\Console\Commands\ClearDefaultBankDuration'
     ];
 
     /**
@@ -98,6 +99,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('hubwise:split')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
+
+        $schedule->command('clear:cleardefaultbankduration')->dailyAt('00:00')->runInBackground();
+
     }
 
     /**

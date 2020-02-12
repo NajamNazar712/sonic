@@ -102,7 +102,9 @@ class AdminFinanceController extends Controller
         $banks = BanksList::where('affiliate', 1)->get();
         $all_banks = BanksList::all();
         $hubs = City::orderBy('name')->where('hub', 1)->get();
-        $petty_cash_list = PettyCashStatement::where('status',2)->select('id')->get();
+        $petty_cash_ids = array();
+        $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
+        $petty_cash_list = PettyCashStatement::where('status','<',3)->whereNotIn('id',$petty_cash_ids)->select('id')->get();
         return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks, 'hubs'=>$hubs, 'all_banks' => $all_banks, 'petty_cash_list' => $petty_cash_list]);
     }
 
@@ -895,6 +897,29 @@ class AdminFinanceController extends Controller
         }
     }
 
+    public function outstanding_shipments_bulk_resolved(Request $request) {
+        foreach($request->shipments as $shipment_id){
+            $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11]);
+            if ($delivery_note_shipment->exists()) {
+                $delivery_note_shipment = $delivery_note_shipment->first();
+
+                $delivery_note_shipment->status = 7;
+
+                $delivery_note_shipment->save();
+                $shipment = Shipment::where('id',$delivery_note_shipment->shipment_id)->where('booking_type_id', '=', 4);
+
+                if ($shipment->exists()) {
+                    $shipment = $shipment->first();
+
+                    $shipment->walk_in_status = 1;
+
+                    $shipment->save();
+                }
+            }
+        }
+        return ['status' => 0, 'success' => 'Shipments has been marked Resolved'];
+    }
+
 
     public function revert_requested_image($image_id){
         $revert_Status_request = RevertStatusRequest::find($image_id);
@@ -1082,6 +1107,31 @@ class AdminFinanceController extends Controller
             $slip->save();
 
         }
+        $new_deposit_ids = explode(',', $request->new_deposit_rows);
+        if(count($new_deposit_ids) > 0){
+            foreach ($new_deposit_ids as $row) {
+                $total_amount += $request->new_amount[$row];
+                
+                $deposit_details = new StationDepositNoteSlip();
+                $deposit_details->station_deposit_note_id = $sdn_id;
+                $deposit_details->deposit_date = $request->new_date[$row];
+                $deposit_details->bank_id = $request->new_bank[$row];
+                $deposit_details->amount = $request->new_amount[$row];
+                $deposit_details->save();
+                $file_name = 'new_deposit_slip_'.$row;
+                $image = $request->file($file_name);
+                $extension = 'png';
+                $random = rand(1000, 100000);
+                $now = Carbon::now();
+                $time = $now->year . '_' . $now->month;
+                $slip = $time . $random . Auth::id() . '.' . $extension;
+                $image->move(public_path('uploads/sdn'), $slip);
+
+                $deposit_details->image = $slip;
+                $deposit_details->save();
+            }
+        }
+        
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
@@ -1211,6 +1261,143 @@ class AdminFinanceController extends Controller
             }
 
         }
+    }
+
+    public function outstanding_shipments_bulk_adjust_in_payment(Request $request) {
+        foreach ($request->shipment_ids as $shipment_id){
+            $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $request->dncc[$shipment_id]);
+            if ($delivery_note_shipment->exists()) {
+                $delivery_note_shipment = $delivery_note_shipment->first();
+
+                $shipment = Shipment::find($shipment_id);
+
+
+                $delivery_note_shipment->status = 8;
+
+                $delivery_note_shipment->save();
+
+                $delivery_note = $delivery_note_shipment->delivery_note;
+
+                $delivery_note_amount = $delivery_note->received_cod_amount - $shipment->amount;
+
+                if ($delivery_note_amount < 0) {
+                    $delivery_note_amount = 0;
+                }
+
+                $delivery_note->delivered_shipments = $delivery_note->delivered_shipments - 1;
+                $delivery_note->received_cod_amount = $delivery_note_amount;
+
+                $delivery_note->save();
+
+                $delivery_note_station_deposit_note = $delivery_note->delivery_note_station_deposit_note;
+
+                if ($delivery_note_station_deposit_note) {
+                    $station_deposit_note = $delivery_note_station_deposit_note->station_deposit_note;
+
+                    $station_deposit_note_amount = $station_deposit_note->sdn_amount - $shipment->amount;
+
+                    if ($station_deposit_note_amount < 0) {
+                        $station_deposit_note_amount = 0;
+                    }
+
+                    $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
+                    $station_deposit_note->sdn_amount = $station_deposit_note_amount;
+                    $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
+
+                    $station_deposit_note->save();
+                }
+
+                $shipment->shipper_status_id = 13;
+                $shipment->consignee_status_id = 13;
+
+                $shipment->payment_status_id = 4;
+
+                $shipment->save();
+
+                $account_type_id = $shipment->user->account_type_id;
+
+                if ($account_type_id == 1) {
+                    $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+
+                    if ($pending_payment_shipment->exists()) {
+                        $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                        $this->adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0, 2);
+                    }
+                    else {
+                        $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+
+                        if ($done_payment_shipment->exists()) {
+                            $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                            $this->adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1,2);
+                        }
+                    }
+                }
+                else {
+                    $payment_shipment_id = NULL;
+                    $payment_type = NULL;
+                    $invoice_shipment_id = NULL;
+                    $invoice_type = NULL;
+
+                    $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+
+                    if ($pending_payment_shipment->exists()) {
+                        $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                        $payment_shipment_id = $pending_payment_shipment->id;
+                        $payment_type = 0;
+                    }
+                    else {
+                        $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+
+                        if ($done_payment_shipment->exists()) {
+                            $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                            $payment_shipment_id = $done_payment_shipment->id;
+                            $payment_type = 1;
+                            $done_payment_id = $done_payment_shipment->done_payment_id;
+                        }
+                    }
+
+                    $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id);
+
+                    if ($pending_invoice_shipment->exists()) {
+                        $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+
+                        $invoice_shipment_id = $pending_invoice_shipment->id;
+                        $invoice_type = 0;
+                    }
+                    else {
+                        $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment_id);
+
+                        if ($done_invoice_shipment->exists()) {
+                            $done_invoice_shipment = $done_invoice_shipment->latest()->first();
+
+                            $invoice_shipment_id = $done_invoice_shipment->id;
+                            $invoice_type = 1;
+                        }
+                    }
+
+                    if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
+                        self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,2);
+                    }
+                }
+
+                if(isset($payment_type) && $payment_type == 1) {
+                    ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), '', $done_payment_id);
+                }
+                else{
+                    ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id());
+                }
+
+                ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                NotificationsController::send(21, $shipment_id, Auth::id());
+
+            }
+        }
+        return ['status' => 0, 'success' => 'Shipment has been marked to be Adjusted in Payment'];
     }
 
     public function outstanding_shipments_adjust_in_payment(Request $request) {
@@ -2160,7 +2347,10 @@ class AdminFinanceController extends Controller
     public function make_payments_list(Request $request) {
         $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->join('user_bank_infos as ubi', 'pending_payments.user_id', '=', 'ubi.user_id')
+            ->join('user_bank_infos as ubi', function ($join) {
+                $join->on('pending_payments.user_id', '=', 'ubi.user_id')
+                    ->where('ubi.default_bank', DB::raw(1));
+            })
             ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
             ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
             ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
@@ -2714,15 +2904,22 @@ class AdminFinanceController extends Controller
 
             $shipper = User::find($done_payment->user_id);
 
+            if($done_payment->user_bank_info_id == NULL) {
+                $shipper_bank = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
+            }
+            else {
+                $shipper_bank = UserBankInfo::find($done_payment->user_bank_info_id);
+            }
+
             $payable = number_format(ROUND((DonePaymentShipment::where('done_payment_id', $done_payment_id)->sum('payable') - $done_payment->ibft_charges), 0, PHP_ROUND_HALF_DOWN));
 
             $row = array();
 
             $row[] = str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
             $row[] = $shipper->name;
-            $row[] = $shipper->bank->account_title;
-            $row[] = $shipper->bank->iban;
-            $row[] = $shipper->bank->bank->name;
+            $row[] = $shipper_bank->account_title;
+            $row[] = $shipper_bank->iban;
+            $row[] = $shipper_bank->bank->name;
             $row[] = $payable;
 
             $details[] = $row;
@@ -2758,7 +2955,17 @@ class AdminFinanceController extends Controller
 
             $pending_payment = PendingPayment::find($pending_payment_id);
 
+            $user_bank_id = NULL;
+
+            $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
+
+            if($user_bank_id){
+               $user_bank_id = $user_bank_id->id;
+            }
+
             if ($total_shipments == $selected_shipments) {
+
+
                 $done_payment = new DonePayment();
 
                 $done_payment->user_id = $pending_payment->user_id;
@@ -2766,6 +2973,7 @@ class AdminFinanceController extends Controller
                 $done_payment->delivered_shipments = $pending_payment->delivered_shipments;
                 $done_payment->returned_shipments = $pending_payment->returned_shipments;
                 $done_payment->adjusted_shipments = $pending_payment->adjusted_shipments;
+                $done_payment->user_bank_info_id = $user_bank_id;
 
                 $settings = GlobalSettings::where('type', 'ibft_charges');
 
@@ -2907,7 +3115,7 @@ class AdminFinanceController extends Controller
                 $done_payment->delivered_shipments = $delivered_shipments;
                 $done_payment->returned_shipments = $returned_shipments;
                 $done_payment->adjusted_shipments = $adjusted_shipments;
-
+                $done_payment->user_bank_info_id = $user_bank_id;
                 $done_payment->save();
 
                 $pending_payment->total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->count();
@@ -2985,8 +3193,22 @@ class AdminFinanceController extends Controller
     public function done_payments_list(Request $request) {
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
-            ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
+            ->leftJoin('user_bank_infos as ubi', function ($join) {
+                $join->on('ubi.id', '=', 'done_payments.user_bank_info_id');
+            })
+            ->leftJoin('user_bank_infos as ubi_default', function ($join) {
+                $join->on('ubi_default.user_id', '=', 'u.id')
+                    ->where('ubi_default.default_bank',DB::raw(1));
+            })
+            ->leftJoin('banks_lists as ub', function ($join) {
+                $join->where(function($sub_query) {
+                    $sub_query->whereNotNull('done_payments.user_bank_info_id')
+                    ->where('ubi.bank_name', '=', 'ub.id');
+                })->orWhere(function($sub_query) {
+                    $sub_query->whereNull('done_payments.user_bank_info_id')
+                    ->where('ubi_default.bank_name', '=', 'ub.id');
+                });
+            })
             ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
             ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
@@ -3482,7 +3704,12 @@ class AdminFinanceController extends Controller
 
         $shipper = $done_payment->shipper;
 
-        $shipper_bank = $shipper->bank;
+        if($done_payment->user_bank_info_id == null){
+            $shipper_bank = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
+        }else{
+            $shipper_bank = UserBankInfo::find($done_payment->user_bank_info_id);
+        }
+
 
         $account_type_id = $shipper->account_type_id;
 
@@ -4036,7 +4263,7 @@ class AdminFinanceController extends Controller
 
             $user_id = $user->id;
 
-            $user_banking_information = $user->bank;
+            $user_banking_information = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
 
             if ($user_banking_information->invoicing_cycle_id == 1) {
                 if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {

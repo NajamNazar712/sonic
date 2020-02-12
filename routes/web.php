@@ -34,6 +34,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('register');
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
+    Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
 
@@ -230,6 +231,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('update/profile/password','Shippers\ShipperDashboardController@update_profile_password')->name('update.profile.password');
     Route::get('getpickups','Shippers\ShipperDashboardController@getPickups')->name('get.pickups');
+    Route::get('getbanks','Shippers\ShipperDashboardController@getBanks')->name('get.banks');
+    Route::post('default_bank','Shippers\ShipperDashboardController@updateDefaultBanks')->name('default.bank');
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
@@ -609,7 +612,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments','Admins\DeliveryController@sdn_delivered_shipments')->name('shipments');
             Route::post('slip_view','Admins\DeliveryController@sdn_slip_view')->name('slip_view');
             Route::post('adjustment/add','Admins\DeliveryController@sdn_adjustment_add')->name('adjustment.add');
-
+            Route::get('petty_cash_detail','Admins\DeliveryController@sdn_petty_cash_detail')->name('petty_cash_detail');
         });
         Route::prefix('misroute')->name('misroute.')->group(function (){
             Route::get('','Admins\DeliveryController@misroute_index')->name('index');
@@ -888,7 +891,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@outstanding_shipments_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@outstanding_shipments_list')->name('list');
             Route::put('resolved', 'Admins\AdminFinanceController@outstanding_shipments_resolved')->name('resolved');
+            Route::put('bulk_resolved', 'Admins\AdminFinanceController@outstanding_shipments_bulk_resolved')->name('bulk_resolved');
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
+            Route::put('bulk_adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_bulk_adjust_in_payment')->name('bulk_adjust_in_payment');
             Route::post('dncc/print', 'Admins\AdminFinanceController@outstanding_shipments_dncc_print')->name('dncc.print');
             Route::post('sdn/print', 'Admins\AdminFinanceController@outstanding_shipments_sdn_print')->name('sdn.print');
             Route::get('walk_in_index', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_index')->name('walk_in_index');
@@ -1420,6 +1425,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('foc_account')->name('foc_account.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@foc_account_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
+        });
+
+        Route::prefix('minimum_chargeable_weight')->name('minimum_chargeable_weight.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
         });
 
     });

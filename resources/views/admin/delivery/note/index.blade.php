@@ -38,7 +38,7 @@
                         <fieldset class="form-group">
                             <select name="rider_name" id="rider_name" class="form-control select2" required >
                                 @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}" data-id="{{$rider->route_id}}">{{$rider->name}}</option>
+                                    <option value="{{$rider->id}}" data-id="{{$rider->route_id}}" data-special="{{ $rider->special_rider }}">{{$rider->name}}</option>
                                 @endforeach
                             </select>
                             <div class="danger" id="rider_error" style="display:none;">This field is required</div>
@@ -82,6 +82,16 @@
                 </table>
                 <form id="create_delivery_note_form" class="" method="post" action="{{ route('admin.delivery.note.create') }}">
                     <div class="row justify-content-center">
+                            <div class="col-2 text-center">
+                                <label class="font-medium-2 font-weight-bold block">Delivery Note Shipment(s) Order</label>
+                                <div class="form-group">
+                                    <label for="order_checkbox" class="font-medium-2 text-bold-600 mr-1">Default</label>
+                                    <input type="checkbox" name="order_checkbox" id="order_checkbox" class="switchery order_checkbox" data-color="info" data-size="sm" data-switchery="true">
+                                    <label for="order_checkbox" class="font-medium-2 text-bold-600 ml-1">Scanned</label>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="row justify-content-center">
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
@@ -90,6 +100,10 @@
                         <input type="hidden" name="rider_info_ids" id="rider_info_ids">
                         <input type="hidden" name="selected_rider_id" id="selected_rider_id">
                         <input type="hidden" name="selected_route_id" id="selected_route_id">
+                        <input type="hidden" name="special_rider_name" id="special_rider_name">
+                        <input type="hidden" name="special_rider_phone" id="special_rider_phone">
+
+
                         <div class="col-3">
                             <button type="submit" class="btn btn-primary btn-block ">Submit &amp; Print</button>
 
@@ -100,7 +114,32 @@
             </div>
         </div>
     </div>
-
+    <div class="modal fade text-left" id="SpecialRiderModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SpecialRiderModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Special Rider</h4>
+                    
+                </div>
+                <form id="special_rider_form" class="justify-content-center" novalidate="novalidate">
+                    <div class="modal-body text-center">
+                        
+                            <div class="form-group">
+                                <input type="text" name="special_rider_name" id="special_rider_name_input" class="form-control" placeholder="Special Rider Name" data-rule-required="true" data-msg-required="Rider Nume is required">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="special_rider_phone" id="special_rider_phone_input" class="form-control phone" placeholder="Special Rider Phone" data-rule-required="true" data-msg-required="Phone Number is required">
+                            </div>
+                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary width-100" id="add_special_rider_button">Add</button>
+                    </div>
+            </form>
+            </div>
+        </div>
+    </div>
 
 
 @endsection
@@ -163,9 +202,15 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('.phone').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
            @if(session('print'))
             var pid = '{{ session('print') }}';
             print(pid);
@@ -499,18 +544,77 @@
                 }
 
             });
+            var special_rider_name = '';
+            var special_rider_phone = '';
+            var special_rider_flag = false;
+            var this_form;
+            function create_delivery_note(){
+                var rider = $('#rider_name').val();
+                var route = $('#route').val();
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to create the Delivery Note!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if(confirm){
+                        blockPagePermanently();
+                        open_box_ids = [];
+                        table.rows().every(function(index) {
+                            var node = $(this.node());
+                            if(node.find('td.open_box input').is(':checked')){
+                                open_box_ids.push(parseInt(node.attr('id')));
+                            }
+                        });
+                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                        $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
+                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                        $('#create_delivery_note_form input#selected_route_id').val(route);
+                        if(special_rider_flag){
+                            $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
+                            $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
+                        }
+                        
+                        this_form.submit();
 
-            $('#create_delivery_note_form').bind('submit', function(event) {
+                    }
+                });
+            }
+
+
+            
+            $('#create_delivery_note_form').on('submit', function(event) {
+                console.log("submitted");
                 event.preventDefault();
                 // riderFormValid();
                 var count = 0;
-                var this_form = this;
+                this_form = this;
                 count = table.rows().count();
 
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
-
+                var special = parseInt($('#rider_name').find(':selected').data('special'));
+                
 
                 if (rider !== '' && rider !== null) {
 
@@ -533,49 +637,15 @@
 
                 if(count > 0) {
                     if (errors === 0) {
-
-                        swal({
-                            title: 'Are You Sure?',
-                            text: 'Select Yes to create the Delivery Note!',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if(confirm){
-                                blockPagePermanently();
-                                open_box_ids = [];
-                                table.rows().every(function(index) {
-                                    var node = $(this.node());
-                                    if(node.find('td.open_box input').is(':checked')){
-                                        open_box_ids.push(parseInt(node.attr('id')));
-                                    }
-                                });
-                                $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                                $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                                $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
-                                $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                                $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                                $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                $('#create_delivery_note_form input#selected_route_id').val(route);
-
-                                this_form.submit();
+                        if(special_rider_flag == false){
+                            if(special == 1){
+                                $('#SpecialRiderModal').modal('show');
+                            }else{
+                                create_delivery_note();
                             }
-                        });
+                        }
+                        
+                        
                                 
                         // $.ajax({
                         //     url: '{!! route('admin.delivery.note.rider_check') !!}',
@@ -713,6 +783,25 @@
                     camera_scanning_stop();
                 }
             });
+
+        $('#special_rider_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $('#add_special_rider_button').prop('disabled', true);
+                    special_rider_name = $('#special_rider_name_input').val();
+                    console.log(special_rider_name)
+                    special_rider_phone = $('#special_rider_phone_input').val();
+                    special_rider_flag = true;
+                    form.reset();
+                    $('#SpecialRiderModal').modal('hide');
+                    create_delivery_note();
+                    return false;
+                }
+            });  
 
         });
 
