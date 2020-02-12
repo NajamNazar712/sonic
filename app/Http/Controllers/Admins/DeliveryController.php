@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Models\Admin\Admin;
@@ -332,6 +333,7 @@ class DeliveryController extends Controller
                                 if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                                     $class = 'complaint_row';
                                 }
+                                ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null,null);
                                 return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks, 'class' => $class]);
 
                             } else {
@@ -359,6 +361,7 @@ class DeliveryController extends Controller
                             if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                                 $class = 'complaint_row';
                             }
+                            ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null,null);
                             return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class]);
                         }
                     } else {
@@ -4295,6 +4298,9 @@ class DeliveryController extends Controller
                     $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
                     $data['amount'] = number_format($shipment->amount);
 
+
+                    ShipmentScanningJourneyController::add($shipment->id, 10, 1, Auth::id(), null,null);
+
                     return response()->json(['status' => 1, 'details' => $data]);
                 }
                 else{
@@ -4694,6 +4700,7 @@ class DeliveryController extends Controller
                     'fake_status_updated_at' => Carbon::now()
                 ]);
             }
+            ShipmentScanningJourneyController::add($shipment['id'], 5, 1, Auth::id(), null,null);
             return ['status' => 1, 'success' => 'Fake Status has been removed'];
         }
         return ['status' => 0, 'error' => 'Something went wrong'];
@@ -4844,6 +4851,8 @@ class DeliveryController extends Controller
                     $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
                     $details['consignee']['destination'] = $shipment->consignee_city->name;
                     $details['consignee']['address'] = $shipment->consignee_address;
+
+                    ShipmentScanningJourneyController::add($shipment->id, 12, 1, Auth::id(), null,null);
 
                     return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
                 }
@@ -5017,6 +5026,8 @@ class DeliveryController extends Controller
                 $delivery_note_shipment->fake_status_updated_at = Carbon::now();
                 $delivery_note_shipment->save();
 
+
+                ShipmentScanningJourneyController::add($shipment->id, 6, 1, Auth::id(), null,null);
                 return redirect()->back()->with(['success' => 'Shipment successfully marked as Fake Status!']);
             }
             else{

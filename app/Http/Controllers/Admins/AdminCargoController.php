@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentStatus;
 use App\Http\Models\DraftCargo;
@@ -432,6 +433,7 @@ class AdminCargoController extends Controller
                                     $details['total'] = $shipments->count;
                                 }
 
+                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null,null);
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                             }
                             else {
@@ -1408,6 +1410,9 @@ class AdminCargoController extends Controller
                         $details['shipping_mode'] = $shipment->shipping_mode->mode;
                         $details['amount'] = number_format($shipment->amount);
                         $details['service_type'] = $shipment->booking_type->booking_type;
+
+
+                        ShipmentScanningJourneyController::add($shipment->id, 3, 1, Auth::id(), null,null);
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     }
                     else {

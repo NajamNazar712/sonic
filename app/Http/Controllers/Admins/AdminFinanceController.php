@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
@@ -1602,6 +1603,7 @@ class AdminFinanceController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
 
+                        ShipmentScanningJourneyController::add($shipment->id, 13, 1, Auth::id(), null,null);
                         return ['status' => 0, 'success' => 'Shipment\'s amount can be changed', 'details' => $details];
                     }
                     else {
@@ -1708,6 +1710,7 @@ class AdminFinanceController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
 
+                        ShipmentScanningJourneyController::add($shipment->id, 14, 1, Auth::id(), null,null);
                         return ['status' => 0, 'success' => 'Shipment\'s weight can be changed', 'details' => $details];
                     }
                     else {

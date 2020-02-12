@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateShipmentScanningJourneysTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('shipment_scanning_journeys', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('shipment_id');
+            $table->integer('screen_location_id');
+            $table->integer('user_type');
+            $table->integer('admin_id')->nullable();
+            $table->integer('user_id')->nullable();
+            $table->integer('substitute_user_id')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('shipment_scanning_journeys');
+    }
+}

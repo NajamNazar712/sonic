@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\City;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Shipper\User;
@@ -1225,6 +1226,7 @@ class AdminPickupsController extends Controller
             $details['estimated_weight'] = floatval($shipment->estimated_weight);
             $details['actual_weight'] = floatval($shipment->actual_weight);
 
+            ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
           }
           else {

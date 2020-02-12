@@ -1517,5 +1517,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('','Admins\AdminResourcesController@index')->name('index');
         Route::get('city_list','Admins\AdminResourcesController@get_network_list')->name('city_list');
     });
+    Route::prefix('scanning_history')->name('scanning_history.')->group(function (){
+        Route::get('','Admins\AdminShipmentScanningHistoryController@index')->name('index');
+        Route::get('city_list','Admins\AdminShipmentScanningHistoryController@get_network_list')->name('city_list');
+    });
 });
 

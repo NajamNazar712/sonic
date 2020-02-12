@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DonePaymentShipment;
@@ -58,6 +59,7 @@ class AdminTrackingController extends Controller
                         }
                     }
                 }
+                ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
 
                 if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
                     $details = array();
@@ -442,6 +444,7 @@ class AdminTrackingController extends Controller
                     $details['current_status_date'] = Carbon::parse($journey->created_at)->toDateTimeString();
                     $details['origin'] = $shipment->pickup_address->city->name;
                     $details['destination'] = $shipment->consignee_city->name;
+                    ShipmentScanningJourneyController::add($shipment->id, 8, 1, Auth::id(), null,null);
                     return response()->json(['status' => 1, 'details' => $details]);
                 }
                 else{

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
@@ -166,6 +167,18 @@ class ShipperTrackingController extends Controller
                             $details['payment_history'][] = $journey_details;
                         }
                     }
+                    $user_id = null;
+                    $substitute_user_id = null;
+                    if (session('user_type') == 1) {
+                        $user_type = 2;
+                        $user_id = Auth::id();
+                    }
+                    else {
+                        $user_type = 3;
+                        $substitute_user_id = Auth::id();
+                    }
+
+                    ShipmentScanningJourneyController::add($shipment->id, 1, $user_type, null, $user_id, $substitute_user_id);
 
         			$tracking['shipments'][$shipment->id] = $details;
                 }
