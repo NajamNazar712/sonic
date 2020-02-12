@@ -442,7 +442,7 @@
                                     if (confirm) {
                                         $.ajax({
                                             url: '{!! route('admin.finance.outstanding_shipments.bulk_resolved') !!}',
-                                            method: 'PUT',
+                                            method: 'post',
                                             data: {
                                                 'shipments': selected_rows,
                                                 '_token': '{{ csrf_token() }}'
@@ -496,7 +496,7 @@
                                     if (confirm) {
                                         $.ajax({
                                             url: '{!! route('admin.finance.outstanding_shipments.bulk_adjust_in_payment') !!}',
-                                            method: 'PUT',
+                                            method: 'post',
                                             data: {
                                                 'shipment_ids': selected_rows,
                                                 'dncc': dncc,
