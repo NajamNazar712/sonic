@@ -45,7 +45,7 @@ class ProcessSMS implements ShouldQueue
     public function handle()
     {
         if ($this->sms->status < 2) {
-            $this->telecard($this->sms);
+            $this->telenor($this->sms);
         }
     }
 
