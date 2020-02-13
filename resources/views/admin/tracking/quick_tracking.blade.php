@@ -370,10 +370,11 @@
                                 scan_sound(2);
                             }else{
                                 $('#single_div').removeClass('d-none');
-                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('goldClass')){
+                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('goldClass') || $('#status_card').hasClass('yellowClass')){
                                     $('#status_card').removeClass('greenClass');
                                     $('#status_card').removeClass('redClass');
                                     $('#status_card').removeClass('goldClass');
+                                    $('#status_card').removeClass('yellowClass');
                                 }
 
                                 scan_sound(1);
@@ -398,6 +399,8 @@
                                     $('#status_card').addClass('goldClass');
                                 }else if(data.details.status_id == 20){
                                     $('#status_card').addClass('redClass');
+                                }else if(data.details.status_id == 54){
+                                    $('#status_card').addClass('yellowClass');
                                 }
 
                                 // var rowNo = table.rows().count();
