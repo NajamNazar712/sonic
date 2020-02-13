@@ -888,21 +888,23 @@ class ReturnController extends Controller
                                 array_push($role_ids, 1);
 
                                 if (!in_array(session('role_id'), $role_ids)) {
-                                    $shipper_payable = 0;
-                                    $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-                                    if ($pending_payment->exists()) {
-                                        $pending_payment = $pending_payment->first();
+                                    if (!$shipment->packaging_material_request) {
+                                        $shipper_payable = 0;
+                                        $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                        if ($pending_payment->exists()) {
+                                            $pending_payment = $pending_payment->first();
 
-                                        $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
-                                        if ($pending_payment_shipments->exists()) {
-                                            $pending_payment_shipments = $pending_payment_shipments->get();
-                                            foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                                                $shipper_payable += $pending_payment_shipment->payable;
+                                            $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                            if ($pending_payment_shipments->exists()) {
+                                                $pending_payment_shipments = $pending_payment_shipments->get();
+                                                foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                                    $shipper_payable += $pending_payment_shipment->payable;
+                                                }
                                             }
                                         }
-                                    }
-                                    if ($shipper_payable < 0) {
-                                        return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                        if ($shipper_payable < 0) {
+                                            return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                        }
                                     }
                                 }
                             }
@@ -948,21 +950,23 @@ class ReturnController extends Controller
                                         $role_ids = array_map('intval', explode(',', $settings->text));
                                         array_push($role_ids, 1);
                                         if (!in_array(session('role_id'), $role_ids)) {
-                                            $shipper_payable = 0;
-                                            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-                                            if ($pending_payment->exists()) {
-                                                $pending_payment = $pending_payment->first();
+                                            if (!$shipment->packaging_material_request) {
+                                                $shipper_payable = 0;
+                                                $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                                if ($pending_payment->exists()) {
+                                                    $pending_payment = $pending_payment->first();
 
-                                                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
-                                                if ($pending_payment_shipments->exists()) {
-                                                    $pending_payment_shipments = $pending_payment_shipments->get();
-                                                    foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                                                        $shipper_payable += $pending_payment_shipment->payable;
+                                                    $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                                    if ($pending_payment_shipments->exists()) {
+                                                        $pending_payment_shipments = $pending_payment_shipments->get();
+                                                        foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                                            $shipper_payable += $pending_payment_shipment->payable;
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            if ($shipper_payable < 0) {
-                                                return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                if ($shipper_payable < 0) {
+                                                    return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                }
                                             }
                                         }
                                     }
@@ -1013,21 +1017,23 @@ class ReturnController extends Controller
                                         $role_ids = array_map('intval', explode(',', $settings->text));
                                         array_push($role_ids, 1);
                                         if (!in_array(session('role_id'), $role_ids)) {
-                                            $shipper_payable = 0;
-                                            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-                                            if ($pending_payment->exists()) {
-                                                $pending_payment = $pending_payment->first();
+                                            if (!$shipment->packaging_material_request) {
+                                                $shipper_payable = 0;
+                                                $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                                if ($pending_payment->exists()) {
+                                                    $pending_payment = $pending_payment->first();
 
-                                                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
-                                                if ($pending_payment_shipments->exists()) {
-                                                    $pending_payment_shipments = $pending_payment_shipments->get();
-                                                    foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                                                        $shipper_payable += $pending_payment_shipment->payable;
+                                                    $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                                    if ($pending_payment_shipments->exists()) {
+                                                        $pending_payment_shipments = $pending_payment_shipments->get();
+                                                        foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                                            $shipper_payable += $pending_payment_shipment->payable;
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            if ($shipper_payable < 0) {
-                                                return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                if ($shipper_payable < 0) {
+                                                    return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                }
                                             }
                                         }
                                     }
@@ -1073,21 +1079,23 @@ class ReturnController extends Controller
                                             $role_ids = array_map('intval', explode(',', $settings->text));
                                             array_push($role_ids, 1);
                                             if (!in_array(session('role_id'), $role_ids)) {
-                                                $shipper_payable = 0;
-                                                $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-                                                if ($pending_payment->exists()) {
-                                                    $pending_payment = $pending_payment->first();
+                                                if (!$shipment->packaging_material_request) {
+                                                    $shipper_payable = 0;
+                                                    $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                                    if ($pending_payment->exists()) {
+                                                        $pending_payment = $pending_payment->first();
 
-                                                    $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
-                                                    if ($pending_payment_shipments->exists()) {
-                                                        $pending_payment_shipments = $pending_payment_shipments->get();
-                                                        foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                                                            $shipper_payable += $pending_payment_shipment->payable;
+                                                        $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                                        if ($pending_payment_shipments->exists()) {
+                                                            $pending_payment_shipments = $pending_payment_shipments->get();
+                                                            foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                                                $shipper_payable += $pending_payment_shipment->payable;
+                                                            }
                                                         }
                                                     }
-                                                }
-                                                if ($shipper_payable < 0) {
-                                                    return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                    if ($shipper_payable < 0) {
+                                                        return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                    }
                                                 }
                                             }
                                         }
