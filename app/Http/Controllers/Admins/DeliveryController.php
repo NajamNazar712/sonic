@@ -645,11 +645,11 @@ class DeliveryController extends Controller
 
                         $dropdown .= $print_undelivered_performa_button;
                     }
-//                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
-//                        if (!$updatedstatusCheck) {
+                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
+                        if (!$updatedstatusCheck) {
                             $dropdown .= $reassign_rider_button;
-//                        }
-//                    }
+                        }
+                    }
 
                     $dropdown .= '
                         </div>
