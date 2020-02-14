@@ -51,7 +51,7 @@ class ProcessSMS implements ShouldQueue
 
     private function telecard($sms) {
         try {
-            $client = new Client(['base_uri' => 'https://bsms.telecard.com.pk/SMSPortal/Customer/ProcessSMS.aspx', 'http_errors' => FALSE, 'connect_timeout' => 15, 'timeout' => 30]);
+            $client = new Client(['base_uri' => 'https://bsms.telecard.com.pk/SMSPortal/Customer/ProcessSMS.aspx', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
 
             $response = $client->get('', [
                 'query' => [
@@ -136,7 +136,7 @@ class ProcessSMS implements ShouldQueue
     }
 
     private function telenor_generate_session_id($base_uri) {
-        $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 15, 'timeout' => 30]);
+        $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
 
         try {
             $error = FALSE;
@@ -209,7 +209,7 @@ class ProcessSMS implements ShouldQueue
         $telenor = Telenor::latest()->first();
 
         if ($telenor) {
-            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 15, 'timeout' => 30]);
+            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
 
             try {
                 $error = FALSE;
@@ -287,7 +287,7 @@ class ProcessSMS implements ShouldQueue
         $telenor = Telenor::latest()->first();
 
         if ($telenor) {
-            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 15, 'timeout' => 30]);
+            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
 
             try {
                 $error = FALSE;
