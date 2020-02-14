@@ -556,6 +556,8 @@ class Permission
 
             'intercept.index' => 245,
             'intercept.update' => 245,
+
+            'scanning_history.index' => 306,
         ],
 
         'shipper' => [

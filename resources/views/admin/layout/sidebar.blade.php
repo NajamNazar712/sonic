@@ -455,7 +455,7 @@
                                 Shipment Weight</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(134, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(306, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.scanning_history.index') }}">Scanning History</a></li>
                     @endif
 

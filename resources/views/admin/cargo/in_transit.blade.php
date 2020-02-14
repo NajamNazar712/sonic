@@ -314,50 +314,52 @@
 		</div>
 	</div>
 
-	<div class="modal fade" id="send_from_junction_modal" role="dialog" aria-labelledby="send_from_junction_modal" aria-hidden="true">
-		<div class="modal-dialog modal-lg" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h4 class="modal-title" id="receive_at_link_title">Send from Junction</h4>
+	@if (session('role_id') == 1 || in_array(305, session('permissions')))
+		<div class="modal fade" id="send_from_junction_modal" role="dialog" aria-labelledby="send_from_junction_modal" aria-hidden="true">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title" id="receive_at_link_title">Send from Junction</h4>
 
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">×</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<form id="scan_send_seal_number_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-						<div class="form-group">
-							<input type="text" name="send_seal_number" class="form-control send_seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
-						</div>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">×</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<form id="scan_send_seal_number_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+							<div class="form-group">
+								<input type="text" name="send_seal_number" class="form-control send_seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
+							</div>
 
-						<div class="form-group ml-1">
-							<button type="submit" name="send_add" class="btn btn-primary" value="Add">Scan</button>
-						</div>
-					</form>
+							<div class="form-group ml-1">
+								<button type="submit" name="send_add" class="btn btn-primary" value="Add">Scan</button>
+							</div>
+						</form>
 
-					<table class="table table-bordered datatable" id="send_from_junction_datatable" style="z-index: 3;">
-						<thead>
-						<tr role="row" class="bg-primary white">
-							<th class="border-primary border-darken-1">S. No.</th>
-							<th class="border-primary border-darken-1">Cargo No.</th>
-							<th class="border-primary border-darken-1">Origin</th>
-							<th class="border-primary border-darken-1">Destination</th>
-							<th class="border-primary border-darken-1">Seal No.</th>
-						</tr>
-						</thead>
-					</table>
+						<table class="table table-bordered datatable" id="send_from_junction_datatable" style="z-index: 3;">
+							<thead>
+							<tr role="row" class="bg-primary white">
+								<th class="border-primary border-darken-1">S. No.</th>
+								<th class="border-primary border-darken-1">Cargo No.</th>
+								<th class="border-primary border-darken-1">Origin</th>
+								<th class="border-primary border-darken-1">Destination</th>
+								<th class="border-primary border-darken-1">Seal No.</th>
+							</tr>
+							</thead>
+						</table>
 
-					<form id="send_from_junction_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate">
+						<form id="send_from_junction_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate">
 
-						<div class="w-100"></div>
+							<div class="w-100"></div>
 
-						<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-						<button type="submit" name="send" class="btn btn-primary send">Send</button>
-					</form>
+							<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+							<button type="submit" name="send" class="btn btn-primary send">Send</button>
+						</form>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	@endif
 @endsection
 
 @section('css')
@@ -518,7 +520,7 @@
 							}
 						}
 					@endif,
-					@if (session('role_id') == 1 || in_array(30, session('permissions')))
+					@if (session('role_id') == 1 || in_array(305, session('permissions')))
 						{
 							text: 'Send from Junction',
 							className: 'btn btn-primary send_from_junction',
@@ -806,7 +808,7 @@
 						}
 					});
 			@endif
-			@if (session('role_id') == 1 || in_array(30, session('permissions')))
+			@if (session('role_id') == 1 || in_array(305, session('permissions')))
 				var send_from_junction_datatable = $('#send_from_junction_datatable').DataTable({
 						dom: 'tr',
 						"autoWidth": false,
@@ -898,7 +900,7 @@
 			});
 			@endif
 
-			@if (session('role_id') == 1 || in_array(30, session('permissions')))
+			@if (session('role_id') == 1 || in_array(305, session('permissions')))
 			$('#receive_at_link #scan_seal_number_form .send_seal_number').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
@@ -1057,7 +1059,7 @@
 				}
 			});
 			@endif
-			@if (session('role_id') == 1 || in_array(30, session('permissions')))
+			@if (session('role_id') == 1 || in_array(305, session('permissions')))
 			$('#send_from_junction_modal #scan_send_seal_number_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
