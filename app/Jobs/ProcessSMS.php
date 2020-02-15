@@ -118,7 +118,7 @@ class ProcessSMS implements ShouldQueue
         $send_sms = FALSE;
 
         if ($generate_session_id) {
-            $result = $this->telenor_generate_session_id($base_uri);
+            $result = $this->telenor_generate_session_id($base_uri, $sms);
 
             if ($result) {
                 $send_sms = TRUE;
@@ -135,7 +135,7 @@ class ProcessSMS implements ShouldQueue
         }
     }
 
-    private function telenor_generate_session_id($base_uri) {
+    private function telenor_generate_session_id($base_uri, $sms) {
         $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
 
         try {
@@ -183,6 +183,10 @@ class ProcessSMS implements ShouldQueue
                     $telenor->save();
                 }
 
+                $sms->status = 1;
+
+                $sms->save();
+
                 return FALSE;
             }
         }
@@ -200,6 +204,10 @@ class ProcessSMS implements ShouldQueue
 
                 $telenor->save();
             }
+
+            $sms->status = 1;
+
+            $sms->save();
 
             return FALSE;
         }
@@ -257,7 +265,9 @@ class ProcessSMS implements ShouldQueue
 
                     $telenor->save();
 
-                    return FALSE;
+                    $sms->status = 1;
+
+                    $sms->save();
                 }
             }
             catch (RequestException $e) {
@@ -271,7 +281,9 @@ class ProcessSMS implements ShouldQueue
 
                 $telenor->save();
 
-                return FALSE;
+                $sms->status = 1;
+
+                $sms->save();
             }
         }
         else {
@@ -280,6 +292,10 @@ class ProcessSMS implements ShouldQueue
             $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>No Entry';
 
             $mail = Mail::to($to)->send(new Notifications($subject, $body));
+
+            $sms->status = 1;
+
+            $sms->save();
         }
     }
 
@@ -314,11 +330,9 @@ class ProcessSMS implements ShouldQueue
 
                     $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
-                    $telenor->status = 0;
+                    // $telenor->status = 0;
 
-                    $telenor->save();
-
-                    return FALSE;
+                    // $telenor->save();
                 }
             }
             catch (RequestException $e) {
@@ -328,11 +342,9 @@ class ProcessSMS implements ShouldQueue
 
                 $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
-                $telenor->status = 0;
+                // $telenor->status = 0;
 
-                $telenor->save();
-
-                return FALSE;
+                // $telenor->save();
             }
         }
         else {
