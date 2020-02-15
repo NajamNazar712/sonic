@@ -197,14 +197,6 @@ class ProcessSMS implements ShouldQueue
 
             $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
-            $telenor = Telenor::latest()->first();
-
-            if ($telenor) {
-                $telenor->status = 0;
-
-                $telenor->save();
-            }
-
             $sms->status = 1;
 
             $sms->save();
@@ -277,10 +269,6 @@ class ProcessSMS implements ShouldQueue
 
                 $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
-                $telenor->status = 0;
-
-                $telenor->save();
-
                 $sms->status = 1;
 
                 $sms->save();
@@ -329,10 +317,6 @@ class ProcessSMS implements ShouldQueue
                     $body = 'Error in Ping SMS API.<br/>Response Received: ' . json_encode($xml);
 
                     $mail = Mail::to($to)->send(new Notifications($subject, $body));
-
-                    // $telenor->status = 0;
-
-                    // $telenor->save();
                 }
             }
             catch (RequestException $e) {
@@ -341,10 +325,6 @@ class ProcessSMS implements ShouldQueue
                 $body = 'Error in Ping SMS API.<br/>No Response';
 
                 $mail = Mail::to($to)->send(new Notifications($subject, $body));
-
-                // $telenor->status = 0;
-
-                // $telenor->save();
             }
         }
         else {
