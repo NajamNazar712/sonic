@@ -5,7 +5,7 @@
     <div class="row mb-2">
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" class="form-control" name="cityName" placeholder="Add City Name" required data-rule-required="true" data-msg-required="This field is required">
+                <input type="text" class="form-control" name="cityName" placeholder="Add City Name*" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
         </div>
         <div class="col-3">
@@ -44,6 +44,26 @@
                         <option value="{{ $zone->id }}">{{ $zone->name }}</option>
                     @endforeach
                 </select>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-6">
+            <fieldset class="form-group">
+                <input type="text" name="attempt_tat" id="attempt_tat" class="form-control attempt_tat" placeholder="Add Attempt Tat*" required data-rule-required="true" data-msg-required="This field is required" data-rule-min="1" data-msg-min="Attempt tat can not be less than 1">
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-3">
+            <h4 class="card-title font-weight-bold">GC Area</h4>
+        </div>
+        <div class="col">
+            <fieldset class="">
+                <input type="checkbox" name="gc_area" id="gc_area" class="icheckbox gc_area">
+                <label for="gc_area" class="">GC Area</label>
             </fieldset>
         </div>
     </div>
@@ -118,6 +138,11 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
+        $('#attempt_tat').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false
+        });
         var errors = 0;
         function checkAtleastOne(targ,id) {
             if($(targ).is(':checked') === true ){

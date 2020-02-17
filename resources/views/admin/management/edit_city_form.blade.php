@@ -49,6 +49,26 @@
         </div>
     </div>
 
+    <div class="row mb-2">
+        <div class="col-6">
+            <fieldset class="form-group">
+                <input type="text" name="attempt_tat" id="attempt_tat" class="form-control attempt_tat" value="{{$city->attempt_tat}}" placeholder="Add Attempt Tat*" required data-rule-required="true" data-msg-required="This field is required" data-rule-min="1" data-msg-min="Attempt tat can not be less than 1">
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-3">
+            <h4 class="card-title font-weight-bold">GC Area</h4>
+        </div>
+        <div class="col">
+            <fieldset class="">
+                <input type="checkbox" name="gc_area" id="gc_area" class="icheckbox gc_area" {{($city->gc_area == 1)? 'checked':''}}>
+                <label for="gc_area" class="">GC Area</label>
+            </fieldset>
+        </div>
+    </div>
+
     <div class="row" id="zone_selection">
         <div class="col">
             <h2 class="card-title"><U>Services</U></h2>

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class City extends Model
 {
     protected $fillable = [
-        'name','hub','hub_id','zone_id','pickup','status'
+        'name','hub','hub_id','zone_id','pickup','status','gc_area','attempt_tat'
     ];
     public function hub(){
        return $this->belongsTo(self::class, 'hub_id');

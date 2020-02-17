@@ -3946,6 +3946,11 @@ use Yajra\Datatables\Datatables;
                                     $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->whereIn('sj.shipper_status_id', [8, 13])
                                     ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
+                                })
+                                ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
+                                    $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                        ->where('sj.shipper_status_id', 5)
+                                        ->whereRaw('date(`sj`.`created_at`) > date(?)', DB::raw('WEEKDAY(DATE_ADD(sj.created_at, cities.attempt_tat)) IN (6)), 1, 0'));
                                 });
                             });
                         }
@@ -3985,6 +3990,11 @@ use Yajra\Datatables\Datatables;
                                     $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->where('sj.shipper_status_id', '=', 13)
                                     ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
+                                })
+                                ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
+                                    $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    ->where('sj.shipper_status_id', '=', 5)
+                                    ->whereRaw('date(`sj`.`created_at`) <= date(?)', DB::raw('WEEKDAY(DATE_ADD(sj.created_at, cities.attempt_tat)) IN (6)), 1, 0'));
                                 });
                             });
                         }

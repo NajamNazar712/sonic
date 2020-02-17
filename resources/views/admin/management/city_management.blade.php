@@ -25,6 +25,8 @@
                                     <th class="border-primary border-darken-1">Hub Name</th>
                                     <th class="border-primary border-darken-1">Hub Code</th>
                                     <th class="border-primary border-darken-1">Zone</th>
+                                    <th class="border-primary border-darken-1">GC Area</th>
+                                    <th class="border-primary border-darken-1">Attempt Tat</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
@@ -66,6 +68,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -87,6 +90,8 @@
                             head.push('Hub Name');
                             head.push('Hub Code');
                             head.push('Zone');
+                            head.push('GC Area');
+                            head.push('Attempt Tat');
                             head.push('Status');
                             head.push('Updated By');
                             head.push('Updated At');
@@ -101,6 +106,8 @@
                                 row.push(values.hub);
                                 row.push(values.hub_id);
                                 row.push(values.zone);
+                                row.push(values.gc_area);
+                                row.push(values.attempt_tat);
                                 row.push(values.status);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
@@ -167,6 +174,8 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
+                    {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},
+                    {data: 'attempt_tat', name: 'cities.attempt_tat', class: 'align-middle attempt_tat'},
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'ch.created_at', class: 'align-middle updated_at'},
@@ -188,6 +197,10 @@
                        '<option value="0">Inactive</option>' +
                        '<option value="1">Active</option>' +
                        '</select>';
+                   var gc_area_select = '<select name="gc_area_select" id="gc_area_select" class="select2 form-control">' +
+                       '<option value="0">No</option>' +
+                       '<option value="1">Yes</option>' +
+                       '</select>';
                    this.api().columns().every(function(column_id) {
                        var column = this;
                        var header = column.header();
@@ -196,6 +209,11 @@
                            $(td).appendTo($(search));
                        }else if($(header).is('.status')){
                            $(status_select).appendTo($(search))
+                               .on( 'change', function () {
+                                   column.search($(this).val(), false, false, true).draw();
+                               } ).wrap(td);
+                       }else if($(header).is('.gc_area')){
+                           $(gc_area_select).appendTo($(search))
                                .on( 'change', function () {
                                    column.search($(this).val(), false, false, true).draw();
                                } ).wrap(td);
@@ -212,6 +230,12 @@
                    });
                    $("#status_select").prepend('<option value="" selected></option>').select2({
                        placeholder: "Select Status",
+                       width:'100%',
+                       containerCssClass: 'select-xs',
+                       dropdownCssClass: 'form-control-sm p-0'
+                   });
+                   $("#gc_area_select").prepend('<option value="" selected></option>').select2({
+                       placeholder: "Select GC Area",
                        width:'100%',
                        containerCssClass: 'select-xs',
                        dropdownCssClass: 'form-control-sm p-0'
