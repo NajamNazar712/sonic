@@ -1909,7 +1909,7 @@ class ReturnController extends Controller
                           <table class="table table-sm table-bordered border mt-1">
                             <tbody>
                                 <tr>
-                                    <td class="color primary" colspan="6"><strong style="font-size: large">SUMMARY</strong></td>
+                                    <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY</strong></td>
                                 </tr>
                               <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
@@ -1918,6 +1918,7 @@ class ReturnController extends Controller
                                 <td class="color primary"><strong>Contact Person Phone</strong></td>
                                 <td class="color primary"><strong>Client Address</strong></td>
                                 <td class="color primary"><strong>Total Shipments</strong></td>
+                                <td class="color primary"><strong>Sign</strong></td>
                               </tr>
             ';
 
@@ -1938,6 +1939,7 @@ class ReturnController extends Controller
                                 <td>' . $filtered_shipments_user->pickup_address->phone . '</td>
                                 <td>' . $filtered_shipments_user->pickup_address->pickup_address . '</td>
                                 <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
+                                <td></td>
                     ';
 
                         $shipment_details .= $shipment_details_row_start_summary;
