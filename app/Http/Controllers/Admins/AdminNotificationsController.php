@@ -254,13 +254,13 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['vendor', 'shipper_name', 'shipments_detail'];
         }
         else if ($id == 44) {
-            $details['fields'] = ['hub', 'date', 'link'];
+            $details['fields'] = ['hub', 'date', 'link', 'preview'];
         }
         else if ($id == 45) {
-            $details['fields'] = ['zone', 'date', 'link'];
+            $details['fields'] = ['zone', 'date', 'link', 'preview'];
         }
         else if ($id == 46) {
-            $details['fields'] = ['date', 'link'];
+            $details['fields'] = ['date', 'link', 'preview'];
         }
         else if ($id == 47) {
             $details['fields'] = ['date', 'link', 'preview'];
