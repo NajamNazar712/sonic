@@ -43,7 +43,7 @@ class DebriefingEmail extends Command
         AdminReportsController::debriefing_archive_directory();
         $response = AdminReportsController::debriefing_hub_wise_report($date);
         if($response){
-//            NotificationsController::send(44, $date);
+            NotificationsController::send(44, $date);
         }
         $response = AdminReportsController::debriefing_zone_wise_report($date);
         if($response){
