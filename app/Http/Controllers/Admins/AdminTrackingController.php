@@ -431,6 +431,8 @@ class AdminTrackingController extends Controller
                     $details = array();
 
                     $details['tracking_number'] = $tracking_no;
+                    $details['amount'] = $shipment->amount;
+                    $details['shipper'] = $shipment->user->name;
                     $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
                     $details['status'] = $journey->shipment_status_shipper->name;
                     if ($journey->status_reason_id != null) {
