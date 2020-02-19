@@ -2971,13 +2971,13 @@ class ShipperShipmentBookController extends Controller
 
     public function shipments_list_store(Request $request) {
         if (isset($request->consignee_phone_number) && !empty($request->consignee_phone_number)) {
-            $consignee_phone_number = substr_replace($request->consignee_phone_number, '-', 3, 0);
+            $consignee_phone_number = $request->consignee_phone_number;
 
             if (substr($consignee_phone_number, 0, 2) == '92') {
                 $consignee_phone_number = substr($consignee_phone_number, 2);
             }
 
-            $consignee_phone_number = '0' . $consignee_phone_number;
+            $consignee_phone_number = '0' . substr_replace($consignee_phone_number, '-', 3, 0);
 
             $shipment = Shipment::where('user_id', session('user_id'))->where('consignee_phone_number_1', $consignee_phone_number);
 
