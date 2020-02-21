@@ -169,7 +169,7 @@
 											</div>
 
 											<div class="form-group">
-												<textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="500" data-msg-maxlength="Item Description can be maximum 500 characters" rows="5"></textarea>
+												<textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" rows="5"></textarea>
 											</div>
 
 											<div class="form-group input-group">
@@ -207,7 +207,7 @@
 												</div>
 
 												<div class="form-group">
-													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="500" data-msg-maxlength="Item Description can be maximum 500 characters"></textarea>
+													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters"></textarea>
 												</div>
 
 												<div class="form-group input-group">
@@ -239,7 +239,7 @@
 															</div>
 
 															<div class="form-group">
-																<textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="500" data-msg-maxlength="Item Description can be maximum 500 characters"></textarea>
+																<textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters"></textarea>
 															</div>
 
 															<div class="form-group input-group">

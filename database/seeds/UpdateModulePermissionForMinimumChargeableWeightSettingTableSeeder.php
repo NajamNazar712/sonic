@@ -12,7 +12,7 @@ class UpdateModulePermissionForMinimumChargeableWeightSettingTableSeeder extends
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 303, 'name' => 'View', 'module_id' => 14)
+            array('id' => 303, 'name' => 'Minimum Chargeable Weight - View', 'module_id' => 14)
         ));
     }
 }

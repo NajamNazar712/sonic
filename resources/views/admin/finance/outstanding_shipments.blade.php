@@ -324,7 +324,7 @@
             } );
             var selected_rows = [];
             var dncc = [];
-			var selected_delivery_note_ids = {};
+			// var selected_delivery_note_ids = {};
             var filtered_rows = [];
             var filtered_delivery_notes = [];
 			var table = $('#datatable').DataTable({
@@ -337,22 +337,22 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows.length > 0){
-                                table.rows().nodes().each(function(index) {
-                                    var row = table.row(index);
-
-                                    if ($(row.node()).hasClass('selected')) {
-                                        var id = parseInt(row.id());
-                                        var delivery_note_id = $(row.node()).attr('data-dncc');
-                                        selected_delivery_note_ids[id] = delivery_note_id;
-                                    }
-                                });
+                                // table.rows().nodes().each(function(index) {
+                                //     var row = table.row(index);
+                                //
+                                //     if ($(row.node()).hasClass('selected')) {
+                                //         var id = parseInt(row.id());
+                                //         var delivery_note_id = $(row.node()).attr('data-dncc');
+                                //         selected_delivery_note_ids[id] = delivery_note_id;
+                                //     }
+                                // });
 
                                 $.ajax({
                                     url: '{!! route('admin.finance.outstanding_shipments.revert_request_shipments_check') !!}',
                                     method: 'PUT',
                                     data: {
                                         'shipment_ids': selected_rows,
-										'delivery_note_ids': selected_delivery_note_ids,
+										'delivery_note_ids': dncc,
                                         '_token': '{{ csrf_token() }}'
                                     }
                                 })
@@ -442,7 +442,7 @@
                                     if (confirm) {
                                         $.ajax({
                                             url: '{!! route('admin.finance.outstanding_shipments.bulk_resolved') !!}',
-                                            method: 'PUT',
+                                            method: 'post',
                                             data: {
                                                 'shipments': selected_rows,
                                                 '_token': '{{ csrf_token() }}'
@@ -466,7 +466,7 @@
                     @endif
                     @if (session('role_id') == 1 || in_array(56, session('permissions')))
                     {
-                        text: 'Adjust in payments',
+                        text: 'Adjust in Payments',
                         className: 'btn btn-primary bulk_adjust_in_payments',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -496,7 +496,7 @@
                                     if (confirm) {
                                         $.ajax({
                                             url: '{!! route('admin.finance.outstanding_shipments.bulk_adjust_in_payment') !!}',
-                                            method: 'PUT',
+                                            method: 'post',
                                             data: {
                                                 'shipment_ids': selected_rows,
                                                 'dncc': dncc,
@@ -540,9 +540,8 @@
 
                                     if (index === -1) {
                                         selected_rows.push(id);
-                                        dncc[id] = dncc_no;
+                                        dncc.push(dncc_no);
                                     }
-                                    console.log(dncc);
 
                                     table.button('.revert_request').enable();
                                     table.button('.bulk_resolved').enable();
@@ -569,7 +568,7 @@
 
                                     if (index !== -1) {
                                         selected_rows.splice(index, 1);
-                                        dncc.splice(id, 1);
+                                        dncc.splice(index, 1);
                                     }
 
                                 }
@@ -728,12 +727,12 @@
 
                 if (index === -1) {
                     selected_rows.push(id);
-                    dncc[id]= dncc_no;
+                    dncc.push(dncc_no);
 
                 }
                 else {
                     selected_rows.splice(index, 1);
-                    dncc.splice(id, 1);
+                    dncc.splice(index, 1);
 
                 }
 

@@ -233,7 +233,7 @@ class AdminNotificationsController extends Controller
              $details['fields'] = ['user_id', 'updated_at', 'tagged_sales_person'];
         }
         else if ($id == 35) {
-             $details['fields'] = ['consignee_name', 'shipper_name', 'tracking_number', 'receiver_name'];
+             $details['fields'] = ['consignee_name', 'shipper_name', 'tracking_number', 'receiver_name','status_date','order_id'];
         }
         else if ($id == 36 || $id == 37) {
              $details['fields'] = ['account_id', 'company_name_b', 'company_name_a', 'trax_logo'];
@@ -283,13 +283,12 @@ class AdminNotificationsController extends Controller
         else if ($id == 56){
             $details['fields'] = ['account_id', 'shipper_name'];
         }
-        else if ($id == 57){
+		else if ($id == 57){
             $details['fields'] = ['account_id', 'shipper_name'];
         }
         else if ($id == 58){
             $details['fields'] = ['shipper_name'];
-        }
-        return $details;
+        }        return $details;
     }
 
     public function edit(Request $request) {
