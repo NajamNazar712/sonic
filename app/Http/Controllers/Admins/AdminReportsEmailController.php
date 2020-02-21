@@ -146,19 +146,20 @@ class AdminReportsEmailController extends Controller
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
             'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
         ];
-        $sps_count  = count($sale_person_shipments);
-        $ts = "D2".":D".$sps_count;
+        // $sps_count  = count($sale_person_shipments);
+        $sps_count  = $serial;
+        $ts = "D3:D".$sps_count;
 
-        $tas = "E2".":E".$sps_count;
-        $tr = "G2".":G".$sps_count;
-        $tar = "H2".":H".$sps_count;
+        $tas = "E3:E".$sps_count;
+        $tr = "G3:G".$sps_count;
+        $tar = "H3:H".$sps_count;
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($sale_person_array,NULL,'A2',true);
-        // $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
-        $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
+        $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
+        // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
         $sheet->getStyle($ts)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
         $sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
         $sheet->getStyle($tr)

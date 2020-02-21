@@ -3547,11 +3547,11 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $sale_person_number->sales_person->name . '</td>';
                     }
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->shipments) . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->target_shipments) . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($target_shipments_achieved) . '%</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($sale_person_number->target_shipments) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($target_shipments_achieved) . '%</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->revenue)) . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->target_revenue) . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($target_revenue_achieved) . '%</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($sale_person_number->target_revenue) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($target_revenue_achieved) . '%</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->avg_revenue)) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->contribution,2,'.','') . '%</td>';
                     $html .= '</tr>';
@@ -3574,11 +3574,11 @@ class NotificationsController extends Controller
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_target_shipments) . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_target_shipments_achieved) . '%</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($total_target_shipments) . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($total_target_shipments_achieved) . '%</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($revenue_count)) . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($total_target_revenue)) . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_target_revenue_achieved) . '%</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format(round($total_target_revenue)) . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($total_target_revenue_achieved) . '%</td>';
 
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_count)) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($contribution_count) . '%</td>';
