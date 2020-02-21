@@ -3967,12 +3967,12 @@ use Yajra\Datatables\Datatables;
                                     $sub_query->where(function ($sub_sub_query) {
                                         $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
                                             ->whereIn('sj.shipper_status_id', [2,6,7,8,9,11,12,13,15])
-                                            ->where(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
+                                            ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
                                     })
                                     ->orWhere(function ($sub_sub_sub_query) {
                                         $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
                                             ->whereIn('sj.shipper_status_id', [4,6,7,8,9,11,12,13,15])
-                                            ->where('CURDATE()', '=', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
+                                            ->whereDate('CURDATE()', '=', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
                                     });
                                 });
                             });
@@ -4018,12 +4018,12 @@ use Yajra\Datatables\Datatables;
                                     $sub_query->where(function ($sub_sub_query) {
                                         $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
                                             ->whereIn('sj.shipper_status_id', [2,6,7,8,9,11,12,13,15])
-                                            ->whereRaw(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
+                                            ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
                                     })
                                     ->orWhere(function ($sub_sub_sub_query) {
                                         $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
                                             ->whereIn('sj.shipper_status_id', [4,6,7,8,9,11,12,13,15])
-                                            ->whereRaw(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
+                                            ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
                                     });
                                 });
                             });
