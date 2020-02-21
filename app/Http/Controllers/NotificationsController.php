@@ -3532,7 +3532,7 @@ class NotificationsController extends Controller
                   $target_revenue_achieved = 0;
                   $target_shipments = $sale_person_number->target_shipments;
                   if($target_shipments > 0){
-                      $target_shipments_achieved = ($sale_person_shipment->shipments / $target_shipments) * 100;
+                      $target_shipments_achieved = ($sale_person_number->shipments / $target_shipments) * 100;
                   }
                   $target_revenue = $sale_person_number->target_revenue;
                   if($target_revenue > 0){

@@ -8,7 +8,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
-use Ap\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\City;
 use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DailyFakeStatus;
@@ -96,8 +96,7 @@ class AdminReportsEmailController extends Controller
                     $target_revenue_achieved = ($revenue[$sale_person_shipment->admin_id] / $target_revenue) * 100;
                 }
             }
-
-            $sale_person_array[] = ['serial' => $serial, 'Admin' => $sale_person_shipment->admin, 'Achieved Shipments' => $sale_person_shipment->shipment_count, 'Target Shipments' => $target_shipments, 'Target Achieved %' => $target_shipments_achieved.'%', 'Achieved Revenue' => $revenue[$sale_person_shipment->admin_id], 'Target Revenue' => $target_revenue, 'Target Achieved %' => $target_revenue_achieved.'%', 'Avg Revenue/Parcel' => round($avg_revenue[$sale_person_shipment->admin_id], 2), 'Contribution' => ($contribution[$sale_person_shipment->admin_id]) * 100];
+            $sale_person_array[] = ['serial' => $serial, 'Admin' => $sale_person_shipment->admin, 'Achieved Shipments' => $sale_person_shipment->shipment_count, 'Target Shipments' => $target_shipments, 'Target Achieved %' => $target_shipments_achieved.'%', 'Achieved Revenue' => $revenue[$sale_person_shipment->admin_id], 'Target Revenue' => $target_revenue, 'Target Revenue Achieved %' => $target_revenue_achieved.'%', 'Avg Revenue/Parcel' => round($avg_revenue[$sale_person_shipment->admin_id], 2), 'Contribution' => ($contribution[$sale_person_shipment->admin_id]) * 100];
             $sale_person_entry = new SalePersonNumbers();
             $sale_person_entry->admin_id = $sale_person_shipment->admin_id;
             $sale_person_entry->shipments = $sale_person_shipment->shipment_count;
