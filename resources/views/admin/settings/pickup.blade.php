@@ -31,7 +31,7 @@
                                 <div class="card-body">
 
                                     <div class="card-content">
-                                    <div class="row">
+                                    <div class="row justify-content-center">
                                         @php
                                         $pickup_weight = '';
                                         if(!empty($settings)){

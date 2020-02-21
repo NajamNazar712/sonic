@@ -1435,7 +1435,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
         });
+        Route::prefix('sales')->name('sales.')->group(function () {
+            Route::prefix('targets')->name('targets.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@sales_person_targets')->name('index');
+                Route::post('', 'Admins\GlobalSettingsController@sales_person_targets_submit')->name('update');
+                Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_list')->name('list');
 
+            });
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@sales_person_targets_history')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_history_list')->name('list');
+            });
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

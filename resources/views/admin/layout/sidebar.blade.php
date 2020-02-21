@@ -2,8 +2,7 @@
      data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-            <li class=" nav-item"><a href="{{route('admin.dashboard.index')}}"><i class="la la-area-chart"></i><span class="menu-title"
-                                                                                                                     data-i18n="nav.dash.main">Dashboard</span></a>
+            <li class=" nav-item"><a href="{{route('admin.dashboard.index')}}"><i class="la la-area-chart"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a>
             </li>
             @if (session('role_id') == 1 || count(array_intersect([5, 11, 15, 242, 76, 79, 217], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.vertical_nav.main"><i class="la la-users"></i>Shippers</span></a>
@@ -458,7 +457,19 @@
                     @if (session('role_id') == 1 || in_array(306, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.scanning_history.index') }}">Scanning History</a></li>
                     @endif
+                    @if (session('role_id') == 1 || count(array_intersect([307,308], session('permissions'))) !== 0)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Sales</span></a>
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(307, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.settings.sales.targets.index') }}">Targets</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(308, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.settings.sales.history.index') }}">History</a></li>
+                                @endif
+                            </ul>
 
+                        </li>
+                    @endif
                 </ul>
             </li>
 
@@ -853,11 +864,12 @@
                                 </ul>
                             </li>
                         @endif
+
+                        
                     </ul>
                 </li>
             @endif
-                <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title"
-                                                                                                                        data-i18n="nav.dash.main">Tracking</span></a>
+                <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a>
         </ul>
     </div>
 </div>
