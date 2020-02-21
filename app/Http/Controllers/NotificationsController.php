@@ -9,6 +9,7 @@ use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
@@ -3169,6 +3170,7 @@ class NotificationsController extends Controller
                   $hubs = $hubs->get();
                   $date = $reference_1_id;
                   foreach ($hubs as $hub) {
+                      $debriefing = Debriefing::where('hub', $hub->id)->first();
                     if (strpos($subject, '[hub]') !== FALSE) {
                       $subject = str_replace('[hub]', $hub->name, $subject);
                     }
@@ -3182,6 +3184,32 @@ class NotificationsController extends Controller
                     if (strpos($body, '[date]') !== FALSE) {
                         $body = str_replace('[date]', $date, $body);
                     }
+
+                      $details = '<table style="width:100%;">';
+                      $details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Hub</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivered</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Unsuccessful</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">On Hold</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Status Not Attempted</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Fake Status</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Confirmation Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Tomorrow</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Grand Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th></tr></thead>';
+                      $details .= '<tbody>';
+                      $details .= '<tr>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $hub->name . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;e">' . $debriefing->delivered . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_unsuccessful . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->on_hold . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->status_not_attempted . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->fake_status . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->confirmation_pending . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1 . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1_ratio . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_note_pending . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2 . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2_ratio . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_tomorrow . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total_ratio . '</td>';
+                      $details .= '</tr>';
+                      $details .= '</tbody></table>';
+
+                      if (strpos($body, '[preview]') !== FALSE) {
+                          $body = str_replace('[preview]', $details, $body);
+                      }
                     $file = Storage::disk('public')->url('/reports/debriefing/hubs/debriefing_report_'.$date.'_'. $hub->id .'.xlsx');
                     $link = '<div class="row"><button onclick="window.open(' . $file . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">Download</button>';
 
@@ -3216,6 +3244,7 @@ class NotificationsController extends Controller
                   $zones = $zones->get();
                   $date = $reference_1_id;
                   foreach ($zones as $zone) {
+                    $debriefings = Debriefing::where('zone_id', $zone->id)->get();
                     if (strpos($subject, '[zone]') !== FALSE) {
                       $subject = str_replace('[zone]', $zone->name, $subject);
                     }
@@ -3229,6 +3258,96 @@ class NotificationsController extends Controller
                     if (strpos($body, '[date]') !== FALSE) {
                         $body = str_replace('[date]', $date, $body);
                     }
+
+                      $details = '<table style="width:100%;">';
+                      $details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Hub</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivered</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Unsuccessful</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">On Hold</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Status Not Attempted</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Fake Status</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Confirmation Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Tomorrow</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Grand Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th></tr></thead>';
+                      $details .= '<tbody>';
+
+                      $total_delivered = 0;
+                      $total_delivery_unsuccessful = 0;
+                      $total_on_hold = 0;
+                      $total_status_not_attempted = 0;
+                      $total_fake_status = 0;
+                      $total_confirmation_pending = 0;
+                      $total_delivery_note_pending = 0;
+                      $total_delivery_tomorrow = 0;
+                      $total_total_1 = 0;
+                      $total_total_1_ratio = 0;
+                      $total_total_2 = 0;
+                      $total_total_2_ratio = 0;
+                      $total_grand_total = 0;
+                      $total_grand_total_ratio = 0;
+                      foreach($debriefings as $debriefing) {
+                          $details .= '<tr>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->city->name . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivered . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_unsuccessful . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->on_hold . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->status_not_attempted . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->fake_status . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->confirmation_pending . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1 . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1_ratio . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_note_pending . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2 . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2_ratio . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_tomorrow . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total . '</td>';
+                          $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total_ratio . '</td>';
+                          $details .= '</tr>';
+
+                        $total_delivered = $total_delivered + $debriefing->delivered;
+                        $total_delivery_unsuccessful = $total_delivery_unsuccessful + $debriefing->delivered;
+                        $total_on_hold = $total_on_hold + $debriefing->delivered;
+                        $total_status_not_attempted = $total_status_not_attempted + $debriefing->delivered;
+                        $total_fake_status = $total_fake_status + $debriefing->fake_status;
+                        $total_confirmation_pending = $total_confirmation_pending + $debriefing->confirmation_pending;
+                        $total_delivery_note_pending = $total_delivery_note_pending + $debriefing->delivery_note_pending;
+                        $total_delivery_tomorrow = $total_delivery_tomorrow + $debriefing->delivery_tomorrow;
+                        $total_total_1 = $total_total_1 + $debriefing->total_1;
+                        $total_total_2 = $total_total_2 + $debriefing->total_2;
+                        $total_grand_total = $total_grand_total + $debriefing->grand_total;
+                      }
+                      if($debriefing->total_1 != 0){
+                          $total_total_1_ratio = $total_delivered / $debriefing->total_1;
+                      }
+                      else{
+                          $total_total_1_ratio = 0;
+                      }
+                      if($debriefing->total_2 != 0){
+                          $total_total_2_ratio = $total_delivered / $debriefing->total_2;
+                      }
+                      else{
+                          $total_total_2_ratio = 0;
+                      }
+                      if($debriefing->grand_total != 0){
+                          $total_grand_total_ratio = $total_delivered / $debriefing->grand_total;
+                      }
+                      else{
+                          $total_grand_total_ratio = 0;
+                      }
+                      $details .= '<tr>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold"> Total </td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_delivered . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_delivery_unsuccessful . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_on_hold . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red; font-weight: bold">' . $total_status_not_attempted . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red; font-weight: bold">' . $total_fake_status . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_confirmation_pending . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_total_1 . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_total_1_ratio . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_delivery_note_pending . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_total_2 . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_total_2_ratio . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_delivery_tomorrow . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_grand_total . '</td>';
+                      $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_grand_total_ratio . '</td>';
+                      $details .= '</tr>';
+                      $details .= '</tbody></table>';
+
+                      if (strpos($body, '[preview]') !== FALSE) {
+                          $body = str_replace('[preview]', $details, $body);
+                      }
                     $file = Storage::disk('public')->url('/reports/debriefing/zones/debriefing_report_'.$date.'_'. $zone->id .'.xlsx');
 
                     $link = '<div class="row"><button onclick="window.open(' . $file . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">Download</button>';
@@ -3264,7 +3383,98 @@ class NotificationsController extends Controller
                 if (strpos($body, '[date]') !== FALSE) {
                     $body = str_replace('[date]', $date, $body);
                 }
-                
+
+                $debriefings = Debriefing::get();
+
+                $details = '<table style="width:100%;">';
+                $details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Hub</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivered</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Unsuccessful</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">On Hold</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Status Not Attempted</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Fake Status</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Confirmation Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Tomorrow</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Grand Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th></tr></thead>';
+                $details .= '<tbody>';
+
+                $total_delivered = 0;
+                $total_delivery_unsuccessful = 0;
+                $total_on_hold = 0;
+                $total_status_not_attempted = 0;
+                $total_fake_status = 0;
+                $total_confirmation_pending = 0;
+                $total_delivery_note_pending = 0;
+                $total_delivery_tomorrow = 0;
+                $total_total_1 = 0;
+                $total_total_1_ratio = 0;
+                $total_total_2 = 0;
+                $total_total_2_ratio = 0;
+                $total_grand_total = 0;
+                $total_grand_total_ratio = 0;
+                foreach($debriefings as $debriefing) {
+                    $details .= '<tr>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->city->name . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;e">' . $debriefing->delivered . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_unsuccessful . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->on_hold . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->status_not_attempted . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->fake_status . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->confirmation_pending . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1 . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1_ratio . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_note_pending . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2 . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2_ratio . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_tomorrow . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total . '</td>';
+                    $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total_ratio . '</td>';
+                    $details .= '</tr>';
+
+                    $total_delivered = $total_delivered + $debriefing->delivered;
+                    $total_delivery_unsuccessful = $total_delivery_unsuccessful + $debriefing->delivered;
+                    $total_on_hold = $total_on_hold + $debriefing->delivered;
+                    $total_status_not_attempted = $total_status_not_attempted + $debriefing->delivered;
+                    $total_fake_status = $total_fake_status + $debriefing->fake_status;
+                    $total_confirmation_pending = $total_confirmation_pending + $debriefing->confirmation_pending;
+                    $total_delivery_note_pending = $total_delivery_note_pending + $debriefing->delivery_note_pending;
+                    $total_delivery_tomorrow = $total_delivery_tomorrow + $debriefing->delivery_tomorrow;
+                    $total_total_1 = $total_total_1 + $debriefing->total_1;
+                    $total_total_2 = $total_total_2 + $debriefing->total_2;
+                    $total_grand_total = $total_grand_total + $debriefing->grand_total;
+                }
+                if($debriefing->total_1 != 0){
+                    $total_total_1_ratio = $total_delivered / $debriefing->total_1;
+                }
+                else{
+                    $total_total_1_ratio = 0;
+                }
+                if($debriefing->total_2 != 0){
+                    $total_total_2_ratio = $total_delivered / $debriefing->total_2;
+                }
+                else{
+                    $total_total_2_ratio = 0;
+                }
+                if($debriefing->grand_total != 0){
+                    $total_grand_total_ratio = $total_delivered / $debriefing->grand_total;
+                }
+                else{
+                    $total_grand_total_ratio = 0;
+                }
+                $details .= '<tr>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold"> Total </td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_delivered . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_delivery_unsuccessful . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_on_hold . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red; font-weight: bold">' . $total_status_not_attempted . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red; font-weight: bold">' . $total_fake_status . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_confirmation_pending . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_total_1 . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_total_1_ratio . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_delivery_note_pending . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_total_2 . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_total_2_ratio . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold">' . $total_delivery_tomorrow . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_grand_total . '</td>';
+                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $total_grand_total_ratio . '</td>';
+                $details .= '</tr>';
+                $details .= '</tbody></table>';
+
+                if (strpos($body, '[preview]') !== FALSE) {
+                    $body = str_replace('[preview]', $details, $body);
+                }
                 
                 $file = Storage::disk('public')->url('/reports/debriefing/overall/debriefing_report_'.$date.'.xlsx');
                 $link = '<div class="row"><button onclick="window.open(' . $file . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">Download</button>';

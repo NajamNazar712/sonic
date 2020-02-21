@@ -7,6 +7,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\City;
+use App\Http\Models\Excel_reports\Debriefing;
 use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
@@ -3958,6 +3959,11 @@ use Yajra\Datatables\Datatables;
                                     $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->whereIn('sj.shipper_status_id', [8, 13])
                                     ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
+                                })
+                                ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
+                                    $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                        ->where('sj.shipper_status_id', 5)
+                                        ->whereRaw('date(`sj`.`created_at`) > date(?)', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'));
                                 });
                             });
                         }
@@ -3997,6 +4003,11 @@ use Yajra\Datatables\Datatables;
                                     $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->where('sj.shipper_status_id', '=', 13)
                                     ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
+                                })
+                                ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
+                                    $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    ->where('sj.shipper_status_id', '=', 5)
+                                    ->whereRaw('date(`sj`.`created_at`) <= date(?)', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'));
                                 });
                             });
                         }
@@ -4195,7 +4206,6 @@ use Yajra\Datatables\Datatables;
                 $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_attempted', 'fake_status', 'confirmation_pending', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
 
                 $type_names = ['delivered' => 'Delivered', 'delivery_unsucessful' => 'Delivery Unsuccessful', 'on_hold' => 'On Hold', 'status_not_attempted' => 'Status Not Attempted', 'fake_status' => 'Fake Status', 'confirmation_pending' => 'Confirmation Pending', 'total_1' => 'Total', 'total_1_ratio' => 'Ratio', 'delivery_note_pending' => 'Delivery Note Pending', 'total_2' => 'Total', 'total_2_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
-
                 foreach ($result['counts'] as $hub => $count) {
                     $row = array();
 
@@ -4230,15 +4240,22 @@ use Yajra\Datatables\Datatables;
                 $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
                 $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
 
+                $spreadsheet->getActiveSheet()->getStyle('A')->getFont()->setBold(TRUE)->getColor()->setARGB('0000FF');
+                $spreadsheet->getActiveSheet()->getStyle('H')->getFont()->setBold(TRUE)->getColor()->setARGB('0000FF');
+                $spreadsheet->getActiveSheet()->getStyle('K')->getFont()->setBold(TRUE)->getColor()->setARGB('0000FF');
+                $spreadsheet->getActiveSheet()->getStyle('N')->getFont()->setBold(TRUE)->getColor()->setARGB('0000FF');
+                $spreadsheet->getActiveSheet()->getStyle('I')->getFont()->setBold(TRUE)->getColor()->setARGB('0000FF');
+                $spreadsheet->getActiveSheet()->getStyle('L')->getFont()->setBold(TRUE)->getColor()->setARGB('0000FF');
+                $spreadsheet->getActiveSheet()->getStyle('O')->getFont()->setBold(TRUE)->getColor()->setARGB('0000FF');
                 $spreadsheet->getActiveSheet()->getStyle('E')->getFont()->getColor()->setARGB('FFFF0000');
                 $spreadsheet->getActiveSheet()->getStyle('F')->getFont()->getColor()->setARGB('FFFF0000');
 
                 $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
 
                 $highest_row = $spreadsheet->getActiveSheet()->getHighestRow();
-
                 $highest_row = 'A' . $highest_row . ':O' . $highest_row;
 
+                $spreadsheet->getActiveSheet()->getStyle('A1:O1')->getFont()->setBold(TRUE);
                 $spreadsheet->getActiveSheet()->getStyle($highest_row)->getFont()->setBold(TRUE);
 
                 $types = array();
@@ -4317,6 +4334,34 @@ use Yajra\Datatables\Datatables;
                 ob_end_clean();
                 Storage::disk('public')->put('/reports/debriefing/zones/'.$file_name, $contents);
             }else if($report_type == 3){
+                Debriefing::truncate();
+                foreach ($result as $index => $res){
+                    if($index != 'status' && $index != 'success' && $index != 'Grand Total' && $index != 'shipments'){
+                        foreach ($res as $hub_name => $data){
+                            if($hub_name != 'Grand Total') {
+                                $hub = City::where('name', $hub_name)->first();
+                                $debriefing = new Debriefing();
+                                $debriefing->hub = $hub->id;
+                                $debriefing->zone_id = $hub->zone_id;
+                                $debriefing->delivered = $data['delivered'];
+                                $debriefing->delivery_unsuccessful = $data['delivery_unsucessful'];
+                                $debriefing->on_hold = $data['on_hold'];
+                                $debriefing->status_not_attempted = $data['status_not_attempted'];
+                                $debriefing->fake_status = $data['fake_status'];
+                                $debriefing->confirmation_pending = $data['confirmation_pending'];
+                                $debriefing->delivery_note_pending = $data['delivery_note_pending'];
+                                $debriefing->delivery_tomorrow = $data['delivery_tomorrow'];
+                                $debriefing->total_1 = $data['total_1'];
+                                $debriefing->total_1_ratio = $data['total_1_ratio'];
+                                $debriefing->total_2 = $data['total_2'];
+                                $debriefing->total_2_ratio = $data['total_2_ratio'];
+                                $debriefing->grand_total = $data['grand_total'];
+                                $debriefing->grand_total_ratio = $data['grand_total_ratio'];
+                                $debriefing->save();
+                            }
+                        }
+                    }
+                }
                 ob_start();
                 $writer->save('php://output');
                 $contents = ob_get_contents();

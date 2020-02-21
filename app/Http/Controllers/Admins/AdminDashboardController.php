@@ -7109,11 +7109,14 @@ if(session('department_id') == 7){
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
                 return ($cities->status == 1)? 'Active': 'Inactive';
+            })
+            ->editColumn('gc_area', function ($cities) {
+                return ($cities->gc_area == 1)? 'Yes': 'No';
             })
 //        ->filterColumn('status', function($query, $keyword) {
 //            $keyword = strtolower($keyword);
@@ -7211,7 +7214,9 @@ if(session('department_id') == 7){
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
                 'zone_id'=>City::find($request->hubs)->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'gc_area'=>($request->has('gc_area'))? 1:0,
+                'attempt_tat'=>$request->attempt_tat
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -7220,6 +7225,8 @@ if(session('department_id') == 7){
                 'zone_id'=> City::find($request->hubs)->zone_id,
                 'pickup'=> ($request->has('pickup'))? 1:0,
                 'status' => $city_id->status,
+                'gc_area'=>($request->has('gc_area'))? 1:0,
+                'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id()
             ]);
             WalkInCities::where('city_id',$id)->delete();
@@ -7252,7 +7259,9 @@ if(session('department_id') == 7){
                 'hub'=>1,
                 'hub_id'=>$id,
                 'zone_id'=>$request->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'gc_area'=>($request->has('gc_area'))? 1:0,
+                'attempt_tat'=>$request->attempt_tat,
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -7261,6 +7270,8 @@ if(session('department_id') == 7){
                 'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status' => $city_id->status,
+                'gc_area'=>($request->has('gc_area'))? 1:0,
+                'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id()
             ]);
             WalkInCities::where('city_id',$id)->delete();
@@ -7291,7 +7302,6 @@ if(session('department_id') == 7){
     }
     //update city end
     public function addCityHub(Request $request){
-
         if($request->postType == 'city'){
             $zone_id = City::find($request->hubs)->zone_id;
 
@@ -7301,6 +7311,8 @@ if(session('department_id') == 7){
                 'hub_id'=>$request->hubs,
                 'zone_id'=> $zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
+                'gc_area'=>($request->has('gc_area'))? 1:0,
+                'attempt_tat'=>$request->attempt_tat,
                 'status'=>1
             ]);
 
@@ -7311,6 +7323,8 @@ if(session('department_id') == 7){
                 'zone_id'=> $zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1,
+                'gc_area'=>($request->has('gc_area'))? 1:0,
+                'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id()
             ]);
 
@@ -7341,6 +7355,8 @@ if(session('department_id') == 7){
                 'hub'=>1,
                 'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
+                'gc_area'=>($request->has('gc_area'))? 1:0,
+                'attempt_tat'=>$request->attempt_tat,
                 'status'=>1
             ]);
 
@@ -7350,6 +7366,8 @@ if(session('department_id') == 7){
                 'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1,
+                'gc_area'=>($request->has('gc_area'))? 1:0,
+                'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id()
             ]);
 

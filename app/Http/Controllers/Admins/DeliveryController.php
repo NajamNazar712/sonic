@@ -5063,7 +5063,7 @@ class DeliveryController extends Controller
         $delivery_note = DeliveryNote::find($delivery_note_id);
         if($delivery_note){
             if($delivery_note->hub_id == $rider->hub_id){
-                $delivery_note->rider_id = $rider;
+                $delivery_note->rider_id = $rider_id;
                 $delivery_note->save();
                 return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
             }
