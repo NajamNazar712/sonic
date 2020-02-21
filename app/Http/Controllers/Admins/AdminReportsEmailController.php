@@ -8,6 +8,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
+use Ap\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\City;
 use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DailyFakeStatus;
@@ -22,6 +23,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PHPExcel_Style_Fill;
+use PHPExcel_Cell;
 
 class AdminReportsEmailController extends Controller
 {
@@ -65,30 +68,58 @@ class AdminReportsEmailController extends Controller
             }
         }
 
-        $sale_person_array['header'] = ['S. No.','Admin', 'Shipments', 'Revenue', 'Avg Revenue/Parcel', 'Contribution'];
+        $sale_person_array['header'] = ['S. No.','Admin', 'Achieved Shipments', 'Target Shipments', 'Target Achieved %', 'Achieved Revenue','Target Revenue', 'Target Achieved %', 'Avg Revenue/Parcel', 'Contribution'];
         $serial = 1;
 
         $total_shipments_count = 0;
         $total_avg_revenue_count = 0;
         $total_contribution_count = 0;
+        $total_target_shipments = 0;
+        $total_target_shipments_achieved = 0;
+        $total_target_revenue = 0;
+        $total_target_revenue_achieved = 0;
         SalePersonNumbers::truncate();
         foreach ($sale_person_shipments as $sale_person_shipment) {
-            $sale_person_array[] = ['serial' => $serial, 'Admin' => $sale_person_shipment->admin, 'Shipments' => $sale_person_shipment->shipment_count, 'Revenue' => $revenue[$sale_person_shipment->admin_id], 'Avg Revenue/Parcel' => round($avg_revenue[$sale_person_shipment->admin_id], 2), 'Contribution' => ($contribution[$sale_person_shipment->admin_id]) * 100];
+            $target_shipments = 0;
+            $target_shipments_achieved = 0;
+            $target_revenue = 0;
+            $target_revenue_achieved = 0;
+            $target = SalePersonTarget::where('sales_person_id', $sale_person_shipment->admin_id);
+            if($target->exists()){
+                $target = $target->first();
+                $target_shipments = $target->target_days;
+                if($target_shipments > 0){
+                    $target_shipments_achieved = ($sale_person_shipment->shipment_count / $target_shipments) * 100;
+                }
+                $target_revenue = $target->average_revenue;
+                if($target_revenue > 0){
+                    $target_revenue_achieved = ($revenue[$sale_person_shipment->admin_id] / $target_revenue) * 100;
+                }
+            }
+
+            $sale_person_array[] = ['serial' => $serial, 'Admin' => $sale_person_shipment->admin, 'Achieved Shipments' => $sale_person_shipment->shipment_count, 'Target Shipments' => $target_shipments, 'Target Achieved %' => $target_shipments_achieved.'%', 'Achieved Revenue' => $revenue[$sale_person_shipment->admin_id], 'Target Revenue' => $target_revenue, 'Target Achieved %' => $target_revenue_achieved.'%', 'Avg Revenue/Parcel' => round($avg_revenue[$sale_person_shipment->admin_id], 2), 'Contribution' => ($contribution[$sale_person_shipment->admin_id]) * 100];
             $sale_person_entry = new SalePersonNumbers();
             $sale_person_entry->admin_id = $sale_person_shipment->admin_id;
             $sale_person_entry->shipments = $sale_person_shipment->shipment_count;
             $sale_person_entry->revenue = $revenue[$sale_person_shipment->admin_id];
             $sale_person_entry->avg_revenue = $avg_revenue[$sale_person_shipment->admin_id];
             $sale_person_entry->contribution = $contribution[$sale_person_shipment->admin_id] * 100;
+            $sale_person_entry->target_shipments = $target_shipments;
+            $sale_person_entry->target_revenue = $target_revenue;
+
             $sale_person_entry->save();
             $serial++;
 
+            $total_target_shipments += $target_shipments;
+            $total_target_revenue += $target_revenue;
+            $total_target_shipments_achieved += $target_shipments_achieved;
+            $total_target_revenue_achieved += $target_revenue_achieved;
 
             $total_shipments_count = $total_shipments_count + $sale_person_shipment->shipment_count;
             $total_contribution_count = $total_contribution_count + $contribution[$sale_person_shipment->admin_id];
         }
         foreach ($walk_in_shipments as $walk_in_shipment) {
-            $sale_person_array[] = ['serial' => $serial, 'Admin' => 'Walk-In', 'Shipments' => $walk_in_shipment->shipment_count, 'Revenue' => $revenue[0], 'Avg Revenue/Parcel' => round($avg_revenue[0], 2), 'Contribution' => $contribution[0] * 100];
+            $sale_person_array[] = ['serial' => $serial, 'Admin' => 'Walk-In', 'Achieved Shipments' => $walk_in_shipment->shipment_count, 'Target Shipments' => '', 'Target Achieved %' => '', 'Achieved Revenue' => $revenue[0], 'Target Revenue' => '', 'Target Achieved %' => '', 'Avg Revenue/Parcel' => round($avg_revenue[0], 2), 'Contribution' => $contribution[0] * 100];
             $sale_person_entry = new SalePersonNumbers();
             $sale_person_entry->admin_id = 0;
             $sale_person_entry->shipments = $walk_in_shipment->shipment_count;
@@ -108,19 +139,39 @@ class AdminReportsEmailController extends Controller
         else{
             $total_avg_revenue_count = 0;
         }
-        $sale_person_array[] = ['serial' => '', 'Admin' => '', 'Shipments' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Contribution' => ''];
-        $sale_person_array[] = ['serial' => 'Total', 'Admin' => '', 'Shipments' => $total_shipments_count, 'Revenue' => $total_revenue, 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Contribution' => round($total_contribution_count * 100)];
+        $sale_person_array[] = ['serial' => '', 'Admin' => '', 'Achieved Shipments' => '','Target Shipments' => '','Target Achieved %' => '', 'Achieved Revenue' => '', 'Target Revenue' => '', 'Target Achieved %' => '', 'Avg Revenue/Parcel' => '', 'Contribution' => ''];
+        $sale_person_array[] = ['serial' => 'Total', 'Admin' => '', 'Achieved Shipments' => $total_shipments_count, 'Target Shipments' => $total_target_shipments,  'Target Achieved %' => $total_target_shipments_achieved.'%','Achieved Revenue' => $total_revenue, 'Target Revenue' => $total_target_revenue,'Target Achieved %' => $total_target_revenue_achieved .'%', 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Contribution' => round($total_contribution_count * 100)];
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
             'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
         ];
+        $sps_count  = count($sale_person_shipments);
+        $ts = "D2".":D".$sps_count;
+
+        $tas = "E2".":E".$sps_count;
+        $tr = "G2".":G".$sps_count;
+        $tar = "H2".":H".$sps_count;
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($sale_person_array,NULL,'A2',true);
-        $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
+        // $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
+        $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
+        $sheet->getStyle($ts)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
+        $sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+        $sheet->getStyle($tr)
+                ->getFill()
+                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->getStartColor()
+                ->setRGB('FFE699');
+        $sheet->getStyle($tar)
+                ->getFill()
+                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->getStartColor()
+                ->setRGB('C7E0B4');
+        // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
         $sheet->setTitle('Sale Person Numbers');
         $writer = new Xlsx($spreadsheet);
 

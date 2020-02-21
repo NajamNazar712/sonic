@@ -3307,13 +3307,27 @@ class NotificationsController extends Controller
                 $date = Carbon::today()->startOfDay()->toDateTimeString();
                 $date_end = Carbon::today()->endOfDay()->toDateTimeString();
                 $sale_person_number_data = SalePersonNumbers::whereBetween('created_at', [$date, $date_end])->orderBy('shipments', 'desc')->get();
-                $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Admin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Contribution</strong></th></tr></thead><tbody>';
+                $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Admin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Achieved Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Achieved %</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Achieved Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Achieved %</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Contribution</strong></th></tr></thead><tbody>';
                 $serial = 1;
                 $shipments_count = 0;
                 $revenue_count = 0;
                 $avg_revenue_count = 0;
                 $contribution_count = 0;
+                $total_target_shipments = 0;
+                $total_target_shipments_achieved = 0;
+                $total_target_revenue = 0;
+                $total_target_revenue_achieved = 0;
                 foreach ($sale_person_number_data as $sale_person_number) {
+                  $target_shipments_achieved = 0;
+                  $target_revenue_achieved = 0;
+                  $target_shipments = $sale_person_number->target_shipments;
+                  if($target_shipments > 0){
+                      $target_shipments_achieved = ($sale_person_shipment->shipments / $target_shipments) * 100;
+                  }
+                  $target_revenue = $sale_person_number->target_revenue;
+                  if($target_revenue > 0){
+                      $target_revenue_achieved = ($sale_person_number->revenue / $target_revenue) * 100;
+                  }
                     $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                     if($sale_person_number->admin_id == 0){
@@ -3323,13 +3337,21 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $sale_person_number->sales_person->name . '</td>';
                     }
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->shipments) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->target_shipments) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($target_shipments_achieved) . '%</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->revenue)) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->target_revenue) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($target_revenue_achieved) . '%</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->avg_revenue)) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->contribution,2,'.','') . '%</td>';
                     $html .= '</tr>';
                     $shipments_count = $shipments_count + $sale_person_number->shipments;
                     $revenue_count = $revenue_count + $sale_person_number->revenue;
                     $contribution_count = $contribution_count + $sale_person_number->contribution;
+                    $total_target_shipments += $sale_person_number->target_shipments;
+                    $total_target_shipments_achieved += $target_shipments_achieved;
+                    $total_target_revenue += $sale_person_number->target_revenue;
+                    $total_target_revenue_achieved += $target_revenue_achieved;
                     $serial++;
                 }
                 if($shipments_count != 0){
@@ -3342,7 +3364,12 @@ class NotificationsController extends Controller
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_target_shipments) . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_target_shipments_achieved) . '%</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($revenue_count)) . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($total_target_revenue)) . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_target_revenue_achieved) . '%</td>';
+
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_count)) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($contribution_count) . '%</td>';
                 $html .= '</tr>';
