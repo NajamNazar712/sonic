@@ -1037,6 +1037,7 @@ class ReturnController extends Controller
                                 if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                                     $class = 'complaint_row';
                                 }
+                                ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
                                 return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
 
                             } else
