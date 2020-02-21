@@ -3566,10 +3566,16 @@ class NotificationsController extends Controller
                     $revenue_count = $revenue_count + $sale_person_number->revenue;
                     $contribution_count = $contribution_count + $sale_person_number->contribution;
                     $total_target_shipments += $sale_person_number->target_shipments;
-                    $total_target_shipments_achieved += $target_shipments_achieved;
+                    
                     $total_target_revenue += $sale_person_number->target_revenue;
-                    $total_target_revenue_achieved += $target_revenue_achieved;
+                    
                     $serial++;
+                }
+                if($total_target_shipments > 0){
+                  $total_target_shipments_achieved = ($shipments_count / $total_target_shipments) * 100;
+                }
+                if($total_target_revenue > 0){
+                  $total_target_shipments_achieved = ($revenue_count / $total_target_revenue) * 100;
                 }
                 if($shipments_count != 0){
                     $avg_revenue_count = $revenue_count / $shipments_count;
