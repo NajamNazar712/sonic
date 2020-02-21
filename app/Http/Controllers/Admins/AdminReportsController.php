@@ -3824,6 +3824,8 @@ use Yajra\Datatables\Datatables;
                 $day_cut_off_time = 12;
             }
 
+//            $not_delivered_statuses = [4,6,7,8,9,11,12,13,15];
+
             $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id','name');
 
             if ($hub) {
@@ -3871,6 +3873,7 @@ use Yajra\Datatables\Datatables;
                             })
                             ->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
                             ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
+                            ->leftjoin('cities as sch', 's.consignee_city_id', '=', 'sch.id')
                             ->leftjoin('zone_class_cities as zcc', function($join) {
                                 $join->on('pc.zone_id', '=', 'zcc.zone_id')
                                 ->on('s.consignee_city_id', '=', 'zcc.city_id');
@@ -3961,9 +3964,16 @@ use Yajra\Datatables\Datatables;
                                     ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
                                 })
                                 ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                                    $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
-                                        ->where('sj.shipper_status_id', 5)
-                                        ->whereRaw('date(`sj`.`created_at`) > date(?)', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'));
+                                    $sub_query->where(function ($sub_sub_query) {
+                                        $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
+                                            ->where('sj.shipper_status_id', '=', [2,6,7,8,9,11,12,13,15])
+                                            ->whereRaw('date(CURDATE()) > date(?)', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'));
+                                    })
+                                        ->orWhere(function ($sub_sub_sub_query) {
+                                            $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
+                                                ->where('sj.shipper_status_id', '=', [4,6,7,8,9,11,12,13,15])
+                                                ->whereRaw('date(CURDATE()) > date(?)', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'));
+                                        });
                                 });
                             });
                         }
@@ -4005,9 +4015,16 @@ use Yajra\Datatables\Datatables;
                                     ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
                                 })
                                 ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                                    $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
-                                    ->where('sj.shipper_status_id', '=', 5)
-                                    ->whereRaw('date(`sj`.`created_at`) <= date(?)', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'));
+                                    $sub_query->where(function ($sub_sub_query) {
+                                        $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
+                                            ->where('sj.shipper_status_id', '=', [2,6,7,8,9,11,12,13,15])
+                                            ->whereRaw('date(CURDATE()) <= date(?)', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'));
+                                    })
+                                    ->orWhere(function ($sub_sub_sub_query) {
+                                        $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
+                                            ->where('sj.shipper_status_id', '=', [4,6,7,8,9,11,12,13,15])
+                                            ->whereRaw('date(CURDATE()) <= date(?)', DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'));
+                                    });
                                 });
                             });
                         }
