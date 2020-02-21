@@ -520,6 +520,7 @@
 
             $('#reassign_button').on('click', function(){
                var rider = $('#riders').val();
+               console.log(rider);
                 swal({
                     text: 'Are you sure, you want to Reassign rider?',
                     icon: 'warning',
