@@ -5062,7 +5062,7 @@ class DeliveryController extends Controller
         $rider = Rider::leftjoin('cities as c', 'c.id', '=', 'riders.city_id')->select('c.hub_id as hub_id')->where('riders.id', $rider_id)->first();
         $delivery_note = DeliveryNote::find($delivery_note_id);
         if($delivery_note){
-            if($delivery_note->city_id == $rider->hub_id){
+            if($delivery_note->hub_id == $rider->hub_id){
                 $delivery_note->rider_id = $rider;
                 $delivery_note->save();
                 return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
