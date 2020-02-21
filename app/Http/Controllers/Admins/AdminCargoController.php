@@ -432,7 +432,7 @@ class AdminCargoController extends Controller
 
                                     $details['total'] = $shipments->count;
                                 }
-
+                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null,null);
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                             }
                             else {
