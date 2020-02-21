@@ -1226,7 +1226,7 @@ class AdminPickupsController extends Controller
             $details['estimated_weight'] = floatval($shipment->estimated_weight);
             $details['actual_weight'] = floatval($shipment->actual_weight);
 
-            ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
+            ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null,null);
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
           }
           else {

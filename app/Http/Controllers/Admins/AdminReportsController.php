@@ -2414,7 +2414,9 @@ use Yajra\Datatables\Datatables;
             $to_date = $request->to_date;
             $months_array = array();
             $months_array = $this->get_months($from_date,$to_date);
-
+            $from_time = Carbon::createFromTime(7,59,59)->format('H:i:s');
+            $to_time = Carbon::createFromTime(8,0,0)->format('H:i:s');
+            
             if(session('role_id') == 1){
                 if($hub != null){
                     $city = DB::connection('reports')->table('cities')->where('id',$hub)->select('id','name')->get();
@@ -2480,35 +2482,33 @@ use Yajra\Datatables\Datatables;
                     foreach ($shippers->get() as $key => $s) {
                         $details['shipper'][$c->id][$s->id] = $s->name;
                         foreach ($months_array as $month) {
-                            $thisMonth = Carbon::parse($month)->month;
-                            $thisYear = Carbon::parse($month)->year;
+
+                            $firstDayOfMonth = Carbon::parse($month)->firstOfMonth()->format('Y-m-d 07:59A');
+                            $firstDayOfNextMonth = Carbon::parse($month)->addMonth()->format('Y-m-d 08:00A');
+                            
                             $details['parcels'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)
-                                ->whereExists(function($query) use ($thisMonth,$thisYear) {
+                                ->whereExists(function($query) use ($firstDayOfMonth, $firstDayOfNextMonth) {
                                     $query->from('shipments_journey')
                                     ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
-                                    ->whereMonth('created_at', $thisMonth)
-                                    ->whereYear('created_at', $thisYear)
+                                    ->whereBetween('created_at', [$firstDayOfMonth, $firstDayOfNextMonth])
                                     ->where('shipper_status_id', 2);
                                 })->count();
-                            $details['weight'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($thisMonth,$thisYear) {
+                            $details['weight'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($firstDayOfMonth, $firstDayOfNextMonth) {
                                 $query->from('shipments_journey')
                                     ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
-                                    ->whereMonth('created_at', $thisMonth)
-                                    ->whereYear('created_at', $thisYear)
+                                    ->whereBetween('created_at', [$firstDayOfMonth, $firstDayOfNextMonth])
                                     ->where('shipper_status_id', 2);
                             })->sum('actual_weight');
-                            $details['amount'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($thisMonth,$thisYear) {
+                            $details['amount'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($firstDayOfMonth, $firstDayOfNextMonth) {
                                 $query->from('shipments_journey')
                                     ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
-                                    ->whereMonth('created_at', $thisMonth)
-                                    ->whereYear('created_at', $thisYear)
+                                    ->whereBetween('created_at', [$firstDayOfMonth, $firstDayOfNextMonth])
                                     ->where('shipper_status_id', 2);
                             })->sum('amount'));
-                            $details['revenue'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($thisMonth,$thisYear) {
+                            $details['revenue'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($firstDayOfMonth, $firstDayOfNextMonth) {
                                 $query->from('shipments_journey')
                                     ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
-                                    ->whereMonth('created_at', $thisMonth)
-                                    ->whereYear('created_at', $thisYear)
+                                    ->whereBetween('created_at', [$firstDayOfMonth, $firstDayOfNextMonth])
                                     ->where('shipper_status_id', 2);
                             })->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)')));
 
@@ -3024,7 +3024,11 @@ use Yajra\Datatables\Datatables;
             return view('admin.reports.overall_sales')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses, 'sales_persons' => $sales_persons]);
         }
         public function overall_sales_list(Request $request){
-
+                $from = $request->get('search_date_from');
+                $from = Carbon::parse($from)->setTimeFromTimeString('07:59:59');
+                $to = $request->get('search_date_to');
+                $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('08:00:00');
+                
             $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
                 ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
                 ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -3087,7 +3091,8 @@ use Yajra\Datatables\Datatables;
                             DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id)'));
                 })
     			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges')
-                ->whereNotIn('shipments.shipper_status_id',[1,17]);
+                ->whereNotIn('shipments.shipper_status_id',[1,17])
+                ->whereBetween('sj.created_at', [$from,$to]);
     //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
     //            $now = Carbon::now();
     //            $yesterday = Carbon::now()->subDays(3);
@@ -3276,11 +3281,11 @@ use Yajra\Datatables\Datatables;
             if($status = $request->get('search_status')){
                 $datatable->where('ss.id', '=', $status);
             }
-            if ($request->get('search_date_from') && $request->get('search_date_to')) {
-                $from = $request->get('search_date_from');
-                $to = $request->get('search_date_to');
-                $datatable->whereBetween('sj.created_at', [$from,$to]);
-            }
+            // if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            //     $from = $request->get('search_date_from');
+            //     $to = $request->get('search_date_to');
+            //     $datatable->whereBetween('sj.created_at', [$from,$to]);
+            // }
             return $datatable->make(true);
         }
 
@@ -3390,11 +3395,18 @@ use Yajra\Datatables\Datatables;
                         $sales_persons_data[$person->id]['shipper'][$user->id] = $user->name;
     //                    $sales_persons_data[$person->id]['account'][$user->id] = str_pad($user->id, 6, '0', STR_PAD_LEFT);
                         foreach ($dates as $date){
+                            $custom_date_from = Carbon::parse($date);
+                            $custom_date_to = Carbon::parse($date);
+                           
+                            $custom_date_from_time = $custom_date_from->setTimeFromTimeString('07:59:59');
+                            
+                            $custom_date_to_time = $custom_date_to->addDay()->setTimeFromTimeString('08:00:00');
+                            
                             if($hub != null){
-                                $sum = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date) {
+                                $sum = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($custom_date_from_time,$custom_date_to_time) {
                                     $query->from('shipments_journey')
                                     ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
-                                    ->whereDate('created_at', $date)
+                                    ->whereBetween('created_at',[$custom_date_from_time, $custom_date_to_time])
                                     ->where('shipper_status_id', 2);
                                 })->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
@@ -3406,10 +3418,10 @@ use Yajra\Datatables\Datatables;
                                     });
                                 })->where('shipments.user_id', $user->id)->count();
                             }else{
-                                $sum = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date) {
+                                $sum = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($custom_date_from_time, $custom_date_to_time) {
                                     $query->from('shipments_journey')
                                     ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
-                                    ->whereDate('created_at', $date)
+                                    ->whereBetween('created_at',[$custom_date_from_time, $custom_date_to_time])
                                     ->where('shipper_status_id', 2);
                                 })->where('shipments.user_id', $user->id)->count();
                             }

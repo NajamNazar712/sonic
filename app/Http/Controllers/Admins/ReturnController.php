@@ -845,6 +845,7 @@ class ReturnController extends Controller
             $status = '';
             if($shipment->exists()) {
                 $shipment = $shipment->first();
+                ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
                 $destination_id = $shipment->pickup_address->city_id;
                 $destination_id = City::where('id', $destination_id)->select('hub_id')->first();
                 $destination_id = $destination_id->hub_id;//first it was origin now for return its destination
@@ -1097,7 +1098,6 @@ class ReturnController extends Controller
                                     if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                                         $class = 'complaint_row';
                                     }
-                                    ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
                                     return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
 
                                 } else {
@@ -1909,7 +1909,7 @@ class ReturnController extends Controller
                           <table class="table table-sm table-bordered border mt-1">
                             <tbody>
                                 <tr>
-                                    <td class="color primary" colspan="6"><strong style="font-size: large">SUMMARY</strong></td>
+                                    <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY</strong></td>
                                 </tr>
                               <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
@@ -1918,6 +1918,7 @@ class ReturnController extends Controller
                                 <td class="color primary"><strong>Contact Person Phone</strong></td>
                                 <td class="color primary"><strong>Client Address</strong></td>
                                 <td class="color primary"><strong>Total Shipments</strong></td>
+                                <td class="color primary"><strong>Sign</strong></td>
                               </tr>
             ';
 
@@ -1938,6 +1939,7 @@ class ReturnController extends Controller
                                 <td>' . $filtered_shipments_user->pickup_address->phone . '</td>
                                 <td>' . $filtered_shipments_user->pickup_address->pickup_address . '</td>
                                 <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
+                                <td></td>
                     ';
 
                         $shipment_details .= $shipment_details_row_start_summary;

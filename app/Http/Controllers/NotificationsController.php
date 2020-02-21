@@ -2717,7 +2717,13 @@ class NotificationsController extends Controller
 	                    }
 
 	                    if($crm_request->status_id != 1) {
-	                        $cc = 'complaints@trax.pk';
+                          $cc = array();
+                          $crm_roles = Admin::where('role_id', 37)->pluck('email');
+                          if($crm_roles->exists()){
+                            $crm_roles = $crm_roles->toArray();
+                            $cc = array_merge($cc, $crm_roles);
+                          }
+	                        $cc[] = 'complaints@trax.pk';
 	                        self::email($subject, $body, $to, $cc);
 	                    }
 	                    else{

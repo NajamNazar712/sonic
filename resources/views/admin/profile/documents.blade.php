@@ -8,7 +8,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Documents
+        Documents - {{$shipper}}
     </h1>
 
     <div class="card">

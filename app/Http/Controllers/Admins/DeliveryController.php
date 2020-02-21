@@ -645,11 +645,11 @@ class DeliveryController extends Controller
 
                         $dropdown .= $print_undelivered_performa_button;
                     }
-                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
+//                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
                         if (!$updatedstatusCheck) {
                             $dropdown .= $reassign_rider_button;
                         }
-                    }
+//                    }
 
                     $dropdown .= '
                         </div>
@@ -5062,8 +5062,8 @@ class DeliveryController extends Controller
         $rider = Rider::leftjoin('cities as c', 'c.id', '=', 'riders.city_id')->select('c.hub_id as hub_id')->where('riders.id', $rider_id)->first();
         $delivery_note = DeliveryNote::find($delivery_note_id);
         if($delivery_note){
-            if($delivery_note->city_id == $rider->hub_id){
-                $delivery_note->rider_id = $rider;
+            if($delivery_note->hub_id == $rider->hub_id){
+                $delivery_note->rider_id = $rider_id;
                 $delivery_note->save();
                 return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
             }

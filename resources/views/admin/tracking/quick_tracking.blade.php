@@ -91,7 +91,27 @@
                                             </div>
                                         </div>
                                     </div></div>
+                                    
+                                    
                             </div>
+                            <div class="row justify-content-center">
+                                        <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">COD Amount</h4>
+                                                <p class="card-text amount">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                    <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Shipper</h4>
+                                                <p class="card-text shipper">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                    </div>
                             </div>
                             <div id="multiple_div" class="d-none">
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -105,6 +125,8 @@
                                         <th class="border-primary border-darken-1">Status Date</th>
                                         <th class="border-primary border-darken-1">Origin</th>
                                         <th class="border-primary border-darken-1">Destination</th>
+                                        <th class="border-primary border-darken-1">Amount</th>
+                                        <th class="border-primary border-darken-1">Shipper Name</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -259,7 +281,9 @@
                         {name: 'remarks', class: 'align-middle remarks', orderable: false},
                         {name: 'current_status_date', class: 'align-middle current_status_date', orderable: false},
                         {name: 'origin', class: 'align-middle origin', orderable: false},
-                        {name: 'destination', class: 'align-middle destination', orderable: false}
+                        {name: 'destination', class: 'align-middle destination', orderable: false},
+                        {name: 'amount', class: 'align-middle amount', orderable: false},
+                        {name: 'shipper', class: 'align-middle shipper', orderable: false}
                     ],
                     rowCallback: function(row, data, index) {
                         var status = parseInt($(row).attr('id'));
@@ -309,7 +333,7 @@
                                 }else{
                                     var rowNo = table.rows().count();
 
-                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination]).node().id = data.details.status_id;
+                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper]).node().id = data.details.status_id;
                                     table.draw(false);
                                     scan_sound(1);
                                 }
@@ -334,7 +358,7 @@
                                     }else{
                                         var rowNo = table.rows().count();
 
-                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination]).node().id = data.details.status_id;
+                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper]).node().id = data.details.status_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -382,6 +406,8 @@
                                 $('#single_div p.status').text(data.details.status);
                                 $('#single_div p.origin').text(data.details.origin);
                                 $('#single_div p.destination').text(data.details.destination);
+                                $('#single_div p.amount').text(data.details.amount);
+                                $('#single_div p.shipper').text(data.details.shipper);
                                 if(data.details.reason == null){
                                     $('#single_div p.reason').text('No Reason');
                                 }else{

@@ -11,7 +11,8 @@ use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
-
+use App\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\SalePersonTargetLog;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
@@ -1541,5 +1542,79 @@ class GlobalSettingsController extends Controller
         $same_day = MinimumChargeableWeightSetting::where('shipping_mode_id', 4)->update(['weight' => $request->same_day]);
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function sales_person_targets(){
+        $sales = DB::table('admins')->whereExists(function($query) {
+                    $query->from('admin_roles')
+                    ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
+                    ->where('department_id', '=', 7);
+                })->select('id', 'name')->where('admins.status', 1)->get();
+
+        $targets = SalePersonTarget::all();
+        return view('admin.settings.sales_person.sales_target')->with(['sales_person' => $sales, 'targets' => $targets]);
+    }
+
+    public function sales_person_targets_submit(Request $request){
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        if($start_date == null || $end_date == null){
+            return redirect()->back()->with('error' , 'Date not selected!');
+        }
+        $sales_persons = $request->sales_person;
+        if(count($sales_persons) > 0){
+            foreach($sales_persons as $person){
+
+                $sales_target = SalePersonTarget::where('sales_person_id', $person);
+                if($sales_target->exists()){
+                    $sales_target = $sales_target->first();
+
+                    $sales_person_log = new SalePersonTargetLog();
+                    $sales_person_log->start_date = $sales_target->start_date;
+                    $sales_person_log->end_date = $sales_target->end_date;
+                    $sales_person_log->sales_person_id = $sales_target->sales_person_id;
+                    $sales_person_log->target_days = $sales_target->target_days;
+                    $sales_person_log->target_week = $sales_target->target_week;
+                    $sales_person_log->average_revenue = $sales_target->average_revenue;
+                    $sales_person_log->save();
+
+                    $sales_target->start_date = $start_date;
+                    $sales_target->end_date = $end_date;
+                    $sales_target->target_days = $request->target_shipment_days;
+                    $sales_target->target_week = $request->target_shipment_week;
+                    $sales_target->average_revenue = $request->average_revenue;
+                    $sales_target->save();
+
+                    
+                }else{
+                    $sale_person_target = new SalePersonTarget();
+                    $sale_person_target->start_date = $start_date;
+                    $sale_person_target->end_date = $end_date;
+                    $sale_person_target->sales_person_id = $person;
+                    $sale_person_target->target_days = $request->target_shipment_days;
+                    $sale_person_target->target_week = $request->target_shipment_week;
+                    $sale_person_target->average_revenue = $request->average_revenue;
+                    $sale_person_target->save();
+                }
+            }
+        }
+        
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function sales_person_targets_list(Request $request){
+        $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
+            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_week', 'sale_person_targets.average_revenue');
+        return Datatables::of($targets)->make(true);
+    }
+    public function sales_person_targets_history(){
+        return view('admin.settings.sales_person.history');
+    }
+
+    public function sales_person_targets_history_list(Request $request){
+        $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
+            ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_week', 'sale_person_target_logs.average_revenue','sale_person_target_logs.created_at')
+            ->orderBy('sale_person_target_logs.created_at');
+        return Datatables::of($targets)->make(true);
     }
 }
