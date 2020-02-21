@@ -98,7 +98,7 @@
                                         <div class="col-3"><div class="card text-center">
                                         <div class="card-content">
                                             <div class="card-body">
-                                                <h4 class="card-title success">Amount</h4>
+                                                <h4 class="card-title success">COD Amount</h4>
                                                 <p class="card-text amount">No Data</p>
                                             </div>
                                         </div>

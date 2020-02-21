@@ -3026,7 +3026,7 @@ use Yajra\Datatables\Datatables;
                 $from = $request->get('search_date_from');
                 $from = Carbon::parse($from)->setTimeFromTimeString('07:59:59');
                 $to = $request->get('search_date_to');
-                $to = Carbon::parse($to)->setTimeFromTimeString('08:00:00');
+                $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('08:00:00');
                 
             $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
                 ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
