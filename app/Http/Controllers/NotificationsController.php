@@ -3314,24 +3314,24 @@ class NotificationsController extends Controller
                         $total_total_1 = $total_total_1 + $debriefing->total_1;
                         $total_total_2 = $total_total_2 + $debriefing->total_2;
                         $total_grand_total = $total_grand_total + $debriefing->grand_total;
-                      }
-                      if($debriefing->total_1 != 0){
-                          $total_total_1_ratio = $total_delivered / $debriefing->total_1;
-                      }
-                      else{
-                          $total_total_1_ratio = 0;
-                      }
-                      if($debriefing->total_2 != 0){
-                          $total_total_2_ratio = $total_delivered / $debriefing->total_2;
-                      }
-                      else{
-                          $total_total_2_ratio = 0;
-                      }
-                      if($debriefing->grand_total != 0){
-                          $total_grand_total_ratio = $total_delivered / $debriefing->grand_total;
-                      }
-                      else{
-                          $total_grand_total_ratio = 0;
+                        if($debriefing->total_1 != 0){
+                            $total_total_1_ratio = $total_delivered / $debriefing->total_1;
+                        }
+                        else{
+                            $total_total_1_ratio = 0;
+                        }
+                        if($debriefing->total_2 != 0){
+                            $total_total_2_ratio = $total_delivered / $debriefing->total_2;
+                        }
+                        else{
+                            $total_total_2_ratio = 0;
+                        }
+                        if($debriefing->grand_total != 0){
+                            $total_grand_total_ratio = $total_delivered / $debriefing->grand_total;
+                        }
+                        else{
+                            $total_grand_total_ratio = 0;
+                        }
                       }
                       $details .= '<tr>';
                       $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold"> Total </td>';
