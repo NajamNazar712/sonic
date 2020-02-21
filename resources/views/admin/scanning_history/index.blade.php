@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Tracking')
+@section('title', 'Scanning History')
 
 @section('content')
     <div class="app-content content">
