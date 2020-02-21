@@ -551,6 +551,9 @@
                     dangerMode: true
                 }).then(function (confirm) {
                     if (confirm) {
+                        $(table.table().header()).find('input').val('');
+                        $(table.table().header()).find('select').val('').trigger('change.select2');
+                        table.columns().search('').draw();
                         var id = '';
                         var count = table.data().count();
                         for(var i = 0;i<count;i++){

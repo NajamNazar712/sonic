@@ -1035,8 +1035,7 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                                 <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
                                 <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
-                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Estimated Weight</strong></td>
-                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
+                                <td colspan="2" class="border twice-top twice-bottom twice-left" style="height: 20px;"></td>
                               </tr>
                               <tr>
                     ';
@@ -1066,8 +1065,7 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                                 <td rowspan="2" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
                                 <td rowspan="2" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
-                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Weight</strong></td>
-                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
+                                <td colspan="2" class="border twice-top twice-bottom twice-left" style="height: 32px;"></td>
                     ';
                 }
 
@@ -2942,7 +2940,7 @@ class ShipperShipmentBookController extends Controller
                             <span class="col-6 text-left">'. $shipment->pickup_address->city->name .'</span>
                             <span class="col-6 text-right">'. $shipment->consignee_city->name .'</span>
                         </div>
-                        <span class="d-block">' . implode(' ', str_split(str_replace('-', '', ltrim($shipment->consignee_phone_number_1, '0')))) . '</span>
+                        <span class="d-block">' . implode(' ', str_split('92' . str_replace('-', '', ltrim($shipment->consignee_phone_number_1, '0')))) . '</span>
                     </div>
                     <div class="barcode">
                         <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
@@ -2973,12 +2971,18 @@ class ShipperShipmentBookController extends Controller
 
     public function shipments_list_store(Request $request) {
         if (isset($request->consignee_phone_number) && !empty($request->consignee_phone_number)) {
-            $consignee_phone_number = '0' . substr_replace($request->consignee_phone_number, '-', 3, 0);
+            $consignee_phone_number = $request->consignee_phone_number;
+
+            if (substr($consignee_phone_number, 0, 2) == '92') {
+                $consignee_phone_number = substr($consignee_phone_number, 2);
+            }
+
+            $consignee_phone_number = '0' . substr_replace($consignee_phone_number, '-', 3, 0);
 
             $shipment = Shipment::where('user_id', session('user_id'))->where('consignee_phone_number_1', $consignee_phone_number);
 
             if ($shipment->exists()) {
-                $shipment = $shipment->first();
+                $shipment = $shipment->latest('id')->first();
 
                 $shipment_array = array();
 
@@ -3007,9 +3011,9 @@ class ShipperShipmentBookController extends Controller
             $shipment = Shipment::where('user_id', session('user_id'))->where('tracking_number', $request->tracking_number);
 
             if ($shipment->exists()) {
-                $shipment = $shipment->first();
+                $shipment = $shipment->latest('id')->first();
 
-                $consignee_phone_number = str_replace('-', '', ltrim($shipment->consignee_phone_number_1, '0'));
+                $consignee_phone_number = '92' . str_replace('-', '', ltrim($shipment->consignee_phone_number_1, '0'));
 
                 if ($consignee_phone_number == $request->consignee_phone_number) {
                     $shipment_array = array();

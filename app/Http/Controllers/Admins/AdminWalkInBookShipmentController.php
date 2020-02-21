@@ -982,16 +982,16 @@ class AdminWalkInBookShipmentController extends Controller
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1)'));
             })
             ->join('admins as a', 'a.id', '=' , 'sj.admin_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftjoin('charges_modes as cm', 'cm.id', '=', 'shipments.charges_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','ss.name as status', 'a.name as booked_by', 'oc.name as origin','dc.name as destination', 'h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_address','shipments.weight_charges','shipments.fuel_surcharge','shipments.return_charges','shipments.gst','shipments.created_at as arrival_date','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'cm.charges_mode as charges_mode'])
-            ->where('shipments.booking_type_id', 4)
-            ->groupBy('shipments.id');
-        if (!in_array(session('role_id'), [1, 2, 3, 4, 5, 6]) && in_array(206, session('permissions'))){
+            ->where('shipments.booking_type_id', 4);
+
+        if (!in_array(session('role_id'), [1, 2, 3, 4, 5, 6])){
             $shipments = $shipments->where('sj.admin_id', Auth::id());
         }
             $datatable = Datatables::of($shipments)

@@ -2550,7 +2550,8 @@ class AdminFinanceController extends Controller
                 $datatables->where('u.status', '!=', 3);
             }
         }
-        if ($shipper_document_status = $request->get('shipper_document_status')) {
+        if ($request->get('shipper_document_status') !== null) {
+            $shipper_document_status = $request->get('shipper_document_status');
             if ($shipper_document_status == 0) {
                 $datatables->where('u.documents_status', '=', 0);
             }

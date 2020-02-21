@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentStatus;
 use App\Http\Models\DraftCargo;
@@ -433,7 +432,6 @@ class AdminCargoController extends Controller
                                     $details['total'] = $shipments->count;
                                 }
 
-                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null,null);
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                             }
                             else {
@@ -709,8 +707,8 @@ class AdminCargoController extends Controller
             ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
             ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_consignments.type as cargo_type','cargo_consignments.seal_number', DB::raw('(SELECT COUNT(s.id) FROM shipments AS s INNER JOIN cargo_consignment_shipments AS css ON s.id = css.shipment_id WHERE css.cargo_consignment_id = cargo_consignments.id AND s.shipper_status_id = 3) AS short_received_shipments'))
-            ->whereIn('cargo_consignments.status_id', [1, 2, 4, 6, 7, 9]);
+            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_consignments.type as cargo_type','cargo_consignments.seal_number', DB::raw('(SELECT COUNT(s.id) FROM shipments AS s INNER JOIN cargo_consignment_shipments AS css ON s.id = css.shipment_id WHERE css.cargo_consignment_id = cargo_consignments.id AND (s.shipper_status_id = 3 OR s.shipper_status_id = 21)) AS short_received_shipments'))
+            ->whereIn('cargo_consignments.status_id', [1, 2, 4, 6, 7]);
 
         if (session('role_id') != 1) {
             $cargo_consignments = $cargo_consignments->where(function ($query) {
@@ -1168,54 +1166,6 @@ class AdminCargoController extends Controller
 
         return ['status' => 0, 'success' => 'Cargo(s) has been received at Junction'];
     }
-    public function send_from_junction(Request $request) {
-        $cargo_consignment = CargoConsignment::where('seal_number', $request->seal_number);
-
-        if ($cargo_consignment->exists()) {
-            $cargo_consignment = $cargo_consignment->first();
-
-            if (session('role_id') == 1 || (in_array($cargo_consignment->junction_hub_1_id, session('hubs')) || in_array($cargo_consignment->junction_hub_2_id, session('hubs')))) {
-                if (in_array($cargo_consignment->status_id, [6, 7])) {
-                    $details = array();
-
-                    $details['cargo_number'] = str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
-                    $details['origin'] = $cargo_consignment->origin_hub->name;
-                    $details['destination'] = $cargo_consignment->destination_hub->name;
-                    $details['seal_number'] = $cargo_consignment->seal_number;
-
-                    return ['status' => 0, 'success' => 'Cargo has been scanned', 'details' => $details];
-                }
-                else {
-                    return ['status' => 1, 'error' => 'Given Seal Number\'s Cargo has already been modified'];
-                }
-            }
-            else {
-                return ['status' => 1, 'error' => 'Given Seal Number\'s Cargo does not have any of your assigned Hub\'s Cities as it\'s Junctions'];
-            }
-        }
-        else {
-            return ['status' => 1, 'error' => 'No Cargo with given Seal Number is present'];
-        }
-    }
-
-    public function in_transit_send_from_junction(Request $request) {
-        foreach ($request->cargo_consignment_ids as $cargo_consignment_id) {
-//            $cargo_consignment_junction_send = new CargoConsignmentJunctionReceival();
-//
-//            $cargo_consignment_junction_send->cargo_consignment_id = $cargo_consignment_id;
-//            $cargo_consignment_junction_send->junction_id = $request->junction;
-//            $cargo_consignment_junction_send->receiver_id = Auth::id();
-//
-//            $cargo_consignment_junction_send->save();
-
-            $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
-            $cargo_consignment->status_id = 9;
-
-            $cargo_consignment->save();
-        }
-
-        return ['status' => 0, 'success' => 'Cargo(s) has been Sent from Junction'];
-    }
 
     public function in_transit_forwarding_details(Request $request) {
         $cargo_consignment = CargoConsignment::find($request->cargo_consignment_id);
@@ -1358,7 +1308,10 @@ class AdminCargoController extends Controller
     public function in_transit_short_received_shipments(Request $request) {
         $tracking_numbers = array();
 
-        $cargo_consignments_short_received_shipments = CargoConsignment::leftjoin('cargo_consignment_shipments as css', 'css.cargo_consignment_id', '=', 'cargo_consignments.id')->leftjoin('shipments as s', 's.id', '=', 'css.shipment_id')->select('s.tracking_number as tracking_number')->where('cargo_consignments.id', $request->id)->where('cargo_consignments.status_id', 4)->where('s.shipper_status_id', 3)->get();
+        $cargo_consignments_short_received_shipments = CargoConsignment::leftjoin('cargo_consignment_shipments as css', 'css.cargo_consignment_id', '=', 'cargo_consignments.id')
+            ->leftjoin('shipments as s', 's.id', '=', 'css.shipment_id')
+            ->select('s.tracking_number as tracking_number')
+            ->where('cargo_consignments.id', $request->id)->where('cargo_consignments.status_id', 4)->whereIn('s.shipper_status_id', [3, 21])->get();
 
         foreach ($cargo_consignments_short_received_shipments as $cargo_consignments_short_received_shipment) {
             $shipment = $cargo_consignments_short_received_shipment->tracking_number;
@@ -1410,9 +1363,6 @@ class AdminCargoController extends Controller
                         $details['shipping_mode'] = $shipment->shipping_mode->mode;
                         $details['amount'] = number_format($shipment->amount);
                         $details['service_type'] = $shipment->booking_type->booking_type;
-
-
-                        ShipmentScanningJourneyController::add($shipment->id, 3, 1, Auth::id(), null,null);
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     }
                     else {

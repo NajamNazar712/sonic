@@ -746,7 +746,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[13, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},

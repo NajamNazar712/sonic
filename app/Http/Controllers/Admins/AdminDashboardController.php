@@ -6577,7 +6577,7 @@ if(session('department_id') == 7){
                     $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
                 })
                     ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
+                        $sub_query->where('users.phone2', 'like', '%' . $keyword . '%');
                     });
             })
             ->addColumn("action", function ($result) {
@@ -6741,7 +6741,7 @@ if(session('department_id') == 7){
                     $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
                 })
                     ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('users.phone', 'like', '%' . $keyword . '%');
+                        $sub_query->where('users.phone2', 'like', '%' . $keyword . '%');
                     });
             })
             ->editColumn('status', function ($users) {
@@ -8131,7 +8131,11 @@ if(session('department_id') == 7){
 
     public function userDocuments($id){
         $documents = UserDocumentAttachment::where('user_id', $id)->first();
+
         $user = User::find($id);
+        if($documents == null){
+            $documents = false;
+        }
         return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status, 'shipper' => $user->name]);
     }
 

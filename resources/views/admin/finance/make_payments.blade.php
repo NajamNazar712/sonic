@@ -1111,6 +1111,8 @@
 								dangerMode: true
 							}).then(function(confirm) {
 								if (confirm) {
+									$('#make_payments #make_payments_form button').remove();
+
 									form.submit();
 								}
 							});
@@ -1138,6 +1140,8 @@
 								dangerMode: true
 							}).then(function(confirm) {
 								if (confirm) {
+									$('#make_payments #make_payments_form button').remove();
+
 									form.submit();
 								}
 							});
@@ -1203,6 +1207,8 @@
 							dangerMode: true
 						}).then(function(confirm) {
 							if (confirm) {
+								$('#make_payments #make_payments_form button').remove();
+
 								form.submit();
 							}
 						});

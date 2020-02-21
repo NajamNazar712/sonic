@@ -3811,16 +3811,16 @@ class NotificationsController extends Controller
 
                self::email($subject, $body, $to, $cc);
 
-                // $to = array();
-                // $cc = array();
-
-                // $admins = Admin::whereIn('id', [36, 7])->where('status', 1);
-
-                // if ($admins->exists()) {
-                //     $to = array_merge($to, $admins->pluck('email')->toArray());
-                // }
-
-                // self::email($subject, $body, $to);
+//                 $to = array();
+//                 $cc = array();
+//
+//                 $admins = Admin::whereIn('id', [36, 7])->where('status', 1);
+//
+//                 if ($admins->exists()) {
+//                     $to = array_merge($to, $admins->pluck('email')->toArray());
+//                 }
+//
+//                 self::email($subject, $body, $to);
             }
 
             else if($id == 50){

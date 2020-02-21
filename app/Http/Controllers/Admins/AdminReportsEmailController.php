@@ -308,7 +308,8 @@ class AdminReportsEmailController extends Controller
         $dates = [];
         $total_dates = [];
         $week_holidays = CrmTatHolidays::whereBetween('holiday', [$week_holiday_date_from, $week_holiday_date_to])->count();
-        $holidays = CrmTatHolidays::whereBetween('holiday', [$holiday_date_from, $holiday_date_to])->count();
+        $holiday_to_revamp = Carbon::yesterday()->endOfMonth()->format('Y-m-d');
+        $holidays = CrmTatHolidays::whereBetween('holiday', [$holiday_date_from, $holiday_to_revamp])->count();
         while ($date_from->lte($date_to)) {
             if($date_from->isWeekday() || $date_from->isSaturday()) {
                 $dates[] = $date_from->copy()->format('Y-m-d');
