@@ -259,7 +259,7 @@
                             }
                         }
                     },
-                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(309, session('permissions')))
                     {
                         text: 'Un Tag',
                         className: 'btn btn-primary un_tag',
