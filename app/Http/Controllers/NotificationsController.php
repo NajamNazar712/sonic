@@ -4231,14 +4231,17 @@ class NotificationsController extends Controller
                       $html .= '</tbody></table>';
                       $body = str_replace('[account_id]', '', $body);
                       $body = str_replace('[shipper_name]', '', $body);
-
+                      $admin_sale_person = Admin::find($sale_person_id);
+                      if (strpos($body, '[sale_person]') !== FALSE) {
+                          $body = str_replace('[sale_person]', $admin_sale_person->name, $body);
+                      }
                       if (strpos($body, '[preview]') !== FALSE) {
                           $body = str_replace('[preview]', $html, $body);
                       }
 
                       $to = array();
                       $cc = array();
-                      $sale_person_email = Admin::find($sale_person_id)->email;
+                      $sale_person_email = $admin_sale_person->email;
                       $to = array_merge($to, [$sale_person_email]);
 
                       $cc_admins = Admin::whereIn('id', [12, 32, 13]);
