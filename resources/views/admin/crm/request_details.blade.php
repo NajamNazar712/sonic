@@ -30,7 +30,11 @@
                                 <button type="button" class="btn btn-primary width-10-per" id="tag"><span
                                             class="d-none d-lg-block" style="color: white">Tag</span></button>
                             @endif
-                                @if((session('role_id') == 1 || in_array(213, session('permissions'))))
+                            @if(($crm_details['status_id'] == 2) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(185, session('permissions'))))
+                                <button type="button" class="btn btn-primary width-10-per" id="un_tag"><span
+                                            class="d-none d-lg-block" style="color: white">Un Tag</span></button>
+                            @endif
+                            @if((session('role_id') == 1 || in_array(213, session('permissions'))))
                                 <button type="button" class="btn btn-primary width-10-per" id="edit_request"><span
                                             class="d-none d-lg-block" style="color: white">Edit Request</span></button>
                             @endif
@@ -502,9 +506,12 @@
                                                             @if($tagging_history->crm_request_tagging_type_id == 1)
                                                                 <td>{{$tagging_history->department->name}}</td>
                                                                 <td>{{$tagging_history->tagging->name}}</td>
-                                                            @else
+                                                            @elseif($tagging_history->crm_request_tagging_type_id == 2)
                                                                 <td>{{$tagging_history->user->name}}</td>
                                                                 <td>{{$tagging_history->tagging->name}}</td>
+                                                            @else
+                                                                <td>-</td>
+                                                                <td>Un Tagged</td>
                                                             @endif
                                                             <td>{{$tagging_history->created_at}}</td>
                                                             <td>{{$tagging_history->agent->name}}</td>
@@ -888,6 +895,69 @@
             $('#tag').on('click', function (e) {
                 e.preventDefault();
                 $('#tagModal').modal('show');
+            });
+            $('#un_tag').on('click', function (e) {
+                e.preventDefault();
+                swal({
+                    text: 'Are you sure, you want to un tag this Request?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if(confirm){
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Request is being un tagged.',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        $.ajax({
+                            url: '{!! route('admin.crm.in_process.un_tag') !!}',
+                            method: 'POST',
+                            data: {
+                                'multiple': 0,
+                                'crm_request_id': $('#crm_request_id').val(),
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    $('#tagModal').modal('hide');
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                    setTimeout(function () {
+                                        window.location.reload();
+                                    }, 2000);
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                            });
+                    }
+                });
             });
             $('#tagModal').on('hide.bs.modal', function (e) {
                 $('#tag_type').val('').trigger('change');

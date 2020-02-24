@@ -1735,6 +1735,46 @@ class AdminCRMController extends Controller
         }
     }
 
+    public function admin_un_tag(Request $request){
+        if($request->multiple == 1){
+            if(count($request->crm_request_ids) > 0){
+                foreach($request->crm_request_ids as $crm_request_id){
+                    $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->first();
+                    if($check_previous){
+                        CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
+                            'crm_request_tagging_type_id' => 3,
+                            'tagged_id' => null
+                        ]);
+                        CrmRequestTaggingHistory::create([
+                            'crm_request_id' => $crm_request_id,
+                            'crm_request_tagging_type_id' => 3,
+                            'tagged_id' => null,
+                            'agent_id' => Auth::id()
+                        ]);
+                    }
+                }
+            }
+            return ['status' => 0, 'success' => 'Request(s) successfully un tagged'];
+        }
+        else{
+            $crm_request_id = $request->crm_request_id;
+            $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->first();
+            if($check_previous){
+                CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
+                    'crm_request_tagging_type_id' => 3,
+                    'tagged_id' => null
+                ]);
+                CrmRequestTaggingHistory::create([
+                    'crm_request_id' => $crm_request_id,
+                    'crm_request_tagging_type_id' => 3,
+                    'tagged_id' => null,
+                    'agent_id' => Auth::id()
+                ]);
+            }
+            return ['status' => 0, 'success' => 'Request(s) successfully un tagged'];
+        }
+    }
+
     public function crm_index(){
         return view('admin.crm.index');
     }
