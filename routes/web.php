@@ -732,6 +732,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('rn.print','Admins\ReturnController@rrd_print')->name('rn.print');
             Route::post('shipments','Admins\ReturnController@receive_return_shipments')->name('shipments');
             Route::post('upload_image','Admins\ReturnController@receive_return_note_image_upload')->name('upload_image');
+            Route::post('undelivered/print','Admins\ReturnController@return_undelivered_print')->name('undelivered.print');
 
         });
         Route::prefix('history')->name('history.')->group(function () {
