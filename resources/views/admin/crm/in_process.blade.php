@@ -261,6 +261,84 @@
                     },
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
                     {
+                        text: 'Un Tag',
+                        className: 'btn btn-primary un_tag',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            swal({
+                                text: 'Are you sure, you want to un tag these Request(s)?',
+                                icon: 'info',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function(confirm) {
+                                if (confirm) {
+                                    $.ajax({
+                                        url: '{!! route('admin.crm.in_process.un_tag') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            'crm_request_ids[]': selected_rows,
+                                            'multiple': 1,
+                                            '_token': '{{ csrf_token() }}'
+                                        }
+                                    })
+                                        .done(function (data) {
+                                            if (data.status == 0) {
+                                                toastr.success(data.success, 'Success!', {
+                                                    positionClass: 'toast-bottom-center',
+                                                    containerId: 'toast-bottom-center'
+                                                });
+                                            } else {
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+                                            table.rows().nodes().each(function(index) {
+                                                var row = table.row(index);
+
+                                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                                    row.deselect();
+
+                                                    id = parseInt(row.id());
+
+                                                    var index = $.inArray(id, selected_rows);
+
+                                                    if (index !== -1) {
+                                                        selected_rows.splice(index, 1);
+                                                    }
+
+                                                    if (selected_rows.length == 0) {
+                                                        table.button('.assign').disable();
+                                                        table.button('.un_tag').disable();
+                                                        table.button('.close_request').disable();
+                                                        table.button('.tag').disable();
+                                                    }
+                                                }
+                                            });
+                                            table.draw('false');
+                                        });
+                                    }
+                            });
+                        }
+                    },
+                    @endif
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
+                    {
                         text: 'Assign Agent',
                         className: 'btn btn-primary assign',
                         enabled: false,
@@ -336,6 +414,9 @@
 
                                                             if (selected_rows.length == 0) {
                                                                 table.button('.assign').disable();
+                                                                table.button('.un_tag').disable();
+                                                                table.button('.close_request').disable();
+                                                                table.button('.tag').disable();
                                                             }
                                                         }
                                                     });
@@ -404,9 +485,28 @@
                                                             containerId: 'toast-top-center'
                                                         });
                                                     }
-                                                    selected_rows = [];
+                                                    table.rows().nodes().each(function(index) {
+                                                        var row = table.row(index);
 
-                                                    table.rows().deselect();
+                                                        if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                                            row.deselect();
+
+                                                            id = parseInt(row.id());
+
+                                                            var index = $.inArray(id, selected_rows);
+
+                                                            if (index !== -1) {
+                                                                selected_rows.splice(index, 1);
+                                                            }
+
+                                                            if (selected_rows.length == 0) {
+                                                                table.button('.assign').disable();
+                                                                table.button('.un_tag').disable();
+                                                                table.button('.close_request').disable();
+                                                                table.button('.tag').disable();
+                                                            }
+                                                        }
+                                                    });
 
                                                     table.draw('false');
                                                 });
@@ -439,6 +539,8 @@
                                     table.button('.assign').enable();
                                     table.button('.close_request').enable();
                                     table.button('.tag').enable();
+                                    table.button('.un_tag').enable();
+
                                 }
                             });
                         }
@@ -467,6 +569,7 @@
                                         table.button('.assign').disable();
                                         table.button('.close_request').disable();
                                         table.button('.tag').disable();
+                                        table.button('.un_tag').disable();
                                     }
                                 }
                             });
@@ -734,11 +837,13 @@
                     table.button('.assign').enable();
                     table.button('.close_request').enable();
                     table.button('.tag').enable();
+                    table.button('.un_tag').enable();
                 }
                 else {
                     table.button('.assign').disable();
                     table.button('.close_request').disable();
                     table.button('.tag').disable();
+                    table.button('.un_tag').disable();
                 }
             });
 
