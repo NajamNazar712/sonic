@@ -13,7 +13,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ReceivingSheetShipment;
-
+use App\Http\Models\Shipper\UserBankInfo;
 use Auth;
 use DB;
 
