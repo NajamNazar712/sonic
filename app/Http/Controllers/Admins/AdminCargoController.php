@@ -1314,7 +1314,7 @@ class AdminCargoController extends Controller
 
             if ($cargo_consignment) {
                 if (session('role_id') == 1 || (in_array($cargo_consignment->destination_hub->hub_id, session('hubs')))) {
-                    if (in_array($cargo_consignment->status_id, [1, 2, 4, 6, 7])) {
+                    if (in_array($cargo_consignment->status_id, [1, 2, 4, 6, 7, 9])) {
                         return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
                     }
                     else {
