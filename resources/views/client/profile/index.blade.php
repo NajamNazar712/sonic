@@ -516,7 +516,25 @@
         </div>
     </div>
     <!-- default modal -->
+    <!-- ADD Bank Modal -->
+    <div class="modal fade text-left" id="AddBankModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddBankModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Add Bank</h4>
+                </div>
+                <div class="modal-body">
 
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ADD Bank Modal -->
 @endsection
 
 @section('css')
@@ -1047,7 +1065,17 @@
                     width:'100%'
                 });
         var btable = $('#bank_datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                {
+                    text: '<i class="la la-cancel"></i> Add Bank',
+                    className: 'btn btn-primary add_bank',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
+                        $('#AddBankModal').modal('show');
+                    }
+                }
+                ],
                 scrollX: true, scrollY: '500px',
                 processing: true,
                 language: {
