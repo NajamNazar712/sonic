@@ -258,7 +258,7 @@
 
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
-                                                                            @if($comment->comment_type == 0)
+                                                                            @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
                                                                                 <button type="button" class="border-0" id="edit_comment_{{$comment->id}}" value="{{$comment->id}}"><i class="ft-edit"></i></button>
                                                                             @endif
                                                                             <p>{!! $comment->comment !!}</p>
@@ -1148,8 +1148,12 @@
                                 var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             } else {
                                 var last_comment = data.last_comment_id;
-                                // var html = '<button type="button" class="border-0" id="edit_comment_' + data.last_comment_id + '" value="' + data.last_comment_id + '"><i class="ft-edit"></i></button>';
-                                var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><button type="button" class="border-0" id="edit_comment_' + last_comment + '" value="' + last_comment + '"><i class="ft-edit"></i></button><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small><div id="updated_by_div_' + last_comment + '"></div></div></div>';
+
+                                var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left">';
+                                @if(session('role_id') == 1 || in_array(310, session('permissions')))
+                                    html += '<button type="button" class="border-0" id="edit_comment_' + last_comment + '" value="' + last_comment + '"><i class="ft-edit"></i></button>';
+                                @endif
+                                html += '<p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small><div id="updated_by_div_' + last_comment + '"></div></div></div>';
                             }
                             $('section.chat-app-window .chats').append(html);
 
@@ -1339,7 +1343,7 @@
 
         @foreach($comments as $comment)
             @if($comment->comment_by == 0)
-                @if($comment->comment_type == 0)
+                @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
                     $('#edit_comment_{{$comment->id}}').on('click', function (e) {
                         var comment_id = $(this).attr("value");
                         e.preventDefault();
