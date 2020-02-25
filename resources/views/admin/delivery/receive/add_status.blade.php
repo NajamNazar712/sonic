@@ -637,7 +637,7 @@
                 paging: false,
                 ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
-                order: [[2, 'desc']],
+                // order: [[2, 'desc']],
                 ordering: false,
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
