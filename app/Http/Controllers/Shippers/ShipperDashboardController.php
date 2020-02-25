@@ -325,6 +325,10 @@ class ShipperDashboardController extends Controller
         return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration]);
     }
 
+    public function addBank(Request $request){
+        return $request;
+    }
+
     public function getBanks(Request $request){
         $banks = UserBankInfo::join('cities as c','user_bank_infos.city_id','=','c.id')
         ->leftJoin('banks_lists as bl','bl.id','=','user_bank_infos.bank_name')
