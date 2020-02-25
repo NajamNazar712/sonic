@@ -333,6 +333,7 @@ class ShipperDashboardController extends Controller
 
         return Datatables::of($banks)
         ->addColumn('action', function ($bank) {
+            return '';
             $dropdown = '
                 <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
