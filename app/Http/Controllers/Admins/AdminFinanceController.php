@@ -2342,31 +2342,6 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_index() {
-        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
-            ->leftjoin('cities as c', 'u.city_id', '=', 'c.id')
-            ->leftjoin('user_bank_infos as ubi', function ($join) {
-                $join->on('pending_payments.user_id', '=', 'ubi.user_id')
-                    ->where('ubi.default_bank', DB::raw(1));
-            })
-            ->leftjoin('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
-            ->leftjoin('cities as bc', 'ubi.city_id', '=', 'bc.id')
-            ->leftjoin('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
-            ->leftjoin('shipments as s', 's.id', '=', 'pps.shipment_id')
-            ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc',DB::raw('(select count(id) from shipments where shipments.user_id = u.id and shipments.shipper_status_id not in (1, 14, 17, 20, 25, 30, 31)) as total_pending_shipments'), DB::raw('SUM(IF(pps.type = 2, pps.payable, 0)) as total_adjustments'), 's.packaging_charges', 'u.documents_status')
-            ->groupBy('pending_payments.id');
-
-        if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
-                $pending_payments = $pending_payments->where(function ($query) {
-                    $query->whereIn('u.id', session('tagged_shippers'));
-                });
-            }
-        }
-        else if (session('role_id') != 1) {
-            $pending_payments = $pending_payments->whereIn('c.hub_id', session('hubs'));
-        }
-        dd($pending_payments->toSql());
         $banks = BanksList::all();
         $shipper_status = [1 => 'Active', 2 => 'Inactive'];
         return view('admin.finance.make_payments')->with(['banks'=>$banks, 'shipper_status' => $shipper_status]);
@@ -2374,16 +2349,16 @@ class AdminFinanceController extends Controller
 
     public function make_payments_list(Request $request) {
         $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
-            ->leftjoin('cities as c', 'u.city_id', '=', 'c.id')
-            ->leftjoin('user_bank_infos as ubi', function ($join) {
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->join('user_bank_infos as ubi', function ($join) {
                 $join->on('pending_payments.user_id', '=', 'ubi.user_id')
                     ->where('ubi.default_bank', DB::raw(1));
             })
-            ->leftjoin('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
-            ->leftjoin('cities as bc', 'ubi.city_id', '=', 'bc.id')
-            ->leftjoin('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
-            ->leftjoin('shipments as s', 's.id', '=', 'pps.shipment_id')
-            ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
+            ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
+            ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
+            ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc',DB::raw('(select count(id) from shipments where shipments.user_id = u.id and shipments.shipper_status_id not in (1, 14, 17, 20, 25, 30, 31)) as total_pending_shipments'), DB::raw('SUM(IF(pps.type = 2, pps.payable, 0)) as total_adjustments'), 's.packaging_charges', 'u.documents_status')
             ->groupBy('pending_payments.id');
 
@@ -3221,7 +3196,7 @@ class AdminFinanceController extends Controller
 
     public function done_payments_list(Request $request) {
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
-            ->leftjoin('cities as c', 'u.city_id', '=', 'c.id')
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftJoin('user_bank_infos as ubi', function ($join) {
                 $join->on('ubi.id', '=', 'done_payments.user_bank_info_id');
             })
@@ -3238,9 +3213,9 @@ class AdminFinanceController extends Controller
                     ->where('ubi_default.bank_name', '=', 'ub.id');
                 });
             })
-            ->leftjoin('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
-            ->leftjoin('shipments as s', 's.id', '=', 'dps.shipment_id')
-            ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
+            ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
             ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 's.booking_type_id', 'usi.poc', 'done_payments.ibft_charges', 's.packaging_charges')
             ->groupBy('done_payments.id');
