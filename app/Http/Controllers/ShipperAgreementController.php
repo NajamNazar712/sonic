@@ -125,7 +125,8 @@ class ShipperAgreementController extends Controller
         }
         $poc_name = '';
         $poc_name = $shipper->poc;
-
+        $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
+        
         $sales_person_name = '';
         $sales_person = $shipper->sales_person()->where('status', 0)->first();
         if($sales_person){
@@ -163,7 +164,7 @@ class ShipperAgreementController extends Controller
                                 <td colspan="1">' . $shipper->address . '</td>
                                 
                                 <td colspan="1"><strong>Bank Name</strong></td>
-                                <td colspan="1">' . $shipper->bank->bank->name . '</td>
+                                <td colspan="1">' . $shipper_bank->bank->name . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>Person Of Contact</strong></td>
@@ -171,7 +172,7 @@ class ShipperAgreementController extends Controller
                                 <td colspan="1">' . $poc_name . '</td>
                                 
                                 <td colspan="1"><strong>Account No.</strong></td>
-                                <td colspan="1">' . $shipper->bank->account_no . '</td>
+                                <td colspan="1">' . $shipper_bank->account_no . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>Phone Number 1</strong></td>
@@ -179,7 +180,7 @@ class ShipperAgreementController extends Controller
                                 <td colspan="1">' . $shipper->phone . '</td>
                                 
                                 <td colspan="1"><strong>Account Title</strong></td>
-                                <td colspan="1">' . $shipper->bank->account_title . '</td>
+                                <td colspan="1">' . $shipper_bank->account_title . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>Phone Number 2</strong></td>
@@ -187,7 +188,7 @@ class ShipperAgreementController extends Controller
                                 <td colspan="1">' . $shipper->phone2 . '</td>
                                 
                                 <td colspan="1"><strong>IBAN Number</strong></td>
-                                <td colspan="1">' . $shipper->bank->iban . '</td>
+                                <td colspan="1">' . $shipper_bank->iban . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>CNIC Number</strong></td>
@@ -195,7 +196,7 @@ class ShipperAgreementController extends Controller
                                 <td colspan="1">' . $shipper->cnic . '</td>
                                 
                                 <td colspan="1"><strong>Payment Cycle</strong></td>
-                                <td colspan="1">' . ucfirst($shipper->bank->payment_cycle) . '</td>
+                                <td colspan="1">' . ucfirst($shipper_bank->payment_cycle) . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>NTN Number</strong></td>
