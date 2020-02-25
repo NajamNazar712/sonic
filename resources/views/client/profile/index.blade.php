@@ -525,7 +525,78 @@
                     <h4 class="modal-title" id="">Add Bank</h4>
                 </div>
                 <div class="modal-body">
+                    <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
 
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12 text-center">
+                                    <div class="form-group">
+                                        <select name="bank_select" id="bank_select" class="select2 form-control">
+
+                                            @foreach($banks as $bank)
+                                                <option value="{{$bank->id}}">{{$bank->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control required" value="{{ old('bank_branch.0') }}" name="bank_branch[]" placeholder="Branch Name*">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                    <input type="text" class="form-control required" value="{{ old('account_no.0') }}" name="account_no[]" placeholder="Account Number*">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
+                                            <option value="Daily">Daily</option>
+                                            <option value="Weekly">Weekly</option>
+                                            <option value="Fortnight">Fortnight</option>
+                                            <option value="Monthly">Monthly</option>
+                                        </select>
+                                    
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        
+                                        <input type='text' class="form-control" name="account_title" placeholder="Account Title*">
+
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                    <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no">
+                                        </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <div>
+                                            <select name="bank_city" id="bank_city" class="select2 form-control">
+                                                @foreach($cities_list as $bank_city)
+                                                   <option value="{{$bank_city->id}}">{{$bank_city->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            
+
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="addEmails" type="submit" class="btn btn-primary btn-block">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Add</button>
