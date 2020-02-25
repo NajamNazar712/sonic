@@ -524,8 +524,8 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Add Bank</h4>
                 </div>
+                <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
                 <div class="modal-body">
-                    <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
                         @method('POST')
                         @csrf
                         <div class="container">
@@ -533,7 +533,7 @@
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12 text-center">
                                     <div class="form-group">
-                                        <select name="bank_select" id="bank_select" class="select2 form-control">
+                                        <select name="bank_select" id="bank_select" class="select2 form-control" data-rule-required="true" data-msg-required="Bank is required">
 
                                             @foreach($banks as $bank)
                                                 <option value="{{$bank->id}}">{{$bank->name}}</option>
@@ -543,12 +543,12 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control required" value="{{ old('bank_branch.0') }}" name="bank_branch[]" placeholder="Branch Name*">
+                                        <input type="text" class="form-control" name="bank_branch" placeholder="Branch Name*" data-rule-required="true" data-msg-required="Branch Name is required">
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                    <input type="text" class="form-control required" value="{{ old('account_no.0') }}" name="account_no[]" placeholder="Account Number*">
+                                    <input type="text" class="form-control required" name="account_no" placeholder="Account Number*">
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -588,20 +588,14 @@
                                 </div>
 
                             </div>
-                            
-
-                            <div class="row justify-content-center">
-                                <div class="col-3">
-                                    <button id="addEmails" type="submit" class="btn btn-primary btn-block">Add</button>
-                                </div>
-                            </div>
                         </div>
-                    </form>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Add</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1216,6 +1210,28 @@
 
             });
             $( "#default_bank_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your default bank is being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                
+                    
+                }
+            });
+            $( "#add_bank_form" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
