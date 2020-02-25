@@ -26,9 +26,6 @@ class UpdateTablesColumnsForIndex extends Migration
         Schema::table('delivery_notes', function (Blueprint $table) {
             $table->index('special_rider');
         });
-        Schema::table('delivery_note_shipments', function (Blueprint $table) {
-            $table->index('ordering');
-        });
         Schema::table('user_bank_infos', function (Blueprint $table) {
             $table->index('default_bank');
         });
@@ -137,9 +134,6 @@ class UpdateTablesColumnsForIndex extends Migration
         });
         Schema::table('delivery_notes', function (Blueprint $table) {
             $table->dropIndex(['special_rider']);
-        });
-        Schema::table('delivery_note_shipments', function (Blueprint $table) {
-            $table->dropIndex(['ordering']);
         });
         Schema::table('user_bank_infos', function (Blueprint $table) {
             $table->dropIndex(['default_bank']);
