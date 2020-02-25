@@ -2123,4 +2123,16 @@ class AdminCRMController extends Controller
 
         return view('admin.crm.picture')->with(['url' => $url]);
     }
+
+    public function edit_comment(Request $request){
+        $comment_id = $request->comment_id;
+        $comment = CrmComments::find($comment_id);
+        $comment->comment_type = 1;
+        $comment->comment_updated_by = Auth::id();
+        $comment->comment_updated_at = Carbon::now();
+        $comment->save();
+
+        $edited_date = Carbon::parse($comment->comment_updated_at)->format('Y-m-d H:i:s');
+        return ['status' => 0, 'success' => 'Comment has been marked as Internal', 'updated_at' => $edited_date, 'updated_by' => $comment->updated_by_admin->name];
+    }
 }

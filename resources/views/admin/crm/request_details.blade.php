@@ -258,8 +258,16 @@
 
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
+                                                                            @if($comment->comment_type == 0)
+                                                                                <button type="button" class="border-0" id="edit_comment_{{$comment->id}}" value="{{$comment->id}}"><i class="ft-edit"></i></button>
+                                                                            @endif
                                                                             <p>{!! $comment->comment !!}</p>
                                                                             <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                                <div id="updated_by_div_{{$comment->id}}">
+                                                                                    @if($comment->comment_updated_by != null && $comment->comment_updated_at != null)
+                                                                                        <small>Updated by: {{$comment->updated_by_admin->name}} ({{$comment->comment_updated_at}})</small>
+                                                                                    @endif
+                                                                                </div>
                                                                         </div>
                                                                     </div>
 
@@ -939,7 +947,6 @@
                         })
                             .done(function (data) {
                                 if (data.status == 0) {
-                                    $('#tagModal').modal('hide');
                                     toastr.success(data.success, 'Success!', {
                                         positionClass: 'toast-bottom-center',
                                         containerId: 'toast-bottom-center'
@@ -1261,6 +1268,75 @@
         $('#invalid_form').on('submit', function (e) {
             blockPagePermanently();
         })
+
+        @foreach($comments as $comment)
+            @if($comment->comment_by == 0)
+                @if($comment->comment_type == 0)
+                    $('#edit_comment_{{$comment->id}}').on('click', function (e) {
+                        var comment_id = $(this).attr("value");
+                        e.preventDefault();
+                        swal({
+                            text: 'Are you sure, you want to edit this comment as Internal?\n\t "{{$comment->comment}}"',
+                            icon: 'info',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function(confirm) {
+                            if(confirm){
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Comment is being updated.',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                                $.ajax({
+                                    url: '{!! route('admin.crm.comment.edit') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'comment_id': comment_id,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                })
+                                    .done(function (data) {
+                                        if (data.status == 0) {
+                                            $('#edit_comment_{{$comment->id}}').remove();
+                                            $('#chat_{{$comment->id}}').addClass('internal');
+                                            $('#updated_by_div_{{$comment->id}}').append('<small>Updated by: ' + data.updated_by + ' (' + data.updated_at + ')</small>');
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                        swal.close();
+                                    });
+                            }
+                        });
+                    });
+                @endif
+            @endif
+        @endforeach
 
     </script>
 @endsection

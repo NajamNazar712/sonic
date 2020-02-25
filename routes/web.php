@@ -1506,6 +1506,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('comment')->name('comment.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_comment')->name('add');
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
+            Route::post('edit', 'Admins\AdminCRMController@edit_comment')->name('edit');
         });
 
         Route::get('permissions', 'Admins\AdminCRMController@crm_index')->name('permissions');
