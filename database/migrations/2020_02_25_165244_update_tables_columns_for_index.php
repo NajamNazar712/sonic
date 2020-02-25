@@ -65,7 +65,6 @@ class UpdateTablesColumnsForIndex extends Migration
         Schema::table('telenor', function (Blueprint $table) {
             $table->index('created_at');
             $table->index('updated_at');
-            $table->index('session_id');
             $table->index('status');
         });
 
