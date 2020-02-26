@@ -45,14 +45,14 @@ class DebriefingEmail extends Command
         if($response){
             NotificationsController::send(44, $date);
         }
-        $response = AdminReportsController::debriefing_zone_wise_report($date);
-        if($response){
-            NotificationsController::send(45, $date);
-        }
-        $response = AdminReportsController::debriefing_overall_report($date);
-        if($response){
-            NotificationsController::send(46, $date);
-        }
+//        $response = AdminReportsController::debriefing_zone_wise_report($date);
+//        if($response){
+//            NotificationsController::send(45, $date);
+//        }
+//        $response = AdminReportsController::debriefing_overall_report($date);
+//        if($response){
+//            NotificationsController::send(46, $date);
+//        }
         
     }
 }

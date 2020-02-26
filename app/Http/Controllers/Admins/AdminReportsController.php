@@ -4340,24 +4340,12 @@ use Yajra\Datatables\Datatables;
                 $writer->save('php://output');
             }
             else if($report_type == 1) {
-                ob_start();
-                $writer->save('php://output');
-                $contents = ob_get_contents();
-                ob_end_clean();
-                Storage::disk('public')->put('/reports/debriefing/hubs/'.$file_name, $contents);
-            }else if($report_type == 2){
-                ob_start();
-                $writer->save('php://output');
-                $contents = ob_get_contents();
-                ob_end_clean();
-                Storage::disk('public')->put('/reports/debriefing/zones/'.$file_name, $contents);
-            }else if($report_type == 3){
-                Debriefing::truncate();
                 foreach ($result as $index => $res){
                     if($index != 'status' && $index != 'success' && $index != 'Grand Total' && $index != 'shipments'){
                         foreach ($res as $hub_name => $data){
                             if($hub_name != 'Grand Total') {
                                 $hub = City::where('name', $hub_name)->first();
+                                Debriefing::where('hub',$hub->id)->delete();
                                 $debriefing = new Debriefing();
                                 $debriefing->hub = $hub->id;
                                 $debriefing->zone_id = $hub->zone_id;
@@ -4380,6 +4368,18 @@ use Yajra\Datatables\Datatables;
                         }
                     }
                 }
+                ob_start();
+                $writer->save('php://output');
+                $contents = ob_get_contents();
+                ob_end_clean();
+                Storage::disk('public')->put('/reports/debriefing/hubs/'.$file_name, $contents);
+            }else if($report_type == 2){
+                ob_start();
+                $writer->save('php://output');
+                $contents = ob_get_contents();
+                ob_end_clean();
+                Storage::disk('public')->put('/reports/debriefing/zones/'.$file_name, $contents);
+            }else if($report_type == 3){
                 ob_start();
                 $writer->save('php://output');
                 $contents = ob_get_contents();
