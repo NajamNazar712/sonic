@@ -531,7 +531,7 @@
                         <div class="container">
 
                             <div class="row mb-2 justify-content-center">
-                                <div class="col-12 text-center">
+                                <div class="col-12">
                                     <div class="form-group">
                                         <select name="bank_select" id="bank_select" class="select2 form-control" data-rule-required="true" data-msg-required="Bank is required">
 
@@ -559,23 +559,23 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no">
+                                            <input type="text" class="form-control" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no" data-rule-required="true" data-msg-required="IBAN is required">
                                         </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <div>
-                                            <select name="bank_city" id="bank_city" class="select2 form-control">
-                                                @foreach($cities_list as $bank_city)
-                                                   <option value="{{$bank_city->id}}">{{$bank_city->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                        
+                                        <select name="bank_city" id="bank_city" class="select2 form-control" data-rule-required="true" data-msg-required="Bank City is required">
+                                            @foreach($cities_list as $bank_city)
+                                               <option value="{{$bank_city->id}}">{{$bank_city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                        
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
+                                        <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" data-rule-required="true" data-msg-required="Cycle Of Payment is required">
                                             <option value="Daily">Daily</option>
                                             <option value="Weekly">Weekly</option>
                                             <option value="Fortnight">Fortnight</option>
@@ -1228,6 +1228,23 @@
                     
                 }
             });
+
+            $("#bank_select").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Bank",
+                width:'100%',
+                dropdownParent:$('#AddBankModal')
+            });
+            $("#bank_city").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Bank City",
+                width:'100%',
+                dropdownParent:$('#AddBankModal')
+            });
+            $("#cycle_of_payment").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Payment Cycle",
+                width:'100%',
+                dropdownParent:$('#AddBankModal')
+            });
+
             $( "#add_bank_form" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
@@ -1250,6 +1267,14 @@
                     
                 }
             });
+            $('#AddBankModal').on('hidden.bs.modal',function () {
+                $("#add_bank_form").validate().resetForm();
+                $('#add_bank_form')[0].reset();
+                $('#bank_select').val('').trigger('change');
+                $('#bank_city').val('').trigger('change');
+                $('#cycle_of_payment').val('').trigger('change');
+            });
+
 
         });
     </script>

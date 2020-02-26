@@ -327,7 +327,23 @@ class ShipperDashboardController extends Controller
     }
 
     public function addBank(Request $request){
-        return $request;
+        
+        $user_id = session('user_id');
+        if($user_id){
+            $user_bank = new UserBankInfo();
+            $user_bank->user_id = $user_id;
+            $user_bank->bank_name = $request->bank_select;
+            $user_bank->bank_branch = $request->bank_branch;
+            $user_bank->account_no = $request->account_no;
+            $user_bank->account_title = $request->account_title;
+            $user_bank->iban = strtoupper($request->iban_no);
+            $user_bank->payment_cycle = $request->cycle_of_payment;
+            $user_bank->city_id = $request->bank_city;
+            $user_bank->save();
+
+            return redirect()->back()->with(['success' => 'Bank successfully added!']);
+        }
+        return redirect()->back()->with(['error' => 'Session Expired!']);
     }
 
     public function getBanks(Request $request){
