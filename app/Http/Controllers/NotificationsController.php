@@ -3608,31 +3608,33 @@ class NotificationsController extends Controller
 
                $to = array();
                $cc = array();
-               $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
-
-               if ($admins->exists()) {
-                   $to = array_merge($to, $admins->pluck('email')->toArray());
-               }
-
-               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
-
-               if ($admins->exists()) {
-                   $to = array_merge($to, $admins->pluck('admins.email')->toArray());
-               }
-
-               $ceo = Admin::find(8);
-
-               if ($ceo) {
-                   $to[] = $ceo->email;
-               }
-               
-               $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk'];
-               
-               $to = array_merge($to, $extra_admins);
-                   
-               
-               $cc = ['asad@trax.pk','syed.sharique@trax.pk'];
-               self::email($subject, $body, $to, $cc);
+//               $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+//
+//               if ($admins->exists()) {
+//                   $to = array_merge($to, $admins->pluck('email')->toArray());
+//               }
+//
+//               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+//
+//               if ($admins->exists()) {
+//                   $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+//               }
+//
+//               $ceo = Admin::find(8);
+//
+//               if ($ceo) {
+//                   $to[] = $ceo->email;
+//               }
+//
+//               $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk'];
+//
+//               $to = array_merge($to, $extra_admins);
+//
+//
+//               $cc = ['asad@trax.pk','syed.sharique@trax.pk'];
+                $to = ['muhammad.waqas@trax.pk','syed.sharique@trax.pk'];
+               self::email($subject, $body, $to);
+//               self::email($subject, $body, $to, $cc);
 
             }
             else if ($id == 48) {
