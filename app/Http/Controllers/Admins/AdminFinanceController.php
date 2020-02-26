@@ -1082,7 +1082,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_sdn_edit_deposit_slip_submit(Request $request){
-//        return $request;
+
         $sdn_id = $request->sdn_id;
         $deposit_ids = explode(',', $request->deposit_rows);
         $total_amount = 0;
