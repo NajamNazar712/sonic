@@ -362,17 +362,18 @@ class RegisterController extends Controller
         $subject = 'Sonic - Account Verification';
 
         $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
-                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-top: 20px;">
+                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
                         <img src="' . asset('img/sonic_logo.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
                         <img src="' . asset('img/trax_logo.png') . '" alt="Trax" style="display: inline-block; width: 15%">
                     </div>';
-        $html .= '<div align="center" style="margin-top: 10px; background-color: #D3D3D3">
-                    <h3>Thank you for choosing Trax Logistics</h3>
+        $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
+                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Thank you for choosing Trax Logistics</h3>
                     <p>Dear '. $newUser->name .','. PHP_EOL .'You are almost ready to start working with us.'. PHP_EOL .'To finish signing up, simply click below to verify your email address.</p>
+                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around;">
+                        <a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
+                    </div>
                 </div>
-                <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-top: 20px;">
-                    <a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
-                </div>
+                    <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © 2020 By Trax Logistics, All Rights Reserved.</p>
                 </div>';
         $body = $html;
         $to = $newUser->email;
