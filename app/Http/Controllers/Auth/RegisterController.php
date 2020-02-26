@@ -15,10 +15,12 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\http\Models\UserDocumentAttachment;
+use App\Mail\Notifications;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -249,6 +251,7 @@ class RegisterController extends Controller
             'average_shipments' => $data['average_shipment'],
             'average_shipment_duration_id' => $data['average_shipment_duration'],
             'reference_id' => $data['reference'],
+            'email_verified' => 0,
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
@@ -354,10 +357,28 @@ class RegisterController extends Controller
         $crf_terms_and_conditions->token = $token;
         $crf_terms_and_conditions->save();
 
+        $route = route('cod.email.verified', ['user_id' => $newUser->id]);
+
+        $subject = 'Account Verification';
+
+        $body = '<div align="center"><div style="border-radius: 25px; border: 2px solid #1B4F72; width: 60%"><div style="margin-bottom: 20px; margin-top: 30px;"><img src="' . asset('img/sonic_logo.png') . '" alt="Sonic" style="display: inline-block; width: 25%; margin-right: 20%"><img src="' . asset('img/trax_logo.png') . '" alt="Trax" style="display: inline-block; width: 33%"></div>'. PHP_EOL .'Dear '. $newUser->name .','. PHP_EOL .'
+                            Thank you for choosing Trax Logistics. You are almost ready to start working with us.'. PHP_EOL .'
+                            To finish signing up, simply click below to verify your email address.'. PHP_EOL .''. PHP_EOL .' <a href="'.$route.'" target="_blank"><button style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold; margin-bottom: 20px;">Verify</button></a></div></div>';
+        $to = $newUser->email;
+        $mail = Mail::to($to);
+
+        $mail->send(new Notifications($subject, $body, null));
+
         return $newUser;
     }
+    public function email_verified($id){
+        $user = User::find($id);
+        $user->email_verified = 1;
+        $user->save();
+        return view('client.register_success')->with(['verify' => 1]);
+    }
     public function register_success(){
-        return view('client.register_success');
+        return view('client.register_success')->with(['verify' => 0]);
     }
     public function addressView(){
         $products = Product::all();

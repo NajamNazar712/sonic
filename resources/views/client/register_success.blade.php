@@ -8,8 +8,10 @@
     <meta name="keywords" content="admin template, modern admin template, dashboard template, flat admin template, responsive admin template, web app, crypto dashboard, bitcoin dashboard">
     <meta name="author" content="Trax IT">
     <title>Registration Success - Sonic | Trax</title>
-    <link rel="apple-touch-icon" href="{{asset('app-assets/images/ico/apple-icon-120.png')}}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{asset('app-assets/images/ico/favicon.ico')}}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('img/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon-32x32.png') }} ">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon-16x16.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{  asset('img/favicon.ico') }}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
           rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
@@ -42,8 +44,11 @@
                 <div class="col-12 d-flex align-items-center justify-content-center">
                     <div class="col-md-4 col-10 p-0">
                         <div class="card-header bg-transparent border-0">
-
-                            <h3 class="text-uppercase text-center">Thanks For Registration, Our Team Will Get Back To You Soon</h3>
+                            @if($verify == 1)
+                                <h3 class="text-uppercase text-center">Thanks For Verification, Our Team Will Get Back To You Soon</h3>
+                            @else
+                                <h3 class="text-uppercase text-center">Thanks For Registration, A Verification Email Has Been Sent To Your Email Account Please Verify Your Email To Continue With Us.</h3>
+                            @endif
                         </div>
                         <div class="card-content">
 
