@@ -1112,7 +1112,7 @@ class AdminFinanceController extends Controller
         if(count($new_deposit_ids) > 0){
             foreach ($new_deposit_ids as $row) {
                 $total_amount += $request->new_amount[$row];
-                
+
                 $deposit_details = new StationDepositNoteSlip();
                 $deposit_details->station_deposit_note_id = $sdn_id;
                 $deposit_details->deposit_date = $request->new_date[$row];
@@ -4267,7 +4267,7 @@ class AdminFinanceController extends Controller
 
             $user_id = $user->id;
 
-            $user_banking_information = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
+            $user_banking_information = UserBankInfo::where('user_id', $user_id)->where('default_bank', 1)->first();
 
             if ($user_banking_information->invoicing_cycle_id == 1) {
                 if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {
@@ -4381,7 +4381,7 @@ class AdminFinanceController extends Controller
 
         $shipper = $invoice->shipper;
 
-        $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
+        $shipper_bank = $shipper->bank;
 
         $account_type_id = $shipper_bank->account_type_id;
 
