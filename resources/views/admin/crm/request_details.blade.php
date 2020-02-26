@@ -258,7 +258,7 @@
 
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
-                                                                            @if($comment->comment_type == 0)
+                                                                            @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
                                                                                 <button type="button" class="border-0" id="edit_comment_{{$comment->id}}" value="{{$comment->id}}"><i class="ft-edit"></i></button>
                                                                             @endif
                                                                             <p>{!! $comment->comment !!}</p>
@@ -1042,6 +1042,71 @@
             $('body').on('change', '#chat_form input', function () {
                 $(this).val($(this).val().trim());
             });
+
+            function last_comment_edit(last_comment, comment){
+                $('#edit_comment_' + last_comment).on('click', function (e) {
+                var comment_id = $(this).attr("value");
+                e.preventDefault();
+                swal({
+                    text: 'Are you sure, you want to edit this comment as Internal?\n\t "' + comment + '"',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if(confirm){
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Comment is being updated.',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        $.ajax({
+                            url: '{!! route('admin.crm.comment.edit') !!}',
+                            method: 'POST',
+                            data: {
+                                'comment_id': last_comment,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    $('#edit_comment_' + last_comment).remove();
+                                    $('#chat_' + last_comment).addClass('internal');
+                                    $('#updated_by_div_' + last_comment).append('<small>Updated by: ' + data.updated_by + ' (' + data.updated_at + ')</small>');
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                            });
+                    }
+                });
+            });
+            }
             $('.chat_send').on('click', function () {
                 var flag = true;
                 var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br/>');
@@ -1082,13 +1147,20 @@
                             if (internal_switch) {
                                 var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             } else {
-                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                var last_comment = data.last_comment_id;
+
+                                var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left">';
+                                @if(session('role_id') == 1 || in_array(310, session('permissions')))
+                                    html += '<button type="button" class="border-0" id="edit_comment_' + last_comment + '" value="' + last_comment + '"><i class="ft-edit"></i></button>';
+                                @endif
+                                html += '<p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small><div id="updated_by_div_' + last_comment + '"></div></div></div>';
                             }
                             $('section.chat-app-window .chats').append(html);
 
                             // }
 
                             $('#last_comment_id').val(data.last_comment_id);
+                            last_comment_edit(last_comment, comment);
 
                             updateScroll();
                         }
@@ -1271,7 +1343,7 @@
 
         @foreach($comments as $comment)
             @if($comment->comment_by == 0)
-                @if($comment->comment_type == 0)
+                @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
                     $('#edit_comment_{{$comment->id}}').on('click', function (e) {
                         var comment_id = $(this).attr("value");
                         e.preventDefault();
