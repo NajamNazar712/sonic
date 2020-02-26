@@ -516,7 +516,87 @@
         </div>
     </div>
     <!-- default modal -->
+    <!-- ADD Bank Modal -->
+    <div class="modal fade text-left" id="AddBankModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddBankModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Add Bank</h4>
+                </div>
+                <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
+                <div class="modal-body">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
 
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <select name="bank_select" id="bank_select" class="select2 form-control" data-rule-required="true" data-msg-required="Bank is required">
+
+                                            @foreach($banks as $bank)
+                                                <option value="{{$bank->id}}">{{$bank->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="bank_branch" placeholder="Branch Name*" data-rule-required="true" data-msg-required="Branch Name is required">
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group">
+                                    <input type="text" class="form-control required" name="account_no" placeholder="Account Number*" data-rule-required="true" data-msg-required="Account No. is required">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <input type='text' class="form-control" name="account_title" placeholder="Account Title*" data-rule-required="true" data-msg-required="Account Title is required">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no" data-rule-required="true" data-msg-required="IBAN is required">
+                                        </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        
+                                        <select name="bank_city" id="bank_city" class="select2 form-control" data-rule-required="true" data-msg-required="Bank City is required">
+                                            @foreach($cities_list as $bank_city)
+                                               <option value="{{$bank_city->id}}">{{$bank_city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                        
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" data-rule-required="true" data-msg-required="Cycle Of Payment is required">
+                                            <option value="Daily">Daily</option>
+                                            <option value="Weekly">Weekly</option>
+                                            <option value="Fortnight">Fortnight</option>
+                                            <option value="Monthly">Monthly</option>
+                                        </select>
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- ADD Bank Modal -->
 @endsection
 
 @section('css')
@@ -1047,7 +1127,17 @@
                     width:'100%'
                 });
         var btable = $('#bank_datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                {
+                    text: '<i class="la la-cancel"></i> Add Bank',
+                    className: 'btn btn-primary add_bank',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
+                        $('#AddBankModal').modal('show');
+                    }
+                }
+                ],
                 scrollX: true, scrollY: '500px',
                 processing: true,
                 language: {
@@ -1138,6 +1228,53 @@
                     
                 }
             });
+
+            $("#bank_select").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Bank",
+                width:'100%',
+                dropdownParent:$('#AddBankModal')
+            });
+            $("#bank_city").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Bank City",
+                width:'100%',
+                dropdownParent:$('#AddBankModal')
+            });
+            $("#cycle_of_payment").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Payment Cycle",
+                width:'100%',
+                dropdownParent:$('#AddBankModal')
+            });
+
+            $( "#add_bank_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your bank is being added!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                
+                    
+                }
+            });
+            $('#AddBankModal').on('hidden.bs.modal',function () {
+                $("#add_bank_form").validate().resetForm();
+                $('#add_bank_form')[0].reset();
+                $('#bank_select').val('').trigger('change');
+                $('#bank_city').val('').trigger('change');
+                $('#cycle_of_payment').val('').trigger('change');
+            });
+
 
         });
     </script>
