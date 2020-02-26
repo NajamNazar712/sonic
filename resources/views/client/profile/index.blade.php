@@ -1127,17 +1127,18 @@
                     width:'100%'
                 });
         var btable = $('#bank_datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
-                {
-                    text: '<i class="la la-cancel"></i> Add Bank',
-                    className: 'btn btn-primary add_bank',
-                    enabled: true,
-                    action: function (e, dt, node, config) {
-                        $('#AddBankModal').modal('show');
-                    }
-                }
-                ],
+                dom:'ltipr',
+                // dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                // buttons: [
+                // {
+                //     text: '<i class="la la-cancel"></i> Add Bank',
+                //     className: 'btn btn-primary add_bank',
+                //     enabled: true,
+                //     action: function (e, dt, node, config) {
+                //         $('#AddBankModal').modal('show');
+                //     }
+                // }
+                // ],
                 scrollX: true, scrollY: '500px',
                 processing: true,
                 language: {
