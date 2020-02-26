@@ -148,7 +148,7 @@ class AdminReportsEmailController extends Controller
         else{
             $total_avg_revenue_count = 0;
         }
-        $sale_person_array[] = ['serial' => '', 'Admin' => '', 'Achieved Shipments' => '','Target Shipments' => '','Target Achieved %' => '', 'Achieved Revenue' => '', 'Target Revenue' => '', 'Target Achieved %' => '', 'Avg Revenue/Parcel' => '', 'Contribution' => ''];
+        $sale_person_array[] = ['serial' => '', 'Admin' => '', 'Achieved Shipments' => '','Target Shipments' => '','Target Achieved %' => '', 'Achieved Revenue' => '', 'Target Revenue' => '', 'Target Revenue Achieved %' => '', 'Avg Revenue/Parcel' => '', 'Contribution' => ''];
         $sale_person_array[] = ['serial' => 'Total', 'Admin' => '', 'Achieved Shipments' => $total_shipments_count, 'Target Shipments' => $total_target_shipments,  'Target Achieved %' => round($total_target_shipments_achieved, 2).'%','Achieved Revenue' => $total_revenue, 'Target Revenue' => $total_target_revenue,'Target Revenue Achieved %' => round($total_target_revenue_achieved, 2) .'%', 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Contribution' => round($total_contribution_count * 100)];
         $cell_st =[
             'font' =>['bold' => true],
