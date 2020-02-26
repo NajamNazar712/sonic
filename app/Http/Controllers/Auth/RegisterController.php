@@ -359,11 +359,22 @@ class RegisterController extends Controller
 
         $route = route('cod.email.verified', ['user_id' => $newUser->id]);
 
-        $subject = 'Account Verification';
+        $subject = 'Sonic - Account Verification';
 
-        $body = '<div align="center"><div style="border-radius: 25px; border: 2px solid #1B4F72; width: 60%"><div style="margin-bottom: 20px; margin-top: 30px;"><img src="' . asset('img/sonic_logo.png') . '" alt="Sonic" style="display: inline-block; width: 25%; margin-right: 20%"><img src="' . asset('img/trax_logo.png') . '" alt="Trax" style="display: inline-block; width: 33%"></div>'. PHP_EOL .'Dear '. $newUser->name .','. PHP_EOL .'
-                            Thank you for choosing Trax Logistics. You are almost ready to start working with us.'. PHP_EOL .'
-                            To finish signing up, simply click below to verify your email address.'. PHP_EOL .''. PHP_EOL .' <a href="'.$route.'" target="_blank"><button style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold; margin-bottom: 20px;">Verify</button></a></div></div>';
+        $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
+                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-top: 20px;">
+                        <img src="' . asset('img/sonic_logo.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
+                        <img src="' . asset('img/trax_logo.png') . '" alt="Trax" style="display: inline-block; width: 15%">
+                    </div>';
+        $html .= '<div align="center" style="margin-top: 10px; background-color: #D3D3D3">
+                    <h3>Thank you for choosing Trax Logistics</h3>
+                    <p>Dear '. $newUser->name .','. PHP_EOL .'You are almost ready to start working with us.'. PHP_EOL .'To finish signing up, simply click below to verify your email address.</p>
+                </div>
+                <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-top: 20px;">
+                    <a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
+                </div>
+                </div>';
+        $body = $html;
         $to = $newUser->email;
         $mail = Mail::to($to);
 
