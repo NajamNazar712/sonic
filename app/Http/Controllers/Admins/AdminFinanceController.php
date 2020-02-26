@@ -4381,9 +4381,9 @@ class AdminFinanceController extends Controller
 
         $shipper = $invoice->shipper;
 
-        $shipper_bank = $shipper->bank;
+        $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
 
-        $account_type_id = $shipper_bank->account_type_id;
+        $account_type_id = $shipper->account_type_id;
 
         $html = '';
 
