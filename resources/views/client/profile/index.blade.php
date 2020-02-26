@@ -546,9 +546,31 @@
                                         <input type="text" class="form-control" name="bank_branch" placeholder="Branch Name*" data-rule-required="true" data-msg-required="Branch Name is required">
                                     </div>
                                 </div>
+
                                 <div class="col-12">
                                     <div class="form-group">
-                                    <input type="text" class="form-control required" name="account_no" placeholder="Account Number*">
+                                    <input type="text" class="form-control required" name="account_no" placeholder="Account Number*" data-rule-required="true" data-msg-required="Account No. is required">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <input type='text' class="form-control" name="account_title" placeholder="Account Title*" data-rule-required="true" data-msg-required="Account Title is required">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no">
+                                        </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <div>
+                                            <select name="bank_city" id="bank_city" class="select2 form-control">
+                                                @foreach($cities_list as $bank_city)
+                                                   <option value="{{$bank_city->id}}">{{$bank_city->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -562,31 +584,6 @@
                                     
                                     </div>
                                 </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        
-                                        <input type='text' class="form-control" name="account_title" placeholder="Account Title*">
-
-                                    </div>
-                                </div>
-
-                                <div class="col">
-                                    <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no">
-                                        </div>
-                                </div>
-                                <div class="col">
-                                    <div class="form-group">
-                                        <div>
-                                            <select name="bank_city" id="bank_city" class="select2 form-control">
-                                                @foreach($cities_list as $bank_city)
-                                                   <option value="{{$bank_city->id}}">{{$bank_city->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
                             </div>
                         </div>
                     
@@ -1241,7 +1238,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Your default bank is being updated!',
+                        text: 'Your bank is being added!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
