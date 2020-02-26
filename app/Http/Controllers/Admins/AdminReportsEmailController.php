@@ -77,6 +77,7 @@ class AdminReportsEmailController extends Controller
         $total_target_shipments = 0;
         $total_target_shipments_achieved = 0;
         $total_target_revenue = 0;
+        $total_revenue_achieved = 0;
         $total_target_revenue_achieved = 0;
         SalePersonNumbers::truncate();
         foreach ($sale_person_shipments as $sale_person_shipment) {
@@ -93,7 +94,8 @@ class AdminReportsEmailController extends Controller
                 }
                 $target_revenue = $target->average_revenue;
                 if($target_revenue > 0){
-                    $target_revenue_achieved = ($revenue[$sale_person_shipment->admin_id] / $target_revenue) * 100;
+                    $all_shipments_target_revenue = $target_revenue * $target_shipments;
+                    $target_revenue_achieved = ($revenue[$sale_person_shipment->admin_id] / $all_shipments_target_revenue) * 100;
                 }
             }
             $sale_person_array[] = ['serial' => $serial, 'Admin' => $sale_person_shipment->admin, 'Achieved Shipments' => $sale_person_shipment->shipment_count, 'Target Shipments' => $target_shipments, 'Target Achieved %' => $target_shipments_achieved.'%', 'Achieved Revenue' => $revenue[$sale_person_shipment->admin_id], 'Target Revenue' => $target_revenue, 'Target Revenue Achieved %' => $target_revenue_achieved.'%', 'Avg Revenue/Parcel' => round($avg_revenue[$sale_person_shipment->admin_id], 2), 'Contribution' => ($contribution[$sale_person_shipment->admin_id]) * 100];
@@ -108,15 +110,19 @@ class AdminReportsEmailController extends Controller
 
             $sale_person_entry->save();
             $serial++;
-
+            $total_revenue_achieved += $revenue[$sale_person_shipment->admin_id];
             $total_target_shipments += $target_shipments;
             $total_target_revenue += $target_revenue;
             $total_target_shipments_achieved += $target_shipments_achieved;
-            $total_target_revenue_achieved += $target_revenue_achieved;
+
 
             $total_shipments_count = $total_shipments_count + $sale_person_shipment->shipment_count;
             $total_contribution_count = $total_contribution_count + $contribution[$sale_person_shipment->admin_id];
         }
+        if($total_target_revenue > 0){
+            $total_target_revenue_achieved = ($total_revenue_achieved / $total_target_revenue) * 100;
+        }
+
         foreach ($walk_in_shipments as $walk_in_shipment) {
             $sale_person_array[] = ['serial' => $serial, 'Admin' => 'Walk-In', 'Achieved Shipments' => $walk_in_shipment->shipment_count, 'Target Shipments' => '', 'Target Achieved %' => '', 'Achieved Revenue' => $revenue[0], 'Target Revenue' => '', 'Target Achieved %' => '', 'Avg Revenue/Parcel' => round($avg_revenue[0], 2), 'Contribution' => $contribution[0] * 100];
             $sale_person_entry = new SalePersonNumbers();

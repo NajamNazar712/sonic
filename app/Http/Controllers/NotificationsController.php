@@ -3534,6 +3534,7 @@ class NotificationsController extends Controller
                 $total_target_shipments_achieved = 0;
                 $total_target_revenue = 0;
                 $total_target_revenue_achieved = 0;
+                $sum_total_target_revenue_achieved = 0;
                 foreach ($sale_person_number_data as $sale_person_number) {
                   $target_shipments_achieved = 0;
                   $target_revenue_achieved = 0;
@@ -3543,7 +3544,8 @@ class NotificationsController extends Controller
                   }
                   $target_revenue = $sale_person_number->target_revenue;
                   if($target_revenue > 0){
-                      $target_revenue_achieved = ($sale_person_number->revenue / $target_revenue) * 100;
+                      $all_shipments_target_revenue = $target_revenue * $target_shipments;
+                      $target_revenue_achieved = ($sale_person_number->revenue / $all_shipments_target_revenue) * 100;
                   }
                     $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
@@ -3566,16 +3568,16 @@ class NotificationsController extends Controller
                     $revenue_count = $revenue_count + $sale_person_number->revenue;
                     $contribution_count = $contribution_count + $sale_person_number->contribution;
                     $total_target_shipments += $sale_person_number->target_shipments;
-                    
                     $total_target_revenue += $sale_person_number->target_revenue;
-                    
+                    $sum_total_target_revenue_achieved += $target_revenue_achieved;
                     $serial++;
                 }
                 if($total_target_shipments > 0){
                   $total_target_shipments_achieved = ($shipments_count / $total_target_shipments) * 100;
                 }
+                $total_all_shipments_target_revenue = 0;
                 if($total_target_revenue > 0){
-                  $total_target_shipments_achieved = ($revenue_count / $total_target_revenue) * 100;
+                  $total_target_revenue_achieved = ($revenue_count / $total_target_revenue) * 100;
                 }
                 if($shipments_count != 0){
                     $avg_revenue_count = $revenue_count / $shipments_count;
@@ -3606,31 +3608,33 @@ class NotificationsController extends Controller
 
                $to = array();
                $cc = array();
-               $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
-
-               if ($admins->exists()) {
-                   $to = array_merge($to, $admins->pluck('email')->toArray());
-               }
-
-               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
-
-               if ($admins->exists()) {
-                   $to = array_merge($to, $admins->pluck('admins.email')->toArray());
-               }
-
-               $ceo = Admin::find(8);
-
-               if ($ceo) {
-                   $to[] = $ceo->email;
-               }
-               
-               $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk'];
-               
-               $to = array_merge($to, $extra_admins);
-                   
-               
-               $cc = ['asad@trax.pk','syed.sharique@trax.pk'];
-               self::email($subject, $body, $to, $cc);
+//               $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+//
+//               if ($admins->exists()) {
+//                   $to = array_merge($to, $admins->pluck('email')->toArray());
+//               }
+//
+//               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+//
+//               if ($admins->exists()) {
+//                   $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+//               }
+//
+//               $ceo = Admin::find(8);
+//
+//               if ($ceo) {
+//                   $to[] = $ceo->email;
+//               }
+//
+//               $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk'];
+//
+//               $to = array_merge($to, $extra_admins);
+//
+//
+//               $cc = ['asad@trax.pk','syed.sharique@trax.pk'];
+                $to = ['muhammad.waqas@trax.pk','syed.sharique@trax.pk'];
+               self::email($subject, $body, $to);
+//               self::email($subject, $body, $to, $cc);
 
             }
             else if ($id == 48) {
