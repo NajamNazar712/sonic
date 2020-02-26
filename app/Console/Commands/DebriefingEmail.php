@@ -39,7 +39,7 @@ class DebriefingEmail extends Command
      */
     public function handle()
     {
-        $date = Carbon::now()->toDateString();
+        $date = Carbon::now()->subDays(1)->toDateString();
         AdminReportsController::debriefing_archive_directory();
         $response = AdminReportsController::debriefing_hub_wise_report($date);
         if($response){
