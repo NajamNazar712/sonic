@@ -3491,14 +3491,19 @@ class NotificationsController extends Controller
                 if (strpos($body, '[link]') !== FALSE) {
                     $body = str_replace('[link]', $link, $body);
                 }
-                $to = 'hassan@trax.pk';
-                $cc = array();
+                // $to = 'hassan@trax.pk';
+                // $cc = array();
 
-                $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 19, 22, 34, 36])->where('status', 1);
+                // $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 19, 22, 34, 36])->where('status', 1);
 
-                if ($department_heads->exists()) {
-                  $cc = array_merge($cc, $department_heads->pluck('email')->toArray());
-                }
+                // if ($department_heads->exists()) {
+                //   $cc = array_merge($cc, $department_heads->pluck('email')->toArray());
+                // }
+
+                // self::email($subject, $body, $to, $cc);
+
+                $to = 'ammar.mir@trax.pk';
+                $cc = ['muhammad.yousuf@trax.pk'];
 
                 self::email($subject, $body, $to, $cc);
             }
