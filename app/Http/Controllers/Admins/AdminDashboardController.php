@@ -144,6 +144,13 @@ class AdminDashboardController extends Controller
         $stats['booked'] = Shipment::where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['canceled'] = Shipment::where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['arrived'] = Shipment::where('shipper_status_id',2)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['destination'] = Shipment::where('shipper_status_id',4)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['out_for_delivery'] = Shipment::where('shipper_status_id',5)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['return_confirm'] = Shipment::where('shipper_status_id',20)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['return_delivered'] = Shipment::where('shipper_status_id',25)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['pending_shipments'] = Shipment::whereIn('shipper_status_id',[6,7,8,9,13,15,18,51,52,56])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['pending_return'] = Shipment::whereIn('shipper_status_id',[21,22,23,24,26,27,28,29,57,60])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['confirmation_pending'] = Shipment::whereIn('shipper_status_id',[12,54,55])->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['in_transit'] = Shipment::where('shipper_status_id',3)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today]);
@@ -205,7 +212,49 @@ class AdminDashboardController extends Controller
                 });
             });
 
-            $stats['pending'] = $stats['pending']->where(function($query) {
+            $stats['destination'] = $stats['destination']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+            $stats['out_for_delivery'] = $stats['out_for_delivery']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+            $stats['return_confirm'] = $stats['return_confirm']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+            $stats['return_delivered'] = $stats['return_delivered']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+            $stats['pending_shipments'] = $stats['pending_shipments']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+            $stats['confirmation_pending'] = $stats['confirmation_pending']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+            $stats['pending_return'] = $stats['pending_return']->where(function($query) {
                 $query->whereHas('pickup_address.city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 })->orWhereHas('consignee_city', function ($sub_query) {
@@ -221,7 +270,13 @@ class AdminDashboardController extends Controller
         $stats['in_transit'] = number_format($stats['in_transit']->count());
         $stats['delivered'] = number_format($stats['delivered']->count());
         $stats['return'] = number_format($stats['return']->count());
-        $stats['pending'] = number_format($stats['pending']->count());
+        $stats['destination'] = number_format($stats['destination']->count());
+        $stats['out_for_delivery'] = number_format($stats['out_for_delivery']->count());
+        $stats['return_confirm'] = number_format($stats['return_confirm']->count());
+        $stats['return_delivered'] = number_format($stats['return_delivered']->count());
+        $stats['pending_shipments'] = number_format($stats['pending_shipments']->count());
+        $stats['confirmation_pending'] = number_format($stats['confirmation_pending']->count());
+        $stats['pending_return'] = number_format($stats['pending_return']->count());
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);

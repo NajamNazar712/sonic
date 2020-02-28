@@ -20,7 +20,7 @@
                                   </div>
                                   <div class="media-body text-right">
                                       <h3 class="">{{$stats['total']}}</h3>
-                                      <span>Total Booked Shipment(s)</span>
+                                      <span>Total Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -37,7 +37,7 @@
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['booked']}}</h3>
-                                      <span>Pending Shipment(s)</span>
+                                      <span>Booked Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -89,6 +89,76 @@
                                       <i class="icon-check text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
+                                      <h3 class="text-white">{{$stats['destination']}}</h3>
+                                      <span>Shipment(s) At Destination</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-3">
+                  <div class="card bg-gradient-directional-warning pull-up">
+                      <div class="card-content">
+                          <div class="card-body">
+                              <div class="media d-flex">
+                                  <div class="align-self-center">
+                                      <i class="icon-loop text-white font-large-2 float-left"></i>
+                                  </div>
+                                  <div class="media-body text-white text-right">
+                                      <h3 class="text-white">{{$stats['out_for_delivery']}}</h3>
+                                      <span>Out for Delivery Shipment(s)</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-3">
+                  <div class="card bg-gradient-directional-inprocess pull-up">
+                      <div class="card-content">
+                          <div class="card-body">
+                              <div class="media d-flex">
+                                  <div class="align-self-center">
+                                      <i class="icon-shuffle text-white font-large-2 float-left"></i>
+                                  </div>
+                                  <div class="media-body text-white text-right">
+                                      <h3 class="text-white">{{$stats['pending_shipments']}}</h3>
+                                      <span>Pending Shipment(s)</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-3">
+                  <div class="card bg-gradient-directional-red pull-up">
+                      <div class="card-content">
+                          <div class="card-body">
+                              <div class="media d-flex">
+                                  <div class="align-self-center">
+                                      <i class="icon-close text-white font-large-2 float-left"></i>
+                                  </div>
+                                  <div class="media-body text-white text-right">
+                                      <h3 class="text-white">{{$stats['confirmation_pending']}}</h3>
+                                      <span>Pending Confirmation(s)</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+            <div class="row justify-content-center">
+              <div class="col-3">
+                  <div class="card bg-gradient-directional-success pull-up">
+                      <div class="card-content">
+                          <div class="card-body">
+                              <div class="media d-flex">
+                                  <div class="align-self-center">
+                                      <i class="icon-check text-white font-large-2 float-left"></i>
+                                  </div>
+                                  <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['delivered']}}</h3>
                                       <span>Delivered Shipment(s)</span>
                                   </div>
@@ -106,8 +176,8 @@
                                       <i class="icon-loop text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['return']}}</h3>
-                                      <span>Returned Shipment(s)</span>
+                                      <h3 class="text-white">{{$stats['return_confirm']}}</h3>
+                                      <span>Returned Confirm Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -123,14 +193,34 @@
                                       <i class="icon-shuffle text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['pending']}}</h3>
-                                      <span>In Process Shipment(s)</span>
+                                      <h3 class="text-white">{{$stats['pending_return']}}</h3>
+                                      <span>Pending Return Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
                       </div>
                   </div>
               </div>
+              <div class="col-3">
+                  <div class="card bg-gradient-directional-red pull-up">
+                      <div class="card-content">
+                          <div class="card-body">
+                              <div class="media d-flex">
+                                  <div class="align-self-center">
+                                      <i class="icon-close text-white font-large-2 float-left"></i>
+                                  </div>
+                                  <div class="media-body text-white text-right">
+                                      <h3 class="text-white">{{$stats['return_delivered']}}</h3>
+                                      <span>Shipment(s) Returned To Shipper</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              </div>
+          </div>
+            <div class="row justify-content-center">
               <div class="col-3">
                   <div class="card bg-gradient-directional-red pull-up">
                       <div class="card-content">
