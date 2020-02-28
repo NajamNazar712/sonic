@@ -3383,9 +3383,9 @@ use Yajra\Datatables\Datatables;
                     if($hub != null){
 
                         $user = DB::connection('reports')->table('users')->whereExists(function ($query) use ($hub) {
-                            $query->from('cities')
-                            ->where('users.city_id', '=', DB::raw('`cities`.`id`'))
-                            ->where('hub_id', '=', $hub);
+                            $query->from('user_shipping_infos')
+                            ->where('user_shipping_infos.user_id', '=', DB::raw('`users`.`id`'))
+                            ->where('city_id', '=', $hub);
                         })->where('id', $shipper->user_id)->whereIn('status',$account_status)->first();
                     }else{
 
