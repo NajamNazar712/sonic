@@ -81,7 +81,7 @@
             </div>
             <div class="row justify-content-center">
               <div class="col-3">
-                  <div class="card bg-gradient-directional-success pull-up">
+                  <div class="card bg-gradient-directional-destination pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -98,7 +98,7 @@
                   </div>
               </div>
               <div class="col-3">
-                  <div class="card bg-gradient-directional-warning pull-up">
+                  <div class="card bg-gradient-directional-out_for_delivery pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -115,7 +115,7 @@
                   </div>
               </div>
               <div class="col-3">
-                  <div class="card bg-gradient-directional-inprocess pull-up">
+                  <div class="card bg-gradient-directional-pending_shipments pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -132,7 +132,7 @@
                   </div>
               </div>
               <div class="col-3">
-                  <div class="card bg-gradient-directional-red pull-up">
+                  <div class="card bg-gradient-directional-pending_confirmation pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -141,7 +141,7 @@
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['confirmation_pending']}}</h3>
-                                      <span>Pending Confirmation(s)</span>
+                                      <span>Pending Confirmation Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -168,7 +168,7 @@
                   </div>
               </div>
               <div class="col-3">
-                  <div class="card bg-gradient-directional-warning pull-up">
+                  <div class="card bg-gradient-directional-return_confirm pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -185,7 +185,7 @@
                   </div>
               </div>
               <div class="col-3">
-                  <div class="card bg-gradient-directional-inprocess pull-up">
+                  <div class="card bg-gradient-directional-pending_return pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -202,7 +202,7 @@
                   </div>
               </div>
               <div class="col-3">
-                  <div class="card bg-gradient-directional-red pull-up">
+                  <div class="card bg-gradient-directional-return_delivered pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -574,8 +574,7 @@
           {{--</div>--}}
           {{--@endif--}}
       </div>
-    </div>
-  </div>
+</div>
   <!-- ////////////////////////////////////////////////////////////////////////////-->
 
   @endsection
@@ -593,8 +592,32 @@
         .small-calender-icon{
             font-size: 17px !important;
         }
-        .bg-gradient-directional-inprocess {
+        .bg-gradient-directional-destination {
+            background-image: linear-gradient(45deg, #4BBFBF, #04FEFE );
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-out_for_delivery {
             background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_shipments {
+            background-image: linear-gradient(45deg, #AF65AC , #FA47AE);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_confirmation {
+            background-image: linear-gradient(45deg, #2A3A82, #5573FC);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_confirm {
+            background-image: linear-gradient(45deg, #9A5C45, #FC9A75);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_return {
+            background-image: linear-gradient(45deg, #6C3C3C , #B27171);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02870C, #4BF958);
             background-repeat: repeat-x;
         }
         .selectize-control {
@@ -761,9 +784,9 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pending Shipment(s)', 'Arrived Shipment(s)', 'In Transit Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)', 'Cancelled Shipment(s)']
+                                data: ['Arrived Shipment(s)', 'In Transit Shipment(s)', 'Shipment(s) At Destination', 'Out for Delivery Shipment(s)', 'Pending Shipment(s)', 'Pending Confirmation Shipment(s)', 'Delivered Shipment(s)', 'Returned Confirm Shipment(s)', 'Pending Return Shipment(s)', 'Shipment(s) Returned To Shipper', 'Cancelled Shipment(s)']
                             },
-                            color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a','#FF0000'],
+                            color: ['#535BE2', '#7B1FA2', '#4BBFBF', '#d6a42a', '#AF65AC', '#2A3A82', '#1EC481', '#9A5C45', '#6C3C3C', '#02870C','#FF0000'],
 
                             xAxis: [{
                                 type: 'category',
@@ -779,11 +802,6 @@
                             }],
                             series: [
                                 {
-                                    name: 'Pending Shipment(s)',
-                                    type: 'line',
-                                    data: data.graph['booked']
-                                },
-                                {
                                     name: 'Arrived Shipment(s)',
                                     type: 'line',
                                     data: data.graph['arrived']
@@ -794,19 +812,44 @@
                                     data: data.graph['in_transit']
                                 },
                                 {
+                                    name: 'Shipment(s) At Destination',
+                                    type: 'line',
+                                    data: data.graph['destination']
+                                },
+                                {
+                                    name: 'Out for Delivery Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['out_for_delivery']
+                                },
+                                {
+                                    name: 'Pending Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['pending_shipments']
+                                },
+                                {
+                                    name: 'Pending Confirmation Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['confirmation_pending']
+                                },
+                                {
                                     name: 'Delivered Shipment(s)',
                                     type: 'line',
                                     data: data.graph['delivered']
                                 },
                                 {
-                                    name: 'Returned Shipment(s)',
+                                    name: 'Returned Confirm Shipment(s)',
                                     type: 'line',
-                                    data: data.graph['return']
+                                    data: data.graph['return_confirm']
                                 },
                                 {
-                                    name: 'In Process Shipment(s)',
+                                    name: 'Pending Return Shipment(s)',
                                     type: 'line',
-                                    data: data.graph['pending']
+                                    data: data.graph['pending_return']
+                                },
+                                {
+                                    name: 'Shipment(s) Returned To Shipper',
+                                    type: 'line',
+                                    data: data.graph['return_delivered']
                                 },
                                 {
                                     name: 'Cancelled Shipment(s)',
