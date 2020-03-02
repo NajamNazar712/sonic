@@ -784,9 +784,9 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Arrived Shipment(s)', 'In Transit Shipment(s)', 'Shipment(s) At Destination', 'Out for Delivery Shipment(s)', 'Pending Shipment(s)', 'Pending Confirmation Shipment(s)', 'Delivered Shipment(s)', 'Returned Confirm Shipment(s)', 'Pending Return Shipment(s)', 'Shipment(s) Returned To Shipper', 'Cancelled Shipment(s)']
+                                data: ['Booked Shipment(s)', 'Arrived Shipment(s)', 'In Transit Shipment(s)', 'Shipment(s) At Destination', 'Out for Delivery Shipment(s)', 'Pending Shipment(s)', 'Pending Confirmation Shipment(s)', 'Delivered Shipment(s)', 'Returned Confirm Shipment(s)', 'Pending Return Shipment(s)', 'Shipment(s) Returned To Shipper', 'Cancelled Shipment(s)']
                             },
-                            color: ['#535BE2', '#7B1FA2', '#4BBFBF', '#d6a42a', '#AF65AC', '#2A3A82', '#1EC481', '#9A5C45', '#6C3C3C', '#02870C','#FF0000'],
+                            color: ['#535BE2', '#168DEE', '#7B1FA2', '#4BBFBF', '#d6a42a', '#AF65AC', '#2A3A82', '#1EC481', '#9A5C45', '#6C3C3C', '#02870C','#FF0000'],
 
                             xAxis: [{
                                 type: 'category',
@@ -801,6 +801,11 @@
                                 type: 'value'
                             }],
                             series: [
+                                {
+                                    name: 'Booked Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['booked']
+                                },
                                 {
                                     name: 'Arrived Shipment(s)',
                                     type: 'line',
