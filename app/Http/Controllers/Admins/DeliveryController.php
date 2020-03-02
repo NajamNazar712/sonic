@@ -2336,6 +2336,9 @@ class DeliveryController extends Controller
                 return redirect()->back()->with('error', 'Delivery note not found!');
             }
         }
+        else{
+            return redirect()->back()->with('error', 'Shipments not found!');
+        }
         }
         
 
