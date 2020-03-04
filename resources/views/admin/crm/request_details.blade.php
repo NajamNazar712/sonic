@@ -603,6 +603,7 @@
                                             <input type="text" name="tracking_number" class="form-control tracking_number"
                                                    placeholder="Tracking Number*" data-tags-input-name="tracking_number"
                                                    data-rule-required="true" data-msg-required="Tracking Number is required">
+                                            <input type="hidden" name="tracking_number" id="tracking_number" value="">
                                         </fieldset>
                                     </div>
                                 </div>
@@ -1235,7 +1236,7 @@
                         var product_cost = $('#claim_product_cost').val();
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
-                        // $('#tracking_number').val( $('.tracking_number').val());
+                        $('#tracking_number').val(tracking_number);
                         // $('#case_nature_id').val(case_nature_id);
                         // $('#complaint_id').val(case_nature_claim_id);
                         var formData = new FormData($('#edit_request_form')[0]);
