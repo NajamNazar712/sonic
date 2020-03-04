@@ -2938,7 +2938,7 @@ class ShipperShipmentBookController extends Controller
                         <img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto">
                         <div class="row no-gutters locations">
                             <span class="col-6 text-left">'. $shipment->pickup_address->city->name .'</span>
-                            <span class="col-6 text-right">'. $shipment->consignee_city->name .'</span>
+                            <span class="col-6 text-right">'. $shipment->consignee_city->hub_city->name . ' (' . $shipment->consignee_city->name . ')' . '</span>
                         </div>
                         <span class="d-block">' . implode(' ', str_split('92' . str_replace('-', '', ltrim($shipment->consignee_phone_number_1, '0')))) . '</span>
                     </div>
