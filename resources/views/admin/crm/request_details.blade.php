@@ -593,8 +593,7 @@
                         </button>
                     </div>
                     <div class="modal-body text-center">
-                        <form id="edit_request_form" method="post">
-                            @method('POST')
+                        <form id="edit_request_form" method="post" enctype="multipart/form-data">
                             @csrf
                             <input type="text" name="request_id" id="request_id" class="hidden" value="{{$crm_details->id}}">
                             <div class="container">
@@ -653,6 +652,39 @@
                                         <div class="col-8">
                                             <fieldset class="form-group">
                                                 <textarea class="form-control" name="description" id="description" rows="5" placeholder="Enter Description Here...">{{$crm_details->description}}</textarea>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="claims d-none" id="request_claims">
+                                    <input type="hidden" name="case_nature_id" id="case_nature_id">
+                                    <input type="hidden" name="complaint_id" id="complaint_id">
+                                    <input type="hidden" name="channel_id" id="channel_id">
+                                    <div class="row justify-content-center">
+                                        <div class="col-8">
+                                            <fieldset class="form-group">
+                                                <select name="case_nature_claim" id="case_nature_claim" class="form-control select2">
+                                                    @foreach($case_nature_type_claims as $claim)
+                                                        <option value="{{$claim->id}}">{{$claim->type}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-8">
+                                            <fieldset class="form-group">
+                                                <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-8 text-left">
+                                            <fieldset class="form-group">
+                                                <label for="product_picture"><b>Product Picture:</b></label>
+                                                <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-8 text-left">
+                                            <fieldset class="form-group">
+                                                <label for="invoice_picture"><b>Invoice Picture:</b></label>
+                                                <input class="form-control form-control-sm" type="file" name="invoice_picture" id="invoice_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                             </fieldset>
                                         </div>
                                     </div>
@@ -761,6 +793,15 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
 
             {{--$('#valid').on('click', function (e) {--}}
             {{--e.preventDefault();--}}
@@ -823,11 +864,20 @@
                     $('#description_div').removeClass('d-none');
                     $('#request_feedback').addClass('d-none');
                     $('#editRequest').removeClass('d-none');
+                    $('#request_claims').addClass('d-none');
                 }else if(id === 2){
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').removeClass('d-none');
                     $('#description_div').removeClass('d-none');
                     $('#request_feedback').addClass('d-none');
+                    $('#editRequest').removeClass('d-none');
+                    $('#request_claims').addClass('d-none');
+                } else if(id === 4){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                    $('#request_feedback').addClass('d-none');
+                    $('#request_claims').removeClass('d-none');
+                    $('#description_div').addClass('d-none');
                     $('#editRequest').removeClass('d-none');
                 }else{
                     $('#request_complaints').addClass('d-none');
@@ -838,6 +888,12 @@
             });$('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Complaint Type",
+                allowClear:true,
+                dropdownParent:$('#edit_request_form')
+            });
+            $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Claim Type",
                 allowClear:true,
                 dropdownParent:$('#edit_request_form')
             });
@@ -1086,91 +1142,161 @@
                 var case_nature_id = parseInt($('#case_nature_select').val());
                 var tracking_number = $('.tracking_number').val();
                 var nature_flag = true;
-                if(case_nature_id === 1) {
-                    var case_nature_complaint_id = $('#case_nature_complaints').val();
-                    var description = $('#description').val();
-                    if (!case_nature_complaint_id) {
-                        nature_flag = false;
-                        var error = "Please select Complaint type!";
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    if (!description) {
-                        nature_flag = false;
-                        var error = "Please Enter Description!";
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    if(!tracking_number){
-                        nature_flag = false;
-                        var error = "Tracking Number Required!";
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                }
-                else if(case_nature_id === 2){
-                    var case_nature_complaint_id = $('#case_nature_requests').val();
-                    var description = $('#description').val();
-                    if(!case_nature_complaint_id){
-                        nature_flag = false;
-                        var error = "Please select Request type!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                    if (!description) {
-                        nature_flag = false;
-                        var error = "Please Enter Description!";
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    if(!tracking_number){
-                        nature_flag = false;
-                        var error = "Tracking Number Required!";
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                }
-                if(nature_flag){
-                    $('#editRequest').attr('disabled',true);
-                    $.ajax({
-                        url: '{!! route('admin.crm.request.edit') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'tracking_number': $('.tracking_number').val(),
-                            'request_id': $('#request_id').val(),
-                            'case_nature_id' : case_nature_id,
-                            'complaint_id' : case_nature_complaint_id,
-                            'description' : description
+                if(case_nature_id === 1 || case_nature_id === 2){
+                    if(case_nature_id === 1) {
+                        var case_nature_complaint_id = $('#case_nature_complaints').val();
+                        var description = $('#description').val();
+                        if (!case_nature_complaint_id) {
+                            nature_flag = false;
+                            var error = "Please select Complaint type!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
                         }
-                    })
-                        .done(function(data) {
-                            if(data.status == 0){
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
-                                setTimeout(function(){
-                                    window.location.reload(1);
-                                }, 1500);
+                        if (!description) {
+                            nature_flag = false;
+                            var error = "Please Enter Description!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if(!tracking_number){
+                            nature_flag = false;
+                            var error = "Tracking Number Required!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                    else if(case_nature_id === 2){
+                        var case_nature_complaint_id = $('#case_nature_requests').val();
+                        var description = $('#description').val();
+                        if(!case_nature_complaint_id){
+                            nature_flag = false;
+                            var error = "Please select Request type!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        if (!description) {
+                            nature_flag = false;
+                            var error = "Please Enter Description!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if(!tracking_number){
+                            nature_flag = false;
+                            var error = "Tracking Number Required!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                    if(nature_flag){
+                        $('#editRequest').attr('disabled',true);
+                        $.ajax({
+                            url: '{!! route('admin.crm.request.edit') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'tracking_number': $('.tracking_number').val(),
+                                'request_id': $('#request_id').val(),
+                                'case_nature_id' : case_nature_id,
+                                'complaint_id' : case_nature_complaint_id,
+                                'description' : description
                             }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
+                        })
+                            .done(function(data) {
+                                if(data.status == 0){
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                    setTimeout(function(){
+                                        window.location.reload(1);
+                                    }, 1500);
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
 
-                            $('#editRequestModal').modal('hide');
-                            $('#editRequest').attr('disabled',false);
-                        });
+                                $('#editRequestModal').modal('hide');
+                                $('#editRequest').attr('disabled',false);
+                            });
+                    }
                 }
+                    else if(case_nature_id === 4){
+                        var nature_flag = true;
+                        var case_nature_claim_id = $('#case_nature_claim').val();
+                        var product_cost = $('#claim_product_cost').val();
+                        var check_product_picture = $('#product_picture').val();
+                        var check_invoice_picture = $('#invoice_picture').val();
+                        // $('#tracking_number').val( $('.tracking_number').val());
+                        // $('#case_nature_id').val(case_nature_id);
+                        // $('#complaint_id').val(case_nature_claim_id);
+                        var formData = new FormData($('#edit_request_form')[0]);
+                        if(!case_nature_claim_id){
+                            nature_flag = false;
+                            var error = "Please select Claim type!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        if(!check_product_picture){
+                            nature_flag = false;
+                            var error = "Please attach Product Picture!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        if(!product_cost){
+                            nature_flag = false;
+                            var error = "Please enter Product Cost!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        if(!check_invoice_picture){
+                            nature_flag = false;
+                            var error = "Please attach Invoice Picture!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        if(!tracking_number){
+                            nature_flag = false;
+                            var error = "Tracking Number Required!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if(nature_flag){
+                            $('#editRequestModal').attr('disabled',true);
+                            $.ajax({
+                                url: '{!! route('admin.crm.request.edit') !!}',
+                                method: 'POST',
+                                enctype: 'multipart/form-data',
+                                data: formData,
+                                dataType: 'json',
+                                processData: false,
+                                contentType: false,
+                            })
+                                .done(function(data) {
+                                    if(data.status == 0){
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                        setTimeout(function(){
+                                            window.location.reload(1);
+                                        }, 1500);
+                                    }
+                                    else {
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                    $('#editRequestModal').modal('hide');
+                                    $('#editRequest').attr('disabled',false);
+                                });
+                        }
+
+                    }
             });
             $('#editRequestModal').on('hide.bs.modal', function (e) {
                 $('#edit_request_form')[0].reset();
@@ -1181,13 +1307,16 @@
                 $('#request_complaints').addClass('d-none');
                 $('#request_service').addClass('d-none');
                 $('#description_div').addClass('d-none');
-
+                $('#request_claims').addClass('d-none');
+                $('#case_nature_claim').val('').trigger('change');
+                $('#claim_channel').val('').trigger('change');
+                $('#claim_product_cost').val('');
             });
         });
 
         $('#valid_form').on('submit', function (e) {
             blockPagePermanently();
-        })
+        });
         $('#invalid_form').on('submit', function (e) {
             blockPagePermanently();
         })
