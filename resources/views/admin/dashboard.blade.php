@@ -28,7 +28,7 @@
                   </div>
               </div>
               <div class="col-3">
-                  <div class="card bg-gradient-directional-primary pull-up">
+                  <div class="card bg-gradient-directional-booked_shipments pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -45,7 +45,7 @@
                   </div>
               </div>
               <div class="col-3">
-                  <div class="card bg-gradient-directional-info pull-up">
+                  <div class="card bg-gradient-directional-arrived_shipments pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -62,7 +62,7 @@
                   </div>
               </div>
               <div class="col-3">
-                  <div class="card bg-gradient-directional-purple pull-up">
+                  <div class="card bg-gradient-directional-in_transit pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -151,7 +151,7 @@
           </div>
             <div class="row justify-content-center">
               <div class="col-3">
-                  <div class="card bg-gradient-directional-success pull-up">
+                  <div class="card bg-gradient-directional-delivered pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -222,7 +222,7 @@
           </div>
             <div class="row justify-content-center">
               <div class="col-3">
-                  <div class="card bg-gradient-directional-red pull-up">
+                  <div class="card bg-gradient-directional-cancelled_shipments pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -592,32 +592,52 @@
         .small-calender-icon{
             font-size: 17px !important;
         }
+        .bg-gradient-directional-booked_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-arrived_shipments {
+            background-image: linear-gradient(45deg, #074077, #2fbef5);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-in_transit {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
+        }
         .bg-gradient-directional-destination {
-            background-image: linear-gradient(45deg, #4BBFBF, #04FEFE );
+            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
             background-repeat: repeat-x;
         }
         .bg-gradient-directional-out_for_delivery {
-            background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
+            background-image: linear-gradient(45deg, #ff9819, #fff824);
             background-repeat: repeat-x;
         }
         .bg-gradient-directional-pending_shipments {
-            background-image: linear-gradient(45deg, #AF65AC , #FA47AE);
+            background-image: linear-gradient(45deg, #39546d , #90929a);
             background-repeat: repeat-x;
         }
         .bg-gradient-directional-pending_confirmation {
-            background-image: linear-gradient(45deg, #2A3A82, #5573FC);
+            background-image: linear-gradient(45deg, #6a1fa2 , #ff4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-delivered {
+            background-image: linear-gradient(45deg, #076500, #11f118);
             background-repeat: repeat-x;
         }
         .bg-gradient-directional-return_confirm {
-            background-image: linear-gradient(45deg, #9A5C45, #FC9A75);
+            background-image: linear-gradient(45deg, #ff0c0c, #ff9191);
             background-repeat: repeat-x;
         }
         .bg-gradient-directional-pending_return {
-            background-image: linear-gradient(45deg, #6C3C3C , #B27171);
+            background-image: linear-gradient(45deg, #7d491c  , #e0b668de);
             background-repeat: repeat-x;
         }
         .bg-gradient-directional-return_delivered {
-            background-image: linear-gradient(45deg, #02870C, #4BF958);
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-cancelled_shipments {
+            background-image: linear-gradient(45deg, #ff6a00, #ffb74c);
             background-repeat: repeat-x;
         }
         .selectize-control {
@@ -786,7 +806,7 @@
                             legend: {
                                 data: ['Booked Shipment(s)', 'Arrived Shipment(s)', 'In Transit Shipment(s)', 'Shipment(s) At Destination', 'Out for Delivery Shipment(s)', 'Pending Shipment(s)', 'Pending Confirmation Shipment(s)', 'Delivered Shipment(s)', 'Returned Confirm Shipment(s)', 'Pending Return Shipment(s)', 'Shipment(s) Returned To Shipper', 'Cancelled Shipment(s)']
                             },
-                            color: ['#535BE2', '#168DEE', '#7B1FA2', '#4BBFBF', '#d6a42a', '#AF65AC', '#2A3A82', '#1EC481', '#9A5C45', '#6C3C3C', '#02870C','#FF0000'],
+                            color: ['#5e187b', '#074077', '#535BE2', '#027d8a', '#ff9819', '#39546d', '#6a1fa2', '#076500', '#ff0c0c', '#7d491c', '#02c123','#ff6a00'],
 
                             xAxis: [{
                                 type: 'category',
