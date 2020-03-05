@@ -588,12 +588,14 @@ class APIController extends Controller
 
           $check = NonServiceArea::pluck('name')->toArray();
           $msg_string = null;
+          $keywords = array();
           $str_arr = null;
           $str_arr = preg_split("/[ ,]+/", $consignee_address);
           foreach ($check as $nsa) {
               foreach ($str_arr as $arr_value) {
                   if (strtolower($nsa) == strtolower($arr_value)) {
                       $con_nsa = $arr_value;
+                      $keywords[] = $arr_value;
                       if ($msg_string != null) {
                           $msg_string = $msg_string . ', ' . $arr_value;
                       } else {
@@ -606,7 +608,7 @@ class APIController extends Controller
           if ($msg_string != null) {
               NotificationsController::send(32, $shipment_id, $msg_string);
               $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
+              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.', 'non_service_area_keywords' => $keywords]);
           }
           else{
               NotificationsController::send(2, $shipment_id);

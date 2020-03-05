@@ -79,7 +79,7 @@ class ProcessSMS implements ShouldQueue
 
                 $sms->save();
 
-                $to = 'muhammad.yousuf@trax.pk';
+                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] SMS API';
                 $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
 
@@ -106,7 +106,7 @@ class ProcessSMS implements ShouldQueue
 
                 $difference = $last->diffInMinutes($now);
 
-                if ($difference >= 30) {
+                if ($difference >= 25) {
                     $generate_session_id = TRUE;
                 }
             }
@@ -169,7 +169,7 @@ class ProcessSMS implements ShouldQueue
             }
 
             if ($error) {
-                $to = 'muhammad.yousuf@trax.pk';
+                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] SMS API';
                 $body = 'Error in Generate Session ID SMS API.<br/>Response Received: ' . json_encode($xml);
 
@@ -191,7 +191,7 @@ class ProcessSMS implements ShouldQueue
             }
         }
         catch (RequestException $e) {
-            $to = 'muhammad.yousuf@trax.pk';
+            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] SMS API';
             $body = 'Error in Generate Session ID SMS API.<br/>No Response';
 
@@ -205,7 +205,7 @@ class ProcessSMS implements ShouldQueue
         }
     }
 
-    private function telenor_sms($base_uri, $sms) {
+    private function telenor_sms($base_uri, $sms, $retry = FALSE) {
         $telenor = Telenor::latest()->first();
 
         if ($telenor) {
@@ -242,12 +242,27 @@ class ProcessSMS implements ShouldQueue
                         $error = TRUE;
                     }
                 }
+                else if ($xml['data'] == 'Error 102') {
+                    if (!$retry) {
+                        $result = $this->telenor_generate_session_id($base_uri, $sms);
+
+                        if ($result) {
+                            $this->telenor_sms($base_uri, $sms, TRUE);
+                        }
+                        else {
+                            $error = TRUE;
+                        }
+                    }
+                    else {
+                        $error = TRUE;
+                    }
+                }
                 else {
                     $error = TRUE;
                 }
 
                 if ($error) {
-                    $to = 'muhammad.yousuf@trax.pk';
+                    $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                     $subject = '[Error] SMS API';
                     $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($xml);
 
@@ -263,7 +278,7 @@ class ProcessSMS implements ShouldQueue
                 }
             }
             catch (RequestException $e) {
-                $to = 'muhammad.yousuf@trax.pk';
+                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] SMS API';
                 $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>No Response';
 
@@ -275,7 +290,7 @@ class ProcessSMS implements ShouldQueue
             }
         }
         else {
-            $to = 'muhammad.yousuf@trax.pk';
+            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] SMS API';
             $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>No Entry';
 
@@ -312,7 +327,7 @@ class ProcessSMS implements ShouldQueue
                 }
 
                 if ($error) {
-                    $to = 'muhammad.yousuf@trax.pk';
+                    $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                     $subject = '[Error] SMS API';
                     $body = 'Error in Ping SMS API.<br/>Response Received: ' . json_encode($xml);
 
@@ -320,7 +335,7 @@ class ProcessSMS implements ShouldQueue
                 }
             }
             catch (RequestException $e) {
-                $to = 'muhammad.yousuf@trax.pk';
+                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] SMS API';
                 $body = 'Error in Ping SMS API.<br/>No Response';
 
@@ -328,7 +343,7 @@ class ProcessSMS implements ShouldQueue
             }
         }
         else {
-            $to = 'muhammad.yousuf@trax.pk';
+            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] SMS API';
             $body = 'Error in Ping SMS API.<br/>No Entry';
 
