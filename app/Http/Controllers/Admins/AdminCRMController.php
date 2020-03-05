@@ -295,11 +295,12 @@ class AdminCRMController extends Controller
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
 
         $sale_person = SalePersonTag::where('user_id', $crm_request->shipper_id)->where('status', 0)->first();
 
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -1825,19 +1826,58 @@ class AdminCRMController extends Controller
             }
             $crm_check = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $request->case_nature_id)->where('case_nature_type_id', $request->complaint_id)->first();
             if($crm_check == null){
-                CrmRequest::where('id', $crm_request_id)->update([
-                    'shipment_id' => $shipment_id,
-                    'case_nature_id' => $request->case_nature_id,
-                    'case_nature_type_id' => $request->complaint_id,
-                    'description' => $request->description,
-                ]);
-                CrmRequestCaseNatureAndTypeHistory::create([
-                    'crm_request_id' => $crm_request_id,
-                    'case_nature_id' => $crm_details['case_nature_id'],
-                    'case_nature_type_id' => $crm_details['case_nature_type_id'],
-                    'description' => $crm_details['description'],
-                    'edited_by' => Auth::id()
-                ]);
+                if($request->case_nature_select == 4){
+                    if($request->hasFile('product_picture')){
+                        $filename = 'claim_product_' . $crm_request_id . '.png';
+                        $file = $request->file('product_picture');
+                        Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                        $product_picture = $filename;
+                    }
+                    else{
+                        $product_picture = null;
+                    }
+
+                    if($request->hasFile('invoice_picture')){
+                        $filename = 'claim_invoice_' . $crm_request_id . '.png';
+                        $file = $request->file('invoice_picture');
+                        Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                        $invoice_picture = $filename;
+                    }
+                    else{
+                        $invoice_picture = null;
+                    }
+
+                    CrmRequest::where('id', $crm_request_id)->update([
+                        'shipment_id' => $shipment_id,
+                        'case_nature_id' => $request->case_nature_select,
+                        'case_nature_type_id' => $request->case_nature_claim,
+                        'product_cost' => $request->claim_product_cost,
+                        'product_picture' => $product_picture,
+                        'invoice_picture' => $invoice_picture,
+                    ]);
+                    CrmRequestCaseNatureAndTypeHistory::create([
+                        'crm_request_id' => $crm_request_id,
+                        'case_nature_id' => $crm_details['case_nature_id'],
+                        'case_nature_type_id' => $crm_details['case_nature_type_id'],
+                        'description' => null,
+                        'edited_by' => Auth::id()
+                    ]);
+                }
+                else{
+                    CrmRequest::where('id', $crm_request_id)->update([
+                        'shipment_id' => $shipment_id,
+                        'case_nature_id' => $request->case_nature_id,
+                        'case_nature_type_id' => $request->complaint_id,
+                        'description' => $request->description,
+                    ]);
+                    CrmRequestCaseNatureAndTypeHistory::create([
+                        'crm_request_id' => $crm_request_id,
+                        'case_nature_id' => $crm_details['case_nature_id'],
+                        'case_nature_type_id' => $crm_details['case_nature_type_id'],
+                        'description' => $crm_details['description'],
+                        'edited_by' => Auth::id()
+                    ]);
+                }
                 return ['status' => 0, 'success' => 'Request Edited Successfully'];
             }
             else{

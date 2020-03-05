@@ -1377,7 +1377,7 @@
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control @if(isset($e_discountCharges[2][0]) && $e_discountCharges[2][0]->title != '' && $ol_discount_title != $e_ol_discount_title) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[2][0]) && $ol_discount_title != $e_ol_discount_title) {{$e_ol_discount_title}} @endif" data-rule-required="true" data-msg-required="This field is required" {{$e_ol_discount_title}} name="ol_discount_title" value="{{$ol_discount_title}}" />
+                                                    <input type='text' class="form-control @if(isset($e_discountCharges[2][0]) && $e_discountCharges[2][0]->title != '' && $ol_discount_title != $e_ol_discount_title) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[2][0]) && $ol_discount_title != $e_ol_discount_title) {{$e_ol_discount_title}} @endif" data-rule-required="true" data-msg-required="This field is required" {{$ol_discount_title_switch}} name="ol_discount_title" value="{{$ol_discount_title}}" >
                                                 </div>
 
                                             </div>
