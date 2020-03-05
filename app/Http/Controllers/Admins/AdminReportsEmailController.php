@@ -765,6 +765,7 @@ class AdminReportsEmailController extends Controller
                             $cargo_consignment_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment->id)->count();
                             $overnight_overland_cargo_array[] = ['serial' => $serial, 'Cargo#' => str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT), 'Origin' => $origin->name, 'Destination' => $cargo_consignment->destination_hub->name, 'No. of Parcels' => $cargo_consignment_shipments, 'Mode of Shipment' => $shipping_mode, 'Vendor' => $cargo_consignment->transport_mode_vendor->name, 'Cargo Created Date' => $cargo_consignment->created_at];
                             $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $cargo_consignment->created_at);
+                            $dates = array();
                             while ($date_from->lte($now)) {
                                 if ($date_from->isWeekday() || $date_from->isSaturday()) {
                                     $dates[] = $date_from->copy()->format('Y-m-d');

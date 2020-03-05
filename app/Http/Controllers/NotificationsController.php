@@ -4366,12 +4366,6 @@ class NotificationsController extends Controller
                     if (strpos($body, '[preview]') !== FALSE) {
                         $body = str_replace('[preview]', $details, $body);
                     }
-//                    if($reference_1_id == 1){
-//                        $file = Storage::disk('public')->url('/reports/overnight_cargo_report_' . $date . '.xlsx');
-//                    }
-//                    else{
-//                        $file = Storage::disk('public')->url('/reports/overland_cargo_report_' . $date . '.xlsx');
-//                    }
 
                     $link = '<a href="' . $reference_2_id . '" target="_blank"><u>Report</u></a>';
 
@@ -4381,10 +4375,10 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $admins =Admin::where('id', 7)->where('status', 1);
+                    $admins =Admin::whereIn('id', [8, 37])->where('status', 1);
 
 
-                    $cc_admins = Admin::whereIn('id', [8, 3]);
+                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
                     if ($admins->exists()) {
                         $to = $admins->distinct('id')->pluck('email')->toArray();
                     }
