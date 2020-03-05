@@ -1217,6 +1217,121 @@ class ShipperShipmentBookController extends Controller
                     $shipment_details .= $table_end;
                 }
             }
+            if($shipment->user->logo_status == 1){
+                $logo_invoice = '<div class="invoice p-1">
+                    <table class="table table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="text-left align-middle">
+                            <img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1">
+                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
+                            <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
+                            <div><strong>NTN:</strong> 7930679-5</div>
+                          </td>
+                          <td class="text-center align-middle color primary"><strong>INVOICE</strong></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row align-items-start justify-content-between summary">
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Sender Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>'. $shipment->pickup_address->poc .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>'. $shipment->pickup_address->phone .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border invoice">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary"><strong>Tracking No.</strong></td>
+                                    <td>'. $shipment->tracking_number .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row align-items-start justify-content-between summary">
+                    <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Receiver Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>'. $shipment->consignee_name .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Address</strong></td>
+                                    <td>'. $shipment->consignee_address .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>'. $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border invoice">
+                              <tbody>
+                                <tr class="color primary">
+                                    <td colspan="4"><strong>Shipment Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Shipping Mode</strong></td>
+                                    <td>'. $shipment->shipping_mode->mode .'</td>
+                                    <td class="color secondary"><strong>Order ID</strong></td>
+                                    <td>'. $shipment->order_id .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Origin</strong></td>
+                                    <td>'. $shipment->pickup_address->city->name .'</td>
+                                    <td class="color secondary"><strong>Destination</strong></td>
+                                    <td>'. $shipment->consignee_city->name .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Booking Date</strong></td>
+                                    <td>'. $shipment->created_at->format('Y-m-d H:i:s') .'</td>
+                                    <td class="color secondary"><strong>Weight</strong></td>
+                                    <td>'. $shipment->actual_weight .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                        <div class="col-12">
+                            <table class="table table-sm table-bordered border invoice">
+                                  <tbody>
+                                    <tr>
+                                      <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                                      <td class="color secondary border twice-top"><strong>Type</strong></td>
+                                      <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                                      <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                      <td class="border twice-top">' . $item->quantity . '</td>
+                                    </tr>
+                                    <tr>
+                                      <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                                      <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+            ';
+            }
         }
 
         $html .= $shipment_details;
