@@ -341,7 +341,10 @@
 
 									<div id="payment_info" class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Payment Information</h4>
-
+										<div id="cod_breakup" class="form-group text-center p-1 border border-light rounded">
+											<label class="d-block">COD Breakup</label>
+											<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
+										</div>
 										<div class="form-group input-group">
 											<div class="input-group-prepend">
 												<span class="input-group-text">Rs</span>
