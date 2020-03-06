@@ -38,6 +38,6 @@ class AccountReconciliationReportCurrent extends Command
      */
     public function handle()
     {
-        dd(AccountReconciliationController::reconciliation_current());
+        AccountReconciliationController::reconciliation_current();
     }
 }
