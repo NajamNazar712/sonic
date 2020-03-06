@@ -864,6 +864,9 @@
                                     @if (session('role_id') == 1 || in_array(269, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.return_delivered_to_shipper_email_cut_off_time.index')}}">Return Delivered To Shipper Email Cut-Off Time</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(311, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.overnight_overland_cargo_report.index')}}">Overnight Overland Cargo Report</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

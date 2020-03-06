@@ -4,488 +4,577 @@
 
 @section('content')
 <div class="app-content content">
-    <div class="content-wrapper">
-      <div class="content-header row">
-      </div>
-      <div class="content-body">
-        <!-- Active Orders -->
-          <div class="row">
-              <div class="col-3">
-                  <div class="card pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-grid font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-right">
-                                      <h3 class="">{{$stats['total']}}</h3>
-                                      <span>Total Booked Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="col-3">
-                  <div class="card bg-gradient-directional-primary pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-hourglass text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['booked']}}</h3>
-                                      <span>Pending Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="col-3">
-                  <div class="card bg-gradient-directional-info pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-layers text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['arrived']}}</h3>
-                                      <span>Arrived Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="col-3">
-                  <div class="card bg-gradient-directional-purple pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-direction text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['in_transit']}}</h3>
-                                      <span>In Transit Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <!-- Active Orders -->
+                <div class="row">
+                    <div class="col-3">
+                        <div class="card pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-grid font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-right">
+                                            <h3 class="">{{$stats['total']}}</h3>
+                                            <span>Total Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-booked_shipments pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['booked']}}</h3>
+                                            <span>Booked Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-arrived_shipments pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-layers text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['arrived']}}</h3>
+                                            <span>Arrived Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-in_transit pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-direction text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['in_transit']}}</h3>
+                                            <span>In Transit Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-destination pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="ft-map-pin text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['destination']}}</h3>
+                                            <span>Shipment(s) At Destination</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-out_for_delivery pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-login text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['out_for_delivery']}}</h3>
+                                            <span>Out for Delivery Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-pending_shipments pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-shuffle text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['pending_shipments']}}</h3>
+                                            <span>Pending Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-pending_confirmation pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="ft-alert-circle text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['confirmation_pending']}}</h3>
+                                            <span>Pending Confirmation Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-delivered pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-check text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['delivered']}}</h3>
+                                            <span>Delivered Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-return_confirm pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-loop text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['return_confirm']}}</h3>
+                                            <span>Returned Confirmed Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-pending_return pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-directions text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['pending_return']}}</h3>
+                                            <span>Pending Return Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-return_delivered pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="la la-refresh text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['return_delivered']}}</h3>
+                                            <span>Shipment(s) Returned To Shipper</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="row justify-content-center">
-              <div class="col-3">
-                  <div class="card bg-gradient-directional-success pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-check text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['delivered']}}</h3>
-                                      <span>Delivered Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="col-3">
-                  <div class="card bg-gradient-directional-warning pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-loop text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['return']}}</h3>
-                                      <span>Returned Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="col-3">
-                  <div class="card bg-gradient-directional-inprocess pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-shuffle text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['pending']}}</h3>
-                                      <span>In Process Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="col-3">
-                  <div class="card bg-gradient-directional-red pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-close text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['canceled']}}</h3>
-                                      <span>Cancelled Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-          <div class="row mt-2">
-              <div class="card col-12">
-                  <div class="card-content collapse show">
-                      <div class="card-body">
-                          <div id="shipment_statistics_chart" class="height-300 echart-container d-none"></div>
-                          <div class="row">
-                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
-                                  <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
-                              </div>
-                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
-                                  <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
-                              </div>
-                              <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
-                                  <select name="graph_destination" id="graph_destination" class="select2 form-control">
-                                      @foreach($cities as $city)
-                                          <option value="{{$city->id}}">{{$city->name}}</option>
-                                      @endforeach
-                                  </select>
-                              </div>
-                              <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
-                                  <select name="graph_shipper" id="graph_shipper" class="select2 form-control">
-                                      @foreach($shippers as $shipper)
-                                          <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                      @endforeach
-                                  </select>
-                              </div>
-                              <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
-                                  <button type="button" class="btn round btn-primary statistics_search">Search <i class="ft-bar-chart"></i></button>
-                              </div>
-                          </div>
+                <div class="col-3">
+                    <div class="card bg-gradient-directional-cancelled_shipments pull-up">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="align-self-center">
+                                        <i class="icon-close text-white font-large-2 float-left"></i>
+                                    </div>
+                                    <div class="media-body text-white text-right">
+                                        <h3 class="text-white">{{$stats['canceled']}}</h3>
+                                        <span>Cancelled Shipment(s)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="card col-12">
+                    <div class="card-content collapse show">
+                        <div class="card-body">
+                            <div id="shipment_statistics_chart" class="height-300 echart-container d-none"></div>
+                            <div class="row">
+                                <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
+                                    <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
+                                    <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
+                                </div>
+                                <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
+                                    <select name="graph_destination" id="graph_destination" class="select2 form-control">
+                                        @foreach($cities as $city)
+                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
+                                    <select name="graph_shipper" id="graph_shipper" class="select2 form-control">
+                                        @foreach($shippers as $shipper)
+                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
+                                    <button type="button" class="btn round btn-primary statistics_search">Search <i class="ft-bar-chart"></i></button>
+                                </div>
+                            </div>
 
-                      </div>
-                  </div>
-              </div>
-          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-          {{--@if (session('role_id') == 1 || session('department_id') == 6)--}}
+            {{--@if (session('role_id') == 1 || session('department_id') == 6)--}}
             {{--<div class="row mt-2">--}}
-              {{--<div class="card col-12">--}}
-                  {{--<div class="card-content collapse show">--}}
-                      {{--<div class="card-body">--}}
-                          {{--<div class="row mb-1">--}}
-                              {{--<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">--}}
-                                  {{--<input type="text" name="from_date_operations" class="form-control chart_date bg-primary border-primary white rounded-right" id="from_date_operations" placeholder="Date From" data-value="{{$operation_dates['from']}}">--}}
-                              {{--</div>--}}
-                              {{--<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">--}}
-                                  {{--<input type="text" name="to_date_operations" class="form-control chart_date bg-primary border-primary white rounded-right" id="to_date_operations" placeholder="Date To" data-value="{{$operation_dates['to']}}">--}}
-                              {{--</div>--}}
-                              {{--<div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">--}}
-                                  {{--<select name="search_hub" id="search_hub" class="select2 form-control">--}}
-                                      {{--@foreach($cities as $city)--}}
-                                          {{--@if($city->id == $default_hub_id)--}}
-                                              {{--<option value="{{$city->id}}" selected="selected">{{$city->name}}</option>--}}
-                                          {{--@else--}}
-                                              {{--<option value="{{$city->id}}">{{$city->name}}</option>--}}
-                                          {{--@endif--}}
-                                      {{--@endforeach--}}
-                                  {{--</select>--}}
-                              {{--</div>--}}
-                              {{--<div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">--}}
-                                  {{--<select name="search_service_type" id="search_service_type" class="select2 form-control">--}}
-                                      {{--@foreach($service_types as $service_type)--}}
-                                          {{--@if($city->id == 1)--}}
-                                              {{--<option value="{{$service_type->id}}" selected="selected">{{$service_type->booking_type}}</option>--}}
-                                          {{--@else--}}
-                                              {{--<option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>--}}
-                                          {{--@endif--}}
-                                      {{--@endforeach--}}
-                                  {{--</select>--}}
-                              {{--</div>--}}
-                              {{--<div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">--}}
-                                  {{--<button type="button" class="btn round btn-primary operations_forecast_search">Search <i class="ft-bar-chart"></i></button>--}}
-                              {{--</div>--}}
-                          {{--</div>--}}
-                          {{--<div class="text-right mt-2">--}}
-                              {{--<h5>--}}
-                                  {{--<b>--}}
-                                      {{--Last updated at:--}}
-                                  {{--</b>--}}
-                                  {{--<u>--}}
-                                      {{--@if(!empty($last_updated_at))--}}
-                                        {{--{{$last_updated_at->updated_at}}--}}
-                                      {{--@else--}}
-                                        {{--0000-00-00 00:00:00--}}
-                                      {{--@endif--}}
-                                  {{--</u>--}}
-                              {{--</h5>--}}
-                          {{--</div>--}}
-                          {{--<div class="row">--}}
-                              {{--<div class="div_border" style="width: 50%">--}}
-                                  {{--<div class="text-center mt-1">--}}
-                                      {{--<h3>Operations Incoming Loads Forecast</h3>--}}
-                                  {{--</div>--}}
-                                  {{--<div class="row ml-1 mt-1" style="width: 95%">--}}
-                                      {{--<div id="incoming_table">--}}
-                                          {{--<table class="table table-sm table-bordered datatable" id="datatable_incoming" style="z-index: 3;">--}}
-                                              {{--<thead>--}}
-                                              {{--<tr role="row" class="black">--}}
-                                                  {{--<th class="black text-center border-darken-1">Description</th>--}}
-                                                  {{--<th class="black text-center border-darken-1">Shipments</th>--}}
-                                              {{--</tr>--}}
-                                              {{--</thead>--}}
-                                          {{--</table>--}}
-                                      {{--</div>--}}
-                                      {{--<div id="incoming_chart" class="width-150 mt-1" style="margin-left: 4px">--}}
-                                          {{--<canvas id="myChartincoming" width="10%" height="10%"></canvas>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
+            {{--<div class="card col-12">--}}
+            {{--<div class="card-content collapse show">--}}
+            {{--<div class="card-body">--}}
+            {{--<div class="row mb-1">--}}
+            {{--<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">--}}
+            {{--<input type="text" name="from_date_operations" class="form-control chart_date bg-primary border-primary white rounded-right" id="from_date_operations" placeholder="Date From" data-value="{{$operation_dates['from']}}">--}}
+            {{--</div>--}}
+            {{--<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">--}}
+            {{--<input type="text" name="to_date_operations" class="form-control chart_date bg-primary border-primary white rounded-right" id="to_date_operations" placeholder="Date To" data-value="{{$operation_dates['to']}}">--}}
+            {{--</div>--}}
+            {{--<div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">--}}
+            {{--<select name="search_hub" id="search_hub" class="select2 form-control">--}}
+            {{--@foreach($cities as $city)--}}
+            {{--@if($city->id == $default_hub_id)--}}
+            {{--<option value="{{$city->id}}" selected="selected">{{$city->name}}</option>--}}
+            {{--@else--}}
+            {{--<option value="{{$city->id}}">{{$city->name}}</option>--}}
+            {{--@endif--}}
+            {{--@endforeach--}}
+            {{--</select>--}}
+            {{--</div>--}}
+            {{--<div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">--}}
+            {{--<select name="search_service_type" id="search_service_type" class="select2 form-control">--}}
+            {{--@foreach($service_types as $service_type)--}}
+            {{--@if($city->id == 1)--}}
+            {{--<option value="{{$service_type->id}}" selected="selected">{{$service_type->booking_type}}</option>--}}
+            {{--@else--}}
+            {{--<option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>--}}
+            {{--@endif--}}
+            {{--@endforeach--}}
+            {{--</select>--}}
+            {{--</div>--}}
+            {{--<div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">--}}
+            {{--<button type="button" class="btn round btn-primary operations_forecast_search">Search <i class="ft-bar-chart"></i></button>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--<div class="text-right mt-2">--}}
+            {{--<h5>--}}
+            {{--<b>--}}
+            {{--Last updated at:--}}
+            {{--</b>--}}
+            {{--<u>--}}
+            {{--@if(!empty($last_updated_at))--}}
+            {{--{{$last_updated_at->updated_at}}--}}
+            {{--@else--}}
+            {{--0000-00-00 00:00:00--}}
+            {{--@endif--}}
+            {{--</u>--}}
+            {{--</h5>--}}
+            {{--</div>--}}
+            {{--<div class="row">--}}
+            {{--<div class="div_border" style="width: 50%">--}}
+            {{--<div class="text-center mt-1">--}}
+            {{--<h3>Operations Incoming Loads Forecast</h3>--}}
+            {{--</div>--}}
+            {{--<div class="row ml-1 mt-1" style="width: 95%">--}}
+            {{--<div id="incoming_table">--}}
+            {{--<table class="table table-sm table-bordered datatable" id="datatable_incoming" style="z-index: 3;">--}}
+            {{--<thead>--}}
+            {{--<tr role="row" class="black">--}}
+            {{--<th class="black text-center border-darken-1">Description</th>--}}
+            {{--<th class="black text-center border-darken-1">Shipments</th>--}}
+            {{--</tr>--}}
+            {{--</thead>--}}
+            {{--</table>--}}
+            {{--</div>--}}
+            {{--<div id="incoming_chart" class="width-150 mt-1" style="margin-left: 4px">--}}
+            {{--<canvas id="myChartincoming" width="10%" height="10%"></canvas>--}}
+            {{--</div>--}}
+            {{--</div>--}}
 
-                                  {{--<div class="row ml-1 mt-1" style="width: 95%">--}}
-                                      {{--<div id="delivered_returned_table">--}}
-                                          {{--<table class="table table-sm table-bordered datatable" id="datatable_incoming_delivered_returned" style="z-index: 3;">--}}
-                                              {{--<thead>--}}
-                                              {{--<tr role="row" class="black">--}}
-                                                  {{--<th class="black text-center border-darken-1">Description</th>--}}
-                                                  {{--<th class="black text-center border-darken-1">Shipments</th>--}}
-                                              {{--</tr>--}}
-                                              {{--</thead>--}}
-                                          {{--</table>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
+            {{--<div class="row ml-1 mt-1" style="width: 95%">--}}
+            {{--<div id="delivered_returned_table">--}}
+            {{--<table class="table table-sm table-bordered datatable" id="datatable_incoming_delivered_returned" style="z-index: 3;">--}}
+            {{--<thead>--}}
+            {{--<tr role="row" class="black">--}}
+            {{--<th class="black text-center border-darken-1">Description</th>--}}
+            {{--<th class="black text-center border-darken-1">Shipments</th>--}}
+            {{--</tr>--}}
+            {{--</thead>--}}
+            {{--</table>--}}
+            {{--</div>--}}
+            {{--</div>--}}
 
-                                  {{--<div class="ml-1 mt-4 row height-200">--}}
-                                      {{--<div class="width-300 mt-1">--}}
-                                          {{--<table class="table table-sm table-bordered datatable" id="datatable_incoming_weight_range" style="z-index: 3;">--}}
-                                              {{--<thead style='display:none;'>--}}
-                                              {{--</thead>--}}
-                                          {{--</table>--}}
-                                      {{--</div>--}}
-                                      {{--<div id="incoming_bar_chart" class="width-200">--}}
-                                          {{--<canvas id="mybarchartincoming" height="230px"></canvas>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
+            {{--<div class="ml-1 mt-4 row height-200">--}}
+            {{--<div class="width-300 mt-1">--}}
+            {{--<table class="table table-sm table-bordered datatable" id="datatable_incoming_weight_range" style="z-index: 3;">--}}
+            {{--<thead style='display:none;'>--}}
+            {{--</thead>--}}
+            {{--</table>--}}
+            {{--</div>--}}
+            {{--<div id="incoming_bar_chart" class="width-200">--}}
+            {{--<canvas id="mybarchartincoming" height="230px"></canvas>--}}
+            {{--</div>--}}
+            {{--</div>--}}
 
-                                  {{--<div class="row ml-1 mr-1">--}}
-                                      {{--<div class="col-6">--}}
-                                          {{--<div class="card bg-gradient-directional-info pull-up">--}}
-                                              {{--<div class="card-content">--}}
-                                                  {{--<div class="card-body justify-content-center">--}}
-                                                      {{--<div class="text-white text-center">--}}
-                                                          {{--<h6 class="text-white">Per Rider Loads</h6>--}}
-                                                      {{--</div>--}}
-                                                      {{--<div id="incoming_per_rider_loads_div">--}}
-                                                          {{--<div id="incoming_per_rider_loads" class="text-white text-center">--}}
-                                                            {{--<h4 class="text-white">{{$operation_incoming['per_rider_loads']}}</h4>--}}
-                                                          {{--</div>--}}
-                                                      {{--</div>--}}
-                                                  {{--</div>--}}
-                                              {{--</div>--}}
-                                          {{--</div>--}}
-                                      {{--</div>--}}
-                                      {{--<div class="col-6">--}}
-                                          {{--<div class="card bg-gradient-directional-info pull-up">--}}
-                                              {{--<div class="card-content">--}}
-                                                  {{--<div class="card-body justify-content-center">--}}
-                                                      {{--<div class="text-white text-center">--}}
-                                                          {{--<h6 class="text-white">Day Wise Growth</h6>--}}
-                                                      {{--</div>--}}
-                                                      {{--<div id="incoming_day_wise_growth_div">--}}
-                                                          {{--<div id="incoming_day_wise_growth" class="text-white text-center">--}}
-                                                            {{--<h4 class="text-white">{{$operation_incoming['day_wise_growth']}}</h4>--}}
-                                                          {{--</div>--}}
-                                                      {{--</div>--}}
-                                                  {{--</div>--}}
-                                              {{--</div>--}}
-                                          {{--</div>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
+            {{--<div class="row ml-1 mr-1">--}}
+            {{--<div class="col-6">--}}
+            {{--<div class="card bg-gradient-directional-info pull-up">--}}
+            {{--<div class="card-content">--}}
+            {{--<div class="card-body justify-content-center">--}}
+            {{--<div class="text-white text-center">--}}
+            {{--<h6 class="text-white">Per Rider Loads</h6>--}}
+            {{--</div>--}}
+            {{--<div id="incoming_per_rider_loads_div">--}}
+            {{--<div id="incoming_per_rider_loads" class="text-white text-center">--}}
+            {{--<h4 class="text-white">{{$operation_incoming['per_rider_loads']}}</h4>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--<div class="col-6">--}}
+            {{--<div class="card bg-gradient-directional-info pull-up">--}}
+            {{--<div class="card-content">--}}
+            {{--<div class="card-body justify-content-center">--}}
+            {{--<div class="text-white text-center">--}}
+            {{--<h6 class="text-white">Day Wise Growth</h6>--}}
+            {{--</div>--}}
+            {{--<div id="incoming_day_wise_growth_div">--}}
+            {{--<div id="incoming_day_wise_growth" class="text-white text-center">--}}
+            {{--<h4 class="text-white">{{$operation_incoming['day_wise_growth']}}</h4>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
 
-                                  {{--<div class="row ml-1 mr-1">--}}
-                                      {{--<div class="col-6">--}}
-                                          {{--<div class="card bg-gradient-directional-info pull-up">--}}
-                                              {{--<div class="card-content">--}}
-                                                  {{--<div class="card-body justify-content-center">--}}
-                                                      {{--<div class="text-white text-center">--}}
-                                                          {{--<h6 class="text-white">Heavy Shipments</h6>--}}
-                                                      {{--</div>--}}
-                                                      {{--<div id="incoming_heavy_deliveries_div">--}}
-                                                          {{--<div id="incoming_heavy_deliveries" class="text-white text-center">--}}
-                                                              {{--<h4 class="text-white">{{$operation_incoming['heavy_deliveries']}}</h4>--}}
-                                                          {{--</div>--}}
-                                                      {{--</div>--}}
-                                                  {{--</div>--}}
-                                              {{--</div>--}}
-                                          {{--</div>--}}
-                                      {{--</div>--}}
-                                      {{--<div class="col-6">--}}
-                                          {{--<div class="card bg-gradient-directional-info pull-up">--}}
-                                              {{--<div class="card-content">--}}
-                                                  {{--<div class="card-body justify-content-center">--}}
-                                                      {{--<div class="text-white text-center">--}}
-                                                          {{--<h6 class="text-white">Light Shipments</h6>--}}
-                                                      {{--</div>--}}
-                                                      {{--<div id="incoming_light_deliveries_div">--}}
-                                                          {{--<div id="incoming_light_deliveries" class="text-white text-center">--}}
-                                                              {{--<h4 class="text-white">{{$operation_incoming['light_deliveries']}}</h4>--}}
-                                                          {{--</div>--}}
-                                                      {{--</div>--}}
-                                                  {{--</div>--}}
-                                              {{--</div>--}}
-                                          {{--</div>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
-                              {{--</div>--}}
-                              {{--<div class="float-right div_border" style="width: 49%; margin-left: 1px">--}}
-                                  {{--<div class="text-center mt-1">--}}
-                                      {{--<h3>Operations Outgoing Loads Forecast</h3>--}}
-                                  {{--</div>--}}
+            {{--<div class="row ml-1 mr-1">--}}
+            {{--<div class="col-6">--}}
+            {{--<div class="card bg-gradient-directional-info pull-up">--}}
+            {{--<div class="card-content">--}}
+            {{--<div class="card-body justify-content-center">--}}
+            {{--<div class="text-white text-center">--}}
+            {{--<h6 class="text-white">Heavy Shipments</h6>--}}
+            {{--</div>--}}
+            {{--<div id="incoming_heavy_deliveries_div">--}}
+            {{--<div id="incoming_heavy_deliveries" class="text-white text-center">--}}
+            {{--<h4 class="text-white">{{$operation_incoming['heavy_deliveries']}}</h4>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--<div class="col-6">--}}
+            {{--<div class="card bg-gradient-directional-info pull-up">--}}
+            {{--<div class="card-content">--}}
+            {{--<div class="card-body justify-content-center">--}}
+            {{--<div class="text-white text-center">--}}
+            {{--<h6 class="text-white">Light Shipments</h6>--}}
+            {{--</div>--}}
+            {{--<div id="incoming_light_deliveries_div">--}}
+            {{--<div id="incoming_light_deliveries" class="text-white text-center">--}}
+            {{--<h4 class="text-white">{{$operation_incoming['light_deliveries']}}</h4>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--<div class="float-right div_border" style="width: 49%; margin-left: 1px">--}}
+            {{--<div class="text-center mt-1">--}}
+            {{--<h3>Operations Outgoing Loads Forecast</h3>--}}
+            {{--</div>--}}
 
-                                  {{--<div class="ml-1 row">--}}
-                                      {{--<div class="mt-1 width-300">--}}
-                                          {{--<table class="table table-sm table-bordered datatable" style="z-index: 3;"><thead>--}}
-                                              {{--<tr role="row">--}}
-                                                  {{--<th class="black text-center">Description</th>--}}
-                                                  {{--<th class="black text-center">Numbers</th>--}}
-                                              {{--</tr>--}}
-                                              {{--</thead>--}}
-                                              {{--<tbody id="outgoing_pickups_tbody">--}}
-                                                  {{--<tr id="pickup_request" role="row">--}}
-                                                      {{--<td>Pickup Request</td>--}}
-                                                      {{--<td class="text-center">{{$operation_outgoing_pickups['pickups']}}</td>--}}
-                                                  {{--</tr>--}}
-                                                  {{--<tr id="no_of_shipments" role="row">--}}
-                                                      {{--<td># of Shipments</td>--}}
-                                                      {{--<td class="text-center">{{$operation_outgoing_pickups['no_of_shipments']}}</td>--}}
-                                                  {{--</tr>--}}
-                                              {{--</tbody>--}}
-                                          {{--</table>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
+            {{--<div class="ml-1 row">--}}
+            {{--<div class="mt-1 width-300">--}}
+            {{--<table class="table table-sm table-bordered datatable" style="z-index: 3;"><thead>--}}
+            {{--<tr role="row">--}}
+            {{--<th class="black text-center">Description</th>--}}
+            {{--<th class="black text-center">Numbers</th>--}}
+            {{--</tr>--}}
+            {{--</thead>--}}
+            {{--<tbody id="outgoing_pickups_tbody">--}}
+            {{--<tr id="pickup_request" role="row">--}}
+            {{--<td>Pickup Request</td>--}}
+            {{--<td class="text-center">{{$operation_outgoing_pickups['pickups']}}</td>--}}
+            {{--</tr>--}}
+            {{--<tr id="no_of_shipments" role="row">--}}
+            {{--<td># of Shipments</td>--}}
+            {{--<td class="text-center">{{$operation_outgoing_pickups['no_of_shipments']}}</td>--}}
+            {{--</tr>--}}
+            {{--</tbody>--}}
+            {{--</table>--}}
+            {{--</div>--}}
+            {{--</div>--}}
 
-                                  {{--<div class="row mt-1">--}}
-                                      {{--<div id="outgoing_table" class="width-60-per ml-1">--}}
-                                          {{--<table class="table table-sm table-bordered datatable" id="datatable_top_five" style="z-index: 3;">--}}
-                                              {{--<thead>--}}
-                                              {{--<tr role="row" class="black">--}}
-                                                  {{--<th class="black border-darken-1">Top Five Customers</th>--}}
-                                                  {{--<th class="black border-darken-1">Shipments</th>--}}
-                                              {{--</tr>--}}
-                                              {{--</thead>--}}
-                                          {{--</table>--}}
-                                      {{--</div>--}}
-                                      {{--<div id="outgoing_chart" class="width-35-per">--}}
-                                          {{--<canvas id="myChartoutgoing" height="230px"></canvas>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
+            {{--<div class="row mt-1">--}}
+            {{--<div id="outgoing_table" class="width-60-per ml-1">--}}
+            {{--<table class="table table-sm table-bordered datatable" id="datatable_top_five" style="z-index: 3;">--}}
+            {{--<thead>--}}
+            {{--<tr role="row" class="black">--}}
+            {{--<th class="black border-darken-1">Top Five Customers</th>--}}
+            {{--<th class="black border-darken-1">Shipments</th>--}}
+            {{--</tr>--}}
+            {{--</thead>--}}
+            {{--</table>--}}
+            {{--</div>--}}
+            {{--<div id="outgoing_chart" class="width-35-per">--}}
+            {{--<canvas id="myChartoutgoing" height="230px"></canvas>--}}
+            {{--</div>--}}
+            {{--</div>--}}
 
-                                  {{--<div class="row height-200">--}}
-                                      {{--<div class="ml-1 width-300 mt-1">--}}
-                                          {{--<table class="table table-sm table-bordered datatable" id="datatable_outgoing_weight_range" style="z-index: 3;">--}}
-                                              {{--<thead style='display:none;'>--}}
-                                              {{--</thead>--}}
-                                          {{--</table>--}}
-                                      {{--</div>--}}
-                                      {{--<div id="outgoing_bar_chart" class="width-200">--}}
-                                          {{--<canvas id="mybarchartoutgoing" height="230px"></canvas>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
-                                  {{--<div class="row ml-1 mr-1">--}}
-                                      {{--<div class="col-6">--}}
-                                          {{--<div class="card bg-gradient-directional-info pull-up">--}}
-                                              {{--<div class="card-content">--}}
-                                                  {{--<div class="card-body justify-content-center">--}}
-                                                      {{--<div class="text-white text-center">--}}
-                                                          {{--<h6 class="text-white">Per Rider Loads</h6>--}}
-                                                      {{--</div>--}}
-                                                      {{--<div id="outgoing_per_rider_loads_div">--}}
-                                                          {{--<div id="outgoing_per_rider_loads" class="text-white text-center">--}}
-                                                              {{--<h4 class="text-white">{{$operation_outgoing['per_rider_loads']}}</h4>--}}
-                                                          {{--</div>--}}
-                                                      {{--</div>--}}
-                                                  {{--</div>--}}
-                                              {{--</div>--}}
-                                          {{--</div>--}}
-                                      {{--</div>--}}
-                                      {{--<div class="col-6">--}}
-                                          {{--<div class="card bg-gradient-directional-info pull-up">--}}
-                                              {{--<div class="card-content">--}}
-                                                  {{--<div class="card-body justify-content-center">--}}
-                                                      {{--<div class="text-white text-center">--}}
-                                                          {{--<h6 class="text-white">Day Wise Growth</h6>--}}
-                                                      {{--</div>--}}
-                                                      {{--<div id="outgoing_day_wise_growth_div">--}}
-                                                          {{--<div id="outgoing_day_wise_growth" class="text-white text-center">--}}
-                                                              {{--<h4 class="text-white">{{$operation_outgoing['day_wise_growth']}}</h4>--}}
-                                                          {{--</div>--}}
-                                                      {{--</div>--}}
-                                                  {{--</div>--}}
-                                              {{--</div>--}}
-                                          {{--</div>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
+            {{--<div class="row height-200">--}}
+            {{--<div class="ml-1 width-300 mt-1">--}}
+            {{--<table class="table table-sm table-bordered datatable" id="datatable_outgoing_weight_range" style="z-index: 3;">--}}
+            {{--<thead style='display:none;'>--}}
+            {{--</thead>--}}
+            {{--</table>--}}
+            {{--</div>--}}
+            {{--<div id="outgoing_bar_chart" class="width-200">--}}
+            {{--<canvas id="mybarchartoutgoing" height="230px"></canvas>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--<div class="row ml-1 mr-1">--}}
+            {{--<div class="col-6">--}}
+            {{--<div class="card bg-gradient-directional-info pull-up">--}}
+            {{--<div class="card-content">--}}
+            {{--<div class="card-body justify-content-center">--}}
+            {{--<div class="text-white text-center">--}}
+            {{--<h6 class="text-white">Per Rider Loads</h6>--}}
+            {{--</div>--}}
+            {{--<div id="outgoing_per_rider_loads_div">--}}
+            {{--<div id="outgoing_per_rider_loads" class="text-white text-center">--}}
+            {{--<h4 class="text-white">{{$operation_outgoing['per_rider_loads']}}</h4>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--<div class="col-6">--}}
+            {{--<div class="card bg-gradient-directional-info pull-up">--}}
+            {{--<div class="card-content">--}}
+            {{--<div class="card-body justify-content-center">--}}
+            {{--<div class="text-white text-center">--}}
+            {{--<h6 class="text-white">Day Wise Growth</h6>--}}
+            {{--</div>--}}
+            {{--<div id="outgoing_day_wise_growth_div">--}}
+            {{--<div id="outgoing_day_wise_growth" class="text-white text-center">--}}
+            {{--<h4 class="text-white">{{$operation_outgoing['day_wise_growth']}}</h4>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
 
-                                  {{--<div class="row ml-1 mr-1">--}}
-                                      {{--<div class="col-6">--}}
-                                          {{--<div class="card bg-gradient-directional-info pull-up">--}}
-                                              {{--<div class="card-content">--}}
-                                                  {{--<div class="card-body justify-content-center">--}}
-                                                      {{--<div class="text-white text-center">--}}
-                                                          {{--<h6 class="text-white">Heavy Shipments</h6>--}}
-                                                      {{--</div>--}}
-                                                      {{--<div id="outgoing_heavy_deliveries_div">--}}
-                                                          {{--<div id="outgoing_heavy_deliveries" class="text-white text-center">--}}
-                                                              {{--<h4 class="text-white">{{$operation_outgoing['heavy_deliveries']}}</h4>--}}
-                                                          {{--</div>--}}
-                                                      {{--</div>--}}
-                                                  {{--</div>--}}
-                                              {{--</div>--}}
-                                          {{--</div>--}}
-                                      {{--</div>--}}
-                                      {{--<div class="col-6">--}}
-                                          {{--<div class="card bg-gradient-directional-info pull-up">--}}
-                                              {{--<div class="card-content">--}}
-                                                  {{--<div class="card-body justify-content-center">--}}
-                                                      {{--<div class="text-white text-center">--}}
-                                                          {{--<h6 class="text-white">Light Shipments</h6>--}}
-                                                      {{--</div>--}}
-                                                      {{--<div id="outgoing_light_deliveries_div">--}}
-                                                          {{--<div id="outgoing_light_deliveries" class="text-white text-center">--}}
-                                                              {{--<h4 class="text-white">{{$operation_outgoing['light_deliveries']}}</h4>--}}
-                                                          {{--</div>--}}
-                                                      {{--</div>--}}
-                                                  {{--</div>--}}
-                                              {{--</div>--}}
-                                          {{--</div>--}}
-                                      {{--</div>--}}
-                                  {{--</div>--}}
-                              {{--</div>--}}
-                          {{--</div>--}}
-                      {{--</div>--}}
-                  {{--</div>--}}
-              {{--</div>--}}
-          {{--</div>--}}
-          {{--@endif--}}
-      </div>
+            {{--<div class="row ml-1 mr-1">--}}
+            {{--<div class="col-6">--}}
+            {{--<div class="card bg-gradient-directional-info pull-up">--}}
+            {{--<div class="card-content">--}}
+            {{--<div class="card-body justify-content-center">--}}
+            {{--<div class="text-white text-center">--}}
+            {{--<h6 class="text-white">Heavy Shipments</h6>--}}
+            {{--</div>--}}
+            {{--<div id="outgoing_heavy_deliveries_div">--}}
+            {{--<div id="outgoing_heavy_deliveries" class="text-white text-center">--}}
+            {{--<h4 class="text-white">{{$operation_outgoing['heavy_deliveries']}}</h4>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--<div class="col-6">--}}
+            {{--<div class="card bg-gradient-directional-info pull-up">--}}
+            {{--<div class="card-content">--}}
+            {{--<div class="card-body justify-content-center">--}}
+            {{--<div class="text-white text-center">--}}
+            {{--<h6 class="text-white">Light Shipments</h6>--}}
+            {{--</div>--}}
+            {{--<div id="outgoing_light_deliveries_div">--}}
+            {{--<div id="outgoing_light_deliveries" class="text-white text-center">--}}
+            {{--<h4 class="text-white">{{$operation_outgoing['light_deliveries']}}</h4>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--</div>--}}
+            {{--@endif--}}
+        </div>
     </div>
-  </div>
   <!-- ////////////////////////////////////////////////////////////////////////////-->
 
   @endsection
@@ -503,8 +592,52 @@
         .small-calender-icon{
             font-size: 17px !important;
         }
-        .bg-gradient-directional-inprocess {
-            background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
+        .bg-gradient-directional-booked_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-arrived_shipments {
+            background-image: linear-gradient(45deg, #074077, #2fbef5);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-in_transit {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-destination {
+            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-out_for_delivery {
+            background-image: linear-gradient(45deg, #ff9819, #fff824);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_shipments {
+            background-image: linear-gradient(45deg, #39546d , #90929a);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_confirmation {
+            background-image: linear-gradient(45deg, #6a1fa2 , #ff4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-delivered {
+            background-image: linear-gradient(45deg, #076500, #11f118);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_confirm {
+            background-image: linear-gradient(45deg, #ff0c0c, #ff9191);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_return {
+            background-image: linear-gradient(45deg, #7d491c  , #e0b668de);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-cancelled_shipments {
+            background-image: linear-gradient(45deg, #ff6a00, #ffb74c);
             background-repeat: repeat-x;
         }
         .selectize-control {
@@ -671,9 +804,9 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pending Shipment(s)', 'Arrived Shipment(s)', 'In Transit Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)', 'Cancelled Shipment(s)']
+                                data: ['Booked Shipment(s)', 'Arrived Shipment(s)', 'In Transit Shipment(s)', 'Shipment(s) At Destination', 'Out for Delivery Shipment(s)', 'Pending Shipment(s)', 'Pending Confirmation Shipment(s)', 'Delivered Shipment(s)', 'Returned Confirm Shipment(s)', 'Pending Return Shipment(s)', 'Shipment(s) Returned To Shipper', 'Cancelled Shipment(s)']
                             },
-                            color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a','#FF0000'],
+                            color: ['#5e187b', '#074077', '#535BE2', '#027d8a', '#ff9819', '#39546d', '#6a1fa2', '#076500', '#ff0c0c', '#7d491c', '#02c123','#ff6a00'],
 
                             xAxis: [{
                                 type: 'category',
@@ -689,7 +822,7 @@
                             }],
                             series: [
                                 {
-                                    name: 'Pending Shipment(s)',
+                                    name: 'Booked Shipment(s)',
                                     type: 'line',
                                     data: data.graph['booked']
                                 },
@@ -704,19 +837,44 @@
                                     data: data.graph['in_transit']
                                 },
                                 {
+                                    name: 'Shipment(s) At Destination',
+                                    type: 'line',
+                                    data: data.graph['destination']
+                                },
+                                {
+                                    name: 'Out for Delivery Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['out_for_delivery']
+                                },
+                                {
+                                    name: 'Pending Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['pending_shipments']
+                                },
+                                {
+                                    name: 'Pending Confirmation Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['confirmation_pending']
+                                },
+                                {
                                     name: 'Delivered Shipment(s)',
                                     type: 'line',
                                     data: data.graph['delivered']
                                 },
                                 {
-                                    name: 'Returned Shipment(s)',
+                                    name: 'Returned Confirm Shipment(s)',
                                     type: 'line',
-                                    data: data.graph['return']
+                                    data: data.graph['return_confirm']
                                 },
                                 {
-                                    name: 'In Process Shipment(s)',
+                                    name: 'Pending Return Shipment(s)',
                                     type: 'line',
-                                    data: data.graph['pending']
+                                    data: data.graph['pending_return']
+                                },
+                                {
+                                    name: 'Shipment(s) Returned To Shipper',
+                                    type: 'line',
+                                    data: data.graph['return_delivered']
                                 },
                                 {
                                     name: 'Cancelled Shipment(s)',

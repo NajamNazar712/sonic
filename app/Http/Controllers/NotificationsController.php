@@ -13,6 +13,7 @@ use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
+use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentItem;
@@ -4306,6 +4307,87 @@ class NotificationsController extends Controller
                     }
                     $to = $shipper->phone;
                     self::sms($body, $to);
+                }
+            }
+            else if($id == 59){
+                $report_data = OvernightOverlandReportData::where('shipping_mode_id', $reference_1_id);
+                if($report_data->exists()){
+                    $report_data = $report_data->get();
+                    $date = Carbon::today()->format('Y-m-d');
+                    if($reference_1_id == 1){
+                        $shipping_mode = 'Overnight';
+                    }
+                    else{
+                        $shipping_mode = 'Overland';
+                    }
+                    if (strpos($subject, '[shipping_mode]') !== FALSE) {
+                        $subject = str_replace('[shipping_mode]', $shipping_mode, $subject);
+                    }
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $details = '<table style="width:100%;">';
+                    $details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S. No</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Cargo#</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">No. of Parcels</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Mode of Shipment</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Cargo Created Date</th></tr></thead>';
+                    $serial = 1;
+                    $details .= '<tbody>';
+                    foreach ($report_data as $data) {
+                        $details .= '<tr>';
+                        if($data->status == 1){
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red;">' . $serial . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red;">' . str_pad($data->cargo_id, 6, "0",STR_PAD_LEFT) . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red;">' . $data->origin->name . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red;">' . $data->destination->name . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red;">' . $data->total_parcels . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red;">' . $data->shipping_mode->mode . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red;">' . $data->transport_mode_vendor->name . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red;">' . $data->cargo_created_at . '</td>';
+
+                        }
+                        else{
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . str_pad($data->cargo_id, 6, "0",STR_PAD_LEFT) . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->origin->name . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->destination->name . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->total_parcels . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->shipping_mode->name . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->transport_mode_vendor->name . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cargo_created_at . '</td>';
+                        }
+                        $details .= '</tr>';
+
+                        $serial++;
+                    }
+                    $details .= '</tbody></table>';
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $details, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank"><u>Report</u></a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    $admins =Admin::whereIn('id', [8, 37])->where('status', 1);
+
+
+                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
+                    if ($admins->exists()) {
+                        $to = $admins->distinct('id')->pluck('email')->toArray();
+                    }
+                    if ($cc_admins->exists()) {
+                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
+                    }
+
+
+                    self::email($subject, $body, $to, $cc);
                 }
             }
         }

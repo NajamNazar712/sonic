@@ -1456,6 +1456,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_history_list')->name('list');
             });
         });
+        Route::prefix('overnight_overland_cargo_report')->name('overnight_overland_cargo_report.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_list')->name('list');
+            Route::post('update', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_rad_tat_submit')->name('update');
+            Route::get('edit/{id}', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_edit_index')->name('edit');
+            Route::post('edit/update', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_origin_submit')->name('edit.update');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
