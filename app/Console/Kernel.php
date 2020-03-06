@@ -34,7 +34,10 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\PettyCashImageArchive',
         '\App\Console\Commands\DailyFakeStatusReportEmail',
         '\App\Console\Commands\NegativeBalanceShipperSalesPerson',
-        '\App\Console\Commands\ClearDefaultBankDuration'
+        '\App\Console\Commands\ClearDefaultBankDuration',
+        '\App\Console\Commands\AccountReconciliationReportFromStart',
+        '\App\Console\Commands\AccountReconciliationReportCurrent'
+
     ];
 
     /**
@@ -101,6 +104,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
 
         $schedule->command('clear:cleardefaultbankduration')->dailyAt('00:00')->runInBackground();
+
+        $schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
 
     }
 
