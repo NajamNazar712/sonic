@@ -278,6 +278,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_index')->name('index');
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_store')->name('store');
         });
+        Route::prefix('logo')->name('logo.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@upload_logo_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@upload_logo_submit')->name('upload');
+        });
     });
 
 });

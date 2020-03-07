@@ -341,7 +341,10 @@
 
 									<div id="payment_info" class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Payment Information</h4>
-
+										<div id="cod_breakup" class="form-group text-center p-1 border border-light rounded">
+											<label class="d-block">COD Breakup</label>
+											<input type="checkbox" name="cod_breakup_checkbox" class="switch" id="cod_breakup_checkbox">
+										</div>
 										<div class="form-group input-group">
 											<div class="input-group-prepend">
 												<span class="input-group-text">Rs</span>
@@ -402,6 +405,63 @@
 						</div>
 					</div>
 				</div>
+
+			<!--items modal-->
+				<div class="modal fade" id="cod_breakup_modal" role="dialog" aria-labelledby="cod_breakup_modal_title" aria-hidden="true">
+					<div class="modal-dialog modal-xl" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title" id="cod_breakup_modal_title">COD Breakup</h4>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form id="cod_breakup_form" class="form" style="width: 100%;">
+								{{ csrf_field() }}
+								<div class="modal-body">
+									<table class="table table-bordered datatable" id="cod_breakup_table" style="z-index: 3;min-width: 100%;">
+										<thead>
+										<tr role="row" class="bg-primary white">
+											<th class="border-primary border-darken-1">S. No.</th>
+											<th class="border-primary border-darken-1">Item Description</th>
+											<th class="border-primary border-darken-1">Amount</th>
+											<th class="border-primary border-darken-1"></th>
+										</tr>
+										</thead>
+									</table>
+									<div class="row">
+										<div class="col-3">
+											<div class="form-group">
+
+												<div class="input-group">
+													<div class="input-group-prepend">
+														<span class="input-group-text">Shipping Charges</span>
+													</div>
+													<input type="text" name="cod_breakup_shipping_charges" id="cod_breakup_shipping_charges" class="form-control amount" placeholder="Shipping Charges*" data-rule-required="true" data-msg-required="Shipping Charges is required" value="">
+												</div>
+											</div>
+										</div>
+										<div class="col-3">
+											<div class="form-group">
+
+												<div class="input-group">
+													<div class="input-group-prepend">
+														<span class="input-group-text">Total COD</span>
+													</div>
+													<input type="text" name="cod_breakup_total" id="cod_breakup_total" class="form-control amount" placeholder="Total COD*" data-rule-required="true" data-msg-required="Total COD is required" value="">
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="submit" id="cod_breakup_submit_btn" disabled class="btn btn-primary mx-auto">Update</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			<!--items modal-->
+
 			</div>
 		</div>
 	</div>
@@ -416,6 +476,54 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+	<style>
+		table.dataTable {
+			font-size: 12px;
+		}
+
+		table.dataTable thead tr th {
+			padding-left: 0.5em;
+			white-space: normal;
+			word-wrap: break-word;
+		}
+
+		table.dataTable thead tr th:before,
+		table.dataTable thead tr th:after {
+			height: 20px;
+			margin-bottom: -10px;
+			bottom: 50% !important;
+		}
+
+		table.dataTable tbody tr td {
+			padding-left: 0.5em;
+			padding-right: 0.5em;
+		}
+
+		table.dataTable tbody tr td.select-checkbox:before {
+			top: 50%;
+			border-color: #64a0d2;
+		}
+
+		table.dataTable tbody tr.selected td.select-checkbox:after {
+			top: 50%;
+			text-shadow: none;
+		}
+
+		.btn-group .dropdown-menu .dropdown-item {
+			white-space: normal;
+		}
+
+		#toast-bottom-center.toast-container {
+			text-align: center;
+		}
+
+		#toast-bottom-center.toast-container .toast {
+			display: table;
+			width: auto !important;
+			text-align: left;
+		}
+	</style>
 @endsection
 
 @section('js')
@@ -430,6 +538,9 @@
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
 
 	<script>
 
@@ -856,6 +967,7 @@
 
 			$('#information_display').checkboxpicker();
 
+
 			$('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'City*'
@@ -1111,6 +1223,14 @@
 				$(this).valid();
 			});
 
+			function isEmpty(obj) {
+				for(var key in obj) {
+					if(obj.hasOwnProperty(key))
+						return false;
+				}
+				return true;
+			}
+			var breakup_rows = {};
 			var check = @json($check);
 			$('#booking_form').validate({
 				errorClass: 'danger',
@@ -1122,6 +1242,7 @@
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
+
 					var pressed_button = $(this.submitButton);
 
 					$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
@@ -1137,8 +1258,19 @@
 							}
 						}
 					}
-					// console.log(present.length);
-					// console.log(present);
+					if(!isEmpty(breakup_rows)){
+						$(form).append('<input type="hidden" name="cod_breakup" value="TRUE">');
+						var cod_breakup_shipping_charges = $('#cod_breakup_shipping_charges').val();
+						var cod_breakup_total_cod = $('#cod_breakup_total').val();
+						$(form).append('<input type="hidden" name="cod_breakup_shipping_charges" value="' +cod_breakup_shipping_charges + '">');
+						$(form).append('<input type="hidden" name="cod_breakup_total_cod" value="' + cod_breakup_total_cod + '">');
+
+						$.each(breakup_rows, function (index, value) {
+							$(form).append('<input type="hidden" name="cod_breakup_description[]" value="' + value.description + '">');
+							$(form).append('<input type="hidden" name="cod_breakup_amount[]" value="' + value.amount + '">');
+						});
+					}
+
 					if(present.length > 0){
 						var html = '<div class="text-left">In case of,<br/>';
 						html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
@@ -1252,6 +1384,109 @@
 				'allowMinus': false,
 				'allowPlus': false
 			});
+
+			var cb_table = $('#cod_breakup_table').DataTable({
+				dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				buttons: [{
+					title: 'Add Row',
+					className: 'btn btn-primary mb-1',
+					text: '<i class="la la-plus"></i> Add Row',
+					action: function (e) {
+						add_row();
+					}
+				}],
+				ordering: false,
+				paging: false,
+				columns: [
+					{
+						orderable: false,
+						searchable: false,
+						name: 'serial_number',
+						class: 'align-middle serial_number',
+						targets: 0,
+						render: function (data, type, row) {
+							return '';
+						}
+					},
+					{name: 'item_description', class: 'align-middle item_description form-group', width: '40%'},
+					{name: 'amount', class: 'align-middle amount form-group'},
+					{name: 'action', class: 'align-middle action'},
+				],
+				rowCallback: function (row, data, index) {
+					var info = cb_table.page.info();
+					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+				},
+				initComplete: function () {
+					this.api().table().columns.adjust();
+				}
+			});
+			$('#cod_breakup_checkbox').checkboxpicker();
+			$('#cod_breakup_checkbox').on('change', function() {
+				var check = $(this);
+				if(check.is(':checked')){
+					$('#cod_breakup_modal').modal('show');
+				}else{
+					breakup_rows = {};
+					cb_table.clear();
+				}
+			});
+			var rows_count = 0;
+			function add_row() {
+				rows_count++;
+				var item_description_input = '<input class="form-control item_description" name="item_description['+rows_count+']" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item description is required">';
+				var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">';
+
+				if(rows_count == 1){
+					var remove = '';
+				}else{
+					var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+				}
+				// deposit_table.row.add(0,1,2,3,4,5);
+				cb_table.row.add([0, item_description_input, amount_input,remove]).node().id = rows_count;
+				cb_table.draw(true);
+				$('#cod_breakup_submit_btn').attr('disabled', false);
+
+				$('input.amount').inputmask({
+					'alias': 'decimal',
+					'allowMinus': false,
+					'allowPlus': false,
+					'rightAlign': false,
+					'digits': 2,
+					'min': 0.00,
+					'max': 10000000.00
+				});
+			}
+			$('body').on('change','#cod_breakup_form .item_description',function() {
+				$(this).val($(this).val().trim());
+			});
+
+
+			var cod_breakup_form = $('#cod_breakup_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('.form-group'));
+				},
+				submitHandler: function(form) {
+					breakup_rows = {};
+					cb_table.rows().every(function(index) {
+						var node = $(this.node());
+						var id = node.attr('id');
+						var description = node.find('td.item_description input').val();
+						var amount = node.find('td.amount input').val();
+						breakup_rows[id] = {description: description, amount: amount};
+					});
+					$('#cod_breakup_modal').modal('hide');
+
+				}
+			});
+			$('body').on('click', '#cod_breakup_table a.remove_row',function () {
+
+				cb_table.row( $(this).parents('tr') ).remove().draw();
+			});
+
 		});
 	</script>
 @endsection

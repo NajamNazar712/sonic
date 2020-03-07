@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Shippers;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\Shipper\ShipperGlobalSettings;
+use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ShipperGlobalSettingsController extends Controller
 {
@@ -57,5 +60,25 @@ class ShipperGlobalSettingsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Settings Updated!');
+}
+
+    public function upload_logo_index(){
+        $logo = Storage::url('shippers_logo/logo_' . Auth::id() . '.png');
+        return view('client.settings.logo')->with(['logo'=>$logo]);
+    }
+
+    public function upload_logo_submit(Request $request){
+        if ($request->hasFile('upload_logo')) {
+            $shipper = User::find(Auth::id());
+            $filename = 'logo_' . Auth::id() . '.png';
+
+            $file = $request->file('upload_logo');
+
+            Storage::disk('public')->putFileAs('shippers_logo', $file, $filename);
+            $shipper->logo = $filename;
+            $shipper->logo_status = 1;
+            $shipper->save();
+            return redirect()->back()->with('success', 'Logo Successfully Updated!');
+        }
     }
 }
