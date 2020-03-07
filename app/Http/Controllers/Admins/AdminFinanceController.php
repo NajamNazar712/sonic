@@ -1082,6 +1082,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_sdn_edit_deposit_slip_submit(Request $request){
+
         $sdn_id = $request->sdn_id;
         $deposit_ids = explode(',', $request->deposit_rows);
         $total_amount = 0;
@@ -1108,31 +1109,35 @@ class AdminFinanceController extends Controller
             $slip->save();
 
         }
-        $new_deposit_ids = explode(',', $request->new_deposit_rows);
-        if(count($new_deposit_ids) > 0){
-            foreach ($new_deposit_ids as $row) {
-                $total_amount += $request->new_amount[$row];
-                
-                $deposit_details = new StationDepositNoteSlip();
-                $deposit_details->station_deposit_note_id = $sdn_id;
-                $deposit_details->deposit_date = $request->new_date[$row];
-                $deposit_details->bank_id = $request->new_bank[$row];
-                $deposit_details->amount = $request->new_amount[$row];
-                $deposit_details->save();
-                $file_name = 'new_deposit_slip_'.$row;
-                $image = $request->file($file_name);
-                $extension = 'png';
-                $random = rand(1000, 100000);
-                $now = Carbon::now();
-                $time = $now->year . '_' . $now->month;
-                $slip = $time . $random . Auth::id() . '.' . $extension;
-                $image->move(public_path('uploads/sdn'), $slip);
 
-                $deposit_details->image = $slip;
-                $deposit_details->save();
+        if($request->new_deposit_rows){
+            $new_deposit_ids = explode(',', $request->new_deposit_rows);
+            if(count($new_deposit_ids) > 0){
+                foreach ($new_deposit_ids as $row) {
+                    $total_amount += $request->new_amount[$row];
+
+                    $deposit_details = new StationDepositNoteSlip();
+                    $deposit_details->station_deposit_note_id = $sdn_id;
+                    $deposit_details->deposit_date = $request->new_date[$row];
+                    $deposit_details->bank_id = $request->new_bank[$row];
+                    $deposit_details->amount = $request->new_amount[$row];
+                    $deposit_details->save();
+                    $file_name = 'new_deposit_slip_'.$row;
+                    $image = $request->file($file_name);
+                    $extension = 'png';
+                    $random = rand(1000, 100000);
+                    $now = Carbon::now();
+                    $time = $now->year . '_' . $now->month;
+                    $slip = $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('uploads/sdn'), $slip);
+
+                    $deposit_details->image = $slip;
+                    $deposit_details->save();
+                }
             }
+
         }
-        
+
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
@@ -4267,7 +4272,7 @@ class AdminFinanceController extends Controller
 
             $user_id = $user->id;
 
-            $user_banking_information = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
+            $user_banking_information = UserBankInfo::where('user_id', $user_id)->where('default_bank', 1)->first();
 
             if ($user_banking_information->invoicing_cycle_id == 1) {
                 if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {
@@ -4381,9 +4386,9 @@ class AdminFinanceController extends Controller
 
         $shipper = $invoice->shipper;
 
-        $shipper_bank = $shipper->bank;
+        $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
 
-        $account_type_id = $shipper_bank->account_type_id;
+        $account_type_id = $shipper->account_type_id;
 
         $html = '';
 
@@ -5025,9 +5030,9 @@ class AdminFinanceController extends Controller
 
             $shipper = User::find($shipper);
 
-            $shipper_bank = $shipper->bank;
+            $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
 
-            $account_type_id = $shipper_bank->account_type_id;
+            $account_type_id = $shipper->account_type_id;
 
             $html = '';
 
@@ -5429,7 +5434,7 @@ class AdminFinanceController extends Controller
         $filtered_dncc = array();
         if(!empty($request->shipment_ids)){
             foreach ($request->shipment_ids as $index => $shipment_id){
-                if(DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_ids[$shipment_id])->where('shipment_id', $shipment_id)->whereIn('status', [4,5,6,7])->exists()){
+                if(DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_ids[$index])->where('shipment_id', $shipment_id)->whereIn('status', [4,5,6,7])->exists()){
                     $tracking_number = Shipment::find($shipment_id)->tracking_number;
                     $filtered_shipments[$shipment_id] = $tracking_number;
                     $filtered_dncc[$shipment_id] = $request->delivery_note_ids[$index];

@@ -2719,9 +2719,9 @@ class NotificationsController extends Controller
 
 	                    if($crm_request->status_id != 1) {
                           $cc = array();
-                          $crm_roles = Admin::where('role_id', 37)->pluck('email');
+                          $crm_roles = Admin::where('role_id', 37);
                           if($crm_roles->exists()){
-                            $crm_roles = $crm_roles->toArray();
+                            $crm_roles = $crm_roles->pluck('email')->toArray();
                             $cc = array_merge($cc, $crm_roles);
                           }
 	                        $cc[] = 'complaints@trax.pk';
@@ -3492,14 +3492,19 @@ class NotificationsController extends Controller
                 if (strpos($body, '[link]') !== FALSE) {
                     $body = str_replace('[link]', $link, $body);
                 }
-                $to = 'hassan@trax.pk';
-                $cc = array();
+                // $to = 'hassan@trax.pk';
+                // $cc = array();
 
-                $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 19, 22, 34, 36])->where('status', 1);
+                // $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 19, 22, 34, 36])->where('status', 1);
 
-                if ($department_heads->exists()) {
-                  $cc = array_merge($cc, $department_heads->pluck('email')->toArray());
-                }
+                // if ($department_heads->exists()) {
+                //   $cc = array_merge($cc, $department_heads->pluck('email')->toArray());
+                // }
+
+                // self::email($subject, $body, $to, $cc);
+
+                $to = 'ammar.mir@trax.pk';
+                $cc = ['muhammad.yousuf@trax.pk'];
 
                 self::email($subject, $body, $to, $cc);
             }
@@ -3535,7 +3540,10 @@ class NotificationsController extends Controller
                 $total_target_shipments_achieved = 0;
                 $total_target_revenue = 0;
                 $total_target_revenue_achieved = 0;
+                $sum_total_target_revenue_achieved = 0;
+                $total_target_revenue_avg = 0;
                 foreach ($sale_person_number_data as $sale_person_number) {
+                  $all_shipments_target_revenue = 0;
                   $target_shipments_achieved = 0;
                   $target_revenue_achieved = 0;
                   $target_shipments = $sale_person_number->target_shipments;
@@ -3544,7 +3552,9 @@ class NotificationsController extends Controller
                   }
                   $target_revenue = $sale_person_number->target_revenue;
                   if($target_revenue > 0){
-                      $target_revenue_achieved = ($sale_person_number->revenue / $target_revenue) * 100;
+                      $all_shipments_target_revenue = $target_revenue * $target_shipments;
+                      $total_target_revenue_avg += $all_shipments_target_revenue;
+                      $target_revenue_achieved = ($sale_person_number->revenue / $all_shipments_target_revenue) * 100;
                   }
                     $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
@@ -3558,7 +3568,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($sale_person_number->target_shipments) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($target_shipments_achieved) . '%</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->revenue)) . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($sale_person_number->target_revenue) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($all_shipments_target_revenue) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($target_revenue_achieved) . '%</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->avg_revenue)) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->contribution,2,'.','') . '%</td>';
@@ -3567,16 +3577,16 @@ class NotificationsController extends Controller
                     $revenue_count = $revenue_count + $sale_person_number->revenue;
                     $contribution_count = $contribution_count + $sale_person_number->contribution;
                     $total_target_shipments += $sale_person_number->target_shipments;
-                    
                     $total_target_revenue += $sale_person_number->target_revenue;
-                    
+                    $sum_total_target_revenue_achieved += $target_revenue_achieved;
                     $serial++;
                 }
                 if($total_target_shipments > 0){
                   $total_target_shipments_achieved = ($shipments_count / $total_target_shipments) * 100;
                 }
-                if($total_target_revenue > 0){
-                  $total_target_shipments_achieved = ($revenue_count / $total_target_revenue) * 100;
+                $total_all_shipments_target_revenue = 0;
+                if($total_target_revenue_avg > 0){
+                  $total_target_revenue_achieved = ($revenue_count / $total_target_revenue_avg) * 100;
                 }
                 if($shipments_count != 0){
                     $avg_revenue_count = $revenue_count / $shipments_count;
@@ -3591,7 +3601,7 @@ class NotificationsController extends Controller
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($total_target_shipments) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($total_target_shipments_achieved) . '%</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($revenue_count)) . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format(round($total_target_revenue)) . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format(round($total_target_revenue_avg)) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($total_target_revenue_achieved) . '%</td>';
 
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_count)) . '</td>';
@@ -3624,13 +3634,14 @@ class NotificationsController extends Controller
                if ($ceo) {
                    $to[] = $ceo->email;
                }
-               
+
                $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk'];
-               
+
                $to = array_merge($to, $extra_admins);
-                   
-               
+
+
                $cc = ['asad@trax.pk','syed.sharique@trax.pk'];
+
                self::email($subject, $body, $to, $cc);
 
             }

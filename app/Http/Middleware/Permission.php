@@ -59,7 +59,7 @@ class Permission
             'pickups.assigned.pickups' => 20,
             'pickups.assigned.cancel' => 21,
             'pickups.assigned.view_details' => 20,
-            'pickups.assigned.print' => 22,
+//            'pickups.assigned.print' => 22,
             'pickups.receive.index' => 23,
             'pickups.receive.list' => 23,
             'pickups.receive.bookings.all' => 23,

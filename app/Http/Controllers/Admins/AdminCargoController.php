@@ -1117,7 +1117,7 @@ class AdminCargoController extends Controller
             $cargo_consignment = $cargo_consignment->first();
 
             if (session('role_id') == 1 || (in_array($cargo_consignment->junction_hub_1_id, session('hubs')) || in_array($cargo_consignment->junction_hub_2_id, session('hubs')))) {
-                if (in_array($cargo_consignment->status_id, [1, 2, 6, 7])) {
+                if (in_array($cargo_consignment->status_id, [1, 2, 6, 7, 9])) {
                     $details = array();
 
                     $details['cargo_number'] = str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
@@ -1314,7 +1314,7 @@ class AdminCargoController extends Controller
 
             if ($cargo_consignment) {
                 if (session('role_id') == 1 || (in_array($cargo_consignment->destination_hub->hub_id, session('hubs')))) {
-                    if (in_array($cargo_consignment->status_id, [1, 2, 4, 6, 7])) {
+                    if (in_array($cargo_consignment->status_id, [1, 2, 4, 6, 7, 9])) {
                         return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
                     }
                     else {

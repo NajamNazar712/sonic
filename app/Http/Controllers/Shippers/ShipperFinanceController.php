@@ -13,7 +13,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ReceivingSheetShipment;
-
+use App\Http\Models\Shipper\UserBankInfo;
 use Auth;
 use DB;
 
@@ -263,7 +263,12 @@ class ShipperFinanceController extends Controller
 
       $shipper = $done_payment->shipper;
 
-      $shipper_bank = $shipper->bank;
+      if($done_payment->user_bank_info_id == null){
+          $shipper_bank = UserBankInfo::where('user_id', session('user_id'))->where('default_bank', 1)->first();
+      }else{
+          $shipper_bank = UserBankInfo::find($done_payment->user_bank_info_id);
+      }
+      
 
       $account_type_id = $shipper->account_type_id;
 

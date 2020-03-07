@@ -22,4 +22,5 @@ class UserBankInfo extends Model
     public function invoicing(){
         return $this->belongsTo('App\Http\Models\InvoicingCycle','invoicing_cycle_id','id');
     }
+    
 }

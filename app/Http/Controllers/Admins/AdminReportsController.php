@@ -3841,12 +3841,12 @@ use Yajra\Datatables\Datatables;
                 $hubs = $hubs->get();
 
                 if ($date) {
-                    $from_month = Carbon::parse($date)->subDays(60)->addHour($day_cut_off_time)->toDateTimeString();
+                    $from_month = Carbon::parse($date)->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                     $from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
                     $to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
                 }
                 else {
-                    $from_month = Carbon::today()->subDays(60)->addHour($day_cut_off_time)->toDateTimeString();
+                    $from_month = Carbon::today()->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                     $from = Carbon::today()->addHour($day_cut_off_time)->toDateTimeString();
                     $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
                 }
@@ -3963,19 +3963,19 @@ use Yajra\Datatables\Datatables;
                                     $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->whereIn('sj.shipper_status_id', [8, 13])
                                     ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
-                                })
-                                ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                                    $sub_query->where(function ($sub_sub_query) {
-                                        $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
-                                            ->whereIn('sj.shipper_status_id', [2,6,7,8,9,11,12,13,15])
-                                            ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
-                                    })
-                                    ->orWhere(function ($sub_sub_sub_query) {
-                                        $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
-                                            ->whereIn('sj.shipper_status_id', [4,6,7,8,9,11,12,13,15])
-                                            ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
-                                    });
                                 });
+                                // ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
+                                //     $sub_query->where(function ($sub_sub_query) {
+                                //         $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
+                                //             ->whereIn('sj.shipper_status_id', [2,6,7,8,9,11,12,13,15])
+                                //             ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
+                                //     })
+                                //     ->orWhere(function ($sub_sub_sub_query) {
+                                //         $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
+                                //             ->whereIn('sj.shipper_status_id', [4,6,7,8,9,11,12,13,15])
+                                //             ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
+                                //     });
+                                // });
                             });
                         }
                         else if ($type == 'confirmation_pending') {
@@ -4014,19 +4014,19 @@ use Yajra\Datatables\Datatables;
                                     $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->where('sj.shipper_status_id', '=', 13)
                                     ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
-                                })
-                                ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                                    $sub_query->where(function ($sub_sub_query) {
-                                        $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
-                                            ->whereIn('sj.shipper_status_id', [2,6,7,8,9,11,12,13,15])
-                                            ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
-                                    })
-                                    ->orWhere(function ($sub_sub_sub_query) {
-                                        $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
-                                            ->whereIn('sj.shipper_status_id', [4,6,7,8,9,11,12,13,15])
-                                            ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
-                                    });
                                 });
+                                // ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
+                                //     $sub_query->where(function ($sub_sub_query) {
+                                //         $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
+                                //             ->whereIn('sj.shipper_status_id', [2,6,7,8,9,11,12,13,15])
+                                //             ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
+                                //     })
+                                //     ->orWhere(function ($sub_sub_sub_query) {
+                                //         $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
+                                //             ->whereIn('sj.shipper_status_id', [4,6,7,8,9,11,12,13,15])
+                                //             ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
+                                //     });
+                                // });
                             });
                         }
 
@@ -4340,24 +4340,12 @@ use Yajra\Datatables\Datatables;
                 $writer->save('php://output');
             }
             else if($report_type == 1) {
-                ob_start();
-                $writer->save('php://output');
-                $contents = ob_get_contents();
-                ob_end_clean();
-                Storage::disk('public')->put('/reports/debriefing/hubs/'.$file_name, $contents);
-            }else if($report_type == 2){
-                ob_start();
-                $writer->save('php://output');
-                $contents = ob_get_contents();
-                ob_end_clean();
-                Storage::disk('public')->put('/reports/debriefing/zones/'.$file_name, $contents);
-            }else if($report_type == 3){
-                Debriefing::truncate();
                 foreach ($result as $index => $res){
                     if($index != 'status' && $index != 'success' && $index != 'Grand Total' && $index != 'shipments'){
                         foreach ($res as $hub_name => $data){
                             if($hub_name != 'Grand Total') {
                                 $hub = City::where('name', $hub_name)->first();
+                                Debriefing::where('hub',$hub->id)->delete();
                                 $debriefing = new Debriefing();
                                 $debriefing->hub = $hub->id;
                                 $debriefing->zone_id = $hub->zone_id;
@@ -4380,6 +4368,18 @@ use Yajra\Datatables\Datatables;
                         }
                     }
                 }
+                ob_start();
+                $writer->save('php://output');
+                $contents = ob_get_contents();
+                ob_end_clean();
+                Storage::disk('public')->put('/reports/debriefing/hubs/'.$file_name, $contents);
+            }else if($report_type == 2){
+                ob_start();
+                $writer->save('php://output');
+                $contents = ob_get_contents();
+                ob_end_clean();
+                Storage::disk('public')->put('/reports/debriefing/zones/'.$file_name, $contents);
+            }else if($report_type == 3){
                 ob_start();
                 $writer->save('php://output');
                 $contents = ob_get_contents();

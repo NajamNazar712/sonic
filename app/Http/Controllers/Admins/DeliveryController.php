@@ -2001,11 +2001,12 @@ class DeliveryController extends Controller
 
     public function receive_delivery_verify_status_submit(Request $request)
     {
-        
         $delivery_note_id = $request->delivery_note_id;
         $delivery_note = DeliveryNote::find($delivery_note_id);
         $zero_cod_shipments = array();
-        if($delivery_note) {
+        $shipments = explode(',', $request->shipment_ids);
+        if(count($shipments)  == $delivery_note->shipments_count){
+            if($delivery_note) {
 
             if ($delivery_note->status == 1) {
                 return redirect(route('admin.delivery.receive.index'))->with('error', 'Delivery note already verified!');
@@ -2016,7 +2017,7 @@ class DeliveryController extends Controller
                 $verification = 0;
             }
             $current_time = Carbon::now();
-            $shipments = explode(',', $request->shipment_ids);
+            
             $shipment_count = 0;
             $dispute_shipments = array();
             $delivered_status_array = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 45, 46);
@@ -2155,10 +2156,10 @@ class DeliveryController extends Controller
 
                                                 if ($parcel->charges_mode_id == 1) {
                                                     Shipment::where('id', $shipment)->update(['received_amount' => 0, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
-													DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 7]);
+                                                    DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 7]);
                                                 } else {
                                                     Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
-													DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
+                                                    DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                                                 }
                                             } else {
                                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
@@ -2335,6 +2336,11 @@ class DeliveryController extends Controller
                 return redirect()->back()->with('error', 'Delivery note not found!');
             }
         }
+        else{
+            return redirect()->back()->with('error', 'Shipments not found!');
+        }
+        }
+        
 
     }
 
