@@ -9,6 +9,8 @@ use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\ShipmentInvoice;
+use App\Http\Models\ShipmentInvoiceItem;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
@@ -39,6 +41,7 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Jobs\ProcessShipmentBooking;
 
 use Auth;
+use Illuminate\Support\Facades\Storage;
 use Session;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -266,6 +269,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
+
         if (BookingType::whereNotIn('id', [3, 4])->where('id', $request->input('selected_service_type'))->exists()) {
             if (!empty($request->input('shipping_mode'))) {
                     $user_id = session('user_id');
@@ -274,8 +278,8 @@ class ShipperShipmentBookController extends Controller
                     $user_email_id = $request->input('consignee_email_address');
                 }
                 else{
-                    $user_email = User::find($user_id);
-                    $user_email_id = $user_email->email;
+                    $user = User::find($user_id);
+                    $user_email_id = $user->email;
                 }
 
                     $service_type_id = $request->input('selected_service_type');
@@ -532,6 +536,18 @@ class ShipperShipmentBookController extends Controller
 
                     if ($msg_string != null) {
                         NotificationsController::send(32, $shipment_id, $msg_string);
+                    }
+                    if($user->logo_status){
+                        $shipment = Shipment::find($shipment_id);
+                        $shipment->shipment_invoice_status = 1;
+                        $shipment->save();
+                        if($request->has('cod_breakup')){
+                            $shipping_charges = $request->cod_breakup_shipping_charges;
+                            $total_cod = $request->cod_breakup_total_cod;
+                            $descriptions = $request->cod_breakup_description;
+                            $amounts = $request->cod_breakup_amount;
+                            $this->cod_breakup_create($shipment_id, $shipping_charges, $total_cod, $descriptions, $amounts);
+                        }
                     }
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
@@ -1217,38 +1233,18 @@ class ShipperShipmentBookController extends Controller
                     $shipment_details .= $table_end;
                 }
             }
-            if($shipment->user->logo_status == 1){
-                $logo_invoice = '<div class="invoice p-1">
-                    <table class="table table-bordered border">
-                      <tbody>
-                        <tr>
-                          <td class="text-left align-middle">
-                            <img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1">
-                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
-                            <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
-                            <div><strong>NTN:</strong> 7930679-5</div>
-                          </td>
-                          <td class="text-center align-middle color primary"><strong>INVOICE</strong></td>
-                        </tr>
-                      </tbody>
-                    </table>
+//            if($shipment->user->logo_status){
+//                if($shipment->shipment_invice_status){
+                    $logo = $shipment->user->logo;
+                    $logo_invoice = '<div class="invoice p-1">
+                    <div class="row"><div class="col-3"><h3>Invoice ('. $shipment->order_id .')</h3></div></div>
+                    <div class="row"><div class="col-6 text-left">
+                    <img src="' . Storage::url('shippers_logo/'.$logo) . '" width="150" class="d-block mb-1">
+</div><div class="col-6 text-center"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1"></div></div>
+                    
                     <div class="row align-items-start justify-content-between summary">
                         <div class="col-6">
-                            <table class="table table-sm table-bordered border">
-                              <tbody>
-                                <tr>
-                                    <td class="color primary" colspan="2"><strong>Sender Details</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Name</strong></td>
-                                    <td>'. $shipment->pickup_address->poc .'</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Contact No.</strong></td>
-                                    <td>'. $shipment->pickup_address->phone .'</td>
-                                </tr>
-                               </tbody>
-                            </table>
+                            <div></div>
                         </div>
 
                         <div class="col-6">
@@ -1288,7 +1284,7 @@ class ShipperShipmentBookController extends Controller
                             <table class="table table-sm table-bordered border invoice">
                               <tbody>
                                 <tr class="color primary">
-                                    <td colspan="4"><strong>Shipment Details</strong></td>
+                                    <td colspan="4"><strong>Item Description</strong></td>
                                 </tr>
                                 <tr>
                                     <td class="color secondary"><strong>Shipping Mode</strong></td>
@@ -1315,7 +1311,7 @@ class ShipperShipmentBookController extends Controller
                             <table class="table table-sm table-bordered border invoice">
                                   <tbody>
                                     <tr>
-                                      <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                                      <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item Description</strong></td>
                                       <td class="color secondary border twice-top"><strong>Type</strong></td>
                                       <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
                                       <td class="color secondary border twice-top"><strong>Quantity</strong></td>
@@ -1331,7 +1327,10 @@ class ShipperShipmentBookController extends Controller
                     </div>
                     
             ';
-            }
+                    $shipment_details .= $logo_invoice;
+//                }
+
+//            }
         }
 
         $html .= $shipment_details;
@@ -3151,5 +3150,22 @@ class ShipperShipmentBookController extends Controller
         else {
             return ['status' => 1, 'error' => 'No Tracking Number and/or Consignee Phone Number entered'];
         }
+    }
+
+    public function cod_breakup_create($shipment_id, $shipping_charges, $total_cod, $invoice_item_descriptions, $amounts){
+        $invoice = new ShipmentInvoice();
+        $invoice->shipment_id = $shipment_id;
+        $invoice->shipping_charges = $shipping_charges;
+        $invoice->total_cod = $total_cod;
+        $invoice->save();
+
+        foreach ($invoice_item_descriptions as $key => $description){
+            $invoice_item = new ShipmentInvoiceItem();
+            $invoice_item->shipment_invoice_id = $invoice->id;
+            $invoice_item->description = $description;
+            $invoice_item->amount = $amounts[$key];
+            $invoice_item->save();
+        }
+
     }
 }
