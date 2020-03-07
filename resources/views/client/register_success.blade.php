@@ -44,8 +44,11 @@
                 <div class="col-12 d-flex align-items-center justify-content-center">
                     <div class="col-md-4 col-10 p-0">
                         <div class="card-header bg-transparent border-0">
-
-                            <h3 class="text-uppercase text-center">Thanks For Registration, Our Team Will Get Back To You Soon</h3>
+                            @if($verify == 1)
+                                <h3 class="text-uppercase text-center">Thanks For Verification, Our Team Will Get Back To You Soon</h3>
+                            @else
+                                <h3 class="text-uppercase text-center">Thanks For Registration, A Verification Email Has Been Sent To Your Email Account Please Verify Your Email To Continue With Us.</h3>
+                            @endif
                         </div>
                         <div class="card-content">
 

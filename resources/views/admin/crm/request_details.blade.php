@@ -30,7 +30,11 @@
                                 <button type="button" class="btn btn-primary width-10-per" id="tag"><span
                                             class="d-none d-lg-block" style="color: white">Tag</span></button>
                             @endif
-                                @if((session('role_id') == 1 || in_array(213, session('permissions'))))
+                            @if(($crm_details['status_id'] == 2) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(309, session('permissions'))))
+                                <button type="button" class="btn btn-primary width-10-per" id="un_tag"><span
+                                            class="d-none d-lg-block" style="color: white">Un Tag</span></button>
+                            @endif
+                            @if((session('role_id') == 1 || in_array(213, session('permissions'))))
                                 <button type="button" class="btn btn-primary width-10-per" id="edit_request"><span
                                             class="d-none d-lg-block" style="color: white">Edit Request</span></button>
                             @endif
@@ -254,8 +258,16 @@
 
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
+                                                                            @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
+                                                                                <button type="button" class="border-0" id="edit_comment_{{$comment->id}}" value="{{$comment->id}}"><i class="ft-edit"></i></button>
+                                                                            @endif
                                                                             <p>{!! $comment->comment !!}</p>
                                                                             <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                                <div id="updated_by_div_{{$comment->id}}">
+                                                                                    @if($comment->comment_updated_by != null && $comment->comment_updated_at != null)
+                                                                                        <small>Updated by: {{$comment->updated_by_admin->name}} ({{$comment->comment_updated_at}})</small>
+                                                                                    @endif
+                                                                                </div>
                                                                         </div>
                                                                     </div>
 
@@ -502,9 +514,12 @@
                                                             @if($tagging_history->crm_request_tagging_type_id == 1)
                                                                 <td>{{$tagging_history->department->name}}</td>
                                                                 <td>{{$tagging_history->tagging->name}}</td>
-                                                            @else
+                                                            @elseif($tagging_history->crm_request_tagging_type_id == 2)
                                                                 <td>{{$tagging_history->user->name}}</td>
                                                                 <td>{{$tagging_history->tagging->name}}</td>
+                                                            @else
+                                                                <td>-</td>
+                                                                <td>Un Tagged</td>
                                                             @endif
                                                             <td>{{$tagging_history->created_at}}</td>
                                                             <td>{{$tagging_history->agent->name}}</td>
@@ -889,6 +904,68 @@
                 e.preventDefault();
                 $('#tagModal').modal('show');
             });
+            $('#un_tag').on('click', function (e) {
+                e.preventDefault();
+                swal({
+                    text: 'Are you sure, you want to un tag this Request?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if(confirm){
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Request is being un tagged.',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        $.ajax({
+                            url: '{!! route('admin.crm.in_process.un_tag') !!}',
+                            method: 'POST',
+                            data: {
+                                'multiple': 0,
+                                'crm_request_id': $('#crm_request_id').val(),
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                    setTimeout(function () {
+                                        window.location.reload();
+                                    }, 2000);
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                            });
+                    }
+                });
+            });
             $('#tagModal').on('hide.bs.modal', function (e) {
                 $('#tag_type').val('').trigger('change');
                 $('#admin_tag_div').addClass('d-none');
@@ -965,6 +1042,71 @@
             $('body').on('change', '#chat_form input', function () {
                 $(this).val($(this).val().trim());
             });
+
+            function last_comment_edit(last_comment, comment){
+                $('#edit_comment_' + last_comment).on('click', function (e) {
+                var comment_id = $(this).attr("value");
+                e.preventDefault();
+                swal({
+                    text: 'Are you sure, you want to edit this comment as Internal?\n\t "' + comment + '"',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if(confirm){
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Comment is being updated.',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        $.ajax({
+                            url: '{!! route('admin.crm.comment.edit') !!}',
+                            method: 'POST',
+                            data: {
+                                'comment_id': last_comment,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    $('#edit_comment_' + last_comment).remove();
+                                    $('#chat_' + last_comment).addClass('internal');
+                                    $('#updated_by_div_' + last_comment).append('<small>Updated by: ' + data.updated_by + ' (' + data.updated_at + ')</small>');
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                            });
+                    }
+                });
+            });
+            }
             $('.chat_send').on('click', function () {
                 var flag = true;
                 var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br/>');
@@ -1005,13 +1147,20 @@
                             if (internal_switch) {
                                 var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             } else {
-                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                var last_comment = data.last_comment_id;
+
+                                var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left">';
+                                @if(session('role_id') == 1 || in_array(310, session('permissions')))
+                                    html += '<button type="button" class="border-0" id="edit_comment_' + last_comment + '" value="' + last_comment + '"><i class="ft-edit"></i></button>';
+                                @endif
+                                html += '<p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small><div id="updated_by_div_' + last_comment + '"></div></div></div>';
                             }
                             $('section.chat-app-window .chats').append(html);
 
                             // }
 
                             $('#last_comment_id').val(data.last_comment_id);
+                            last_comment_edit(last_comment, comment);
 
                             updateScroll();
                         }
@@ -1191,6 +1340,75 @@
         $('#invalid_form').on('submit', function (e) {
             blockPagePermanently();
         })
+
+        @foreach($comments as $comment)
+            @if($comment->comment_by == 0)
+                @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
+                    $('#edit_comment_{{$comment->id}}').on('click', function (e) {
+                        var comment_id = $(this).attr("value");
+                        e.preventDefault();
+                        swal({
+                            text: 'Are you sure, you want to edit this comment as Internal?\n\t "{{$comment->comment}}"',
+                            icon: 'info',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function(confirm) {
+                            if(confirm){
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Comment is being updated.',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                                $.ajax({
+                                    url: '{!! route('admin.crm.comment.edit') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'comment_id': comment_id,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                })
+                                    .done(function (data) {
+                                        if (data.status == 0) {
+                                            $('#edit_comment_{{$comment->id}}').remove();
+                                            $('#chat_{{$comment->id}}').addClass('internal');
+                                            $('#updated_by_div_{{$comment->id}}').append('<small>Updated by: ' + data.updated_by + ' (' + data.updated_at + ')</small>');
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                        swal.close();
+                                    });
+                            }
+                        });
+                    });
+                @endif
+            @endif
+        @endforeach
 
     </script>
 @endsection

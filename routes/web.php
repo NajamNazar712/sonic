@@ -35,6 +35,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
+    Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
 
@@ -733,6 +734,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('rn.print','Admins\ReturnController@rrd_print')->name('rn.print');
             Route::post('shipments','Admins\ReturnController@receive_return_shipments')->name('shipments');
             Route::post('upload_image','Admins\ReturnController@receive_return_note_image_upload')->name('upload_image');
+            Route::post('undelivered/print','Admins\ReturnController@return_undelivered_print')->name('undelivered.print');
 
         });
         Route::prefix('history')->name('history.')->group(function () {
@@ -1274,6 +1276,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@destination_delivery_received_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@destination_delivery_received_list')->name('list');
         });
+
+        Route::prefix('account_reconciliation')->name('account_reconciliation.')->group(function (){
+            Route::get('', 'Reports\AccountReconciliationController@account_reconciliation_index')->name('index');
+            Route::post('export_to_excel', 'Reports\AccountReconciliationController@account_reconciliation_export_to_excel')->name('export_to_excel');
+            Route::get('download', 'Reports\AccountReconciliationController@account_reconciliation_download')->name('download');
+        });
+
     });
 
     //Reports end
@@ -1448,6 +1457,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_history_list')->name('list');
             });
         });
+        Route::prefix('overnight_overland_cargo_report')->name('overnight_overland_cargo_report.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_list')->name('list');
+            Route::post('update', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_rad_tat_submit')->name('update');
+            Route::get('edit/{id}', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_edit_index')->name('edit');
+            Route::post('edit/update', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_origin_submit')->name('edit.update');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
@@ -1487,6 +1503,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');
             Route::get('list', 'Admins\AdminCRMController@in_process_list')->name('list');
             Route::post('tag', 'Admins\AdminCRMController@bulk_admin_tag')->name('tag');
+            Route::post('un_tag', 'Admins\AdminCRMController@admin_un_tag')->name('un_tag');
         });
         Route::prefix('resolved')->name('resolved.')->group(function(){
             Route::get('', 'Admins\AdminCRMController@resolved_index')->name('index');
@@ -1505,6 +1522,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('comment')->name('comment.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_comment')->name('add');
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
+            Route::post('edit', 'Admins\AdminCRMController@edit_comment')->name('edit');
         });
 
         Route::get('permissions', 'Admins\AdminCRMController@crm_index')->name('permissions');

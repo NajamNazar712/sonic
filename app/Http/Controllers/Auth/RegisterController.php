@@ -15,10 +15,12 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\http\Models\UserDocumentAttachment;
+use App\Mail\Notifications;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -249,6 +251,7 @@ class RegisterController extends Controller
             'average_shipments' => $data['average_shipment'],
             'average_shipment_duration_id' => $data['average_shipment_duration'],
             'reference_id' => $data['reference'],
+            'email_verified' => 0,
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
@@ -354,10 +357,40 @@ class RegisterController extends Controller
         $crf_terms_and_conditions->token = $token;
         $crf_terms_and_conditions->save();
 
+        $route = route('cod.email.verified', ['user_id' => $newUser->id]);
+
+        $subject = 'Sonic - Account Verification';
+
+        $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
+                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
+                        <img src="' . asset('img/sonic_logo.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
+                        <img src="' . asset('img/trax_logo.png') . '" alt="Trax" style="display: inline-block; width: 15%">
+                    </div>';
+        $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
+                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Thank you for choosing Trax Logistics</h3>
+                    <p>Dear '. $newUser->name .','. PHP_EOL .'You are almost ready to start working with us.'. PHP_EOL .'To finish signing up, simply click below to verify your email address.</p>
+                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around;">
+                        <a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
+                    </div>
+                </div>
+                    <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © 2020 By Trax Logistics, All Rights Reserved.</p>
+                </div>';
+        $body = $html;
+        $to = $newUser->email;
+        $mail = Mail::to($to);
+
+        $mail->send(new Notifications($subject, $body, null));
+
         return $newUser;
     }
+    public function email_verified($id){
+        $user = User::find($id);
+        $user->email_verified = 1;
+        $user->save();
+        return view('client.register_success')->with(['verify' => 1]);
+    }
     public function register_success(){
-        return view('client.register_success');
+        return view('client.register_success')->with(['verify' => 0]);
     }
     public function addressView(){
         $products = Product::all();

@@ -7,21 +7,21 @@ use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class MonthAverageReportEmail extends Command
+class OvernightCargoReport extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'month:average';
+    protected $signature = 'overnight:cargo_report';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Average Shipments of Month Day Wise';
+    protected $description = 'Overnight Cargo Report';
 
     /**
      * Create a new command instance.
@@ -40,8 +40,8 @@ class MonthAverageReportEmail extends Command
      */
     public function handle()
     {
-        $date = Carbon::today()->format('Y-m-d');
-        $response = AdminReportsEmailController::month_average($date . ' 00:00:00');
-        NotificationsController::send(49, $date, $response);
+        $date = Carbon::yesterday()->format('Y-m-d');
+        $response = AdminReportsEmailController::overnight_overland_cargo($date, 1);
+        NotificationsController::send(59, 1, $response);
     }
 }
