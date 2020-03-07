@@ -1279,6 +1279,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@destination_delivery_received_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@destination_delivery_received_list')->name('list');
         });
+
+        Route::prefix('account_reconciliation')->name('account_reconciliation.')->group(function (){
+            Route::get('', 'Reports\AccountReconciliationController@account_reconciliation_index')->name('index');
+            Route::post('export_to_excel', 'Reports\AccountReconciliationController@account_reconciliation_export_to_excel')->name('export_to_excel');
+            Route::get('download', 'Reports\AccountReconciliationController@account_reconciliation_download')->name('download');
+        });
+
     });
 
     //Reports end
