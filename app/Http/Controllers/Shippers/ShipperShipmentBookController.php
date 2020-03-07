@@ -1233,104 +1233,58 @@ class ShipperShipmentBookController extends Controller
                     $shipment_details .= $table_end;
                 }
             }
-//            if($shipment->user->logo_status){
-//                if($shipment->shipment_invice_status){
+
+            if($shipment->user->logo_status){
+                if($shipment->shipment_invoice_status){
                     $logo = $shipment->user->logo;
+                    $invoice_id = '('.($shipment->order_id != null) ? $shipment->order_id:''.')';
                     $logo_invoice = '<div class="invoice p-1">
-                    <div class="row"><div class="col-3"><h3>Invoice ('. $shipment->order_id .')</h3></div></div>
+                    <div class="row"><div class="col-3"><h2>Invoice '. $invoice_id .'</h2></div></div>
                     <div class="row"><div class="col-6 text-left">
                     <img src="' . Storage::url('shippers_logo/'.$logo) . '" width="150" class="d-block mb-1">
-</div><div class="col-6 text-center"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1"></div></div>
+</div><div class="col-6 text-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1"></div></div>
                     
-                    <div class="row align-items-start justify-content-between summary">
-                        <div class="col-6">
-                            <div></div>
-                        </div>
-
-                        <div class="col-6">
-                            <table class="table table-sm table-bordered border invoice">
-                              <tbody>
-                                <tr>
-                                    <td class="color primary"><strong>Tracking No.</strong></td>
-                                    <td>'. $shipment->tracking_number .'</td>
-                                </tr>
-                               </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="row align-items-start justify-content-between summary">
-                    <div class="col-6">
-                            <table class="table table-sm table-bordered border">
-                              <tbody>
-                                <tr>
-                                    <td class="color primary" colspan="2"><strong>Receiver Details</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Name</strong></td>
-                                    <td>'. $shipment->consignee_name .'</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Address</strong></td>
-                                    <td>'. $shipment->consignee_address .'</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Contact No.</strong></td>
-                                    <td>'. $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') .'</td>
-                                </tr>
-                               </tbody>
-                            </table>
-                        </div>
-                        <div class="col-6">
-                            <table class="table table-sm table-bordered border invoice">
-                              <tbody>
-                                <tr class="color primary">
-                                    <td colspan="4"><strong>Item Description</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Shipping Mode</strong></td>
-                                    <td>'. $shipment->shipping_mode->mode .'</td>
-                                    <td class="color secondary"><strong>Order ID</strong></td>
-                                    <td>'. $shipment->order_id .'</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Origin</strong></td>
-                                    <td>'. $shipment->pickup_address->city->name .'</td>
-                                    <td class="color secondary"><strong>Destination</strong></td>
-                                    <td>'. $shipment->consignee_city->name .'</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Booking Date</strong></td>
-                                    <td>'. $shipment->created_at->format('Y-m-d H:i:s') .'</td>
-                                    <td class="color secondary"><strong>Weight</strong></td>
-                                    <td>'. $shipment->actual_weight .'</td>
-                                </tr>
-                               </tbody>
-                            </table>
-                        </div>
+                    <div class="row align-items-start justify-content-between p-2">
                         <div class="col-12">
-                            <table class="table table-sm table-bordered border invoice">
-                                  <tbody>
-                                    <tr>
-                                      <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item Description</strong></td>
-                                      <td class="color secondary border twice-top"><strong>Type</strong></td>
-                                      <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
-                                      <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                                      <td class="border twice-top">' . $item->quantity . '</td>
+                            <div class=""><h5 class="d-inline">Booking Date: </h5> <span>'. $shipment->created_at .'</span></div>
+                            <div class="mb-2"><h5 class="d-inline">Shipper Name: </h5> <span>'. $shipment->user->name .'</span></div>
+                            
+                            <div class=""><h5 class="d-inline">Consignee Name: </h5> <span>'. $shipment->consignee_name .'</span></div>
+                            <div class=""><h5 class="d-inline">Consignee Address: </h5> <span>'. $shipment->consignee_address .'</span></div>
+                            <div class=""><h5 class="d-inline">Consignee City: </h5> <span>'. $shipment->consignee_city->name .'</span></div>
+                            <div class=""><h5 class="d-inline">Consignee Phone Number: </h5> <span>'. $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') .'</span></div>
+                        </div>
+                    </div>';
+                    $invoice_items = '';
+                    $shipment_invoice = ShipmentInvoice::where('shipment_id', $shipment->id)->first();
+                    if($shipment_invoice){
+                        $invoice_items .= '<div class="row align-items-start justify-content-between summary">
+                        <div class="col-12">
+                            <table class="table table-sm invoice">
+                                  <thead><tr><td  colspan="1">S.NO.</td>
+                                  <td class="text-center" colspan="6">ITEM DESCRIPTION</td>
+                                  <td class="text-center" colspan="2">AMOUNT</td></tr></thead><tbody>';
+                         $serial = 1;
+                        foreach ($shipment_invoice->items as $item) {
+                            $invoice_items .='<tr>
+                                    <td colspan="1">'. $serial .'</td>
+                                    <td colspan="6" class="">' . $item->description . '</td>
+                                    <td colspan="2" class="text-center color secondary">' . $item->amount . '</td>
                                     </tr>
-                                    <tr>
-                                      <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                      <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
-                                    </tr>
-                                </tbody>
+                                    ';
+                            $serial++;
+                    }
+                        $invoice_items .= '<tr colspan="1"><td></td><td colspan="6" class="text-right">Shipping Charges</td><td class="text-center" colspan="2">'. $shipment_invoice->shipping_charges .'</td></tr>
+                                <td colspan="1"></td><td colspan="6" class="text-right">Total COD Amount</td><td class="text-center" colspan="2">'. $shipment_invoice->total_cod .'</td></tbody>
                             </table>
                         </div>
-                    </div>
-                    
-            ';
+                    </div>';
+                    }
+                    $logo_invoice .= $invoice_items;
                     $shipment_details .= $logo_invoice;
-//                }
+                }
 
-//            }
+            }
         }
 
         $html .= $shipment_details;
