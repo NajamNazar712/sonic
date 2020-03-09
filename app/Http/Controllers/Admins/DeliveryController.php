@@ -1465,7 +1465,7 @@ class DeliveryController extends Controller
     }
 
     public function receive_delivery_status_submit(Request $request)
-    {   
+    {
         $open_box_ids = array();
         $shipments = explode(',', $request->shipment_ids);
         
