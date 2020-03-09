@@ -341,10 +341,12 @@
 
 									<div id="payment_info" class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Payment Information</h4>
+										@if($user->logo_status)
 										<div id="cod_breakup" class="form-group text-center p-1 border border-light rounded">
 											<label class="d-block">COD Breakup</label>
 											<input type="checkbox" name="cod_breakup_checkbox" class="switch" id="cod_breakup_checkbox">
 										</div>
+										@endif
 										<div class="form-group input-group">
 											<div class="input-group-prepend">
 												<span class="input-group-text">Rs</span>
@@ -405,7 +407,7 @@
 						</div>
 					</div>
 				</div>
-
+			@if($user->logo_status)
 			<!--items modal-->
 				<div class="modal fade" id="cod_breakup_modal" role="dialog" aria-labelledby="cod_breakup_modal_title" aria-hidden="true">
 					<div class="modal-dialog modal-xl" role="document">
@@ -461,7 +463,7 @@
 					</div>
 				</div>
 			<!--items modal-->
-
+			@endif
 			</div>
 		</div>
 	</div>
@@ -1384,7 +1386,7 @@
 				'allowMinus': false,
 				'allowPlus': false
 			});
-
+			@if($user->logo_status)
 			var cb_table = $('#cod_breakup_table').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				buttons: [{
@@ -1479,6 +1481,9 @@
 						breakup_rows[id] = {description: description, amount: amount};
 					});
 					$('#cod_breakup_modal').modal('hide');
+                    var total_cod_breakup = $('#cod_breakup_total').val();
+
+                    $('#amount').val(total_cod_breakup);
 
 				}
 			});
@@ -1486,7 +1491,7 @@
 
 				cb_table.row( $(this).parents('tr') ).remove().draw();
 			});
-
+			@endif
 		});
 	</script>
 @endsection
