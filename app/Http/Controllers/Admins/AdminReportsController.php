@@ -213,12 +213,24 @@ use Yajra\Datatables\Datatables;
                 })
                 ->editColumn('image', function ($return_note) {
                     $now = Carbon::now();
-                    if ($return_note->image != null && ($now->diffInDays($return_note->updated_at) < 30)) {
-                        $img = asset('uploads/return_notes/' . $return_note->image);
-                        return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-
-                    } else {
+                    if($return_note->image == null){
                         return "-";
+                    }else {
+                        $url = 'uploads/return_notes/' . $return_note->image;
+
+                        if(file_exists($url)){
+                            $img = asset('uploads/return_notes/' . $return_note->image);
+                            return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
+                        }else{
+                            $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note->image);
+                            if($exists){
+                                $img = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note->image, now()->addMinutes(5));
+                                return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
+                            }else{
+                                return "-";
+                            }
+                        }
+
                     }
 
                 })

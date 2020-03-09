@@ -12,6 +12,7 @@ use App\Http\Models\WMS\WmsStorageType;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\WMS\WmsPackingCharge;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Models\CorporateReturnCharge;
 use App\Http\Models\CorporateWeightCharge;
@@ -1364,7 +1365,6 @@ class AdminCorporateAccountsController extends Controller
 
     public function edit_rates_submit(Request $request, $id)
     {
-//        return $request;
         $user = User::find($id);
         if ($user['status'] != 3) {
 
@@ -4260,7 +4260,7 @@ class AdminCorporateAccountsController extends Controller
                         $ptype = new WmsPendingPackingCharge();
                         $ptype->user_id = $id;
                         $ptype->packing_type_id = $packing;
-                        $ptype->packing_type_id = $request->packing_size[$key];
+                        $ptype->packing_size_id = $request->packing_size[$key];
                         $ptype->charges = $request->packing_charges[$key];
                         $ptype->save();
                     }
