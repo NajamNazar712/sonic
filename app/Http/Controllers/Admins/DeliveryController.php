@@ -1893,7 +1893,7 @@ class DeliveryController extends Controller
                 if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
                     $where = array(7, 8, 9, 15, 18, 56);
                 }else{
-                    $where = array(7, 8, 9, 12, 15, 18, 20, 56);
+                    $where = array(7, 8, 9, 12, 15, 18, 56);
                 }
 
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
