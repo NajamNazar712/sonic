@@ -395,6 +395,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
+                deferLoading: [50, 0],
                 buttons: [
                     {
                         extend: 'excelHtml5',
