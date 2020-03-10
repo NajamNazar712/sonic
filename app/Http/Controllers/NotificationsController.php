@@ -4454,7 +4454,7 @@ class NotificationsController extends Controller
                                 }
                                 $to = $sale_admin->email;
 
-                                $cc_admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+                                $cc_admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
                                 if ($cc_admins->exists()) {
                                     $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
                                 }
