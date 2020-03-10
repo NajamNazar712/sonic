@@ -104,7 +104,7 @@
                                                             Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" id="person_of_contact" title="Numbers are not allowed" class="form-control required" placeholder="Person Name" name="shipper_poc" value="{{old('shipper_poc')}}">
+                                                        <input type="text" class="form-control required" placeholder="Person Name" name="shipper_poc" value="{{old('shipper_poc')}}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -817,9 +817,6 @@
     //$('.pickadate').pickadate();
     $(document).ready(function () {
 
-        // $('#person_of_contact').inputmask({
-        //     'alias': '';
-        // );
 
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select City',
