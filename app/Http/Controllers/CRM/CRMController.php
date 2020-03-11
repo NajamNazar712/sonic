@@ -63,5 +63,6 @@ class CRMController extends Controller
         $crm_request_status_history->save();
         NotificationsController::send(31, $id);
 
+        return $crm_request->id;
     }
 }
