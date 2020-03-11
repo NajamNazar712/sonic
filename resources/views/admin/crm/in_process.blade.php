@@ -51,6 +51,8 @@
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Tagged To</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Agent Assigned Date</th>
+                                    <th class="border-primary border-darken-1">Agent Assigned By</th>
                                     <th class="border-primary border-darken-1">Valid Date</th>
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
@@ -200,6 +202,8 @@
                             head.push('Tagged (Admin/Department)');
                             head.push('Tagged To');
                             head.push('Launched Date');
+                            head.push('Agent Assigned Date');
+                            head.push('Agent Assigned By');
                             head.push('Valid Date');
                             head.push('Launched To Today (TAT)');
                             head.push('Last Comment By');
@@ -227,6 +231,8 @@
                                 row.push(values.tagged);
                                 row.push(values.tagged_to);
                                 row.push(values.created_at);
+                                row.push(values.agent_assigned_date);
+                                row.push(values.agent_assigned_by);
                                 row.push(values.valid_date);
                                 row.push(values.current_tat);
                                 row.push(values.last_comment_name);
@@ -624,6 +630,8 @@
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
+                    {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
