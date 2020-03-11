@@ -30,6 +30,7 @@
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Reference</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                     </tr>
@@ -113,6 +114,7 @@
                         head.push('Shipping Mode');
                         head.push('Service Type');
                         head.push('Remarks');
+                        head.push('Reference');
                         head.push('Arrival Date');
                         head.push('Status Date');
                         $.each(result.data, function(index, values) {
@@ -132,6 +134,7 @@
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.remarks);
+                            row.push(values.reference);
                             row.push(values.arrival);
                             row.push(values.current_status_date);
 
@@ -388,6 +391,7 @@
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
+                {data: 'reference', name: 'shipments_journey.reference_1_id', class: 'align-middle reference'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'}
             ],
