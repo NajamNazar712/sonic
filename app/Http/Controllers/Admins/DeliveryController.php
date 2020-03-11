@@ -1249,6 +1249,7 @@ class DeliveryController extends Controller
 
     }
     public function receive_delivery_status_submit_all(Request $request){
+
         $open_box_ids = array();
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
@@ -1468,9 +1469,9 @@ class DeliveryController extends Controller
     {
         $open_box_ids = array();
         $shipments = explode(',', $request->shipment_ids);
-        
+
         $open_box_ids = explode(',', $request->open_box_ids);
-        
+
         $delivery_note_id = $request->delivery_note_id;
         $password = $request->password;
         if(!DeliveryNote::where('id', $delivery_note_id)->where('password', $password)->exists()){
@@ -1823,7 +1824,6 @@ class DeliveryController extends Controller
     //verify delivery page
     public function receive_delivery_note_verify_view(Request $request, $id)
     {
-
         $note_data = DeliveryNote::where('id', $id)->first();
         if($note_data && ($note_data->pending_status ==1)){
             $note_data_shipments = DeliveryNoteShipment::where('delivery_note_id', $id)->pluck('shipment_id')->toArray();
@@ -1874,11 +1874,16 @@ class DeliveryController extends Controller
                     ->where('rrb.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
         return Datatables::of($deliveries)
+            ->setRowAttr([
+                'tracking_number' => function ($shipments) {
+                    return $shipments->tracking_number;
+                },
+            ])
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number_link' class='tracking' target='_blank'>$shipments->tracking_number_link</a></u>";
@@ -2001,10 +2006,12 @@ class DeliveryController extends Controller
 
     public function receive_delivery_verify_status_submit(Request $request)
     {
+        return $request;
         $delivery_note_id = $request->delivery_note_id;
         $delivery_note = DeliveryNote::find($delivery_note_id);
         $zero_cod_shipments = array();
         $shipments = explode(',', $request->shipment_ids);
+//        $shipments = $request->shipment_ids;
         if(count($shipments)  == $delivery_note->shipments_count){
             if($delivery_note) {
 
