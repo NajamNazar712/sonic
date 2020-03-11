@@ -171,7 +171,7 @@ class LostShipmentsController extends Controller
                 if($parcel->shipper_status_id == 18) {
 
                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 13, 'consignee_status_id' => 13]);
-                    ShipmentsJourneyController::add($shipment, 13, 13, NULL, NULL, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment, 13, 13, NULL, $request->remarks, NULL, Auth::id());
                 }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )"];
