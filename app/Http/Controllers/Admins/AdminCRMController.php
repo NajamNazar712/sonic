@@ -86,8 +86,7 @@ class AdminCRMController extends Controller
         }
         else{
             if ($request->has('shipment_ids')) {
-
-                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                if ($nature_id == 4) {
                     $shipment_ids = explode(',', $request->input('shipment_ids'));
                 }
                 else{
@@ -100,8 +99,13 @@ class AdminCRMController extends Controller
                             $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                             if($is_shipment){
                                 if($is_shipment->case_nature_id != $nature_id){
-                                    if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-                                        CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                    if ($nature_id == 4) {
+                                        if($complaint_id == 26){
+                                            CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description);
+                                        }
+                                        else{
+                                            CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                        }
                                     }
                                     else{
                                         CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -111,8 +115,8 @@ class AdminCRMController extends Controller
                                     $flag = true;
                                 }
                             }else{
-                                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-                                    CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                if ($nature_id == 4) {
+                                    CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                 }
                                 else{
                                     CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
