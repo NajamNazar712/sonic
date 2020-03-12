@@ -285,6 +285,7 @@
                         '<option value="0">Created</option>' +
                         '<option value="1">Station Approved</option>' +
                         '<option value="2">Operation Approved</option>' +
+                        '<option value="7">Received Statement</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;

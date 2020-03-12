@@ -105,7 +105,7 @@ class AdminFinanceController extends Controller
         $hubs = City::orderBy('name')->where('hub', 1)->get();
         $petty_cash_ids = array();
         $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
-        $petty_cash_list = PettyCashStatement::where('status','<',3)->whereNotIn('id',$petty_cash_ids)->select('id')->get();
+        $petty_cash_list = PettyCashStatement::whereIn('status',[0,1,2,7])->whereNotIn('id',$petty_cash_ids)->select('id')->get();
         return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks, 'hubs'=>$hubs, 'all_banks' => $all_banks, 'petty_cash_list' => $petty_cash_list]);
     }
 

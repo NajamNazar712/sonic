@@ -14,7 +14,7 @@ class UpdateCrmRequestAgentHistoriesForAssignedByTable extends Migration
     public function up()
     {
         Schema::table('crm_request_agent_histories', function (Blueprint $table) {
-            $table->boolean('assigned_by')->nullable();
+            $table->integer('assigned_by')->nullable();
         });
     }
 
