@@ -646,6 +646,9 @@
                         @if (session('role_id') == 1 || in_array(312, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.account_reconciliation.index') }}">Account Reconciliation</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(319, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.cargo_short_received_shipments.index') }}">Cargo Short Received Shipments</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

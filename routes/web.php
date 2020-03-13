@@ -1287,6 +1287,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('export_to_excel', 'Reports\AccountReconciliationController@account_reconciliation_export_to_excel')->name('export_to_excel');
             Route::get('download', 'Reports\AccountReconciliationController@account_reconciliation_download')->name('download');
         });
+        Route::prefix('cargo_short_received_shipments')->name('cargo_short_received_shipments.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@cargo_short_received_shipments_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@cargo_short_received_shipments_list')->name('list');
+        });
 
     });
 
