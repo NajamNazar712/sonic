@@ -10,6 +10,7 @@ use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\City;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
@@ -249,6 +250,7 @@ class AdminCRMController extends Controller
             ->whereNotIn('admin_roles.department_id', [1,3])->get();
         $types = CrmRequestTaggingTypes::get();
         $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
+        $hubs = City::where('status', 1)->where('hub', 1)->get();
         $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->first();
         $tagged_name = '';
         $tag_check = '';
@@ -310,7 +312,7 @@ class AdminCRMController extends Controller
         $sale_person = SalePersonTag::where('user_id', $crm_request->shipper_id)->where('status', 0)->first();
 
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -779,7 +781,8 @@ class AdminCRMController extends Controller
                         ->where('adp.id', '=', session('department_id'))
                         ->where(function ($sub_sub_query) {
                             $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
-                                ->orWhereIn('dc.hub_id', session('hubs'));
+                                ->orWhereIn('dc.hub_id', session('hubs'))
+                                ->orWhereIn('crt.hub_id', session('hubs'));
                         });
                 });
             });
@@ -1798,6 +1801,10 @@ class AdminCRMController extends Controller
 
     public function admin_tag(Request $request){
         $crm_request = CrmRequest::where('id', $request->crm_request_id)->first();
+        $tagged_hub = null;
+        if($request->tagged_hub != null){
+            $tagged_hub = $request->tagged_hub;
+        }
         if($request->crm_request_tagging_type_id == 1){
             $name = AdminDepartment::where('id', $request->tagged_id)->first();
         }
@@ -1809,14 +1816,16 @@ class AdminCRMController extends Controller
             if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
                 CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->update([
                     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
-                    'tagged_id' => $request->tagged_id
+                    'tagged_id' => $request->tagged_id,
+                    'hub_id' => $tagged_hub
                 ]);
 
                 CrmRequestTaggingHistory::create([
                     'crm_request_id' => $request->crm_request_id,
                     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
                     'tagged_id' => $request->tagged_id,
-                    'agent_id' => Auth::id()
+                    'agent_id' => Auth::id(),
+                    'hub_id' => $tagged_hub
                 ]);
 
                 if ($request->prev_status == 3) {
@@ -1839,14 +1848,16 @@ class AdminCRMController extends Controller
             CrmRequestTagging::create([
                 'crm_request_id' => $request->crm_request_id,
                 'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
-                'tagged_id' => $request->tagged_id
+                'tagged_id' => $request->tagged_id,
+                'hub_id' => $tagged_hub
             ]);
 
             CrmRequestTaggingHistory::create([
                 'crm_request_id' => $request->crm_request_id,
                 'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
                 'tagged_id' => $request->tagged_id,
-                'agent_id' => Auth::id()
+                'agent_id' => Auth::id(),
+                'hub_id' => $tagged_hub
             ]);
             NotificationsController::send(31,$request->crm_request_id);
         }
