@@ -200,7 +200,10 @@ class AdminFinanceController extends Controller
                     $dropdown .= $reconcile_delivery_notes_button;
                 }
 
-                $dropdown .= $edit_deposit_button;
+                $delivery_note_shipments = DeliveryNoteStationDepositNote::leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_note_station_deposit_notes.delivery_note_id')->where('delivery_note_station_deposit_notes.station_deposit_note_id', $station_deposit_note->id)->where('dns.status', '!=',  7)->get();
+                if(count($delivery_note_shipments) > 0){
+                    $dropdown .= $edit_deposit_button;
+                }
 
                 if (session('role_id') == 1 || in_array(251, session('permissions'))) {
                     $dropdown .= $sdn_adjustment_add_button;
