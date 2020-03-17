@@ -38,7 +38,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\OvernightCargoReport',
         '\App\Console\Commands\OverlandCargoReport',
 		'\App\Console\Commands\AccountReconciliationReportFromStart',
-        '\App\Console\Commands\AccountReconciliationReportCurrent'
+        '\App\Console\Commands\AccountReconciliationReportCurrent',
+        '\App\Console\Commands\BusinessProjectionAndRetention'
 ];
 
     /**
@@ -108,6 +109,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('overland:cargo_report')->dailyAt('00:00')->runInBackground();
 
 		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
+
+		$schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
     }
 
     /**

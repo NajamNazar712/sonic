@@ -544,6 +544,10 @@ class Permission
             'settings.foc_account.index' => 302,
             'settings.minimum_chargeable_weight.index' => 303,
 
+            'settings.sales.projection.percentage.index' => 313,
+            'settings.sales.projection.reasons.index' => 314,
+            'settings.sales.projection.shipment.index' => 318,
+
 
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
@@ -560,6 +564,8 @@ class Permission
             'intercept.update' => 245,
 
             'scanning_history.index' => 306,
+
+            'dashboard.sales.index' => 315,
         ],
 
         'shipper' => [

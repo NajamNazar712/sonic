@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\BusinessProjectionReason;
+use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
@@ -1703,5 +1705,107 @@ class GlobalSettingsController extends Controller
 
 
         return redirect()->route('admin.settings.overnight_overland_cargo_report.index')->with('success', 'Setting Updated Successfully');
+    }
+
+    public function projection_percentage_index(){
+        $settings = GlobalSettings::where('type', 'sales_projection_percentage')->first();
+        $percentage = '';
+        if($settings){
+            $percentage = $settings->setting_value;
+        }
+        return view('admin.settings.sales.percentage')->with(['projection_percentage' => $percentage]);
+    }
+
+    public function projection_percentage_update(Request $request){
+        $percentage = $request->projection_percentage;
+        $setting = GlobalSettings::where('type', 'sales_projection_percentage');
+        if($setting->exists()){
+            $setting = $setting->first();
+            $setting->setting_value = $percentage;
+            $setting->save();
+        }else{
+            $setting = new GlobalSettings();
+            $setting->setting_value = $percentage;
+            $setting->type = 'sales_projection_percentage';
+            $setting->save();
+        }
+        return redirect()->back()->with('success', 'Setting updated');
+    }
+    public function projection_reason_index(){
+        return view('admin.settings.sales.reasons');
+    }
+
+
+    public function projection_reason_list(Request $request) {
+        $reasons = BusinessProjectionReason::all(['id','name']);
+        return Datatables::of($reasons)->make(true);
+    }
+
+    public function projection_reason_update(Request $request){
+        $reason = $request->reason;
+        if($reason == null && $reason == ''){
+             return response()->json(['status' => 0, 'error' => 'Please enter reason!']);
+        }
+        $projection_reason = BusinessProjectionReason::where('name', $reason);
+        if ($projection_reason->exists()) {
+            return response()->json(['status' => 0, 'error' => 'Same reason already exists!']);
+        }
+        else {
+            $business_projection_reason = new BusinessProjectionReason();
+            $business_projection_reason->name = $reason;
+            $business_projection_reason->save();
+
+            return response()->json(['status' => 1, 'success' => 'New Reason added successfully!']);
+        }
+    }
+    public function projection_shipments_index(){
+        $shippers = User::where('status', '>', 1)->select('id','name');
+
+        if(session('department_id') == 7){
+//            if(session('role_id') != 4 ){
+                $shippers = $shippers->where(function ($query) {
+                    $query->whereIn('users.id', session('tagged_shippers'));
+                });
+//            }
+        }
+        $shippers = $shippers->get();
+
+        $business_shipment = BusinessProjectionShipment::all();
+
+        return view('admin.settings.sales.shipments')->with(['shippers' => $shippers, 'shipments' => $business_shipment]);
+    }
+
+    public function projection_shipments_update(Request $request){
+        $shippers = $request->shippers;
+        $shipment = $request->projected_shipment;
+        if(count($shippers) > 0){
+            foreach ($shippers as $shipper) {
+                $business_shipment = BusinessProjectionShipment::where('user_id', $shipper);
+                if($business_shipment->exists()){
+                    $business_shipment = $business_shipment->first();
+                    $business_shipment->shipment = $shipment;
+                }else{
+                    $business_shipment = new BusinessProjectionShipment();
+                    $business_shipment->user_id = $shipper;
+                    $business_shipment->shipment = $shipment;
+                }
+                $business_shipment->save();
+            }
+            return redirect()->back()->with('success', 'Settings successfully updated');
+        }else{
+            return redirect()->back()->with('error', 'Shippers not selected!');
+        }
+    }
+
+    public function projection_shipments_list(Request $request){
+        $shipments = BusinessProjectionShipment::join('users as u','u.id','=','business_projection_shipments.user_id')->select('u.name as shipper','business_projection_shipments.shipment');
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $shipments = $shipments->where(function ($query) {
+                $query->whereIn('u.id', session('tagged_shippers'));
+            });
+            }
+        }
+        return Datatables::of($shipments)->make(true);
     }
 }
