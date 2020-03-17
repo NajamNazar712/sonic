@@ -35,12 +35,12 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table class="table table-stripped table-bordered">
+                            <table class="table  table-bordered">
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">City</th>
-                                    <th class="border-primary border-darken-1">Average Shipment / Day</th>
-                                    <th class="border-primary border-darken-1">Projected Shipment / Day</th>
+                                    <th class="border-primary border-darken-1">Average Shipment/Day</th>
+                                    <th class="border-primary border-darken-1">Projected Shipment/Day</th>
                                     <th class="border-primary border-darken-1">Last Day Numbers</th>
                                     <th class="border-primary border-darken-1">Achieved %</th>
                                 </tr>
@@ -49,7 +49,7 @@
                                 @if(count($hubs_data) > 0)
                                     @foreach($hubs_data as $hub)
                                         <tr>
-                                            <td>{{ $hub->city->name }}</td><td>{{ $hub->average_shipment }}</td><td>{{ $hub->projected_shipment }}</td><td>{{ $hub->last_day_number }}</td><td>{{ $hub->achieved }}</td>
+                                            <td>{{ $hub->city->name }}</td><td>{{ $hub->average_shipment }}</td><td>{{ $hub->projected_shipment }}</td><td>{{ $hub->last_day_number }}</td><td>{{ $hub->achieved }}%</td>
                                         </tr>
                                     @endforeach
                                 @else
@@ -58,6 +58,30 @@
                                     </tr>
                                 @endif
 
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <table class="table table-stripped table-bordered">
+                                <tbody>
+                                <tr>
+                                    <td>Current Average Shipments Per Day</td><td>{{ $business_accounts_total->average_shipments }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Projected Shipments Per Day</td><td>{{ $business_accounts_total->projected_shipments }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Overall Projection achieved per Day</td><td>{{ $business_accounts_total->last_day_numbers }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Overall Projection achieved %</td><td>{{ $business_accounts_total->achieved }}%</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>

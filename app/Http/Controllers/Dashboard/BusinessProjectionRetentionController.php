@@ -114,6 +114,8 @@ class BusinessProjectionRetentionController extends Controller
         $date = Carbon::today()->toDateString();
         $business_accounts = BusinessProjectionAccount::where('date', $date)->select(DB::raw('SUM(average_shipment) as average_shipments'), DB::raw('SUM(projected_shipment) as projected_shipments'), DB::raw('SUM(last_day_number) as last_day_numbers'), DB::raw('AVG(achieved) as achieved'))->first();
         $hubs_data = BusinessProjectionHub::where('date', $date)->get();
+        $reasons = BusinessProjectionAccount::where('date', $date)->select(DB::raw('ifnull(COUNT(business_projection_reason_id),0) as reason'))->groupBy('business_projection_reason_id')->get();
+        return $reasons;
 //        $data['hubs'] =
         return view('admin.sales.dashboard.index')->with(['business_accounts_total' => $business_accounts, 'hubs_data' => $hubs_data]);
     }
