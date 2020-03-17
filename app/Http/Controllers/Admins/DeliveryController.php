@@ -2006,7 +2006,6 @@ class DeliveryController extends Controller
 
     public function receive_delivery_verify_status_submit(Request $request)
     {
-        return $request;
         $delivery_note_id = $request->delivery_note_id;
         $delivery_note = DeliveryNote::find($delivery_note_id);
         $zero_cod_shipments = array();
