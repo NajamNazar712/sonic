@@ -305,7 +305,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
+
+        Route::prefix('sales')->name('sales.')->group(function () {
+            Route::get('index', 'Dashboard\BusinessProjectionRetentionController@dashboard')->name('index');
+            Route::get('list', 'Dashboard\BusinessProjectionRetentionController@dashboard_list')->name('list');
+            Route::post('update_reason','Dashboard\BusinessProjectionRetentionController@update_reason')->name('update_reason');
+        });
+
     });
+
+
+
+
     Route::prefix('operation_forecasting')->name('operation_forecasting.')->group(function () {
         Route::prefix('incoming')->name('incoming.')->group(function () {
             Route::get('{from?}/{to?}/{service_type_id?}/{hub?}/{status?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
@@ -318,6 +329,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('update/profile/password','Admins\AdminDashboardController@update_profile_password')->name('update.profile.password');
     Route::post('update/profile/password/submit','Admins\AdminDashboardController@update_profile_password_submit')->name('update.profile.password.submit');
+
 
 
     Route::prefix('orders')->name('orders.')->group(function () {
@@ -1465,6 +1477,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets_history')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_history_list')->name('list');
             });
+
+            Route::prefix('projection')->name('projection.')->group(function () {
+                Route::prefix('percentage')->name('percentage.')->group(function () {
+                    Route::get('', 'Admins\GlobalSettingsController@projection_percentage_index')->name('index');
+                    Route::post('', 'Admins\GlobalSettingsController@projection_percentage_update')->name('store');
+                });
+                Route::prefix('reasons')->name('reasons.')->group(function () {
+                    Route::get('', 'Admins\GlobalSettingsController@projection_reason_index')->name('index');
+                    Route::get('list', 'Admins\GlobalSettingsController@projection_reason_list')->name('list');
+                    Route::post('', 'Admins\GlobalSettingsController@projection_reason_update')->name('store');
+                });
+
+                Route::prefix('shipments')->name('shipments.')->group(function () {
+                    Route::get('', 'Admins\GlobalSettingsController@projection_shipments_index')->name('index');
+                    Route::post('', 'Admins\GlobalSettingsController@projection_shipments_update')->name('store');
+                    Route::get('list', 'Admins\GlobalSettingsController@projection_shipments_list')->name('list');
+                });
+
+            });
+
         });
         Route::prefix('overnight_overland_cargo_report')->name('overnight_overland_cargo_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_index')->name('index');
