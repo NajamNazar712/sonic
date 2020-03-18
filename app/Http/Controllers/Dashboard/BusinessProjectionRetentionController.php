@@ -127,10 +127,10 @@ class BusinessProjectionRetentionController extends Controller
         $reasons_data = BusinessProjectionAccount::where('date', $date)->select(DB::raw("business_projection_reason_id as reason_id, count(business_projection_reason_id) as count"))->groupBy('business_projection_reason_id');
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $reasons_data = $reasons_datare->whereIn('user_id', session('tagged_shippers'));
+                $reasons_data = $reasons_data->whereIn('user_id', session('tagged_shippers'));
             }
         }
-        $business_accounts = $business_accounts->first();
+        $reasons_data = $reasons_data->first();
         $reasons = BusinessProjectionReason::all();
         foreach ($reasons as $reason){
 
