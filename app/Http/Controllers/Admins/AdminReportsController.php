@@ -5509,7 +5509,8 @@ use Yajra\Datatables\Datatables;
 
         public function adjustments_index(){
             $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
-            return view('admin.reports.adjustments')->with(['shippers' => $shippers]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.adjustments')->with(['shippers' => $shippers, 'shipping_modes' => $shipping_modes]);
         }
 
         public function adjustments_list(Request $request){
@@ -5546,6 +5547,9 @@ use Yajra\Datatables\Datatables;
             }
             if($type = $request->get('search_type')){
                 $datatable->where('adjustment_logs.type', '=', $type);
+            }
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatable->where('s.booking_type_id', '=', $mode);
             }
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
@@ -5800,7 +5804,8 @@ use Yajra\Datatables\Datatables;
             $riders = DB::connection('reports')->table('riders')->get(['id','name']);
             $destinations = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
             $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
-            return view('admin.reports.fake_statuses_shipments_report')->with(['riders' => $riders, 'hubs' => $hubs, 'destinations' => $destinations]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.fake_statuses_shipments_report')->with(['riders' => $riders, 'hubs' => $hubs, 'destinations' => $destinations, 'shipping_modes' => $shipping_modes]);
         }
 
         public function fake_status_shipments_list(request $request){
@@ -5827,6 +5832,9 @@ use Yajra\Datatables\Datatables;
             }
             if ($destination = $request->get('destination')) {
                 $datatables->where('dc.id', $destination);
+            }
+            if($mode = $request->get('search_shipping_mode')){
+                $datatables->where('s.id','=',$mode);
             }
             if ($tracking_number = $request->get('search_tracking_no')) {
                 $datatables->where('s.tracking_number', $tracking_number);
@@ -5887,7 +5895,8 @@ use Yajra\Datatables\Datatables;
             $fromDays = Carbon::now()->subDays(29);
             $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
             $riders = DB::connection('reports')->table('riders')->get(['id','name']);
-            return view('admin.reports.delivered_shipment_report')->with(['cities' => $cities, 'riders' => $riders, 'fromDays' => $fromDays, 'toDays' => $toDays]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.delivered_shipment_report')->with(['cities' => $cities, 'riders' => $riders, 'fromDays' => $fromDays, 'toDays' => $toDays, 'shipping_modes' => $shipping_modes]);
         }
         public function delivered_shipment_list(Request $request){
             $from = $request->search_date_from;
@@ -5903,18 +5912,19 @@ use Yajra\Datatables\Datatables;
                 ->join('rider_categories as rc','rc.id', '=', 'riders.rider_category_id')
                 ->join('cities as c','c.id', '=', 'riders.city_id')
                 ->leftjoin('routes as rou', 'rou.id', '=', 'riders.route_id')
-                ->leftJoin('delivery_notes as dn', function ($join) use ($fromDays, $toDays){
+                ->leftjoin('delivery_notes as dn', function ($join) use ($fromDays, $toDays){
                     $join->on('dn.rider_id', '=', 'riders.id')
                         ->whereBetween('dn.created_at', [$fromDays,$toDays]);
                 })
-                ->leftJoin('shipments_journey as sj', function ($join) use ($fromDays, $toDays) {
+                ->leftjoin('shipments_journey as sj', function ($join) use ($fromDays, $toDays) {
                     $join->on('sj.reference_1_id', '=', 'dn.id')
                         ->where('sj.shipper_status_id', '=', 14)
                         ->where('sj.verification', '=', 1)
                         ->whereBetween('sj.updated_at', [$fromDays,$toDays]);
                 })
-                ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'dn.id')
-                ->select('riders.name as courier_name', 'rc.name as courier_type', 'rou.code as route_code', DB::raw('count(dns.shipment_id) as shipments_count'), DB::raw('count(sj.id) as delivered_shipments_count'), DB::raw('count(dns.shipment_id)/count(sj.id) as delivery_ratio'), 'c.name as station')
+                ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'dn.id')
+                ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
+                ->select('riders.name as courier_name', 'rc.name as courier_type', 'rou.code as route_code', DB::raw('count(s.id) as shipments_count'), DB::raw('count(sj.id) as delivered_shipments_count'), DB::raw('count(s.id)/count(sj.id) as delivery_ratio'), 'c.name as station')
                 ->groupBy('riders.id');
 
 
@@ -5925,6 +5935,9 @@ use Yajra\Datatables\Datatables;
             }
             if($station = $request->get('search_station')){
                 $datatables = $datatables->where('c.id', '=', $station);
+            }
+            if($mode = $request->get('search_shipping_mode')){
+                $datatables->where('s.booking_type_id','=',$mode);
             }
             return $datatables->make(true);
         }
