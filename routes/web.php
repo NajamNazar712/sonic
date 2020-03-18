@@ -309,6 +309,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::get('index', 'Dashboard\BusinessProjectionRetentionController@dashboard')->name('index');
             Route::get('list', 'Dashboard\BusinessProjectionRetentionController@dashboard_list')->name('list');
+            Route::post('update_reason','Dashboard\BusinessProjectionRetentionController@update_reason')->name('update_reason');
         });
 
     });

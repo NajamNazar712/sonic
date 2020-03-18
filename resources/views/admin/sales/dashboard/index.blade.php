@@ -7,31 +7,119 @@
 
     <section>
         <div class="row">
-            <div class="col-3">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            <table class="table table-stripped table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <td>Current Average Shipments Per Day</td><td>{{ $business_accounts_total->average_shipments }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Projected Shipments Per Day</td><td>{{ $business_accounts_total->projected_shipments }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Overall Projection achieved per Day</td><td>{{ $business_accounts_total->last_day_numbers }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Overall Projection achieved %</td><td>{{ $business_accounts_total->achieved }}%</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-xl-3 col-lg-6 col-12">
+                        <div class="card pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="media-body text-left">
+                                            <h3 class="info">{{ $business_accounts_total->average_shipments }}</h3>
+                                            <h6>Current Average Shipments Per Day</h6>
+                                        </div>
+                                        <div>
+                                            <span class="ft ft-activity info font-large-2 float-right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                        <div class="progress-bar bg-gradient-x-info" role="progressbar" style="width: 80%"
+                                             aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-12">
+                        <div class="card pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="media-body text-left">
+                                            <h3 class="info">{{ $business_accounts_total->projected_shipments }}</h3>
+                                            <h6>Projected Shipments Per Day</h6>
+                                        </div>
+                                        <div>
+                                            <span class="ft ft-activity info font-large-2 float-right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                        <div class="progress-bar bg-gradient-x-info" role="progressbar" style="width: 80%"
+                                             aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-12">
+                        <div class="card pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="media-body text-left">
+                                            <h3 class="info">{{ $business_accounts_total->last_day_numbers }}</h3>
+                                            <h6>Overall Projection achieved per Day</h6>
+                                        </div>
+                                        <div>
+                                            <span class="ft ft-activity info font-large-2 float-right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                        <div class="progress-bar bg-gradient-x-info" role="progressbar" style="width: 80%"
+                                             aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-12">
+                        <div class="card pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="media-body text-left">
+                                            <h3 class="info">{{ round($business_accounts_total->achieved,2) }}%</h3>
+                                            <h6>Overall Projection achieved %</h6>
+                                        </div>
+                                        <div>
+                                            <span class="ft ft-activity info font-large-2 float-right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                        <div class="progress-bar bg-gradient-x-info" role="progressbar" style="width: 80%"
+                                             aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-5">
+{{--            <div class="col-12">--}}
+{{--                <div class="card">--}}
+{{--                    <div class="card-content">--}}
+{{--                        <div class="card-body">--}}
+{{--                            <table class="table table-stripped table-bordered">--}}
+{{--                                <tbody>--}}
+{{--                                    <tr>--}}
+{{--                                        <td>Current Average Shipments Per Day</td><td>{{ $business_accounts_total->average_shipments }}</td>--}}
+{{--                                    </tr>--}}
+{{--                                    <tr>--}}
+{{--                                        <td>Projected Shipments Per Day</td><td>{{ $business_accounts_total->projected_shipments }}</td>--}}
+{{--                                    </tr>--}}
+{{--                                    <tr>--}}
+{{--                                        <td>Overall Projection achieved per Day</td><td>{{ $business_accounts_total->last_day_numbers }}</td>--}}
+{{--                                    </tr>--}}
+{{--                                    <tr>--}}
+{{--                                        <td>Overall Projection achieved %</td><td>{{ round($business_accounts_total->achieved,2) }}%</td>--}}
+{{--                                    </tr>--}}
+{{--                                </tbody>--}}
+{{--                            </table>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+            <div class="col-8">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -64,24 +152,18 @@
                     </div>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-4">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <table class="table table-stripped table-bordered">
                                 <tbody>
+                                @foreach($reasons_data as $id => $r)
                                 <tr>
-                                    <td>Current Average Shipments Per Day</td><td>{{ $business_accounts_total->average_shipments }}</td>
+                                    <td>{{$r['name']}}</td><td>{{$r['count']}}</td>
                                 </tr>
-                                <tr>
-                                    <td>Projected Shipments Per Day</td><td>{{ $business_accounts_total->projected_shipments }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Overall Projection achieved per Day</td><td>{{ $business_accounts_total->last_day_numbers }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Overall Projection achieved %</td><td>{{ $business_accounts_total->achieved }}%</td>
-                                </tr>
+
+                                @endforeach
                                 </tbody>
                             </table>
                         </div>
@@ -125,28 +207,33 @@
             </div>
         </div>
     </section>
-{{--    <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"--}}
-{{--         aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-md" role="document">--}}
-{{--            <div class="modal-content">--}}
-{{--                <div class="modal-header">--}}
-{{--                    <h4 class="modal-title" id="">Tag Sales Person</h4>--}}
-{{--                </div>--}}
-{{--                <div class="modal-body">--}}
-{{--                    <input type="hidden" id="shipper_id">--}}
-{{--                    <select name="Sale_person" id="saletag" class="form-control select2">--}}
-{{--                        @foreach($sale_name as $sn)--}}
-{{--                            <option value="{{ $sn->id }}" > {{ $sn->name }} </option>--}}
-{{--                        @endforeach--}}
-{{--                    </select>--}}
-{{--                </div>--}}
-{{--                <div class="modal-footer">--}}
-{{--                    <button type="button" class="btn btn-success" id="salesTagSubmit">Submit</button>--}}
-{{--                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
+    <div class="modal fade text-left" id="UpdateReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UpdateReasonModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Update Reason</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="row_id">
+                    <div class="form-group">
+                        <select name="reason_select" id="reason_select" class="form-control select2">
+                            @foreach($reasons as $sn)
+                                <option value="{{ $sn->id }}" > {{ $sn->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="remarks" id="remarks_input" class="form-control" cols="30" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="reasonSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -315,6 +402,58 @@
 
                     this.api().table().columns.adjust();
                 }
+            });
+
+            $("#reason_select").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reason",
+                width:'100%',
+                dropdownParent:$('#UpdateReasonModal')
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action button.reason', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    $('#row_id').val(id);
+                    $('#UpdateReasonModal').modal('show');
+                }
+            });
+
+            $('body').on('change','#UpdateReasonModal #remarks',function() {
+                $(this).val($(this).val().trim());
+            });
+
+            $('#reasonSubmit').on('click',function () {
+                var row_id = $('#row_id').val();
+                var reason_select = parseInt($('#reason_select').val());
+                var remarks = $('#remarks_input').val();
+                if(reason_select){
+                    $.ajax({
+                        url: '{!! route('admin.dashboard.sales.update_reason') !!}',
+                        method: 'POST',
+                        data: {
+                            'reason_id': reason_select,
+                            'row_id':row_id,
+                            'remarks' : remarks,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            $('#reason_select').val('').trigger('change');
+                            $('#remarks_input').val('');
+                            $('#UpdateReasonModal').modal('hide');
+                            table.draw(true);
+                        });
+                }else{
+                    var error = "Reason Not Selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
             });
 
         });

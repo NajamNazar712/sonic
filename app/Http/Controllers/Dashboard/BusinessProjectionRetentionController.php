@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Models\Admin\BusinessProjectionAccount;
 use App\Http\Models\Admin\BusinessProjectionHub;
+use App\Http\Models\Admin\BusinessProjectionReason;
+use App\Http\Models\Admin\BusinessProjectionReasonsLog;
 use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Shipper\User;
@@ -12,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
+use Auth;
 
 class BusinessProjectionRetentionController extends Controller
 {
@@ -108,16 +111,39 @@ class BusinessProjectionRetentionController extends Controller
 
     }
 
-
     public function dashboard(){
         $data = array();
         $date = Carbon::today()->toDateString();
-        $business_accounts = BusinessProjectionAccount::where('date', $date)->select(DB::raw('SUM(average_shipment) as average_shipments'), DB::raw('SUM(projected_shipment) as projected_shipments'), DB::raw('SUM(last_day_number) as last_day_numbers'), DB::raw('AVG(achieved) as achieved'))->first();
+        $business_accounts = BusinessProjectionAccount::where('date', $date)->select(DB::raw('SUM(average_shipment) as average_shipments'), DB::raw('SUM(projected_shipment) as projected_shipments'), DB::raw('SUM(last_day_number) as last_day_numbers'), DB::raw('AVG(achieved) as achieved'));
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $business_accounts = $business_accounts->whereIn('user_id', session('tagged_shippers'));
+            }
+        }
+        $business_accounts = $business_accounts->first();
+
         $hubs_data = BusinessProjectionHub::where('date', $date)->get();
-        $reasons = BusinessProjectionAccount::where('date', $date)->select(DB::raw('ifnull(COUNT(business_projection_reason_id),0) as reason'))->groupBy('business_projection_reason_id')->get();
-        return $reasons;
-//        $data['hubs'] =
-        return view('admin.sales.dashboard.index')->with(['business_accounts_total' => $business_accounts, 'hubs_data' => $hubs_data]);
+
+        $reasons_data = BusinessProjectionAccount::where('date', $date)->select(DB::raw("business_projection_reason_id as reason_id, count(business_projection_reason_id) as count"))->groupBy('business_projection_reason_id');
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $reasons_data = $reasons_datare->whereIn('user_id', session('tagged_shippers'));
+            }
+        }
+        $business_accounts = $business_accounts->first();
+        $reasons = BusinessProjectionReason::all();
+        foreach ($reasons as $reason){
+
+            $data[$reason->id]['name'] = $reason->name;
+            $data[$reason->id]['count'] = 0;
+            foreach ($reasons_data as $reason_data) {
+                if($reason_data['reason_id'] == $reason->id){
+                    $data[$reason->id]['count'] = $reason_data['count'];
+                }
+            }
+        }
+
+        return view('admin.sales.dashboard.index')->with(['business_accounts_total' => $business_accounts, 'hubs_data' => $hubs_data, 'reasons_data' => $data, 'reasons' => $reasons]);
     }
     public function dashboard_list(Request $request){
         $business = BusinessProjectionAccount::join('users as u', 'u.id', '=', 'business_projection_accounts.user_id')
@@ -126,6 +152,11 @@ class BusinessProjectionRetentionController extends Controller
             ->leftjoin('business_projection_reasons as bpr', 'bpr.id', '=', 'business_projection_accounts.business_projection_reason_id')
             ->select('business_projection_accounts.id', 'u.id as account_id','u.name as shipper', 'cities.name as city', 'u.poc', 'u.phone', 'u.address', 'u.email', 'u.status', 'sp.name as sales_person', 'bpr.name as reason', 'business_projection_accounts.remarks', 'business_projection_accounts.average_shipment','business_projection_accounts.projected_shipment','business_projection_accounts.last_day_number','business_projection_accounts.achieved')
             ->whereDate('date', Carbon::today());
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $business = $business->whereIn('u.id', session('tagged_shippers'));
+            }
+        }
         return Datatables::of($business)
             ->editColumn('shipper_status', function ($data){
                 if($data->status == 3){
@@ -151,7 +182,7 @@ class BusinessProjectionRetentionController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
-                $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Reason</div></button>';
+                $dropdown .= '<button type="button" class="dropdown-item reason"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Reason</div></button>';
 
                 $dropdown .= '
                     </div>
@@ -162,5 +193,26 @@ class BusinessProjectionRetentionController extends Controller
 
             })
             ->make(true);
+    }
+
+    public function update_reason(Request $request){
+        $row_id = $request->row_id;
+        $reason_id = $request->reason_id;
+        $remarks = $request->remarks;
+        if($row_id && $reason_id){
+            $account = BusinessProjectionAccount::find($row_id);
+            if($account->business_projection_reason_id != NULL){
+                $logs = new BusinessProjectionReasonsLog();
+                $logs->user_id = $account->user_id;
+                $logs->admin_id = Auth::id();
+                $logs->business_projection_reason_id = $account->business_projection_reason_id;
+                $logs->save();
+            }
+            $account->business_projection_reason_id = $reason_id;
+            $account->remarks = $remarks;
+            $account->save();
+            return response()->json(['status' => 1, 'success' => 'Reason successfully updated!']);
+        }
+
     }
 }
