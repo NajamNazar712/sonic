@@ -183,7 +183,8 @@ use Yajra\Datatables\Datatables;
             $riders = DB::connection('reports')->table('riders')->get(['id','name']);
             $admins = DB::connection('reports')->table('admins')->get(['id','name']);
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
-            return view('admin.reports.return_notes_report')->with(['riders' => $riders, 'admins' => $admins, 'hubs' => $hubs]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.return_notes_report')->with(['riders' => $riders, 'admins' => $admins, 'hubs' => $hubs, 'shipping_modes' => $shipping_modes]);
         }
         public function return_note_list(Request $request){
             $return_note = DB::connection('reports')->table('return_notes')
@@ -258,6 +259,9 @@ use Yajra\Datatables\Datatables;
             if ($hub = $request->get('search_hub')) {
                 $return->where('oc.id', '=', $hub);
             }
+            if ($mode = $request->get('search_shipping_mode')) {
+                $return->where('shipments.booking_type_id', '=', $mode);
+            }
             if($created_by = $request->get('search_created_by')){
                 $return->where('cr.id','=',$created_by);
             }
@@ -293,7 +297,8 @@ use Yajra\Datatables\Datatables;
             $riders = DB::connection('reports')->table('riders')->get(['id','name']);
             $admins = DB::connection('reports')->table('admins')->get(['id','name']);
             $cities = DB::connection('reports')->table('cities')->get(['id','name']);
-            return view('admin.reports.pickup_notes_report')->with(['riders'=>$riders,'admins'=>$admins,'cities'=>$cities]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.pickup_notes_report')->with(['riders'=>$riders,'admins'=>$admins,'cities'=>$cities,'shipping_modes'=>$shipping_modes]);
         }
         public function pickup_note_list(Request $request){
             $pickup_note = DB::connection('reports')->table('pickup_notes')->join('cities','cities.id','=','pickup_notes.city_id')
@@ -346,6 +351,12 @@ use Yajra\Datatables\Datatables;
             }
             if($city = $request->get('search_city')){
                 $pickup_note->where('cities.id','=',$city);
+            }
+            if($shipping_mode = $request->get('search_shipping_mode')){
+                $pickup_note = $pickup_note->leftjoin('pickup_request_received_shipments as prrs', 'prrs.pickup_request_id', '=', 'pr.id')
+                ->leftjoin('shipments as s', 's.id', '=', 'prrs.shipment_id')
+                ->where('s.booking_type_id', '=', $shipping_mode)
+                ->groupBy('pickup_notes.id');
             }
             if($submitted_by = $request->get('search_completed_by')){
                 $pickup_note->where('up.id','=',$submitted_by);
@@ -973,7 +984,8 @@ use Yajra\Datatables\Datatables;
         }
         public function outstanding_shipments_index(Request $request){
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
-            return view('admin.reports.outstanding_shipments_report')->with('hubs',$hubs);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.outstanding_shipments_report')->with(['hubs' => $hubs, 'shipping_modes' => $shipping_modes]);
         }
         public function outstanding_shipments_list(Request $request){
             $shipments = DB::connection('reports')->table('delivery_note_shipments')->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
@@ -1111,6 +1123,9 @@ use Yajra\Datatables\Datatables;
                 }
             }
 
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatables->where('s.booking_type_id', '=', $mode);
+            }
             if ($hub = $request->get('hub')) {
                 $datatables->where('hc.id', '=', $hub);
             }
@@ -2625,7 +2640,8 @@ use Yajra\Datatables\Datatables;
             $riders = DB::connection('reports')->table('riders')->get(['id','name']);
             $admins = DB::connection('reports')->table('admins')->get(['id','name']);
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
-            return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs,'shipping_modes'=>$shipping_modes]);
         }
         public function completed_delivery_notes_list(Request $request){
             $deliveries = DB::connection('reports')->table('delivery_notes')->
@@ -2722,6 +2738,9 @@ use Yajra\Datatables\Datatables;
             }
             if ($hub = $request->get('search_hub')) {
                 $datatable->where('oc.id', '=', $hub);
+            }
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatable->where('shipments.booking_type_id', '=', $mode);
             }
             if($submission_date = $request->get('search_submission')){
                 $datatable->whereDate('delivery_notes.updated_at',$submission_date);
@@ -3556,7 +3575,8 @@ use Yajra\Datatables\Datatables;
 
         public function negative_balance_customers_index()
         {
-            return view('admin.reports.invoice_for_negative_balance_customers');
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.invoice_for_negative_balance_customers')->with(['shipping_modes'=>$shipping_modes]);
 
         }
         public function negative_balance_customers_list(Request $request)
@@ -3578,12 +3598,17 @@ use Yajra\Datatables\Datatables;
                 ->addColumn('account_no', function ($user) {
                     return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
                 });
+
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatable->where('s.booking_type_id', '=', $mode);
+            }
             return $datatable->make(true);
 
         }
         public function call_verification_index()
         {
-            return view('admin.reports.call_verification_report');
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.call_verification_report')->with(['shipping_modes'=>$shipping_modes]);
 
         }
         public function call_verification_list(request $request)
@@ -3614,6 +3639,9 @@ use Yajra\Datatables\Datatables;
                     $route = route('admin.tracking.index');
                     return "<u><a href='{$route}?tracking_number=$shipments->tracking_no' class='tracking' target='_blank'>$shipments->tracking_no</a></u>";
                 });
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatable->where('s.booking_type_id', '=', $mode);
+            }
             return $datatable->make(true);
 
         }
@@ -3697,7 +3725,8 @@ use Yajra\Datatables\Datatables;
         public function fake_status_index(){
             $riders = DB::connection('reports')->table('riders')->get(['id','name']);
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
-            return view('admin.reports.fake_statuses_report')->with(['riders' => $riders, 'hubs' => $hubs]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.fake_statuses_report')->with(['riders' => $riders, 'hubs' => $hubs, 'shipping_modes' => $shipping_modes]);
         }
 
         public function fake_status_list(request $request){
@@ -3746,6 +3775,9 @@ use Yajra\Datatables\Datatables;
             }
             if ($tracking_number = $request->get('search_tracking_no')) {
                 $datatables->where('s.tracking_number', $tracking_number);
+            }
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatables->where('s.booking_type_id', '=', $mode);
             }
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
@@ -4493,9 +4525,9 @@ use Yajra\Datatables\Datatables;
         }
 
         public function cargo_returns_shipment_index(){
-
             $cities = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
-            return view('admin.reports.cargo_returns_shipment_report')->with('cities', $cities);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.cargo_returns_shipment_report')->with(['cities' => $cities, 'shipping_modes' => $shipping_modes]);
         }
         public function cargo_returns_shipment_list(Request $request){
             $cargo_returns_Shipment = DB::connection('reports')->table('shipments')->join('shipments_journey as sj', function ($join) {
@@ -4567,6 +4599,10 @@ use Yajra\Datatables\Datatables;
                 $cargo_returns_Shipment->where('ss.id', '=', $status);
             }
 
+            if ($mode = $request->get('search_shipping_mode')) {
+                $cargo_returns_Shipment->where('shipments.booking_type_id', '=', $mode);
+            }
+
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
@@ -4579,7 +4615,8 @@ use Yajra\Datatables\Datatables;
 
         public function return_reattempt_ratio_index(){
             $cities = DB::connection('reports')->table('cities')->where('status', 1)->get();
-            return view('admin.reports.return_reattempt_ratio')->with(['cities' => $cities]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.return_reattempt_ratio')->with(['cities' => $cities, 'shipping_modes' => $shipping_modes]);
         }
 
         public function return_reattempt_ratio_list(Request $request){
@@ -4645,6 +4682,10 @@ use Yajra\Datatables\Datatables;
                 });
             if ($city = $request->get('search_city')) {
                 $datatable->where('dc.id', '=', $city);
+            }
+
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatable->where('shipments.booking_type_id', '=', $mode);
             }
 
             if ($request->get('search_from') && $request->get('search_to')) {
@@ -4724,7 +4765,8 @@ use Yajra\Datatables\Datatables;
             $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
             $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
-            return view('admin.reports.revenue')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.revenue')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses,'shipping_modes'=>$shipping_modes]);
         }
         public function revenue_list(Request $request){
 
@@ -4962,6 +5004,9 @@ use Yajra\Datatables\Datatables;
             if($destination = $request->get('search_destination')){
                 $datatable->where('dc.id', '=', $destination);
             }
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatable->where('shipments.booking_type_id', '=', $mode);
+            }
             if($hub = $request->get('search_hub')){
                 $datatable->where('h.id', '=', $hub);
             }
@@ -5033,7 +5078,8 @@ use Yajra\Datatables\Datatables;
                 ->where('admin_roles.department_id',3)->get();
             $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
             $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6,7])->get();
-            return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'statuses'=>$statuses]);
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
+            return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'statuses'=>$statuses, 'shipping_modes' => $shipping_modes]);
         }
 
         public function crm_list(Request $request){
@@ -5203,6 +5249,9 @@ use Yajra\Datatables\Datatables;
             if($case_nature = $request->get('search_case_nature')){
                 $datatable->where('crcn.id', '=', $case_nature);
             }
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatable->where('s.booking_type_id', '=', $mode);
+            }
             if($agent = $request->get('search_agent')){
                 $datatable->where('a.id', '=', $agent);
             }
@@ -5223,8 +5272,9 @@ use Yajra\Datatables\Datatables;
             $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
             $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
             $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
+            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
 
-            return view('admin.reports.summary')->with(['hubs'=>$hubs,'shippers'=>$shippers,'today' => $today, 'thirtyday' => $thirtyDays]);
+            return view('admin.reports.summary')->with(['hubs'=>$hubs,'shippers'=>$shippers,'today' => $today, 'thirtyday' => $thirtyDays, 'shipping_modes' => $shipping_modes]);
         }
 
         public function summary_data(Request $request){
@@ -5403,6 +5453,9 @@ use Yajra\Datatables\Datatables;
             }
             if($destination = $request->get('search_destination')){
                 $datatable->where('dc.id', '=', $destination);
+            }
+            if ($mode = $request->get('search_shipping_mode')) {
+                $datatable->where('shipments.booking_type_id', '=', $mode);
             }
             if($card = $request->get('cards_filter')){
                 switch ($card) {
