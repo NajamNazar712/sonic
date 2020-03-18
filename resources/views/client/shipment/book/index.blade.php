@@ -359,12 +359,11 @@
 										</div>
 									</div>
 								</div>
-
 								<div class="row mt-2">
 									<div class="col">
 										<div class="form-group text-center">
-											<button type="submit" name="book" class="btn btn-primary" value="Book">Book</button>
-											<button type="submit" name="book_and_print" class="btn btn-primary ml-1" value="Book & Print">Book & Print</button>
+											<button type="submit" name="book" class="btn btn-primary submission" value="Book">Book</button>
+											<button type="submit" name="book_and_print" class="btn btn-primary ml-1 submission" value="Book & Print">Book & Print</button>
 										</div>
 									</div>
 								</div>
@@ -1041,7 +1040,13 @@
 				}
 			});
 
+			$('#amount').bind('keypress', function () {
+				$('#booking_form .submission').attr('disabled', true);
+			});
+
 			$('#amount, #consignee_city, #pickup_address').change(function(){
+				$('#booking_form .submission').attr('disabled', true);
+
 				$('#span').remove();
 				if ($('#pickup_address').val() == 0) {
 					var pickup_city_id = $('#new_pickup_city').val();
@@ -1069,6 +1074,8 @@
 					}
 					if(data.status === 2) {
 						$('#span').remove();
+
+						$('#booking_form .submission').attr('disabled', false);
 					}
 					if(data.status === 0) {
 						$('#span').remove();

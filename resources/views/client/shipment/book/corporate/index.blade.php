@@ -357,8 +357,8 @@
                                 <div class="row mt-2">
                                     <div class="col">
                                         <div class="form-group text-center">
-                                            <button type="submit" name="book" id="sub_book" class="btn btn-primary" value="Book">Book</button>
-                                            <button type="submit" name="book_and_print" id="sub_book_print" class="btn btn-primary ml-1" value="Book & Print">Book &amp; Print</button>
+                                            <button type="submit" name="book" class="btn btn-primary submission" value="Book">Book</button>
+                                            <button type="submit" name="book_and_print" class="btn btn-primary ml-1 submission" value="Book & Print">Book & Print</button>
                                         </div>
                                     </div>
                                 </div>
@@ -500,6 +500,10 @@
                 if ($(this).hasClass('danger')) {
                     $(this).valid();
                 }
+            });
+
+            $('#amount').bind('keypress', function () {
+                $('#booking_form .submission').attr('disabled', true);
             });
 
             function shipping_modes() {
@@ -1003,6 +1007,7 @@
 
             $('#amount, #consignee_city, #pickup_address').change(function(){
                 $('#span').remove();
+                $('#booking_form .submission').attr('disabled', true);
                 if ($('#pickup_address').val() == 0) {
                     var pickup_city_id = $('#new_pickup_city').val();
                 }
@@ -1029,6 +1034,7 @@
                     }
                     if(data.status === 2) {
                         $('#span').remove();
+                        $('#booking_form .submission').attr('disabled', false);
                     }
                     if(data.status === 0) {
                         $('#span').remove();
