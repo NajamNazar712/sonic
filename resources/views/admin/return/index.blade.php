@@ -60,6 +60,9 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
+                        <th class="border-primary border-darken-1">Assigned Agent</th>
+                        <th class="border-primary border-darken-1">Assigned At</th>
+                        <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Actions</th>
                     </tr>
                     </thead>
@@ -154,13 +157,13 @@
                     <form id="update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
 
                         <div class="form-group">
-                        @if($return_confirm_reasons)
-                        <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
-                            @foreach($return_confirm_reasons as $reason)
-                                <option value="{{$reason->id}}">{{$reason->name}}</option>
-                            @endforeach
-                        </select>
-                        @endif
+                            @if($return_confirm_reasons)
+                                <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
+                                    @foreach($return_confirm_reasons as $reason)
+                                        <option value="{{$reason->id}}">{{$reason->name}}</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
 
                         <div class="form-group ml-1">
@@ -190,13 +193,13 @@
                         <input type="hidden" id="return_reason_shipment_id">
                         <input type="hidden" id="return_reason_shipment_remarks">
                         <div class="form-group">
-                        @if($return_confirm_reasons)
-                        <select id="single_return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
-                            @foreach($return_confirm_reasons as $reason)
-                                <option value="{{$reason->id}}">{{$reason->name}}</option>
-                            @endforeach
-                        </select>
-                        @endif
+                            @if($return_confirm_reasons)
+                                <select id="single_return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
+                                    @foreach($return_confirm_reasons as $reason)
+                                        <option value="{{$reason->id}}">{{$reason->name}}</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
 
                         <div class="form-group ml-1">
@@ -208,6 +211,28 @@
 
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Assign Agent</h4>
+                </div>
+                <div class="modal-body">
+                    <select name="Sale_person" id="assign_agent" class="form-control select2">
+                        @foreach($agents as $agent)
+                            <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="assign_agentSubmit">Assign</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -285,6 +310,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $("#assign_agent").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Agent",
+                width:'100%',
+                dropdownParent:$('#AssignAgentModal')
+            });
+
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Shipping Mode',
@@ -333,6 +364,9 @@
                             head.push('Arrival Date');
                             head.push('Status Date');
                             head.push('Re-Attempt Count');
+                            head.push('Assigned Agent');
+                            head.push('Assigned At');
+                            head.push('Assigned By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -360,6 +394,9 @@
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
                                 row.push(values.reattempts);
+                                row.push(values.assigned_agent);
+                                row.push(values.assigned_at);
+                                row.push(values.assigned_by);
 
                                 body.push(row);
                             });
@@ -370,43 +407,33 @@
                     return {body: body, header: head};
                 }
             } );
-            
+
             var return_confirm_reasons = @json($return_confirm_reasons);
             var selected_rows = [];
             var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0)
+                @if (session('role_id') == 1 || count(array_intersect([45, 46, 316], session('permissions'))) !== 0)
+                buttons: [
+                        @if (session('role_id') == 1 || in_array(316, session('permissions')))
+                    {
+                        text: 'Assign Agent',
+                        className: 'btn btn-primary assign',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows !== ''){
+                                $('#AssignAgentModal').modal('show');
 
-                    buttons: [
-                    @if (session('role_id') == 1 || in_array(45, session('permissions')))
-                        {
-                            text: 'Confirm',
-                            className: 'btn btn-primary confirm',
-                            enabled: false,
-                            action: function (e, dt, node, config) {
-                                if(selected_rows !== ''){
-                                   $('#ReturnConfirmReasonModal').modal('show');
-
-                                }else{
-                                    var error = "Not selected any shipments!";
-                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            }
-                        },
-                    @endif
-
-                    @if (session('role_id') == 1 || in_array(46, session('permissions')))
-                        {
-                            text: 'Re-Attempt',
-                            className: 'btn btn-primary re-attempt',
-                            enabled: false,
-                            action: function (e, dt, node, config) {
-                                if(selected_rows != ''){
+                                $('#AssignAgentModal').on('shown.bs.modal',function (e) {
+                                });
+                                $('#AssignAgentModal').on('hide.bs.modal', function (e) {
+                                    $('#assign_agent').val('').trigger('change');
+                                });
+                                $('#assign_agentSubmit').on('click',function () {
+                                    var assign = parseInt($('#assign_agent').val());
                                     swal({
-                                        title: 'Are You Sure?',
-                                        text: 'Select Yes to change shipment status to Re-Attempt!',
-                                        icon: 'warning',
+                                        text: 'Are you sure, you want to Assign these shipments(s)?',
+                                        icon: 'info',
                                         buttons: {
                                             cancel: {
                                                 text: 'No',
@@ -424,103 +451,200 @@
                                         closeOnClickOutside: false,
                                         closeOnEsc: false,
                                         dangerMode: true
-                                    }).then(function (confirm) {
+                                    }).then(function(confirm) {
                                         if (confirm) {
-                                            blockPagePermanently();
-                                            table.rows().nodes().each(function(index) {
-                                                var row = table.row(index);
+                                            if (assign) {
+                                                $.ajax({
+                                                    url: '{!! route('admin.return.assign.agent') !!}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        'admin_id': assign,
+                                                        'shipment_ids[]': selected_rows,
+                                                        '_token': '{{ csrf_token() }}'
+                                                    }
+                                                })
+                                                    .done(function (data) {
+                                                        if (data.status == 0) {
+                                                            $('#AssignAgentModal').modal('hide');
+                                                            toastr.success(data.success, 'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
+                                                        } else {
+                                                            toastr.error(data.error, 'Error!', {
+                                                                positionClass: 'toast-top-center',
+                                                                containerId: 'toast-top-center'
+                                                            });
+                                                        }
+                                                        selected_rows = [];
 
-                                                if ($(row.node()).hasClass('selected')) {
-                                                    var id = parseInt(row.id());
-                                                    var remark = $(row.node()).find('td.shipment_remarks input').val();
-                                                    shipment_remarks[id] = remark;
-                                                }
-                                            });
+                                                        table.rows().deselect();
 
-                                            $.ajax({
-                                                url:"{{route('admin.return.reattempt.status')}}",
-                                                method:'POST',
-                                                data:{
-                                                    'shipment_ids':selected_rows,
-                                                    '_token':'{{ csrf_token() }}',
-                                                    'action': 'reattempt',
-                                                    'remark': shipment_remarks
-                                                }
-                                            }).done(function (data) {
-                                                UnblockPagePermanently();
-                                                selected_rows = [];
-                                                shipment_remarks = {};
-                                                table.button('.confirm').disable();
-                                                table.button('.re-attempt').disable();
-                                                table.draw('false');
-                                                table.rows().deselect();
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                            });
+                                                        table.draw(true);
+                                                    });
+                                            } else {
+                                                var error = "Agent Not Selected!";
+                                                toastr.error(error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
                                         }
                                     });
+                                });
 
-                                }
+                            }else{
+                                var error = "Not selected any shipments!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
-                        },
-                    @endif
-                        {
-                            extend: 'excel',
-                            title: 'Return Marked',
-                            className: 'btn btn-primary',
-                            text: '<i class="la la-file-excel-o"></i> Excel',
-                        }, {
-                            extend: 'selectAll',
-                            text: 'Select All',
-                            className: 'select_all',
-                            action : function(e) {
-                                e.preventDefault();
+                        }
+                    },
+                        @endif
 
-                                table.rows().nodes().each(function(index) {
-                                    var row = table.row(index);
+                        @if (session('role_id') == 1 || in_array(45, session('permissions')))
+                    {
+                        text: 'Confirm',
+                        className: 'btn btn-primary confirm',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows !== ''){
+                                $('#ReturnConfirmReasonModal').modal('show');
 
-                                    if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
-                                        id = parseInt(row.id());
+                            }else{
+                                var error = "Not selected any shipments!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
+                    },
+                        @endif
 
-                                        hub_id = $(row.node()).data('hub');
-
-                                        var allow = false;
-
-                                        if(hub_ids.length == 0) {
-                                            hub_ids.push(hub_id);
-
-                                            allow = true;
+                        @if (session('role_id') == 1 || in_array(46, session('permissions')))
+                    {
+                        text: 'Re-Attempt',
+                        className: 'btn btn-primary re-attempt',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to change shipment status to Re-Attempt!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
                                         }
-                                        else if(hub_ids[0] == hub_id) {
-                                            allow = true;
-                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        table.rows().nodes().each(function(index) {
+                                            var row = table.row(index);
 
-                                        if (allow) {
-                                            row.select();
-
-                                            var index = $.inArray(id, selected_rows);
-
-                                            if (index === -1) {
-                                                selected_rows.push(id);
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                var remark = $(row.node()).find('td.shipment_remarks input').val();
+                                                shipment_remarks[id] = remark;
                                             }
+                                        });
 
-                                            table.button('.confirm').enable();
-                                            table.button('.re-attempt').enable();
-                                        }
+                                        $.ajax({
+                                            url:"{{route('admin.return.reattempt.status')}}",
+                                            method:'POST',
+                                            data:{
+                                                'shipment_ids':selected_rows,
+                                                '_token':'{{ csrf_token() }}',
+                                                'action': 'reattempt',
+                                                'remark': shipment_remarks
+                                            }
+                                        }).done(function (data) {
+                                            UnblockPagePermanently();
+                                            selected_rows = [];
+                                            shipment_remarks = {};
+                                            table.button('.confirm').disable();
+                                            table.button('.re-attempt').disable();
+                                            table.button('.assign').disable();
+                                            table.draw('false');
+                                            table.rows().deselect();
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                        });
                                     }
                                 });
+
                             }
-                        }, {
-                            extend: 'selectNone',
-                            text: 'Select None',
-                            className: 'select_none',
-                            action : function(e) {
-                                e.preventDefault();
+                        }
+                    },
+                        @endif
+                    {
+                        extend: 'excel',
+                        title: 'Return Marked',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }, {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
 
-                                table.rows().nodes().each(function(index) {
-                                  var row = table.row(index);
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
 
-                                  if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                    id = parseInt(row.id());
+
+                                    hub_id = $(row.node()).data('hub');
+
+                                    var allow = false;
+
+                                    if(hub_ids.length == 0) {
+                                        hub_ids.push(hub_id);
+
+                                        allow = true;
+                                    }
+                                    else if(hub_ids[0] == hub_id) {
+                                        allow = true;
+                                    }
+
+                                    if (allow) {
+                                        row.select();
+
+                                        var index = $.inArray(id, selected_rows);
+
+                                        if (index === -1) {
+                                            selected_rows.push(id);
+                                        }
+
+                                        table.button('.confirm').enable();
+                                        table.button('.assign').enable();
+                                        table.button('.re-attempt').enable();
+                                    }
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
                                     row.deselect();
 
                                     id = parseInt(row.id());
@@ -533,26 +657,27 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.confirm').disable();
+                                        table.button('.assign').disable();
                                         table.button('.re-attempt').disable();
 
                                         hub_ids.splice(index, 1);
                                     }
-                                  }
-                                });
-                            }
-                        },
-                        {
-                            title: 'Upload',
-                            className: 'btn btn-primary excel-upload',
-                            text: '<i class="la la-file-excel-o"></i> Upload',
-                            action : function(e) {
-                                $('#excel_upload_modal').modal('show');
-                            }
-                        },
+                                }
+                            });
+                        }
+                    },
+                    {
+                        title: 'Upload',
+                        className: 'btn btn-primary excel-upload',
+                        text: '<i class="la la-file-excel-o"></i> Upload',
+                        action : function(e) {
+                            $('#excel_upload_modal').modal('show');
+                        }
+                    },
                     'reset'
-                        ],
+                ],
                 @else
-                   buttons:[{
+                buttons:[{
                     extend: 'excel',
                     title: 'Return Marked',
                     className: 'btn btn-primary',
@@ -607,6 +732,9 @@
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
+                    {data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
+                    {data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
+                    {data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -720,10 +848,12 @@
 
                     if (selected_rows.length > 0) {
                         table.button('.confirm').enable();
+                        table.button('.assign').enable();
                         table.button('.re-attempt').enable();
                     }
                     else {
                         table.button('.confirm').disable();
+                        table.button('.assign').disable();
                         table.button('.re-attempt').disable();
                     }
                 }else{
@@ -739,10 +869,12 @@
 
                         if (selected_rows.length > 0) {
                             table.button('.confirm').enable();
+                            table.button('.assign').enable();
                             table.button('.re-attempt').enable();
                         }
                         else {
                             table.button('.confirm').disable();
+                            table.button('.assign').disable();
                             table.button('.re-attempt').disable();
                         }
                     }else{
@@ -928,6 +1060,7 @@
                                 selected_rows = [];
                                 shipment_remarks = {};
                                 table.button('.confirm').disable();
+                                table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
                                 table.draw('false');
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -972,7 +1105,7 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if (confirm) {
-                             var action = 'confirm';
+                            var action = 'confirm';
                             blockPagePermanently();
                             $.ajax({
                                 url:"{{route('admin.return.marked.status.single')}}",
@@ -1003,7 +1136,7 @@
                             });
                         }
                     });
-                   
+
 
                 }
 
@@ -1111,11 +1244,11 @@
 
 
             $('#datatable').on('click', '.editEstimateCharges', function () {
-               var id =  $(this).parents('tr').attr('id');
-               if(id){
-                   $('#EditEstimateChargesModal').modal('show');
-                   $('#eec_shipment_id').val(id);
-               }
+                var id =  $(this).parents('tr').attr('id');
+                if(id){
+                    $('#EditEstimateChargesModal').modal('show');
+                    $('#eec_shipment_id').val(id);
+                }
 
             });
             $('#update_charges_form').validate({

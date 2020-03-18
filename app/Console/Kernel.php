@@ -39,8 +39,7 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\OverlandCargoReport',
 		'\App\Console\Commands\AccountReconciliationReportFromStart',
         '\App\Console\Commands\AccountReconciliationReportCurrent',
-        '\App\Console\Commands\BusinessProjectionAndRetention'
-];
+		'\App\Console\Commands\BusinessProjectionAndRetention'];
 
     /**
      * Define the application's command schedule.
@@ -104,6 +103,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('hubwise:split')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
+        $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
 
         $schedule->command('overnight:cargo_report')->dailyAt('00:00')->runInBackground();
         $schedule->command('overland:cargo_report')->dailyAt('00:00')->runInBackground();

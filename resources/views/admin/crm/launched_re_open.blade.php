@@ -53,6 +53,7 @@
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned Date</th>
+                                    <th class="border-primary border-darken-1">Agent Assigned By</th>
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
@@ -247,6 +248,7 @@
                             head.push('Launched By Type');
                             head.push('Launched Date');
                             head.push('Agent Assigned Date');
+                            head.push('Agent Assigned By');
                             head.push('Launched To Today (TAT)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
@@ -274,6 +276,7 @@
                                 row.push(values.added_by);
                                 row.push(values.created_at);
                                 row.push(values.agent_assigned_date);
+                                row.push(values.agent_assigned_by);
                                 row.push(values.current_tat);
                                 row.push(values.last_comment_name);
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));
@@ -601,6 +604,7 @@
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'agent_assigned_date', name: 'res.created_at', class: 'align-middle agent_assigned_date'},
+                    {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},

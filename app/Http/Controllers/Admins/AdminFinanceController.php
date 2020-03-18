@@ -105,7 +105,7 @@ class AdminFinanceController extends Controller
         $hubs = City::orderBy('name')->where('hub', 1)->get();
         $petty_cash_ids = array();
         $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
-        $petty_cash_list = PettyCashStatement::where('status','<',3)->whereNotIn('id',$petty_cash_ids)->select('id')->get();
+        $petty_cash_list = PettyCashStatement::whereIn('status',[0,1,2,7])->whereNotIn('id',$petty_cash_ids)->select('id')->get();
         return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks, 'hubs'=>$hubs, 'all_banks' => $all_banks, 'petty_cash_list' => $petty_cash_list]);
     }
 
@@ -200,7 +200,10 @@ class AdminFinanceController extends Controller
                     $dropdown .= $reconcile_delivery_notes_button;
                 }
 
-                $dropdown .= $edit_deposit_button;
+                $delivery_note_shipments = DeliveryNoteStationDepositNote::leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_note_station_deposit_notes.delivery_note_id')->where('delivery_note_station_deposit_notes.station_deposit_note_id', $station_deposit_note->id)->where('dns.status', '!=',  7)->get();
+                if(count($delivery_note_shipments) > 0){
+                    $dropdown .= $edit_deposit_button;
+                }
 
                 if (session('role_id') == 1 || in_array(251, session('permissions'))) {
                     $dropdown .= $sdn_adjustment_add_button;

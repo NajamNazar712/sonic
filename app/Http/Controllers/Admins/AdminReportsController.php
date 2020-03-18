@@ -6,6 +6,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\Excel_reports\Debriefing;
 use Carbon\Carbon;
@@ -6086,6 +6087,36 @@ use Yajra\Datatables\Datatables;
             if($destination = $request->get('search_destination')){
                 $datatables = $datatables->where('cities.id', '=', $destination);
             }
+            return $datatables->make(true);
+        }
+
+        public function cargo_short_received_shipments_index(){
+            return view('admin.reports.cargo_short_received_shipments');
+        }
+        public function cargo_short_received_shipments_list(Request $request){
+            $cargo_consignments_short_received_shipments = DB::connection('reports')->table('cargo_consignments')->leftjoin('cargo_consignment_shipments as css', 'css.cargo_consignment_id', '=', 'cargo_consignments.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'cargo_consignments.origin_hub_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 'cargo_consignments.destination_hub_id')
+                ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'cargo_consignments.shipping_mode_id')
+                ->leftjoin('shipments as s', 's.id', '=', 'css.shipment_id')
+                ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'cargo_consignments.type as cargo_type', 'cargo_consignments.created_at as transited_at')
+                ->where('cargo_consignments.status_id', 4)
+                ->whereIn('s.shipper_status_id', [3, 21])->get();
+
+
+
+            $datatables = Datatables::of($cargo_consignments_short_received_shipments)
+                ->editColumn('tracking_number_link', function ($shipments) {
+                    $route = route('admin.tracking.index');
+                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                })
+                ->editColumn('cargo_type',function ($shipments){
+                    if($shipments->cargo_type == 1){
+                        return 'Normal';
+                    }else{
+                        return 'Return';
+                    }
+                });
             return $datatables->make(true);
         }
     }

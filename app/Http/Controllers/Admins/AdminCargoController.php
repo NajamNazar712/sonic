@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\BookingType;
+use App\http\Models\CargoConsignmentJunctionSend;
 use App\Http\Models\CargoConsignmentStatus;
 use App\Http\Models\DraftCargo;
 use App\Http\Models\DraftCargoShipment;
@@ -1195,13 +1196,12 @@ class AdminCargoController extends Controller
     }
     public function in_transit_send_from_junction(Request $request) {
         foreach ($request->cargo_consignment_ids as $cargo_consignment_id) {
-//            $cargo_consignment_junction_send = new CargoConsignmentJunctionReceival();
-//
-//            $cargo_consignment_junction_send->cargo_consignment_id = $cargo_consignment_id;
-//            $cargo_consignment_junction_send->junction_id = $request->junction;
-//            $cargo_consignment_junction_send->receiver_id = Auth::id();
-//
-//            $cargo_consignment_junction_send->save();
+
+            $cargo_consignment_junction_send = new CargoConsignmentJunctionSend();
+            $cargo_consignment_junction_send->cargo_consignment_id = $cargo_consignment_id;
+            $cargo_consignment_junction_send->sender_id = Auth::id();
+            $cargo_consignment_junction_send->save();
+
             $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
             $cargo_consignment->status_id = 9;
             $cargo_consignment->save();
@@ -1589,7 +1589,25 @@ class AdminCargoController extends Controller
             ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
             ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status','cargo_consignments.type as cargo_type','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.seal_number', DB::raw('(SELECT COUNT(s.id) FROM shipments AS s INNER JOIN cargo_consignment_shipments AS css ON s.id = css.shipment_id WHERE css.cargo_consignment_id = cargo_consignments.id AND s.shipper_status_id = 3) AS short_received_shipments'));
+            ->leftJoin('cargo_consignment_junction_receivals as ccjrone', function ($join) {
+                $join->on('ccjrone.cargo_consignment_id', '=', 'cargo_consignments.id')
+                    ->where('ccjrone.id', '=',
+                        DB::raw('(select max(id) from cargo_consignment_junction_receivals where cargo_consignment_junction_receivals.cargo_consignment_id = cargo_consignments.id and cargo_consignment_junction_receivals.junction_id = cargo_consignments.junction_hub_1_id)'));
+            })
+            ->leftjoin('admins as ccjronea', 'ccjrone.receiver_id', '=', 'ccjronea.id')
+            ->leftJoin('cargo_consignment_junction_receivals as ccjrtwo', function ($join) {
+                $join->on('ccjrtwo.cargo_consignment_id', '=', 'cargo_consignments.id')
+                    ->where('ccjrtwo.id', '=',
+                        DB::raw('(select max(id) from cargo_consignment_junction_receivals where cargo_consignment_junction_receivals.cargo_consignment_id = cargo_consignments.id and cargo_consignment_junction_receivals.junction_id = cargo_consignments.junction_hub_2_id)'));
+            })
+            ->leftjoin('admins as ccjrtwoa', 'ccjrtwo.receiver_id', '=', 'ccjrtwoa.id')
+            ->leftJoin('cargo_consignment_junction_sends as ccjs', function ($join) {
+                $join->on('ccjs.cargo_consignment_id', '=', 'cargo_consignments.id')
+                    ->where('ccjs.id', '=',
+                        DB::raw('(select max(id) from cargo_consignment_junction_sends where cargo_consignment_junction_sends.cargo_consignment_id = cargo_consignments.id)'));
+            })
+            ->leftjoin('admins as ccjsa', 'ccjs.sender_id', '=', 'ccjsa.id')
+            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status','cargo_consignments.type as cargo_type','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.seal_number', DB::raw('(SELECT COUNT(s.id) FROM shipments AS s INNER JOIN cargo_consignment_shipments AS css ON s.id = css.shipment_id WHERE css.cargo_consignment_id = cargo_consignments.id AND s.shipper_status_id = 3) AS short_received_shipments'), 'ccjronea.name as junction_1_received_by', 'ccjrone.created_at as junction_1_received_at', 'ccjrtwoa.name as junction_2_received_by', 'ccjrtwo.created_at as junction_2_received_at', 'ccjsa.name as junction_send_by', 'ccjs.created_at as junction_send_at');
 
         if (session('role_id') != 1) {
             $cargo_consignments = $cargo_consignments->where(function ($query) {

@@ -388,6 +388,8 @@ class Permission
             'reports.destination_delivery_received.index' => 300,
             'reports.destination_delivery_received.list' => 300,
             'reports.account_reconciliation.index' => 312,
+            'reports.cargo_short_received_shipments.index' => 319,
+            'reports.cargo_short_received_shipments.list' => 319,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

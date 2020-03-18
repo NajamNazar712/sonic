@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CrmRequestTaggingHistory extends Model
 {
     protected $fillable = [
-        'crm_request_id','crm_request_tagging_type_id','tagged_id','agent_id'
+        'crm_request_id','crm_request_tagging_type_id','tagged_id','agent_id','hub_id'
     ];
     public function tagging() {
         return $this->belongsTo('App\Http\Models\CRM\CrmRequestTaggingTypes','crm_request_tagging_type_id','id');
@@ -20,5 +20,8 @@ class CrmRequestTaggingHistory extends Model
     }
     public function user() {
         return $this->belongsTo('App\Http\Models\Admin\Admin','tagged_id','id');
+    }
+    public function hub() {
+        return $this->belongsTo('App\Http\Models\City','hub_id','id');
     }
 }
