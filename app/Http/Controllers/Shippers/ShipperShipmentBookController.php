@@ -537,6 +537,7 @@ class ShipperShipmentBookController extends Controller
                     if ($msg_string != null) {
                         NotificationsController::send(32, $shipment_id, $msg_string);
                     }
+                    $user = User::find($user_id);
                     if($user->logo_status){
                         $shipment = Shipment::find($shipment_id);
                         $shipment->shipment_invoice_status = 1;
