@@ -542,13 +542,13 @@ class AdminDashboardController extends Controller
                 $graph['in_transit'][] = $in_transit->count();
                 $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
-                $graph['destination'] = $destination->count();
-                $graph['out_for_delivery'] = $out_for_delivery->count();
-                $graph['return_confirm'] = $return_confirm->count();
-                $graph['return_delivered'] = $return_delivered->count();
-                $graph['pending_shipments'] = $pending_shipments->count();
-                $graph['confirmation_pending'] = $confirmation_pending->count();
-                $graph['pending_return'] = $pending_return->count();
+                $graph['destination'][] = $destination->count();
+                $graph['out_for_delivery'][] = $out_for_delivery->count();
+                $graph['return_confirm'][] = $return_confirm->count();
+                $graph['return_delivered'][] = $return_delivered->count();
+                $graph['pending_shipments'][] = $pending_shipments->count();
+                $graph['confirmation_pending'][] = $confirmation_pending->count();
+                $graph['pending_return'][] = $pending_return->count();
             }
         }else if(($destination == '') && ($shipper != '')){
             foreach ($dates as $this_date) {
@@ -665,13 +665,13 @@ class AdminDashboardController extends Controller
                 $graph['in_transit'][] = $in_transit->count();
                 $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
-                $graph['destination'] = $destination->count();
-                $graph['out_for_delivery'] = $out_for_delivery->count();
-                $graph['return_confirm'] = $return_confirm->count();
-                $graph['return_delivered'] = $return_delivered->count();
-                $graph['pending_shipments'] = $pending_shipments->count();
-                $graph['confirmation_pending'] = $confirmation_pending->count();
-                $graph['pending_return'] = $pending_return->count();
+                $graph['destination'][] = $destination->count();
+                $graph['out_for_delivery'][] = $out_for_delivery->count();
+                $graph['return_confirm'][] = $return_confirm->count();
+                $graph['return_delivered'][] = $return_delivered->count();
+                $graph['pending_shipments'][] = $pending_shipments->count();
+                $graph['confirmation_pending'][] = $confirmation_pending->count();
+                $graph['pending_return'][] = $pending_return->count();
             }
         }else if(($destination != '') && ($shipper == '')){
             foreach ($dates as $this_date) {
@@ -788,13 +788,13 @@ class AdminDashboardController extends Controller
                 $graph['in_transit'][] = $in_transit->count();
                 $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
-                $graph['destination'] = $destination->count();
-                $graph['out_for_delivery'] = $out_for_delivery->count();
-                $graph['return_confirm'] = $return_confirm->count();
-                $graph['return_delivered'] = $return_delivered->count();
-                $graph['pending_shipments'] = $pending_shipments->count();
-                $graph['confirmation_pending'] = $confirmation_pending->count();
-                $graph['pending_return'] = $pending_return->count();
+                $graph['destination'][] = $destination->count();
+                $graph['out_for_delivery'][] = $out_for_delivery->count();
+                $graph['return_confirm'][] = $return_confirm->count();
+                $graph['return_delivered'][] = $return_delivered->count();
+                $graph['pending_shipments'][] = $pending_shipments->count();
+                $graph['confirmation_pending'][] = $confirmation_pending->count();
+                $graph['pending_return'][] = $pending_return->count();
             }
         }else{
             foreach ($dates as $this_date) {
