@@ -415,7 +415,7 @@ class AdminDashboardController extends Controller
     public function statistics_search(Request $request){
 //        return $request;
         $graph = array();
-        $destination = $request->destination;
+        $destination_id = $request->destination;
         $shipper = $request->shipper;
         $current_date = $request->current_date;
         $old_date = $request->old_date;
@@ -427,23 +427,23 @@ class AdminDashboardController extends Controller
             $dates[] = $date;
         }
 
-        if(($destination != '') && ($shipper != '')){
+        if(($destination_id != '') && ($shipper != '')){
             foreach ($dates as $this_date) {
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination, 'shipper_status_id' => 1]);
-                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id', 2);
-                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id', 3);
-                $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id', 17);
-                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id',4);
-                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id',5);
-                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id',20);
-                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id',25);
-                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [6,7,8,9,13,15,18,51,52,56]);
-                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
-                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [12,54,55]);
-                $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id, 'shipper_status_id' => 1]);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
+                $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
+                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id',4);
+                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id',5);
+                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id',20);
+                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id',25);
+                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6,7,8,9,13,15,18,51,52,56]);
+                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
+                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12,54,55]);
+                $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
 
                 if (session('role_id') != 1) {
                     $booked = $booked->where(function($query) {
@@ -550,7 +550,7 @@ class AdminDashboardController extends Controller
                 $graph['confirmation_pending'][] = $confirmation_pending->count();
                 $graph['pending_return'][] = $pending_return->count();
             }
-        }else if(($destination == '') && ($shipper != '')){
+        }else if(($destination_id == '') && ($shipper != '')){
             foreach ($dates as $this_date) {
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
@@ -673,23 +673,23 @@ class AdminDashboardController extends Controller
                 $graph['confirmation_pending'][] = $confirmation_pending->count();
                 $graph['pending_return'][] = $pending_return->count();
             }
-        }else if(($destination != '') && ($shipper == '')){
+        }else if(($destination_id != '') && ($shipper == '')){
             foreach ($dates as $this_date) {
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id',1);
-                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id', 2);
-                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id', 3);
-                $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id', 17);
-                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id',4);
-                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id',5);
-                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id',20);
-                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id',25);
-                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [6,7,8,9,13,15,18,51,52,56]);
-                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
-                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [12,54,55]);
-                $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',1);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
+                $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
+                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',4);
+                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',5);
+                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',20);
+                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',25);
+                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6,7,8,9,13,15,18,51,52,56]);
+                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
+                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12,54,55]);
+                $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
 
                 if (session('role_id') != 1) {
                     $booked = $booked->where(function($query) {
