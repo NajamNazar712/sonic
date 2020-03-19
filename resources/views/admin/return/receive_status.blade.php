@@ -61,7 +61,12 @@
                         <div class="col-2">
                             <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Verify Status</button>
                         </div>
+                        @else
+                            <div class="mr-1 ml-1">
+                                <button id="printUndeliveredDNCC" type="button" class="btn btn-warning btn-block">Print Undelivered Performa</button>
+                            </div>
                         @endif
+                        
                     </div>
                 </form>
             </div>
@@ -789,7 +794,41 @@
 
             // upload_return_note_image();
 
+            function printUndelivered(id) {
+                $.ajax({
+                    url: '{!! route('admin.return.receive.undelivered.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
 
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                        // location.reload();
+
+                    });
+            }
+
+            $('#printUndeliveredDNCC').on('click',function () {
+                var note_id = $('#return_note').val();
+                printUndelivered(note_id);
+            });
 
         });
     </script>

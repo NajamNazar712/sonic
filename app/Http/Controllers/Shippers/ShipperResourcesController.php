@@ -35,20 +35,23 @@ class ShipperResourcesController extends Controller
                 $city_list_array['header'] = ['S. No.','ID', 'Name', 'Class'];
                 $serial = 1;
                 foreach ($zone->zone_cities as $city) {
-                    $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
-                    if ($class) {
-                        $class = $class->class;
-                        if ($class == 0) {
-                            $class_name = "A";
-                        } elseif ($class == 1) {
-                            $class_name = "B";
-                        } elseif ($class == 2) {
-                            $class_name = "C";
-                        } else {
-                            $class_name = "D";
+                    $city_check = City::where('id', $city->id)->first();
+                    if ($city_check->status == 1) {
+                        $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
+                        if ($class) {
+                            $class = $class->class;
+                            if ($class == 0) {
+                                $class_name = "A";
+                            } elseif ($class == 1) {
+                                $class_name = "B";
+                            } elseif ($class == 2) {
+                                $class_name = "C";
+                            } else {
+                                $class_name = "D";
+                            }
+                            $city_list_array[] = ['serial' => $serial, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name];
+                            $serial++;
                         }
-                        $city_list_array[] = ['serial' => $serial, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name];
-                        $serial++;
                     }
                 }
                 $spreadsheet->setActiveSheetIndex($index);

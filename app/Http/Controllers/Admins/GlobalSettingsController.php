@@ -13,6 +13,7 @@ use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\City;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
@@ -23,6 +24,7 @@ use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\MultipleSaleTagging;
+use App\Http\Models\OvernightOverlandReportOriginHubs;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
@@ -1616,5 +1618,90 @@ class GlobalSettingsController extends Controller
             ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_week', 'sale_person_target_logs.average_revenue','sale_person_target_logs.created_at')
             ->orderBy('sale_person_target_logs.created_at');
         return Datatables::of($targets)->make(true);
+    }
+
+    public function overnight_overland_cargo_report_index(){
+        $overnight_rad_tat = GlobalSettings::where('type', 'rad_tat_overnight')->first();
+        $overland_rad_tat = GlobalSettings::where('type', 'rad_tat_overland')->first();
+        return view('admin.settings.overnight_overland_cargo_report.index')->with(['overnight' => $overnight_rad_tat, 'overland' => $overland_rad_tat]);
+    }
+
+    public function overnight_overland_cargo_report_list(Request $request){
+        $setting = City::leftjoin('admins as a', 'a.id', '=', 'cities.cut_off_time_updated_by')
+            ->select('cities.id as origin_id', 'cities.name as origin', 'cities.cut_off_time as cut_off_time', 'cities.cut_off_time_updated_at as updated_at', 'a.name as updated_by')
+            ->where('cities.hub', 1);
+        return Datatables::of($setting)
+
+            ->addColumn('action', function ($requests){
+
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                $dropdown .= '<button type="button" data-target-id=' . $requests->origin_id . ' class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    return $dropdown;
+            })->make(true);
+    }
+
+    public function overnight_overland_cargo_report_rad_tat_submit(Request $request){
+        GlobalSettings::where('type', 'rad_tat_overnight')->update([
+            'setting_value' => $request->overnight
+        ]);
+        GlobalSettings::where('type', 'rad_tat_overland')->update([
+            'setting_value' => $request->overland
+        ]);
+        return redirect()->back()->with('success', 'Rad Tat Updated Successfully!');
+    }
+
+
+    public function overnight_overland_cargo_report_edit_index($id){
+        $origin = City::find($id);
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $overnight_hubs = OvernightOverlandReportOriginHubs::where('origin_id', $id)->where('shipping_mode_id', 1)->pluck('hub_id')->toArray();
+        return view('admin.settings.overnight_overland_cargo_report.update')->with(['origin' => $origin, 'hubs' => $hubs, 'overnight_hubs' => $overnight_hubs]);
+    }
+
+    public function overnight_overland_cargo_report_origin_submit(Request $request){
+        $city = City::find($request->origin_id);
+        $city->cut_off_time = $request->cut_off_time;
+        $city->cut_off_time_updated_at = Carbon::now();
+        $city->cut_off_time_updated_by = Auth::id();
+        $city->save();
+
+        OvernightOverlandReportOriginHubs::where('origin_id', $city->id)->delete();
+
+        $hubs = City::where('hub', 1)->where('id', '!=', $city->id)->where('status', 1)->pluck('id')->toArray();
+
+        if ($request->has('hub_ids')) {
+            foreach($hubs as $hub){
+                if(in_array($hub, $request->hub_ids)){
+                    $overnight_hubs = new OvernightOverlandReportOriginHubs();
+                    $overnight_hubs->origin_id = $city->id;
+                    $overnight_hubs->hub_id = $hub;
+                    $overnight_hubs->shipping_mode_id = 1;
+                    $overnight_hubs->save();
+                }
+                else{
+                    $overland_hubs = new OvernightOverlandReportOriginHubs();
+                    $overland_hubs->origin_id = $city->id;
+                    $overland_hubs->hub_id = $hub;
+                    $overland_hubs->shipping_mode_id = 2;
+                    $overland_hubs->save();
+                }
+            }
+        }
+        else{
+            foreach($hubs as $hub){
+                $overland_hubs = new OvernightOverlandReportOriginHubs();
+                $overland_hubs->origin_id = $city->id;
+                $overland_hubs->hub_id = $hub;
+                $overland_hubs->shipping_mode_id = 2;
+                $overland_hubs->save();
+            }
+        }
+
+
+        return redirect()->route('admin.settings.overnight_overland_cargo_report.index')->with('success', 'Setting Updated Successfully');
     }
 }

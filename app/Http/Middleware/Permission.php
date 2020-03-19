@@ -387,6 +387,7 @@ class Permission
             'reports.route_distribution.list' => 300,
             'reports.destination_delivery_received.index' => 300,
             'reports.destination_delivery_received.list' => 300,
+            'reports.account_reconciliation.index' => 312,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -497,7 +498,7 @@ class Permission
             'settings.ticker.store' => 152,
 
             'settings.walk_in.store' => 154,
-		'settings.petty_cash.heads.index' => 157,
+		    'settings.petty_cash.heads.index' => 157,
             'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
             'settings.petty_cash.heads.edit' => 160,
@@ -542,7 +543,8 @@ class Permission
 
             'settings.foc_account.index' => 302,
             'settings.minimum_chargeable_weight.index' => 303,
-            
+
+
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,

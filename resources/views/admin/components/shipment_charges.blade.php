@@ -8,6 +8,11 @@
                 <th class="border-primary border-darken-1 align-middle text-center">Estimated</th>
                 <th class="border-primary border-darken-1 align-middle text-center">Actual</th>
                 <th class="border-primary border-darken-1 align-middle text-center">Chargeable</th>
+                @if($shipment->length != null && $shipment->breadth != null && $shipment->height != null)
+                    <th class="border-primary border-darken-1 align-middle text-center">Length</th>
+                    <th class="border-primary border-darken-1 align-middle text-center">Breadth</th>
+                    <th class="border-primary border-darken-1 align-middle text-center">Height</th>
+                @endif
                 <th class="border-primary border-darken-1 align-middle text-center">Charges</th>
                 @if ($shipment->fuel_surcharge != null)
                     <th class="border-primary border-darken-1 align-middle text-center">Fuel Surcharge</th>
@@ -24,6 +29,11 @@
                     <td class="align-middle text-center"> {{ $shipment->estimated_weight }}</td>
                     <td class="align-middle text-center"> {{ $shipment->actual_weight }}</td>
                     <td class="align-middle text-center"> {{ $shipment->chargeable_weight }}</td>
+                    @if($shipment->length != null && $shipment->breadth != null && $shipment->height != null)
+                        <td class="align-middle text-center"> {{ $shipment->length }}</td>
+                        <td class="align-middle text-center"> {{ $shipment->breadth }}</td>
+                        <td class="align-middle text-center"> {{ $shipment->height }}</td>
+                    @endif
                     <td class="align-middle text-center">Rs. {{ floatval($shipment->weight_charges) }}</td>
                     @if ($shipment->fuel_surcharge != null)
                         <td class="align-middle text-center">Rs. {{ floatval($shipment->fuel_surcharge) }}</td>

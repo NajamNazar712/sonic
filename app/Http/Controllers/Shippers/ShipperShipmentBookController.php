@@ -9,6 +9,8 @@ use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\ShipmentInvoice;
+use App\Http\Models\ShipmentInvoiceItem;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
@@ -39,6 +41,7 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Jobs\ProcessShipmentBooking;
 
 use Auth;
+use Illuminate\Support\Facades\Storage;
 use Session;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -266,6 +269,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
+
         if (BookingType::whereNotIn('id', [3, 4])->where('id', $request->input('selected_service_type'))->exists()) {
             if (!empty($request->input('shipping_mode'))) {
                     $user_id = session('user_id');
@@ -274,8 +278,8 @@ class ShipperShipmentBookController extends Controller
                     $user_email_id = $request->input('consignee_email_address');
                 }
                 else{
-                    $user_email = User::find($user_id);
-                    $user_email_id = $user_email->email;
+                    $user = User::find($user_id);
+                    $user_email_id = $user->email;
                 }
 
                     $service_type_id = $request->input('selected_service_type');
@@ -532,6 +536,18 @@ class ShipperShipmentBookController extends Controller
 
                     if ($msg_string != null) {
                         NotificationsController::send(32, $shipment_id, $msg_string);
+                    }
+                    if($user->logo_status){
+                        $shipment = Shipment::find($shipment_id);
+                        $shipment->shipment_invoice_status = 1;
+                        $shipment->save();
+                        if($request->has('cod_breakup')){
+                            $shipping_charges = $request->cod_breakup_shipping_charges;
+                            $total_cod = $request->cod_breakup_total_cod;
+                            $descriptions = $request->cod_breakup_description;
+                            $amounts = $request->cod_breakup_amount;
+                            $this->cod_breakup_create($shipment_id, $shipping_charges, $total_cod, $descriptions, $amounts);
+                        }
                     }
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
@@ -1216,6 +1232,58 @@ class ShipperShipmentBookController extends Controller
 
                     $shipment_details .= $table_end;
                 }
+            }
+
+            if($shipment->user->logo_status){
+                if($shipment->shipment_invoice_status){
+                    $logo = $shipment->user->logo;
+                    $invoice_id = '('.($shipment->order_id != null) ? $shipment->order_id:''.')';
+                    $logo_invoice = '<div class="invoice p-1" style="page-break-before: always;">
+                    <div class="row"><div class="col-3"><h2>Invoice '. $invoice_id .'</h2></div></div>
+                    <div class="row"><div class="col-6 text-center">
+                    <img src="' . Storage::url('shippers_logo/'.$logo) . '" width="150" class="d-block mb-1">
+</div><div class="col-6 text-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1" style="margin: 0 auto;"></div></div>
+                    
+                    <div class="row align-items-start justify-content-between p-2">
+                        <div class="col-12">
+                            <div class=""><h5 class="d-inline">Booking Date: </h5> <span>'. $shipment->created_at .'</span></div>
+                            <div class="mb-2"><h5 class="d-inline">Shipper Name: </h5> <span>'. $shipment->user->name .'</span></div>
+                            
+                            <div class=""><h5 class="d-inline">Consignee Name: </h5> <span>'. $shipment->consignee_name .'</span></div>
+                            <div class=""><h5 class="d-inline">Consignee Address: </h5> <span>'. $shipment->consignee_address .'</span></div>
+                            <div class=""><h5 class="d-inline">Consignee City: </h5> <span>'. $shipment->consignee_city->name .'</span></div>
+                            <div class=""><h5 class="d-inline">Consignee Phone Number: </h5> <span>'. $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') .'</span></div>
+                        </div>
+                    </div>';
+                    $invoice_items = '';
+                    $shipment_invoice = ShipmentInvoice::where('shipment_id', $shipment->id)->first();
+                    if($shipment_invoice){
+                        $invoice_items .= '<div class="row align-items-start justify-content-between summary">
+                        <div class="col-12">
+                            <table class="table table-sm invoice">
+                                  <thead><tr><td  colspan="1">S.NO.</td>
+                                  <td class="text-center" colspan="6">ITEM DESCRIPTION</td>
+                                  <td class="text-center" colspan="2">AMOUNT</td></tr></thead><tbody>';
+                         $serial = 1;
+                        foreach ($shipment_invoice->items as $item) {
+                            $invoice_items .='<tr>
+                                    <td colspan="1">'. $serial .'</td>
+                                    <td colspan="6" class="">' . $item->description . '</td>
+                                    <td colspan="2" class="text-center color secondary">' . $item->amount . '</td>
+                                    </tr>
+                                    ';
+                            $serial++;
+                    }
+                        $invoice_items .= '<tr colspan="1"><td></td><td colspan="6" class="text-right">Shipping Charges</td><td class="text-center" colspan="2">'. $shipment_invoice->shipping_charges .'</td></tr>
+                                <td colspan="1"></td><td colspan="6" class="text-right">Total COD Amount</td><td class="text-center" colspan="2">'. $shipment_invoice->total_cod .'</td></tbody>
+                            </table>
+                        </div>
+                    </div>';
+                    }
+                    $logo_invoice .= $invoice_items;
+                    $shipment_details .= $logo_invoice;
+                }
+
             }
         }
 
@@ -3036,5 +3104,22 @@ class ShipperShipmentBookController extends Controller
         else {
             return ['status' => 1, 'error' => 'No Tracking Number and/or Consignee Phone Number entered'];
         }
+    }
+
+    public function cod_breakup_create($shipment_id, $shipping_charges, $total_cod, $invoice_item_descriptions, $amounts){
+        $invoice = new ShipmentInvoice();
+        $invoice->shipment_id = $shipment_id;
+        $invoice->shipping_charges = $shipping_charges;
+        $invoice->total_cod = $total_cod;
+        $invoice->save();
+
+        foreach ($invoice_item_descriptions as $key => $description){
+            $invoice_item = new ShipmentInvoiceItem();
+            $invoice_item->shipment_invoice_id = $invoice->id;
+            $invoice_item->description = $description;
+            $invoice_item->amount = $amounts[$key];
+            $invoice_item->save();
+        }
+
     }
 }

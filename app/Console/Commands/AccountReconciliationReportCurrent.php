@@ -2,26 +2,24 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\AdminReportsEmailController;
-use App\Http\Controllers\NotificationsController;
-use Carbon\Carbon;
+use App\Http\Controllers\Reports\AccountReconciliationController;
 use Illuminate\Console\Command;
 
-class MonthAverageReportEmail extends Command
+class AccountReconciliationReportCurrent extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'month:average';
+    protected $signature = 'accounts:reconciliationcurrent';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Average Shipments of Month Day Wise';
+    protected $description = 'Accounts Reconciliation Report of current 2 months';
 
     /**
      * Create a new command instance.
@@ -40,8 +38,6 @@ class MonthAverageReportEmail extends Command
      */
     public function handle()
     {
-        $date = Carbon::today()->format('Y-m-d');
-        $response = AdminReportsEmailController::month_average($date . ' 00:00:00');
-        NotificationsController::send(49, $date, $response);
+        AccountReconciliationController::reconciliation_current();
     }
 }

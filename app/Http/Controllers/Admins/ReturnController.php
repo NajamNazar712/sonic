@@ -2448,4 +2448,271 @@ class ReturnController extends Controller
 
         return $datatables->make(true);
     }
+
+    public function return_undelivered_print(Request $request){
+
+
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Return Note</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+                      td.complaint {
+                            background: #09262e !important;
+                            color: #ffffff;
+                       }
+                       div.page
+                        {
+                            page-break-after: always;
+                            page-break-inside: avoid;
+                        }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+      ';
+        $return_note = ReturnNote::where('id',$request->id);
+        if($return_note->exists()) {
+            $total_shipments = 0;
+            $total_users = 0;
+            $shipment_ids = ReturnNoteShipment::where('return_note_id',$request->id)->select('shipment_id')->get();
+            $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->get();
+            $filtered_shipments_users = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->groupBy('user_id')->get();
+            $shipment_details = '';
+
+            $shipment_details .= '<div class="page text-center">';
+                $shipment_details .= '
+                          <table class="table table-sm table-bordered border mt-1">
+                            <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY</strong></td>
+                                </tr>
+                              <tr>
+                                <td class="color primary"><strong>S. No.</strong></td>
+                                <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
+                                <td class="color primary"><strong>Contact Person</strong></td>
+                                <td class="color primary"><strong>Contact Person Phone</strong></td>
+                                <td class="color primary"><strong>Client Address</strong></td>
+                                <td class="color primary"><strong>Total Shipments</strong></td>
+                                <td class="color primary"><strong>Sign</strong></td>
+                              </tr>
+            ';
+
+            foreach ($filtered_shipments_users as $filtered_shipments_user){
+                $total_users++;
+                $user_shipment_collection_charges[$filtered_shipments_user->user_id] = 0;
+                $user_total_shipments[$filtered_shipments_user->user_id] = 0;
+                foreach ($filtered_shipments as $shipment) {
+                    if($shipment->user_id == $filtered_shipments_user->user_id){
+                        $user_total_shipments[$filtered_shipments_user->user_id]++;
+                    }
+                }
+                        $shipment_details_row_start_summary = '
+                              <tr>
+                                <td>' . $total_users . '</td>
+                                <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
+                                <td>' . $filtered_shipments_user->pickup_address->poc . '</td>
+                                <td>' . $filtered_shipments_user->pickup_address->phone . '</td>
+                                <td>' . $filtered_shipments_user->pickup_address->pickup_address . '</td>
+                                <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
+                                <td></td>
+                    ';
+
+                        $shipment_details .= $shipment_details_row_start_summary;
+            }
+            $shipment_details .= '
+                        </tbody>
+                      </table>
+                      </div>
+                     
+        ';
+            foreach ($filtered_shipments_users as $filtered_shipments_user){
+                $shipment_details .= '<div class="mb-1 text-center">';
+
+                $shipment_details .= '
+                          <table class="table table-sm table-bordered border">
+                            <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="9"><strong style="font-size: large">' . $filtered_shipments_user->user->name . '</strong></td>
+                                </tr>
+                              <tr>
+                                <td class="color primary"><strong>S. No.</strong></td>
+                                <td class="color primary"><strong>Tracking No.</strong></td>
+                                <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
+                                <td class="color primary"><strong>Contact Person</strong></td>
+                                <td class="color primary"><strong>Contact Person Phone</strong></td>
+                                <td class="color primary"><strong>Client Address</strong></td>
+                                <td class="color primary"><strong>No. of Items</strong></td>
+                                <td class="color primary"><strong>Collection Charges</strong></td>
+                                <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
+                              </tr>
+            ';
+
+                foreach ($filtered_shipments as $shipment) {
+                    if($shipment->user_id == $filtered_shipments_user->user_id && !in_array($shipment->shipper_status_id, [25,31,38])){
+                        $total_shipments++;
+                        $class = null;
+                        if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
+                            $class = 'complaint';
+                        }
+                        $shipment_details_row_start = '
+                              <tr>
+                                <td>' . $total_shipments . '</td>
+                                <td class="'. $class .'">' . $shipment->tracking_number . '</td>
+                                <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
+                                <td>' . $shipment->pickup_address->poc . '</td>
+                                <td>' . $shipment->pickup_address->phone . '</td>
+                                <td>' . $shipment->pickup_address->pickup_address . '</td>
+                                <td>' . $shipment->items->sum('quantity') . '</td>
+                    ';
+
+                        if ($shipment->booking_type_id != 4) {
+                            $shipment_details_row_start .= '
+                                <td></td>
+                        ';
+                        }
+                        else {
+                            if ($shipment->charges_mode_id == 1) {
+                                $shipment_details_row_start .= '
+                                <td>' . number_format($shipment->return_charges) . '</td>
+                            ';
+                            }
+                            else {
+                                $shipment_details_row_start .= '
+                                <td>' . number_format($shipment->amount) . '</td>
+                            ';
+                            }
+                        }
+
+                        $shipment_details_row_start .= '
+                                <td></td>
+    
+                              </tr>
+                ';
+
+                        $shipment_details .= $shipment_details_row_start;
+                    }
+                }
+                $shipment_details .= '
+                        </tbody>
+                      </table>
+                      </div>
+        ';
+            }
+            $return_note_details = ReturnNote::where('id',$request->id)->first();
+            $rider = Rider::where('id',$return_note_details->rider_id)->first();
+            $city_name = $return_note_details->hub->name;
+            $rider_name = $rider->name;
+            $category = $rider->rider_category->name;
+            $route_name = $return_note_details->route->code .' ('.$return_note_details->route->start.' to '.$return_note_details->route->end.')';
+            $main_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle color primary"><strong>Return Note</strong></td>
+                            <td class="text-center align-middle color secondary">Created at ' . $return_note_details->created_at . '</br> by ' . ucfirst($return_note_details->admin->name) . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                          </tr>
+                         
+                          <tr>
+                            <td class="color secondary"><strong>Rider Name</strong></td>
+                            <td>' . $rider_name . '</td>
+                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Category</strong></td>
+                            <td>' . $category . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Route</strong></td>
+                            <td>' . $route_name . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>City</strong></td>
+                            <td>' . $city_name  . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Undelivered Shipments</strong></td>
+                            <td>' . $total_shipments . '</td>
+                          </tr>
+                        
+                        </tbody>
+                      </table>
+        ';
+            $html .= $main_details;
+            $html .= $shipment_details;
+
+        }
+
+//        return $shipments;
+
+
+        $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
+
+
+    
+    }
 }

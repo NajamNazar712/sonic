@@ -92,6 +92,9 @@
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{route('cod.settings.air_waybill_printing.index')}}">Air Waybill Information And Print Count</a></li>
                     </ul>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{route('cod.settings.logo.index')}}">Logo</a></li>
+                    </ul>
                 </li>
             @endif
 
