@@ -212,7 +212,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('adjustments')->name('adjustments.')->group(function (){
             Route::get('', 'Shippers\ShipperReportsController@adjustments_index')->name('index');
             Route::get('list', 'Shippers\ShipperReportsController@adjustments_list')->name('list');
+        });
 
+        Route::prefix('delivery_and_return')->name('delivery_and_return.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@delivery_and_return_index')->name('index');
         });
     });
 

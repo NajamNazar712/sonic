@@ -72,6 +72,10 @@
                         <li><a class="menu-item" href="{{ route('cod.reports.sales.index') }}">Overall Sales</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.summary.index') }}">Summary</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.adjustments.index') }}">Adjustments</a></li>
+
+                        @if (in_array(session('user_id'), [405, 167, 1159, 2035]))
+                            <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
