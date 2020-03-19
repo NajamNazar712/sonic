@@ -107,7 +107,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('overnight:cargo_report')->dailyAt('00:00')->runInBackground();
         $schedule->command('overland:cargo_report')->dailyAt('00:00')->runInBackground();
 
-		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
+//		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
     }
 
     /**
