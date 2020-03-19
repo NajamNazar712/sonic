@@ -1664,30 +1664,36 @@ class AdminFinanceController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-
-            if (!in_array($shipment->shipper_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46])) {
+//            [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46]
+            if (!in_array($shipment->shipper_status_id, [14, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46])) {
+                $message = 'Shipment\'s weight can be changed';
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
 
-                if (!$pending_payment_shipment->exists()) {
+                if ($pending_payment_shipment->exists()) {
+                    $message = 'Shipment\'s payment is pending or already processed';
+                }else{
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
-
-                    if (!$done_payment_shipment->exists()) {
+                    if ($done_payment_shipment->exists()) {
+                        $message = 'Shipment\'s payment is pending or already processed';
+                    }
+                    else{
                         $account_type_id = $shipment->user->account_type_id;
-
                         if ($account_type_id == 2) {
                             $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
-
                             if ($pending_invoice_shipment->exists()) {
-                                return ['status' => 1, 'error' => 'A Invoice Payment of given Shipment is in Pending'];
+                                $message = 'A Invoice Payment of given Shipment is in Pending';
                             }
                             else {
                                 $invoice_shipment = InvoiceShipment::where('shipment_id', $shipment->id);
 
                                 if ($invoice_shipment->exists()) {
-                                    return ['status' => 1, 'error' => 'A Invoice Payment of given Shipment has already been Processed'];
+                                    $message = 'A Invoice Payment of given Shipment has already been Processed';
+
                                 }
                             }
                         }
+                    }
+                }
 
                         $details = array();
 
@@ -1698,6 +1704,7 @@ class AdminFinanceController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['status'] = $shipment->status_shipper->name;
 
+                        $details['booking_type_id'] = $shipment->booking_type_id;
                         $details['service_type'] = $shipment->booking_type->booking_type;
                         $details['shipping_mode'] = $shipment->shipping_mode->mode;
                         $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
@@ -1718,16 +1725,12 @@ class AdminFinanceController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
 
+                        if($shipment->booking_type_id == 2){
+                            $details['items'] = $shipment->items;
+                        }
+
                         ShipmentScanningJourneyController::add($shipment->id, 14, 1, Auth::id(), null,null);
-                        return ['status' => 0, 'success' => 'Shipment\'s weight can be changed', 'details' => $details];
-                    }
-                    else {
-                        return ['status' => 1, 'error' => 'A Payment of given Shipment has already been Processed'];
-                    }
-                }
-                else {
-                    return ['status' => 1, 'error' => 'A Payment of given Shipment is in Pending'];
-                }
+                        return ['status' => 0, 'success' => 'Shipment\'s weight can be changed', 'warning' => $message , 'details' => $details];
             }
             else {
                 return ['status' => 1, 'error' => 'Shipment has already been Delivered'];
@@ -1743,6 +1746,7 @@ class AdminFinanceController extends Controller
         $weight = $request->input('weight');
 
         $shipment = Shipment::find($shipment_id);
+        $previous_weight_charges = $shipment->weight_charges;
         if($shipment->actual_weight == null){
             return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
         }
@@ -1759,6 +1763,20 @@ class AdminFinanceController extends Controller
 
         ShipmentChargesController::weight($shipment_id);
         ShipmentChargesController::fuel_surcharge($shipment_id);
+
+//        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+//        $adjustment = $previous_weight_charges - $shipment->weight_charges;
+//        if($pending_payment->exists()){
+//
+//            self::add_adjustment($shipment->id, $adjustment, 'Change Shipment Weight Adjustment', 4);
+//        }else{
+//            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+//            if($done_payment->exists()){
+//                self::add_adjustment($shipment->id, $adjustment, 'Change Shipment Weight Adjustment', 4);
+//            }
+//        }
+
+
 
         return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
     }
