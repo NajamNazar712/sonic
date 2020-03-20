@@ -268,7 +268,12 @@ class AdminReportsEmailController extends Controller
             $total_avg_ratio_count = $total_avg_ratio_count + $ratio[$hub_wise_split->hub_id];
             $total_actual_weight_count = $total_actual_weight_count + $hub_wise_split->actual_weight;
         }
-        $total_avg_actual_weight_count = $total_actual_weight_count / $total_shipments_count;
+        if($total_shipments_count <= 0){
+            $total_avg_actual_weight_count = 0;
+        }
+        else{
+            $total_avg_actual_weight_count = $total_actual_weight_count / $total_shipments_count;
+        }
         $hub_wise_split_array[] = ['serial' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight/Shipment' => ''];
         $hub_wise_split_array[] = ['serial' => 'Total', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count * 100, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight/Shipment' => round($total_avg_actual_weight_count, 2)];
         $cell_st = [
