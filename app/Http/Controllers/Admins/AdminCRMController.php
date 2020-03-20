@@ -1878,6 +1878,10 @@ class AdminCRMController extends Controller
    // }
     public function bulk_admin_tag(Request $request){
         if(count($request->crm_request_ids) > 0){
+            $tagged_hub = null;
+            if($request->tagged_hub != null){
+                $tagged_hub = $request->tagged_hub;
+            }
             foreach($request->crm_request_ids as $crm_request_id){
                 $crm_request = CrmRequest::where('id', $crm_request_id)->first();
                 if($request->crm_request_tagging_type_id == 1){

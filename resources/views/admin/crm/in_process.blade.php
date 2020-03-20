@@ -134,6 +134,14 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        <div class="mt-1">
+                                            <select name="tag_hub" id="tag_hub"
+                                                    class="form-control select2">
+                                                @foreach($hubs as $hub)
+                                                    <option value="{{$hub->id}}"> {{$hub->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </fieldset>
                                 </div>
                             </div>
@@ -899,6 +907,12 @@
 
             $("#tag_department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            });
+
+            $("#tag_hub").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Hub",
                 width: '100%',
                 dropdownParent: $('#tagModal')
             });
