@@ -1755,6 +1755,9 @@ class AdminFinanceController extends Controller
         }
         if($request->has('replacement_checkbox')){
             $weight = $request->input('shipment_weight');
+            if($weight == null){
+                $weight = $shipment->actual_weight;
+            }
             $replacement_weight = $request->input('replacement_weight');
         }
 

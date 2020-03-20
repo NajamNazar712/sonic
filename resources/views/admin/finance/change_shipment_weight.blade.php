@@ -51,7 +51,7 @@
 												<div id="replacement_weight_div" class="d-none">
 
 														<div class="form-group">
-														<input type="text" name="shipment_weight" class="form-control weight" placeholder="Shipment Weight (kg)*" data-rule-required="true" data-msg-required="Shipment Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Shipment Weight needs to be from 0.01 to 10000">
+														<input type="text" name="shipment_weight" class="form-control weight" placeholder="Shipment Weight (kg)*" data-rule-range="[0.01,10000]" data-msg-range="Shipment Weight needs to be from 0.01 to 10000">
 													</div>
 														<div class="form-group">
 														<input type="text" name="replacement weight" class="form-control weight" placeholder="Replacement Shipment Weight (kg)*" data-rule-required="true" data-msg-required="Replacement Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Shipment Weight needs to be from 0.01 to 10000">
