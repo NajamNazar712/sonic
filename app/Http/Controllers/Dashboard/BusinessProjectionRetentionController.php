@@ -130,19 +130,25 @@ class BusinessProjectionRetentionController extends Controller
                 $reasons_data = $reasons_data->whereIn('user_id', session('tagged_shippers'));
             }
         }
-        $reasons_data = $reasons_data->first();
+        $reasons_data_count = 0;
+        $reasons_data = $reasons_data->get();
+        if($reasons_data){
+            $reasons_data_count = 1;
+        }
         $reasons = BusinessProjectionReason::all();
         foreach ($reasons as $reason){
 
             $data[$reason->id]['name'] = $reason->name;
             $data[$reason->id]['count'] = 0;
-            foreach ($reasons_data as $reason_data) {
-                if($reason_data['reason_id'] == $reason->id){
-                    $data[$reason->id]['count'] = $reason_data['count'];
+            if($reasons_data_count > 0){
+                foreach ($reasons_data as $reason_data) {
+                    if($reason_data['reason_id'] == $reason->id){
+                        $data[$reason->id]['count'] = $reason_data['count'];
+                    }
                 }
             }
-        }
 
+        }
         return view('admin.sales.dashboard.index')->with(['business_accounts_total' => $business_accounts, 'hubs_data' => $hubs_data, 'reasons_data' => $data, 'reasons' => $reasons]);
     }
     public function dashboard_list(Request $request){

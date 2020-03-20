@@ -1047,8 +1047,6 @@
             $('#tag_adminSubmit').on('click', function () {
                 var type = parseInt($('#tag_type').val());
                 var tag_hub = null;
-                console.log(1);
-                console.log(tag_hub);
                 if (type === 1) {
                     var tag = parseInt($('#tag_department').val());
                     tag_hub = parseInt($('#tag_hub').val());

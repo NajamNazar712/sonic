@@ -155,14 +155,14 @@ class LostShipmentsController extends Controller
                 if($parcel->shipper_status_id == 18) {
                     if (!$parcel->packaging_material_request) {
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                        ShipmentsJourneyController::add($shipment, 20, 20, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment, 20, 20, NULL, $request->remarks, NULL, Auth::id());
                         ShipmentChargesController::return ($shipment);
 
                         AdminFinanceController::add_payment($shipment, 1);
                     } else {
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-                        ShipmentsJourneyController::add($shipment, 17, 17, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment, 17, 17, NULL, $request->remarks, NULL, Auth::id());
                     }
                 }
             }
