@@ -127,20 +127,22 @@
                                             </select>
                                         </div>
                                         <div class="d-none" id="department_tag_div">
-                                            <select name="tag_department" id="tag_department"
-                                                    class="form-control  select2">
-                                                @foreach($departments as $department)
-                                                    <option value="{{$department->id}}"> {{$department->name}} </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="mt-1">
-                                            <select name="tag_hub" id="tag_hub"
-                                                    class="form-control select2">
-                                                @foreach($hubs as $hub)
-                                                    <option value="{{$hub->id}}"> {{$hub->name}} </option>
-                                                @endforeach
-                                            </select>
+                                            <div class="">
+                                                <select name="tag_department" id="tag_department"
+                                                        class="form-control  select2">
+                                                    @foreach($departments as $department)
+                                                        <option value="{{$department->id}}"> {{$department->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mt-1">
+                                                <select name="tag_hub" id="tag_hub"
+                                                        class="form-control select2">
+                                                    @foreach($hubs as $hub)
+                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
                                     </fieldset>
                                 </div>
@@ -945,8 +947,13 @@
             });
             $('#tag_adminSubmit').on('click', function () {
                 var type = parseInt($('#tag_type').val());
+                var tag_hub = null;
                 if (type === 1) {
                     var tag = parseInt($('#tag_department').val());
+                    tag_hub = parseInt($('#tag_hub').val());
+                    if(!tag_hub){
+                        tag_hub = null;
+                    }
                 }
                 else if (type === 2) {
                     var tag = parseInt($('#tag_admin').val());
@@ -966,6 +973,7 @@
                         method: 'POST',
                         data: {
                             'tagged_id': tag,
+                            'tagged_hub': tag_hub,
                             'crm_request_ids[]': selected_rows,
                             'crm_request_tagging_type_id': type,
                             '_token': '{{ csrf_token() }}'
