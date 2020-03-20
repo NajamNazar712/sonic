@@ -3693,7 +3693,12 @@ class NotificationsController extends Controller
                     $actual_weight_count = $actual_weight_count + $hub_wise_split->actual_weight;
                     $serial++;
                 }
-                $avg_actual_weight_count = $actual_weight_count / $shipments_count;
+                if($shipments_count <= 0){
+                    $avg_actual_weight_count = 0;
+                }
+                else{
+                    $avg_actual_weight_count = $actual_weight_count / $shipments_count;
+                }
                 $html .= '<tr>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
