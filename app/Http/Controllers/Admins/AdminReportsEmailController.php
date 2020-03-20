@@ -152,6 +152,10 @@ class AdminReportsEmailController extends Controller
         } else {
             $total_avg_revenue_count = 0;
         }
+        $cell_st =[
+            'font' =>['bold' => true],
+            'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
         ];
         // $sps_count  = count($sale_person_shipments);
         $sps_count = $serial;

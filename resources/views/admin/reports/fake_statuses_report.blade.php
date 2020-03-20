@@ -31,6 +31,13 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="form-group ml-1">
+                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                @foreach($shipping_modes as $shipping_mode)
+                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
                             <div class="form-group input-group ml-1">
                                 <div class="input-group-prepend">
@@ -208,6 +215,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_form #search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -328,6 +340,7 @@
                     data: function (d) {
                         d.rider = $('#riders').val();
                         d.hub = $('#hubs').val();
+                        d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();

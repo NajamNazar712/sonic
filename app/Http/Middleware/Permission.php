@@ -388,6 +388,8 @@ class Permission
             'reports.destination_delivery_received.index' => 300,
             'reports.destination_delivery_received.list' => 300,
             'reports.account_reconciliation.index' => 312,
+            'reports.cargo_short_received_shipments.index' => 319,
+            'reports.cargo_short_received_shipments.list' => 319,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -544,6 +546,10 @@ class Permission
             'settings.foc_account.index' => 302,
             'settings.minimum_chargeable_weight.index' => 303,
 
+            'settings.sales.projection.percentage.index' => 313,
+            'settings.sales.projection.reasons.index' => 314,
+            'settings.sales.projection.shipment.index' => 318,
+
 
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
@@ -560,6 +566,8 @@ class Permission
             'intercept.update' => 245,
 
             'scanning_history.index' => 306,
+
+            'dashboard.sales.index' => 315,
         ],
 
         'shipper' => [

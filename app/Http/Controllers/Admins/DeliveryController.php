@@ -1898,7 +1898,7 @@ class DeliveryController extends Controller
                 if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
                     $where = array(7, 8, 9, 15, 18, 56);
                 }else{
-                    $where = array(7, 8, 9, 12, 15, 18, 20, 56);
+                    $where = array(7, 8, 9, 12, 15, 18, 56);
                 }
 
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
@@ -3260,7 +3260,7 @@ class DeliveryController extends Controller
     {
         $petty_cash_ids = array();
         $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
-        $petty_cash_list = PettyCashStatement::where('status','<',3)->whereNotIn('id',$petty_cash_ids)->select('id')->get();
+        $petty_cash_list = PettyCashStatement::whereIn('status',[0,1,2,7])->whereNotIn('id',$petty_cash_ids)->select('id')->get();
         $banks = BanksList::where('affiliate', 1)->get();
         return view('admin.delivery.sdn.index')->with(['banks' => $banks, 'petty_cash_list' => $petty_cash_list]);
     }
@@ -5027,6 +5027,12 @@ class DeliveryController extends Controller
             $sdn->petty_cash_statement_id = $request->petty_cash_select;
             // }
             $sdn->save();
+
+            $petty_details = PettyCashStatement::find($request->petty_cash_select);
+            if($petty_details) {
+                $petty_details->status = 5;
+                $petty_details->save();
+            }
 
             return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
         }else{
