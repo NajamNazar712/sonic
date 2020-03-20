@@ -152,7 +152,6 @@ class AdminReportsEmailController extends Controller
         } else {
             $total_avg_revenue_count = 0;
         }
-        ];
         // $sps_count  = count($sale_person_shipments);
         $sps_count = $serial;
         $ts = "D3:D" . $sps_count;
@@ -165,7 +164,7 @@ class AdminReportsEmailController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($sale_person_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
+//        $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
         // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
         $sheet->getStyle($ts)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
         $sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
