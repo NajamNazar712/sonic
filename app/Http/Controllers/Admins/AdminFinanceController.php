@@ -1665,7 +1665,7 @@ class AdminFinanceController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 //            [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46]
-            if (!in_array($shipment->shipper_status_id, [14, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46])) {
+            if (!in_array($shipment->shipper_status_id, [31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46])) {
                 $message = '';
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
 
@@ -1793,7 +1793,7 @@ class AdminFinanceController extends Controller
                 self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
             }
         }
-        
+
         return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
     }
 
