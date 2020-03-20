@@ -173,6 +173,7 @@ class AccountReconciliationController extends Controller
                     }
                 }
                 $sale_person = '';
+                $sale_person_name = '';
                 $sale_person = SalePersonTag::where('user_id', $user->id)->where('status', 0)->first();
                 if($sale_person){
                     $sale_person_name = $sale_person->sales_person->name;
