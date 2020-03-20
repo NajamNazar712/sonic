@@ -130,8 +130,11 @@ class BusinessProjectionRetentionController extends Controller
                 $reasons_data = $reasons_data->whereIn('user_id', session('tagged_shippers'));
             }
         }
+        $reasons_data_count = 0;
         $reasons_data = $reasons_data->first();
-        $reasons_data_count = count($reasons_data);
+        if($reasons_data){
+            $reasons_data_count = 1;
+        }
         $reasons = BusinessProjectionReason::all();
         foreach ($reasons as $reason){
 
