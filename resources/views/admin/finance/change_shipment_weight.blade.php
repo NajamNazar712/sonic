@@ -48,6 +48,16 @@
 														<input type="checkbox" name="replacement_checkbox" class="switch" id="replacement_checkbox">
 													</div>
 												</div>
+												<div id="replacement_weight_div" class="d-none">
+
+														<div class="form-group">
+														<input type="text" name="shipment_weight" class="form-control weight" placeholder="Shipment Weight (kg)*" data-rule-required="true" data-msg-required="Shipment Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Shipment Weight needs to be from 0.01 to 10000">
+													</div>
+														<div class="form-group">
+														<input type="text" name="replacement weight" class="form-control weight" placeholder="Replacement Shipment Weight (kg)*" data-rule-required="true" data-msg-required="Replacement Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Shipment Weight needs to be from 0.01 to 10000">
+													</div>
+												</div>
+
 											</div>
 
 											<div class="form-group">
@@ -211,7 +221,6 @@
 
 							if(details.booking_type_id == 2){
 								$('#replacement_div').removeClass('d-none');
-
 							}
 							@if (session('role_id') == 1 || in_array(135, session('permissions')))
 								$('#change_weight_form').removeClass('d-none');
@@ -249,7 +258,7 @@
 					errorClass: 'danger',
 					successClass: 'success',
 					errorPlacement: function(error, element) {
-						error.addClass('w-100').appendTo(element.parents('.form-group'));
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
 					}
 				});
 			@endif
@@ -258,9 +267,11 @@
 			$('#replacement_checkbox').on('change', function() {
 				var check = $(this);
 				if(check.is(':checked')){
-
+					$('#replacement_weight_div').removeClass('d-none');
+					$('input[name="weight"]').addClass('d-none');
 				}else{
-
+					$('#replacement_weight_div').addClass('d-none');
+					$('input[name="weight"]').removeClass('d-none');
 				}
 			});
 		});

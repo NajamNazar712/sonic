@@ -1742,6 +1742,7 @@ class AdminFinanceController extends Controller
     }
 
     public function change_shipment_weight_store(Request $request) {
+        return $request;
         $shipment_id = $request->input('shipment_id');
         $weight = $request->input('weight');
 
