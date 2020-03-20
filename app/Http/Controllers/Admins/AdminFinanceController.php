@@ -1793,9 +1793,7 @@ class AdminFinanceController extends Controller
                 self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
             }
         }
-
-
-
+        
         return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
     }
 
