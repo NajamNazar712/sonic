@@ -152,6 +152,7 @@ class AdminReportsEmailController extends Controller
         } else {
             $total_avg_revenue_count = 0;
         }
+        
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
