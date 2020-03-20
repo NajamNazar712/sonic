@@ -178,7 +178,7 @@
                                 var remarks = $('#add_remarks').val();
                                 swal({
                                     title: 'Are You Sure?',
-                                    text: 'Select Yes to change shipment status to Re-Attempt!',
+                                    text: 'Select Yes to change shipment status to Return-Confirm!',
                                     icon: 'warning',
                                     buttons: {
                                         cancel: {
