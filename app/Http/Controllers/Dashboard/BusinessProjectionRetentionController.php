@@ -131,7 +131,7 @@ class BusinessProjectionRetentionController extends Controller
             }
         }
         $reasons_data_count = 0;
-        $reasons_data = $reasons_data->first();
+        $reasons_data = $reasons_data->get();
         if($reasons_data){
             $reasons_data_count = 1;
         }
@@ -149,7 +149,6 @@ class BusinessProjectionRetentionController extends Controller
             }
 
         }
-
         return view('admin.sales.dashboard.index')->with(['business_accounts_total' => $business_accounts, 'hubs_data' => $hubs_data, 'reasons_data' => $data, 'reasons' => $reasons]);
     }
     public function dashboard_list(Request $request){
