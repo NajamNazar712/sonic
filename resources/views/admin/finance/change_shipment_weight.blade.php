@@ -60,7 +60,7 @@
 
 											</div>
 
-											<div class="form-group">
+											<div class="form-group text-center">
 												<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
 											</div>
 										</form>
