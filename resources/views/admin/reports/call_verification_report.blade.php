@@ -11,6 +11,24 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <form id="search_form" class=" mb-1 justify-content-center" novalidate="novalidate">
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                    @foreach($shipping_modes as $shipping_mode)
+                                        <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-2">
+                            <div class="form-group">
+                                <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -103,6 +121,15 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_form').on('submit',function (e) {
+                e.preventDefault();
+                table.draw();
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -160,7 +187,12 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.reports.call_verification.list') }}',
+                ajax: {
+                    url: '{{ route('admin.reports.call_verification.list') }}',
+                    data: function (d) {
+                        d.search_shipping_mode = $('#search_shipping_mode').val();
+                    }
+                },
                 order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

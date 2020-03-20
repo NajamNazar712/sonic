@@ -43,6 +43,15 @@
                         </fieldset>
                     </div>
                     <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                @foreach($shipping_modes as $shipping_mode)
+                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -161,6 +170,11 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
             $('#riders').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Rider',
@@ -272,6 +286,7 @@
                         d.hub = $('#hubs').val();
                         d.destination = $('#destinations').val();
                         d.search_tracking_no = $('#search_tracking_no').val();
+                        d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
