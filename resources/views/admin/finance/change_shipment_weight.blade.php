@@ -31,19 +31,41 @@
 							</div>
 
 							@if (session('role_id') == 1 || in_array(135, session('permissions')))
-								<form id="change_weight_form" class="form-inline mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_weight.store') }}" novalidate="novalidate">
-									{{ csrf_field() }}
+								<div class="row justify-content-center">
+									<div class="col-6">
+										<form id="change_weight_form" class="form mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_weight.store') }}" novalidate="novalidate">
+											{{ csrf_field() }}
 
-									<input type="hidden" name="shipment_id" class="shipment_id">
+											<input type="hidden" name="shipment_id" class="shipment_id">
 
-									<div class="form-group">
-										<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000">
+											<div class="form-group">
+												<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000">
+											</div>
+											<div id="replacement_div" class="d-none">
+												<div class="form-group">
+													<div id="replacement_switch_div" class="form-group text-center p-1 border border-light rounded">
+														<label class="d-block">Replacement Items Weight Breakup</label>
+														<input type="checkbox" name="replacement_checkbox" class="switch" id="replacement_checkbox">
+													</div>
+												</div>
+												<div id="replacement_weight_div" class="d-none">
+
+														<div class="form-group">
+														<input type="text" name="shipment_weight" class="form-control weight" placeholder="Shipment Weight (kg)*" data-rule-required="true" data-msg-required="Shipment Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Shipment Weight needs to be from 0.01 to 10000">
+													</div>
+														<div class="form-group">
+														<input type="text" name="replacement weight" class="form-control weight" placeholder="Replacement Shipment Weight (kg)*" data-rule-required="true" data-msg-required="Replacement Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Shipment Weight needs to be from 0.01 to 10000">
+													</div>
+												</div>
+
+											</div>
+
+											<div class="form-group text-center">
+												<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
+											</div>
+										</form>
 									</div>
-
-									<div class="form-group ml-1">
-										<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
-									</div>
-								</form>
+								</div>
 							@endif
 						</div>
 					</div>
@@ -197,6 +219,9 @@
 
 							$('#shipment').html(shipment);
 
+							if(details.booking_type_id == 2){
+								$('#replacement_div').removeClass('d-none');
+							}
 							@if (session('role_id') == 1 || in_array(135, session('permissions')))
 								$('#change_weight_form').removeClass('d-none');
 
@@ -206,6 +231,9 @@
 							$(form).find('button.search').prop('disabled', false);
 
 							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							if(data.warning != ''){
+								toastr.error(data.warning, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+							}
 						}
 						else {
 							$(form).find('button.search').prop('disabled', false);
@@ -230,10 +258,22 @@
 					errorClass: 'danger',
 					successClass: 'success',
 					errorPlacement: function(error, element) {
-						error.addClass('w-100').appendTo(element.parents('form'));
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
 					}
 				});
 			@endif
+
+			$('#replacement_checkbox').checkboxpicker();
+			$('#replacement_checkbox').on('change', function() {
+				var check = $(this);
+				if(check.is(':checked')){
+					$('#replacement_weight_div').removeClass('d-none');
+					$('input[name="weight"]').addClass('d-none');
+				}else{
+					$('#replacement_weight_div').addClass('d-none');
+					$('input[name="weight"]').removeClass('d-none');
+				}
+			});
 		});
 	</script>
 @endsection
