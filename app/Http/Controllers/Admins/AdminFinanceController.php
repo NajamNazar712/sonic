@@ -1666,7 +1666,7 @@ class AdminFinanceController extends Controller
             $shipment = $shipment->first();
 //            [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46]
             if (!in_array($shipment->shipper_status_id, [14, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46])) {
-                $message = 'Shipment\'s weight can be changed';
+                $message = '';
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
 
                 if ($pending_payment_shipment->exists()) {
@@ -1742,16 +1742,22 @@ class AdminFinanceController extends Controller
     }
 
     public function change_shipment_weight_store(Request $request) {
-//        return $request;
+
         $shipment_id = $request->input('shipment_id');
         $weight = $request->input('weight');
+        $replacement_weight = null;
 
         $shipment = Shipment::find($shipment_id);
         $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges + $shipment->gst;
-//        return $previous_weight_charges;
+
         if($shipment->actual_weight == null){
             return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
         }
+        if($request->has('replacement_checkbox')){
+            $weight = $request->input('shipment_weight');
+            $replacement_weight = $request->input('replacement_weight');
+        }
+
         $change_shipment_weight = new ChangeShipmentWeightLog();
 
         $change_shipment_weight->shipment_id = $shipment->id;
@@ -1759,28 +1765,34 @@ class AdminFinanceController extends Controller
         $change_shipment_weight->new_weight = $weight;
         $change_shipment_weight->admin_id = Auth::id();
         $change_shipment_weight->save();
-        $shipment->actual_weight = $weight;
 
-        $shipment->save();
+        if($request->has('replacement_checkbox')){
+            $shipment->actual_weight = $weight;
+            $shipment->replacement_weight = $replacement_weight;
+            $shipment->save();
+        }else{
+            $shipment->actual_weight = $weight;
+            $shipment->save();
+        }
 
         ShipmentChargesController::weight($shipment_id);
         ShipmentChargesController::fuel_surcharge($shipment_id);
 
-
+        $shipment = Shipment::find($shipment_id);
         $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges + $shipment->gst;
-        return $new_weight_charges;
+
         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
-//        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
-//        $adjustment = $previous_weight_charges - $shipment->weight_charges;
-//        if($pending_payment->exists()){
-//
-//            self::add_adjustment($shipment->id, $adjustment, 'Change Shipment Weight Adjustment', 4);
-//        }else{
-//            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
-//            if($done_payment->exists()){
-//                self::add_adjustment($shipment->id, $adjustment, 'Change Shipment Weight Adjustment', 4);
-//            }
-//        }
+
+        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+
+        if($pending_payment->exists()){
+            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
+        }else{
+            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+            if($done_payment->exists()){
+                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
+            }
+        }
 
 
 
