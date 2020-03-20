@@ -47,34 +47,6 @@ class AdminShipmentCancelController extends Controller
             foreach ($shipments->get() as $shipment) {
                 $shipment->shipper_status_id = 17;
                 $shipment->consignee_status_id = 17;
-                if($shipment->warehouse == 1){
-                    $shipment->warehouse_order_status = 9;
-                    $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->get();
-                    if($shipment_products){
-                        foreach ($shipment_products as $shipment_product){
-                            $pending_pickings_products = WmsPendingPicking::leftjoin('wms_pending_picking_shipments as wpps', 'wpps.picking_id', '=', 'wms_pending_pickings.id')
-                                ->select('wms_pending_pickings.id as id')
-                                ->where('wpps.shipment_id', $shipment->id)
-                                ->where('wms_pending_pickings.product_id', $shipment_product->product_id)->first();
-                            if($pending_pickings_products){
-                                $pending_picking = WmsPendingPicking::find($pending_pickings_products->id);
-                                $pending_picking->quantity = $pending_picking->quantity - $shipment_product->quantity;
-                                $pending_picking->save();
-
-                                $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
-                                if($current_stock_addition){
-                                    $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
-                                    $current_stock_addition->save();
-                                }
-
-                                if($pending_picking->quantity <= 0){
-                                    $pending_picking->status = 1;
-                                    $pending_picking->save();
-                                }
-                            }
-                        }
-                    }
-                }
                 $shipment->save();
 
                 AdminPickupsController::cancel($shipment->id);
