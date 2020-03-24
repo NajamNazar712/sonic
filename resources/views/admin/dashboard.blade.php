@@ -716,7 +716,7 @@
             background-repeat: repeat-x;
         }
         .bg-gradient-directional-complaints_in_process {
-            background-image: linear-gradient(45deg, #027D8A, #01E4E4);
+            background-image: linear-gradient(45deg, #6A1FA2 , #FF4961);
             background-repeat: repeat-x;
         }
         .bg-gradient-directional-complaints_closed {
