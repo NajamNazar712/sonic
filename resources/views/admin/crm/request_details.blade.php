@@ -578,12 +578,22 @@
                                             </select>
                                         </div>
                                         <div class="d-none" id="department_tag_div">
-                                            <select name="tag_department" id="tag_department"
-                                                    class="form-control  select2">
-                                                @foreach($departments as $department)
-                                                    <option value="{{$department->id}}"> {{$department->name}} </option>
-                                                @endforeach
-                                            </select>
+                                            <div class="">
+                                                <select name="tag_department" id="tag_department"
+                                                        class="form-control  select2">
+                                                    @foreach($departments as $department)
+                                                        <option value="{{$department->id}}"> {{$department->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mt-1">
+                                                <select name="tag_hub" id="tag_hub"
+                                                        class="form-control select2">
+                                                    @foreach($hubs as $hub)
+                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
                                     </fieldset>
                                 </div>
@@ -940,6 +950,12 @@
                 dropdownParent: $('#tagModal')
             });
 
+            $("#tag_hub").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Hub",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            });
+
             $("#tag_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Type",
                 width: '100%',
@@ -1030,8 +1046,13 @@
             });
             $('#tag_adminSubmit').on('click', function () {
                 var type = parseInt($('#tag_type').val());
+                var tag_hub = null;
                 if (type === 1) {
                     var tag = parseInt($('#tag_department').val());
+                    tag_hub = parseInt($('#tag_hub').val());
+                    if(!tag_hub){
+                        tag_hub = null;
+                    }
                 }
                 else if (type === 2) {
                     var tag = parseInt($('#tag_admin').val());
@@ -1051,6 +1072,7 @@
                         method: 'POST',
                         data: {
                             'tagged_id': tag,
+                            'tagged_hub': tag_hub,
                             'crm_request_id': $('#crm_request_id').val(),
                             'prev_status': $('#prev_status').val(),
                             'crm_request_tagging_type_id': type,

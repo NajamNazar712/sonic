@@ -152,6 +152,12 @@ class AdminReportsEmailController extends Controller
         } else {
             $total_avg_revenue_count = 0;
         }
+        
+        $cell_st =[
+            'font' =>['bold' => true],
+            'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        ];
         // $sps_count  = count($sale_person_shipments);
         $sps_count = $serial;
         $ts = "D3:D" . $sps_count;
@@ -164,7 +170,7 @@ class AdminReportsEmailController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($sale_person_array, NULL, 'A2', true);
-//        $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
+        $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
         // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
         $sheet->getStyle($ts)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
         $sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
@@ -262,7 +268,12 @@ class AdminReportsEmailController extends Controller
             $total_avg_ratio_count = $total_avg_ratio_count + $ratio[$hub_wise_split->hub_id];
             $total_actual_weight_count = $total_actual_weight_count + $hub_wise_split->actual_weight;
         }
-        $total_avg_actual_weight_count = $total_actual_weight_count / $total_shipments_count;
+        if($total_shipments_count <= 0){
+            $total_avg_actual_weight_count = 0;
+        }
+        else{
+            $total_avg_actual_weight_count = $total_actual_weight_count / $total_shipments_count;
+        }
         $hub_wise_split_array[] = ['serial' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight/Shipment' => ''];
         $hub_wise_split_array[] = ['serial' => 'Total', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count * 100, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight/Shipment' => round($total_avg_actual_weight_count, 2)];
         $cell_st = [

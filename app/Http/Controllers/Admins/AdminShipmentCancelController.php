@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\http\Models\WMS\WmsCurrentStock;
+use App\Http\Models\WMS\WmsPendingPicking;
+use App\Http\Models\WMS\WmsShipmentProduct;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -44,7 +47,6 @@ class AdminShipmentCancelController extends Controller
             foreach ($shipments->get() as $shipment) {
                 $shipment->shipper_status_id = 17;
                 $shipment->consignee_status_id = 17;
-
                 $shipment->save();
 
                 AdminPickupsController::cancel($shipment->id);

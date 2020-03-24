@@ -37,6 +37,16 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="col-2">
+                            <fieldset class="form-group">
+                                <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                    @foreach($shipping_modes as $shipping_mode)
+                                        <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
                         <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
@@ -169,6 +179,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_form #recovery_status_select').select2({
                 width: '100%',
                 placeholder: 'Recovery Status*'
@@ -319,6 +334,7 @@
                     data: function (d) {
                         d.search_recovery_status = $('#search_form #recovery_status_select').val();
                         d.hub = $('#search_form #hub').val();
+                        d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.delivery_date_from = $('#search_form input[name="delivery_date_from_formatted"]').val();
                         d.delivery_date_to = $('#search_form input[name="delivery_date_to_formatted"]').val();
                     }

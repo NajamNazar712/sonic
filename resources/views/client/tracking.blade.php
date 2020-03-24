@@ -131,21 +131,26 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8">
+                                    <div class="col-8" id="claim_product_cost_div">
                                         <fieldset class="form-group">
-                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Product Cost">
+                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 text-left">
+                                    <div class="col-8 text-left" id="claim_product_picture_div">
                                         <fieldset class="form-group">
                                             <label for="product_picture"><b>Product Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 text-left">
+                                    <div class="col-8 text-left" id="claim_invoice_picture_div">
                                         <fieldset class="form-group">
                                             <label for="invoice_picture"><b>Invoice Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file" name="invoice_picture" id="invoice_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -629,6 +634,18 @@
                 placeholder:"Select Claim Type",
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id === 26){
+                    $('#claim_product_cost_div').addClass('d-none');
+                    $('#claim_product_picture_div').addClass('d-none');
+                    $('#claim_invoice_picture_div').addClass('d-none');
+                }
+                else{
+                    $('#claim_product_cost_div').removeClass('d-none');
+                    $('#claim_product_picture_div').removeClass('d-none');
+                    $('#claim_invoice_picture_div').removeClass('d-none');
+                }
             });
             var max_char_request = 245;
             $('#feedback_description').on('keypress copy paste',function (e) {
@@ -775,20 +792,22 @@
                             var error = "Please select Claim type!";
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
-                        if(!check_product_picture){
-                            nature_flag = false;
-                            var error = "Please attach Product Picture!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        if(!product_cost){
-                            nature_flag = false;
-                            var error = "Please enter Product Cost!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        if(!check_invoice_picture){
-                            nature_flag = false;
-                            var error = "Please attach Invoice Picture!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        if(case_nature_claim_id !== "26"){
+                            if(!check_product_picture){
+                                nature_flag = false;
+                                var error = "Please attach Product Picture!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            if(!product_cost){
+                                nature_flag = false;
+                                var error = "Please enter Product Cost!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            if(!check_invoice_picture){
+                                nature_flag = false;
+                                var error = "Please attach Invoice Picture!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
                         }
                         if(nature_flag){
                             $('#AddNewRequest').attr('disabled',true);

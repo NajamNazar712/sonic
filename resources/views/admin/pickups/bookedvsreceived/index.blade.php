@@ -38,6 +38,15 @@
                                             </select>
                                     </div>
                                 </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                            <select name="shipping_mode" id="shipping_mode" class="form-control select2">
+                                                @foreach($shipping_modes as $shipping_mode)
+                                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                                @endforeach
+                                            </select>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-4">
@@ -73,6 +82,7 @@
                             <input type="hidden" name="date_from" id="date_from">
                             <input type="hidden" name="date_to" id="date_to">
                             <input type="hidden" name="shipper_id" id="shipper_id">
+                            <input type="hidden" name="shipping_mode_id" id="shipping_mode_id">
                                 <div id="booked_table_div" style="min-height: 300px;"></div>
                             </div>
                         </div>
@@ -179,6 +189,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping mode',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipper',
                 width:'100%',
@@ -247,11 +262,13 @@
 
                     var shipper_select = $('#search_shipper').val();
                     var city_select = $('#search_city').val();
+                    var shipping_mode = $('#shipping_mode').val();
                     var search_from = $('input[name="search_date_from_formatted"]').val();
                     var search_to = $('input[name="search_date_to_formatted"]').val();
 
                     $('#shipper_id').val(shipper_select);
                     $('#city_id').val(city_select);
+                    $('#shipping_mode_id').val(shipping_mode);
                     $('#date_from').val(search_from);
                     $('#date_to').val(search_to);
                     $.ajax({
@@ -261,6 +278,7 @@
                             '_token': '{{ csrf_token() }}',
                             'shipper_select': shipper_select,
                             'city_select': city_select,
+                            'shipping_mode': shipping_mode,
                             'search_from': search_from,
                             'search_to': search_to,
 
@@ -353,6 +371,7 @@
             $('body').on('click', 'tr td', function() {
                 var shipper_id = parseInt($(this).parents('tr').attr('id'));
                 var city = $('#city_id').val();
+                var shipping_mode = $('#shipping_mode').val();
                 var date_from = $('#date_from').val();
                 var date_to = $('#date_to').val();
 
@@ -364,6 +383,7 @@
                         '_token': '{{ csrf_token() }}',
                         'shipper_id':shipper_id,
                         'city_id': city,
+                        'shipping_mode': shipping_mode,
                         'search_from': date_from,
                         'search_to': date_to,
                     }
@@ -393,6 +413,7 @@
                         '_token': '{{ csrf_token() }}',
                         'shipper_id':shipper_id,
                         'city_id': city,
+                        'shipping_mode': shipping_mode,
                         'search_from': date_from,
                         'search_to': date_to,
                     }
@@ -423,6 +444,7 @@
                         '_token': '{{ csrf_token() }}',
                         'shipper_id':shipper_id,
                         'city_id': city,
+                        'shipping_mode': shipping_mode,
                         'search_from': date_from,
                         'search_to': date_to,
                     }
@@ -452,6 +474,7 @@
                         '_token': '{{ csrf_token() }}',
                         'shipper_id':shipper_id,
                         'city_id': city,
+                        'shipping_mode': shipping_mode,
                         'search_from': date_from,
                         'search_to': date_to,
                     }

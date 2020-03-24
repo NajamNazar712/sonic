@@ -82,7 +82,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.settings.sales.history.list') }}',
+                        url: '{{ route('admin.settings.overnight_overland_cargo_report.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];

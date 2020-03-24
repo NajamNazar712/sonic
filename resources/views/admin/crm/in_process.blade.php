@@ -51,6 +51,8 @@
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Tagged To</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Agent Assigned Date</th>
+                                    <th class="border-primary border-darken-1">Agent Assigned By</th>
                                     <th class="border-primary border-darken-1">Valid Date</th>
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
@@ -125,12 +127,22 @@
                                             </select>
                                         </div>
                                         <div class="d-none" id="department_tag_div">
-                                            <select name="tag_department" id="tag_department"
-                                                    class="form-control  select2">
-                                                @foreach($departments as $department)
-                                                    <option value="{{$department->id}}"> {{$department->name}} </option>
-                                                @endforeach
-                                            </select>
+                                            <div class="">
+                                                <select name="tag_department" id="tag_department"
+                                                        class="form-control  select2">
+                                                    @foreach($departments as $department)
+                                                        <option value="{{$department->id}}"> {{$department->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mt-1">
+                                                <select name="tag_hub" id="tag_hub"
+                                                        class="form-control select2">
+                                                    @foreach($hubs as $hub)
+                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
                                     </fieldset>
                                 </div>
@@ -200,6 +212,8 @@
                             head.push('Tagged (Admin/Department)');
                             head.push('Tagged To');
                             head.push('Launched Date');
+                            head.push('Agent Assigned Date');
+                            head.push('Agent Assigned By');
                             head.push('Valid Date');
                             head.push('Launched To Today (TAT)');
                             head.push('Last Comment By');
@@ -227,6 +241,8 @@
                                 row.push(values.tagged);
                                 row.push(values.tagged_to);
                                 row.push(values.created_at);
+                                row.push(values.agent_assigned_date);
+                                row.push(values.agent_assigned_by);
                                 row.push(values.valid_date);
                                 row.push(values.current_tat);
                                 row.push(values.last_comment_name);
@@ -624,6 +640,8 @@
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
+                    {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
@@ -895,6 +913,12 @@
                 dropdownParent: $('#tagModal')
             });
 
+            $("#tag_hub").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Hub",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            });
+
             $("#tag_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Type",
                 width: '100%',
@@ -923,8 +947,13 @@
             });
             $('#tag_adminSubmit').on('click', function () {
                 var type = parseInt($('#tag_type').val());
+                var tag_hub = null;
                 if (type === 1) {
                     var tag = parseInt($('#tag_department').val());
+                    tag_hub = parseInt($('#tag_hub').val());
+                    if(!tag_hub){
+                        tag_hub = null;
+                    }
                 }
                 else if (type === 2) {
                     var tag = parseInt($('#tag_admin').val());
@@ -944,6 +973,7 @@
                         method: 'POST',
                         data: {
                             'tagged_id': tag,
+                            'tagged_hub': tag_hub,
                             'crm_request_ids[]': selected_rows,
                             'crm_request_tagging_type_id': type,
                             '_token': '{{ csrf_token() }}'

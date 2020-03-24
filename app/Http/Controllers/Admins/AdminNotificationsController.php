@@ -288,7 +288,14 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 58){
             $details['fields'] = ['shipper_name'];
-        }        return $details;
+        }
+        else if ($id == 59){
+            $details['fields'] = ['shipping_mode', 'date', 'preview', 'link'];
+        }
+        else if ($id == 60){
+            $details['fields'] = ['preview', 'date'];
+        }
+        return $details;
     }
 
     public function edit(Request $request) {

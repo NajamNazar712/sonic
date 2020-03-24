@@ -104,7 +104,7 @@
                                                             Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="Person Name" name="shipper_poc" value="{{old('shipper_poc')}}">
+                                                        <input type="text" class="form-control required" placeholder="Person Name (Alphabet Only)" name="shipper_poc" value="{{old('shipper_poc')}}">
                                                     </div>
                                                 </div>
                                             </div>

@@ -53,7 +53,7 @@ class LostShipmentsController extends Controller
                 })
                 ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
 //                ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
-                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc')
+                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference')
 //                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
                 ->where('shipments.shipper_status_id', 18);
                 // ->where(function ($sub_query) {
@@ -81,6 +81,13 @@ class LostShipmentsController extends Controller
                 ->editColumn('arrival', function ($shipments) {
                     if ($shipments->arrival) {
                         return $shipments->arrival;
+                    } else {
+                        return " - ";
+                    }
+                })
+                ->editColumn('reference', function ($shipments) {
+                    if ($shipments->reference) {
+                        return str_pad($shipments->reference, 6, '0', STR_PAD_LEFT);
                     } else {
                         return " - ";
                     }
@@ -148,14 +155,14 @@ class LostShipmentsController extends Controller
                 if($parcel->shipper_status_id == 18) {
                     if (!$parcel->packaging_material_request) {
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                        ShipmentsJourneyController::add($shipment, 20, 20, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment, 20, 20, NULL, $request->remarks, NULL, Auth::id());
                         ShipmentChargesController::return ($shipment);
 
                         AdminFinanceController::add_payment($shipment, 1);
                     } else {
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-                        ShipmentsJourneyController::add($shipment, 17, 17, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment, 17, 17, NULL, $request->remarks, NULL, Auth::id());
                     }
                 }
             }
@@ -171,7 +178,7 @@ class LostShipmentsController extends Controller
                 if($parcel->shipper_status_id == 18) {
 
                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 13, 'consignee_status_id' => 13]);
-                    ShipmentsJourneyController::add($shipment, 13, 13, NULL, NULL, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment, 13, 13, NULL, $request->remarks, NULL, Auth::id());
                 }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )"];

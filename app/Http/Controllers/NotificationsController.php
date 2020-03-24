@@ -2234,6 +2234,12 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $related_admins->pluck('email')->toArray());
                   }
 
+                  $on_request_admin = Admin::where('id', 10)->where('status', 1);
+
+                  if ($on_request_admin->exists()) {
+                      $to = array_merge($to, $on_request_admin->pluck('email')->toArray());
+                  }
+
                   self::email($subject, $body, $to);
 
                   $subject = $original_subject;
@@ -2421,7 +2427,7 @@ class NotificationsController extends Controller
                   $to = array_merge($to, $admins->pluck('email')->toArray());
               }
 
-              $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+              $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1);
 
               if ($admins->exists()) {
                   $to = array_merge($to, $admins->pluck('admins.email')->toArray());
@@ -3623,7 +3629,7 @@ class NotificationsController extends Controller
                    $to = array_merge($to, $admins->pluck('email')->toArray());
                }
 
-               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1);
 
                if ($admins->exists()) {
                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
@@ -3687,7 +3693,12 @@ class NotificationsController extends Controller
                     $actual_weight_count = $actual_weight_count + $hub_wise_split->actual_weight;
                     $serial++;
                 }
-                $avg_actual_weight_count = $actual_weight_count / $shipments_count;
+                if($shipments_count <= 0){
+                    $avg_actual_weight_count = 0;
+                }
+                else{
+                    $avg_actual_weight_count = $actual_weight_count / $shipments_count;
+                }
                 $html .= '<tr>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
@@ -3714,7 +3725,7 @@ class NotificationsController extends Controller
                    $cc = array_merge($to, $admins->pluck('email')->toArray());
                }
 
-               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1);
 
                if ($admins->exists()) {
                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
@@ -3813,7 +3824,7 @@ class NotificationsController extends Controller
                    $to = array_merge($to, $admins->pluck('email')->toArray());
                }
 
-               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1);
 
                if ($admins->exists()) {
                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
@@ -4386,19 +4397,91 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $admins =Admin::whereIn('id', [8, 37])->where('status', 1);
+                    $admins =Admin::whereIn('id', [7, 55, 37])->where('status', 1);
 
 
-                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
+//                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
                     if ($admins->exists()) {
                         $to = $admins->distinct('id')->pluck('email')->toArray();
                     }
-                    if ($cc_admins->exists()) {
-                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
+//                    if ($cc_admins->exists()) {
+//                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
+//                    }
+
+
+                    self::email($subject, $body, $to);
+//                    $admins =Admin::whereIn('id', [8, 37])->where('status', 1);
+//
+//
+//                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
+//                    if ($admins->exists()) {
+//                        $to = $admins->distinct('id')->pluck('email')->toArray();
+//                    }
+//                    if ($cc_admins->exists()) {
+//                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
+//                    }
+//
+//
+//                    self::email($subject, $body, $to, $cc);
+                }
+            }
+            else if($id == 60){
+                $sale_admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1)->select('admins.id as id', 'admins.email as email')->get();
+                if($sale_admins){
+                    foreach ($sale_admins as $sale_admin){
+                        $body = $notification->body;
+                        $tagged_shippers = SalePersonTag::where('admin_id', $sale_admin->id)->where('status', 0);
+                        if($tagged_shippers->exists()){
+                            $tagged_shippers = $tagged_shippers->pluck('user_id')->toArray();
+                            if(count($tagged_shippers) > 0){
+                                if (strpos($subject, '[date]') !== FALSE) {
+                                    $subject = str_replace('[date]', $reference_1_id, $subject);
+                                }
+                                if (strpos($body, '[date]') !== FALSE) {
+                                    $body = str_replace('[date]', $reference_1_id, $body);
+                                }
+                                $details = '<table style="width:100%;">';
+                                $details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S. No</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account ID</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Activated At</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Document Status</th></tr></thead>';
+                                $serial = 1;
+                                $details .= '<tbody>';
+                                $check = false;
+                                foreach ($tagged_shippers as $tagged_shipper) {
+                                    $shipper = User::where('id', $tagged_shipper)->where('status', 3)->whereIn('documents_status', [0, 3])->first();
+                                    if($shipper){
+                                        if($shipper->documents_status == 0){
+                                            $document_status = "Incomplete";
+                                        }
+                                        else{
+                                            $document_status = "Rejected";
+                                        }
+                                        $details .= '<tr>';
+                                        $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                                        $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . str_pad($shipper->id, 6, "0",STR_PAD_LEFT) . '</td>';
+                                        $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->name . '</td>';
+                                        $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->city->name . '</td>';
+                                        $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->activated_at . '</td>';
+                                        $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $document_status . '</td>';
+                                        $details .= '</tr>';
+                                        $serial++;
+                                        $check = true;
+                                    }
+                                }
+                                $details .= '</tbody></table>';
+                                if (strpos($body, '[preview]') !== FALSE) {
+                                    $body = str_replace('[preview]', $details, $body);
+                                }
+                                $to = $sale_admin->email;
+
+                                $cc_admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
+                                if ($cc_admins->exists()) {
+                                    $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
+                                }
+                                if($check == true){
+                                    self::email($subject, $body, $to, $cc);
+                                }
+                            }
+                        }
                     }
-
-
-                    self::email($subject, $body, $to, $cc);
                 }
             }
         }

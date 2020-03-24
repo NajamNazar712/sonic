@@ -52,7 +52,13 @@
                                     <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Junction 1</th>
+                                    <th class="border-primary border-darken-1">Junction 1 Received At</th>
+                                    <th class="border-primary border-darken-1">Junction 1 Received By</th>
                                     <th class="border-primary border-darken-1">Junction 2</th>
+                                    <th class="border-primary border-darken-1">Junction 2 Received At</th>
+                                    <th class="border-primary border-darken-1">Junction 2 Received By</th>
+                                    <th class="border-primary border-darken-1">Send From Junction Date</th>
+                                    <th class="border-primary border-darken-1">Send From Junction By</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Cargo Type</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
@@ -190,7 +196,13 @@
                             head.push('Short Received Shipment(s)');
                             head.push('Shipping Mode');
                             head.push('Junction 1');
+                            head.push('Junction 1 Received At');
+                            head.push('Junction 1 Received By');
                             head.push('Junction 2');
+                            head.push('Junction 2 Received At');
+                            head.push('Junction 2 Received By');
+                            head.push('Send From Junction Date');
+                            head.push('Send From Junction By');
                             head.push('Transport Mode');
                             head.push('Cargo Type');
                             head.push('Vendor');
@@ -218,7 +230,13 @@
                                 row.push(values.short_received_shipments_count);
                                 row.push(values.shipping_mode);
                                 row.push(values.junction_1);
+                                row.push(values.junction_1_received_at);
+                                row.push(values.junction_1_received_by);
                                 row.push(values.junction_2);
+                                row.push(values.junction_2_received_at);
+                                row.push(values.junction_2_received_by);
+                                row.push(values.junction_send_at);
+                                row.push(values.junction_send_by);
                                 row.push(values.transport_mode);
                                 row.push(values.cargo_type);
                                 row.push(values.vendor);
@@ -270,7 +288,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[18, 'desc']],
+                order: [[24, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
@@ -280,7 +298,13 @@
                     {data: 'short_received_shipments', name: 'short_received_shipments', class: 'align-middle text-center short_received_shipments', orderable: false, searchable: false},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                     {data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},
+                    {data: 'junction_1_received_at', name: 'ccjrone.created_at', class: 'align-middle junction_1_received_at'},
+                    {data: 'junction_1_received_by', name: 'ccjronea.name', class: 'align-middle junction_1_received_by'},
                     {data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
+                    {data: 'junction_2_received_at', name: 'ccjrtwo.created_at', class: 'align-middle junction_1_received_at'},
+                    {data: 'junction_2_received_by', name: 'ccjrtwoa.name', class: 'align-middle junction_2_received_by'},
+                    {data: 'junction_send_at', name: 'ccjs.created_at', class: 'align-middle junction_send_at'},
+                    {data: 'junction_send_by', name: 'ccjsa.name', class: 'align-middle junction_send_by'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'cargo_type', name: 'cargo_consignments.type', class: 'align-middle cargo_type'},
                     {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
