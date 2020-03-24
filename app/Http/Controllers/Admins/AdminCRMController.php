@@ -747,8 +747,8 @@ class AdminCRMController extends Controller
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
             })
             ->leftjoin('crm_request_agent_histories as resa', function ($join) {
-                $join->on('res.crm_request_id', '=', 'crm_requests.id')
-                    ->where('res.id','=',
+                $join->on('resa.crm_request_id', '=', 'crm_requests.id')
+                    ->where('resa.id','=',
                         DB::raw('(select max(id) from crm_request_agent_histories where crm_request_agent_histories.crm_request_id = crm_requests.id and crm_request_agent_histories.agent_id = crm_requests.agent_id)'));
             })
             ->leftjoin('admins as resby', 'resby.id', '=', 'resa.assigned_by')
