@@ -4386,7 +4386,7 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $admins =Admin::whereIn('id', [55, 37])->where('status', 1);
+                    $admins =Admin::whereIn('id', [7, 55, 37])->where('status', 1);
 
 
 //                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
