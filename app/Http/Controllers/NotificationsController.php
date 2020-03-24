@@ -4397,19 +4397,32 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $admins =Admin::whereIn('id', [8, 37])->where('status', 1);
+                    $admins =Admin::whereIn('id', [7, 55, 37])->where('status', 1);
 
 
-                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
+//                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
                     if ($admins->exists()) {
                         $to = $admins->distinct('id')->pluck('email')->toArray();
                     }
-                    if ($cc_admins->exists()) {
-                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
-                    }
+//                    if ($cc_admins->exists()) {
+//                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
+//                    }
 
 
-                    self::email($subject, $body, $to, $cc);
+                    self::email($subject, $body, $to);
+//                    $admins =Admin::whereIn('id', [8, 37])->where('status', 1);
+//
+//
+//                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
+//                    if ($admins->exists()) {
+//                        $to = $admins->distinct('id')->pluck('email')->toArray();
+//                    }
+//                    if ($cc_admins->exists()) {
+//                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
+//                    }
+//
+//
+//                    self::email($subject, $body, $to, $cc);
                 }
             }
             else if($id == 60){

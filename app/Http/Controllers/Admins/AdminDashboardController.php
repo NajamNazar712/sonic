@@ -17,6 +17,7 @@ use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CityHistory;
 use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
@@ -154,6 +155,10 @@ class AdminDashboardController extends Controller
         $stats['in_transit'] = Shipment::where('shipper_status_id',3)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['pending'] = Shipment::whereIn('shipper_status_id',[4, 5,6,7,8,9,10,11,12,13,15,18,19,49])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['complaints_launched'] = CrmRequestStatusHistory::where('status_id', 1)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['complaints_in_process'] = CrmRequestStatusHistory::where('status_id', 2)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['complaints_closed'] = CrmRequestStatusHistory::where('status_id', 4)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['complaints_rejected'] = CrmRequestStatusHistory::where('status_id', 7)->whereBetween('created_at',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
             $stats['total'] = $stats['total']->where(function($query) {
@@ -267,6 +272,10 @@ class AdminDashboardController extends Controller
         $stats['pending_shipments'] = number_format($stats['pending_shipments']->count());
         $stats['confirmation_pending'] = number_format($stats['confirmation_pending']->count());
         $stats['pending_return'] = number_format($stats['pending_return']->count());
+        $stats['complaints_launched'] =  number_format($stats['complaints_launched']->count());
+        $stats['complaints_in_process'] =  number_format($stats['complaints_in_process']->count());
+        $stats['complaints_closed'] =  number_format($stats['complaints_closed']->count());
+        $stats['complaints_rejected'] =  number_format($stats['complaints_rejected']->count());
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
@@ -444,7 +453,10 @@ class AdminDashboardController extends Controller
                 $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
                 $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12,54,55]);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-
+//                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_closed = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 4)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_rejected = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 7)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
                 if (session('role_id') != 1) {
                     $booked = $booked->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
@@ -549,6 +561,10 @@ class AdminDashboardController extends Controller
                 $graph['pending_shipments'][] = $pending_shipments->count();
                 $graph['confirmation_pending'][] = $confirmation_pending->count();
                 $graph['pending_return'][] = $pending_return->count();
+//                $graph['complaints_launched'][] = $complaints_launched->count();
+//                $graph['complaints_in_process'][]  = $complaints_in_process->count();
+//                $graph['complaints_closed'][] = $complaints_closed->count();
+//                $graph['complaints_rejected'][] = $complaints_rejected->count();
             }
         }else if(($destination_id == '') && ($shipper != '')){
             foreach ($dates as $this_date) {
@@ -567,6 +583,10 @@ class AdminDashboardController extends Controller
                 $pending_return = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
                 $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [12,54,55]);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+//                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_closed = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 4)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_rejected = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 7)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 
                 if (session('role_id') != 1) {
                     $booked = $booked->where(function($query) {
@@ -672,6 +692,10 @@ class AdminDashboardController extends Controller
                 $graph['pending_shipments'][] = $pending_shipments->count();
                 $graph['confirmation_pending'][] = $confirmation_pending->count();
                 $graph['pending_return'][] = $pending_return->count();
+//                $graph['complaints_launched'][] = $complaints_launched->count();
+//                $graph['complaints_in_process'][]  = $complaints_in_process->count();
+//                $graph['complaints_closed'][] = $complaints_closed->count();
+//                $graph['complaints_rejected'][] = $complaints_rejected->count();
             }
         }else if(($destination_id != '') && ($shipper == '')){
             foreach ($dates as $this_date) {
@@ -690,6 +714,10 @@ class AdminDashboardController extends Controller
                 $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
                 $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12,54,55]);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+//                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_closed = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 4)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_rejected = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 7)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 
                 if (session('role_id') != 1) {
                     $booked = $booked->where(function($query) {
@@ -795,6 +823,10 @@ class AdminDashboardController extends Controller
                 $graph['pending_shipments'][] = $pending_shipments->count();
                 $graph['confirmation_pending'][] = $confirmation_pending->count();
                 $graph['pending_return'][] = $pending_return->count();
+//                $graph['complaints_launched'][] = $complaints_launched->count();
+//                $graph['complaints_in_process'][]  = $complaints_in_process->count();
+//                $graph['complaints_closed'][] = $complaints_closed->count();
+//                $graph['complaints_rejected'][] = $complaints_rejected->count();
             }
         }else{
             foreach ($dates as $this_date) {
@@ -813,6 +845,10 @@ class AdminDashboardController extends Controller
                 $pending_return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
                 $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [12,54,55]);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+//                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_closed = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 4)->whereDate('crm_request_status_histories.created_at', $comparison_date);
+//                $complaints_rejected = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 7)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 
                 if (session('role_id') != 1) {
                     $booked = $booked->where(function($query) {
@@ -918,6 +954,10 @@ class AdminDashboardController extends Controller
                 $graph['pending_shipments'] = $pending_shipments->count();
                 $graph['confirmation_pending'] = $confirmation_pending->count();
                 $graph['pending_return'] = $pending_return->count();
+//                $graph['complaints_launched'][] = $complaints_launched->count();
+//                $graph['complaints_in_process'][]  = $complaints_in_process->count();
+//                $graph['complaints_closed'][] = $complaints_closed->count();
+//                $graph['complaints_rejected'][] = $complaints_rejected->count();
             }
         }
 
