@@ -25,7 +25,7 @@ class BusinessProjectionRetentionController extends Controller
     }
 
     static public function create_business_projections(){
-        $date = Carbon::today();
+        $date = Carbon::yesterday();
         $shippers = array();
         $date_from = Carbon::yesterday()->format('Y-m-d 08:00A');
         $date_to = Carbon::today()->format('Y-m-d 07:59A');
@@ -157,7 +157,7 @@ class BusinessProjectionRetentionController extends Controller
             ->join('admins as sp', 'sp.id', '=', 'business_projection_accounts.sale_person_id')
             ->leftjoin('business_projection_reasons as bpr', 'bpr.id', '=', 'business_projection_accounts.business_projection_reason_id')
             ->select('business_projection_accounts.id', 'u.id as account_id','u.name as shipper', 'cities.name as city', 'u.poc', 'u.phone', 'u.address', 'u.email', 'u.status', 'sp.name as sales_person', 'bpr.name as reason', 'business_projection_accounts.remarks', 'business_projection_accounts.average_shipment','business_projection_accounts.projected_shipment','business_projection_accounts.last_day_number','business_projection_accounts.achieved')
-            ->whereDate('date', Carbon::today());
+            ->whereDate('date', Carbon::yesterday());
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $business = $business->whereIn('u.id', session('tagged_shippers'));
