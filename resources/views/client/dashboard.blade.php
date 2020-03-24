@@ -641,7 +641,6 @@
                 lengthMenu: [[10, 50, 100, 500, 1000], [10, 50, 100, 500, 1000]],
                 pageLength: 10,
                 pagingType: 'full_numbers',
-                deferLoading: 0,
                 processing: true,
                 language: {
                     processing: data_table_loader
