@@ -39,6 +39,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
 
+    Route::get('/welcome', 'Shippers\ShipperDashboardController@welcome_index')->name('welcome');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
 
