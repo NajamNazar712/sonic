@@ -3898,8 +3898,7 @@ use Yajra\Datatables\Datatables;
                 $from_id = DB::connection('reports')->table('shipments_journey')->select(DB::connection('reports')->raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from)->first()->id;
                 $to_id = DB::connection('reports')->table('shipments_journey')->select(DB::connection('reports')->raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to)->first()->id;
 
-                $dn_min_id = DB::connection('reports')->table('delivery_notes')->select(DB::connection('reports')->raw('MIN(id) as id'))->where('status', 1)->where('status_verified_at', '>=', $from)->first()->id;
-                $dn_max_id = DB::connection('reports')->table('delivery_notes')->select(DB::connection('reports')->raw('MAX(id) as id'))->where('status', 1)->where('status_verified_at', '<=', $to)->first()->id;
+                $dn_ids = DB::connection('reports')->table('delivery_notes')->select('id')->where('status', 1)->whereBetween('status_verified_at', [$from, $to])->get()->pluck('id');
 
                 $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_attempted', 'fake_status', 'confirmation_pending', 'delivery_note_pending', 'delivery_tomorrow'];
 
@@ -3941,12 +3940,9 @@ use Yajra\Datatables\Datatables;
                             });
                         }
                         else if ($type == 'fake_status') {
-                            $rows = $rows->join('delivery_note_shipments as dns', 's.id', '=', 'dns.shipment_id')
-                            ->join('delivery_notes as dn', function($join) use ($dn_min_id, $dn_max_id) {
-                                $join->on('dn.id', '=', 'dns.delivery_note_id')
-                                ->where('dn.status', '=', 1)
-                                ->where('dn.id', '>=', $dn_min_id)
-                                ->where('dn.id', '<=', $dn_max_id);
+                            $rows = $rows->join('delivery_note_shipments as dns', function($join) use ($dn_ids) {
+                                $join->on('s.id', '=', 'dns.shipment_id')
+                                ->whereIn('dns.delivery_note_id', $dn_ids);
                             });
                         }
                         else if ($type == 'delivery_note_pending') {
