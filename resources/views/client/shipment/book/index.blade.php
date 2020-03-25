@@ -1281,16 +1281,17 @@
 					}
 
 					if(present.length > 0){
-						var html = '<div class="text-left">In case of,<br/>';
+						var url = '{{asset('img/nsa_osa.png')}}';
+						var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
+						html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
+						html += '<div class="text-left">In case of,<br/>';
 						html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
 						html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
 						html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
 						content = document.createElement('div');
 						content.innerHTML = html;
 						swal({
-							title: 'A Possible Address Anomaly: ' + present + ' Detected!',
 							content: content,
-							icon: 'info',
 							buttons: {
 								cancel: {
 									text: 'Cancel',

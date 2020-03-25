@@ -50,6 +50,10 @@ class ShipperDashboardController extends Controller
         return view('client.access_denied');
     }
 
+    public function welcome_index(){
+        return view('client.welcome');
+    }
+
     public function orders_index() {
         $should_not_show_status = array(32,33,34,35,36,37,38,46);
         $cities = City::where('status',1)->select('id','name')->get();

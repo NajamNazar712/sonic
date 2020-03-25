@@ -39,6 +39,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
 
+    Route::get('/welcome', 'Shippers\ShipperDashboardController@welcome_index')->name('welcome');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
 
@@ -355,6 +356,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
         Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
+        Route::post('auto_disable_days/submit','Admins\ShipperAccountController@auto_disable_days')->name('auto_disable_days.submit');
 
 
         //user profile
