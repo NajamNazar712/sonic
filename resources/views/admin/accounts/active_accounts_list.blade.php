@@ -86,6 +86,24 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="AccountDisableDaysModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AccountDisableDaysModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Auto Account Disable Days</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="shipper_id">
+                    <input type="text" class="form-control disable_days" name="disable_days" id="disable_days" placeholder="Days*" value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="accountDisableDaysSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -101,11 +119,20 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
     $(document).ready(function() {
+        $('.disable_days').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 0,
+            'max': 200
+        });
 
         $('#search_admins').select2({
             width:'100%',
@@ -589,6 +616,69 @@
 
                });
             }
+        });
+
+        $('body').on('click','button.disable_days_button',function () {
+            var id = $(this).parents('tr').attr('id');
+            var days = table.row($(this).parents('tr')).data().auto_account_disabled_days;
+            $('#shipper_id').val(id);
+            $('#disable_days').val(days);
+            $('#AccountDisableDaysModal').modal('show');
+        });
+
+        $('#accountDisableDaysSubmit').on('click',function () {
+            var shipper = $('#shipper_id').val();
+            var days = parseInt($('#disable_days').val());
+            if(days){
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to update auto disable days for this account!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if(confirm){
+                        $.ajax({
+                            url: '{!! route('admin.accounts.auto_disable_days.submit') !!}',
+                            method: 'POST',
+                            data: {
+                                'days': days,
+                                'shipper_id':shipper,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function(data) {
+                                if(data.status == 1){
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                                $('#AccountDisableDaysModal').modal('hide');
+                                table.draw(true);
+                            });
+                    }
+                });
+            }else{
+                var error = "Days field is required!";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+
         });
     });
 
