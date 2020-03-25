@@ -4375,7 +4375,7 @@ class NotificationsController extends Controller
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->origin->name . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->destination->name . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->total_parcels . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->shipping_mode->name . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->shipping_mode->mode . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->transport_mode_vendor->name . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cargo_created_at . '</td>';
                         }
