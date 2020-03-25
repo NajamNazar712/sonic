@@ -1808,4 +1808,34 @@ class GlobalSettingsController extends Controller
         }
         return Datatables::of($shipments)->make(true);
     }
+
+    public function delay_in_delivery_massage(){
+        $message = '';
+        $settings = GlobalSettings::where('type', 'crm_delay_in_delivery_message')->first();
+        if($settings){
+            $message = $settings->text;
+        }
+        return view('admin.settings.CRM.crm_delay_in_delivery_message')->with(['message' => $message]);
+    }
+
+    public function delay_in_delivery_massage_store(Request $request){
+        $message = $request->delay_in_delivery_message;
+
+        if($message){
+            $setting = GlobalSettings::where('type', 'crm_delay_in_delivery_message');
+            if($setting->exists()){
+                $setting = $setting->first();
+                $setting->text = $message;
+                $setting->save();
+            }else{
+                $setting = new GlobalSettings();
+                $setting->type = 'crm_delay_in_delivery_message';
+                $setting->setting_value = 0;
+                $setting->text = $message;
+                $setting->save();
+            }
+            return redirect()->back()->with(['success' => 'Message added successfully!']);
+        }
+        return redirect()->back()->with(['error' => 'Please write a Message!']);
+    }
 }

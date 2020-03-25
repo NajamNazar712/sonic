@@ -38,6 +38,6 @@ class CRMDelayInDelivery extends Command
      */
     public function handle()
     {
-       dd(CRMAutomationController::automation_delay_in_delivery());
+       CRMAutomationController::automation_delay_in_delivery();
     }
 }

@@ -1508,6 +1508,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit/{id}', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_edit_index')->name('edit');
             Route::post('edit/update', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_origin_submit')->name('edit.update');
         });
+
+        Route::prefix('delay_in_delivery_massage')->name('delay_in_delivery_massage.')->group(function (){
+            Route::get('','Admins\GlobalSettingsController@delay_in_delivery_massage')->name('index');
+            Route::post('submit','Admins\GlobalSettingsController@delay_in_delivery_massage_store')->name('store');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

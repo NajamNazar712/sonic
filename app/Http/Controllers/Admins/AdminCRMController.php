@@ -22,6 +22,7 @@ use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\CRM\DelayInDeliveryShipment;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\Shipment;
@@ -1667,7 +1668,9 @@ class AdminCRMController extends Controller
                         'status_id' => 2,
                         'agent_id' => Auth::id()
                     ]);
-
+                    if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
+                        self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
+                    }
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as In-Process']);
@@ -1724,6 +1727,15 @@ class AdminCRMController extends Controller
         else{
             return redirect()->back()->with(['error' => 'Agent is not assigned yet']);
         }
+    }
+
+    public function delay_in_delivery_shipment_add($request_id, $shipment_id){
+
+        $delay_in_delivery = new DelayInDeliveryShipment();
+        $delay_in_delivery->crm_request_id = $request_id;
+        $delay_in_delivery->shipment_id = $shipment_id;
+        $delay_in_delivery->save();
+
     }
 
     public function bulk_re_open(Request $request){
