@@ -12,6 +12,7 @@ use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\CRM\CrmComments;
+use App\Http\Models\CRM\CrmPaymentShipment;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
@@ -1671,6 +1672,9 @@ class AdminCRMController extends Controller
                     if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
                         self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
                     }
+                    if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
+                        self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                    }
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as In-Process']);
@@ -1688,6 +1692,9 @@ class AdminCRMController extends Controller
                     ]);
                     if(DelayInDeliveryShipment::where('crm_request_id', $request->req_id)->exists()){
                         DelayInDeliveryShipment::where('crm_request_id', $request->req_id)->delete();
+                    }
+                    if(CrmPaymentShipment::where('crm_request_id', $request->req_id)->exists()){
+                        CrmPaymentShipment::where('crm_request_id', $request->req_id)->delete();
                     }
                     return redirect()->back()->with(['success' => 'Request marked as Resolved']);
                 } else {
@@ -1738,6 +1745,15 @@ class AdminCRMController extends Controller
         $delay_in_delivery->crm_request_id = $request_id;
         $delay_in_delivery->shipment_id = $shipment_id;
         $delay_in_delivery->save();
+
+    }
+
+    public function automation_payment_add($request_id, $shipment_id){
+
+        $payment = new CrmPaymentShipment();
+        $payment->crm_request_id = $request_id;
+        $payment->shipment_id = $shipment_id;
+        $payment->save();
 
     }
 
