@@ -1612,7 +1612,7 @@ class ShipperShipmentBookController extends Controller
                     $consignee_city = City::where('name', $row['consignee_city_name'])->first();
 
                     if (!$consignee_city->status) {
-                        $errors[$row_id]['consignee_city'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+                        $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                     }
 
                     if (!$consignee_city->zone_id) {
@@ -2753,7 +2753,7 @@ class ShipperShipmentBookController extends Controller
                     $consignee_city = City::where('name', $row['consignee_city_name'])->first();
 
                     if (!$consignee_city->status) {
-                        $errors[$row_id]['consignee_city'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+                        $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                     }
 
                     if (!$consignee_city->zone_id) {
