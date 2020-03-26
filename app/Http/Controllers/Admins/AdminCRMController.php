@@ -1686,6 +1686,9 @@ class AdminCRMController extends Controller
                         'status_id' => 3,
                         'agent_id' => Auth::id()
                     ]);
+                    if(DelayInDeliveryShipment::where('crm_request_id', $request->req_id)->exists()){
+                        DelayInDeliveryShipment::where('crm_request_id', $request->req_id)->delete();
+                    }
                     return redirect()->back()->with(['success' => 'Request marked as Resolved']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as Resolved']);
