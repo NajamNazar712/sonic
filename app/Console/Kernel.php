@@ -106,7 +106,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
 
         $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
-        $schedule->command('overland:cargo_report')->dailyAt('12:00')->runInBackground();
+        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
 
 //		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
 //      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
