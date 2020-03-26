@@ -667,7 +667,7 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318], session('permissions'))) !== 0)                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320], session('permissions'))) !== 0)                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([149, 214, 228,302, 313, 314, 318], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shippers</span></a>
@@ -819,7 +819,7 @@
                         @endif
 
 
-                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([188, 237, 260, 274], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([188, 237, 260, 274, 320], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">CRM</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))
@@ -833,6 +833,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(274, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.crm_reopen.index') }}">Crm Re-Open Count</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(320, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.delay_in_delivery_massage.index') }}">Delay In Delivery Message</a></li>
                                     @endif
                                 </ul>
 

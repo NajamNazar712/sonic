@@ -12,6 +12,7 @@ use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\CRM\CrmComments;
+use App\Http\Models\CRM\CrmPaymentShipment;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
@@ -22,6 +23,7 @@ use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\CRM\DelayInDeliveryShipment;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\Shipment;
@@ -1667,7 +1669,12 @@ class AdminCRMController extends Controller
                         'status_id' => 2,
                         'agent_id' => Auth::id()
                     ]);
-
+                    if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
+                        self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
+                    }
+                    if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
+                        self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                    }
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as In-Process']);
@@ -1683,6 +1690,12 @@ class AdminCRMController extends Controller
                         'status_id' => 3,
                         'agent_id' => Auth::id()
                     ]);
+                    if(DelayInDeliveryShipment::where('crm_request_id', $request->req_id)->exists()){
+                        DelayInDeliveryShipment::where('crm_request_id', $request->req_id)->delete();
+                    }
+                    if(CrmPaymentShipment::where('crm_request_id', $request->req_id)->exists()){
+                        CrmPaymentShipment::where('crm_request_id', $request->req_id)->delete();
+                    }
                     return redirect()->back()->with(['success' => 'Request marked as Resolved']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as Resolved']);
@@ -1724,6 +1737,24 @@ class AdminCRMController extends Controller
         else{
             return redirect()->back()->with(['error' => 'Agent is not assigned yet']);
         }
+    }
+
+    public function delay_in_delivery_shipment_add($request_id, $shipment_id){
+
+        $delay_in_delivery = new DelayInDeliveryShipment();
+        $delay_in_delivery->crm_request_id = $request_id;
+        $delay_in_delivery->shipment_id = $shipment_id;
+        $delay_in_delivery->save();
+
+    }
+
+    public function automation_payment_add($request_id, $shipment_id){
+
+        $payment = new CrmPaymentShipment();
+        $payment->crm_request_id = $request_id;
+        $payment->shipment_id = $shipment_id;
+        $payment->save();
+
     }
 
     public function bulk_re_open(Request $request){
