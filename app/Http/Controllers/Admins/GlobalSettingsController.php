@@ -12,6 +12,7 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
@@ -1541,9 +1542,21 @@ class GlobalSettingsController extends Controller
 
     public function minimum_chargeable_weight_update(Request $request){
         $on = MinimumChargeableWeightSetting::where('shipping_mode_id', 1)->update(['weight' => $request->on]);
+        $standard_on = StandardWeightCharge::where('shipping_mode_id', 1)->first();
+        $standard_on->range_up =  $request->on;
+        $standard_on->save();
         $ol = MinimumChargeableWeightSetting::where('shipping_mode_id', 2)->update(['weight' => $request->ol]);
+        $standard_ol = StandardWeightCharge::where('shipping_mode_id', 2)->first();
+        $standard_ol->range_up =  $request->ol;
+        $standard_ol->save();
         $detain = MinimumChargeableWeightSetting::where('shipping_mode_id', 3)->update(['weight' => $request->det]);
+        $standard_det = StandardWeightCharge::where('shipping_mode_id', 3)->first();
+        $standard_det->range_up =  $request->det;
+        $standard_det->save();
         $same_day = MinimumChargeableWeightSetting::where('shipping_mode_id', 4)->update(['weight' => $request->same_day]);
+        $standard_same_day = StandardWeightCharge::where('shipping_mode_id', )->first();
+        $standard_same_day->range_up =  $request->same_day;
+        $standard_same_day->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
