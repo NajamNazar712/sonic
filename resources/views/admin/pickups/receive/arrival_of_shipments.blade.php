@@ -93,6 +93,61 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="modal fade" id="tryAndbuyModal" data-backdrop="static" role="dialog" aria-labelledby="tryAndbuyModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="delivered_shipments_modal_title">Try And Buy Items(s)</h4>
+
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+					<form id="add_try_and_buy_shipment_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+						<div class="row justify-content-center">
+							<div class="form-group col-5">
+								<input type="text" name="scan_item" class="form-control scan_item" placeholder="Scan Item">
+							</div>
+						</div>
+
+						<table class="table table-bordered datatable" id="try_and_buy_datatable" style="z-index: 3;">
+							<thead>
+							<tr role="row" class="bg-primary white">
+								<th class="border-primary border-darken-1">S. No.</th>
+								<th class="border-primary border-darken-1">Item ID</th>
+								<th class="border-primary border-darken-1">Tracking Number</th>
+								<th class="border-primary border-darken-1"></th>
+							</tr>
+							</thead>
+						</table>
+						<div class="form-group">
+							<button type="button" class="btn btn-secondary" id="try_and_buy_airwaybill">Print Air Waybill</button>
+						</div>
+
+						<div class="row justify-content-center">
+							<div class="form-group col-5">
+								<input type="text" name="try_and_buy_tracking_number" id="try_and_buy_tracking_number" class="form-control tracking_number" placeholder="Scan Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required" disabled="disabled">
+							</div>
+						</div>
+
+						<div class="row justify-content-center">
+							<div class="form-group col-5">
+								<input type="text" name="try_and_buy_weight" id="try_and_buy_weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000" disabled="disabled">
+							</div>
+						</div>
+
+						<div class="form-group">
+							<button type="button" class="btn btn-primary" disabled="disabled">Confirm</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
 @endsection
 
 @section('css')
@@ -110,6 +165,7 @@
 
 	<script>
 		$(document).ready(function() {
+			$('#tryAndbuyModal').modal('show');
 		    @if(session('errors'))
 				scan_sound(2);
 			@endif
