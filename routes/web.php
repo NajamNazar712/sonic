@@ -358,6 +358,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
         Route::post('auto_disable_days/submit','Admins\ShipperAccountController@auto_disable_days')->name('auto_disable_days.submit');
 
+        Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
+
 
         //user profile
         Route::get('/{id}/view','Admins\AdminDashboardController@userProfile')->name('view.profile');

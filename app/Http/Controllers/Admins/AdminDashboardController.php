@@ -18,6 +18,7 @@ use App\Http\Models\BanksList;
 use App\Http\Models\CityHistory;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\DuplicateUser;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\Operataions\OperationForecast;
@@ -6682,6 +6683,16 @@ if(session('department_id') == 7){
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
 
+    public function duplicate_info(Request $request){
+        $shipper_id = $request->shipper_id;
+        $duplicate = DuplicateUser::where('user_id', $shipper_id)->first();
+        $data = array();
+        $data['phone'] = ($duplicate->phone) ? $duplicate->phone:'';
+        $data['cnic'] = ($duplicate->cnic) ? $duplicate->cnic:'';
+        $data['iban'] = ($duplicate->iban) ? $duplicate->iban:'';
+        $data['name'] = ($duplicate->name) ? $duplicate->name:'';
+        return response()->json(['status' => 1, 'info' => $data]);
+    }
     public function activeAccountListAjax(Request $request){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
            ->leftjoin('products as p','p.id','=','users.product_id')
@@ -6695,7 +6706,8 @@ if(session('department_id') == 7){
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_account_disabled_days'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_account_disabled_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6709,6 +6721,27 @@ if(session('department_id') == 7){
 
         if($sale_persons = $request->get('sale_persons')){
             $users = $users->whereIn('ad.id', $sale_persons);
+        }
+        if($search_phone = $request->get('search_phone')){
+            $users->where(function ($sub_query) use ($search_phone) {
+                $sub_query->where('users.phone', 'like', '%' . $search_phone . '%');
+            })
+                ->orWhere(function ($sub_query) use ($search_phone) {
+                    $sub_query->where('users.phone2', 'like', '%' . $search_phone . '%');
+                });
+        }
+        if($search_cnic = $request->get('search_cnic')){
+            $users = $users->where('users.cnic', $search_cnic);
+        }
+        if($search_shipper = $request->get('search_shipper')){
+            $users = $users->where('users.name', 'like', '%' . $search_shipper . '%');
+        }
+
+        if($search_iban = $request->get('search_iban')){
+            $users = $users->leftjoin('user_bank_infos as ubi', function($join) use ($search_iban){
+                $join->on('ubi.user_id', '=', 'users.id')
+                    ->where('ubi.iban', $search_iban);
+            });
         }
 
         return Datatables::of($users)
@@ -6800,6 +6833,26 @@ if(session('department_id') == 7){
                     ->orWhere(function ($sub_query) use ($keyword) {
                         $sub_query->where('users.phone2', 'like', '%' . $keyword . '%');
                     });
+            })
+            ->addColumn('duplication', function($users){
+                $count = 0;
+                if($users->duplicate_phone != null){
+                    $count++;
+                }
+                if($users->duplicate_cnic != null){
+                    $count++;
+                }
+                if($users->duplicate_iban != null){
+                    $count++;
+                }
+                if($users->duplicate_name != null){
+                    $count++;
+                }
+                if($count > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $count . '</button>';
+                }else{
+                    return $count;
+                }
             })
             ->addColumn("action", function ($result) {
                 if(in_array($result->id, session('tagged_shippers'))){
@@ -6901,7 +6954,8 @@ if(session('department_id') == 7){
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name'])->whereIn('users.status',[0,1,2])->where('blacklist',0)->where('users.email_verified',1);
+            ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name'])->whereIn('users.status',[0,1,2])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6913,6 +6967,27 @@ if(session('department_id') == 7){
         }
         if($sale_persons = $request->get('sale_persons')){
             $users = $users->whereIn('ad.id', $sale_persons);
+        }
+        if($search_phone = $request->get('search_phone')){
+            $users->where(function ($sub_query) use ($search_phone) {
+                $sub_query->where('users.phone', 'like', '%' . $search_phone . '%');
+            })
+                ->orWhere(function ($sub_query) use ($search_phone) {
+                    $sub_query->where('users.phone2', 'like', '%' . $search_phone . '%');
+                });
+        }
+        if($search_cnic = $request->get('search_cnic')){
+            $users = $users->where('users.cnic', $search_cnic);
+        }
+        if($search_shipper = $request->get('search_shipper')){
+            $users = $users->where('users.name', 'like', '%' . $search_shipper . '%');
+        }
+
+        if($search_iban = $request->get('search_iban')){
+            $users = $users->join('user_bank_infos as ubi', function($join) use ($search_iban){
+                $join->on('ubi.user_id', '=', 'users.id')
+                    ->where('ubi.iban', $search_iban);
+            });
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
@@ -6997,6 +7072,26 @@ if(session('department_id') == 7){
                 }
                 else {
                     $query->whereRaw('false');
+                }
+            })
+            ->addColumn('duplication', function($users){
+                $count = 0;
+                if($users->duplicate_phone != null){
+                    $count++;
+                }
+                if($users->duplicate_cnic != null){
+                    $count++;
+                }
+                if($users->duplicate_iban != null){
+                    $count++;
+                }
+                if($users->duplicate_name != null){
+                    $count++;
+                }
+                if($count > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $count . '</button>';
+                }else{
+                    return $count;
                 }
             })
             ->addColumn("action", function ($result) {
