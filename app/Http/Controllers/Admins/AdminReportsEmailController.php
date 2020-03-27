@@ -774,7 +774,7 @@ class AdminReportsEmailController extends Controller
             }
             if(count($origin_hubs) > 0){
                 foreach ($origin_hubs as $origin_hub){
-                    $cargo_consignments = CargoConsignment::where('origin_hub_id', $origin->id)->where('destination_hub_id', $origin_hub)->where('status_id', 1)->where('created_at', '<=', $date_to);
+                    $cargo_consignments = CargoConsignment::where('origin_hub_id', $origin->id)->where('destination_hub_id', $origin_hub)->where('status_id', 1)->where('type', 1)->where('created_at', '<=', $date_to);
                     if($cargo_consignments->exists()){
                         $cargo_consignments = $cargo_consignments->get();
                         foreach($cargo_consignments as $cargo_consignment){
