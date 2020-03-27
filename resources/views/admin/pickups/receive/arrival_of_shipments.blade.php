@@ -165,7 +165,7 @@
 
 	<script>
 		$(document).ready(function() {
-			$('#tryAndbuyModal').modal('show');
+			// $('#tryAndbuyModal').modal('show');
 		    @if(session('errors'))
 				scan_sound(2);
 			@endif
@@ -173,6 +173,7 @@
 				scan_sound(1);
 			@endif
 			var shipment_ids = [];
+			var shipment_item_ids = [];
 
 			$('#add_shipment_form input.tracking_number').focus();
 
@@ -221,6 +222,23 @@
 						// }
 					});
 
+					this.api().table().columns.adjust();
+				}
+			});
+
+			$('#add_try_and_buy_shipment_form input.scan_item').focus();
+
+			var try_and_buy_table = $('#try_and_buy_datatable').DataTable({
+				dom: 'ltipr',
+				paging:false,
+				autoWidth: false,
+				columns: [
+					{orderable: false, searchable: false, name: 'try_serial_number', class: 'align-middle serial_number'},
+					{name: 'try_item_id', class: 'align-middle item_id', orderable: false, searchable: false},
+					{name: 'try_tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+					{name: 'try_remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
+				],
+				initComplete: function() {
 					this.api().table().columns.adjust();
 				}
 			});
@@ -331,11 +349,32 @@
 									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 							}
-							else {
-								$('#add_shipment_form button.add').prop('disabled', false);
-                                scan_sound(2);
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-							}
+							else if(data.status == 2){
+								if(data.details.scanned_shipment_item){
+									var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+									var try_rowNo = try_and_buy_table.rows().count();
+									try_and_buy_table.row.add([try_rowNo + 1, data.details.scanned_shipment_item, data.details.tracking_number, try_remove_button]).node().id = data.details.scanned_shipment_item;
+									try_and_buy_table.draw(false);
+									try_and_buy_table.columns.adjust().draw();
+									scan_sound(1);
+									shipment_item_ids.push(data.scanned_shipment_item);
+									$('#tryAndbuyModal').modal('show');
+								}
+								else{
+									$('#tryAndbuyModal').modal('show');
+								}
+
+									$('#add_shipment_form button.add').prop('disabled', false);
+
+									$('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+								else {
+									$('#add_shipment_form button.add').prop('disabled', false);
+									scan_sound(2);
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
 						});
 					}
 					else {
