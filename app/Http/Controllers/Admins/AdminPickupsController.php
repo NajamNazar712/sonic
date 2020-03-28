@@ -1223,11 +1223,84 @@ class AdminPickupsController extends Controller
             }
         }
         else{
-        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+            $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+                    $exists = FALSE;
+                    $pickup_note = PickupNote::find($request->pickup_receive_pickup_note_id);
+
+                    foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
+                        $pickup_request = $pickup_note_request->pickup_request;
+
+                        if ($pickup_request->shipper_id == $shipment->user_id && $pickup_request->pickup_address_id == $shipment->pickup_address_id) {
+                            $exists = TRUE;
+
+                            break;
+                        }
+                    }
+                    if($shipment->booking_type_id == 3){
+                        if ($exists) {
+                            $details = array();
+                            $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+                            $shipment_items_count = count($shipment_items);
+
+                            $details['id'] = $shipment->id;
+                            $details['tracking_number'] = $shipment->tracking_number;
+                            $details['shipment_items'] = $shipment_items;
+                            $details['shipment_items_count'] = $shipment_items_count;
+
+                            ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                            return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
+                        } else {
+                            return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment does not belong to the Selected Pickup Note'];
+                        }
+                    }
+                    else{
+                        if ($exists) {
+                            if (empty($request->weight)) {
+                                $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+                                $shipment->length = $request->length;
+                                $shipment->breadth = $request->breadth;
+                                $shipment->height = $request->height;
+                            } else {
+                                $shipment->actual_weight = $request->weight;
+                            }
+
+                            $shipment->save();
+
+                            $details = array();
+
+                            $details['id'] = $shipment->id;
+                            $details['tracking_number'] = $shipment->tracking_number;
+                            $details['receiving_sheet_no'] = ($shipment->receiving_sheet_shipment) ? str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT) : '';
+                            $details['order_id'] = $shipment->order_id;
+                            $details['destination'] = $shipment->consignee_city->name;
+                            $details['cod_amount'] = number_format($shipment->amount);
+                            $details['estimated_weight'] = floatval($shipment->estimated_weight);
+                            $details['actual_weight'] = floatval($shipment->actual_weight);
+
+                            ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+                        } else {
+                            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to the Selected Pickup Note'];
+                        }
+                    }
+                } else {
+                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                }
+            } else {
+                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+            }
+        }
+    }
+    public function receive_try_and_buy_shipment_details(Request $request)
+    {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-
             if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
                 $exists = FALSE;
                 $pickup_note = PickupNote::find($request->pickup_receive_pickup_note_id);
@@ -1241,34 +1314,9 @@ class AdminPickupsController extends Controller
                         break;
                     }
                 }
-                if($shipment->booking_type_id = 3){
+                if($shipment->booking_type_id == 3){
                     if ($exists) {
-                        $details = array();
-                        $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
-                        $shipment_items_count = count($shipment_items);
-
-                        $details['id'] = $shipment->id;
-                        $details['tracking_number'] = $shipment->tracking_number;
-                        $details['shipment_items'] = $shipment_items;
-                        $details['shipment_items_count'] = $shipment_items_count;
-
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
-                        return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
-                    } else {
-                        return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment does not belong to the Selected Pickup Note'];
-                    }
-                }
-                else{
-                    if ($exists) {
-                        if (empty($request->weight)) {
-                            $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
-                            $shipment->length = $request->length;
-                            $shipment->breadth = $request->breadth;
-                            $shipment->height = $request->height;
-                        } else {
-                            $shipment->actual_weight = $request->weight;
-                        }
-
+                        $shipment->actual_weight = $request->weight;
                         $shipment->save();
 
                         $details = array();
@@ -1295,6 +1343,24 @@ class AdminPickupsController extends Controller
             return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
         }
     }
+    public function try_and_buy_item_details(Request $request){
+        $shipment_id = $request->shipment_id;
+        $shipment_item_id = $request->item_id;
+
+        $shipment_item = ShipmentItem::find($shipment_item_id);
+        if($shipment_item){
+            if($shipment_item->shipment_id == $shipment_id){
+                $scanned_shipment_item = $shipment_item->id;
+                return ['status' => 0, 'success' => 'Try and Buy Shipment Item found!', 'scanned_shipment_item' => $scanned_shipment_item];
+            }
+            else{
+                return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
+            }
+
+        }
+        else{
+            return ['status' => 1, 'error' => 'No Shipment Item with given Item ID is present'];
+        }
     }
 
     public function receive_shipment_remove(Request $request) {
