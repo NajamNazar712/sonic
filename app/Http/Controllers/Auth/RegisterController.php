@@ -346,6 +346,7 @@ class RegisterController extends Controller
                     'billing_person_phone' => $data['billing_person_phone'],
                     'billing_person_email' => $data['billing_person_email'],
                     'billing_address' => $data['billing_address'],
+                    'default_bank' => 1
                 ]);
             }
         }
