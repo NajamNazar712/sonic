@@ -46,6 +46,7 @@ use App\Http\Models\Invoice;
 use App\Http\Models\InvoiceShipment;
 use App\Http\Models\InvoiceStatus;
 use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\Http\Models\InvoiceForReimbursement;
 
 use Auth;
 use DB;
@@ -5145,7 +5146,29 @@ class AdminFinanceController extends Controller
               <body>
             ';
 
-            $invoice_number = '';
+            $invoice_for_reimbursement = InvoiceForReimbursement::where('user_id', $shipper->id)->where('payment_type', $payment_type)->where('from_date', $from_date)->where('to_date', $to_date);
+
+            if ($invoice_for_reimbursement->exists()) {
+                $invoice_for_reimbursement = $invoice_for_reimbursement->first();
+
+                $invoice_number = $invoice_for_reimbursement->invoice_number;
+            }
+            else {
+                $invoice_for_reimbursement = new InvoiceForReimbursement();
+
+                $invoice_for_reimbursement->user_id = $shipper->id;
+                $invoice_for_reimbursement->payment_type = $payment_type;
+                $invoice_for_reimbursement->from_date = $from_date;
+                $invoice_for_reimbursement->to_date = $to_date;
+
+                $invoice_for_reimbursement->save();
+
+                $invoice_number = $shipper->id . str_pad($invoice_for_reimbursement->id, 6, '0', STR_PAD_LEFT);
+
+                $invoice_for_reimbursement->invoice_number = $invoice_number;
+
+                $invoice_for_reimbursement->save();
+            }
 
             $shipment_details = '';
 
