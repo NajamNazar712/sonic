@@ -12,8 +12,8 @@
                     @include('admin.inc.messages')
                     <div class="card-content">
                         <div class="card-body card-dashboard">
-                            @if (session('role_id') == 1 || in_array(276, session('permissions')))
-                            <div id="search_form" class="row mb-2 justify-content-center">
+                            @if (session('role_id') == 1 || count(array_intersect([276, 321], session('permissions'))) !== 0)
+                            <div id="search_form" class="row p-1 mb-2 justify-content-center">
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <select name="search_admins[]" id="search_admins" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
@@ -21,6 +21,26 @@
                                                 <option value="{{$admin->id}}">{{$admin->name}}</option>
                                             @endforeach
                                         </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <input type="text" name="search_phone" id="search_phone" class="form-control phone" placeholder="Phone Number">
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <input type="text" name="search_iban" id="search_iban" class="form-control iban" placeholder="IBAN">
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <input type="text" name="search_cnic" id="search_cnic" class="form-control cnic" placeholder="CNIC">
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <input type="text" name="search_shipper" id="search_shipper" class="form-control shipper_name" placeholder="Shipper Name">
                                     </fieldset>
                                 </div>
                                 <div class="col-2">
@@ -54,6 +74,7 @@
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
                                         <th class="border-primary border-darken-1">Documents Status</th>
                                         <th class="border-primary border-darken-1">Documents Rejection Reason</th>
+                                        <th class="border-primary border-darken-1">Duplicate</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -104,6 +125,26 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -125,6 +166,11 @@
 
     <script type="text/javascript">
     $(document).ready(function() {
+        $("input[name='search_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+        $("input[name='search_cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
+        $('body').on('change','#search_iban',function() {
+            $(this).val($(this).val().trim());
+        });
         $('.disable_days').inputmask({
             'alias': 'integer',
             'allowMinus': false,
@@ -239,6 +285,10 @@
                url: '{{ route('admin.accounts.active.ajax') }}',
                data: function (d) {
                    d.sale_persons = $('#search_admins').val();
+                   d.search_phone = $('#search_phone').val();
+                   d.search_cnic = $('#search_cnic').val();
+                   d.search_shipper = $('#search_shipper').val();
+                   d.search_iban = $('#search_iban').val();
                }
            },
             columns: [
@@ -265,6 +315,7 @@
                 {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
+                {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -293,7 +344,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks') || $(header).is('.rate_status')) {
+                    if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks') || $(header).is('.rate_status') || $(header).is('.duplicate') ) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
@@ -679,6 +730,26 @@
                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
             }
 
+        });
+
+        $('body').on('click', 'button.duplicate_modal',  function(){
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+                $.ajax({
+                    url: '{!! route('admin.accounts.duplicate.info') !!}',
+                    data: {
+                        'shipper_id': id,
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status){
+                            $('#duplicate_modal').modal('show');
+                            var html = '<table class="table table-bordered"><tr><td><strong>Phone</strong></td><td>'+ data.info.phone +'</td></tr><tr><td><strong>CNIC</strong></td><td>'+ data.info.cnic +'</td></tr><tr><td><strong>IBAN</strong></td><td>'+ data.info.iban +'</td></tr><tr><td><strong>Name</strong></td><td>'+ data.info.name +'</td></tr>';
+                            $('#duplicate_modal .modal-body').html(html);
+                        }
+
+                    });
+            }
         });
     });
 

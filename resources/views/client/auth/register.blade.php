@@ -961,7 +961,6 @@
                 var bcc = $('.card.nbank').length;
                 var bid = $('.card.nbank').eq(bcc-1);
                 var banking_div = banks_count + 1;
-                console.log(banking_div);
                 bid.attr('id','banking_'+banking_div);
                 $('#banking_'+banking_div+' h3.card-title' ).text('Bank '+banking_div);
                 var innerdivcount = banks_count + 1;
