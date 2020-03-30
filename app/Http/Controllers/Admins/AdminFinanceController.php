@@ -2389,7 +2389,10 @@ class AdminFinanceController extends Controller
     public function make_payments_index() {
         $banks = BanksList::all();
         $shipper_status = [1 => 'Active', 2 => 'Inactive'];
-        return view('admin.finance.make_payments')->with(['banks'=>$banks, 'shipper_status' => $shipper_status]);
+        $total_amount = PendingPaymentShipment::sum('amount');
+        $total_charges = PendingPaymentShipment::sum('charges');
+        $total_payable = PendingPaymentShipment::sum('payable');
+        return view('admin.finance.make_payments')->with(['banks'=>$banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'total_charges' => $total_charges, 'total_payable' => $total_payable]);
     }
 
     public function make_payments_list(Request $request) {
@@ -3181,6 +3184,43 @@ class AdminFinanceController extends Controller
         }
 
         return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
+    }
+
+    public function make_payments_stats_calculate(Request $request) {
+        $total_amount = 0;
+        $total_charges = 0;
+        $total_payable = 0;
+
+        if ($positive_negative_filter = $request->get('positive_negative_filter')) {
+            if (PendingPayment::exists()) {
+                foreach (PendingPayment::get() as $pending_payment) {
+                    $payable = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('payable');
+
+                    if ($positive_negative_filter == 1 && $payable >= 0) {
+                        $total_amount += PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('amount');
+                        $total_charges += PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('charges');
+                        $total_payable += $payable;
+                    }
+                    else if ($positive_negative_filter == 2 && $payable < 0) {
+                        $total_amount += PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('amount');
+                        $total_charges += PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('charges');
+                        $total_payable += $payable;
+                    }
+                }
+            }
+            else {
+                $total_amount = PendingPaymentShipment::sum('amount');
+                $total_charges = PendingPaymentShipment::sum('charges');
+                $total_payable = PendingPaymentShipment::sum('payable');
+            }
+        }
+        else {
+            $total_amount = PendingPaymentShipment::sum('amount');
+            $total_charges = PendingPaymentShipment::sum('charges');
+            $total_payable = PendingPaymentShipment::sum('payable');
+        }
+
+        return ['total_amount' => $total_amount, 'total_charges' => $total_charges, 'total_payable' => $total_payable];
     }
 
     static public function done_payment($shipment_id, $type) {

@@ -60,7 +60,20 @@
 									</div>
 									</form>
 								</div>
-								
+							</div>
+
+							<div class="row text-center">
+								<div class="col-4">
+									<h4 class="bg-primary mb-0 text-white border">Total Amount</h4><p class="border" id="stats_total_amount">Rs. {{ $total_amount }}</p>
+								</div>
+
+								<div class="col-4">
+									<h4 class="bg-primary mb-0 text-white border">Total Charges</h4><p class="border" id="stats_total_charges">Rs. {{ $total_charges }}</p>
+								</div>
+
+								<div class="col-4">
+									<h4 class="bg-primary mb-0 text-white border">Total Payable</h4><p class="border" id="stats_total_payable">Rs. {{ $total_payable }}</p>
+								</div>
 							</div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -288,6 +301,22 @@
 				window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?done_payment_ids=' + '{{ implode(',', session('print')) }}', '_blank');
 			@endif
 
+			function stats_calculate() {
+				positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
+
+				$.ajax({
+					url: '{!! route('admin.finance.make_payments.stats_calculate') !!}',
+					data: {
+						'positive_negative_filter': positive_negative_filter
+					}
+				})
+				.done(function(data) {
+					$('#stats_total_amount').html(data.total_amount);
+					$('#stats_total_charges').html(data.total_charges);
+					$('#stats_total_payable').html(data.total_payable);
+				});
+			}
+
 			var selected_rows = [];
 
 			var selected_rows_shipments = [];
@@ -299,6 +328,7 @@
                 width:'100%',
                 allowClear: true
             }).bind('change', function() {
+            	stats_calculate();
 				table.draw(false);
 			});
 
