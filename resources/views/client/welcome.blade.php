@@ -1,6 +1,6 @@
 @extends('client.layout.master')
 
-@section('title', 'Access Denied')
+@section('title', 'Welcome')
 
 @section('content')
     <div class="card">

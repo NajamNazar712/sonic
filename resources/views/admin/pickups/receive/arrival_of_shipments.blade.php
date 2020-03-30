@@ -93,6 +93,67 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="modal fade" id="tryAndbuyModal" data-backdrop="static" role="dialog" aria-labelledby="tryAndbuyModal" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="delivered_shipments_modal_title">Try And Buy Items(s)</h4>
+
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+					<form id="add_try_and_buy_shipment_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+						<input type="hidden" name="try_and_buy_shipment_id" id="try_and_buy_shipment_id">
+						<input type="hidden" name="try_and_buy_tracking_number" id="try_and_buy_tracking_number">
+						<input type="hidden" name="try_and_buy_shipment_items_count" id="try_and_buy_shipment_items_count">
+						<div class="row justify-content-center">
+							<div class="form-group col-5">
+								<input type="text" name="scan_item" id="scan_item" class="form-control scan_item" placeholder="Scan Item">
+							</div>
+						</div>
+						<div class="row justify-content-center">
+							<div class="row">
+								<p id="total_item_count"></p>
+							</div>
+						</div>
+						<table class="table table-bordered datatable" id="try_and_buy_datatable" style="z-index: 3;">
+							<thead>
+							<tr role="row" class="bg-primary white">
+								<th class="border-primary border-darken-1">S. No.</th>
+								<th class="border-primary border-darken-1">Item ID</th>
+								<th class="border-primary border-darken-1">Tracking Number</th>
+								<th class="border-primary border-darken-1"></th>
+							</tr>
+							</thead>
+						</table>
+						<div class="form-group">
+							<button type="button" class="btn btn-secondary" id="try_and_buy_airwaybill">Print Air Waybill</button>
+						</div>
+
+						<div class="row justify-content-center">
+							<div class="form-group col-5">
+								<input type="text" name="scan_try_and_buy_tracking_number" id="scan_try_and_buy_tracking_number" class="form-control scan_try_and_buy_tracking_number" placeholder="Scan Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required" disabled="disabled">
+							</div>
+						</div>
+
+						<div class="row justify-content-center">
+							<div class="form-group col-5">
+								<input type="text" name="try_and_buy_weight" id="try_and_buy_weight" class="form-control try_and_buy_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000" disabled="disabled">
+							</div>
+						</div>
+
+						<div class="form-group">
+							<button type="submit" class="btn btn-primary try_and_buy_confirm" id="try_and_buy_confirm" disabled="disabled">Confirm</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
 @endsection
 
 @section('css')
@@ -110,6 +171,37 @@
 
 	<script>
 		$(document).ready(function() {
+			function print(id) {
+				var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+
+				$.ajax({
+					url: url,
+					method: 'POST',
+					data: {
+						'ids[]': id,
+						'admin': true,
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+						.done(function (data) {
+							var tab = window.open('', '_blank');
+
+							if (!tab) {
+								swal({
+									title: 'Popup Blocker Enabled!',
+									text: 'Please add this site to your exception list.',
+									icon: 'error',
+									closeOnClickOutside: false,
+									closeOnEsc: false
+								});
+							}
+							else {
+								tab.document.write(data);
+								tab.document.close();
+								tab.focus();
+							}
+						});
+			}
 		    @if(session('errors'))
 				scan_sound(2);
 			@endif
@@ -117,6 +209,8 @@
 				scan_sound(1);
 			@endif
 			var shipment_ids = [];
+			var shipment_item_ids = [];
+			var all_shipment_item_ids = [];
 
 			$('#add_shipment_form input.tracking_number').focus();
 
@@ -169,6 +263,23 @@
 				}
 			});
 
+			$('#add_try_and_buy_shipment_form input.scan_item').focus();
+
+			var try_and_buy_table = $('#try_and_buy_datatable').DataTable({
+				dom: 'ltipr',
+				paging:false,
+				autoWidth: false,
+				columns: [
+					{orderable: false, searchable: false, name: 'try_serial_number', class: 'align-middle serial_number'},
+					{name: 'try_item_id', class: 'align-middle item_id', orderable: false, searchable: false},
+					{name: 'try_tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+					{name: 'try_remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
+				],
+				initComplete: function() {
+					this.api().table().columns.adjust();
+				}
+			});
+
 			$('#add_shipment_form input.volumetric_weight').checkboxpicker().bind('change', function() {
 				var parent = $(this).parent('.form-group').prev('.form-group');
 
@@ -188,6 +299,23 @@
 				'alias': 'integer',
 				'allowMinus': false,
 				'allowPlus': false
+			});
+			$('#add_try_and_buy_shipment_form input.scan_item').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+			$('#scan_try_and_buy_tracking_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+
+			$('#try_and_buy_weight').inputmask({
+				'alias': 'decimal',
+				'allowMinus': false,
+				'allowPlus': false,
+				'digits': 2
 			});
 
 			$('#add_shipment_form input.weight').inputmask({
@@ -233,7 +361,6 @@
 					var length = $(form).find('input.length').val();
 					var breadth = $(form).find('input.breadth').val();
 					var height = $(form).find('input.height').val();
-
 					if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
 						$.ajax({
 							url: '{!! route('admin.pickups.receive.shipment_details') !!}',
@@ -275,11 +402,57 @@
 									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 							}
-							else {
-								$('#add_shipment_form button.add').prop('disabled', false);
-                                scan_sound(2);
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-							}
+							else if(data.status == 2){
+								$('#scan_try_and_buy_tracking_number').prop('disabled', true);
+								$('#try_and_buy_weight').prop('disabled', true);
+								$('#try_and_buy_confirm').prop('disabled', true);
+								if(data.details.scanned_shipment_item){
+									var item_index = $.inArray(parseInt(data.details.scanned_shipment_item), all_shipment_item_ids);
+									console.log(data.scanned_shipment_item);
+									console.log(data.all_shipment_item_ids);
+									if (item_index === -1) {
+										var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+										var try_rowNo = try_and_buy_table.rows().count();
+										try_and_buy_table.row.add([try_rowNo + 1, data.details.scanned_shipment_item, data.details.tracking_number, try_remove_button]).node().id = data.details.scanned_shipment_item;
+										try_and_buy_table.draw(false);
+										try_and_buy_table.columns.adjust().draw();
+										scan_sound(1);
+										shipment_item_ids.push(data.details.scanned_shipment_item);
+										$('#try_and_buy_shipment_id').val(data.details.id);
+										$('#try_and_buy_tracking_number').val(data.details.tracking_number);
+										$('#try_and_buy_shipment_items_count').val(data.details.shipment_items_count);
+										$('#total_item_count').html('Total Shipment Items: ' + data.details.shipment_items_count);
+										// all_shipment_item_ids.push(data.scanned_shipment_item);
+										var check = parseInt(try_rowNo) + 1;
+										if(parseInt(data.details.shipment_items_count) === parseInt(check)){
+											$('#scan_try_and_buy_tracking_number').prop('disabled', false);
+											$('#try_and_buy_weight').prop('disabled', false);
+											$('#try_and_buy_confirm').prop('disabled', false);
+										}
+										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+										$('#tryAndbuyModal').modal('show');
+									}
+									else{
+										toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+									}
+								}
+								else{
+									$('#try_and_buy_shipment_id').val(data.details.id);
+									$('#try_and_buy_tracking_number').val(data.details.tracking_number);
+									$('#try_and_buy_shipment_items_count').val(data.details.shipment_items_count);
+									$('#total_item_count').html('Total Shipment Items: ' + data.details.shipment_items_count);
+									$('#tryAndbuyModal').modal('show');
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+									$('#add_shipment_form button.add').prop('disabled', false);
+
+									$('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+								}
+								else {
+									$('#add_shipment_form button.add').prop('disabled', false);
+									scan_sound(2);
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
 						});
 					}
 					else {
@@ -290,6 +463,148 @@
 
 					return false;
 				}
+			});
+
+			$('#scan_item').on('change', function () {
+				var item = parseInt($(this).val());
+				$('#scan_item').val('').focus();
+				var new_item_index = $.inArray(item, shipment_item_ids);
+				if (new_item_index === -1) {
+					var shipment_id = $('#try_and_buy_shipment_id').val();
+					var shipment_tracking_number = $('#try_and_buy_tracking_number').val();
+					var shipment_items_count = $('#try_and_buy_shipment_items_count').val();
+					$.ajax({
+						url: '{!! route('admin.pickups.receive.try_and_buy.item_details') !!}',
+						method: 'POST',
+						data: {
+							'shipment_id': shipment_id,
+							'item_id': item,
+							'_token': '{{ csrf_token() }}'
+						}
+					}).done(function(data) {
+						if(data.status == 0){
+							var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+							var try_rowNo = try_and_buy_table.rows().count();
+							try_and_buy_table.row.add([try_rowNo + 1, data.scanned_shipment_item, shipment_tracking_number, try_remove_button]).node().id = data.scanned_shipment_item;
+							try_and_buy_table.draw(false);
+							try_and_buy_table.columns.adjust().draw();
+							scan_sound(1);
+							shipment_item_ids.push(data.scanned_shipment_item);
+							var check = parseInt(try_rowNo) + 1;
+							if(parseInt(shipment_items_count) === parseInt(check)){
+								$('#scan_try_and_buy_tracking_number').prop('disabled', false);
+								$('#try_and_buy_weight').prop('disabled', false);
+								$('#try_and_buy_confirm').prop('disabled', false);
+							}
+							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+						else{
+							toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+						}
+					});
+				}
+				else{
+					toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+				}
+			});
+
+
+			$('#try_and_buy_datatable tbody').on('click', 'tr td.remove button', function() {
+				var parent = $(this).parents('tr');
+				var id = parseInt(parent.attr('id'));
+				var index = $.inArray(id, shipment_item_ids);
+				if (index !== -1) {
+					try_and_buy_table.row(parent).remove();
+					try_and_buy_table.draw(false);
+					var try_rowNo = try_and_buy_table.rows().count();
+					shipment_item_ids.splice(index, 1);
+					var shipment_items_count = $('#try_and_buy_shipment_items_count').val();
+					var check = parseInt(try_rowNo);
+					if(parseInt(shipment_items_count) !== parseInt(check)){
+						$('#scan_try_and_buy_tracking_number').prop('disabled', true);
+						$('#try_and_buy_weight').prop('disabled', true);
+						$('#try_and_buy_confirm').prop('disabled', true);
+					}
+				}
+			});
+
+
+			$('#try_and_buy_airwaybill').on('click', function () {
+				id = $('#try_and_buy_shipment_id').val();
+				print(id);
+			});
+
+			$('#add_try_and_buy_shipment_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function (error, element) {
+					error.addClass('w-100').appendTo(element.parents('.form-group'));
+				},
+				submitHandler: function (form) {
+					var shipment_id = $('#try_and_buy_shipment_id').val();
+					shipment_ids.push(shipment_id);
+					var pickup_receive_pickup_note_id = $('#add_shipment_form').find('input.pickup_receive_pickup_note_id').val();
+					var tracking_number = $(form).find('input.scan_try_and_buy_tracking_number').val();
+					var weight = $(form).find('input.try_and_buy_weight').val();
+					$.ajax({
+						url: '{!! route('admin.pickups.receive.try_and_buy.shipment_details') !!}',
+						method: 'POST',
+						data: {
+							'pickup_receive_pickup_note_id': pickup_receive_pickup_note_id,
+							'tracking_number': tracking_number,
+							'weight': weight,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
+							.done(function (data) {
+								form.reset();
+								remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+
+								if (data.status == 0) {
+									id = data.details.id;
+
+									var index = $.inArray(id, shipment_ids);
+
+									if (index === -1) {
+										var rowNo = table.rows().count();
+										table.row.add([rowNo + 1, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).node().id = data.details.id;
+										table.draw(false);
+										table.order([0, 'desc']).draw();
+										scan_sound(1);
+										shipment_ids.push(data.details.id);
+										if(all_shipment_item_ids.length == 0){
+											all_shipment_item_ids = shipment_item_ids;
+										}
+										else{
+											all_shipment_item_ids.concat(shipment_item_ids);
+										}
+										$('#add_shipment_form button.add').prop('disabled', false);
+
+										$('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+
+										toastr.success(data.success, 'Success!', {
+											positionClass: 'toast-bottom-center',
+											containerId: 'toast-bottom-center'
+										});
+									}
+									$('#tryAndbuyModal').modal('hide');
+									// shipment_item_ids = [];
+									// try_and_buy_table.clear().draw();
+								}
+								else{
+									$('#add_shipment_form button.add').prop('disabled', false);
+									scan_sound(2);
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
+							})
+				}
+			});
+
+
+			$('#tryAndbuyModal').on('hide.bs.modal', function (e) {
+				$('#add_try_and_buy_shipment_form').reset();
+				shipment_item_ids = [];
+				try_and_buy_table.clear().draw();
 			});
 
 			$('#arrival_of_shipments_form').bind('submit', function(e) {
