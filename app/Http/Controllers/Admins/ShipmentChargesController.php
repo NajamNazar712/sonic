@@ -173,7 +173,7 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($weight > 1) {
-                        $result['chargeable_weight'] = ROUND($weight, 0);
+                        $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
                     }
                     else {
                         $result['chargeable_weight'] = $weight;
@@ -219,7 +219,7 @@ class ShipmentChargesController extends Controller
 
                     $result = array();
 
-                    $result['chargeable_weight'] = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
+                    $result['chargeable_weight'] = (CEIL(($weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1)) * 2) / 2);
 
                     $previous = TRUE;
 
