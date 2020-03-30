@@ -514,6 +514,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_remove', 'Admins\AdminPickupsController@receive_shipment_remove')->name('shipment_remove');
             Route::post('bookings/all','Admins\AdminPickupsController@receive_all_bookings')->name('bookings.all');
 
+            Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+                Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+                Route::post('shipment_details', 'Admins\AdminPickupsController@receive_try_and_buy_shipment_details')->name('shipment_details');
+            });
             Route::prefix('arrival_of_shipments')->name('arrival_of_shipments.')->group(function () {
                 Route::get('', 'Admins\AdminPickupsController@receive_arrival_of_shipments_index')->name('index');
                 Route::post('', 'Admins\AdminPickupsController@receive_arrival_of_shipments_store')->name('store');
@@ -965,6 +969,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('verify', 'Admins\AdminFinanceController@make_payments_verify')->name('verify');
             Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
+            Route::get('stats_calculate', 'Admins\AdminFinanceController@make_payments_stats_calculate')->name('stats_calculate');
         });
 
         Route::prefix('done_payments')->name('done_payments.')->group(function () {
