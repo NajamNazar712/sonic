@@ -171,7 +171,37 @@
 
 	<script>
 		$(document).ready(function() {
-			// $('#tryAndbuyModal').modal('show');
+			function print(id) {
+				var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+
+				$.ajax({
+					url: url,
+					method: 'POST',
+					data: {
+						'ids[]': id,
+						'admin': true,
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+						.done(function (data) {
+							var tab = window.open('', '_blank');
+
+							if (!tab) {
+								swal({
+									title: 'Popup Blocker Enabled!',
+									text: 'Please add this site to your exception list.',
+									icon: 'error',
+									closeOnClickOutside: false,
+									closeOnEsc: false
+								});
+							}
+							else {
+								tab.document.write(data);
+								tab.document.close();
+								tab.focus();
+							}
+						});
+			}
 		    @if(session('errors'))
 				scan_sound(2);
 			@endif
@@ -499,6 +529,11 @@
 			});
 
 
+			$('#try_and_buy_airwaybill').on('click', function () {
+				id = $('#try_and_buy_shipment_id').val();
+				print(id);
+			});
+
 			$('#add_try_and_buy_shipment_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
@@ -553,8 +588,8 @@
 										});
 									}
 									$('#tryAndbuyModal').modal('hide');
-									shipment_item_ids = [];
-									try_and_buy_table.clear().draw();
+									// shipment_item_ids = [];
+									// try_and_buy_table.clear().draw();
 								}
 								else{
 									$('#add_shipment_form button.add').prop('disabled', false);
@@ -564,6 +599,14 @@
 							})
 				}
 			});
+
+
+			$('#tryAndbuyModal').on('hide.bs.modal', function (e) {
+				$('#add_try_and_buy_shipment_form').reset();
+				shipment_item_ids = [];
+				try_and_buy_table.clear().draw();
+			});
+
 			$('#arrival_of_shipments_form').bind('submit', function(e) {
 				e.preventDefault();
 
