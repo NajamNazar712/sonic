@@ -1430,7 +1430,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_index() {
-        $booking_types = BookingType::whereNotIn('id',[3, 4, 5])->get();
+        $booking_types = BookingType::whereNotIn('id',[ 4, 5])->get();
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
@@ -1514,7 +1514,7 @@ class ShipperShipmentBookController extends Controller
 
         $rules = [
             'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
-                $query->whereNotIn('id', [3, 4, 5]);
+                $query->whereNotIn('id', [4, 5]);
             })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
@@ -1528,10 +1528,10 @@ class ShipperShipmentBookController extends Controller
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'order_id' => ['nullable', 'between:0,100'],
 
-            'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,1000'],
-            'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
-            'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_product_type_id' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description' => ['required_if:service_type_id,1,2,3', 'between:0,1000'],
+            'item_quantity' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance' => ['required_if:service_type_id,1,2,3', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -1764,7 +1764,7 @@ class ShipperShipmentBookController extends Controller
                 }
                     else {
                     $cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-                    $booking_types = BookingType::whereNotIn('id', [3, 4, 5])->pluck('booking_type', 'id');
+                    $booking_types = BookingType::whereNotIn('id', [4, 5])->pluck('booking_type', 'id');
                     $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                         $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
                     })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->pluck('id');
