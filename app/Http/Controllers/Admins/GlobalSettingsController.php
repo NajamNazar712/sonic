@@ -1554,7 +1554,7 @@ class GlobalSettingsController extends Controller
         $standard_det->range_up =  $request->det;
         $standard_det->save();
         $same_day = MinimumChargeableWeightSetting::where('shipping_mode_id', 4)->update(['weight' => $request->same_day]);
-        $standard_same_day = StandardWeightCharge::where('shipping_mode_id', )->first();
+        $standard_same_day = StandardWeightCharge::where('shipping_mode_id', 4)->first();
         $standard_same_day->range_up =  $request->same_day;
         $standard_same_day->save();
 

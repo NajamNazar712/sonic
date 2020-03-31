@@ -468,43 +468,45 @@
 			$('#scan_item').on('change', function () {
 				var item = parseInt($(this).val());
 				$('#scan_item').val('').focus();
-				var new_item_index = $.inArray(item, shipment_item_ids);
-				if (new_item_index === -1) {
-					var shipment_id = $('#try_and_buy_shipment_id').val();
-					var shipment_tracking_number = $('#try_and_buy_tracking_number').val();
-					var shipment_items_count = $('#try_and_buy_shipment_items_count').val();
-					$.ajax({
-						url: '{!! route('admin.pickups.receive.try_and_buy.item_details') !!}',
-						method: 'POST',
-						data: {
-							'shipment_id': shipment_id,
-							'item_id': item,
-							'_token': '{{ csrf_token() }}'
-						}
-					}).done(function(data) {
-						if(data.status == 0){
-							var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
-							var try_rowNo = try_and_buy_table.rows().count();
-							try_and_buy_table.row.add([try_rowNo + 1, data.scanned_shipment_item, shipment_tracking_number, try_remove_button]).node().id = data.scanned_shipment_item;
-							try_and_buy_table.draw(false);
-							try_and_buy_table.columns.adjust().draw();
-							scan_sound(1);
-							shipment_item_ids.push(data.scanned_shipment_item);
-							var check = parseInt(try_rowNo) + 1;
-							if(parseInt(shipment_items_count) === parseInt(check)){
-								$('#scan_try_and_buy_tracking_number').prop('disabled', false);
-								$('#try_and_buy_weight').prop('disabled', false);
-								$('#try_and_buy_confirm').prop('disabled', false);
+				if(item){
+					var new_item_index = $.inArray(item, shipment_item_ids);
+					if (new_item_index === -1) {
+						var shipment_id = $('#try_and_buy_shipment_id').val();
+						var shipment_tracking_number = $('#try_and_buy_tracking_number').val();
+						var shipment_items_count = $('#try_and_buy_shipment_items_count').val();
+						$.ajax({
+							url: '{!! route('admin.pickups.receive.try_and_buy.item_details') !!}',
+							method: 'POST',
+							data: {
+								'shipment_id': shipment_id,
+								'item_id': item,
+								'_token': '{{ csrf_token() }}'
 							}
-							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-						else{
-							toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-						}
-					});
-				}
-				else{
-					toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+						}).done(function(data) {
+							if(data.status == 0){
+								var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+								var try_rowNo = try_and_buy_table.rows().count();
+								try_and_buy_table.row.add([try_rowNo + 1, data.scanned_shipment_item, shipment_tracking_number, try_remove_button]).node().id = data.scanned_shipment_item;
+								try_and_buy_table.draw(false);
+								try_and_buy_table.columns.adjust().draw();
+								scan_sound(1);
+								shipment_item_ids.push(data.scanned_shipment_item);
+								var check = parseInt(try_rowNo) + 1;
+								if(parseInt(shipment_items_count) === parseInt(check)){
+									$('#scan_try_and_buy_tracking_number').prop('disabled', false);
+									$('#try_and_buy_weight').prop('disabled', false);
+									$('#try_and_buy_confirm').prop('disabled', false);
+								}
+								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
+							else{
+								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+							}
+						});
+					}
+					else{
+						toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					}
 				}
 			});
 
@@ -567,9 +569,13 @@
 
 									if (index === -1) {
 										var rowNo = table.rows().count();
-										table.row.add([rowNo + 1, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).node().id = data.details.id;
+										var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).draw().node();
+										$(new_row).css('color', 'white');
+										$(new_row).css('background-color', 'orange');
+										new_row.id = data.details.id;
 										table.draw(false);
 										table.order([0, 'desc']).draw();
+// console.log($(new_row).parent('tr'));
 										scan_sound(1);
 										shipment_ids.push(data.details.id);
 										if(all_shipment_item_ids.length == 0){
