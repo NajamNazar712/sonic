@@ -959,6 +959,45 @@ class DeliveryController extends Controller
                 ';
 
                 $shipment_details .= $shipment_details_row_start;
+
+                if($shipment->booking_type_id == 3){
+                    $total_Shipment_items = 0;
+                    foreach ($shipment->items as $shipment_item){
+                        $total_Shipment_items++;
+                        $shipment_details_row_start = '
+                          <tr>
+                            <td class="'.$class.'">' . $total_shipments . '.'. $total_Shipment_items .'</td>
+                            <td class="'.$class.'">'. $shipment_item->id .' (' . $shipment->tracking_number . ')</td>
+                            <td class="'.$class.'"><b>Product Type:</b></td>
+                            <td class="'.$class.'">' . $shipment_item->product->product_name . '</td>
+                            <td class="'.$class.'">' . $shipment_item->description . '</td>
+                ';
+                        $shipment_details_row_start .= '
+                    <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
+                ';
+
+                        $shipment_details_row_start .= '
+                    <td class="'.$class.'">' . $shipment_item->quantity . '</td>';
+
+                        $shipment_details_row_start .= '
+                            <td class="'.$class.'">Rs ' . number_format($shipment_item->price) . '</td>
+                    ';
+                        $shipment_details_row_start .= '<td class="'.$class.'">-</td>';
+
+                        $shipment_details_row_start .= '
+                        <td class="'.$class.'"></td>
+                    ';
+
+
+                        $shipment_details_row_start .= '
+                            <td class="'.$class.'"></td>
+                            <td class="'.$class.'"></td>
+                          </tr>
+                ';
+
+                        $shipment_details .= $shipment_details_row_start;
+                    }
+                }
             }
             $shipment_details .= '
                         </tbody>

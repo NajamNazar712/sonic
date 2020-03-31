@@ -602,7 +602,8 @@
 
 
 			$('#tryAndbuyModal').on('hide.bs.modal', function (e) {
-				$('#add_try_and_buy_shipment_form').reset();
+				$('#scan_try_and_buy_tracking_number').val('');
+				$('#try_and_buy_weight').val('');
 				shipment_item_ids = [];
 				try_and_buy_table.clear().draw();
 			});

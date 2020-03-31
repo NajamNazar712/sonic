@@ -1962,8 +1962,12 @@ class ReturnController extends Controller
         if($return_note->exists()) {
             $total_shipments = 0;
             $total_users = 0;
+            $try_and_buy_total_users = 0;
+            $try_and_buy_total_shipments = 0;
             $shipment_ids = ReturnNoteShipment::where('return_note_id',$request->id)->select('shipment_id')->get();
             $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->get();
+            $filtered_shipments_regular = Shipment::whereIn('id',$shipment_ids)->where('booking_type_id', '!=', '3')->orderBy('id')->get();
+            $filtered_shipments_try_and_buy = Shipment::whereIn('id',$shipment_ids)->where('booking_type_id', '=', '3')->orderBy('id')->get();
             $filtered_shipments_users = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->groupBy('user_id')->get();
             $shipment_details = '';
 
@@ -1972,7 +1976,7 @@ class ReturnController extends Controller
                           <table class="table table-sm table-bordered border mt-1">
                             <tbody>
                                 <tr>
-                                    <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY</strong></td>
+                                    <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY - Regular</strong></td>
                                 </tr>
                               <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
@@ -1986,15 +1990,16 @@ class ReturnController extends Controller
             ';
 
             foreach ($filtered_shipments_users as $filtered_shipments_user){
-                $total_users++;
                 $user_shipment_collection_charges[$filtered_shipments_user->user_id] = 0;
                 $user_total_shipments[$filtered_shipments_user->user_id] = 0;
-                foreach ($filtered_shipments as $shipment) {
+                foreach ($filtered_shipments_regular as $shipment) {
                     if($shipment->user_id == $filtered_shipments_user->user_id){
                         $user_total_shipments[$filtered_shipments_user->user_id]++;
                     }
                 }
-                $shipment_details_row_start_summary = '
+                if($user_total_shipments[$filtered_shipments_user->user_id] > 0){
+                    $total_users++;
+                    $shipment_details_row_start_summary = '
                               <tr>
                                 <td>' . $total_users . '</td>
                                 <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
@@ -2005,11 +2010,64 @@ class ReturnController extends Controller
                                 <td></td>
                     ';
 
-                $shipment_details .= $shipment_details_row_start_summary;
+                    $shipment_details .= $shipment_details_row_start_summary;
+                }
             }
             $shipment_details .= '
                         </tbody>
                       </table>
+                     
+        ';
+            if(count($filtered_shipments_try_and_buy) > 0){
+
+                $shipment_details .= '
+                          <table class="table table-sm table-bordered border mt-1">
+                            <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY - Try & Buy</strong></td>
+                                </tr>
+                              <tr>
+                                <td class="color primary"><strong>S. No.</strong></td>
+                                <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
+                                <td class="color primary"><strong>Contact Person</strong></td>
+                                <td class="color primary"><strong>Contact Person Phone</strong></td>
+                                <td class="color primary"><strong>Client Address</strong></td>
+                                <td class="color primary"><strong>Total Shipments</strong></td>
+                                <td class="color primary"><strong>Sign</strong></td>
+                              </tr>
+            ';
+
+                foreach ($filtered_shipments_users as $filtered_shipments_user){
+                    $user_shipment_collection_charges[$filtered_shipments_user->user_id] = 0;
+                    $user_total_shipments[$filtered_shipments_user->user_id] = 0;
+                    foreach ($filtered_shipments_try_and_buy as $shipment) {
+                        if($shipment->user_id == $filtered_shipments_user->user_id){
+                            $user_total_shipments[$filtered_shipments_user->user_id]++;
+                        }
+                    }
+                    if($user_total_shipments[$filtered_shipments_user->user_id] > 0){
+                        $try_and_buy_total_users++;
+                        $shipment_details_row_start_summary = '
+                              <tr>
+                                <td>' . $try_and_buy_total_users . '</td>
+                                <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
+                                <td>' . $filtered_shipments_user->pickup_address->poc . '</td>
+                                <td>' . $filtered_shipments_user->pickup_address->phone . '</td>
+                                <td>' . $filtered_shipments_user->pickup_address->pickup_address . '</td>
+                                <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
+                                <td></td>
+                    ';
+
+                        $shipment_details .= $shipment_details_row_start_summary;
+                    }
+                }
+                $shipment_details .= '
+                        </tbody>
+                      </table>
+                     
+        ';
+            }
+            $shipment_details .= '
                       </div>
                      
         ';
