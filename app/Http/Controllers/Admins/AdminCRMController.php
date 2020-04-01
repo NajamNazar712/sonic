@@ -1780,6 +1780,14 @@ class AdminCRMController extends Controller
     {
         $crm_request = CrmRequest::where('id', $request->req_id)->first();
         if ($crm_request['agent_id'] != null) {
+            if($crm_request['status_id'] == 2){
+                if(DelayInDeliveryShipment::where('crm_request_id', $request->req_id)->exists()){
+                    DelayInDeliveryShipment::where('crm_request_id', $request->req_id)->delete();
+                }
+                if(CrmPaymentShipment::where('crm_request_id', $request->req_id)->exists()){
+                    CrmPaymentShipment::where('crm_request_id', $request->req_id)->delete();
+                }
+            }
             if ($crm_request['status_id'] != 4) {
                 CrmRequest::where('id', $request->req_id)->update([
                     'status_id' => 4,
@@ -2185,6 +2193,12 @@ class AdminCRMController extends Controller
                                 'status_id' => 2,
                                 'agent_id' => Auth::id()
                             ]);
+                            if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
+                                self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
+                            }
+                            if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
+                                self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                            }
                         }
                         elseif ($request->valid == 0){
                             CrmRequest::where('id', $crm_request->id)->update([
