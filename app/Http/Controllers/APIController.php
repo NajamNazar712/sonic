@@ -276,7 +276,7 @@ class APIController extends Controller
       if($user_type['account_type_id'] == 1) {
         $rules = [
             'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
-                $query->whereNotIn('id', [3, 4, 5]);
+                $query->whereNotIn('id', [4, 5]);
             })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
@@ -289,7 +289,7 @@ class APIController extends Controller
             'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
             'order_id' => ['nullable', 'filled'],
-            'package_type' => ['required_if:service_type_id,3', 'boolean'],
+//            'package_type' => ['required_if:service_type_id,3', 'boolean'],
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
             'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -340,7 +340,7 @@ class APIController extends Controller
             'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
             'order_id' => ['nullable', 'filled'],
-            'package_type' => ['required_if:service_type_id,3', 'boolean'],
+//            'package_type' => ['required_if:service_type_id,3', 'boolean'],
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
             'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -356,10 +356,10 @@ class APIController extends Controller
                 $query->whereIn('id', [2, 3]);
             })],
 
-            'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,1000'],
-            'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
-            'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
+            'item_product_type_id' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description' => ['required_if:service_type_id,1,2,3', 'between:0,1000'],
+            'item_quantity' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance' => ['required_if:service_type_id,1,2,3', 'boolean'],
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],

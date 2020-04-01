@@ -94,6 +94,26 @@
                                                         <input type="hidden" name="form[{{$no}}][item_quantity]" value="{{$ro['item_quantity']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_insurance]" value="{{$ro['item_insurance']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_price]" value="{{$ro['item_price']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_2]" value="{{$ro['item_product_type_id_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_2]" value="{{$ro['item_description_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_2]" value="{{$ro['item_quantity_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_2]" value="{{$ro['item_insurance_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_2]" value="{{$ro['item_price_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_3]" value="{{$ro['item_product_type_id_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_3]" value="{{$ro['item_description_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_3]" value="{{$ro['item_quantity_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_3]" value="{{$ro['item_insurance_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_3]" value="{{$ro['item_price_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_4]" value="{{$ro['item_product_type_id_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_4]" value="{{$ro['item_description_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_4]" value="{{$ro['item_quantity_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_4]" value="{{$ro['item_insurance_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_4]" value="{{$ro['item_price_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_5]" value="{{$ro['item_product_type_id_5']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_5]" value="{{$ro['item_description_5']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_5]" value="{{$ro['item_quantity_5']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_5]" value="{{$ro['item_insurance_5']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_5]" value="{{$ro['item_price_5']}}">
                                                         <input type="hidden" name="form[{{$no}}][replacement_item_product_type_id]" value="{{$ro['replacement_item_product_type_id']}}">
                                                         <input type="hidden" name="form[{{$no}}][replacement_item_description]" value="{{$ro['replacement_item_description']}}">
                                                         <input type="hidden" name="form[{{$no}}][replacement_item_quantity]" value="{{$ro['replacement_item_quantity']}}">

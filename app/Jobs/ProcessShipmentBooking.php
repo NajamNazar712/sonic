@@ -114,7 +114,7 @@ class ProcessShipmentBooking implements ShouldQueue
 
         $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-        if ($service_type_id == 1 || $service_type_id == 5 || $service_type_id == 3) {
+        if ($service_type_id == 1 || $service_type_id == 5) {
             $item_product_type_id = $this->booking['item_product_type_id'];
 
             if (!empty(trim($this->booking['item_description']))) {
@@ -175,6 +175,125 @@ class ProcessShipmentBooking implements ShouldQueue
             $replacement_item_type = 1;
 
             ShipperShipmentBookController::add_item($shipment_id, $replacement_item_product_type_id, $replacement_item_description, $replacement_item_quantity, $replacement_item_price, $replacement_item_insurance, $replacement_item_type);
+        }
+        else if ($service_type_id == 3) {
+            $item_product_type_id = $this->booking['item_product_type_id'];
+
+            if (!empty(trim($this->booking['item_description']))) {
+                $item_description = $this->booking['item_description'];
+            } else {
+                $item_description = NULL;
+            }
+
+            $item_quantity = $this->booking['item_quantity'];
+
+            if (strtolower($this->booking['item_insurance']) == 'yes') {
+                $item_price = str_replace(',', '', $this->booking['item_price']);
+                $item_insurance = TRUE;
+            } else {
+                $item_price = NULL;
+                $item_insurance = FALSE;
+            }
+
+            $item_type = 2;
+
+            ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+
+            if($this->booking['item_product_type_id_2'] != null){
+                $item_product_type_id = $this->booking['item_product_type_id_2'];
+
+                if (!empty(trim($this->booking['item_description_2']))) {
+                    $item_description = $this->booking['item_description_2'];
+                } else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $this->booking['item_quantity_2'];
+
+                if (strtolower($this->booking['item_insurance_2']) == 'yes') {
+                    $item_price = str_replace(',', '', $this->booking['item_price_2']);
+                    $item_insurance = TRUE;
+                } else {
+                    $item_price = NULL;
+                    $item_insurance = FALSE;
+                }
+
+                $item_type = 2;
+
+                ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            }
+
+            if($this->booking['item_product_type_id_3'] != null){
+                $item_product_type_id = $this->booking['item_product_type_id_3'];
+
+                if (!empty(trim($this->booking['item_description_3']))) {
+                    $item_description = $this->booking['item_description_3'];
+                } else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $this->booking['item_quantity_3'];
+
+                if (strtolower($this->booking['item_insurance_3']) == 'yes') {
+                    $item_price = str_replace(',', '', $this->booking['item_price_3']);
+                    $item_insurance = TRUE;
+                } else {
+                    $item_price = NULL;
+                    $item_insurance = FALSE;
+                }
+
+                $item_type = 2;
+
+                ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            }
+
+            if($this->booking['item_product_type_id_4'] != null){
+                $item_product_type_id = $this->booking['item_product_type_id_4'];
+
+                if (!empty(trim($this->booking['item_description_4']))) {
+                    $item_description = $this->booking['item_description_4'];
+                } else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $this->booking['item_quantity_4'];
+
+                if (strtolower($this->booking['item_insurance_4']) == 'yes') {
+                    $item_price = str_replace(',', '', $this->booking['item_price_4']);
+                    $item_insurance = TRUE;
+                } else {
+                    $item_price = NULL;
+                    $item_insurance = FALSE;
+                }
+
+                $item_type = 2;
+
+                ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            }
+
+            if($this->booking['item_product_type_id_5'] != null){
+                $item_product_type_id = $this->booking['item_product_type_id_5'];
+
+                if (!empty(trim($this->booking['item_description_5']))) {
+                    $item_description = $this->booking['item_description_5'];
+                } else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $this->booking['item_quantity_5'];
+
+                if (strtolower($this->booking['item_insurance_5']) == 'yes') {
+                    $item_price = str_replace(',', '', $this->booking['item_price_5']);
+                    $item_insurance = TRUE;
+                } else {
+                    $item_price = NULL;
+                    $item_insurance = FALSE;
+                }
+
+                $item_type = 2;
+
+                ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            }
         }
 
         if(!empty($this->booking['nsas']) && $this->booking['nsa']) {

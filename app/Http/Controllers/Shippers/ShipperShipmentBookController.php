@@ -1470,11 +1470,32 @@ class ShipperShipmentBookController extends Controller
             'consignee_email_address' => 'Consignee Email Address',
             'order_id' => 'Order ID',
 
+
             'item_product_type_id' => 'Item Product Type ID',
             'item_description' => 'Item Description',
             'item_quantity' => 'Item Quantity',
             'item_insurance' => 'Item Insurance',
             'item_price' => 'Product Value',
+            'item_product_type_id_2' => 'Item Product Type ID 2',
+            'item_description_2' => 'Item Description 2',
+            'item_quantity_2' => 'Item Quantity 2',
+            'item_insurance_2' => 'Item Insurance 2',
+            'item_price_2' => 'Product Value 2',
+            'item_product_type_id_3' => 'Item Product Type ID 3',
+            'item_description_3' => 'Item Description 3',
+            'item_quantity_3' => 'Item Quantity 3',
+            'item_insurance_3' => 'Item Insurance 3',
+            'item_price_3' => 'Product Value 3',
+            'item_product_type_id_4' => 'Item Product Type ID 4',
+            'item_description_4' => 'Item Description 4',
+            'item_quantity_4' => 'Item Quantity 4',
+            'item_insurance_4' => 'Item Insurance 4',
+            'item_price_4' => 'Product Value 4',
+            'item_product_type_id_5' => 'Item Product Type ID 5',
+            'item_description_5' => 'Item Description 5',
+            'item_quantity_5' => 'Item Quantity 5',
+            'item_insurance_5' => 'Item Insurance 5',
+            'item_price_5' => 'Product Value 5',
 
             'replacement_item_product_type_id' => 'Replacement Item Product Type ID',
             'replacement_item_description' => 'Replacement Item Description',
@@ -1532,7 +1553,31 @@ class ShipperShipmentBookController extends Controller
             'item_description' => ['required_if:service_type_id,1,2,3', 'between:0,1000'],
             'item_quantity' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'item_insurance' => ['required_if:service_type_id,1,2,3', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+            'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+            'item_product_type_id_2' => ['nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description_2' => ['required_with:item_product_type_id_2,', 'nullable', 'between:0,1000'],
+            'item_quantity_2' => ['required_with:item_product_type_id_2,','nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance_2' => ['required_with:item_product_type_id_2,','nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_price_2' => ['required_with:item_product_type_id_2,','nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+            'item_product_type_id_3' => ['nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description_3' => ['required_with:item_product_type_id_3,', 'nullable', 'between:0,1000'],
+            'item_quantity_3' => ['required_with:item_product_type_id_3,', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance_3' => ['required_with:item_product_type_id_3,', 'nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_price_3' => ['required_with:item_product_type_id_3,', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+            'item_product_type_id_4' => ['nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description_4' => ['required_with:item_product_type_id_4,', 'nullable', 'between:0,1000'],
+            'item_quantity_4' => ['required_with:item_product_type_id_4,', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance_4' => ['required_with:item_product_type_id_4,', 'nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_price_4' => ['required_with:item_product_type_id_4,', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+            'item_product_type_id_5' => ['nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description_5' => ['required_with:item_product_type_id_5,', 'nullable', 'between:0,1000'],
+            'item_quantity_5' => ['required_with:item_product_type_id_5,', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance_5' => ['required_with:item_product_type_id_5,', 'nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_price_5' => ['required_with:item_product_type_id_5,', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
@@ -1554,7 +1599,7 @@ class ShipperShipmentBookController extends Controller
             })]
         ];
 
-        $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'pickup_date', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id'];
+        $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'item_product_type_id_2', 16 => 'item_description_2', 17 => 'item_quantity_2', 18 => 'item_insurance_2', 19 => 'item_price_2', 20 => 'item_product_type_id_3', 21 => 'item_description_3', 22 => 'item_quantity_3', 23 => 'item_insurance_3', 24 => 'item_price_3', 25 => 'item_product_type_id_4', 26 => 'item_description_4', 27 => 'item_quantity_4', 28 => 'item_insurance_4', 29 => 'item_price_4', 30 => 'item_product_type_id_5', 31 => 'item_description_5', 32 => 'item_quantity_5', 33 => 'item_insurance_5', 34 => 'item_price_5', 35 => 'replacement_item_product_type_id', 36 => 'replacement_item_description', 37 => 'replacement_item_quantity', 38 => 'pickup_date', 39 => 'special_instructions', 40 => 'estimated_weight', 41 => 'shipping_mode_id', 42 => 'same_day_timing_id', 43 => 'amount', 44 => 'payment_mode_id', 45 => 'charges_mode_id'];
 //        $form= $request->shipments;
 //        dd($form);
         if($file = $request->file('shipments')) {
@@ -1563,13 +1608,13 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
+            $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Item Product Type ID 2', 'Item Description 2', 'Item Quantity 2', 'Item Insurance 2', 'Product Value 2', 'Item Product Type ID 3', 'Item Description 3', 'Item Quantity 3', 'Item Insurance 3', 'Product Value 3', 'Item Product Type ID 4', 'Item Description 4', 'Item Quantity 4', 'Item Insurance 4', 'Product Value 4', 'Item Product Type ID 5', 'Item Description 5', 'Item Quantity 5', 'Item Insurance 5', 'Product Value 5', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
 
             foreach ($spreadsheet[0] as $index => $header_value) {
-                if ($index == 25) {}
+                if ($index == 45) {}
                 elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                     $header_correct = FALSE;
                     break;

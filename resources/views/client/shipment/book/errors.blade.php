@@ -35,6 +35,26 @@
                                 <th>Item Quantity</th>
                                 <th>Item Insurance</th>
                                 <th>Item Price</th>
+                                <th>Item Product Type ID 2</th>
+                                <th>Item Description 2</th>
+                                <th>Item Quantity 2</th>
+                                <th>Item Insurance 2</th>
+                                <th>Item Price 2</th>
+                                <th>Item Product Type ID 3</th>
+                                <th>Item Description 3</th>
+                                <th>Item Quantity 3</th>
+                                <th>Item Insurance 3</th>
+                                <th>Item Price 3</th>
+                                <th>Item Product Type ID 4</th>
+                                <th>Item Description 4</th>
+                                <th>Item Quantity 4</th>
+                                <th>Item Insurance 4</th>
+                                <th>Item Price 4</th>
+                                <th>Item Product Type ID 5</th>
+                                <th>Item Description 5</th>
+                                <th>Item Quantity 5</th>
+                                <th>Item Insurance 5</th>
+                                <th>Item Price 5</th>
                                 <th>Replacement Item Product Type ID</th>
                                 <th>Replacement Item Description</th>
                                 <th>Replacement Item Quantity</th>
@@ -141,6 +161,106 @@
                                     <td>{!! Form::text('form[' . $no . '][item_price]', $ro['item_price'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['item_price']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][item_price]', $ro['item_price'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_product_type_id_2']))
+                                    <td>{!! Form::select('form[' . $no . '][item_product_type_id_2]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id_2','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id_2']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_product_type_id_2]', $ro['item_product_type_id_2'],['class' => 'form-control','style'=>'width:144px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_description_2']))
+                                    <td>{!! Form::textarea('form[' . $no . '][item_description_2]', $ro['item_description_2'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['item_description_2']}}</font></td>
+                                @else
+                                    <td>{!! Form::textarea('form[' . $no . '][item_description_2]', $ro['item_description_2'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_quantity']))
+                                    <td>{!! Form::text('form[' . $no . '][item_quantity_2]', $ro['item_quantity_2'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['item_quantity_2']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_quantity_2]', $ro['item_quantity_2'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_insurance_2']))
+                                    <td>{!! Form::select('form[' . $no . '][item_insurance_2]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid item_insurance select2','id'=>'item_insurance_2','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance_2']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_insurance_2]', $ro['item_insurance_2'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_price']))
+                                    <td>{!! Form::text('form[' . $no . '][item_price_2]', $ro['item_price_2'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['item_price_2']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_price_2]', $ro['item_price_2'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_product_type_id_3']))
+                                    <td>{!! Form::select('form[' . $no . '][item_product_type_id_3]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id_3','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id_3']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_product_type_id_3]', $ro['item_product_type_id_3'],['class' => 'form-control','style'=>'width:144px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_description_3']))
+                                    <td>{!! Form::textarea('form[' . $no . '][item_description_3]', $ro['item_description_3'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['item_description_3']}}</font></td>
+                                @else
+                                    <td>{!! Form::textarea('form[' . $no . '][item_description_3]', $ro['item_description_3'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_quantity_3']))
+                                    <td>{!! Form::text('form[' . $no . '][item_quantity_3]', $ro['item_quantity_3'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['item_quantity_3']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_quantity_3]', $ro['item_quantity_3'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_insurance_3']))
+                                    <td>{!! Form::select('form[' . $no . '][item_insurance_3]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid item_insurance select2','id'=>'item_insurance_3','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance_3']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_insurance_3]', $ro['item_insurance_3'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_price_3']))
+                                    <td>{!! Form::text('form[' . $no . '][item_price_3]', $ro['item_price_3'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['item_price_3']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_price_3]', $ro['item_price_3'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_product_type_id_4']))
+                                    <td>{!! Form::select('form[' . $no . '][item_product_type_id_4]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id_4','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id_4']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_product_type_id_4]', $ro['item_product_type_id_4'],['class' => 'form-control','style'=>'width:144px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_description_4']))
+                                    <td>{!! Form::textarea('form[' . $no . '][item_description_4]', $ro['item_description_4'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['item_description_4']}}</font></td>
+                                @else
+                                    <td>{!! Form::textarea('form[' . $no . '][item_description_4]', $ro['item_description_4'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_quantity_4']))
+                                    <td>{!! Form::text('form[' . $no . '][item_quantity_4]', $ro['item_quantity_4'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['item_quantity_4']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_quantity_4]', $ro['item_quantity_4'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_insurance_4']))
+                                    <td>{!! Form::select('form[' . $no . '][item_insurance_4]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid item_insurance select2','id'=>'item_insurance_4','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance_4']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_insurance_4]', $ro['item_insurance_4'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_price_4']))
+                                    <td>{!! Form::text('form[' . $no . '][item_price_4]', $ro['item_price_4'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['item_price_4']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_price_4]', $ro['item_price_4'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_product_type_id_5']))
+                                    <td>{!! Form::select('form[' . $no . '][item_product_type_id_5]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id_5','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id_5']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_product_type_id_5]', $ro['item_product_type_id_5'],['class' => 'form-control','style'=>'width:144px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_description_5']))
+                                    <td>{!! Form::textarea('form[' . $no . '][item_description_5]', $ro['item_description_5'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['item_description_5']}}</font></td>
+                                @else
+                                    <td>{!! Form::textarea('form[' . $no . '][item_description_5]', $ro['item_description_5'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_quantity_5']))
+                                    <td>{!! Form::text('form[' . $no . '][item_quantity_5]', $ro['item_quantity_5'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['item_quantity_5']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_quantity_5]', $ro['item_quantity_5'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_insurance_5']))
+                                    <td>{!! Form::select('form[' . $no . '][item_insurance_5]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid item_insurance select2','id'=>'item_insurance_5','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance_5']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_insurance_5]', $ro['item_insurance_5'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['item_price_5']))
+                                    <td>{!! Form::text('form[' . $no . '][item_price_5]', $ro['item_price_5'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['item_price_5']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][item_price_5]', $ro['item_price_5'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['replacement_item_product_type_id']))
                                     <td>{!! Form::select('form[' . $no . '][replacement_item_product_type_id]', $products,null,['class' => 'form-control is-invalid replacement_item_product_type_id select2','id'=>'replacement_item_product_type_id','placeholder' => '']) !!}<font color="red">{{$errors[$no]['replacement_item_product_type_id']}}</font></td>
