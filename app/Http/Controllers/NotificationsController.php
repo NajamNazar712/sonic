@@ -3798,7 +3798,13 @@ class NotificationsController extends Controller
                     $month_speed_count = $month_speed_count + $month_average->month_speed;
                     $serial++;
                 }
-                $avg_revenue_count = $revenue_count / $shipments_count;
+                if($shipments_count != 0)
+                {
+                    $avg_revenue_count = $revenue_count / $shipments_count;
+                }
+                else{
+                    $avg_revenue_count = 0;
+                }
                 $html .= '<tr>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
