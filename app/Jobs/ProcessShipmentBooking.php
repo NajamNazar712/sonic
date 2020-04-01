@@ -114,7 +114,7 @@ class ProcessShipmentBooking implements ShouldQueue
 
         $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-        if ($service_type_id == 1 || $service_type_id == 5) {
+        if ($service_type_id == 1 || $service_type_id == 5 || $service_type_id == 3) {
             $item_product_type_id = $this->booking['item_product_type_id'];
 
             if (!empty(trim($this->booking['item_description']))) {
