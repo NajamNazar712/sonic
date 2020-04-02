@@ -298,7 +298,7 @@ class APIController extends Controller
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
 
-            'amount' => ['required_if:service_type_id,1,2,5', 'numeric', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2,5', 'nullable', 'numeric', 'min:0'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
@@ -316,7 +316,7 @@ class APIController extends Controller
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
-            'try_and_buy_charges' => ['required_if:service_type_id,3', 'numeric', 'min:0'],
+            'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'numeric', 'min:0'],
             'items' => ['required_if:service_type_id,3', 'array'],
             'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,1000'],
