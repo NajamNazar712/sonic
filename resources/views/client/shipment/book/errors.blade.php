@@ -66,6 +66,7 @@
                                 <th>Amount</th>
                                 <th>Mode of Payment ID</th>
                                 <th>Charges Mode ID</th>
+                                <th>Try and Buy Charges</th>
                             </tr>
                             </thead>
                             <tbody>
