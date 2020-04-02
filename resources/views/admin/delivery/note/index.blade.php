@@ -585,111 +585,99 @@
                             }
                         }
                     });
-				if (consolidation_ids.length > 0) {
+                if (consolidation_ids.length > 0) {
 
-                                $.ajax({
-                                    url: '{{route('admin.delivery.note.consolidation_check')}}',
-                                    type: 'POST',
-                                    data: {
-                                        'consolidation_ids': consolidation_ids,
-                                        'shipment_ids': shipment_ids,
-                                        '_token': '{!! csrf_token() !!}'
+                    $.ajax({
+                        url: '{{route('admin.delivery.note.consolidation_check')}}',
+                        type: 'POST',
+                        data: {
+                            'consolidation_ids': consolidation_ids,
+                            'shipment_ids': shipment_ids,
+                            '_token': '{!! csrf_token() !!}'
+                        }
+                    }).done(function (data) {
+                        if (data.missing_flag) {
+                            errors = 1;
+                            var html = '';
+
+                            html += 'The following Shipment(s) are missing from consolidation:<br/>';
+
+                            $.each(data.missing_shipments, function (index, tracking) {
+                                html += tracking + ', ';
+                            });
+
+                            html = html.slice(0, -2);
+
+                            content = document.createElement('div');
+                            content.innerHTML = html;
+                            swal({
+                                content: content,
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'Close',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            });
+                        } else {
+
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to create the Delivery Note!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
                                     }
-                                }).done(function (data) {
-                                    if (data.missing_flag) {
-                                        errors = 1;
-                                        var html = '';
-
-                                        html += 'The following Shipment(s) are missing from consolidation:<br/>';
-
-                                        $.each(data.missing_shipments, function (index, tracking) {
-                                            html += tracking + ', ';
-                                        });
-
-                                        html = html.slice(0, -2);
-
-                                        content = document.createElement('div');
-                                        content.innerHTML = html;
-                                        swal({
-                                            content: content,
-                                            icon: 'warning',
-                                            buttons: {
-                                                cancel: {
-                                                    text: 'Close',
-                                                    value: null,
-                                                    visible: true,
-                                                    closeModal: true,
-                                                },
-                                            },
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false,
-                                            dangerMode: true
-                                        });
-                                    } else {
-
-                                        if (count > 0) {
-                                            if (errors === 0) {
-
-                                                swal({
-                                                    title: 'Are You Sure?',
-                                                    text: 'Select Yes to create the Delivery Note!',
-                                                    icon: 'warning',
-                                                    buttons: {
-                                                        cancel: {
-                                                            text: 'No',
-                                                            value: null,
-                                                            visible: true,
-                                                            closeModal: true,
-                                                        },
-                                                        confirm: {
-                                                            text: 'Yes',
-                                                            value: true,
-                                                            visible: true,
-                                                            closeModal: true
-                                                        }
-                                                    },
-                                                    closeOnClickOutside: false,
-                                                    closeOnEsc: false,
-                                                    dangerMode: true
-                                                }).then(function (confirm) {
-                                                    if(confirm){
-                                                        blockPagePermanently();
-                                                        open_box_ids = [];
-                                                        table.rows().every(function(index) {
-                                                            var node = $(this.node());
-                                                            if(node.find('td.open_box input').is(':checked')){
-                                                                open_box_ids.push(parseInt(node.attr('id')));
-                                                            }
-                                                        });
-                                                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                                                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                                                        $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
-                                                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                                                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                                                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                                        $('#create_delivery_note_form input#selected_route_id').val(route);
-                                                        if(special_rider_flag){
-                                                            $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
-                                                            $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
-                                                        }
-                                                        
-                                                        this_form.submit();
-                                                    }
-                                                });
-
-
-                                            }
-                                        } else {
-                                            var error = "Select at-least one shipment!";
-                                            toastr.error(error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    blockPagePermanently();
+                                    open_box_ids = [];
+                                    table.rows().every(function (index) {
+                                        var node = $(this.node());
+                                        if (node.find('td.open_box input').is(':checked')) {
+                                            open_box_ids.push(parseInt(node.attr('id')));
                                         }
+                                    });
+                                    $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                                    $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                    $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
+                                    $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                                    $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                                    $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                    $('#create_delivery_note_form input#selected_route_id').val(route);
+                                    if (special_rider_flag) {
+                                        $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
+                                        $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
                                     }
-                                });
-                            }
+
+                                    this_form.submit();
+                                }
+                            });
+
+
+                        }
+                    });
+                }
             }
 
 
