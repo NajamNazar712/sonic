@@ -828,12 +828,12 @@ class ShipperShipmentBookController extends Controller
             if ($user_type == 3 || $user_id == $shipment->user_id) {
 
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
-                    $table_start = '';
+                    $table_start = '
+                      <div class="position-relative">';
                     foreach ($shipment->items as $shipment_item){
                         $table_start .= '
-                      <div class="position-relative">
-                        <table class="table table-sm table-bordered border twice">
-                            <tbody><tr>
+                        <div class="col"><table class="table table-sm table-bordered border twice">
+                            <tbody>
                 ';
 
                         if ($user_type != 4 && $type != 'pdf') {
@@ -857,12 +857,12 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
-
-                                <td class="color primary border twice-left"><strong>Type</strong></td>
-                                <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
-                                <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                                <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
-                                <td colspan="2" class="border twice-top">Tracking Number</td>
+                                <tr>
+                                    <td class="color primary border twice-left"><strong>Type</strong></td>
+                                    <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
+                                    <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                    <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
+                                    <td colspan="2" class="border twice-top">Tracking Number</td>
                                 </tr>
                     ';
                         } else {
@@ -871,12 +871,12 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
-
-                                <td class="color primary border twice-left"><strong>Type</strong></td>
-                                <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
-                                <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                                <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
-                                <td colspan="2" class="border twice-top">Tracking Number</td>
+                                <tr>
+                                    <td class="color primary border twice-left"><strong>Type</strong></td>
+                                    <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
+                                    <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                    <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
+                                    <td colspan="2" class="border twice-top">Tracking Number</td>
                                 </tr>
                     ';
                         }
@@ -895,7 +895,7 @@ class ShipperShipmentBookController extends Controller
                                 </td>
                               </tr>
                             </tbody>
-                        </table>
+                        </table></div>
                     ';
                         } else {
                             $table_start .= '
@@ -909,6 +909,7 @@ class ShipperShipmentBookController extends Controller
                     ';
                         }
                     }
+                    $table_start .= '</div>';
                     $shipment_details = $table_start;
                 } else {
                     $table_start = '
