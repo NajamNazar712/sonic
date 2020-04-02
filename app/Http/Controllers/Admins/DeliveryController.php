@@ -1151,7 +1151,7 @@ class DeliveryController extends Controller
             ->setRowAttr([
                 'class' => function ($deliveries) {
                     if ($deliveries->current_status_id !== 5) {
-                        $delivered_statuses = array(14, 30, 36);
+                        $delivered_statuses = array(14, 30, 36, 37);
                         if (in_array($deliveries->current_status_id, $delivered_statuses)) {
                             return 'statusDelivered';
                         } else if ($deliveries->current_status_id == 12) {
