@@ -1748,7 +1748,7 @@ class DeliveryController extends Controller
                 $product[] = ['pid' => $item->id, 'type' => $item->product->product_name, 'description' => ($item->description == '') ? ' - ' : $item->description, 'price' => $item->price];
 //
             }
-            return ['status' => 0, 'data' => $product, 'total_cod' => number_format($amount->amount)];
+            return ['status' => 0, 'data' => $product, 'total_cod' => $amount->amount];
         } else {
             return ['status' => 1, 'error' => 'No Shipment found'];
         }
