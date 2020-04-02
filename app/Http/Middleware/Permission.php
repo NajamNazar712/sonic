@@ -528,6 +528,8 @@ class Permission
             'settings.delivery_call_verification_ratio.list' => 237,
             'settings.crm_cut_off_time_and_holidays.update' => 237,
             'settings.delivery_call_verification_ratio.add' => 237,
+			'settings.consolidation.max.index' => 256,
+            'settings.consolidation.max.update' => 256,
             'settings.crm_case_nature_types.index' => 260,
             'settings.crm_case_nature_types.list' => 260,
             'settings.crm_case_nature_types.store' => 260,
@@ -561,6 +563,8 @@ class Permission
             'shipment.history.walk_in_history' => 209,
             'shipment.history.walk_in_history_list' => 209,
 
+			'shipment.consolidation.history.index' => 254,
+            'shipment.consolidation.history.list' => 254,
 
             'intercept.index' => 245,
             'intercept.update' => 245,

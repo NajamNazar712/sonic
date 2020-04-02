@@ -23,6 +23,8 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\Consolidation;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\InterceptReBookRequest;
@@ -80,7 +82,7 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
-        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55); //for pending deliveries
+        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -242,10 +244,50 @@ class DeliveryController extends Controller
 
         return view('admin.delivery.note.index')->with(['riders' => $riders, 'routes' => $routes]);
     }
+	
+	public function note_consolidation_check(Request $request){
+        $missing_shipments = array();
+        foreach ($request->consolidation_ids as $id){
+            $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $id);
+            if($consolidation_shipments->exists()){
+                $consolidation_shipments = $consolidation_shipments->pluck('shipment_id')->toArray();
+                foreach ($consolidation_shipments as $shipment_id){
+                    if(!in_array($shipment_id, $request->shipment_ids)){
+                        $tracking = Shipment::find($shipment_id)->tracking_number;
+                        $missing_shipments[] = $tracking;
+                    }
 
+                }
+            }
+        }
+        if(count($missing_shipments) > 0){
+            return response()->json(['missing_flag' => TRUE, 'missing_shipments' => $missing_shipments]);
+        }else{
+            return response()->json(['missing_flag' => FALSE]);
+        }
+    }
+
+    static public function check_consolidation($shipment_id){
+
+        $consolidation_details = array();
+
+        $consolidation_shipment = ConsolidationShipments::where('shipment_id', $shipment_id);
+
+        if($consolidation_shipment->exists()){
+            $consolidation_shipment = $consolidation_shipment->first();
+            $consolidation = Consolidation::find($consolidation_shipment->consolidation_id);
+            $consolidation_details['order'] = $consolidation_shipment->order;
+            $consolidation_details['consolidation_id'] = $consolidation_shipment->consolidation_id;
+            $consolidation_details['count'] = $consolidation->count;
+            return $consolidation_details;
+        }
+        else{
+            return false;
+        }
+    }
     public function get_shipment_details(Request $request)
     {
-        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55);
+        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
             $remarks = '';
@@ -334,7 +376,13 @@ class DeliveryController extends Controller
                                     $class = 'complaint_row';
                                 }
                                 ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null,null);
-                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks, 'class' => $class]);
+								$consolidation_details = self::check_consolidation($shipment->id);
+								$consolidation_flag = FALSE;
+
+                                if($consolidation_details){
+                                    $consolidation_flag = TRUE;
+                                }
+                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details]);
 
                             } else {
                                 return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id];
@@ -362,7 +410,16 @@ class DeliveryController extends Controller
                                 $class = 'complaint_row';
                             }
                             ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null,null);
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class]);
+							$consolidation_details = self::check_consolidation($shipment->id);
+
+                            $consolidation_flag = FALSE;
+
+                            if($consolidation_details){
+                                $consolidation_flag = TRUE;
+                            }
+
+
+                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details]);
                         }
                     } else {
                         return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];
@@ -411,7 +468,7 @@ class DeliveryController extends Controller
         }
         $admin = Auth::id();
 
-        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55);
+        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55, 59);
 
         $valid_shipments = array();
 
@@ -738,23 +795,52 @@ class DeliveryController extends Controller
             $delivery_note = $request->delivery_note_id;
             $delivery = DeliveryNote::where('id', $delivery_note);
             if ($delivery->exists()) {
-                $parcel = Shipment::where('id', $request->shipment_id)->first();
-                DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
-                $delivery = $delivery->first();
-                $count = $delivery->shipments_count;
-                $cod = $delivery->total_cod_amount;
-                $count-=1;
-                if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
-                    $cod = $cod - $parcel->amount;
-                }
-                if ($count == 0) {
-                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
-                } else {
-                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
-                }
-                Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
-                ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+                $consolidation_shipments = ConsolidationShipments::where('shipment_id', $request->shipment_id);
+                if($consolidation_shipments->exists()){
+                    $consolidation_shipments = $consolidation_shipments->first();
+                    $consolidation_id = $consolidation_shipments->consolidation_id;
+                    $consolidated_shipments = ConsolidationShipments::where('consolidation_id',$consolidation_id)->pluck('shipment_id')->toArray();
+                    $shipment_count = 0;
+                    $shipment_cod = 0;
+                    foreach ($consolidated_shipments as $consolidated_shipment) {
+                        $parcel = Shipment::where('id', $consolidated_shipment)->first();
+                        $shipment_cod += $parcel->amount;
+                        $shipment_count += 1;
+                        DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $consolidated_shipment])->delete();
+                        Shipment::where('id', $consolidated_shipment)->update(['shipper_status_id' => 6]);
+                        ShipmentsJourneyController::add($consolidated_shipment, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+                    }
+                    $delivery = $delivery->first();
+                    $count = $delivery->shipments_count;
+                    $cod = $delivery->total_cod_amount;
+                    $count = $count - $shipment_count;
+                    if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
+                        $cod = $cod - $shipment_cod;
+                    }
+                    if ($count == 0) {
+                        DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+                    } else {
+                        DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
+                    }
 
+                }else{
+                    $parcel = Shipment::where('id', $request->shipment_id)->first();
+                    DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
+                    $delivery = $delivery->first();
+                    $count = $delivery->shipments_count;
+                    $cod = $delivery->total_cod_amount;
+                    $count-=1;
+                    if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
+                        $cod = $cod - $parcel->amount;
+                    }
+                    if ($count == 0) {
+                        DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+                    } else {
+                        DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
+                    }
+                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
+                    ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+                }
 
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
             } else {
@@ -1139,7 +1225,12 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering'])
+			->leftjoin('consolidation_shipments as consolidations', function ($join){
+                $join->on('consolidations.shipment_id', '=', 'shipments.id')
+                    ->where('consolidations.consolidation_id','=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
+            })
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering','consolidations.consolidation_id'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -1167,6 +1258,13 @@ class DeliveryController extends Controller
                 },
                 'amount' => function ($deliveries){
                     return $deliveries->amount;
+                },
+				'consolidation_id' => function($deliveries){
+                    if($deliveries->consolidation_id != null){
+                        return $deliveries->consolidation_id;
+                    } else {
+                        return '';
+                    }
                 }
             ])
             ->addColumn('collection_amount', function($shipment){
@@ -1207,6 +1305,24 @@ class DeliveryController extends Controller
             ->addColumn('open_box', function ($deliveries){
                  $open_box_checkbox = '<input type="checkbox" class="open_box" name="open_box[' . $deliveries->shId . ']">';
                      return $open_box_checkbox;
+            })
+			->addColumn('consolidation', function($deliveries){
+                $consolidations = self::check_consolidation($deliveries->shId);
+                $consol = '';
+                if($consolidations){
+                    $consol = $consolidations['order'] . '/'. $consolidations['count'];
+                }
+                else{
+                    $consol = '-';
+                }
+                return $consol;
+            })
+            ->addColumn('consolidated_id', function ($deliveries){
+                if($deliveries->consolidation_id){
+                    return $deliveries->consolidation_id;
+                }else{
+                    return '-';
+                }
             })
             ->addColumn('status', function ($deliveries) {
                 if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
@@ -1512,6 +1628,8 @@ class DeliveryController extends Controller
         }
         if ($delivery_note_id != '') {
             foreach ($shipments as $shipment) {
+				$consolidation_shipments = ConsolidationShipments::where('shipment_id', $shipment);
+				if (!$consolidation_shipments->exists()) {
                 $statusId = "reason_drop.$shipment";
                 $status_drop = "status_drop.$shipment";
                 $shipment_status = Shipment::where('id', $shipment)->first();
@@ -1591,6 +1709,7 @@ class DeliveryController extends Controller
                     }
                 }
 
+				}
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
             $delivery_note_data->last_updated_at = Carbon::now();

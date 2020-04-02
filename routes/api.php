@@ -41,6 +41,7 @@ Route::name('api.')->group(function () {
 		Route::get('cities', 'APIController@cities')->name('cities');
 
 		Route::post('charges_calculate', 'APIController@charges_calculate')->name('charges_calculate');
+		Route::post('consolidate', 'APIController@shipment_consolidate')->name('consolidate');
 	});
 
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {

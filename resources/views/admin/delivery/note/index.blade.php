@@ -76,6 +76,7 @@
                         <th class="border-primary border-darken-1">Last Rider Name</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Open Box</th>
+						<th class="border-primary border-darken-1">Consolidation</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -246,6 +247,7 @@
 
             var shipment_ids = [];
             var tracking_ids = [];
+			var consolidation_ids = [];
             var notification_ids = [];
             var rider_info_ids = [];
             var table = $('#datatable').DataTable({
@@ -362,6 +364,7 @@
                     {name: 'rider_name', class: 'align-middle rider_name', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
                     {name: 'open_box', class: 'align-middle open_box', orderable: false},
+					{name: 'consolidation', class: 'align-middle consolidation', orderable: false},
                     {name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -430,9 +433,18 @@
                                 var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
 
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                var row = table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,remove]).node().id = data.shId;
+								var consolidation = '';
+                                if(data.consolidation_flag){
+                                    consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
+                                }else{
+                                    consolidation = '-';
+                                }
+                                var row = table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,consolidation,remove]).node().id = data.shId;
                                 table.draw(false);
                                 $('tr#'+row).attr('class',data.class);
+								if(data.consolidation_flag){
+                                    $('tr#'+row).attr('consolidation_id',data.consolidation_details.consolidation_id);
+                                }
                                 // table.rows(row).nodes().attr("class", data.class);
                                 scan_sound(1);
                                 UnblockPagePermanently();
@@ -478,10 +490,18 @@
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                     var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
-
-                                    var row = table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,remove]).node().id = data.shId;
+									var consolidation = '';
+                                    if(data.consolidation_flag){
+                                        consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
+                                    }else{
+                                        consolidation = '-';
+                                    }
+                                    var row = table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,consolidation,remove]).node().id = data.shId;
                                     table.draw(false);
                                     $('tr#'+row).attr('class',data.class);
+									 if(data.consolidation_flag){
+                                        $('tr#'+row).attr('consolidation_id',data.consolidation_details.consolidation_id);
+                                    }
                                     scan_sound(1);
                                     UnblockPagePermanently();
                                     shipment_ids.push(data.shId);
@@ -551,225 +571,172 @@
             function create_delivery_note(){
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to create the Delivery Note!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if(confirm){
-                        blockPagePermanently();
-                        open_box_ids = [];
-                        table.rows().every(function(index) {
-                            var node = $(this.node());
-                            if(node.find('td.open_box input').is(':checked')){
-                                open_box_ids.push(parseInt(node.attr('id')));
-                            }
-                        });
-                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                        $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
-                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                        $('#create_delivery_note_form input#selected_route_id').val(route);
-                        if(special_rider_flag){
-                            $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
-                            $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
-                        }
-                        
-                        this_form.submit();
+                table.rows().nodes().each(function (index) {
+                        var row = table.row(index);
 
-                    }
-                });
+                        if ($(row.node()).attr('consolidation_id')) {
+
+                            var id = parseInt($(row.node()).attr('consolidation_id'));
+                            //
+                            var index = $.inArray(id, consolidation_ids);
+
+                            if (index === -1) {
+                                consolidation_ids.push(id);
+                            }
+                        }
+                    });
+				if (consolidation_ids.length > 0) {
+
+                                $.ajax({
+                                    url: '{{route('admin.delivery.note.consolidation_check')}}',
+                                    type: 'POST',
+                                    data: {
+                                        'consolidation_ids': consolidation_ids,
+                                        'shipment_ids': shipment_ids,
+                                        '_token': '{!! csrf_token() !!}'
+                                    }
+                                }).done(function (data) {
+                                    if (data.missing_flag) {
+                                        errors = 1;
+                                        var html = '';
+
+                                        html += 'The following Shipment(s) are missing from consolidation:<br/>';
+
+                                        $.each(data.missing_shipments, function (index, tracking) {
+                                            html += tracking + ', ';
+                                        });
+
+                                        html = html.slice(0, -2);
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+                                        swal({
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    } else {
+
+                                        if (count > 0) {
+                                            if (errors === 0) {
+
+                                                swal({
+                                                    title: 'Are You Sure?',
+                                                    text: 'Select Yes to create the Delivery Note!',
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'No',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                        confirm: {
+                                                            text: 'Yes',
+                                                            value: true,
+                                                            visible: true,
+                                                            closeModal: true
+                                                        }
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                }).then(function (confirm) {
+                                                    if(confirm){
+                                                        blockPagePermanently();
+                                                        open_box_ids = [];
+                                                        table.rows().every(function(index) {
+                                                            var node = $(this.node());
+                                                            if(node.find('td.open_box input').is(':checked')){
+                                                                open_box_ids.push(parseInt(node.attr('id')));
+                                                            }
+                                                        });
+                                                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                                                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                                        $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
+                                                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                                                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                                                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                                        $('#create_delivery_note_form input#selected_route_id').val(route);
+                                                        if(special_rider_flag){
+                                                            $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
+                                                            $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
+                                                        }
+                                                        
+                                                        this_form.submit();
+                                                    }
+                                                });
+
+
+                                            }
+                                        } else {
+                                            var error = "Select at-least one shipment!";
+                                            toastr.error(error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+
+                                        }
+                                    }
+                                });
+                            }
             }
 
 
             
             $('#create_delivery_note_form').on('submit', function(event) {
-                console.log("submitted");
-                event.preventDefault();
-                // riderFormValid();
-                var count = 0;
-                this_form = this;
-                count = table.rows().count();
-
-                var errors = 0;
-                var rider = $('#rider_name').val();
-                var route = $('#route').val();
-                var special = parseInt($('#rider_name').find(':selected').data('special'));
-                
-
-                if (rider !== '' && rider !== null) {
-
-                    $('#rider_error').css('display', 'none');
-                } else {
-                    var error = "Rider not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                    $('#rider_error').css('display', 'block');
-                }
-                if (route !== '' && route !== null) {
-
-                    $('#route_error').css('display', 'none');
-                } else {
-                    var error = "Route not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                    $('#route_error').css('display', 'block');
-                }
-
-                if(count > 0) {
-                    if (errors === 0) {
-                        if(special_rider_flag == false){
-                            if(special == 1){
-                                $('#SpecialRiderModal').modal('show');
-                            }else{
-                                create_delivery_note();
-                            }
-                        }
-                        
-                        
-                                
-                        // $.ajax({
-                        //     url: '{!! route('admin.delivery.note.rider_check') !!}',
-                        //     method: 'POST',
-                        //     data: {
-                        //         'rider_id': rider,
-                        //         '_token': '{{ csrf_token() }}'
-                        //     }
-                        //     }).done(function(data) {
-                        //         if(data.flag){
-                        //             swal({
-                        //             title: 'Are You Sure?',
-                        //             text: 'Select Yes to create the Delivery Note!',
-                        //             icon: 'warning',
-                        //             buttons: {
-                        //                 cancel: {
-                        //                     text: 'No',
-                        //                     value: null,
-                        //                     visible: true,
-                        //                     closeModal: true,
-                        //                 },
-                        //                 confirm: {
-                        //                     text: 'Yes',
-                        //                     value: true,
-                        //                     visible: true,
-                        //                     closeModal: true
-                        //                 }
-                        //             },
-                        //             closeOnClickOutside: false,
-                        //             closeOnEsc: false,
-                        //             dangerMode: true
-                        //         }).then(function (confirm) {
-                        //             if(confirm){
-                        //                 blockPagePermanently();
-                        //                 $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                        //                 $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                        //                 $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                        //                 $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                        //                 $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                        //                 $('#create_delivery_note_form input#selected_route_id').val(route);
-
-                        //                 this_form.submit();
-                        //             }
-                        //         });
-                        //     }
-                        //     else{
-                        //             var html = '';
-                        //             html += '<table class="table table-sm table-borderless mb-0">';
-                        //             html += '<thead><tr><td>Delivery Note ID</td><td>No. of Shipments</td><td>Amount</td></tr></thead>'
-                        //             html += '<tbody>';
-
-                                   
-                        //             $.each(data.delivery_note, function(key, value){
-                        //                     html += '<tr>';
-                        //                     html += '<td>'+ value.id +'</td><td>'+ value.shipments_count + '</td><td>'+ value.total_cod_amount + '</td>';
-                        //                     html += '</tr>';
-
-                        //             });
-                        //             html += '</tbody></table>';
-                        //             content = document.createElement('div');
-                        //             content.innerHTML = html;
-
-                        //         swal({
-                        //             title: 'Previously unclosed delivery note(s)!',
-                        //             content: content, 
-                        //             icon: 'warning',
-                        //             @if (session('role_id') == 1 || in_array(267, session('permissions')))
-                        //             buttons: {
-                        //                 cancel: {
-                        //                     text: 'No',
-                        //                     value: null,
-                        //                     visible: true,
-                        //                     closeModal: true,
-                        //                 },
-                        //                 confirm: {
-                        //                     text: 'Proceed',
-                        //                     value: true,
-                        //                     visible: true,
-                        //                     closeModal: true
-                        //                 }
-                        //             },
-                        //             @else
-                        //             buttons: {
-                        //                 cancel: {
-                        //                     text: 'Close',
-                        //                     value: null,
-                        //                     visible: true,
-                        //                     closeModal: true,
-                        //                 },
-                        //             },
-                        //             @endif
-                        //             closeOnClickOutside: false,
-                        //             closeOnEsc: false,
-                        //             dangerMode: true
-                        //         }).then(function (confirm) {
-                        //             if(confirm){
-                        //                 blockPagePermanently();
-                        //                 $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                        //                 $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                        //                 $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                        //                 $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                        //                 $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                        //                 $('#create_delivery_note_form input#selected_route_id').val(route);
-
-                        //                 this_form.submit();
-                        //             }
-                        //         });
-
-
-                        //     }
-                                
-                        // });
-
-
-                    }
-                }else{
-                    var error = "Select at-least one shipment!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                }
-
-
-
-            });
+				console.log("submitted");
+				event.preventDefault();
+				// riderFormValid();
+				var count = 0;
+				this_form = this;
+				count = table.rows().count();
+				var errors = 0;
+				var rider = $('#rider_name').val();
+				var route = $('#route').val();
+				var special = parseInt($('#rider_name').find(':selected').data('special'));
+				if (rider !== '' && rider !== null) {
+				    $('#rider_error').css('display', 'none');
+				} else {
+				    var error = "Rider not selected!";
+				    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+				    errors = 1;
+				    $('#rider_error').css('display', 'block');
+				}
+				if (route !== '' && route !== null) {
+				    $('#route_error').css('display', 'none');
+				} else {
+				    var error = "Route not selected!";
+				    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+				    errors = 1;
+				    $('#route_error').css('display', 'block');
+				}
+				if(count > 0) {
+				    if (errors === 0) {
+				        if(special_rider_flag == false){
+				            if(special == 1){
+				                $('#SpecialRiderModal').modal('show');
+				            }else{
+				                create_delivery_note();
+				            }
+				        }
+       
+				    }
+				}else{
+				    var error = "Select at-least one shipment!";
+				    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+				}
+			});
 
             $('#camera_scan_initiate').bind('click', function() {
                 if ($('#camera_scan').hasClass('d-none')) {

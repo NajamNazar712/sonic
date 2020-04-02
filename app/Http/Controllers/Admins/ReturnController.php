@@ -16,6 +16,7 @@ use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
@@ -108,7 +109,12 @@ class ReturnController extends Controller
             })
             ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
             ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by')
+			->leftjoin('consolidation_shipments as consolidations', function ($join){
+                $join->on('consolidations.shipment_id', '=', 'shipments.id')
+                    ->where('consolidations.consolidation_id','=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
+            })
+            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by','consolidations.consolidation_id')
             ->whereIn('shipments.shipper_status_id', [12,52])
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
@@ -138,6 +144,13 @@ class ReturnController extends Controller
                         return 'goldClass';
                     }
                 },
+				'consolidation_id' => function($shipments){
+                    if($shipments->consolidation_id != null){
+                        return $shipments->consolidation_id;
+                    } else {
+                        return '';
+                    }
+                }
             ])
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');
@@ -237,6 +250,24 @@ class ReturnController extends Controller
                     $query->whereRaw('false');
                 }
             })
+			->addColumn('consolidation', function($shipments){
+                $consolidations = DeliveryController::check_consolidation($shipments->shId);
+                $consol = '';
+                if($consolidations){
+                    $consol = $consolidations['order'] . '/'. $consolidations['count'];
+                }
+                else{
+                    $consol = '-';
+                }
+                return $consol;
+            })
+            ->addColumn('consolidated_id', function ($shipments){
+                if($shipments->consolidation_id){
+                    return $shipments->consolidation_id;
+                }else{
+                    return '-';
+                }
+            })
             ->addColumn("action", function ($result) {
                 $open_intercept = CityDelivery::where('city_id', $result->consignee_city_id)->where('shipping_mode_id',$result->shipping_mode_id)->exists();
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
@@ -251,11 +282,11 @@ class ReturnController extends Controller
                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
 
-                    if (session('role_id') == 1 || in_array(45, session('permissions'))) {
+                    if ((session('role_id') == 1 || (in_array(45, session('permissions')))) && !$result->consolidation_id) {
                         $dropdown .= $confirm_button;
                     }
 
-                    if (session('role_id') == 1 || in_array(46, session('permissions'))) {
+                    if ((session('role_id') == 1 || in_array(46, session('permissions'))) && !$result->consolidation_id) {
                         $dropdown .= $re_attempt_button;
                     }
 
@@ -270,7 +301,7 @@ class ReturnController extends Controller
                             $dropdown .= $edit_estimate_charges;
                         }
                     }
-                    if ((session('role_id') == 1 || in_array(245, session('permissions')))) {
+                    if ((session('role_id') == 1 || in_array(245, session('permissions'))) && !$result->consolidation_id) {
                         if(($result->current_status_id == 12 || $result->current_status_id == 52) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0){
                             if($open_intercept){
                                 $dropdown .= $intercept;
@@ -484,8 +515,19 @@ class ReturnController extends Controller
         $remark = $request->remark;
         if($shipmentId){
             if(Shipment::where('id', $shipmentId)->where('shipper_status_id','!=', 15)->exists()){
-                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>15,'consignee_status_id'=>15]);
-                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, NULL, Auth::id());
+               $consolidated_shipments = ConsolidationShipments::where('shipment_id', $shipmentId);
+                if($consolidated_shipments->exists()){
+                    $consolidated_shipments = $consolidated_shipments->first();
+                    $all_consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidated_shipments->consolidation_id)->pluck('shipment_id')->toArray();
+                    Shipment::whereIn('id',$all_consolidation_shipments)->update(['shipper_status_id'=>15,'consignee_status_id'=>15]);
+                    foreach ($all_consolidation_shipments as $shipment){
+                        ShipmentsJourneyController::add($shipment, 15, 15, NULL, $remark, NULL, Auth::id());
+
+                    }
+                }else{
+                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>15,'consignee_status_id'=>15]);
+                    ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, NULL, Auth::id());
+                }
 
                 return ['status'=>0, 'success'=>"Shipment status successfully updated to Shipment - On Hold for Self Collection"];
             }else{
@@ -502,9 +544,16 @@ class ReturnController extends Controller
         $charges = $request->charges;
         if($shipment_id){
             if($charges != null){
-                $shipment = Shipment::find($shipment_id);
-                $shipment->nsa_osa_estimated_charges = $charges;
-                $shipment->save();
+                $consolidated_shipments = ConsolidationShipments::where('shipment_id', $shipment_id);
+                if($consolidated_shipments->exists()) {
+                    $consolidated_shipments = $consolidated_shipments->first();
+                    $all_consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidated_shipments->consolidation_id)->pluck('shipment_id')->toArray();
+                    Shipment::whereIn('id', $all_consolidation_shipments)->update(['nsa_osa_estimated_charges' => $charges]);
+                }else{
+                    $shipment = Shipment::find($shipment_id);
+                    $shipment->nsa_osa_estimated_charges = $charges;
+                    $shipment->save();
+                }
 
                 return response()->json(['status' => 0, 'success' => 'Charges Updated!']);
             }else{
@@ -800,26 +849,38 @@ class ReturnController extends Controller
             })
             ->addColumn('action', function($shipment) {
                 if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
-                    $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
-
-                    $dropdown = '
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                    ';
-
-                    $dropdown .= $revert_button;
-
-                    $dropdown .= '
-                        </div>
-                      </div>
-                    ';
-
-                    return $dropdown;
-                }
-                else {
-                    return '';
-                }
+					$flag = true;
+				        $consolidation = ConsolidationShipments::where('shipment_id', $shipment->shipment_id)->first();
+				        if($consolidation){
+				            $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+				            foreach ($consolidation_shipments as $consolidation_shipment){
+				                $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+				                if($is_shipment->shipper_status_id == 23){
+				                    $flag = false;
+				                }
+				            }
+				        }
+				        if($flag == true){
+				            $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
+				            $dropdown = '
+				              <div class="btn-group">
+				                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+				                <div class="dropdown-menu dropdown-menu-sm">
+				            ';
+				                $dropdown .= $revert_button;
+				            $dropdown .= '
+				                </div>
+				              </div>
+				            ';
+				                return $dropdown;
+				        }
+				        else{
+				            return '';
+				        }
+				    }
+				    else {
+				        return '';
+				    }
             });
         if($mode = $request->get('search_shipping_mode')){
             $datatables->where('sm.id', '=', $mode);
@@ -2215,30 +2276,68 @@ class ReturnController extends Controller
 
     public function return_confirmed_revert(Request $request) {
         $shipment = Shipment::find($request->id);
-
-        if ($shipment->shipper_status_id == 20) {
-            $shipment->shipper_status_id = 13;
-            $shipment->consignee_status_id = 13;
-
-            $shipment->save();
-
-            $journey = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id', 20)->latest()->first();
-            if($journey){
-                $return_reattempt = new ReturnReattemptRatio();
-                $return_reattempt->shipment_id = $shipment->id;
-                $return_reattempt->return_confirm_date = $journey->created_at;
-                $return_reattempt->save();
+        $flag = true;
+        $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
+        if($consolidation){
+            $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+            foreach ($consolidation_shipments as $consolidation_shipment){
+                $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+                if($is_shipment->shipper_status_id == 23){
+                    $flag = false;
+                }
             }
+        }
+        if($flag == true) {
+            if ($shipment->shipper_status_id == 20) {
+                if($consolidation){
+                    $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+                    foreach ($consolidation_shipments as $consolidation_shipment){
+                        $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+
+                        $is_shipment->shipper_status_id = 13;
+                        $is_shipment->consignee_status_id = 13;
+
+                        $is_shipment->save();
+                        $is_journey = ShipmentsJourney::where('shipment_id', $is_shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                        if ($is_journey) {
+                            $return_reattempt = new ReturnReattemptRatio();
+                            $return_reattempt->shipment_id = $is_shipment->id;
+                            $return_reattempt->return_confirm_date = $is_journey->created_at;
+                            $return_reattempt->save();
+                        }
+
+                        ShipmentsJourneyController::add($is_shipment->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
+
+                        AdminFinanceController::return_confirmed_revert($is_shipment->id, 1);
+                    }
+                }
+                else{
+                    $shipment->shipper_status_id = 13;
+                    $shipment->consignee_status_id = 13;
+
+                    $shipment->save();
+
+                    $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                    if ($journey) {
+                        $return_reattempt = new ReturnReattemptRatio();
+                        $return_reattempt->shipment_id = $shipment->id;
+                        $return_reattempt->return_confirm_date = $journey->created_at;
+                        $return_reattempt->save();
+                    }
 
 
-            ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
+                    ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
 
-            AdminFinanceController::return_confirmed_revert($request->id, 1);
+                    AdminFinanceController::return_confirmed_revert($request->id, 1);
+                }
 
-            return ['status' => 0, 'success' => 'Shipment has been Reverted'];
+                return ['status' => 0, 'success' => 'Shipment has been Reverted'];
+            } else {
+                return ['status' => 1, 'error' => 'Shipment has already been Reverted'];
+            }
         }
         else {
-            return ['status' => 1, 'error' => 'Shipment has already been Reverted'];
+            return ['status' => 1, 'error' => 'Consolidated Shipment found in Return Note'];
         }
     }
 

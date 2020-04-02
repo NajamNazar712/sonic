@@ -75,7 +75,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([155, 117, 209], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([155, 117, 209, 254], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([155, 209], session('permissions'))) !== 0)
@@ -92,6 +92,10 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(117, session('permissions')))
                             <li class="menu-item"><a href="{{ route('admin.cancelled_shipments.index') }}">Cancelled</a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(254, session('permissions')))
+                            <li class="menu-item"><a href="{{ route('admin.shipment.consolidation.history.index') }}">Consolidation History</a>
                             </li>
                         @endif
 
@@ -704,7 +708,7 @@
 
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([116, 150, 154, 197], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([116, 150, 154, 197, 256], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Bookings</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(116, session('permissions')))
@@ -718,6 +722,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(197, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.cod_cap_zones.index') }}">COD CAP for Zone Classes</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(256, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.consolidation.max.index') }}">Maximum Consolidation Shipments</a></li>
                                     @endif
                                 </ul>
                             </li>

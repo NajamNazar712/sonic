@@ -63,6 +63,8 @@
                         <th class="border-primary border-darken-1">Assigned Agent</th>
                         <th class="border-primary border-darken-1">Assigned At</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
+						<th class="border-primary border-darken-1">Consolidation</th>
+                        <th class="border-primary border-darken-1">Consolidated IDs</th>
                         <th class="border-primary border-darken-1">Actions</th>
                     </tr>
                     </thead>
@@ -367,7 +369,8 @@
                             head.push('Assigned Agent');
                             head.push('Assigned At');
                             head.push('Assigned By');
-
+							head.push('Consolidation');
+                            head.push('Consolidation IDs');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -397,7 +400,8 @@
                                 row.push(values.assigned_agent);
                                 row.push(values.assigned_at);
                                 row.push(values.assigned_by);
-
+								row.push(values.consolidation);
+                                row.push(values.consolidated_id);
                                 body.push(row);
                             });
                         },
@@ -735,6 +739,8 @@
                     {data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
                     {data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
                     {data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
+					{data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation'},
+                    {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -760,7 +766,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts') || $(header).is('.consolidation')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -835,29 +841,50 @@
 
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var hub_id = $(this).parents('tr').data('hub');
-                if(hub_ids.length == 0){
-                    hub_ids.push(hub_id);
-                    var index = $.inArray(id, selected_rows);
+                var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
+                if(con_id){
+                    if(hub_ids.length == 0){
+                        hub_ids.push(hub_id);
+                    }else if(hub_ids[0] != hub_id){
+                        var error = "Selected hubs should be the same!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        return false;
+                    }
+                    table.rows().nodes().each(function(index) {
+                        var row = table.row(index);
+                        if ($(row.node()).attr('consolidation_id') == con_id) {
+                            var rid = parseInt($(row.node()).attr('id'));
+                            var rindex = $.inArray(rid, selected_rows);
 
-                    if (index === -1) {
-                        selected_rows.push(id);
-                    }
-                    else {
-                        selected_rows.splice(index, 1);
-                    }
+                            if (rindex === -1) {
+                                selected_rows.push(rid);
+                                if(id != rid){
 
-                    if (selected_rows.length > 0) {
-                        table.button('.confirm').enable();
-                        table.button('.assign').enable();
-                        table.button('.re-attempt').enable();
-                    }
-                    else {
-                        table.button('.confirm').disable();
-                        table.button('.assign').disable();
-                        table.button('.re-attempt').disable();
-                    }
+                                    table.row(row).select();
+                                }
+                            }
+                            else {
+                                if(id != rid){
+
+                                    row.deselect();
+                                }
+                                selected_rows.splice(rindex, 1);
+                            }
+                            if (selected_rows.length > 0) {
+                                table.button('.confirm').enable();
+                                table.button('.assign').enable();
+                                table.button('.re-attempt').enable();
+                            }
+                            else {
+                                table.button('.confirm').disable();
+                                table.button('.assign').disable();
+                                table.button('.re-attempt').disable();
+                            }
+                        }
+                    });
                 }else{
-                    if(hub_ids[0] == hub_id){
+                    if(hub_ids.length == 0){
+                        hub_ids.push(hub_id);
                         var index = $.inArray(id, selected_rows);
 
                         if (index === -1) {
@@ -878,11 +905,33 @@
                             table.button('.re-attempt').disable();
                         }
                     }else{
-                        var error = "Selected hubs should be the same!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        return false;
-                    }
+                        if(hub_ids[0] == hub_id){
+                            var index = $.inArray(id, selected_rows);
 
+                            if (index === -1) {
+                                selected_rows.push(id);
+                            }
+                            else {
+                                selected_rows.splice(index, 1);
+                            }
+
+                            if (selected_rows.length > 0) {
+                                table.button('.confirm').enable();
+                                table.button('.assign').enable();
+                                table.button('.re-attempt').enable();
+                            }
+                            else {
+                                table.button('.confirm').disable();
+                                table.button('.assign').disable();
+                                table.button('.re-attempt').disable();
+                            }
+                        }else{
+                            var error = "Selected hubs should be the same!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            return false;
+                        }
+
+                    }
                 }
 
             });
