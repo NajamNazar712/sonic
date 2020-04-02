@@ -1606,8 +1606,8 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,20', 'min:0'],
-            'try_and_buy_charges' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2,5', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
