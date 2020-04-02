@@ -905,7 +905,7 @@ class ShipperShipmentBookController extends Controller
                                 </td>
                               </tr>
                             </tbody>
-                        </table>
+                        </table></div>
                     ';
                         }
                     }
