@@ -918,6 +918,18 @@ class DeliveryController extends Controller
                         background: #c8c8c8;
                         border-radius: 25px;
                       }
+
+                      td.try_and_buy span {
+                        width: 22px;
+                      }
+
+                      td.try_and_buy span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
                       
                       td.complaint {
                             background: #09262e !important;
@@ -994,6 +1006,10 @@ class DeliveryController extends Controller
                     $shipment_details_row_start .= '
                     <td class="replacement '.$class.'"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
                 ';
+                }else if ($shipment->booking_type_id == 3) {
+                    $shipment_details_row_start .= '
+                    <td class="try_and_buy '.$class.'"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/try_and_buy.png') . '"></span></td>
+                ';
                 } else {
                     $shipment_details_row_start .= '
                     <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
@@ -1059,7 +1075,7 @@ class DeliveryController extends Controller
                             <td class="'.$class.'">' . $shipment_item->description . '</td>
                 ';
                         $shipment_details_row_start .= '
-                    <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
+                    <td class="try_and_buy '.$class.'"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/try_and_buy.png') . '"></span></td>
                 ';
 
                         $shipment_details_row_start .= '
@@ -1242,7 +1258,7 @@ class DeliveryController extends Controller
             ->setRowAttr([
                 'class' => function ($deliveries) {
                     if ($deliveries->current_status_id !== 5) {
-                        $delivered_statuses = array(14, 30, 36);
+                        $delivered_statuses = array(14, 30, 36, 37);
                         if (in_array($deliveries->current_status_id, $delivered_statuses)) {
                             return 'statusDelivered';
                         } else if ($deliveries->current_status_id == 12) {
@@ -1867,7 +1883,7 @@ class DeliveryController extends Controller
                 $product[] = ['pid' => $item->id, 'type' => $item->product->product_name, 'description' => ($item->description == '') ? ' - ' : $item->description, 'price' => $item->price];
 //
             }
-            return ['status' => 0, 'data' => $product, 'total_cod' => number_format($amount->amount)];
+            return ['status' => 0, 'data' => $product, 'total_cod' => $amount->amount];
         } else {
             return ['status' => 1, 'error' => 'No Shipment found'];
         }
@@ -1886,12 +1902,12 @@ class DeliveryController extends Controller
                 ShipmentItem::where('id', $item_ids)->update(['bought' => 1]);
             }
             if ($checked != $unchecked) {
-                Shipment::where('id', $request->trybuy_shipment_id)->update(['received_amount' => $cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
+                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $cod, 'received_amount' => $cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                 ShipmentsJourneyController::add($request->trybuy_shipment_id, 37, 37, NULL, NULL, NULL, Auth::id(), $request->delivery_note_trybuy, NULL, 0);
             } elseif ($checked == $unchecked) {
-                Shipment::where('id', $request->trybuy_shipment_id)->update(['received_amount' => $cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
+                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $cod, 'received_amount' => $cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
             }
-
+            ShipmentChargesController::cash_handling($request->trybuy_shipment_id);
             DeliveryNoteShipment::where(['shipment_id' => $request->trybuy_shipment_id, 'delivery_note_id' => $request->delivery_note_trybuy])->update(['status' => 5]);
 
             $delivery_note_data = DeliveryNote::find($request->delivery_note_trybuy);

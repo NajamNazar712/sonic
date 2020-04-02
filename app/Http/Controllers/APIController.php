@@ -250,7 +250,7 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
+            'amount' => ['required_if:service_type_id,1,2,5', 'nullable', 'numeric', 'min:0'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
@@ -268,6 +268,7 @@ class APIController extends Controller
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,500'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
+			'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'numeric', 'min:0'],
             'items' => ['required_if:service_type_id,3', 'array'],
             'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,500'],
@@ -484,8 +485,15 @@ class APIController extends Controller
 
         $amount = $request->input('amount');
         $payment_mode_id = $request->input('payment_mode_id');
+		if ($service_type_id == 3) {
+              $try_and_buy_charges = $request->input('try_and_buy_charges');
+              $amount = 0;
+          }
+          else {
+              $try_and_buy_charges = NULL;
+          }
           if($user_type['account_type_id'] == 1) {
-              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id);
+              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges);
           }
           else {
               $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);
@@ -560,6 +568,7 @@ class APIController extends Controller
           ShipperShipmentBookController::add_item($shipment_id, $replacement_item_product_type_id, $replacement_item_description, $replacement_item_quantity, $replacement_item_price, $replacement_item_insurance, $replacement_item_type);
         }
         else if ($service_type_id == 3) {
+			$try_and_buy_cod_amount = intval($try_and_buy_charges);
           foreach ($request->input('items') as $item) {
             $item_product_type_id = $item['item_product_type_id'];
 
@@ -582,8 +591,12 @@ class APIController extends Controller
 
             $item_type = 2;
 
+			$try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
             ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
           }
+			$shipment_try_and_buy = Shipment::find($shipment_id);
+            $shipment_try_and_buy->amount = $try_and_buy_cod_amount;
+            $shipment_try_and_buy->save();
         }
 
           $check = NonServiceArea::pluck('name')->toArray();

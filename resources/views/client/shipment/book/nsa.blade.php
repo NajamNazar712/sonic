@@ -125,6 +125,7 @@
                                                         <input type="hidden" name="form[{{$no}}][amount]" value="{{$ro['amount']}}">
                                                         <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
                                                         <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
+                                                        <input type="hidden" name="form[{{$no}}][try_and_buy_charges]" value="{{$ro['try_and_buy_charges']}}">
                                                     @endif
                                                 </tr>
                                             @endforeach

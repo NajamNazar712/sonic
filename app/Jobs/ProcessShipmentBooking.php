@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Models\Shipment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -99,8 +100,15 @@ class ProcessShipmentBooking implements ShouldQueue
 
         $package_type = TRUE;
 
+        if ($service_type_id == 3) {
+            $try_and_buy_charges = $this->booking['try_and_buy_charges'];
+            $amount = 0;
+        }
+        else {
+            $try_and_buy_charges = NULL;
+        }
         if ($this->booking['account_type_id'] == 1) {
-            $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id);
+            $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges);
         }
         else {
             $delivery_type_id = $this->booking['delivery_type_id'];
@@ -177,6 +185,7 @@ class ProcessShipmentBooking implements ShouldQueue
             ShipperShipmentBookController::add_item($shipment_id, $replacement_item_product_type_id, $replacement_item_description, $replacement_item_quantity, $replacement_item_price, $replacement_item_insurance, $replacement_item_type);
         }
         else if ($service_type_id == 3) {
+            $try_and_buy_cod_amount = intval($try_and_buy_charges);
             $item_product_type_id = $this->booking['item_product_type_id'];
 
             if (!empty(trim($this->booking['item_description']))) {
@@ -188,15 +197,14 @@ class ProcessShipmentBooking implements ShouldQueue
             $item_quantity = $this->booking['item_quantity'];
 
             if (strtolower($this->booking['item_insurance']) == 'yes') {
-                $item_price = str_replace(',', '', $this->booking['item_price']);
                 $item_insurance = TRUE;
             } else {
-                $item_price = NULL;
                 $item_insurance = FALSE;
             }
+            $item_price = str_replace(',', '', $this->booking['item_price']);
 
             $item_type = 2;
-
+            $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
             ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
 
             if($this->booking['item_product_type_id_2'] != null){
@@ -210,16 +218,17 @@ class ProcessShipmentBooking implements ShouldQueue
 
                 $item_quantity = $this->booking['item_quantity_2'];
 
+
                 if (strtolower($this->booking['item_insurance_2']) == 'yes') {
-                    $item_price = str_replace(',', '', $this->booking['item_price_2']);
                     $item_insurance = TRUE;
                 } else {
-                    $item_price = NULL;
                     $item_insurance = FALSE;
                 }
+                $item_price = str_replace(',', '', $this->booking['item_price_2']);
 
                 $item_type = 2;
 
+                $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
                 ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
             }
 
@@ -235,15 +244,15 @@ class ProcessShipmentBooking implements ShouldQueue
                 $item_quantity = $this->booking['item_quantity_3'];
 
                 if (strtolower($this->booking['item_insurance_3']) == 'yes') {
-                    $item_price = str_replace(',', '', $this->booking['item_price_3']);
                     $item_insurance = TRUE;
                 } else {
-                    $item_price = NULL;
                     $item_insurance = FALSE;
                 }
+                $item_price = str_replace(',', '', $this->booking['item_price_3']);
 
                 $item_type = 2;
 
+                $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
                 ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
             }
 
@@ -259,15 +268,15 @@ class ProcessShipmentBooking implements ShouldQueue
                 $item_quantity = $this->booking['item_quantity_4'];
 
                 if (strtolower($this->booking['item_insurance_4']) == 'yes') {
-                    $item_price = str_replace(',', '', $this->booking['item_price_4']);
                     $item_insurance = TRUE;
                 } else {
-                    $item_price = NULL;
                     $item_insurance = FALSE;
                 }
+                $item_price = str_replace(',', '', $this->booking['item_price_4']);
 
                 $item_type = 2;
 
+                $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
                 ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
             }
 
@@ -283,17 +292,21 @@ class ProcessShipmentBooking implements ShouldQueue
                 $item_quantity = $this->booking['item_quantity_5'];
 
                 if (strtolower($this->booking['item_insurance_5']) == 'yes') {
-                    $item_price = str_replace(',', '', $this->booking['item_price_5']);
                     $item_insurance = TRUE;
                 } else {
-                    $item_price = NULL;
                     $item_insurance = FALSE;
                 }
+                $item_price = str_replace(',', '', $this->booking['item_price_5']);
 
                 $item_type = 2;
 
+                $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
+
                 ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
             }
+            $shipment_try_and_buy = Shipment::find($shipment_id);
+            $shipment_try_and_buy->amount = $try_and_buy_cod_amount;
+            $shipment_try_and_buy->save();
         }
 
         if(!empty($this->booking['nsas']) && $this->booking['nsa']) {

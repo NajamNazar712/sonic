@@ -219,6 +219,9 @@
 										<div id="try_and_buy" class="d-none">
 											<div class="repeater mb-1">
 												<div data-repeater-list="try_and_buy">
+													<div class="form-group input-group">
+														<input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">
+													</div>
 													<div class="product mb-1" data-repeater-item>
 														<div class="d-flex justify-content-between align-items-center bg-dark border border-dark rounded-top">
 															<h4 class="m-1 white">Product #<span>1</span></h4>
@@ -275,12 +278,12 @@
 												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
 											</div>
 
-											<div class="form-group">
-												<div class="form-group text-center p-1 border border-light rounded">
-													<label class="d-block">Type of Package</label>
-													<input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">
-												</div>
-											</div>
+{{--											<div class="form-group">--}}
+{{--												<div class="form-group text-center p-1 border border-light rounded">--}}
+{{--													<label class="d-block">Type of Package</label>--}}
+{{--													<input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">--}}
+{{--												</div>--}}
+{{--											</div>--}}
 										</div>
 
 										<div class="form-group input-group">
@@ -764,6 +767,10 @@
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
 				$('#try_and_buy').removeClass('d-none');
+				$('#amount').prop('disabled', true);
+			}
+			else{
+				$('#amount').prop('disabled', false);
 			}
 
 			$('#select_service_type form #service_type').val(service_type).trigger('change');
@@ -794,6 +801,7 @@
 						$('#shipping_header_info').removeClass('mt-2');
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
+						$('#amount').prop('disabled', false);
 					}
 					else if (service_type == 2) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -810,6 +818,7 @@
 						$('#shipping_header_info').removeClass('mt-2');
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
+						$('#amount').prop('disabled', false);
 					}
 					else if (service_type == 3) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -826,6 +835,7 @@
 						$('#shipping_header_info').removeClass('mt-2');
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
+						$('#amount').prop('disabled', true);
 					}
 					else if (service_type == 5) {
 						$('#shipping_header_div').removeClass('col col_custom');
@@ -843,6 +853,7 @@
 						$('#charges_mode_div').addClass('d-none');
 						$('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
 						$('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
+						$('#amount').prop('disabled', false);
 					}
 					$('#booking_form #selected_service_type').val(service_type);
 
@@ -1010,7 +1021,7 @@
 
 			$('#try_and_buy .insurance').checkboxpicker();
 
-			$('#package_type').checkboxpicker();
+			// $('#package_type').checkboxpicker();
 
 			var current_date = '{{$date}}';
 			$('#pickup_date').pickadate({

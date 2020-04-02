@@ -66,6 +66,7 @@
                                 <th>Amount</th>
                                 <th>Mode of Payment ID</th>
                                 <th>Charges Mode ID</th>
+                                <th>Try and Buy Charges</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -320,6 +321,11 @@
                                     <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['try_and_buy_charges']))
+                                    <td>{!! Form::text('form[' . $no . '][try_and_buy_charges]', $ro['try_and_buy_charges'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['try_and_buy_charges']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][try_and_buy_charges]', $ro['try_and_buy_charges'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                 @endif
                             </tr>
 

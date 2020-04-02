@@ -130,7 +130,7 @@
 							</thead>
 						</table>
 						<div class="form-group">
-							<button type="button" class="btn btn-secondary" id="try_and_buy_airwaybill">Print Air Waybill</button>
+							<button type="button" class="btn btn-secondary" id="try_and_buy_airwaybill" disabled="disabled">Print Air Waybill</button>
 						</div>
 
 						<div class="row justify-content-center">
@@ -425,9 +425,7 @@
 										// all_shipment_item_ids.push(data.scanned_shipment_item);
 										var check = parseInt(try_rowNo) + 1;
 										if(parseInt(data.details.shipment_items_count) === parseInt(check)){
-											$('#scan_try_and_buy_tracking_number').prop('disabled', false);
-											$('#try_and_buy_weight').prop('disabled', false);
-											$('#try_and_buy_confirm').prop('disabled', false);
+											$('#try_and_buy_airwaybill').prop('disabled', false);
 										}
 										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 										$('#tryAndbuyModal').modal('show');
@@ -493,9 +491,7 @@
 								shipment_item_ids.push(data.scanned_shipment_item);
 								var check = parseInt(try_rowNo) + 1;
 								if(parseInt(shipment_items_count) === parseInt(check)){
-									$('#scan_try_and_buy_tracking_number').prop('disabled', false);
-									$('#try_and_buy_weight').prop('disabled', false);
-									$('#try_and_buy_confirm').prop('disabled', false);
+									$('#try_and_buy_airwaybill').prop('disabled', false);
 								}
 								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
@@ -523,6 +519,7 @@
 					var shipment_items_count = $('#try_and_buy_shipment_items_count').val();
 					var check = parseInt(try_rowNo);
 					if(parseInt(shipment_items_count) !== parseInt(check)){
+						$('#try_and_buy_airwaybill').prop('disabled', true);
 						$('#scan_try_and_buy_tracking_number').prop('disabled', true);
 						$('#try_and_buy_weight').prop('disabled', true);
 						$('#try_and_buy_confirm').prop('disabled', true);
@@ -533,6 +530,9 @@
 
 			$('#try_and_buy_airwaybill').on('click', function () {
 				id = $('#try_and_buy_shipment_id').val();
+				$('#scan_try_and_buy_tracking_number').prop('disabled', false);
+				$('#try_and_buy_weight').prop('disabled', false);
+				$('#try_and_buy_confirm').prop('disabled', false);
 				print(id);
 			});
 

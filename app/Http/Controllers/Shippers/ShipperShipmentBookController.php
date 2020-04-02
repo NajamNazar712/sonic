@@ -86,7 +86,7 @@ class ShipperShipmentBookController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges) {
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -116,6 +116,8 @@ class ShipperShipmentBookController extends Controller
         $shipment->charges_mode_id = $charges_mode_id;
         $shipment->shipper_status_id = 1;
         $shipment->consignee_status_id = 1;
+
+        $shipment->try_and_buy_charges = $try_and_buy_charges;
 
 
         $shipment->booked_by = session('user_type');
@@ -411,7 +413,15 @@ class ShipperShipmentBookController extends Controller
                         $payment_mode_id = 1;
                     }
 
-                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id);
+                    if ($service_type_id == 3) {
+                        $try_and_buy_charges = $request->input('try_and_buy_charges');
+                        $amount = 0;
+                    }
+                    else {
+                        $try_and_buy_charges = NULL;
+                    }
+
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges);
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
@@ -482,6 +492,7 @@ class ShipperShipmentBookController extends Controller
                         $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
                     }
                     else if ($service_type_id == 3) {
+                        $try_and_buy_cod_amount = intval($try_and_buy_charges);
                         foreach ($request->input('try_and_buy') as $try_and_buy) {
                             $product_type_id = $try_and_buy['product_type'];
 
@@ -494,7 +505,7 @@ class ShipperShipmentBookController extends Controller
 
                             $item_quantity = $try_and_buy['item_quantity'];
                             $price = str_replace(',', '', $try_and_buy['item_price']);
-
+                            $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($price);
                             if (isset($try_and_buy['insurance']) && !empty($try_and_buy['insurance'])) {
                                 $insurance = TRUE;
                             }
@@ -506,6 +517,9 @@ class ShipperShipmentBookController extends Controller
 
                             $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
                         }
+                        $shipment_try_and_buy = Shipment::find($shipment_id);
+                        $shipment_try_and_buy->amount = $try_and_buy_cod_amount;
+                        $shipment_try_and_buy->save();
                     }
 
                     NotificationsController::send(2, $shipment_id);
@@ -828,12 +842,12 @@ class ShipperShipmentBookController extends Controller
             if ($user_type == 3 || $user_id == $shipment->user_id) {
 
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
-                    $table_start = '';
+                    $table_start = '
+                      <div class="position-relative">';
                     foreach ($shipment->items as $shipment_item){
                         $table_start .= '
-                      <div class="position-relative">
-                        <table class="table table-sm table-bordered border twice">
-                            <tbody><tr>
+                        <div class="col"><table class="table table-sm table-bordered border twice">
+                            <tbody>
                 ';
 
                         if ($user_type != 4 && $type != 'pdf') {
@@ -857,12 +871,12 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
-
-                                <td class="color primary border twice-left"><strong>Type</strong></td>
-                                <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
-                                <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                                <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
-                                <td colspan="2" class="border twice-top">Tracking Number</td>
+                                <tr>
+                                    <td class="color primary border twice-left"><strong>Type</strong></td>
+                                    <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
+                                    <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                    <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
+                                    <td colspan="2" class="border twice-top">Tracking Number</td>
                                 </tr>
                     ';
                         } else {
@@ -871,12 +885,12 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
-
-                                <td class="color primary border twice-left"><strong>Type</strong></td>
-                                <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
-                                <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                                <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
-                                <td colspan="2" class="border twice-top">Tracking Number</td>
+                                <tr>
+                                    <td class="color primary border twice-left"><strong>Type</strong></td>
+                                    <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
+                                    <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                    <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
+                                    <td colspan="2" class="border twice-top">Tracking Number</td>
                                 </tr>
                     ';
                         }
@@ -895,7 +909,7 @@ class ShipperShipmentBookController extends Controller
                                 </td>
                               </tr>
                             </tbody>
-                        </table>
+                        </table></div>
                     ';
                         } else {
                             $table_start .= '
@@ -905,10 +919,11 @@ class ShipperShipmentBookController extends Controller
                                 </td>
                               </tr>
                             </tbody>
-                        </table>
+                        </table></div>
                     ';
                         }
                     }
+                    $table_start .= '</div>';
                     $shipment_details = $table_start;
                 } else {
                     $table_start = '
@@ -1508,7 +1523,8 @@ class ShipperShipmentBookController extends Controller
             'same_day_timing_id' => 'Same Day Timing ID',
             'amount' => 'Collection Amount',
             'payment_mode_id' => 'Payment Mode ID',
-            'charges_mode_id' => 'Charges Mode ID'
+            'charges_mode_id' => 'Charges Mode ID',
+            'try_and_buy_charges' => 'Try and Buy Charges'
         ];
 
         $messages = [
@@ -1590,7 +1606,8 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2,5', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
@@ -1599,7 +1616,7 @@ class ShipperShipmentBookController extends Controller
             })]
         ];
 
-        $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'item_product_type_id_2', 16 => 'item_description_2', 17 => 'item_quantity_2', 18 => 'item_insurance_2', 19 => 'item_price_2', 20 => 'item_product_type_id_3', 21 => 'item_description_3', 22 => 'item_quantity_3', 23 => 'item_insurance_3', 24 => 'item_price_3', 25 => 'item_product_type_id_4', 26 => 'item_description_4', 27 => 'item_quantity_4', 28 => 'item_insurance_4', 29 => 'item_price_4', 30 => 'item_product_type_id_5', 31 => 'item_description_5', 32 => 'item_quantity_5', 33 => 'item_insurance_5', 34 => 'item_price_5', 35 => 'replacement_item_product_type_id', 36 => 'replacement_item_description', 37 => 'replacement_item_quantity', 38 => 'pickup_date', 39 => 'special_instructions', 40 => 'estimated_weight', 41 => 'shipping_mode_id', 42 => 'same_day_timing_id', 43 => 'amount', 44 => 'payment_mode_id', 45 => 'charges_mode_id'];
+        $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'item_product_type_id_2', 16 => 'item_description_2', 17 => 'item_quantity_2', 18 => 'item_insurance_2', 19 => 'item_price_2', 20 => 'item_product_type_id_3', 21 => 'item_description_3', 22 => 'item_quantity_3', 23 => 'item_insurance_3', 24 => 'item_price_3', 25 => 'item_product_type_id_4', 26 => 'item_description_4', 27 => 'item_quantity_4', 28 => 'item_insurance_4', 29 => 'item_price_4', 30 => 'item_product_type_id_5', 31 => 'item_description_5', 32 => 'item_quantity_5', 33 => 'item_insurance_5', 34 => 'item_price_5', 35 => 'replacement_item_product_type_id', 36 => 'replacement_item_description', 37 => 'replacement_item_quantity', 38 => 'pickup_date', 39 => 'special_instructions', 40 => 'estimated_weight', 41 => 'shipping_mode_id', 42 => 'same_day_timing_id', 43 => 'amount', 44 => 'payment_mode_id', 45 => 'charges_mode_id', 46 => 'try_and_buy_charges'];
 //        $form= $request->shipments;
 //        dd($form);
         if($file = $request->file('shipments')) {
@@ -1608,13 +1625,13 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Item Product Type ID 2', 'Item Description 2', 'Item Quantity 2', 'Item Insurance 2', 'Product Value 2', 'Item Product Type ID 3', 'Item Description 3', 'Item Quantity 3', 'Item Insurance 3', 'Product Value 3', 'Item Product Type ID 4', 'Item Description 4', 'Item Quantity 4', 'Item Insurance 4', 'Product Value 4', 'Item Product Type ID 5', 'Item Description 5', 'Item Quantity 5', 'Item Insurance 5', 'Product Value 5', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
+            $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Item Product Type ID 2', 'Item Description 2', 'Item Quantity 2', 'Item Insurance 2', 'Product Value 2', 'Item Product Type ID 3', 'Item Description 3', 'Item Quantity 3', 'Item Insurance 3', 'Product Value 3', 'Item Product Type ID 4', 'Item Description 4', 'Item Quantity 4', 'Item Insurance 4', 'Product Value 4', 'Item Product Type ID 5', 'Item Description 5', 'Item Quantity 5', 'Item Insurance 5', 'Product Value 5', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID', 'Try and Buy Charges'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
 
             foreach ($spreadsheet[0] as $index => $header_value) {
-                if ($index == 45) {}
+                if ($index == 46) {}
                 elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                     $header_correct = FALSE;
                     break;
