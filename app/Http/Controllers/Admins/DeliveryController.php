@@ -832,6 +832,18 @@ class DeliveryController extends Controller
                         background: #c8c8c8;
                         border-radius: 25px;
                       }
+
+                      td.try_and_buy span {
+                        width: 22px;
+                      }
+
+                      td.try_and_buy span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
                       
                       td.complaint {
                             background: #09262e !important;
@@ -908,6 +920,10 @@ class DeliveryController extends Controller
                     $shipment_details_row_start .= '
                     <td class="replacement '.$class.'"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
                 ';
+                }else if ($shipment->booking_type_id == 3) {
+                    $shipment_details_row_start .= '
+                    <td class="try_and_buy '.$class.'"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/try_and_buy.png') . '"></span></td>
+                ';
                 } else {
                     $shipment_details_row_start .= '
                     <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
@@ -973,7 +989,7 @@ class DeliveryController extends Controller
                             <td class="'.$class.'">' . $shipment_item->description . '</td>
                 ';
                         $shipment_details_row_start .= '
-                    <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
+                    <td class="try_and_buy '.$class.'"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/try_and_buy.png') . '"></span></td>
                 ';
 
                         $shipment_details_row_start .= '
