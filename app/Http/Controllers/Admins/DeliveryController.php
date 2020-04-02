@@ -1767,12 +1767,12 @@ class DeliveryController extends Controller
                 ShipmentItem::where('id', $item_ids)->update(['bought' => 1]);
             }
             if ($checked != $unchecked) {
-                Shipment::where('id', $request->trybuy_shipment_id)->update(['received_amount' => $cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
+                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $cod, 'received_amount' => $cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                 ShipmentsJourneyController::add($request->trybuy_shipment_id, 37, 37, NULL, NULL, NULL, Auth::id(), $request->delivery_note_trybuy, NULL, 0);
             } elseif ($checked == $unchecked) {
-                Shipment::where('id', $request->trybuy_shipment_id)->update(['received_amount' => $cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
+                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $cod, 'received_amount' => $cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
             }
-
+            ShipmentChargesController::cash_handling($request->trybuy_shipment_id);
             DeliveryNoteShipment::where(['shipment_id' => $request->trybuy_shipment_id, 'delivery_note_id' => $request->delivery_note_trybuy])->update(['status' => 5]);
 
             $delivery_note_data = DeliveryNote::find($request->delivery_note_trybuy);
