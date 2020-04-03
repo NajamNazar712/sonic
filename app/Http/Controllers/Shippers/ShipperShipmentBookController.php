@@ -1498,11 +1498,15 @@ class ShipperShipmentBookController extends Controller
             'item_insurance' => 'Item Insurance',
             'item_price' => 'Product Value',
 
-            'item_product_type_id_1' => 'Try and Buy Item Product Type ID 2',
-            'item_description_1' => 'Try and Buy Item Description 2',
-            'item_quantity_1' => 'Try and Buy Item Quantity 2',
-            'item_insurance_1' => 'Try and Buy Item Insurance 2',
-            'item_price_1' => 'Try and Buy Product Value 2',
+            'replacement_item_product_type_id' => 'Replacement Item Product Type ID',
+            'replacement_item_description' => 'Replacement Item Description',
+            'replacement_item_quantity' =>'Replacement Item Quantity',
+
+            'item_product_type_id_1' => 'Try and Buy Item Product Type ID 1',
+            'item_description_1' => 'Try and Buy Item Description 1',
+            'item_quantity_1' => 'Try and Buy Item Quantity 1',
+            'item_insurance_1' => 'Try and Buy Item Insurance 1',
+            'item_price_1' => 'Try and Buy Product Value 1',
             'item_product_type_id_2' => 'Try and Buy Item Product Type ID 2',
             'item_description_2' => 'Try and Buy Item Description 2',
             'item_quantity_2' => 'Try and Buy Item Quantity 2',
@@ -1524,19 +1528,15 @@ class ShipperShipmentBookController extends Controller
             'item_insurance_5' => 'Try and Buy Item Insurance 5',
             'item_price_5' => 'Try and Buy Product Value 5',
 
-            'replacement_item_product_type_id' => 'Replacement Item Product Type ID',
-            'replacement_item_description' => 'Replacement Item Description',
-            'replacement_item_quantity' =>'Replacement Item Quantity',
-
             'pickup_date' => 'Pickup Date',
             'special_instructions' => 'Special Instructions',
             'estimated_weight' => 'Estimated Weight',
             'shipping_mode_id' => 'Shipping Mode ID',
             'same_day_timing_id' => 'Same Day Timing ID',
+            'try_and_buy_charges' => 'Try and Buy Charges',
             'amount' => 'Collection Amount',
             'payment_mode_id' => 'Payment Mode ID',
-            'charges_mode_id' => 'Charges Mode ID',
-            'try_and_buy_charges' => 'Try and Buy Charges'
+            'charges_mode_id' => 'Charges Mode ID'
         ];
 
         $messages = [
@@ -1643,7 +1643,7 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Try and Buy Item Product Type ID 1', 'Try and Buy Item Description 1', 'Try and Buy Item Quantity 1', 'Try and Buy Item Insurance 1', 'Try and Buy Product Value 1', 'Try and Buy Item Product Type ID 2', 'Try and Buy Item Description 2', 'Try and Buy Item Quantity 2', 'Try and Buy Item Insurance 2', 'Try and Buy Product Value 2', 'Try and Buy Item Product Type ID 3', 'Try and Buy Item Description 3', 'Try and Buy Item Quantity 3', 'Try and Buy Item Insurance 3', 'Try and Buy Product Value 3', 'Try and Buy Item Product Type ID 4', 'Try and Buy Item Description 4', 'Try and Buy Item Quantity 4', 'Try and Buy Item Insurance 4', 'Try and Buy Product Value 4', 'Try and Buy Item Product Type ID 5', 'Try and Buy Item Description 5', 'Try and Buy Item Quantity 5', 'Try and Buy Item Insurance 5', 'Try and Buy Product Value 5', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID', 'Try and Buy Charges'];
+            $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Try and Buy Item Product Type ID 1', 'Try and Buy Item Description 1', 'Try and Buy Item Quantity 1', 'Try and Buy Item Insurance 1', 'Try and Buy Product Value 1', 'Try and Buy Item Product Type ID 2', 'Try and Buy Item Description 2', 'Try and Buy Item Quantity 2', 'Try and Buy Item Insurance 2', 'Try and Buy Product Value 2', 'Try and Buy Item Product Type ID 3', 'Try and Buy Item Description 3', 'Try and Buy Item Quantity 3', 'Try and Buy Item Insurance 3', 'Try and Buy Product Value 3', 'Try and Buy Item Product Type ID 4', 'Try and Buy Item Description 4', 'Try and Buy Item Quantity 4', 'Try and Buy Item Insurance 4', 'Try and Buy Product Value 4', 'Try and Buy Item Product Type ID 5', 'Try and Buy Item Description 5', 'Try and Buy Item Quantity 5', 'Try and Buy Item Insurance 5', 'Try and Buy Product Value 5', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Try and Buy Charges', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
