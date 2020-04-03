@@ -94,6 +94,11 @@
                                                         <input type="hidden" name="form[{{$no}}][item_quantity]" value="{{$ro['item_quantity']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_insurance]" value="{{$ro['item_insurance']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_price]" value="{{$ro['item_price']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_1]" value="{{$ro['item_product_type_id_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_1]" value="{{$ro['item_description_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_1]" value="{{$ro['item_quantity_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_1]" value="{{$ro['item_insurance_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_1]" value="{{$ro['item_price_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_product_type_id_2]" value="{{$ro['item_product_type_id_2']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_description_2]" value="{{$ro['item_description_2']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_quantity_2]" value="{{$ro['item_quantity_2']}}">

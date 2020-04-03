@@ -263,7 +263,7 @@
 												</div>
 
 												<div class="form-group text-right">
-													<button data-repeater-create type="button" class="btn btn-block btn-primary">Add</button>
+													<button data-repeater-create type="button" class="btn btn-block btn-primary" id="try_and_buy_add">Add</button>
 												</div>
 											</div>
 
@@ -1060,10 +1060,12 @@
 			}).bind('change', function() {
 				$(this).valid();
 			});
-
+			var repeater_limit = 5;
+			var repeater_count = 1;
 			$('#try_and_buy .repeater').repeater({
 				isFirstItemUndeletable: true,
 				show: function() {
+					repeater_count++;
 					$(this).find('.select2-container--default').remove();
 
 					$(this).find('.select2').prepend('<option value="" selected="selected"></option>').select2({
@@ -1118,6 +1120,12 @@
 
 					insurance.checkboxpicker();
 
+					if(repeater_count === repeater_limit){
+
+						console.log(repeater_count);
+						$("#try_and_buy_add").hide("slow");
+					}
+
 					try_and_buy_product_numbering();
 				},
 				hide: function(delete_element) {
@@ -1146,6 +1154,11 @@
 						dangerMode: true
 					}).then(function(confirm) {
 						if (confirm) {
+							repeater_count--;
+
+							if(repeater_count < repeater_limit){
+								$("#try_and_buy_add").show("slow");
+							}
 							$(this).slideUp(delete_element);
 
 							try_and_buy_product_numbering();
