@@ -721,19 +721,46 @@
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var dncc_no = parseInt($(this).parents('tr').attr('data-dncc'));
+                var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
 
+                if(con_id){
+                    table.rows().nodes().each(function(index) {
+                        var row = table.row(index);
+                        if ($(row.node()).attr('consolidation_id') == con_id) {
+                            var rid = parseInt($(row.node()).attr('id'));
+                            var rindex = $.inArray(rid, selected_rows);
 
-                var index = $.inArray(id, selected_rows);
+                            if (rindex === -1) {
+                                selected_rows.push(rid);
+                                if(id != rid){
 
-                if (index === -1) {
-                    selected_rows.push(id);
-                    dncc.push(dncc_no);
+                                    table.row(row).select();
+                                }
+                            }
+                            else {
+                                if(id != rid){
 
+                                    row.deselect();
+                                }
+                                selected_rows.splice(rindex, 1);
+                            }
+                        }
+                    });
                 }
-                else {
-                    selected_rows.splice(index, 1);
-                    dncc.splice(index, 1);
+                else
+                {
+                    var index = $.inArray(id, selected_rows);
 
+                    if (index === -1) {
+                        selected_rows.push(id);
+                        dncc.push(dncc_no);
+
+                    }
+                    else {
+                        selected_rows.splice(index, 1);
+                        dncc.splice(index, 1);
+
+                    }
                 }
 
                 if (selected_rows.length > 0) {

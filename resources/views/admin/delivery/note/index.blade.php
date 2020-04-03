@@ -569,6 +569,7 @@
             var special_rider_flag = false;
             var this_form;
             function create_delivery_note(){
+
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
                 table.rows().nodes().each(function (index) {
@@ -585,6 +586,7 @@
                             }
                         }
                     });
+                console.log(consolidation_ids);
                 if (consolidation_ids.length > 0) {
 
                     $.ajax({
@@ -675,6 +677,53 @@
                             });
 
 
+                        }
+                    });
+                }else{
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to create the Delivery Note!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            open_box_ids = [];
+                            table.rows().every(function (index) {
+                                var node = $(this.node());
+                                if (node.find('td.open_box input').is(':checked')) {
+                                    open_box_ids.push(parseInt(node.attr('id')));
+                                }
+                            });
+                            $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                            $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                            $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
+                            $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                            $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                            $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                            $('#create_delivery_note_form input#selected_route_id').val(route);
+                            if (special_rider_flag) {
+                                $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
+                                $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
+                            }
+
+                            this_form.submit();
                         }
                     });
                 }
