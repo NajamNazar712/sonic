@@ -617,12 +617,12 @@
                                                     
                                             </div>
                                             
-                                            <!-- <div class="row" id="more_banks_btn_div">
+                                            <div class="row" id="more_banks_btn_div">
                                                 <div class="col-12">
                                                         <button id="addMoreBanks" type="button" class="btn btn-primary btn-min-width mr-1 mb-1"><i class="la la-plus"></i>&nbsp; Add More Banks</button>
                                                 </div>
-                                                
-                                            </div> -->
+
+                                            </div>
                                             <div id="billing_information_div" class="row d-none">
                                                 <div class="col-md-6">
 
