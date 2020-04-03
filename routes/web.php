@@ -39,6 +39,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
 
+    Route::get('/welcome', 'Shippers\ShipperDashboardController@welcome_index')->name('welcome');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
 
@@ -355,6 +356,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
         Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
+        Route::post('auto_disable_days/submit','Admins\ShipperAccountController@auto_disable_days')->name('auto_disable_days.submit');
+
+        Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
 
 
         //user profile
@@ -510,6 +514,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_remove', 'Admins\AdminPickupsController@receive_shipment_remove')->name('shipment_remove');
             Route::post('bookings/all','Admins\AdminPickupsController@receive_all_bookings')->name('bookings.all');
 
+            Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+                Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+                Route::post('shipment_details', 'Admins\AdminPickupsController@receive_try_and_buy_shipment_details')->name('shipment_details');
+            });
             Route::prefix('arrival_of_shipments')->name('arrival_of_shipments.')->group(function () {
                 Route::get('', 'Admins\AdminPickupsController@receive_arrival_of_shipments_index')->name('index');
                 Route::post('', 'Admins\AdminPickupsController@receive_arrival_of_shipments_store')->name('store');
@@ -961,6 +969,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('verify', 'Admins\AdminFinanceController@make_payments_verify')->name('verify');
             Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
+            Route::get('stats_calculate', 'Admins\AdminFinanceController@make_payments_stats_calculate')->name('stats_calculate');
         });
 
         Route::prefix('done_payments')->name('done_payments.')->group(function () {
@@ -1507,6 +1516,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_rad_tat_submit')->name('update');
             Route::get('edit/{id}', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_edit_index')->name('edit');
             Route::post('edit/update', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_origin_submit')->name('edit.update');
+        });
+
+        Route::prefix('delay_in_delivery_massage')->name('delay_in_delivery_massage.')->group(function (){
+            Route::get('','Admins\GlobalSettingsController@delay_in_delivery_massage')->name('index');
+            Route::post('submit','Admins\GlobalSettingsController@delay_in_delivery_massage_store')->name('store');
         });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {

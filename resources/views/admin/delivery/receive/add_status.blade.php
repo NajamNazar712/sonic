@@ -150,6 +150,17 @@
                     {{--</button>--}}
                 </div>
                 <div class="modal-body  text-center">
+                    <div class="row justify-content-center">
+                        <div class="col-4">
+                            <form id="items_scan_form" action="#">
+                                <div class="form-group">
+                                    <input type="text" name="item_number" class="form-control item_number" placeholder="Shipment Item Number Scan*" data-rule-required="true" data-msg-required="Item Number is required">
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
                     <form id="trybuy_form" action="{{route('admin.delivery.receive.trybuys.submit')}}" method="post">
                         <table class="table table-bordered datatable" id="trybuytable" style="z-index: 3;">
                             <thead>
@@ -1269,11 +1280,9 @@
                                     var rowNo = trybuy.rows().count();
                                     $.each(data.data,function (key,value) {
                                         trybuy_ids.push(value.pid);
-                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
-                                        // console.log(value.tracking_number)
+                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]' readonly onclick=\"return false;\">";
                                         trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
                                         trybuy.draw(false);
-                                        // shipment_id_list.push(value.id);
                                         $('#cod').text(data.total_cod);
                                     });
 
@@ -1292,6 +1301,40 @@
                 });
             }
             checkShipmentStatuses();
+
+            $('#items_scan_form input.item_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#items_scan_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('form'));
+                },
+                submitHandler: function(form) {
+
+                    var item_number = $(form).find('input.item_number').val();
+
+                    form.reset();
+
+                    if (trybuy.rows('[id='+ item_number +']').any()) {
+                        var item = $('tr#'+item_number).find('.receiving input');
+                        if(item.is(':checked')){
+                            item.attr('checked', false);
+                            item_scanned_cod_change(item);
+                        }else{
+                            toastr.error('Item has been scanned already!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    }else{
+                        toastr.error('Item not found in the list!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+
+                    return false;
+                }
+            });
 
             function print(id,temp = null) {
                 $.ajax({
@@ -1367,11 +1410,10 @@
                 printUndelivered(note_id);
             });
 
-
-            $('body').on('click','.receiving input:checkbox',function () {
-                var check = $(this);
-                var id = parseInt($(this).parents('tr').attr('id'));
-                var price = $(this).parents('tr').find('td.item_price').text();
+            function item_scanned_cod_change(bought){
+                var check = $(bought);
+                var id = parseInt($(bought).parents('tr').attr('id'));
+                var price = $(bought).parents('tr').find('td.item_price').text();
                 var total_cod = $('#cod').text();
                 var newcod = '';
                 if($.isNumeric(price)){
@@ -1386,7 +1428,11 @@
                         $('#cod').text(newcod);
                     }
                 }
-            });
+            }
+            // $('body').on('click','.receiving input:checkbox',function () {
+            //     item_scanned_cod_change($(this));
+            // });
+
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
                 e.preventDefault();
@@ -1407,7 +1453,8 @@
             });
             //end replacement
             $('#trybuy_form').bind('submit',function (e) {
-                blockPagePermanently();
+                // blockPagePermanently();
+                var this_form = this;
                 e.preventDefault();
                 var total = $('#cod').text();
                 total = parseInt(total);
@@ -1419,14 +1466,40 @@
                 $('#item_checked').val(checkbox_count);
                 $('#item_unchecked').val(uncheckbox_count);
                 $('#delivery_note_trybuy').val(deliverynote_id);
-                if(checkbox_count > 0){
-                    UnblockPagePermanently();
-                    this.submit();
-                }else{
-                    UnblockPagePermanently();
-                    var error = "Select at-least one item!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
+                // if(checkbox_count > 0){
+                    // UnblockPagePermanently();
+
+                // }else{
+                //     UnblockPagePermanently();
+                //     var error = "Select at-least one item!";
+                //     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                // }
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to update Try & Buy Delivery!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        this_form.submit();
+                    }
+                });
             });
 
             var shipment_remarks_obj = {};

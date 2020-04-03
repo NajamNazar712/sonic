@@ -16,6 +16,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\http\Models\WMS\WmsCurrentStock;
 use App\Http\Models\WMS\WmsPendingPicking;
 use App\Http\Models\WMS\WmsShipmentProduct;
+use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -48,6 +49,11 @@ class ShipperDashboardController extends Controller
 
     public function access_denied() {
         return view('client.access_denied');
+    }
+
+    public function welcome_index(){
+        $quote = Inspiring::quote();
+        return view('client.welcome')->with(['quote' => $quote]);
     }
 
     public function orders_index() {

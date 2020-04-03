@@ -819,6 +819,10 @@ class AdminReportsEmailController extends Controller
                 }
             }
         }
+//        usort($overnight_overland_cargo_array, function ($item1, $item2) {
+//            return $item2['Cargo Created Date'] <=> $item1['Cargo Created Date'];
+//        });
+
         $cell_st = [
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],

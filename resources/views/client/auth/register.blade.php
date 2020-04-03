@@ -242,7 +242,7 @@
                                                         <div>
                                                             <select name="average_shipment_duration" id="average_shipment_duration" class="select2 form-control required" style="width: 100%">
                                                                 @foreach($average_shipment_durations as $average_shipment_duration)
-                                                                    <option value="{{$average_shipment_duration->id}}" {{ old('reference') == $average_shipment_duration->id ? 'selected' : '' }} >{{$average_shipment_duration->name}}</option>
+                                                                    <option value="{{$average_shipment_duration->id}}" {{ old('average_shipment_duration') == $average_shipment_duration->id ? 'selected' : '' }} >{{$average_shipment_duration->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -262,7 +262,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6 d-none" id="sale_person_div">
+                                                <div class="col-md-6" id="sale_person_div">
                                                     <div class="form-group">
                                                         <label for="sale_person">Sale Person:
                                                             <span class="danger">*</span>
@@ -924,15 +924,6 @@
         $('select[name="reference"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Reference',
             // dropdownParent:$('#registership')
-        }).bind('change', function() {
-            if (this.value == 1) {
-                $('#sale_person_div').removeClass('d-none');
-                $('#sale_person').addClass('required');
-            }
-            else{
-                $('#sale_person_div').addClass('d-none');
-                $('#sale_person').removeClass('required');
-            }
         });
         $('select[name="sale_person"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Sale Person',
@@ -970,7 +961,6 @@
                 var bcc = $('.card.nbank').length;
                 var bid = $('.card.nbank').eq(bcc-1);
                 var banking_div = banks_count + 1;
-                console.log(banking_div);
                 bid.attr('id','banking_'+banking_div);
                 $('#banking_'+banking_div+' h3.card-title' ).text('Bank '+banking_div);
                 var innerdivcount = banks_count + 1;

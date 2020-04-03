@@ -261,6 +261,10 @@ p.comment {
 .complaint_row{
 	background-color: var(--light);
 }
+.tnb_row, .tnb_row a{
+	background-color: orange;
+	color: white;
+}
 .vendor_row{
 	background-color: yellow;
 }

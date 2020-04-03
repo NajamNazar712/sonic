@@ -39,7 +39,10 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\OverlandCargoReport',
 		'\App\Console\Commands\AccountReconciliationReportFromStart',
         '\App\Console\Commands\AccountReconciliationReportCurrent',
-		'\App\Console\Commands\BusinessProjectionAndRetention'];
+		'\App\Console\Commands\BusinessProjectionAndRetention',
+		'\App\Console\Commands\CRMDelayInDelivery',
+		'\App\Console\Commands\CRMPaymentComplains'
+        ];
 
     /**
      * Define the application's command schedule.
@@ -112,6 +115,8 @@ class Kernel extends ConsoleKernel
 //      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
 
 		$schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
+		$schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
+		$schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
     }
 
     /**

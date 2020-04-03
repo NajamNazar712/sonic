@@ -70,6 +70,43 @@
         </div>
     </div>
 
+
+    <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Return Confirm Reason</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            @if($return_confirm_reasons)
+                                <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
+                                    @foreach($return_confirm_reasons as $reason)
+                                        <option value="{{$reason->id}}">{{$reason->name}}</option>
+                                    @endforeach
+                                </select>
+                            @endif
+                        </div>
+
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary update_return_confirm" value="Add">Update To Return Confirm</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -89,6 +126,10 @@
 
     <script type="text/javascript">
     $(document).ready(function(){
+        $('#return_reason_select').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Reason'
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -160,11 +201,11 @@
                     enabled: false,
                     action: function (e, dt, node, config) {
 
-                        $('#add_remarks_modal').modal('show');
-                        $('#add_remarks_modal').on('hide.bs.modal', function () {
-                            $('#add_remarks_form input.add_remarks').val('');
+                        $('#ReturnConfirmReasonModal').modal('show');
+                        $('#ReturnConfirmReasonModal').on('hide.bs.modal', function () {
+                            $('#return_reason_select').val(null).trigger('change');
                         });
-                        $('#add_remarks_form').validate({
+                        $('#update_return_reason_form').validate({
                             ignore: [],
                             errorClass: 'danger',
                             successClass: 'success',
@@ -175,7 +216,7 @@
                                 return $.trim(value);
                             },
                             submitHandler: function(form) {
-                                var remarks = $('#add_remarks').val();
+                                var return_reason_select = $('#return_reason_select').val();
                                 swal({
                                     title: 'Are You Sure?',
                                     text: 'Select Yes to change shipment status to Return-Confirm!',
@@ -205,12 +246,12 @@
                                             method:'POST',
                                             data:{
                                                 'shipment_ids':selected_rows,
-                                                'remarks':remarks,
+                                                'reason':return_reason_select,
                                                 '_token':'{{ csrf_token() }}'
                                             }
                                         }).done(function (data) {
                                             UnblockPagePermanently();
-                                            $('#add_remarks_modal').modal('hide');
+                                            $('#ReturnConfirmReasonModal').modal('hide');
                                             selected_rows = [];
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
