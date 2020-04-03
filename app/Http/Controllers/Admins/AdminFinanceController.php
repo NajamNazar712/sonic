@@ -1558,6 +1558,9 @@ class AdminFinanceController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+            if($shipment->booking_type_id == 3){
+                return ['status' => 1, 'error' => 'Try & Buy shipment\'s weight can\'t be changed!'];
+            }
 
             if (!in_array($shipment->shipper_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46])) {
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
