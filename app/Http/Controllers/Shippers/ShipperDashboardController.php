@@ -419,7 +419,7 @@ class ShipperDashboardController extends Controller
 
         return Datatables::of($banks)
         ->addColumn('action', function ($bank) {
-            return '';
+
             $dropdown = '
                 <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -427,10 +427,11 @@ class ShipperDashboardController extends Controller
             ';
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
 
-            if (!$bank->default_bank) {
-                $dropdown .= $default_button;
-            }else{
+            if ($bank->default_bank) {
                 $dropdown = 'Default Address';
+
+            }else{
+                $dropdown .= $default_button;
             }
             
 

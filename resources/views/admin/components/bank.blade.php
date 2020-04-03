@@ -5,7 +5,7 @@
         <tbody>
             <tr role="row">
                 <th class="border-primary border-darken-1 align-middle text-center">Bank Name</th>
-                <td class="align-middle text-center">{{$bank->bank_name}}</td>
+                <td class="align-middle text-center">{{$bank->bank->name}}</td>
             </tr>
             <tr role="row">
                 <th class="border-primary border-darken-1 align-middle text-center">Bank Branch</th>
