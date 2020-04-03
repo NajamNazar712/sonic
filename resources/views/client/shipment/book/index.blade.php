@@ -219,9 +219,6 @@
 										<div id="try_and_buy" class="d-none">
 											<div class="repeater mb-1">
 												<div data-repeater-list="try_and_buy">
-													<div class="form-group input-group">
-														<input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">
-													</div>
 													<div class="product mb-1" data-repeater-item>
 														<div class="d-flex justify-content-between align-items-center bg-dark border border-dark rounded-top">
 															<h4 class="m-1 white">Product #<span>1</span></h4>
@@ -356,6 +353,11 @@
 											</div>
 
 											<input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
+										</div>
+
+
+										<div class="form-group input-group d-none" id="try_and_buy_charges_div">
+											<input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">
 										</div>
 
 										<div class="form-group">
@@ -797,6 +799,7 @@
 						$('#payment_info').removeClass('d-none');
 						$('#replacement').addClass('d-none');
 						$('#try_and_buy').addClass('d-none');
+						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#order_header_info').removeClass('mt-2');
 						$('#shipping_header_info').removeClass('mt-2');
 						$('#shipper_header_info').html('Shipper Information');
@@ -819,6 +822,7 @@
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
 						$('#amount').prop('disabled', false);
+						$('#try_and_buy_charges_div').addClass('d-none');
 					}
 					else if (service_type == 3) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -836,6 +840,7 @@
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
 						$('#amount').prop('disabled', true);
+						$('#try_and_buy_charges_div').removeClass('d-none');
 					}
 					else if (service_type == 5) {
 						$('#shipping_header_div').removeClass('col col_custom');
@@ -854,6 +859,7 @@
 						$('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
 						$('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
 						$('#amount').prop('disabled', false);
+						$('#try_and_buy_charges_div').addClass('d-none');
 					}
 					$('#booking_form #selected_service_type').val(service_type);
 
