@@ -30,6 +30,9 @@
                                 <th>Consignee Phone Number 2 (03000000000)</th>
                                 <th>Consignee Email Address</th>
                                 <th>Order ID</th>
+                                <th>Replacement Item Product Type ID</th>
+                                <th>Replacement Item Description</th>
+                                <th>Replacement Item Quantity</th>
                                 <th>Item Product Type ID</th>
                                 <th>Item Description</th>
                                 <th>Item Quantity</th>
@@ -55,18 +58,15 @@
                                 <th>Item Quantity 5</th>
                                 <th>Item Insurance 5</th>
                                 <th>Item Price 5</th>
-                                <th>Replacement Item Product Type ID</th>
-                                <th>Replacement Item Description</th>
-                                <th>Replacement Item Quantity</th>
                                 <th>Pickup Date (YYYY-MM-DD)</th>
                                 <th>Special Instructions</th>
                                 <th>Estimated Weight (kg)</th>
                                 <th>Mode of Shipment ID</th>
                                 <th>Same Day Timing ID</th>
+                                <th>Try and Buy Charges</th>
                                 <th>Amount</th>
                                 <th>Mode of Payment ID</th>
                                 <th>Charges Mode ID</th>
-                                <th>Try and Buy Charges</th>
                             </tr>
                             </thead>
                             <tbody>
