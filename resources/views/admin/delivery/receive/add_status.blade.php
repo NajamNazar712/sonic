@@ -154,7 +154,7 @@
                         <div class="col-4">
                             <form id="items_scan_form" action="#">
                                 <div class="form-group">
-                                    <input type="text" name="item_number" class="form-control item_number" placeholder="Item Number Scan*" data-rule-required="true" data-msg-required="Item Number is required">
+                                    <input type="text" name="item_number" class="form-control item_number" placeholder="Shipment Item Number Scan*" data-rule-required="true" data-msg-required="Item Number is required">
                                 </div>
 
                             </form>
@@ -1280,7 +1280,7 @@
                                     var rowNo = trybuy.rows().count();
                                     $.each(data.data,function (key,value) {
                                         trybuy_ids.push(value.pid);
-                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
+                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]' readonly onclick=\"return false;\">";
                                         trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
                                         trybuy.draw(false);
                                         $('#cod').text(data.total_cod);
@@ -1429,9 +1429,9 @@
                     }
                 }
             }
-            $('body').on('click','.receiving input:checkbox',function () {
-                item_scanned_cod_change($(this));
-            });
+            // $('body').on('click','.receiving input:checkbox',function () {
+            //     item_scanned_cod_change($(this));
+            // });
 
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
@@ -1453,7 +1453,8 @@
             });
             //end replacement
             $('#trybuy_form').bind('submit',function (e) {
-                blockPagePermanently();
+                // blockPagePermanently();
+                var this_form = this;
                 e.preventDefault();
                 var total = $('#cod').text();
                 total = parseInt(total);
@@ -1465,14 +1466,40 @@
                 $('#item_checked').val(checkbox_count);
                 $('#item_unchecked').val(uncheckbox_count);
                 $('#delivery_note_trybuy').val(deliverynote_id);
-                if(checkbox_count > 0){
-                    UnblockPagePermanently();
-                    this.submit();
-                }else{
-                    UnblockPagePermanently();
-                    var error = "Select at-least one item!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
+                // if(checkbox_count > 0){
+                    // UnblockPagePermanently();
+
+                // }else{
+                //     UnblockPagePermanently();
+                //     var error = "Select at-least one item!";
+                //     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                // }
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to update Try & Buy Delivery!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        this_form.submit();
+                    }
+                });
             });
 
             var shipment_remarks_obj = {};
