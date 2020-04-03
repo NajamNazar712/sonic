@@ -136,6 +136,8 @@ class ReturnController extends Controller
                     }
                     if ($shipments->current_status_id == 52) {
                         return 'goldClass';
+                    }else if($shipments->booking_type_id == 3){
+                        return "tnb_row";
                     }
                 },
             ])
@@ -710,6 +712,8 @@ class ReturnController extends Controller
                 'class' => function ($shipments) {
                     if ($shipments->complaint != null) {
                         return 'complaint_row';
+                    }else if($shipments->booking_type_id == 3){
+                        return "tnb_row";
                     }
                 },
             ])
