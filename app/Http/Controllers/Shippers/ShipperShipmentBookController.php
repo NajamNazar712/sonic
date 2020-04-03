@@ -838,7 +838,7 @@ class ShipperShipmentBookController extends Controller
         }
 
         $shipment_details = '';
-
+        $page_items = 1;
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
@@ -848,10 +848,18 @@ class ShipperShipmentBookController extends Controller
 
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
                     foreach ($shipment->items as $shipment_item){
-                        $table_start = '
+                        if($page_items == 0){
+                            $table_start = '
+                    <div class="page position-relative"><table class="table table-sm table-bordered border twice">
+                        <tbody>
+            ';
+                        }
+                        else{
+                            $table_start = '
                     <div class="position-relative"><table class="table table-sm table-bordered border twice">
                         <tbody>
             ';
+                        }
 
                         if ($user_type != 4 && $type != 'pdf') {
                             $table_start .= '
@@ -925,10 +933,17 @@ class ShipperShipmentBookController extends Controller
                         </table></div>
                     ';
                         }
-                        $table_start .= '</div>';
                         $shipment_details .= $table_start;
+                        $page_items++;
+                        if($page_items >= 5){
+                            $page_items = 0;
+                        }
                     }
                 } else {
+                    $page_items = $page_items + 3;
+                    if($page_items >= 5){
+                        $page_items = 0;
+                    }
                     $table_start = '
                       <div class="position-relative">
                         <table class="table table-sm table-bordered border twice">
