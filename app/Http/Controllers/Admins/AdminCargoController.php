@@ -355,7 +355,7 @@ class AdminCargoController extends Controller
                                         $cargo_type = 1;
                                     }
                                     else {
-                                        if (!in_array($shipment->shipper_status_id, [20, 30, 36, 37])) {
+                                        if (!in_array($shipment->shipper_status_id, [20, 30, 37])) {
                                             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
                                         }
 
@@ -565,7 +565,7 @@ class AdminCargoController extends Controller
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49, 55])) {
+            if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
                 $shipments++;
                 $shipments_weight += $shipment->actual_weight;
                 
