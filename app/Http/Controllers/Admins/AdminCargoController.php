@@ -297,7 +297,7 @@ class AdminCargoController extends Controller
             }
 
 
-            if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49, 55])) {
+            if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
                 if ($shipment->shipper_status_id == 2) {
                     $hub_id = $shipment->pickup_address->city->hub_id;
                 }
@@ -424,7 +424,7 @@ class AdminCargoController extends Controller
                                             })
                                             ->select(DB::raw('count(shipments.id) as count'))
                                             ->where('dc.hub_id', $hub->id)
-                                            ->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+                                            ->whereIn('shipments.shipper_status_id', [20, 30, 37])
                                             ->where('shipments.shipping_mode_id', $shipping_mode_id);
                                     }
 
