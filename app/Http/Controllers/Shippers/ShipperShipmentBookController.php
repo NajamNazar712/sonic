@@ -745,6 +745,11 @@ class ShipperShipmentBookController extends Controller
                         line-height: 3.5rem;
                         opacity: 0.25;
                       }
+                       div.page
+                        {
+                            page-break-after: always;
+                            page-break-inside: avoid;
+                        }
                     </style>
                   </head>
                   <body>
@@ -842,13 +847,11 @@ class ShipperShipmentBookController extends Controller
             if ($user_type == 3 || $user_id == $shipment->user_id) {
 
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
-                    $table_start = '
-                      <div class="position-relative">';
                     foreach ($shipment->items as $shipment_item){
-                        $table_start .= '
-                        <div class="col"><table class="table table-sm table-bordered border twice">
-                            <tbody>
-                ';
+                        $table_start = '
+                    <div class="position-relative"><table class="table table-sm table-bordered border twice">
+                        <tbody>
+            ';
 
                         if ($user_type != 4 && $type != 'pdf') {
                             $table_start .= '
@@ -922,9 +925,9 @@ class ShipperShipmentBookController extends Controller
                         </table></div>
                     ';
                         }
+                        $table_start .= '</div>';
+                        $shipment_details .= $table_start;
                     }
-                    $table_start .= '</div>';
-                    $shipment_details .= $table_start;
                 } else {
                     $table_start = '
                       <div class="position-relative">
@@ -1577,10 +1580,10 @@ class ShipperShipmentBookController extends Controller
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'order_id' => ['nullable', 'between:0,100'],
 
-            'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,1000'],
-            'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
-            'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_product_type_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description' => ['required_if:service_type_id,1,2', 'nullable', 'between:0,1000'],
+            'item_quantity' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance' => ['required_if:service_type_id,1,2', 'nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'item_product_type_id_1' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
