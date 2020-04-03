@@ -16,6 +16,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\http\Models\WMS\WmsCurrentStock;
 use App\Http\Models\WMS\WmsPendingPicking;
 use App\Http\Models\WMS\WmsShipmentProduct;
+use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -51,7 +52,8 @@ class ShipperDashboardController extends Controller
     }
 
     public function welcome_index(){
-        return view('client.welcome');
+        $quote = Inspiring::quote();
+        return view('client.welcome')->with(['quote' => $quote]);
     }
 
     public function orders_index() {
