@@ -356,7 +356,7 @@
 										</div>
 
 
-										<div class="form-group input-group d-none" id="try_and_buy_charges_div">
+										<div class="form-group input-group" id="try_and_buy_charges_div">
 											<input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">
 										</div>
 
