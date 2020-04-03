@@ -120,6 +120,8 @@ class DeliveryController extends Controller
                 'class' => function ($shipments) {
                     if ($shipments->complaint != null) {
                         return 'complaint_row';
+                    }else if($shipments->booking_type_id == 3){
+                        return "tnb_row";
                     } else {
                         return '';
                     }

@@ -603,7 +603,7 @@
 
             
             $('#create_delivery_note_form').on('submit', function(event) {
-                console.log("submitted");
+
                 event.preventDefault();
                 // riderFormValid();
                 var count = 0;
