@@ -578,7 +578,7 @@ class AdminPickupsController extends Controller
     public function assigned_list(Request $request) {
       $pickup_notes = PickupNote::join('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
       ->join('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
-      ->join('routes as ro', 'r.route_id', '=', 'ro.id')
+      ->leftjoin('routes as ro', 'r.route_id', '=', 'ro.id')
       ->join('cities as c', 'r.city_id', '=', 'c.id')
       ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
