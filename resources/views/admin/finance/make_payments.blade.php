@@ -1029,7 +1029,7 @@
 
 			function calculation(parent) {
 				var id = parseInt(parent.attr('id'));
-				
+
 				var index = $.inArray(id, selected_rows_shipments);
 
 				var total_amount_selector = $('#make_payments #make_payments_form .total_amount');
@@ -1089,18 +1089,20 @@
 			$('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
 				var parent = $(this).parent('tr');
+				var selected_id = $(this).parent('tr').attr('id');
 				var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
 				if(con_id){
 					var count = 0;
 					make_payments_table.rows().nodes().each(function(index) {
 						var row = make_payments_table.row(index);
 						var consolidation_id = $(row.node()).attr('consolidation_id');
+						var row_id = $(row.node()).attr('id');
 						if(con_id == consolidation_id){
 							if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
 								var parent = $(row.node());
 
 								calculation(parent);
-								if(count > 0){
+								if(selected_id != row_id){
 									row.select();
 								}
 								count++;
@@ -1108,7 +1110,7 @@
 								var parent = $(row.node());
 
 								calculation(parent);
-								if(count > 0){
+								if(selected_id != row_id){
 									row.deselect();
 								}
 								count++;
