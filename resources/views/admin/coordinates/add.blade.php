@@ -44,7 +44,7 @@
                                     </div>
                                 </div>
                             </form>
-                            @if (session('role_id') == 1 || in_array(322, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(324, session('permissions')))
                                 <form id="add_coordinates_form" class="mb-1 mt-2 d-none" method="POST" action="{{ route('admin.coordinates.add.submit') }}" novalidate="novalidate">
                                     {{ csrf_field() }}
 
@@ -148,7 +148,7 @@
 
                     form.reset();
 
-                    @if (session('role_id') == 1 || in_array(322, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(324, session('permissions')))
                     $('#search_coordinates_form').addClass('d-none');
                     $('#add_coordinates_form').addClass('d-none');
                     @endif
@@ -253,7 +253,7 @@ console.log(details);
 
                                 $('#shipment').html(shipment);
 
-                                @if (session('role_id') == 1 || in_array(322, session('permissions')))
+                                @if (session('role_id') == 1 || in_array(324, session('permissions')))
                                 $('#search_coordinates_form').removeClass('d-none');
                                 $('#add_coordinates_form').removeClass('d-none');
 
@@ -275,7 +275,7 @@ console.log(details);
                 }
             });
 
-            @if (session('role_id') == 1 || in_array(322, session('permissions')))
+            @if (session('role_id') == 1 || in_array(324, session('permissions')))
             $('#add_coordinates_form .cord').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,

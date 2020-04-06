@@ -467,7 +467,7 @@
                                 Shipment Weight</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(322, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(324, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.coordinates.add.index') }}">Add Cordinates</a></li>
                     @endif
 

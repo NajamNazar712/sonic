@@ -12,7 +12,7 @@ class UpdateModulePermissionForCoordinatesTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 322, 'name' => 'Support - Add Coordinates', 'module_id' => 12),
+            array('id' => 324, 'name' => 'Support - Add Coordinates', 'module_id' => 12),
         ));
     }
 }

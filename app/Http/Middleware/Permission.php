@@ -569,10 +569,10 @@ class Permission
 
             'dashboard.sales.index' => 315,
 
-            'coordinates.add.index' => 322,
-            'coordinates.add.submit' => 322,
-            'coordinates.add.shipment_details' => 322,
-            'coordinates.add.search.address' => 322,
+            'coordinates.add.index' => 324,
+            'coordinates.add.submit' => 324,
+            'coordinates.add.shipment_details' => 324,
+            'coordinates.add.search.address' => 324,
         ],
 
         'shipper' => [
