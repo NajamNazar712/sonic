@@ -581,4 +581,18 @@ class RiderAPIController extends Controller {
             return response()->json(['status' => 0, 'message' => 'Pickup Action Log(s) Successfully']);
         }
     }
+
+    public function delivery_summary(Request $request){
+        $rider_id = $request->rider_id;
+        return response()->json(['status'=>1, 'data'=>$rider_id]);
+        $delivery_note = DeliveryNote::where('rider_id', $rider_id)->whereIn('status', 0);
+        if ($delivery_note->exists()) {
+            $delivery_note = $delivery_note->latest('id')->first();
+            $information = array();
+
+            $information['delivery_note_id'] = $delivery_note->id;
+            $information['summary'] = array();
+
+        }
+    }
 }

@@ -58,6 +58,13 @@ Route::name('api.')->group(function () {
                 Route::post('not_pick', 'Rider\RiderAPIController@pickup_not_pick')->name('pickup_not_pick');
                 Route::post('action_log', 'Rider\RiderAPIController@pickup_action_log')->name('pickup_action_log');
 	        });
+            Route::prefix('delivery')->name('delivery.')->group(function () {
+                Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('summary');
+            });
+
 		});
+
+
+
 	});
 });
