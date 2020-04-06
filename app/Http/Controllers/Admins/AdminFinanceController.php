@@ -9,6 +9,7 @@ use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\ChargesModes;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\RevertStatusRequestLog;
 use App\Http\Models\Rider;
@@ -3022,11 +3023,24 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_store(Request $request) {
+
         $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
             return [$item['pending_payment_id'] => $item['id']];
         })->toArray();
 
         $done_payment_ids = array();
+//        $present_consolidation_shipments = array();
+//        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
+//            foreach ($pending_payment_shipment_ids as $shipment_id){
+//                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
+//                if($present->exists()){
+//                    $present = $present->first();
+//                    $consolidation_id = $present->consolidation_id;
+//
+//                }
+//            }
+//        }
+
 
         foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
             $total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();

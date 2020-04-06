@@ -1029,7 +1029,7 @@
 
 			function calculation(parent) {
 				var id = parseInt(parent.attr('id'));
-
+				
 				var index = $.inArray(id, selected_rows_shipments);
 
 				var total_amount_selector = $('#make_payments #make_payments_form .total_amount');
@@ -1087,9 +1087,40 @@
 			}
 
 			$('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-				var parent = $(this).parent('tr');
 
-				calculation(parent);
+				var parent = $(this).parent('tr');
+				var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
+				if(con_id){
+					var count = 0;
+					make_payments_table.rows().nodes().each(function(index) {
+						var row = make_payments_table.row(index);
+						var consolidation_id = $(row.node()).attr('consolidation_id');
+						if(con_id == consolidation_id){
+							if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+								var parent = $(row.node());
+
+								calculation(parent);
+								if(count > 0){
+									row.select();
+								}
+								count++;
+							}else{
+								var parent = $(row.node());
+
+								calculation(parent);
+								if(count > 0){
+									row.deselect();
+								}
+								count++;
+							}
+						}
+
+					});
+
+				}else{
+					calculation(parent);
+				}
+
 			});
 
 			$('#make_payments #make_payments_form').bind('submit', function(e) {
