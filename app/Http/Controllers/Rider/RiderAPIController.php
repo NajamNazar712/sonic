@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
@@ -695,5 +696,66 @@ class RiderAPIController extends Controller {
             return response()->json(['status' => 0, 'message' => 'Delivery Note Is Assigned', 'information' => $information]);
         }
         return response()->json(['status' => 1, 'message' => 'No Delivery Note Assigned']);
+    }
+
+    public function crm_comment_add(Request $request){
+        $rules = [
+            'crm_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:crm_requests,id'],
+            'comment' => ['required', 'between:0,190'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else{
+            $rider_id = $request->rider_id;
+//            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+            $comment = new CrmComments();
+            $comment->crm_request_id = $request->crm_request_id;
+            $comment->comment_by_id = $rider_id;
+            $comment->comment_by = 2;
+            $comment->comment_type = 2;
+            $comment->comment = $request->comment;
+//            $comment->created_at = $added_at;
+            $comment->save();
+            return response()->json(['status' => 0, 'message' => 'Comment added Successfully']);
+        }
+    }
+
+    public function delivery_action_log(Request $request){
+        $rules = [
+            'actions' => ['required', 'array', 'min:1'],
+            'actions.*.logged_at' => ['required'],
+            'actions.*.type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_actions,id'],
+            'actions.*.delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
+            'actions.*.shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $rider_id = $request->rider_id;
+
+            foreach ($request->actions as $action) {
+                $rider_delivery_action_log = new RiderDeliveryActionLog();
+
+                $rider_delivery_action_log->logged_at = Carbon::createFromTimestampMs($action['logged_at'])->toDateTimeString();
+                $rider_delivery_action_log->type_id = $action['type_id'];
+                $rider_delivery_action_log->delivery_note_id = $action['delivery_note_id'];
+                $rider_delivery_action_log->shipment_id = $action['shipment_id'];
+
+                $rider_delivery_action_log->save();
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Delivery Action Log(s) Successfully']);
+        }
     }
 }
