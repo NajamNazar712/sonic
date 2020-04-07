@@ -1149,7 +1149,12 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                     ';
                     }
-
+                    if($shipment->booking_type_id == 3){
+                        $table_start .= ' <tr>
+                                <td rowspan="3" class="color primary border twice-top twice-bottom twice-right"><strong>Try & Buy Fees</strong></td>
+                                <td rowspan="5" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->try_and_buy_charges . '</td>
+                              </tr>';
+                    }
                     if ($type != 'pdf') {
                         $table_end = '
                               <tr>
