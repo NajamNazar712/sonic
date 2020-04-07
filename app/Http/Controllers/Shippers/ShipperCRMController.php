@@ -224,7 +224,7 @@ class ShipperCRMController extends Controller
             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                 $shipment_ids = explode(',', $request->input('shipment_ids'));
             }
-            if(!empty($shipment_ids)){
+            if(count($shipment_ids) > 0){
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
