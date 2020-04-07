@@ -2166,7 +2166,7 @@ class ReturnController extends Controller
                                 <td>' . $shipment->pickup_address->poc . '</td>
                                 <td>' . $shipment->pickup_address->phone . '</td>
                                 <td>' . $shipment->pickup_address->pickup_address . '</td>
-                                <td>' . $shipment->items->sum('quantity') . '</td>
+                                <td>' . $shipment->items->where('bought', 0)->sum('quantity') . '</td>
                     ';
 
                         if ($shipment->booking_type_id != 4) {
