@@ -1149,12 +1149,7 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                     ';
                     }
-                    if($shipment->booking_type_id == 3){
-                        $table_start .= ' <tr>
-                                <td rowspan="3" class="color primary border twice-top twice-bottom twice-right"><strong>Try & Buy Fees</strong></td>
-                                <td rowspan="5" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->try_and_buy_charges . '</td>
-                              </tr>';
-                    }
+
                     if ($type != 'pdf') {
                         $table_end = '
                               <tr>
@@ -1320,13 +1315,14 @@ class ShipperShipmentBookController extends Controller
                         $shipment_details .= $table_end;
                     } else if ($shipment->booking_type_id == 3) {
                         $shipment_details .= $table_start;
+
                         $item_quantity = 0;
                         foreach ($shipment->items as $item) {
                             $item_quantity += $item->quantity;
                         }
                         $shipment_details .= '
                               <tr>
-                                <td rowspan="1" class="align-middle color primary border twice-top twice-bottom"><strong>Try & But Products</strong></td>
+                                <td rowspan="1" class="align-middle color primary border twice-top twice-bottom"><strong>Try & Buy Products</strong></td>
                                 <td class="color secondary border twice-top"><strong>Products</strong></td>
                                 <td colspan="2" class="border twice-top">' . count($shipment->items) . '</td>
                                 <td class="color secondary border twice-top"><strong>Quantity</strong></td>
@@ -1334,8 +1330,12 @@ class ShipperShipmentBookController extends Controller
                                 <td colspan="4" class=""></td>
                               </tr>
                         ';
-
+                        $shipment_details .= ' <tr>
+                                <td colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Try & Buy Fees</strong></td>
+                                <td colspan="6" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->try_and_buy_charges . '</td>
+                              </tr>';
                         $shipment_details .= $table_end;
+
                     }
 
                     if ($shipment->user->logo_status) {
