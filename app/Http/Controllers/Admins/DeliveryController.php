@@ -1157,7 +1157,19 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering'])
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.rider_status_id IS NOT NULL)'));
+            })
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where('sjl.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sj.rider_status_id')
+            ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sj.rider_status_reason_id')
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering', 'sj.rider_status_id as rider_status_id', 'sj.rider_status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -1236,13 +1248,37 @@ class DeliveryController extends Controller
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
                 $drops = '';
                 foreach ($statuses as $status) {
-                    $drops .= '<option value="' . $status->id . '">' . $status->name . '</option>';
+                    if($status->id == $deliveries->rider_status_id){
+                        $drops .= '<option value="' . $status->id . '" selected="selected">' . $status->name . '</option>';
+                    }
+                    else{
+                        $drops .= '<option value="' . $status->id . '">' . $status->name . '</option>';
+                    }
                 }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop[' . $deliveries->shId . ']" >' . $drops . '</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop[' . $deliveries->shId . ']" id="statusDrop_' . $deliveries->shId . '">' . $drops . '</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop[' . $deliveries->shId . ']" ></select>';
+                if($deliveries->rider_status_reason_id != null){
+                    if($deliveries->nsa_osa_status == 1){
+                        $reasons = ShipmentStatus::find($deliveries->rider_status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
+                    }else{
+                        $reasons = ShipmentStatus::find($deliveries->rider_status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+                    }
+                    $drops = '';
+                    foreach($reasons as $reason){
+                        if($reason->id == $deliveries->rider_status_reason_id){
+                            $drops .= '<option value="' . $reason->id . '" selected="selected">' . $reason->name . '</option>';
+                        }
+                        else{
+                            $drops .= '<option value="' . $reason->id . '">' . $reason->name . '</option>';
+                        }
+                    }
+                    $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop[' . $deliveries->shId . ']" id="reasonDrop_' . $deliveries->shId . '">' . $drops . '</select>';
+                }
+                else{
+                    $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop[' . $deliveries->shId . ']" id="reasonDrop_' . $deliveries->shId . '"></select>';
+                }
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {

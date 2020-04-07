@@ -1,7 +1,6 @@
 
 @extends('admin.layout.master')
 @section('title','Receive Deliveries')
-
 @section('content')
     <h1 class="mb-1">
         Receive Deliveries(Delivery Note: {{str_pad($delivery_note_id, 6, '0', STR_PAD_LEFT)}})
@@ -55,6 +54,8 @@
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
+                            <th class="border-primary border-darken-1">Rider Status</th>
+                            <th class="border-primary border-darken-1">Rider Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Address</th>
@@ -659,6 +660,8 @@
                     {data:'collection_amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status form-group statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason form-group reasonSelect',orderable: false, searchable: false},
+                    {data:'rider_status',name: 'rss.name', class: 'align-middle status form-group rider_status',orderable: false, searchable: false},
+                    {data:'rider_reason',name: 'rssr.name', class: 'align-middle reason form-group rider_reason',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
@@ -678,18 +681,31 @@
                     }
                 },
                 drawCallback: function (settings) {
-
-                    $(".reasonDrop").prepend('<option value="" selected="selected"></option>').select2({
-                        placeholder: "Select a Reason",
-                        width:'100%'
-                    });
-                    $(".statusDrop").prepend('<option value="" selected="selected"></option>').select2({
-                        placeholder: "Select a Status",
-                        width:'100%'
-                    });
                     var api = new $.fn.dataTable.Api( settings );
                     var data = api.rows( {page:'current'} ).data();
                     $.each(data,function (key,value) {
+                        if(value.rider_status_id == null){
+                            $("#statusDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                placeholder: "Select a Status",
+                                width:'100%'
+                            });
+
+                            $("#reasonDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                placeholder: "Select a Reason",
+                                width:'100%'
+                            });
+                        }
+                        else{
+                            $("#statusDrop_"+value.shId).select2({
+                                placeholder: "Select a Status",
+                                width:'100%'
+                            });
+                            $("#reasonDrop_"+value.shId).select2({
+                                placeholder: "Select a Reason",
+                                width:'100%'
+                            });
+                            $('#statusSubmit').removeAttr('disabled');
+                        }
                         if(shipment_status.length !== 0){
                             $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
                         }
