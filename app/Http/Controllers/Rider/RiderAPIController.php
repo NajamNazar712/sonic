@@ -730,8 +730,8 @@ class RiderAPIController extends Controller {
             'actions' => ['required', 'array', 'min:1'],
             'actions.*.logged_at' => ['required'],
             'actions.*.type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_actions,id'],
-            'actions.*.pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_notes,id'],
-            'actions.*.pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_requests,id'],
+            'actions.*.delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
+            'actions.*.shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -745,17 +745,17 @@ class RiderAPIController extends Controller {
             $rider_id = $request->rider_id;
 
             foreach ($request->actions as $action) {
-                $rider_pickup_action_log = new RiderPickupActionLog();
+                $rider_delivery_action_log = new RiderDeliveryActionLog();
 
-                $rider_pickup_action_log->logged_at = Carbon::createFromTimestampMs($action['logged_at'])->toDateTimeString();
-                $rider_pickup_action_log->type_id = $action['type_id'];
-                $rider_pickup_action_log->pickup_note_id = $action['pickup_note_id'];
-                $rider_pickup_action_log->pickup_request_id = $action['pickup_request_id'];
+                $rider_delivery_action_log->logged_at = Carbon::createFromTimestampMs($action['logged_at'])->toDateTimeString();
+                $rider_delivery_action_log->type_id = $action['type_id'];
+                $rider_delivery_action_log->delivery_note_id = $action['delivery_note_id'];
+                $rider_delivery_action_log->shipment_id = $action['shipment_id'];
 
-                $rider_pickup_action_log->save();
+                $rider_delivery_action_log->save();
             }
 
-            return response()->json(['status' => 0, 'message' => 'Pickup Action Log(s) Successfully']);
+            return response()->json(['status' => 0, 'message' => 'Delivery Action Log(s) Successfully']);
         }
     }
 }
