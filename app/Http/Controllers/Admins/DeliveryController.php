@@ -1169,7 +1169,7 @@ class DeliveryController extends Controller
             })
             ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sj.rider_status_id')
             ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sj.rider_status_reason_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering', 'sj.rider_status_id as rider_status_id', 'sj.rider_status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering', 'sj.rider_status_id as rider_status_id', 'sj.rider_status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.rider_status_id as latest_rider_status_id'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -1248,8 +1248,13 @@ class DeliveryController extends Controller
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
                 $drops = '';
                 foreach ($statuses as $status) {
-                    if($status->id == $deliveries->rider_status_id){
-                        $drops .= '<option value="' . $status->id . '" selected="selected">' . $status->name . '</option>';
+                    if($deliveries->rider_status_reason_id != null && $deliveries->latest_rider_status_id != null){
+                        if($status->id == $deliveries->rider_status_id){
+                            $drops .= '<option value="' . $status->id . '" selected="selected">' . $status->name . '</option>';
+                        }
+                        else{
+                            $drops .= '<option value="' . $status->id . '">' . $status->name . '</option>';
+                        }
                     }
                     else{
                         $drops .= '<option value="' . $status->id . '">' . $status->name . '</option>';
@@ -1259,7 +1264,7 @@ class DeliveryController extends Controller
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                if($deliveries->rider_status_reason_id != null){
+                if($deliveries->rider_status_reason_id != null && $deliveries->latest_rider_status_id != null){
                     if($deliveries->nsa_osa_status == 1){
                         $reasons = ShipmentStatus::find($deliveries->rider_status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
                     }else{
@@ -1891,7 +1896,14 @@ class DeliveryController extends Controller
                     ->where('rrb.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering'])
+            ->leftJoin('shipments_journey as sjr', function ($join) {
+                $join->on('sjr.shipment_id', '=', 'shipments.id')
+                    ->where('sjr.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.rider_status_id IS NOT NULL)'));
+            })
+            ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sjr.rider_status_id')
+            ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sjr.rider_status_reason_id')
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 

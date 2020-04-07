@@ -684,18 +684,7 @@
                     var api = new $.fn.dataTable.Api( settings );
                     var data = api.rows( {page:'current'} ).data();
                     $.each(data,function (key,value) {
-                        if(value.rider_status_id == null){
-                            $("#statusDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
-                                placeholder: "Select a Status",
-                                width:'100%'
-                            });
-
-                            $("#reasonDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
-                                placeholder: "Select a Reason",
-                                width:'100%'
-                            });
-                        }
-                        else{
+                        if(value.rider_status_id != null && value.latest_rider_status_id != null ){
                             $("#statusDrop_"+value.shId).select2({
                                 placeholder: "Select a Status",
                                 width:'100%'
@@ -705,6 +694,17 @@
                                 width:'100%'
                             });
                             $('#statusSubmit').removeAttr('disabled');
+                        }
+                        else{
+                            $("#statusDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                placeholder: "Select a Status",
+                                width:'100%'
+                            });
+
+                            $("#reasonDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                placeholder: "Select a Reason",
+                                width:'100%'
+                            });
                         }
                         if(shipment_status.length !== 0){
                             $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
