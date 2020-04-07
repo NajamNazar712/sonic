@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRiderDeliveryActionLogsTable extends Migration
+class CreateDeliveryActionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,10 @@ class CreateRiderDeliveryActionLogsTable extends Migration
      */
     public function up()
     {
-        Schema::create('rider_delivery_action_logs', function (Blueprint $table) {
+        Schema::create('delivery_actions', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('name');
             $table->timestamps();
-            $table->timestamp('logged_at');
-            $table->integer('type_id');
-            $table->integer('delivery_note_id');
-            $table->integer('shipment_id');
         });
     }
 
@@ -30,6 +27,6 @@ class CreateRiderDeliveryActionLogsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rider_delivery_action_logs');
+        Schema::dropIfExists('delivery_actions');
     }
 }
