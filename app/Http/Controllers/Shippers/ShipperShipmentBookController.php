@@ -87,6 +87,28 @@ class ShipperShipmentBookController extends Controller
     }
 
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges) {
+
+        //Existing Coordinates
+        $coordinates = Shipment::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+                $sub_query->where('consignee_phone_number_1', $consignee_phone_number_1)
+                    ->orwhere('consignee_phone_number_2', $consignee_phone_number_1)
+                    ->orwhere('consignee_phone_number_1', $consignee_phone_number_2)
+                    ->orwhere(function ($sub_sub_query) use ($consignee_phone_number_2) {
+                        $sub_sub_query->whereNotNull('consignee_phone_number_2')
+                            ->where('consignee_phone_number_2', $consignee_phone_number_2);
+                    });
+            })->whereNotNull('lat')->whereNotNull('long');
+        if($coordinates->exists()){
+            $coordinates = $coordinates->first();
+            $lat = $coordinates->lat;
+            $long = $coordinates->long;
+        }
+        else{
+            $lat = NULL;
+            $long = NULL;
+        }
+        //Existing Coordinates
+
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -118,6 +140,9 @@ class ShipperShipmentBookController extends Controller
         $shipment->consignee_status_id = 1;
 
         $shipment->try_and_buy_charges = $try_and_buy_charges;
+
+        $shipment->lat = $lat;
+        $shipment->long = $long;
 
 
         $shipment->booked_by = session('user_type');
@@ -1894,6 +1919,27 @@ class ShipperShipmentBookController extends Controller
 
     static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id) {
 
+        //Existing Coordinates
+        $coordinates = Shipment::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+            $sub_query->where('consignee_phone_number_1', $consignee_phone_number_1)
+                ->orwhere('consignee_phone_number_2', $consignee_phone_number_1)
+                ->orwhere('consignee_phone_number_1', $consignee_phone_number_2)
+                ->orwhere(function ($sub_sub_query) use ($consignee_phone_number_2) {
+                    $sub_sub_query->whereNotNull('consignee_phone_number_2')
+                        ->where('consignee_phone_number_2', $consignee_phone_number_2);
+                });
+        })->whereNotNull('lat')->whereNotNull('long');
+        if($coordinates->exists()){
+            $coordinates = $coordinates->first();
+            $lat = $coordinates->lat;
+            $long = $coordinates->long;
+        }
+        else{
+            $lat = NULL;
+            $long = NULL;
+        }
+        //Existing Coordinates
+
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -1924,6 +1970,10 @@ class ShipperShipmentBookController extends Controller
         $shipment->consignee_status_id = 1;
         $shipment->walk_in_delivery_type_id = $delivery_type_id;
         $shipment->charges_mode_id = $charges_mode_id;
+
+
+        $shipment->lat = $lat;
+        $shipment->long = $long;
 
         $shipment->booked_by = session('user_type');
         $shipment->save();

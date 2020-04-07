@@ -4490,6 +4490,21 @@ class NotificationsController extends Controller
                     }
                 }
             }
+            else if($id == 61){
+                $rider = Rider::find($reference_1_id);
+                $pin = $reference_2_id;
+                if($rider){
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+                    if (strpos($body, '[pin]') !== FALSE) {
+                        $body = str_replace('[pin]', $pin, $body);
+                    }
+
+                    $to = $rider->phone;
+                    self::sms($body, $to);
+                }
+            }
         }
       }
     }

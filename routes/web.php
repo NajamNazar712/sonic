@@ -1609,5 +1609,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('','Admins\AdminShipmentScanningHistoryController@index')->name('index');
         Route::post('details','Admins\AdminShipmentScanningHistoryController@details')->name('details');
     });
+
+    Route::prefix('coordinates')->name('coordinates.')->group(function (){
+        Route::prefix('add')->name('add.')->group(function (){
+            Route::get('','Admins\CoordinatesController@add_index')->name('index');
+            Route::post('submit','Admins\CoordinatesController@add_submit')->name('submit');
+            Route::post('details','Admins\CoordinatesController@shipment_details')->name('shipment_details');
+            Route::post('search','Admins\CoordinatesController@address_search')->name('search.address');
+        });
+    });
 });
 

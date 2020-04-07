@@ -765,14 +765,17 @@
 
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
+				$('#try_and_buy_charges_div').addClass('d-none');
 			}
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
 				$('#try_and_buy').removeClass('d-none');
+				$('#try_and_buy_charges_div').removeClass('d-none');
 				$('#amount').prop('disabled', true);
 			}
 			else{
 				$('#amount').prop('disabled', false);
+				$('#try_and_buy_charges_div').addClass('d-none');
 			}
 
 			$('#select_service_type form #service_type').val(service_type).trigger('change');

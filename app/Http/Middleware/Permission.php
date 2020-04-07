@@ -568,6 +568,11 @@ class Permission
             'scanning_history.index' => 306,
 
             'dashboard.sales.index' => 315,
+
+            'coordinates.add.index' => 324,
+            'coordinates.add.submit' => 324,
+            'coordinates.add.shipment_details' => 324,
+            'coordinates.add.search.address' => 324,
         ],
 
         'shipper' => [

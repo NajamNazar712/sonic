@@ -8082,6 +8082,7 @@ if(session('department_id') == 7){
             'pin'=> bcrypt($request->pin)
         ]);
         if($rider){
+            NotificationsController::send(61, $rider->id, $request->pin);
             return redirect()->back()->with('success','Rider added successfully');
         }
 
@@ -8136,6 +8137,8 @@ if(session('department_id') == 7){
         }
         if($request->pin != '') {
             $rider->pin = bcrypt($request->pin);
+
+            NotificationsController::send(61, $rider->id, $request->pin);
         }
 
         $rider->save();
