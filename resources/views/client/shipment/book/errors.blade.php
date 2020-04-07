@@ -194,7 +194,7 @@
                                     <td>{!! Form::text('form[' . $no . '][item_quantity_1]', $ro['item_quantity_1'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['item_insurance_1']))
-                                    <td>{!! Form::select('form[' . $no . '][item_insurance_1]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid item_insurance select2','id'=>'item_insurance_1','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance_1']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][item_insurance_1]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid item_insurance select2','id'=>'item_insurance_1','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance_1a']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][item_insurance_1]', $ro['item_insurance_1'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
