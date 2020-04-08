@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\AdminPickupsController;
 use App\http\Models\WMS\WmsCurrentStock;
 use App\Http\Models\WMS\WmsPendingPicking;
 use App\Http\Models\WMS\WmsShipmentProduct;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\Admin\GlobalSettings;
@@ -35,23 +35,32 @@ class AdminShipmentCancelController extends Controller
     }
 
     static public function cancel() {
-        $settings = GlobalSettings::where('type', 'shipment_cancellation_cut_off_days')->first();
+        $active_users = User::where('status', 3)->get();
+        if(count($active_users)){
+            foreach ($active_users as $user){
+                if($user->auto_shipment_cancellation_days == null){
+                    $settings = GlobalSettings::where('type', 'shipment_cancellation_cut_off_days')->first();
 
-        $days = $settings->setting_value;
+                    $days = $settings->setting_value;
 
-        $date = Carbon::now()->subDays($days);
+                    $date = Carbon::now()->subDays($days);
+                }
+                else{
+                    $days = $user->auto_shipment_cancellation_days;
+                    $date = Carbon::now()->subDays($days);
+                }
+                $shipments = Shipment::where('shipper_status_id', 1)->where('user_id', $user->id)->where('created_at', '<', $date)->groupBy('id');
 
-        $shipments = Shipment::where('shipper_status_id', 1)->where('created_at', '<', $date);
+                if ($shipments->exists()) {
+                    foreach ($shipments->get() as $shipment) {
+                        $shipment->shipper_status_id = 17;
+                        $shipment->consignee_status_id = 17;
+                        $shipment->save();
 
-        if ($shipments->exists()) {
-            foreach ($shipments->get() as $shipment) {
-                $shipment->shipper_status_id = 17;
-                $shipment->consignee_status_id = 17;
-                $shipment->save();
-
-                AdminPickupsController::cancel($shipment->id);
-
-                ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
+                        AdminPickupsController::cancel($shipment->id);
+                        ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
+                    }
+                }
             }
         }
     }
@@ -213,6 +222,27 @@ class AdminShipmentCancelController extends Controller
         }
 
         return ['status' => 0, 'success' => 'Shipment(s) has been Reverted'];
+    }
+
+
+    static public function auto_shipment_cancel_days(Request $request)
+    {
+        $user_id = $request->shipper_id;
+        $days = $request->days;
+        $user = User::find($user_id);
+        if($user){
+            if($days > 0 && $days != null){
+                $user->auto_shipment_cancellation_days = $days;
+                $user->save();
+                return response()->json(['status' => 1, 'success' => 'Auto shipment cancellation days updated successfully for ' . $user->name]);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Invalid days']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Invalid Shipper']);
+        }
     }
 
 }

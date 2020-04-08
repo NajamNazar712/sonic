@@ -107,16 +107,16 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="AccountDisableDaysModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AccountDisableDaysModal"
+    <div class="modal fade text-left" id="ShipmentCancellationDaysModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ShipmentCancellationDaysModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Auto Account Disable Days</h4>
+                    <h4 class="modal-title" id="">Auto Shipment Cancel Days</h4>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="shipper_id">
-                    <input type="text" class="form-control disable_days" name="disable_days" id="disable_days" placeholder="Days*" value="">
+                    <input type="text" class="form-control cancellation_days" name="cancellation_days" id="cancellation_days" placeholder="Days*" value="">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="accountDisableDaysSubmit">Submit</button>
@@ -171,7 +171,7 @@
         $('body').on('change','#search_iban',function() {
             $(this).val($(this).val().trim());
         });
-        $('.disable_days').inputmask({
+        $('.cancellation_days').inputmask({
             'alias': 'integer',
             'allowMinus': false,
             'allowPlus': false,
@@ -669,17 +669,17 @@
             }
         });
 
-        $('body').on('click','button.disable_days_button',function () {
+        $('body').on('click','button.shipment_days_button',function () {
             var id = $(this).parents('tr').attr('id');
-            var days = table.row($(this).parents('tr')).data().auto_account_disabled_days;
+            var days = table.row($(this).parents('tr')).data().auto_shipment_cancellation_days;
             $('#shipper_id').val(id);
-            $('#disable_days').val(days);
-            $('#AccountDisableDaysModal').modal('show');
+            $('#cancellation_days').val(days);
+            $('#ShipmentCancellationDaysModal').modal('show');
         });
 
         $('#accountDisableDaysSubmit').on('click',function () {
             var shipper = $('#shipper_id').val();
-            var days = parseInt($('#disable_days').val());
+            var days = parseInt($('#cancellation_days').val());
             if(days){
                 swal({
                     title: 'Are You Sure?',
@@ -705,7 +705,7 @@
                 }).then(function (confirm) {
                     if(confirm){
                         $.ajax({
-                            url: '{!! route('admin.accounts.auto_disable_days.submit') !!}',
+                            url: '{!! route('admin.accounts.auto_shipment_cancel_days.submit') !!}',
                             method: 'POST',
                             data: {
                                 'days': days,
@@ -720,7 +720,7 @@
                                 else {
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
-                                $('#AccountDisableDaysModal').modal('hide');
+                                $('#ShipmentCancellationDaysModal').modal('hide');
                                 table.draw(true);
                             });
                     }

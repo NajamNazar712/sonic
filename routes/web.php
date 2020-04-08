@@ -356,7 +356,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
         Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
-        Route::post('auto_disable_days/submit','Admins\ShipperAccountController@auto_disable_days')->name('auto_disable_days.submit');
+        Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
 
