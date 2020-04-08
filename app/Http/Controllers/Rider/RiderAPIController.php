@@ -598,6 +598,7 @@ class RiderAPIController extends Controller {
             $information['delivery_note_id'] = $delivery_note->id;
             $information['summary'] = array();
             $information['summary']['deliveries'] = $delivery_note->shipments_count;
+            $information['summary']['completed'] = $delivery_note->delivery_note_shipments->where('status', '>', 0)->count();
             $information['summary']['complains'] = 0;
             $information['summary']['requests'] = 0;
 
@@ -646,12 +647,14 @@ class RiderAPIController extends Controller {
                                 $comments = array();
                                 $comments['name'] = Admin::find($crm_request_comment->comment_by_id)->name;
                                 $comments['comment'] = $crm_request_comment->comment;
+                                $comments['type'] = 'Admin';
                                 $comments['commented_at'] = Carbon::parse($crm_request_comment->created_at)->format('Y-m-d H:i:s');
                                 $deliveries['complain']['comments'][] = $comments;
                             }else if($crm_request_comment->comment_by == 2){
                                 $comments = array();
                                 $comments['name'] = Rider::find($crm_request_comment->comment_by_id)->name;
                                 $comments['comment'] = $crm_request_comment->comment;
+                                $comments['type'] = 'Rider';
                                 $comments['commented_at'] = Carbon::parse($crm_request_comment->created_at)->format('Y-m-d H:i:s');
                                 $deliveries['complain']['comments'][] = $comments;
                             }
@@ -661,11 +664,12 @@ class RiderAPIController extends Controller {
                 }else if(CrmRequest::where('shipment_id', $shipment_data->id)->where('case_nature_id', 2)->whereNotIn('status_id', [3,4])->exists()){
                     $information['summary']['requests']++;
                     $deliveries['ordering'] = 2;
+                    $deliveries['request'] = array();
                     $crm_request = CrmRequest::where('shipment_id', $shipment_data->id)->where('case_nature_id', 2)->first();
-                    $deliveries['complain']['id'] = $crm_request->id;
-                    $deliveries['complain']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                    $deliveries['complain']['description'] = $crm_request->description;
-                    $deliveries['complain']['comments'] = array();
+                    $deliveries['request']['id'] = $crm_request->id;
+                    $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
+                    $deliveries['request']['description'] = $crm_request->description;
+                    $deliveries['request']['comments'] = array();
                     $crm_request_comments = $crm_request->comments->where('comment_type', 2);
                     if(count($crm_request_comments) > 0){
                         foreach ($crm_request_comments as $crm_request_comment) {
@@ -673,14 +677,16 @@ class RiderAPIController extends Controller {
                                 $comments = array();
                                 $comments['name'] = Admin::find($crm_request_comment->comment_by_id)->name;
                                 $comments['comment'] = $crm_request_comment->comment;
+                                $comments['type'] = 'Admin';
                                 $comments['commented_at'] = Carbon::parse($crm_request_comment->created_at)->format('Y-m-d H:i:s');
-                                $deliveries['complain']['comments'][] = $comments;
+                                $deliveries['request']['comments'][] = $comments;
                             }else if($crm_request_comment->comment_by == 2){
                                 $comments = array();
                                 $comments['name'] = Rider::find($crm_request_comment->comment_by_id)->name;
                                 $comments['comment'] = $crm_request_comment->comment;
+                                $comments['type'] = 'Rider';
                                 $comments['commented_at'] = Carbon::parse($crm_request_comment->created_at)->format('Y-m-d H:i:s');
-                                $deliveries['complain']['comments'][] = $comments;
+                                $deliveries['request']['comments'][] = $comments;
                             }
                         }
                     }
