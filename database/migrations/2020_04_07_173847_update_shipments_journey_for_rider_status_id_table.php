@@ -16,6 +16,7 @@ class UpdateShipmentsJourneyForRiderStatusIdTable extends Migration
         Schema::table('shipments_journey', function (Blueprint $table) {
             $table->integer('rider_status_reason_id')->after('status_reason_id')->nullable();
             $table->integer('rider_status_id')->after('status_reason_id')->nullable();
+            $table->integer('rider_id')->after('admin_id')->nullable();
         });
     }
 
@@ -29,6 +30,7 @@ class UpdateShipmentsJourneyForRiderStatusIdTable extends Migration
         Schema::table('shipments_journey', function (Blueprint $table) {
             $table->dropColumn('rider_status_reason_id');
             $table->dropColumn('rider_status_id');
+            $table->dropColumn('rider_id');
         });
     }
 }
