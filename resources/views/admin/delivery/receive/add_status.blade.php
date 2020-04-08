@@ -683,17 +683,31 @@
                 drawCallback: function (settings) {
                     var api = new $.fn.dataTable.Api( settings );
                     var data = api.rows( {page:'current'} ).data();
+                    var statuses = [7, 8, 9, 12, 15, 18, 56];
                     $.each(data,function (key,value) {
                         if(value.rider_status_id != null && value.latest_rider_status_id != null ){
-                            $("#statusDrop_"+value.shId).select2({
-                                placeholder: "Select a Status",
-                                width:'100%'
-                            });
-                            $("#reasonDrop_"+value.shId).select2({
-                                placeholder: "Select a Reason",
-                                width:'100%'
-                            });
-                            $('#statusSubmit').removeAttr('disabled');
+                            if(statuses.includes(value.rider_status_id)){
+                                $("#statusDrop_"+value.shId).select2({
+                                    placeholder: "Select a Status",
+                                    width:'100%'
+                                });
+                                $("#reasonDrop_"+value.shId).select2({
+                                    placeholder: "Select a Reason",
+                                    width:'100%'
+                                });
+                                $('#statusSubmit').removeAttr('disabled');
+                            }
+                            else{
+                                $("#statusDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                    placeholder: "Select a Status",
+                                    width:'100%'
+                                });
+
+                                $("#reasonDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                    placeholder: "Select a Reason",
+                                    width:'100%'
+                                });
+                            }
                         }
                         else{
                             $("#statusDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({

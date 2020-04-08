@@ -61,6 +61,7 @@ Route::name('api.')->group(function () {
             Route::prefix('delivery')->name('delivery.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
+                Route::post('delivered', 'Rider\RiderAPIController@shipment_delivered')->name('delivered');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');

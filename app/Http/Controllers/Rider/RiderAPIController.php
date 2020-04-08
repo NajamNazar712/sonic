@@ -6,6 +6,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\RiderDelivery;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -771,12 +772,12 @@ class RiderAPIController extends Controller {
             'added_at' => ['required'],
             'rider_id' => ['required', 'integer', 'digits_between:1,10', 'exists:riders,id'],
             'delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
-            'pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_requests,id'],
             'start_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'start_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
-            'shipments' => ['required', 'integer', 'digits_between:1,10']
+            'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
+            'cnic' => ['nullabe, string, max:255'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -785,6 +786,73 @@ class RiderAPIController extends Controller {
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else{
+
+            $rider_id = $request->rider_id;
+
+            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+
+            if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
+                $shipment = Shipment::find($request->shipment_id);
+
+                $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
+
+                $rider_delivery = new RiderDelivery();
+
+                $rider_delivery->added_at = $added_at;
+                $rider_delivery->delivery_note_id = $request->delivery_note_id;
+                $rider_delivery->shipment_id = $request->shipment_id;
+                $rider_delivery->rider_id = $request->rider_id;
+                $rider_delivery->start_location_latitude = $request->start_location_latitude;
+                $rider_delivery->start_location_longitude = $request->start_location_longitude;
+                $rider_delivery->actual_location_latitude = $request->actual_location_latitude;
+                $rider_delivery->actual_location_longitude = $request->actual_location_longitude;
+                $rider_delivery->rider_status_id = 14;
+                $rider_delivery->delivered_status = 1;
+
+                if($request->has('cnic')){
+                    $rider_delivery->cnic = $request->cnic;
+                }
+
+                if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
+                    $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
+
+                    $rider_delivery->distance_from_start_to_actual = $this->distance($origin, $destination);
+
+                    if ($shipment->lat && $shipment->long) {
+                        $rider_delivery->current_location_latitude = $shipment->lat;
+                        $rider_delivery->current_location_longitude = $shipment->long;
+
+                        $origin = $shipment->lat . ',' . $shipment->long;
+
+                        $distance = $this->distance($origin, $destination);
+
+                        $rider_delivery->distance_from_current_to_actual = $distance;
+                    }
+                    else {
+                        $shipment->lat = $request->actual_location_latitude;
+                        $shipment->long = $request->actual_location_longitude;
+                    }
+                }
+                else {
+                    $rider_delivery->distance_from_start_to_actual = 0;
+
+                    if ($shipment->lat && $shipment->long) {
+                        $rider_delivery->current_location_latitude = $shipment->lat;
+                        $rider_delivery->current_location_longitude = $shipment->long;
+                        $rider_delivery->distance_from_current_to_actual = 0;
+                    }
+                }
+                $shipment->shipper_status_id = 14;
+                $shipment->consignee_status_id = 14;
+                $shipment->save();
+
+                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, 14, $rider_id);
+                $rider_delivery->save();
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Shipment marked as Delivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
         }
     }
 }
