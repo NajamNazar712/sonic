@@ -45,7 +45,9 @@ class ShipperAccountController extends Controller
                         $days = $settings->setting_value;
                         $date = Carbon::now()->subDays($days);
                     }
-                    if($active_user->created_at < $date){
+                    $shipments = Shipment::where('created_at', '>', $date)->where('user_id', $active_user->id)->groupBy('user_id');
+
+                    if(!$shipments->exists()){
                         $active_user->status = 4;
                         $active_user->disable_remarks = 'Auto Disabled after ' . $days . ' Day(s)';
                         $active_user->save();
