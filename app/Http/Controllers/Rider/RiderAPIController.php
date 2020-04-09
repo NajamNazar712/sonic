@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\ConsigneeLocation;
+use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\RiderDelivery;
@@ -599,6 +601,9 @@ class RiderAPIController extends Controller {
             $information['delivery_note_id'] = $delivery_note->id;
             $information['summary'] = array();
             $information['summary']['deliveries'] = $delivery_note->shipments_count;
+            $information['summary']['pending'] = $delivery_note->delivery_note_shipments->where('status', 0)->count();
+            $information['summary']['undelivered'] = $delivery_note->delivery_note_shipments->whereIn('status', 1)->count();
+            $information['summary']['delivered'] = $delivery_note->delivery_note_shipments->whereIn('status', '>', 1)->count();
             $information['summary']['completed'] = $delivery_note->delivery_note_shipments->where('status', '>', 0)->count();
             $information['summary']['complains'] = 0;
             $information['summary']['requests'] = 0;
@@ -608,7 +613,7 @@ class RiderAPIController extends Controller {
             foreach ($delivery_note_shipments as $delivery_note_shipment) {
 
                 $shipment_data = $delivery_note_shipment->shipment;
-
+                $shipment_id = $shipment_data->id;
                 $tracking_number = $shipment_data->tracking_number;
                 $consignee_address = $shipment_data->consignee_address;
                 $consignee_phone = $shipment_data->consignee_phone_number_1;
@@ -630,6 +635,17 @@ class RiderAPIController extends Controller {
                 $deliveries['cod_amount'] = $cod_amount;
                 $deliveries['special_instructions'] = $special_instructions;
                 $deliveries['remarks'] = $remarks;
+                $deliveries['latitude'] = '';
+                $deliveries['longitude'] = '';
+                $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
+                if($shipment_location->exists()){
+                    $shipment_location = $shipment_location->first();
+                    $previous_location_id = $shipment_location->previous_location_id;
+                    $location = ConsigneeLocation::find($previous_location_id);
+                    $deliveries['latitude'] = $location->lat;
+                    $deliveries['longitude'] = $location->long;
+                }
+
 
                 if(CrmRequest::where('shipment_id', $shipment_data->id)->where('case_nature_id', 1)->whereNotIn('status_id', [3,4])->exists()){
                     $information['summary']['complains']++;
