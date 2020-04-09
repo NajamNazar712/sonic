@@ -240,27 +240,34 @@ class RegisterController extends Controller
         }
         $user_phone = NULL;
         $phone_number = User::where('id', '<>', $user_id);
-        $phone_number = $phone_number->where(function ($sub_query) use ($phone1) {
-            $sub_query->where('users.phone',  $phone1);
-        })
-            ->orWhere(function ($sub_query) use ($phone1) {
-                $sub_query->where('users.phone2', $phone1);
+        $phone_number = $phone_number->where(function ($query) use ($phone1) {
+            $query->where(function ($sub_query) use ($phone1) {
+                $sub_query->where('users.phone',  $phone1);
+            })
+                ->orWhere(function ($sub_query) use ($phone1) {
+                    $sub_query->where('users.phone2', $phone1);
+                });
         });
         if($phone_number->exists()){
             $phone_flag = true;
             $user_phone = $phone1;
         }else{
-            $phone_number2 = User::where('id', '<>', $user_id);
-            $phone_number2 = $phone_number2->where(function ($sub_query) use ($phone2) {
-                $sub_query->where('users.phone',  $phone2);
-            })
-                ->orWhere(function ($sub_query) use ($phone2) {
-                    $sub_query->where('users.phone2', $phone2);
-             });
-            if($phone_number2->exists()){
-                $phone_flag = true;
-                $user_phone = $phone2;
+            if($phone2 != null){
+                $phone_number2 = User::where('id', '<>', $user_id);
+                $phone_number2 = $phone_number2->where(function ($query) use ($phone2) {
+                    $query->where(function ($sub_query) use ($phone2) {
+                        $sub_query->where('users.phone',  $phone2);
+                    })
+                        ->orWhere(function ($sub_query) use ($phone2) {
+                            $sub_query->where('users.phone2', $phone2);
+                        });
+                });
+                if($phone_number2->exists()){
+                    $phone_flag = true;
+                    $user_phone = $phone2;
+                }
             }
+
         }
 
         $user_cnic = User::where('id','<>', $user_id)->where('cnic', $cnic);
