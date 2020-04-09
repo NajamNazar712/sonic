@@ -327,7 +327,11 @@ class AdminCRMController extends Controller
         $comment_type = 0;
         if($request->internal_switch == 1){
             $comment_type = 1;
+        }else
+        if($request->internal_switch == 2){
+            $comment_type = 2;
         }
+
         if($comment == null){
             return ['status' => 0, 'error' => 'Comment Not selected!'];
         }

@@ -335,7 +335,7 @@
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-100" placeholder="Type your message" row="4"></textarea>
+                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-2">
                                                             <fieldset
@@ -348,14 +348,23 @@
                                                             </fieldset>
                                                             @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))
                                                                 <fieldset
-                                                                        class="form-group position-relative has-icon-left m-0">
+                                                                        class="form-group position-relative has-icon-left mb-1">
                                                                     <button id="chat_send" type="button"
-                                                                            class="btn btn-block btn-default chat_send" to="0">
+                                                                            class="btn btn-block btn-outline-primary chat_send" to="0">
                                                                         <i class="la la-paper-plane-o d-lg-none"></i>
                                                                         <span class="">Shipper</span>
                                                                     </button>
                                                                 </fieldset>
                                                             @endif
+                                                            <fieldset
+                                                                    class="form-group has-icon-left">
+                                                                <button id="chat_send" type="button"
+                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i
+                                                                            class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Rider</span>
+                                                                </button>
+                                                            </fieldset>
+
                                                         </div>
                                                     </form>
                                                 </section>
@@ -379,7 +388,7 @@
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-100" placeholder="Type your message"></textarea>
+                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-2">
                                                             <fieldset
@@ -394,12 +403,20 @@
                                                             <fieldset
                                                                     class="form-group position-relative has-icon-left m-0">
                                                                 <button id="chat_send" type="button"
-                                                                        class="btn btn-block btn-default chat_send" to="0">
+                                                                        class="btn btn-block btn-outline-primary chat_send" to="0">
                                                                     <i class="la la-paper-plane-o d-lg-none"></i>
                                                                     <span class="">Shipper</span>
                                                                 </button>
                                                             </fieldset>
                                                             @endif
+                                                            <fieldset
+                                                                    class="form-group has-icon-left">
+                                                                <button id="chat_send" type="button"
+                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i
+                                                                            class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Rider</span>
+                                                                </button>
+                                                            </fieldset>
                                                         </div>
                                                     </form>
                                                 </section>
@@ -1195,6 +1212,8 @@
                 var internal_class = '';
                 if (internal_switch) {
                     internal_class = 'internal';
+                }else if(internal_switch == 2){
+                    internal_class = 'rider';
                 } else {
                     internal_class = '';
                 }
