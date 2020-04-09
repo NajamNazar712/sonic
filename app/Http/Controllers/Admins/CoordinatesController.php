@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\ConsigneeLocation;
+use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -21,12 +23,39 @@ class CoordinatesController extends Controller
     }
     public function add_submit(Request $request){
         $shipment = Shipment::find($request->shipment_id);
+        $consignee_phone_number_1 = $shipment->consignee_phone_number_1;
+        $consignee_phone_number_2 = $shipment->consignee_phone_number_2;
+        $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+            $sub_query->where('phone_number', $consignee_phone_number_1)
+                ->orwhere('phone_number', $consignee_phone_number_2);
+        })->where('address', $shipment->consignee_address)->where('lat', $request->lat)->where('long', $request->long);
 
-        $shipment->lat = $request->lat;
-        $shipment->long = $request->long;
+        if($coordinates->exists()){
+            $new_coordinates = $coordinates->first();
+        }
+        else{
+            $new_coordinates = new ConsigneeLocation();
+            $new_coordinates->phone_number = $consignee_phone_number_1;
+            $new_coordinates->address = $shipment->consignee_address;
+            $new_coordinates->lat = $request->lat;
+            $new_coordinates->long = $request->long;
+            $new_coordinates->save();
+        }
 
-        $shipment->save();
-
+        $shipment_coordinates = ConsigneeShipmentLocation::where('shipment_id', $shipment->id);
+        if($shipment_coordinates->exists()){
+            $new_shipment_coordinates = $shipment_coordinates->first();
+            $new_shipment_coordinates->previous_location_id = $new_coordinates->id;
+            $new_shipment_coordinates->current_location_id = NULL;
+            $new_shipment_coordinates->save();
+        }
+        else{
+            $new_shipment_coordinates = new ConsigneeShipmentLocation();
+            $new_shipment_coordinates->shipment_id = $shipment->id;
+            $new_shipment_coordinates->previous_location_id = $new_coordinates->id;
+            $new_shipment_coordinates->current_location_id = NULL;
+            $new_shipment_coordinates->save();
+        }
         return redirect()->back()->with('success', 'Shipment\'s Latitude Longitude updated successfully!');
     }
     public function shipment_details(Request $request) {
@@ -73,10 +102,10 @@ class CoordinatesController extends Controller
     }
 
     public function address_search(Request $request){
-        $shipment = Shipment::where('consignee_address', 'like', '%' . $request->address . '%')->whereNotNull('lat')->whereNotNull('long');
-        if($shipment->exists()){
-            $shipment = $shipment->first();
-            return response()->json(['status' => 0, 'success' => 'Address Found', 'lat' => $shipment->lat, 'long' => $shipment->long]);
+        $coordinates = ConsigneeLocation::where('address', 'like', '%' . $request->address . '%');
+        if($coordinates->exists()){
+            $coordinates = $coordinates->get();
+            return response()->json(['status' => 0, 'success' => 'Address Found', 'coordinates' => $coordinates]);
         }
         else {
             return response()->json(['status' => 1, 'error' => 'Address not found']);
