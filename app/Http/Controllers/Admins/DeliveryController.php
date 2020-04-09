@@ -23,6 +23,8 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\ConsigneeLocation;
+use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\InterceptReBookRequest;
@@ -33,6 +35,7 @@ use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider;
+use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentInformationLog;
@@ -1903,7 +1906,15 @@ class DeliveryController extends Controller
             })
             ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sjr.rider_status_id')
             ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sjr.rider_status_reason_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason'])
+            ->leftJoin('rider_deliveries as rds', function ($join) {
+                $join->on('rds.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where('rds.id', '=',
+                        DB::raw('(select max(id) from rider_deliveries where rider_deliveries.delivery_note_id = delivery_notes.id and rider_deliveries.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('consignee_shipment_locations as csl', 'csl.shipment_id', '=', 'shipments.id')
+            ->leftjoin('consignee_locations as pcls', 'pcls.id', '=', 'csl.previous_location_id')
+            ->leftjoin('consignee_locations as ccls', 'ccls.id', '=', 'csl.current_location_id')
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -2029,6 +2040,56 @@ class DeliveryController extends Controller
                  $open_box_checkbox = '<input type="checkbox" class="open_box" name="open_box[' . $deliveries->shId . ']">';
                      return $open_box_checkbox;
             })
+            ->addColumn('confirm_location', function ($deliveries){
+                $delivered_statuses = array(14, 16, 30, 36, 37);
+                if (!in_array($deliveries->current_status_id, $delivered_statuses)) {
+                    return '';
+                } else {
+                    $lat = null;
+                    $long = null;
+                    if($deliveries->actual_location_latitude != null && $deliveries->actual_location_longitude != null){
+                        $lat = $deliveries->actual_location_latitude;
+                        $long = $deliveries->actual_location_longitude;
+                    }
+                    else if($deliveries->previous_location_id != null){
+                        $lat = $deliveries->plat;
+                        $long = $deliveries->plong;
+                    }
+                    if($lat != null && $long != null) {
+                        $confirm_location_checkbox = '<input type="checkbox" class="confirm_location" name="confirm_location[' . $deliveries->shId . ']">';
+                    }
+                    else{
+                        return '';
+                    }
+                    return $confirm_location_checkbox;
+                }
+            })
+            ->addColumn('rider_location', function ($deliveries){
+                $location = '<div class="text-center">';
+                if($deliveries->actual_location_latitude != null && $deliveries->actual_location_longitude != null){
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $deliveries->actual_location_latitude . ',' . $deliveries->actual_location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    return $location;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('existing_location', function ($deliveries){
+                $lat = null;
+                $long = null;
+                if($deliveries->previous_location_id != null){
+                    $lat = $deliveries->plat;
+                    $long = $deliveries->plong;
+                }
+                $location = '<div class="text-center">';
+                if($lat != null && $long != null){
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $lat . ',' . $long . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    return $location;
+                }
+                else{
+                    return '-';
+                }
+            })
             ->make(true);
     }
 
@@ -2070,7 +2131,9 @@ class DeliveryController extends Controller
                     $status_drop = "status_drop.$shipment";
                     $reasonId = "reason_drop.$shipment";
                     $open_box_shipment = "open_box.$shipment";
+                    $confirm_location_shipment = "confirm_location.$shipment";
                     $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
+
                     if($verify_fake){
                         if ($request->has($fake)) {
                             $verify_fake->fake_status = 1;
@@ -2093,6 +2156,44 @@ class DeliveryController extends Controller
                             }
                         
                         
+                    }
+
+                    if($request->has($confirm_location_shipment)){
+                        $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
+                        $coordinates_shipment = Shipment::find($shipment);
+                        $consignee_phone_number_1 = $coordinates_shipment->consignee_phone_number_1;
+                        $consignee_phone_number_2 = $coordinates_shipment->consignee_phone_number_2;
+                        $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+                            $sub_query->where('phone_number', $consignee_phone_number_1)
+                                ->orwhere('phone_number', $consignee_phone_number_2);
+                        })->where('address', $coordinates_shipment->consignee_address);
+                        if($coordinates->exists()){
+                            $coordinates = $coordinates->latest()->first();
+                            $coordinates->lat = $rider_delivery->actual_location_latitude;
+                            $coordinates->long = $rider_delivery->actual_location_longitude;
+                            $coordinates->save();
+                        }
+                        else{
+                            $coordinates = new ConsigneeLocation();
+                            $coordinates->phone_number = $consignee_phone_number_1;
+                            $coordinates->address = $coordinates_shipment->consignee_address;
+                            $coordinates->lat = $rider_delivery->actual_location_latitude;
+                            $coordinates->long = $rider_delivery->actual_location_longitude;
+                            $coordinates->save();
+                        }
+                        $existing_shipment_coordinates = ConsigneeShipmentLocation::where('shipment_id', $shipment);
+                        if($existing_shipment_coordinates->exists()){
+                            $existing_shipment_coordinates = $existing_shipment_coordinates->first();
+                            $existing_shipment_coordinates->current_location_id = $coordinates->id;
+                            $existing_shipment_coordinates->save();
+                        }
+                        else{
+                            $existing_shipment_coordinates = new ConsigneeShipmentLocation();
+                            $existing_shipment_coordinates->shipment_id = $shipment;
+                            $existing_shipment_coordinates->previous_location_id = null;
+                            $existing_shipment_coordinates->current_location_id = $coordinates->id;
+                            $existing_shipment_coordinates->save();
+                        }
                     }
                     if (!$in_new_delivery_note) {
                         if (!in_array($shipper_status_details->shipper_status_id, $return_status_array)) {
