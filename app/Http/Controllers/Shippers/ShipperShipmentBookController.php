@@ -138,7 +138,7 @@ class ShipperShipmentBookController extends Controller
         $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
             $sub_query->where('phone_number', $consignee_phone_number_1)
                 ->orwhere('phone_number', $consignee_phone_number_2);
-        });
+        })->where('address', $consignee_address);
         if($coordinates->exists()){
             $coordinates = $coordinates->latest()->first();
 
