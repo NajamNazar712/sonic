@@ -2041,8 +2041,7 @@ class DeliveryController extends Controller
                      return $open_box_checkbox;
             })
             ->addColumn('confirm_location', function ($deliveries){
-                $delivered_statuses = array(14, 16, 30, 36, 37);
-                if (!in_array($deliveries->current_status_id, $delivered_statuses)) {
+                if ($deliveries->current_status_id != 14) {
                     return '';
                 } else {
                     $lat = null;
@@ -2158,41 +2157,51 @@ class DeliveryController extends Controller
                         
                     }
 
-                    if($request->has($confirm_location_shipment)){
-                        $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
-                        $coordinates_shipment = Shipment::find($shipment);
-                        $consignee_phone_number_1 = $coordinates_shipment->consignee_phone_number_1;
-                        $consignee_phone_number_2 = $coordinates_shipment->consignee_phone_number_2;
-                        $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
-                            $sub_query->where('phone_number', $consignee_phone_number_1)
-                                ->orwhere('phone_number', $consignee_phone_number_2);
-                        })->where('address', $coordinates_shipment->consignee_address);
-                        if($coordinates->exists()){
-                            $coordinates = $coordinates->latest()->first();
-                            $coordinates->lat = $rider_delivery->actual_location_latitude;
-                            $coordinates->long = $rider_delivery->actual_location_longitude;
-                            $coordinates->save();
+                    if ($request->has($status_drop) && $request->status_drop[$shipment] == 14) {
+                        if ($request->has($confirm_location_shipment)) {
+                            $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
+                            $coordinates_shipment = Shipment::find($shipment);
+                            $consignee_phone_number_1 = $coordinates_shipment->consignee_phone_number_1;
+                            $consignee_phone_number_2 = $coordinates_shipment->consignee_phone_number_2;
+                            $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+                                $sub_query->where('phone_number', $consignee_phone_number_1)
+                                    ->orwhere('phone_number', $consignee_phone_number_2);
+                            })->where('address', $coordinates_shipment->consignee_address);
+                            if ($coordinates->exists()) {
+                                $coordinates = $coordinates->latest()->first();
+                                $coordinates->lat = $rider_delivery->actual_location_latitude;
+                                $coordinates->long = $rider_delivery->actual_location_longitude;
+                                $coordinates->save();
+                            } else {
+                                $coordinates = new ConsigneeLocation();
+                                $coordinates->phone_number = $consignee_phone_number_1;
+                                $coordinates->address = $coordinates_shipment->consignee_address;
+                                $coordinates->lat = $rider_delivery->actual_location_latitude;
+                                $coordinates->long = $rider_delivery->actual_location_longitude;
+                                $coordinates->save();
+                            }
+                            $existing_shipment_coordinates = ConsigneeShipmentLocation::where('shipment_id', $shipment);
+                            if ($existing_shipment_coordinates->exists()) {
+                                $existing_shipment_coordinates = $existing_shipment_coordinates->first();
+                                $existing_shipment_coordinates->current_location_id = $coordinates->id;
+                                $existing_shipment_coordinates->save();
+                            } else {
+                                $existing_shipment_coordinates = new ConsigneeShipmentLocation();
+                                $existing_shipment_coordinates->shipment_id = $shipment;
+                                $existing_shipment_coordinates->previous_location_id = null;
+                                $existing_shipment_coordinates->current_location_id = $coordinates->id;
+                                $existing_shipment_coordinates->save();
+                            }
                         }
                         else{
-                            $coordinates = new ConsigneeLocation();
-                            $coordinates->phone_number = $consignee_phone_number_1;
-                            $coordinates->address = $coordinates_shipment->consignee_address;
-                            $coordinates->lat = $rider_delivery->actual_location_latitude;
-                            $coordinates->long = $rider_delivery->actual_location_longitude;
-                            $coordinates->save();
-                        }
-                        $existing_shipment_coordinates = ConsigneeShipmentLocation::where('shipment_id', $shipment);
-                        if($existing_shipment_coordinates->exists()){
-                            $existing_shipment_coordinates = $existing_shipment_coordinates->first();
-                            $existing_shipment_coordinates->current_location_id = $coordinates->id;
-                            $existing_shipment_coordinates->save();
-                        }
-                        else{
-                            $existing_shipment_coordinates = new ConsigneeShipmentLocation();
-                            $existing_shipment_coordinates->shipment_id = $shipment;
-                            $existing_shipment_coordinates->previous_location_id = null;
-                            $existing_shipment_coordinates->current_location_id = $coordinates->id;
-                            $existing_shipment_coordinates->save();
+                            $existing_shipment_coordinates = ConsigneeShipmentLocation::where('shipment_id', $shipment);
+                            if ($existing_shipment_coordinates->exists()) {
+                                $existing_shipment_coordinates = $existing_shipment_coordinates->first();
+                                if($existing_shipment_coordinates->previous_location_id != null){
+                                    $existing_shipment_coordinates->current_location_id = $existing_shipment_coordinates->previous_location_id;
+                                    $existing_shipment_coordinates->save();
+                                }
+                            }
                         }
                     }
                     if (!$in_new_delivery_note) {
