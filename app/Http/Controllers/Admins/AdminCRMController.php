@@ -354,8 +354,10 @@ class AdminCRMController extends Controller
                 if($comment_details->id > $comment_id){
                     if($comment_details->comment_by == 0){
                         $name = $comment_details->admin->name;
-                    }else if($comment_details->comment_by == 1){
+                    }else if($comment_details->comment_by == 1) {
                         $name = $comment_details->shipper->name;
+                    }else if($comment_details->comment_by == 2 && $comment_details->comment_type == 2){
+                        $name = $comment_details->rider->name;
                     }else{
                         $name = $comment_details->substitute_user->name;
                     }
