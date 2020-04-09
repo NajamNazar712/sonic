@@ -7,10 +7,10 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeLocation;
+use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
-use App\Http\Models\ShipmentConsigneeLocation;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
@@ -142,7 +142,7 @@ class ShipperShipmentBookController extends Controller
         if($coordinates->exists()){
             $coordinates = $coordinates->latest()->first();
 
-            $shipment_coordinates = new ShipmentConsigneeLocation();
+            $shipment_coordinates = new ConsigneeShipmentLocation();
             $shipment_coordinates->shipment_id = $shipment_id;
             $shipment_coordinates->previous_location_id = $coordinates->id;
             $shipment_coordinates->current_location_id = NULL;

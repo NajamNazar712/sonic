@@ -44,6 +44,10 @@
                                     </div>
                                 </div>
                             </form>
+
+                            <div class="row justify-content-center mt-2 d-none" id="coordinates_div">
+                            </div>
+
                             @if (session('role_id') == 1 || in_array(324, session('permissions')))
                                 <form id="add_coordinates_form" class="mb-1 mt-2 d-none" method="POST" action="{{ route('admin.coordinates.add.submit') }}" novalidate="novalidate">
                                     {{ csrf_field() }}
@@ -103,6 +107,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function (form) {
+                    $('#coordinates_div').addClass('d-none');
                     $(form).find('button.search').prop('disabled', true);
 
                     var address = $(form).find('textarea.address').val();
@@ -119,8 +124,28 @@
                         .done(function(data) {
                             if (data.status == 0) {
                                 $(form).find('button.search').prop('disabled', false);
-                                $('#lat').val(data.lat);
-                                $('#long').val(data.long);
+                                coordinates_table = '<div class="col-6">';
+                                coordinates_table += '<table class="table table-sm datatable text-center"><thead>';
+                                coordinates_table += '<tr>';
+                                coordinates_table += '<td><strong>Phone Number</strong></td>';
+                                coordinates_table += '<td><strong>Address</strong></td>';
+                                coordinates_table += '<td><strong>Latitude</strong></td>';
+                                coordinates_table += '<td><strong>Longitude</strong></td>';
+                                coordinates_table += '</tr>';
+                                coordinates_table += '</thead>';
+                                coordinates_table += '<tbody>';
+                                $.each(data.coordinates, function(index, value) {
+                                    coordinates_table += '<tr>';
+                                    coordinates_table += '<td>' + value.phone_number + '</td>';
+                                    coordinates_table += '<td>' + value.address + '</td>';
+                                    coordinates_table += '<td>' + value.lat + '</td>';
+                                    coordinates_table += '<td>' + value.long + '</td>';
+                                    coordinates_table += '</tr>';
+                                });
+                                coordinates_table += '</tbody></table>';
+                                coordinates_table += '</div>';
+                                $('#coordinates_div').html(coordinates_table);
+                                $('#coordinates_div').removeClass('d-none');
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             }
                             else{

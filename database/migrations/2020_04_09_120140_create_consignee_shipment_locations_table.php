@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateShipmentConsigneeLocationsTable extends Migration
+class CreateConsigneeShipmentLocationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateShipmentConsigneeLocationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('shipment_consignee_locations', function (Blueprint $table) {
+        Schema::create('consignee_shipment_locations', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shipment_id');
             $table->integer('previous_location_id')->nullable()->default(NULL);
@@ -29,6 +29,6 @@ class CreateShipmentConsigneeLocationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('shipment_consignee_locations');
+        Schema::dropIfExists('consignee_shipment_locations');
     }
 }
