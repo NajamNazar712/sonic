@@ -6,9 +6,11 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\ConsigneeInfo;
+use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\ShipmentConsigneeLocation;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
@@ -88,26 +90,6 @@ class ShipperShipmentBookController extends Controller
 
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges) {
 
-        //Existing Coordinates
-        $coordinates = Shipment::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
-                $sub_query->where('consignee_phone_number_1', $consignee_phone_number_1)
-                    ->orwhere('consignee_phone_number_2', $consignee_phone_number_1)
-                    ->orwhere('consignee_phone_number_1', $consignee_phone_number_2)
-                    ->orwhere(function ($sub_sub_query) use ($consignee_phone_number_2) {
-                        $sub_sub_query->whereNotNull('consignee_phone_number_2')
-                            ->where('consignee_phone_number_2', $consignee_phone_number_2);
-                    });
-            })->whereNotNull('lat')->whereNotNull('long');
-        if($coordinates->exists()){
-            $coordinates = $coordinates->first();
-            $lat = $coordinates->lat;
-            $long = $coordinates->long;
-        }
-        else{
-            $lat = NULL;
-            $long = NULL;
-        }
-        //Existing Coordinates
 
         $shipment = new Shipment();
 
@@ -141,9 +123,6 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->try_and_buy_charges = $try_and_buy_charges;
 
-        $shipment->lat = $lat;
-        $shipment->long = $long;
-
 
         $shipment->booked_by = session('user_type');
         $shipment->save();
@@ -153,6 +132,23 @@ class ShipperShipmentBookController extends Controller
         AdminPickupsController::generate($shipment_id);
 
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
+
+
+        //Existing Coordinates
+        $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+            $sub_query->where('phone_number', $consignee_phone_number_1)
+                ->orwhere('phone_number', $consignee_phone_number_2);
+        });
+        if($coordinates->exists()){
+            $coordinates = $coordinates->latest()->first();
+
+            $shipment_coordinates = new ShipmentConsigneeLocation();
+            $shipment_coordinates->shipment_id = $shipment_id;
+            $shipment_coordinates->previous_location_id = $coordinates->id;
+            $shipment_coordinates->current_location_id = NULL;
+            $shipment_coordinates->save();
+        }
+        //Existing Coordinates
 
         return $shipment_id;
     }
