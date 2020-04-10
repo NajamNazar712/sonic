@@ -657,7 +657,7 @@ class RiderAPIController extends Controller {
                     $deliveries['request'] = array();
                     $crm_request = CrmRequest::where('shipment_id', $shipment_data->id)->where('case_nature_id', '!=', 3)->latest()->first();
                     $deliveries['request']['id'] = $crm_request->id;
-
+                    
                     if($crm_request->case_nature_id == 1){
                         $information['summary']['requests']['complains']++;
                         $deliveries['ordering'] = 1;
@@ -676,7 +676,6 @@ class RiderAPIController extends Controller {
 
                     $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
                     $deliveries['request']['description'] = $crm_request->description;
-                    
                     $deliveries['request']['comments'] = array();
 
                     $crm_request_comments = $crm_request->comments->where('comment_type', 2);
