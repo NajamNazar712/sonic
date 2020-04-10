@@ -5242,4 +5242,22 @@ class DeliveryController extends Controller
             return response()->json(['status' => 1, 'error' => 'Delivery note does not exists']);
         }
     }
+
+    static public function rider_delivery_archive_directory(){
+
+        $files = File::glob(public_path() . '/storage/rider_delivery/*.*');
+        $now = Carbon::now();
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                $created = date("F d Y H:i:s.",filemtime($file));
+                $file_name = pathinfo($file);
+                if($now->diffInDays($created) > 1){
+                    Storage::disk('s3')->put('rider_delivery/'.$file_name['basename'], file_get_contents($file));
+                    if(Storage::disk('s3')->exists('rider_delivery/'.$file_name['basename'])){
+                        File::delete($file);
+                    }
+                }
+            }
+        }
+    }
 }
