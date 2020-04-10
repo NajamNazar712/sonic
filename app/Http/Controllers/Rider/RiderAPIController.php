@@ -885,7 +885,7 @@ class RiderAPIController extends Controller {
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
-            'shipper_status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
+            'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'picture' => ['required', 'image']
         ];
 
