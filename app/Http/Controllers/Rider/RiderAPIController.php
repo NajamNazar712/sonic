@@ -856,7 +856,7 @@ class RiderAPIController extends Controller {
                 $shipment->consignee_status_id = 14;
                 $shipment->save();
 
-                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, 14, $rider_id);
+                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
                 $rider_delivery->save();
             }
 
