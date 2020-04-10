@@ -50,6 +50,9 @@
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Open Box</th>
+                            <th class="border-primary border-darken-1">Rider Location</th>
+                            <th class="border-primary border-darken-1">Existing Location</th>
+                            <th class="border-primary border-darken-1">Confirm Location</th>
                         </tr>
                         </thead>
                     </table>
@@ -188,7 +191,10 @@
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'shipper',name: 'users.name', class: 'align-middle shipper'},
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data:'open_box',name: 'open_box', class: 'align-middle text-center open_box',orderable: false, searchable: false}
+                    {data:'open_box',name: 'open_box', class: 'align-middle text-center open_box',orderable: false, searchable: false},
+                    {data:'rider_location',name: 'rider_location', class: 'align-middle text-center rider_location',orderable: false, searchable: false},
+                    {data:'existing_location',name: 'existing_location', class: 'align-middle text-center existing_location',orderable: false, searchable: false},
+                    {data:'confirm_location',name: 'confirm_location', class: 'align-middle text-center confirm_location',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
