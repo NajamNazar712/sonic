@@ -1672,9 +1672,12 @@ class AdminCRMController extends Controller
                     if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
                         self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
                     }
-                    if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
-                        self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                    if($request->prev_status == 1){
+                        if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
+                            self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                        }
                     }
+
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as In-Process']);
@@ -2196,9 +2199,12 @@ class AdminCRMController extends Controller
                             if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
                                 self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
                             }
-                            if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
-                                self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                            if($crm_request->status_id == 1){
+                                if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
+                                    self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                                }
                             }
+
                         }
                         elseif ($request->valid == 0){
                             CrmRequest::where('id', $crm_request->id)->update([
