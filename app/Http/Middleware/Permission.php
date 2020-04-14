@@ -540,6 +540,9 @@ class Permission
             'settings.crm_reopen.index' => 274,
             'settings.crm_reopen.update' => 274,
 
+            'settings.crm_comment.index' => 325,
+            'settings.crm_comment.store' => 325,
+
             'settings.multiple_sale_tagging.index' => 279,
             'settings.multiple_sale_tagging.list' => 279,
 

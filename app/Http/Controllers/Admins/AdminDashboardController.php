@@ -1419,7 +1419,7 @@ class AdminDashboardController extends Controller
         $user->rejected_reason = $reject_reason;
         $user->rate_status = 2;
         $user->save();
-        
+
         return ['success' => 'Rates has been rejected!'];
     }
     public function UserStatusBlock(Request $request){

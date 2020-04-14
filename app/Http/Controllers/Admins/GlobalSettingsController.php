@@ -1851,4 +1851,20 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with(['error' => 'Please write a Message!']);
     }
+
+
+    public function auto_crm_comment_index() {
+        $settings = GlobalSettings::where('type', 'auto_crm_comment')->first();
+
+        return view('admin.settings.crm_comment')->with('settings', $settings);
+    }
+    public function auto_crm_comment_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'auto_crm_comment')->first();
+
+        $settings->text = $request->comment;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

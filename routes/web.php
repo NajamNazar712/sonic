@@ -1522,6 +1522,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\GlobalSettingsController@delay_in_delivery_massage')->name('index');
             Route::post('submit','Admins\GlobalSettingsController@delay_in_delivery_massage_store')->name('store');
         });
+
+        Route::prefix('crm_comment')->name('crm_comment.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@auto_crm_comment_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@auto_crm_comment_store')->name('store');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
