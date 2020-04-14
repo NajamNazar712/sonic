@@ -633,6 +633,14 @@ class RiderAPIController extends Controller {
                     $journey = $journey->first();
                     $remarks = $journey->remarks;
                 }
+                if($delivery_note_shipment->status == 0){
+                    $status = 1;
+                }else if($delivery_note_shipment->status == 1){
+                    $status = 3;
+                }else if($delivery_note_shipment->status > 1){
+                    $status = 2;
+                }
+
                 $deliveries = array();
                 $deliveries['shipment_id'] = $shipment_id;
                 $deliveries['tracking_number'] = $tracking_number;
@@ -643,6 +651,7 @@ class RiderAPIController extends Controller {
                 $deliveries['remarks'] = $remarks;
                 $deliveries['latitude'] = '';
                 $deliveries['longitude'] = '';
+                $deliveries['status'] = $status;
                 $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                 if($shipment_location->exists()){
                     $shipment_location = $shipment_location->first();
