@@ -1412,7 +1412,14 @@ class AdminDashboardController extends Controller
     {
         $shipper_id = $request->shipper_id;
         $reject_reason = $request->rejected_reason;
-        User::where('id',$shipper_id)->update(['rejected_reason'=>$reject_reason, 'rate_status'=>2]);
+        $user = User::find($shipper_id);
+        if($user->status != 3){
+            $user->status = 5;
+        }
+        $user->rejected_reason = $reject_reason;
+        $user->rate_status = 2;
+        $user->save();
+        
         return ['success' => 'Rates has been rejected!'];
     }
     public function UserStatusBlock(Request $request){
@@ -6995,7 +7002,7 @@ if(session('department_id') == 7){
                     ->where('spt.status','=',0);
             })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name'])->whereIn('users.status',[0,1,2])->where('blacklist',0)->where('users.email_verified',1);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7086,12 +7093,12 @@ if(session('department_id') == 7){
                     });
             })
             ->editColumn('status', function ($users) {
-                return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
+                return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation': ($users->status == 5? 'Rates Rejected':'')));
             })
             ->filterColumn('status', function($query, $keyword) {
                 $keyword = strtolower($keyword);
 
-                if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
+                if ($keyword == 0 || $keyword == 1 || $keyword == 2 || $keyword == 5) {
                     $query->where('users.status', '=', $keyword);
                 }
                 else {

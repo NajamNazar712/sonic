@@ -300,6 +300,7 @@
                     '<option value="0">Request Received</option>' +
                     '<option value="1">Rates Added</option>' +
                     '<option value="2">Pending For Activation</option>' +
+                    '<option value="5">Rates Rejected</option>' +
                     '</select>';
                 var documents_drop_select = '<select name="documents_status_select" id="documents_status_select" class="select2 form-control">' +
                     '<option value="0">Incomplete</option>' +
