@@ -296,7 +296,15 @@ class ShipperReturnController extends Controller
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null) ? $request->remark[$parcel->id] : null;
 
                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
-                    ShipmentsJourneyController::add($shipment, 52, 52, NULL, $remarks, session('user_id'), NULL);
+
+                    if (session('user_type') != 1) {
+                        $reference_1_id = Auth::id();
+                    }
+                    else{
+                        $reference_1_id = null;
+                    }
+
+                    ShipmentsJourneyController::add($shipment, 52, 52, NULL, $remarks, session('user_id'), NULL, $reference_1_id);
                     if($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12)){
                         NotificationsController::send(33, $shipment);
                     }
@@ -318,7 +326,14 @@ class ShipperReturnController extends Controller
                 if($parcel->shipper_status_id == 12){
                     $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
-                    ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL);
+
+                    if (session('user_type') != 1) {
+                        $reference_1_id = Auth::id();
+                    }
+                    else{
+                        $reference_1_id = null;
+                    }
+                    ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL, $reference_1_id);
                     if($journey){
                         NotificationsController::send(33, $request->shipment_id);
                     }

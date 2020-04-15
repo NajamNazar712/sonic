@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'CRM TAT Cut-Off Time & Holidays')
+@section('title', 'Shippers Default Weight')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    CRM TAT Cut-Off Time & Holidays
+                    Shippers Default Weight
                 </h1>
 
                 <div class="card">
@@ -17,43 +17,16 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.crm_cut_off_time_and_holidays.update') }}" novalidate="novalidate">
-                                {{ csrf_field() }}
-                                <div class="row justify-content-center">
-                                    <div class="col-4">
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-                                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                  <span class="">From*</span>
-                                              </span>
-                                            </div>
-                                            <input type="text" name="cut_off_time_from" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="{{$cut_off_time_from}}" id="cut_off_time_from" placeholder="Cut-Off Time From*" data-rule-required="true" data-msg-required="Cut-Off Time From is required">
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="">To*</span>
-                                    </span>
-                                            </div>
-                                            <input type="text" name="cut_off_time_to" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_to" id="cut_off_time_to" value="{{$cut_off_time_to}}" placeholder="Cut-Off Time To*" data-rule-required="true" data-msg-required="Cut-Off Time To is required">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary">Update</button>
-                            </form>
-
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
 
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Date</th>
-                                    <th class="border-primary border-darken-1">Reason</th>
-                                    <th class="border-primary border-darken-1">Created At</th>
-                                    <th class="border-primary border-darken-1">Created By</th>
+                                    <th class="border-primary border-darken-1">Shipper</th>
+                                    <th class="border-primary border-darken-1">Weight</th>
+                                    <th class="border-primary border-darken-1">Updated At</th>
+                                    <th class="border-primary border-darken-1">Updated By</th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -64,39 +37,67 @@
         </div>
     </div>
     {{--View Modal--}}
-    <div class="modal fade text-left" id="AddHoliday" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddHoliday"
+    <div class="modal fade text-left" id="AddUserModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddUserModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Holiday</h4>
+                    <h4 class="modal-title white">Add Weight</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="holiday_form" class="form-horizontal text-center" novalidate="novalidate">
+                    <form id="add_user_form" class="form-horizontal text-center" novalidate="novalidate">
                         {{ csrf_field() }}
 
                         <div class="row justify-content-center">
                             <div class="col-5">
-                                <div class="form-group input-group ml-1">
-                                    <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o"></span>
-                                    </span>
-                                    </div>
-                                    <input type="text" name="holiday_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="holiday_date" placeholder="Holiday Date*">
-                                </div>
+                                <fieldset class="form-group">
+                                    <select name="shipper" id="select_shipper" class="form-control select2">
+                                        @foreach($shippers as $shipper)
+                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
                             </div>
                             <div class="col-3 form-group">
-                                <input type="text" class="form-control" name="reason" id="reason" placeholder="Reason*" data-rule-required="true" data-msg-required="Reason is required">
+                                <input type="text" class="form-control weight" name="weight" id="weight" placeholder="Weight*" data-rule-required="true" data-msg-required="Weight is required">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary width-100" id="add_holiday_button">Add</button>
+                    <button type="button" class="btn btn-primary width-100" id="add_shipper_button">Add</button>
+                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="EditUserModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditUserModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Edit Weight</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_user_form" class="form-horizontal text-center" novalidate="novalidate">
+                        {{ csrf_field() }}
+
+                        <div class="row justify-content-center">
+                            <input type="hidden" name="default_weight" id="edit_default_weight">
+                            <div class="col form-group">
+                                <input type="text" class="form-control weight" name="edit_weight" id="edit_weight" placeholder="Weight*" data-rule-required="true" data-msg-required="Weight is required">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary width-100" id="edit_shipper_button">Edit</button>
                     <button class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -173,22 +174,20 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.cut_off_time_from').pickatime({
-                clear: '',
-                format: 'h:i A',
+
+            $('#select_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Shipper',
+                width:'100%',
+                allowClear:true,
+                dropdownParent:$('#AddUserModal')
             });
-            $('.cut_off_time_to').pickatime({
-                clear: '',
-                format: 'h:i A',
-            });
-            $('#holiday_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                disable: [7],
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted'
+
+            $('#add_user_form input.weight').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'min': 0.1,
+                'digits': 2
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -197,7 +196,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.settings.crm_cut_off_time_and_holidays.list') }}',
+                        url: '{{ route('admin.settings.default_weight.list') }}',
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -207,18 +206,18 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Date');
-                            head.push('Reason');
-                            head.push('Created At');
-                            head.push('Created By');
+                            head.push('Shipper');
+                            head.push('Weight');
+                            head.push('Updated At');
+                            head.push('Updated By');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.holiday);
-                                row.push(values.reason);
-                                row.push(values.created_at);
-                                row.push(values.created_by);
+                                row.push(values.shipper);
+                                row.push(values.weight);
+                                row.push(values.updated_at);
+                                row.push(values.updated_by);
 
 
                                 body.push(row);
@@ -235,17 +234,17 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
-                        text: '<i class="la la-plus"></i> Add Holiday',
-                        className: 'btn btn-primary add_holiday',
+                        text: '<i class="la la-plus"></i> Add Shipper',
+                        className: 'btn btn-primary add_shipper',
                         enabled: true,
                         action: function (e, dt, node, config) {
-                            // $('#AddHoliday .modal-body').html(html);
-                            $('#AddHoliday').modal('show');
+                            // $('#AddUserModal .modal-body').html(html);
+                            $('#AddUserModal').modal('show');
                         }
                     },
                     {
                         extend: 'excelHtml5',
-                        title: 'CRM TAT Cut-Off Time & Holidays',
+                        title: 'Default Weight Shipper',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'
@@ -253,26 +252,28 @@
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
+                autoWidth: false,
                 language: {
                     processing: data_table_loader
                 },
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.settings.crm_cut_off_time_and_holidays.list') }}',
+                    url: '{{ route('admin.settings.default_weight.list') }}',
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                 },
+                rowId: 'id',
                 order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'holiday', name: 'crm_tat_holidays.holiday', class: 'align-middle holiday'},
-                    {data: 'reason', name: 'crm_tat_holidays.reason', class: 'align-middle reason'},
-                    {data: 'created_at', name: 'crm_tat_holidays.created_at', class: 'align-middle created_at'},
-                    {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
-
+                    {data: 'shipper', name: 'u.name', class: 'align-middle holiday'},
+                    {data: 'weight', name: 'default_weights.default_weight', class: 'align-middle reason'},
+                    {data: 'updated_at', name: 'default_weights.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated_by', name: 'a.name', class: 'align-middle created_by'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -290,7 +291,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -307,58 +308,87 @@
                 }
             });
 
-            $('#add_holiday_button').on('click', function () {
-                var holiday_date = $('input[name="holiday_date_formatted"]').val();
-                var holiday_reason = $('#reason').val();
+            $('body').on('click','tr .action button.edit',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#edit_default_weight').val(id);
+                $('#EditUserModal').modal('show');
+            });
+
+            $('#add_shipper_button').on('click', function () {
+                var shipper = $('#select_shipper').val();
+                var weight = $('#weight').val();
                 var flag = true;
-                if(!holiday_date){
+                if(!shipper){
                     flag = false;
-                    var error = "Please select Holiday Date!";
+                    var error = "Please select Shipper!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-                if(!holiday_reason){
+                if(!weight){
                     flag = false;
-                    var error = "Please select Reason!";
+                    var error = "Please enter Weight!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
                 if(flag){
-                    $('#add_holiday_button').attr('disabled',true);
+                    $('#add_shipper_button').attr('disabled',true);
                     $.ajax({
-                        url: '{!! route('admin.settings.crm_cut_off_time_and_holidays.add') !!}',
+                        url: '{!! route('admin.settings.default_weight.add') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'holiday_date': holiday_date,
-                            'holiday_reason' : holiday_reason
+                            'shipper': shipper,
+                            'weight' : weight
                         }
                     })
                         .done(function(data) {
                             if (data.status == 1) {
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                $('#AddHoliday').modal('hide');
+                                $('#AddUserModal').modal('hide');
                                 table.draw();
                             }
                             else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
-                            $('#add_holiday_button').attr('disabled',false);
+                            $('#add_shipper_button').attr('disabled',false);
+                        });
+                }
+            });
+            $('#edit_shipper_button').on('click', function () {
+                var weight_id = $('#edit_default_weight').val();
+                var weight = $('#edit_weight').val();
+                var flag = true;
+                if(!weight){
+                    flag = false;
+                    var error = "Please enter Weight!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(flag){
+                    $('#add_shipper_button').attr('disabled',true);
+                    $.ajax({
+                        url: '{!! route('admin.settings.default_weight.edit') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'weight_id': weight_id,
+                            'weight' : weight
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 1) {
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                $('#EditUserModal').modal('hide');
+                                table.draw();
+                            }
+                            $('#add_shipper_button').attr('disabled',false);
                         });
                 }
             });
 
-            $('#AddHoliday').on('hide.bs.modal', function (e) {
-                $('#holiday_date').val('');
-                $('input[name="holiday_date_formatted"]').val('');
-                $('#reason').val('');
+            $('#AddUserModal').on('hide.bs.modal', function (e) {
+                $('#select_shipper').val('').trigger('change');
+                $('#weight').val('');
             });
-
-
-            $('#settings_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                }
+            $('#EditUserModal').on('hide.bs.modal', function (e) {
+                $('#edit_weight').val('');
             });
 
         });
