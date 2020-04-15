@@ -727,11 +727,14 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([104], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([104, 326], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">First Mile</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(104, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}">Pickup Weight Threshold</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(326, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.default_weight.index')}}">Default Weight</a></li>
                                     @endif
                                 </ul>
                             </li>

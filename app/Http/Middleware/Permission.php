@@ -484,6 +484,11 @@ class Permission
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
 
+            'settings.default_weight.index' => 104,
+            'settings.default_weight.list' => 104,
+            'settings.default_weight.add' => 104,
+            'settings.default_weight.editw' => 104,
+
             'settings.shipment_cancellation_cut_off_days.index' => 116,
             'settings.shipment_cancellation_cut_off_days.store' => 116,
 
