@@ -651,8 +651,8 @@ class RiderAPIController extends Controller {
                 $deliveries['cod_amount'] = $cod_amount;
                 $deliveries['special_instructions'] = $special_instructions;
                 $deliveries['remarks'] = $remarks;
-                $deliveries['latitude'] = '';
-                $deliveries['longitude'] = '';
+                $deliveries['latitude'] = NULL;
+                $deliveries['longitude'] = NULL;
                 $deliveries['status'] = $status;
                 $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                 if($shipment_location->exists()){
