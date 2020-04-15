@@ -16,3 +16,4 @@ class UpdatePermissionModuleForShipperDefaultWeightTableSeeder extends Seeder
         ));
     }
 }
+a

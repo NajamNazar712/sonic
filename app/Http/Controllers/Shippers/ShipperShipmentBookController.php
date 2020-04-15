@@ -131,7 +131,13 @@ class ShipperShipmentBookController extends Controller
 
         AdminPickupsController::generate($shipment_id);
 
-        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
+        if (session('user_type') != 1) {
+            $reference_1_id = Auth::id();
+        }
+        else{
+            $reference_1_id = null;
+        }
+        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
 
 
         //Existing Coordinates
@@ -1978,7 +1984,13 @@ class ShipperShipmentBookController extends Controller
 
         AdminPickupsController::generate($shipment_id);
 
-        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
+        if (session('user_type') != 1) {
+            $reference_1_id = Auth::id();
+        }
+        else{
+            $reference_1_id = null;
+        }
+        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
 
         return $shipment_id;
     }
