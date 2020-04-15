@@ -620,6 +620,7 @@ class RiderAPIController extends Controller {
                 $shipment_data = $delivery_note_shipment->shipment;
                 $shipment_id = $shipment_data->id;
                 $tracking_number = $shipment_data->tracking_number;
+                $consignee_name = $shipment_data->consignee_name;
                 $consignee_address = $shipment_data->consignee_address;
                 $consignee_phone = $shipment_data->consignee_phone_number_1;
                 if($shipment_data->consignee_phone_number_2 != null){
@@ -644,6 +645,7 @@ class RiderAPIController extends Controller {
                 $deliveries = array();
                 $deliveries['shipment_id'] = $shipment_id;
                 $deliveries['tracking_number'] = $tracking_number;
+                $deliveries['consignee_name'] = $consignee_name;
                 $deliveries['consignee_address'] = $consignee_address;
                 $deliveries['consignee_phone'] = $consignee_phone;
                 $deliveries['cod_amount'] = $cod_amount;
