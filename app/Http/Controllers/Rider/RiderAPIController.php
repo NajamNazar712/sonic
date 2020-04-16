@@ -796,7 +796,8 @@ class RiderAPIController extends Controller {
             'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
-            'cnic' => ['nullabe, string, max:255'],
+            'receiver_name' => ['nullable, string, max:255'],
+            'cnic' => ['nullable, string, max:255'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -828,11 +829,20 @@ class RiderAPIController extends Controller {
                 $rider_delivery->actual_location_longitude = $request->actual_location_longitude;
                 $rider_delivery->rider_status_id = 14;
                 $rider_delivery->delivered_status = 1;
-
+                $received_by = NULL;
+                if($request->has('receiver_name')){
+                    $received_by = $request->receiver_name;
+                }
                 if($request->has('cnic')){
                     $rider_delivery->cnic = $request->cnic;
+                    $received_by .= ' | '. $request->cnic;
                 }
 
+                if($request->has('receiver_name')){
+                    $rider_delivery->receiver_name = $request->receiver_name;
+                }
+
+                $shipment = Shipment::find($request->shipment_id);
 
                 $consignee_phone_number_1 = $shipment->consignee_phone_number_1;
                 $consignee_phone_number_2 = $shipment->consignee_phone_number_2;
@@ -872,12 +882,11 @@ class RiderAPIController extends Controller {
                 }
                 $rider_delivery->save();
 
-                $shipment = Shipment::find($request->shipment_id);
                 $shipment->shipper_status_id = 14;
                 $shipment->consignee_status_id = 14;
                 $shipment->save();
 
-                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
+                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
             }
 
             return response()->json(['status' => 0, 'message' => 'Shipment marked as Delivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -897,6 +906,7 @@ class RiderAPIController extends Controller {
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
+            'remarks' => ['nullable, string, max:255'],
             'picture' => ['required', 'image']
         ];
 
@@ -979,7 +989,13 @@ class RiderAPIController extends Controller {
                 $shipment->consignee_status_id = $request->status_reason_id;
                 $shipment->save();
 
-                ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
+                $remarks = NULL;
+
+                if($request->has('remarks')){
+                    $remarks = $request->remarks;
+                }
+
+                ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
             }
             else{
                 return response()->json(['status' => 0, 'message' => 'Shipment is already marked as Delivered', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
