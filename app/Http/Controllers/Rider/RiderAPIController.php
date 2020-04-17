@@ -56,6 +56,14 @@ class RiderAPIController extends Controller {
         'reason_id' => 'Reason ID',
         'picture' => 'Picture',
 
+        'delivery_note_id' => 'Delivery Note ID',
+        'receiver_name' => 'Receiver Name',
+        'cnic' => 'CNIC',
+
+        'shipper_status_id' => 'Shipper Status ID',
+        'status_reason_id' => 'Status Reason ID',
+        'remarks' => 'Remarks',
+
         'actions' => 'Actions',
         'actions.*' => 'Action',
         'actions.*.logged_at' => 'Logged At',
