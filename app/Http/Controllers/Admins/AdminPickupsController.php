@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
+use App\http\Models\DefaultWeight;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
