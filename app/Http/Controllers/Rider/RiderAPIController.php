@@ -795,7 +795,6 @@ class RiderAPIController extends Controller {
 
         $rules = [
             'added_at' => ['required'],
-            'rider_id' => ['required', 'integer', 'digits_between:1,10', 'exists:riders,id'],
             'delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
             'start_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'start_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
@@ -903,7 +902,6 @@ class RiderAPIController extends Controller {
 
         $rules = [
             'added_at' => ['required'],
-            'rider_id' => ['required', 'integer', 'digits_between:1,10', 'exists:riders,id'],
             'delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
             'start_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'start_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
