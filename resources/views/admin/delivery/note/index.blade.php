@@ -245,6 +245,7 @@
 
             var shipment_ids = [];
             var tracking_ids = [];
+            var consolidation_ids = [];
             var notification_ids = [];
             var rider_info_ids = [];
             var table = $('#datatable').DataTable({
@@ -365,8 +366,8 @@
                 ],
                 rowCallback: function(row, data, index) {
                     // var info = 
-table.page.info
-();
+                    table.page.info
+                    ();
                     //
                     // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
@@ -412,9 +413,7 @@ table.page.info
                     if(rowsCount === 0) {
                         blockPagePermanently();
                         $.ajax({
-                            url:'{{route('
-admin.delivery.note.shipment.info
-')}}',
+                            url:'{{route('admin.delivery.note.shipment.info')}}',
                             type:'POST',
                             data: {
                                 'tracking':tracking,
@@ -461,9 +460,7 @@ admin.delivery.note.shipment.info
                             blockPagePermanently();
                             // $('#hub_id').val('');
                             $.ajax({
-                                url:'{{route('
-admin.delivery.note.shipment.info
-')}}',
+                                url:'{{route('admin.delivery.note.shipment.info')}}',
                                 type:'POST',
                                 data: {
                                     'tracking':tracking,
