@@ -604,11 +604,18 @@ class RiderAPIController extends Controller {
 
             $information['summary']['deliveries'] = $delivery_note->shipments_count;
             $information['summary']['completed'] = array();
-
-            $information['summary']['completed']['pending'] = $delivery_note->delivery_note_shipments->where('status', 0)->count();
-            $information['summary']['completed']['undelivered'] = $delivery_note->delivery_note_shipments->whereIn('status', 1)->count();
-            $information['summary']['completed']['delivered'] = $delivery_note->delivery_note_shipments->whereIn('status', '>', 1)->count();
-            $information['summary']['completed']['completed'] = $delivery_note->delivery_note_shipments->where('status', '>', 0)->count();
+            $information['summary']['completed']['pending'] = 0;
+            $information['summary']['completed']['undelivered'] = 0;
+            $information['summary']['completed']['delivered'] = 0;
+            $rider_deliveries = RiderDelivery::where('delivery_note_id', $delivery_note->id);
+            if($rider_deliveries->exists()){
+                $updated_shipments = 0;
+                $updated_shipments = RiderDelivery::where('delivery_note_id', $delivery_note->id)->count();
+                $information['summary']['completed']['pending'] = $delivery_note->shipment_count - $updated_shipments;
+                $information['summary']['completed']['undelivered'] = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 0)->count();
+                $information['summary']['completed']['delivered'] = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 1)->count();
+            }
+            
             $information['summary']['requests'] = array();
             $information['summary']['requests']['complains'] = 0;
             $information['summary']['requests']['service_requests'] = 0;
