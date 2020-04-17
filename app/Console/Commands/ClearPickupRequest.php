@@ -39,20 +39,6 @@ class ClearPickupRequest extends Command
      */
     public function handle()
     {
-        $pickup_requests = PickupRequest::where('status', 1);
-
-        if ($pickup_requests->exists()) {
-            $pickup_requests = $pickup_requests->get();
-
-            foreach ($pickup_requests as $pickup_request) {
-                if (!$pickup_request->pickup_note_request->exists()) {
-                    $pickup_request->status = 0;
-
-                    $pickup_request->save();
-                }
-            }
-        }
-
         $pickup_requests = PickupRequest::where('status', 0);
 
         if ($pickup_requests->exists()) {
