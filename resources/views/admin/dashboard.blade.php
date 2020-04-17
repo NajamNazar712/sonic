@@ -239,6 +239,76 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-3">
+                    <div class="card bg-gradient-directional-complaints_launched pull-up">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="align-self-center">
+                                        <i class="icon-flag text-white font-large-2 float-left"></i>
+                                    </div>
+                                    <div class="media-body text-white text-right">
+                                        <h3 class="text-white">{{$stats['complaints_launched']}}</h3>
+                                        <span>Total Launched Complaints(s)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card bg-gradient-directional-complaints_in_process pull-up">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="align-self-center">
+                                        <i class="icon-clock text-white font-large-2 float-left"></i>
+                                    </div>
+                                    <div class="media-body text-white text-right">
+                                        <h3 class="text-white">{{$stats['complaints_in_process']}}</h3>
+                                        <span>Total In-process Complaints(s)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card bg-gradient-directional-complaints_closed pull-up">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="align-self-center">
+                                        <i class="icon-check text-white font-large-2 float-left"></i>
+                                    </div>
+                                    <div class="media-body text-white text-right">
+                                        <h3 class="text-white">{{$stats['complaints_closed']}}</h3>
+                                        <span>Total Closed Complaints(s)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card bg-gradient-directional-complaints_rejected pull-up">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="align-self-center">
+                                        <i class="icon-shield text-white font-large-2 float-left"></i>
+                                    </div>
+                                    <div class="media-body text-white text-right">
+                                        <h3 class="text-white">{{$stats['complaints_rejected']}}</h3>
+                                        <span>Total Rejected Complaints(s)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row mt-2">
                 <div class="card col-12">
                     <div class="card-content collapse show">
@@ -274,6 +344,7 @@
                     </div>
                 </div>
             </div>
+
 
             {{--@if (session('role_id') == 1 || session('department_id') == 6)--}}
             {{--<div class="row mt-2">--}}
@@ -638,6 +709,22 @@
         }
         .bg-gradient-directional-cancelled_shipments {
             background-image: linear-gradient(45deg, #ff6a00, #ffb74c);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_launched {
+            background-image: linear-gradient(45deg, #074077, #2FBEF5);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_in_process {
+            background-image: linear-gradient(45deg, #6A1FA2 , #FF4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_closed {
+            background-image: linear-gradient(45deg, #076500, #11F118);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_rejected {
+            background-image: linear-gradient(45deg, #FF0C0C, #FF9191);
             background-repeat: repeat-x;
         }
         .selectize-control {

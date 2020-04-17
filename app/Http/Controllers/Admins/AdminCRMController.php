@@ -327,7 +327,11 @@ class AdminCRMController extends Controller
         $comment_type = 0;
         if($request->internal_switch == 1){
             $comment_type = 1;
+        }else
+        if($request->internal_switch == 2){
+            $comment_type = 2;
         }
+
         if($comment == null){
             return ['status' => 0, 'error' => 'Comment Not selected!'];
         }
@@ -350,8 +354,10 @@ class AdminCRMController extends Controller
                 if($comment_details->id > $comment_id){
                     if($comment_details->comment_by == 0){
                         $name = $comment_details->admin->name;
-                    }else if($comment_details->comment_by == 1){
+                    }else if($comment_details->comment_by == 1) {
                         $name = $comment_details->shipper->name;
+                    }else if($comment_details->comment_by == 2 && $comment_details->comment_type == 2){
+                        $name = $comment_details->rider->name;
                     }else{
                         $name = $comment_details->substitute_user->name;
                     }
@@ -749,8 +755,8 @@ class AdminCRMController extends Controller
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
             })
             ->leftjoin('crm_request_agent_histories as resa', function ($join) {
-                $join->on('res.crm_request_id', '=', 'crm_requests.id')
-                    ->where('res.id','=',
+                $join->on('resa.crm_request_id', '=', 'crm_requests.id')
+                    ->where('resa.id','=',
                         DB::raw('(select max(id) from crm_request_agent_histories where crm_request_agent_histories.crm_request_id = crm_requests.id and crm_request_agent_histories.agent_id = crm_requests.agent_id)'));
             })
             ->leftjoin('admins as resby', 'resby.id', '=', 'resa.assigned_by')

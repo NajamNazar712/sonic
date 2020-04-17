@@ -186,22 +186,22 @@ class ProcessShipmentBooking implements ShouldQueue
         }
         else if ($service_type_id == 3) {
             $try_and_buy_cod_amount = intval($try_and_buy_charges);
-            $item_product_type_id = $this->booking['item_product_type_id'];
+            $item_product_type_id = $this->booking['item_product_type_id_1'];
 
-            if (!empty(trim($this->booking['item_description']))) {
-                $item_description = $this->booking['item_description'];
+            if (!empty(trim($this->booking['item_description_1']))) {
+                $item_description = $this->booking['item_description_1'];
             } else {
                 $item_description = NULL;
             }
 
-            $item_quantity = $this->booking['item_quantity'];
+            $item_quantity = $this->booking['item_quantity_1'];
 
-            if (strtolower($this->booking['item_insurance']) == 'yes') {
+            if (strtolower($this->booking['item_insurance_1']) == 'yes') {
                 $item_insurance = TRUE;
             } else {
                 $item_insurance = FALSE;
             }
-            $item_price = str_replace(',', '', $this->booking['item_price']);
+            $item_price = str_replace(',', '', $this->booking['item_price_1']);
 
             $item_type = 2;
             $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);

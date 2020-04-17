@@ -1,7 +1,6 @@
 
 @extends('admin.layout.master')
 @section('title','Receive Deliveries')
-
 @section('content')
     <h1 class="mb-1">
         Receive Deliveries(Delivery Note: {{str_pad($delivery_note_id, 6, '0', STR_PAD_LEFT)}})
@@ -55,6 +54,8 @@
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
+                            <th class="border-primary border-darken-1">Rider Status</th>
+                            <th class="border-primary border-darken-1">Rider Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Address</th>
@@ -155,7 +156,7 @@
                         <div class="col-4">
                             <form id="items_scan_form" action="#">
                                 <div class="form-group">
-                                    <input type="text" name="item_number" class="form-control item_number" placeholder="Item Number Scan*" data-rule-required="true" data-msg-required="Item Number is required">
+                                    <input type="text" name="item_number" class="form-control item_number" placeholder="Shipment Item Number Scan*" data-rule-required="true" data-msg-required="Item Number is required">
                                 </div>
 
                             </form>
@@ -660,6 +661,8 @@
                     {data:'collection_amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status form-group statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason form-group reasonSelect',orderable: false, searchable: false},
+                    {data:'rider_status',name: 'rss.name', class: 'align-middle status form-group rider_status',orderable: false, searchable: false},
+                    {data:'rider_reason',name: 'rssr.name', class: 'align-middle reason form-group rider_reason',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
@@ -680,18 +683,45 @@
                     }
                 },
                 drawCallback: function (settings) {
-
-                    $(".reasonDrop").prepend('<option value="" selected="selected"></option>').select2({
-                        placeholder: "Select a Reason",
-                        width:'100%'
-                    });
-                    $(".statusDrop").prepend('<option value="" selected="selected"></option>').select2({
-                        placeholder: "Select a Status",
-                        width:'100%'
-                    });
                     var api = new $.fn.dataTable.Api( settings );
                     var data = api.rows( {page:'current'} ).data();
+                    var statuses = [7, 8, 9, 12, 15, 18, 56];
                     $.each(data,function (key,value) {
+                        if(value.rider_status_id != null && value.latest_rider_status_id != null ){
+                            if(statuses.includes(value.rider_status_id)){
+                                $("#statusDrop_"+value.shId).select2({
+                                    placeholder: "Select a Status",
+                                    width:'100%'
+                                });
+                                $("#reasonDrop_"+value.shId).select2({
+                                    placeholder: "Select a Reason",
+                                    width:'100%'
+                                });
+                                $('#statusSubmit').removeAttr('disabled');
+                            }
+                            else{
+                                $("#statusDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                    placeholder: "Select a Status",
+                                    width:'100%'
+                                });
+
+                                $("#reasonDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                    placeholder: "Select a Reason",
+                                    width:'100%'
+                                });
+                            }
+                        }
+                        else{
+                            $("#statusDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                placeholder: "Select a Status",
+                                width:'100%'
+                            });
+
+                            $("#reasonDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                placeholder: "Select a Reason",
+                                width:'100%'
+                            });
+                        }
                         if(shipment_status.length !== 0){
                             $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
                         }
@@ -1311,7 +1341,7 @@
                                     var rowNo = trybuy.rows().count();
                                     $.each(data.data,function (key,value) {
                                         trybuy_ids.push(value.pid);
-                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
+                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]' readonly onclick=\"return false;\">";
                                         trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
                                         trybuy.draw(false);
                                         $('#cod').text(data.total_cod);
@@ -1460,9 +1490,9 @@
                     }
                 }
             }
-            $('body').on('click','.receiving input:checkbox',function () {
-                item_scanned_cod_change($(this));
-            });
+            // $('body').on('click','.receiving input:checkbox',function () {
+            //     item_scanned_cod_change($(this));
+            // });
 
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
@@ -1484,7 +1514,8 @@
             });
             //end replacement
             $('#trybuy_form').bind('submit',function (e) {
-                blockPagePermanently();
+                // blockPagePermanently();
+                var this_form = this;
                 e.preventDefault();
                 var total = $('#cod').text();
                 total = parseInt(total);
@@ -1496,14 +1527,40 @@
                 $('#item_checked').val(checkbox_count);
                 $('#item_unchecked').val(uncheckbox_count);
                 $('#delivery_note_trybuy').val(deliverynote_id);
-                if(checkbox_count > 0){
-                    UnblockPagePermanently();
-                    this.submit();
-                }else{
-                    UnblockPagePermanently();
-                    var error = "Select at-least one item!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
+                // if(checkbox_count > 0){
+                    // UnblockPagePermanently();
+
+                // }else{
+                //     UnblockPagePermanently();
+                //     var error = "Select at-least one item!";
+                //     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                // }
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to update Try & Buy Delivery!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        this_form.submit();
+                    }
+                });
             });
 
             var shipment_remarks_obj = {};

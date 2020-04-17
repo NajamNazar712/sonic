@@ -88,7 +88,7 @@ class RegisterController extends Controller
                 'name' => 'required|string|max:255|unique:users',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
-                'shipper_poc'=>'required|regex:/^[a-zA-Z]+$/u|max:255',
+                'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'company_address'=>'required|string|max:255',
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
@@ -102,11 +102,11 @@ class RegisterController extends Controller
                 'product_name' => 'required_if:shipper_product_type, ==, 24',
                 'shipping_city.*'=>'required|string|max:255',
                 'pickup_address.*'=>'required|string|max:255',
-                'shipping_poc.*'=>'required|string|max:255',
+                'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'shipping_phone.*'=>'required|string|max:255',
                 'shipping_email.*'=>'required|string|max:255',
                 'product_type.*'=>'required|max:255',
-                'bank_city.*'=>'required|string|max:255',
+                'bank_city.*'=>'required|max:255',
                 'bank_name.*'=>'required|max:255',
                 'bank_branch.*'=>'required|string|max:255',
                 'account_no.*'=>'required|string|max:255',
@@ -125,7 +125,7 @@ class RegisterController extends Controller
                 'name' => 'required|string|max:255|unique:users',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
-                'shipper_poc'=>'required|regex:/^[a-zA-Z]+$/u|max:255',
+                'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'company_address'=>'required|string|max:255',
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
@@ -139,16 +139,16 @@ class RegisterController extends Controller
                 'product_name' => 'required_if:shipper_product_type, ==, 24',
                 'shipping_city.*'=>'required|string|max:255',
                 'pickup_address.*'=>'required|string|max:255',
-                'shipping_poc.*'=>'required|string|max:255',
+                'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'shipping_phone.*'=>'required|string|max:255',
                 'shipping_email.*'=>'required|string|max:255',
                 'product_type.*'=>'required|max:255',
-                'bank_city'=>'required|string|max:255',
-                'bank_name'=>'required|max:255',
-                'bank_branch'=>'required|string|max:255',
-                'account_no'=>'required|string|max:255',
-                'account_title'=>'required|string|max:255',
-                'iban_no'=>'required|string|max:255',
+                'bank_city.*'=>'required|max:255',
+                'bank_name.*'=>'required|max:255',
+                'bank_branch.*'=>'required|string|max:255',
+                'account_no.*'=>'required|string|max:255',
+                'account_title.*'=>'required|string|max:255',
+                'iban_no.*'=>'required|string|max:255',
                 'cycle_of_payment'=>'required|string|max:255',
                 'cycle_of_invoicing' => 'required',
 //                'generation_date' => 'required_if:cycle_of_invoicing,==,1|required_if:cycle_of_invoicing,==,3|numeric',
@@ -241,10 +241,10 @@ class RegisterController extends Controller
         $user_phone = NULL;
         $phone_number = User::where('id', '<>', $user_id);
         $phone_number = $phone_number->where(function ($sub_query) use ($phone1) {
-            $sub_query->where('users.phone', 'like',  $phone1);
+            $sub_query->where('users.phone',  $phone1);
         })
             ->orWhere(function ($sub_query) use ($phone1) {
-                $sub_query->where('users.phone2', 'like', $phone1);
+                $sub_query->where('users.phone2', $phone1);
         });
         if($phone_number->exists()){
             $phone_flag = true;
@@ -252,10 +252,10 @@ class RegisterController extends Controller
         }else{
             $phone_number2 = User::where('id', '<>', $user_id);
             $phone_number2 = $phone_number2->where(function ($sub_query) use ($phone2) {
-                $sub_query->where('users.phone', 'like',  $phone2);
+                $sub_query->where('users.phone',  $phone2);
             })
                 ->orWhere(function ($sub_query) use ($phone2) {
-                    $sub_query->where('users.phone2', 'like', $phone2);
+                    $sub_query->where('users.phone2', $phone2);
              });
             if($phone_number2->exists()){
                 $phone_flag = true;
@@ -421,6 +421,7 @@ class RegisterController extends Controller
                     'billing_person_phone' => $data['billing_person_phone'],
                     'billing_person_email' => $data['billing_person_email'],
                     'billing_address' => $data['billing_address'],
+                    'default_bank' => 1
                 ]);
             }
         }

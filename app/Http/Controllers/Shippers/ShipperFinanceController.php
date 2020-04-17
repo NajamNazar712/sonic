@@ -393,7 +393,7 @@ class ShipperFinanceController extends Controller
       $total_cash_handling_charges = 0;
       $total_insurance_charges = 0;
       $total_replacement_charges = 0;
-      // $total_try_and_buy_charges = 0;
+      $total_try_and_buy_charges = 0;
       $total_return_charges = 0;
       $total_packaging_material_charges = 0;
       $total_fuel_surcharge = 0;
@@ -417,6 +417,8 @@ class ShipperFinanceController extends Controller
                 $type = 'Adjusted';
             }
 
+            $item = $shipment->items->first();
+
             $shipment_details .= '
                             <tr>
                               <td>' . $serial_number . '</td>
@@ -427,6 +429,7 @@ class ShipperFinanceController extends Controller
                               <td>' . $shipment->consignee_city->name . '</td>
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
+                              <td>' . $item->description . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
@@ -443,7 +446,7 @@ class ShipperFinanceController extends Controller
                       $total_collection_amount += $done_payment_shipment->amount;
                       $total_cash_handling_charges += $shipment->cash_handling_charges;
                       $total_replacement_charges += $shipment->replacement_charges;
-                      // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                       $total_try_and_buy_charges += $shipment->try_and_buy_charges;
                   }
                   else {
                       $total_return_charges += $shipment->return_charges;
@@ -515,6 +518,7 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Destination</strong></td>
                               <td class="color primary"><strong>Service Type</strong></td>
                               <td class="color primary"><strong>Weight (kg)</strong></td>
+                              <td class="color primary"><strong>Item Description</strong></td>
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
@@ -551,6 +555,10 @@ class ShipperFinanceController extends Controller
                                     <tr>
                                         <td class="color secondary"><strong>Total Replacement Charges</strong></td>
                                         <td>' . number_format($total_replacement_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Try & Buy Charges</strong></td>
+                                        <td>' . number_format($total_try_and_buy_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Return Charges</strong></td>
@@ -626,7 +634,7 @@ class ShipperFinanceController extends Controller
         $total_cash_handling_charges = 0;
         $total_insurance_charges = 0;
         $total_replacement_charges = 0;
-        // $total_try_and_buy_charges = 0;
+        $total_try_and_buy_charges = 0;
         $total_return_charges = 0;
         $total_packaging_material_charges = 0;
         $total_fuel_surcharge = 0;
@@ -679,7 +687,7 @@ class ShipperFinanceController extends Controller
                             $total_collection_amount += $done_payment_shipment->amount;
                             $total_cash_handling_charges += $shipment->cash_handling_charges;
                             $total_replacement_charges += $shipment->replacement_charges;
-                            // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                             $total_try_and_buy_charges += $shipment->try_and_buy_charges;
                         }
                         else {
                             $total_return_charges += $shipment->return_charges;
@@ -722,7 +730,7 @@ class ShipperFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges,'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
 
         $details[] = [];
 

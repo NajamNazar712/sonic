@@ -672,6 +672,7 @@
                                 shipment += '<th><strong>City</strong></th>';
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
                                 shipment += '<th><strong>IP Address</strong></th>';
+                                shipment += '<th><strong>Rider</strong></th>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
@@ -686,6 +687,7 @@
                                     shipment += '<td>' + history.city + '</td>';
                                     shipment += '<td>' + history.received_or_refused_by + '</td>';
                                     shipment += '<td>' + history.ip + '</td>';
+                                    shipment += '<td>' + history.rider + '</td>';
                                     shipment += '</tr>';
                                 });
 

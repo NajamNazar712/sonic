@@ -580,7 +580,7 @@ class AdminPickupsController extends Controller
     public function assigned_list(Request $request) {
       $pickup_notes = PickupNote::join('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
       ->join('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
-      ->join('routes as ro', 'r.route_id', '=', 'ro.id')
+      ->leftjoin('routes as ro', 'r.route_id', '=', 'ro.id')
       ->join('cities as c', 'r.city_id', '=', 'c.id')
       ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
@@ -1262,13 +1262,20 @@ class AdminPickupsController extends Controller
                     }
                     else{
                         if ($exists) {
-                            if (empty($request->weight)) {
-                                $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
-                                $shipment->length = $request->length;
-                                $shipment->breadth = $request->breadth;
-                                $shipment->height = $request->height;
-                            } else {
-                                $shipment->actual_weight = $request->weight;
+                            $default_weight = DefaultWeight::where('user_id', $shipment->user->id);
+                            if($default_weight->exists()){
+                                $default_weight = $default_weight->first();
+                                $shipment->actual_weight = $default_weight->default_weight;
+                            }
+                            else {
+                                if (empty($request->weight)) {
+                                    $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+                                    $shipment->length = $request->length;
+                                    $shipment->breadth = $request->breadth;
+                                    $shipment->height = $request->height;
+                                } else {
+                                    $shipment->actual_weight = $request->weight;
+                                }
                             }
 
                             $shipment->save();
@@ -1318,7 +1325,14 @@ class AdminPickupsController extends Controller
                 }
                 if($shipment->booking_type_id == 3){
                     if ($exists) {
-                        $shipment->actual_weight = $request->weight;
+                        $default_weight = DefaultWeight::where('user_id', $shipment->user->id);
+                        if($default_weight->exists()){
+                            $default_weight = $default_weight->first();
+                            $shipment->actual_weight = $default_weight->default_weight;
+                        }
+                        else{
+                            $shipment->actual_weight = $request->weight;
+                        }
                         $shipment->save();
 
                         $details = array();

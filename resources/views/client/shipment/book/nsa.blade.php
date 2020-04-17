@@ -70,6 +70,31 @@
                                                         <td><input type="text" name="form[{{$no}}][replacement_item_product_type_id]" class="form-control number" value="{{$ro['replacement_item_product_type_id']}}" readonly="readonly"></td>
                                                         <td><input type="text" name="form[{{$no}}][replacement_item_description]" class="form-control text" value="{{$ro['replacement_item_description']}}" readonly="readonly"></td>
                                                         <td><input type="text" name="form[{{$no}}][replacement_item_quantity]" class="form-control number" value="{{$ro['replacement_item_quantity']}}" readonly="readonly"></td>
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_1]" value="{{$ro['item_product_type_id_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_1]" value="{{$ro['item_description_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_1]" value="{{$ro['item_quantity_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_1]" value="{{$ro['item_insurance_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_1]" value="{{$ro['item_price_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_2]" value="{{$ro['item_product_type_id_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_2]" value="{{$ro['item_description_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_2]" value="{{$ro['item_quantity_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_2]" value="{{$ro['item_insurance_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_2]" value="{{$ro['item_price_2']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_3]" value="{{$ro['item_product_type_id_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_3]" value="{{$ro['item_description_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_3]" value="{{$ro['item_quantity_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_3]" value="{{$ro['item_insurance_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_3]" value="{{$ro['item_price_3']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_4]" value="{{$ro['item_product_type_id_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_4]" value="{{$ro['item_description_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_4]" value="{{$ro['item_quantity_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_4]" value="{{$ro['item_insurance_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_4]" value="{{$ro['item_price_4']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_5]" value="{{$ro['item_product_type_id_5']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_5]" value="{{$ro['item_description_5']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_5]" value="{{$ro['item_quantity_5']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_5]" value="{{$ro['item_insurance_5']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_5]" value="{{$ro['item_price_5']}}">
                                                         <td><input type="text" name="form[{{$no}}][pickup_date]" class="form-control date" value="{{$ro['pickup_date']}}" readonly="readonly"></td>
                                                         <td><textarea type="text" name="form[{{$no}}][special_instructions]" class="form-control text" value="{{$ro['special_instructions']}}"></textarea></td>
                                                         <td><input type="text" name="form[{{$no}}][estimated_weight]" class="form-control number" value="{{$ro['estimated_weight']}}" readonly="readonly"></td>
@@ -78,6 +103,7 @@
                                                         <td><input type="text" name="form[{{$no}}][amount]" class="form-control text" value="{{$ro['amount']}}" readonly="readonly"></td>
                                                         <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
                                                         <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
+                                                        <input type="hidden" name="form[{{$no}}][try_and_buy_charges]" value="{{$ro['try_and_buy_charges']}}">
                                                     @else
                                                         <input type="hidden" name="form[{{$no}}][service_type_id]" value="{{$ro['service_type_id']}}">
                                                         <input type="hidden" name="form[{{$no}}][pickup_address_id]" value="{{$ro['pickup_address_id']}}">
@@ -94,6 +120,11 @@
                                                         <input type="hidden" name="form[{{$no}}][item_quantity]" value="{{$ro['item_quantity']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_insurance]" value="{{$ro['item_insurance']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_price]" value="{{$ro['item_price']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id_1]" value="{{$ro['item_product_type_id_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description_1]" value="{{$ro['item_description_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity_1]" value="{{$ro['item_quantity_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance_1]" value="{{$ro['item_insurance_1']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price_1]" value="{{$ro['item_price_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_product_type_id_2]" value="{{$ro['item_product_type_id_2']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_description_2]" value="{{$ro['item_description_2']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_quantity_2]" value="{{$ro['item_quantity_2']}}">

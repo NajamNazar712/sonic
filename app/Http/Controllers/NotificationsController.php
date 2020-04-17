@@ -3798,7 +3798,13 @@ class NotificationsController extends Controller
                     $month_speed_count = $month_speed_count + $month_average->month_speed;
                     $serial++;
                 }
-                $avg_revenue_count = $revenue_count / $shipments_count;
+                if($shipments_count != 0)
+                {
+                    $avg_revenue_count = $revenue_count / $shipments_count;
+                }
+                else{
+                    $avg_revenue_count = 0;
+                }
                 $html .= '<tr>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
@@ -4375,7 +4381,7 @@ class NotificationsController extends Controller
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->origin->name . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->destination->name . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->total_parcels . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->shipping_mode->name . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->shipping_mode->mode . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->transport_mode_vendor->name . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cargo_created_at . '</td>';
                         }
@@ -4397,19 +4403,32 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $admins =Admin::whereIn('id', [8, 37])->where('status', 1);
+                    $admins =Admin::whereIn('id', [7, 55, 37])->where('status', 1);
 
 
-                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
+//                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
                     if ($admins->exists()) {
                         $to = $admins->distinct('id')->pluck('email')->toArray();
                     }
-                    if ($cc_admins->exists()) {
-                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
-                    }
+//                    if ($cc_admins->exists()) {
+//                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
+//                    }
 
 
-                    self::email($subject, $body, $to, $cc);
+                    self::email($subject, $body, $to);
+//                    $admins =Admin::whereIn('id', [8, 37])->where('status', 1);
+//
+//
+//                    $cc_admins = Admin::whereIn('id', [3, 20, 8, 9]);
+//                    if ($admins->exists()) {
+//                        $to = $admins->distinct('id')->pluck('email')->toArray();
+//                    }
+//                    if ($cc_admins->exists()) {
+//                        $cc = $cc_admins->distinct('id')->pluck('email')->toArray();
+//                    }
+//
+//
+//                    self::email($subject, $body, $to, $cc);
                 }
             }
             else if($id == 60){
@@ -4469,6 +4488,21 @@ class NotificationsController extends Controller
                             }
                         }
                     }
+                }
+            }
+            else if($id == 61){
+                $rider = Rider::find($reference_1_id);
+                $pin = $reference_2_id;
+                if($rider){
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+                    if (strpos($body, '[pin]') !== FALSE) {
+                        $body = str_replace('[pin]', $pin, $body);
+                    }
+
+                    $to = $rider->phone;
+                    self::sms($body, $to);
                 }
             }
         }

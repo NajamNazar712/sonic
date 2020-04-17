@@ -219,9 +219,6 @@
 										<div id="try_and_buy" class="d-none">
 											<div class="repeater mb-1">
 												<div data-repeater-list="try_and_buy">
-													<div class="form-group input-group">
-														<input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">
-													</div>
 													<div class="product mb-1" data-repeater-item>
 														<div class="d-flex justify-content-between align-items-center bg-dark border border-dark rounded-top">
 															<h4 class="m-1 white">Product #<span>1</span></h4>
@@ -266,7 +263,7 @@
 												</div>
 
 												<div class="form-group text-right">
-													<button data-repeater-create type="button" class="btn btn-block btn-primary">Add</button>
+													<button data-repeater-create type="button" class="btn btn-block btn-primary" id="try_and_buy_add">Add</button>
 												</div>
 											</div>
 
@@ -356,6 +353,11 @@
 											</div>
 
 											<input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
+										</div>
+
+
+										<div class="form-group input-group" id="try_and_buy_charges_div">
+											<input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">
 										</div>
 
 										<div class="form-group">
@@ -763,14 +765,17 @@
 
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
+				$('#try_and_buy_charges_div').addClass('d-none');
 			}
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
 				$('#try_and_buy').removeClass('d-none');
+				$('#try_and_buy_charges_div').removeClass('d-none');
 				$('#amount').prop('disabled', true);
 			}
 			else{
 				$('#amount').prop('disabled', false);
+				$('#try_and_buy_charges_div').addClass('d-none');
 			}
 
 			$('#select_service_type form #service_type').val(service_type).trigger('change');
@@ -797,6 +802,7 @@
 						$('#payment_info').removeClass('d-none');
 						$('#replacement').addClass('d-none');
 						$('#try_and_buy').addClass('d-none');
+						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#order_header_info').removeClass('mt-2');
 						$('#shipping_header_info').removeClass('mt-2');
 						$('#shipper_header_info').html('Shipper Information');
@@ -819,6 +825,7 @@
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
 						$('#amount').prop('disabled', false);
+						$('#try_and_buy_charges_div').addClass('d-none');
 					}
 					else if (service_type == 3) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -836,6 +843,7 @@
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
 						$('#amount').prop('disabled', true);
+						$('#try_and_buy_charges_div').removeClass('d-none');
 					}
 					else if (service_type == 5) {
 						$('#shipping_header_div').removeClass('col col_custom');
@@ -854,6 +862,7 @@
 						$('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
 						$('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
 						$('#amount').prop('disabled', false);
+						$('#try_and_buy_charges_div').addClass('d-none');
 					}
 					$('#booking_form #selected_service_type').val(service_type);
 
@@ -1054,10 +1063,12 @@
 			}).bind('change', function() {
 				$(this).valid();
 			});
-
+			var repeater_limit = 5;
+			var repeater_count = 1;
 			$('#try_and_buy .repeater').repeater({
 				isFirstItemUndeletable: true,
 				show: function() {
+					repeater_count++;
 					$(this).find('.select2-container--default').remove();
 
 					$(this).find('.select2').prepend('<option value="" selected="selected"></option>').select2({
@@ -1112,6 +1123,12 @@
 
 					insurance.checkboxpicker();
 
+					if(repeater_count === repeater_limit){
+
+						console.log(repeater_count);
+						$("#try_and_buy_add").hide("slow");
+					}
+
 					try_and_buy_product_numbering();
 				},
 				hide: function(delete_element) {
@@ -1140,6 +1157,11 @@
 						dangerMode: true
 					}).then(function(confirm) {
 						if (confirm) {
+							repeater_count--;
+
+							if(repeater_count < repeater_limit){
+								$("#try_and_buy_add").show("slow");
+							}
 							$(this).slideUp(delete_element);
 
 							try_and_buy_product_numbering();

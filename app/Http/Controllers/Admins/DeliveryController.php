@@ -23,9 +23,9 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+
 use App\Http\Models\Consolidation;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ConsolidationShipments;use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
@@ -35,6 +35,7 @@ use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider;
+use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentInformationLog;
@@ -122,6 +123,8 @@ class DeliveryController extends Controller
                 'class' => function ($shipments) {
                     if ($shipments->complaint != null) {
                         return 'complaint_row';
+                    }else if($shipments->booking_type_id == 3){
+                        return "tnb_row";
                     } else {
                         return '';
                     }
@@ -1246,7 +1249,19 @@ class DeliveryController extends Controller
                     ->where('consolidations.consolidation_id','=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering','consolidations.consolidation_id'])
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.rider_id IS NOT NULL)'));
+            })
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where('sjl.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sj.shipper_status_id')
+            ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sj.status_reason_id')
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering','consolidations.consolidation_id', 'sj.shipper_status_id as rider_status_id', 'sj.status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.shipper_status_id as latest_rider_status_id'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -1350,13 +1365,42 @@ class DeliveryController extends Controller
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
                 $drops = '';
                 foreach ($statuses as $status) {
-                    $drops .= '<option value="' . $status->id . '">' . $status->name . '</option>';
+                    if($deliveries->rider_status_reason_id != null && $deliveries->latest_rider_status_id != null){
+                        if($status->id == $deliveries->rider_status_id){
+                            $drops .= '<option value="' . $status->id . '" selected="selected">' . $status->name . '</option>';
+                        }
+                        else{
+                            $drops .= '<option value="' . $status->id . '">' . $status->name . '</option>';
+                        }
+                    }
+                    else{
+                        $drops .= '<option value="' . $status->id . '">' . $status->name . '</option>';
+                    }
                 }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop[' . $deliveries->shId . ']" >' . $drops . '</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop[' . $deliveries->shId . ']" id="statusDrop_' . $deliveries->shId . '">' . $drops . '</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop[' . $deliveries->shId . ']" ></select>';
+                if($deliveries->rider_status_reason_id != null && $deliveries->latest_rider_status_id != null){
+                    if($deliveries->nsa_osa_status == 1){
+                        $reasons = ShipmentStatus::find($deliveries->rider_status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
+                    }else{
+                        $reasons = ShipmentStatus::find($deliveries->rider_status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+                    }
+                    $drops = '';
+                    foreach($reasons as $reason){
+                        if($reason->id == $deliveries->rider_status_reason_id){
+                            $drops .= '<option value="' . $reason->id . '" selected="selected">' . $reason->name . '</option>';
+                        }
+                        else{
+                            $drops .= '<option value="' . $reason->id . '">' . $reason->name . '</option>';
+                        }
+                    }
+                    $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop[' . $deliveries->shId . ']" id="reasonDrop_' . $deliveries->shId . '">' . $drops . '</select>';
+                }
+                else{
+                    $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop[' . $deliveries->shId . ']" id="reasonDrop_' . $deliveries->shId . '"></select>';
+                }
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {
@@ -1972,7 +2016,22 @@ class DeliveryController extends Controller
                     ->where('rrb.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering'])
+            ->leftJoin('shipments_journey as sjr', function ($join) {
+                $join->on('sjr.shipment_id', '=', 'shipments.id')
+                    ->where('sjr.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.rider_id IS NOT NULL)'));
+            })
+            ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sjr.shipper_status_id')
+            ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sjr.status_reason_id')
+            ->leftJoin('rider_deliveries as rds', function ($join) {
+                $join->on('rds.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where('rds.id', '=',
+                        DB::raw('(select max(id) from rider_deliveries where rider_deliveries.delivery_note_id = delivery_notes.id and rider_deliveries.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('consignee_shipment_locations as csl', 'csl.shipment_id', '=', 'shipments.id')
+            ->leftjoin('consignee_locations as pcls', 'pcls.id', '=', 'csl.previous_location_id')
+            ->leftjoin('consignee_locations as ccls', 'ccls.id', '=', 'csl.current_location_id')
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -2098,6 +2157,55 @@ class DeliveryController extends Controller
                  $open_box_checkbox = '<input type="checkbox" class="open_box" name="open_box[' . $deliveries->shId . ']">';
                      return $open_box_checkbox;
             })
+            ->addColumn('confirm_location', function ($deliveries){
+                if ($deliveries->current_status_id != 14) {
+                    return '';
+                } else {
+                    $lat = null;
+                    $long = null;
+                    if($deliveries->actual_location_latitude != null && $deliveries->actual_location_longitude != null){
+                        $lat = $deliveries->actual_location_latitude;
+                        $long = $deliveries->actual_location_longitude;
+                    }
+                    else if($deliveries->previous_location_id != null){
+                        $lat = $deliveries->plat;
+                        $long = $deliveries->plong;
+                    }
+                    if($lat != null && $long != null) {
+                        $confirm_location_checkbox = '<input type="checkbox" class="confirm_location" name="confirm_location[' . $deliveries->shId . ']">';
+                    }
+                    else{
+                        return '';
+                    }
+                    return $confirm_location_checkbox;
+                }
+            })
+            ->addColumn('rider_location', function ($deliveries){
+                $location = '<div class="text-center">';
+                if($deliveries->actual_location_latitude != null && $deliveries->actual_location_longitude != null){
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $deliveries->actual_location_latitude . ',' . $deliveries->actual_location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    return $location;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('existing_location', function ($deliveries){
+                $lat = null;
+                $long = null;
+                if($deliveries->previous_location_id != null){
+                    $lat = $deliveries->plat;
+                    $long = $deliveries->plong;
+                }
+                $location = '<div class="text-center">';
+                if($lat != null && $long != null){
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $lat . ',' . $long . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    return $location;
+                }
+                else{
+                    return '-';
+                }
+            })
             ->make(true);
     }
 
@@ -2139,7 +2247,9 @@ class DeliveryController extends Controller
                     $status_drop = "status_drop.$shipment";
                     $reasonId = "reason_drop.$shipment";
                     $open_box_shipment = "open_box.$shipment";
+                    $confirm_location_shipment = "confirm_location.$shipment";
                     $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
+
                     if($verify_fake){
                         if ($request->has($fake)) {
                             $verify_fake->fake_status = 1;
@@ -2162,6 +2272,54 @@ class DeliveryController extends Controller
                             }
                         
                         
+                    }
+
+                    if ($request->has($status_drop) && $request->status_drop[$shipment] == 14) {
+                        if ($request->has($confirm_location_shipment)) {
+                            $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
+                            $coordinates_shipment = Shipment::find($shipment);
+                            $consignee_phone_number_1 = $coordinates_shipment->consignee_phone_number_1;
+                            $consignee_phone_number_2 = $coordinates_shipment->consignee_phone_number_2;
+                            $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+                                $sub_query->where('phone_number', $consignee_phone_number_1)
+                                    ->orwhere('phone_number', $consignee_phone_number_2);
+                            })->where('address', $coordinates_shipment->consignee_address);
+                            if ($coordinates->exists()) {
+                                $coordinates = $coordinates->latest()->first();
+                                $coordinates->lat = $rider_delivery->actual_location_latitude;
+                                $coordinates->long = $rider_delivery->actual_location_longitude;
+                                $coordinates->save();
+                            } else {
+                                $coordinates = new ConsigneeLocation();
+                                $coordinates->phone_number = $consignee_phone_number_1;
+                                $coordinates->address = $coordinates_shipment->consignee_address;
+                                $coordinates->lat = $rider_delivery->actual_location_latitude;
+                                $coordinates->long = $rider_delivery->actual_location_longitude;
+                                $coordinates->save();
+                            }
+                            $existing_shipment_coordinates = ConsigneeShipmentLocation::where('shipment_id', $shipment);
+                            if ($existing_shipment_coordinates->exists()) {
+                                $existing_shipment_coordinates = $existing_shipment_coordinates->first();
+                                $existing_shipment_coordinates->current_location_id = $coordinates->id;
+                                $existing_shipment_coordinates->save();
+                            } else {
+                                $existing_shipment_coordinates = new ConsigneeShipmentLocation();
+                                $existing_shipment_coordinates->shipment_id = $shipment;
+                                $existing_shipment_coordinates->previous_location_id = null;
+                                $existing_shipment_coordinates->current_location_id = $coordinates->id;
+                                $existing_shipment_coordinates->save();
+                            }
+                        }
+                        else{
+                            $existing_shipment_coordinates = ConsigneeShipmentLocation::where('shipment_id', $shipment);
+                            if ($existing_shipment_coordinates->exists()) {
+                                $existing_shipment_coordinates = $existing_shipment_coordinates->first();
+                                if($existing_shipment_coordinates->previous_location_id != null){
+                                    $existing_shipment_coordinates->current_location_id = $existing_shipment_coordinates->previous_location_id;
+                                    $existing_shipment_coordinates->save();
+                                }
+                            }
+                        }
                     }
                     if (!$in_new_delivery_note) {
                         if (!in_array($shipper_status_details->shipper_status_id, $return_status_array)) {
@@ -5199,6 +5357,24 @@ class DeliveryController extends Controller
         }
         else{
             return response()->json(['status' => 1, 'error' => 'Delivery note does not exists']);
+        }
+    }
+
+    static public function rider_delivery_archive_directory(){
+
+        $files = File::glob(public_path() . '/storage/rider_delivery/*.*');
+        $now = Carbon::now();
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                $created = date("F d Y H:i:s.",filemtime($file));
+                $file_name = pathinfo($file);
+                if($now->diffInDays($created) > 1){
+                    Storage::disk('s3')->put('rider_delivery/'.$file_name['basename'], file_get_contents($file));
+                    if(Storage::disk('s3')->exists('rider_delivery/'.$file_name['basename'])){
+                        File::delete($file);
+                    }
+                }
+            }
         }
     }
 }

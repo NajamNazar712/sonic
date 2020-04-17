@@ -18,6 +18,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\http\Models\WMS\WmsCurrentStock;
 use App\Http\Models\WMS\WmsPendingPicking;
 use App\Http\Models\WMS\WmsShipmentProduct;
+use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -53,7 +54,8 @@ class ShipperDashboardController extends Controller
     }
 
     public function welcome_index(){
-        return view('client.welcome');
+        $quote = Inspiring::quote();
+        return view('client.welcome')->with(['quote' => $quote]);
     }
 
     public function orders_index() {
@@ -470,7 +472,7 @@ class ShipperDashboardController extends Controller
 
         return Datatables::of($banks)
         ->addColumn('action', function ($bank) {
-            return '';
+
             $dropdown = '
                 <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -478,10 +480,11 @@ class ShipperDashboardController extends Controller
             ';
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
 
-            if (!$bank->default_bank) {
-                $dropdown .= $default_button;
-            }else{
+            if ($bank->default_bank) {
                 $dropdown = 'Default Address';
+
+            }else{
+                $dropdown .= $default_button;
             }
             
 

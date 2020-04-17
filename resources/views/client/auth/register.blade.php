@@ -505,7 +505,7 @@
                                                             IBAN Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no.0') }}" name="iban_no[]">
+                                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="{{ old('iban_no.0') }}" name="iban_no[]" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
                                                     </div>
 
                                                         <div class="form-group">
@@ -587,7 +587,7 @@
                                                                                 IBAN Number:
                                                                                 <span class="danger">*</span>
                                                                             </label>
-                                                                            <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no.'.$b) }}" name="iban_no[]">
+                                                                            <input type="text" class="form-control required" placeholder="(e.g: PK37MEZN0001220100004069)" value="{{ old('iban_no.'.$b) }}" name="iban_no[]" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
                                                                         </div>
 
                                                                             <div class="form-group">
@@ -617,12 +617,12 @@
                                                     
                                             </div>
                                             
-                                            <!-- <div class="row" id="more_banks_btn_div">
+                                            <div class="row" id="more_banks_btn_div">
                                                 <div class="col-12">
                                                         <button id="addMoreBanks" type="button" class="btn btn-primary btn-min-width mr-1 mb-1"><i class="la la-plus"></i>&nbsp; Add More Banks</button>
                                                 </div>
-                                                
-                                            </div> -->
+
+                                            </div>
                                             <div id="billing_information_div" class="row d-none">
                                                 <div class="col-md-6">
 
@@ -939,6 +939,7 @@
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
         $("input[name='strn_no']").inputmask({'mask': "9999999999999", 'clearIncomplete': true});
+
         $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,
             theme: 'dark',
@@ -981,6 +982,7 @@
                 }, 2000);
                 $('#banking_' + banking_div + ' .select2').select2({
                 });
+
 
                 $('#banking_' + banking_div + ' a[data-action="close"]').on('click',function(){
                     $(this).closest('.card').remove();

@@ -115,6 +115,51 @@ class APIController extends Controller
       'distinct' => ':attribute must not be Repeated.'
     ];
 
+    public function login(Request $request) {
+      $rules = [
+        'email_address' => ['required', 'email'],
+        'password' => ['required', 'min:6']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $user = User::where('email', $request->input('email_address'));
+
+        if ($user->exists()) {
+          $user = $user->first();
+
+          if ($user->blacklist == 1) {
+            return response()->json(['status' => 1, 'message' => 'Your Account is Blacklisted.']);
+          }
+          else if ($user->status != 3) {
+            return response()->json(['status' => 1, 'message' => 'Your Account is not Activated yet.']);
+          }
+          else if (Hash::check($request->input('password'), $user->password)) {
+            $information = array();
+
+            $information['id'] = $user->id;
+            $information['name'] = $user->name;
+            $information['account_type_id'] = $user->account_type_id;
+            $information['api_key'] = $user->api_token;
+
+            return response()->json(['status' => 0, 'message' => 'Logged In Succesfully', 'information' => $information]);
+          }
+          else {
+            return response()->json(['status' => 1, 'message' => 'Invalid Password']);
+          }
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'No User with given Email Address']);
+        }
+      }
+    }
+
     public function verify(Request $request) {
       return response()->json(['status' => 0, 'message' => 'API Key is Valid']);
     }
@@ -229,7 +274,7 @@ class APIController extends Controller
       if($user_type['account_type_id'] == 1) {
         $rules = [
             'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
-                $query->whereNotIn('id', [3, 4, 5]);
+				$query->whereNotIn('id', [4, 5]);
             })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
@@ -259,19 +304,19 @@ class APIController extends Controller
             })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,500'],
+            'item_description' => ['required_if:service_type_id,1,2', 'between:0,1000'],
             'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,500'],
+            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
 			'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'numeric', 'min:0'],
-            'items' => ['required_if:service_type_id,3', 'array'],
+            'items' => ['required_if:service_type_id,3', 'array', 'min:1', 'max:5'],
             'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,500'],
+            'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,1000'],
             'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
             'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
@@ -302,7 +347,7 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
+            'amount' => ['required', 'numeric', 'between:0,1000000'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
@@ -317,12 +362,12 @@ class APIController extends Controller
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,500'],
+            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
             'items' => ['required_if:service_type_id,3', 'array'],
             'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,500'],
+            'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,1000'],
             'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
             'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']

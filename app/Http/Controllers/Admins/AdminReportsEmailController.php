@@ -400,7 +400,12 @@ class AdminReportsEmailController extends Controller
             $total_avg_shipment_count = $total_avg_shipment_count + $avg_shipment[$month_average->origin_id];
             $total_month_speed_count = $total_month_speed_count + $month_speed[$month_average->origin_id];
         }
-        $total_avg_revenue_count = $total_revenue_count / $total_shipments_count;
+        if($total_shipments_count != 0){
+            $total_avg_revenue_count = $total_revenue_count / $total_shipments_count;
+        }
+        else{
+            $total_avg_revenue_count = 0;
+        }
 
         $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Avg Shipments/Day' => '', 'Month Speed' => ''];
         $month_average_array[] = ['serial' => 'Total', 'Origin' => '', 'Total Parcel' => $total_shipments_count, 'Revenue' => round($total_revenue_count, 2), 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Avg Shipments/Day' => round($total_avg_shipment_count, 2), 'Month Speed' => round($total_month_speed_count, 2)];
@@ -774,7 +779,7 @@ class AdminReportsEmailController extends Controller
             }
             if(count($origin_hubs) > 0){
                 foreach ($origin_hubs as $origin_hub){
-                    $cargo_consignments = CargoConsignment::where('origin_hub_id', $origin->id)->where('destination_hub_id', $origin_hub)->where('status_id', 1)->where('created_at', '<=', $date_to);
+                    $cargo_consignments = CargoConsignment::where('origin_hub_id', $origin->id)->where('destination_hub_id', $origin_hub)->where('status_id', 1)->where('type', 1)->where('created_at', '<=', $date_to);
                     if($cargo_consignments->exists()){
                         $cargo_consignments = $cargo_consignments->get();
                         foreach($cargo_consignments as $cargo_consignment){

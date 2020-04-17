@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CRM;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
@@ -62,6 +63,17 @@ class CRMController extends Controller
 
         $crm_request_status_history->save();
         NotificationsController::send(31, $id);
+
+        if($case_nature_id == 1 && $launched_by == 1){
+            $settings = GlobalSettings::where('type', 'auto_crm_comment');
+            if($settings->exists()){
+                $settings = $settings->first();
+                $comment = $settings->text;
+                $comment_by = 0;
+                $comment_type = 0;
+                CRMCommentController::add($id, 61,$comment_by,$comment_type, $comment);
+            }
+        }
 
         return $crm_request->id;
     }

@@ -156,7 +156,7 @@ class AdminTrackingController extends Controller
                             }
                         }
 
-                        if ($journey->reference_1_id) {
+                        if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
                             if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
                                 $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
                             }
@@ -187,13 +187,20 @@ class AdminTrackingController extends Controller
 
                             $journey_details['status'] .= ')';
                         }
+                        $user = '';
+                        if($journey->admin_id){
+                            $user = $journey->admin->name;
+                        }else if($journey->user_id){
+                            $user = $journey->user->name;
+                        }
 
                         $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                         $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
-                        $journey_details['user'] = ($journey->admin_id) ? $journey->admin->name : $journey->user->name;
+                        $journey_details['user'] = $user;
                         $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
                         $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
                         $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
+                        $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
 
                         $details['tracking_history'][] = $journey_details;
                     }
