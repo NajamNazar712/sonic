@@ -41,7 +41,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\AccountReconciliationReportCurrent',
 		'\App\Console\Commands\BusinessProjectionAndRetention',
 		'\App\Console\Commands\CRMDelayInDelivery',
-		'\App\Console\Commands\CRMPaymentComplains'
+		'\App\Console\Commands\CRMPaymentComplains',
+        '\App\Console\Commands\AutoShipmentArrival'
         ];
 
     /**
@@ -117,6 +118,8 @@ class Kernel extends ConsoleKernel
 		$schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
 		$schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
 		$schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
+
+        $schedule->command('auto:shipmentarrival')->dailyAt('10:00')->runInBackground();
     }
 
     /**
