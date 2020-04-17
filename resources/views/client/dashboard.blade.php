@@ -568,100 +568,101 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
 
+                    {{--{--}}
+                    {{--    text: '<i class="la la-plus"></i> Consolidate',--}}
+                    {{--    className: 'btn btn-primary consolidate',--}}
+                    {{--    enabled: false,--}}
+                    {{--    action: function (e, dt, node, config) {--}}
+                    {{--        if (selected_rows.length > 1) {--}}
+                    {{--            $.ajax({--}}
+                    {{--                url: '{!! route('cod.orders.consolidate.shipment_info') !!}',--}}
+                    {{--                method: 'POST',--}}
+                    {{--                data: {--}}
+                    {{--                    'shipment_ids': selected_rows,--}}
+                    {{--                    '_token': '{{ csrf_token() }}'--}}
+                    {{--                }--}}
+                    {{--            }).done(function (data) {--}}
+                    {{--                if (data.status === 1) {--}}
+                    {{--                    $('#consolidate_shipment_ids').val(selected_rows);--}}
+                    {{--                    var route = '{!! route('cod.tracking.index') !!}';--}}
+                    {{--                    var html = '';--}}
+                    {{--                    html += '<table class="table datatable text-center">';--}}
+                    {{--                    html += '<thead><tr><th>S No.</th><th><strong>Tracking No</strong></th><th><strong>Origin</strong></th><th><strong>Destination</strong><th><strong>Consignee Name & Phone</strong></th><th><strong>Consignee Address</strong></th><th><strong>COD Amount</strong></th><th><strong>Product Type</strong></th><th><strong>Booking Date</strong></th><th><strong>Action</strong></th></tr></thead>';--}}
+                    {{--                    html += '<tbody>';--}}
+                    {{--                    $.each(data.shipment_info, function(index, value) {--}}
+                    {{--                        var ind = index+1;--}}
+                    {{--                        html += '<tr class=""><td>' + ind + '</td>';--}}
+                    {{--                        html += '<td><u><a href='+route+'?tracking_number='+value.tracking_number+' target="_blank">'+value.tracking_number+'</a></u></td>';--}}
+                    {{--                        // if(value.order_id != null){--}}
+                    {{--                        //     html += '<td>' + value.order_id + '</td>';--}}
+                    {{--                        // } else{--}}
+                    {{--                        //     html += '<td>-</td>';--}}
+                    {{--                        // }--}}
+                    {{--                        html += '<td>' + value.origin + '</td>';--}}
+                    {{--                        html += '<td>' + value.destination + '</td>';--}}
+                    {{--                        html += '<td>' + value.consignee_name + ' | ' + value.consignee_phone_number_1 + '</td>';--}}
+                    {{--                        // html += '<td>' + value.consignee_phone_number_1 + '</td>';--}}
+                    {{--                        html += '<td>' + value.consignee_address + '</td>';--}}
+                    {{--                        html += '<td>' + value.amount + '</td>';--}}
+                    {{--                        html += '<td>' + value.product_type + '</td>';--}}
+                    {{--                        html += '<td>' + value.created_at + '</td>';--}}
+                    {{--                        if(index == 0){--}}
+                    {{--                            html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '" checked="checked"><label for="default-radio">Make Default</label></td></tr>';--}}
+                    {{--                        }--}}
+                    {{--                        else{--}}
+                    {{--                            html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '"><label for="default-radio">Make Default</label></td></tr>';--}}
+                    {{--                        }--}}
+                    {{--                    });--}}
+                    {{--                    html += '</tbody></table>';--}}
+
+                    {{--                    $('#ConsolidateModal .modal-body .row .consolidate_shipment_table').html(html);--}}
+                    {{--                    $('#ConsolidateModal').modal('show');--}}
+                    {{--                } else if(data.status === 2){--}}
+                    {{--                        var consolidated_html = '';--}}
+
+                    {{--                        $.each(data.consolidated_Shipments, function(index, tracking_number) {--}}
+                    {{--                            consolidated_html += tracking_number + '<br/>';--}}
+                    {{--                        });--}}
+
+                    {{--                        consolidated_html += '<br/>Above Shipment(s) are already Consolidated!';--}}
+
+                    {{--                        content = document.createElement('div');--}}
+                    {{--                        content.innerHTML = consolidated_html;--}}
+
+                    {{--                        swal({--}}
+                    {{--                            title: 'Already Consolidated',--}}
+                    {{--                            content: content,--}}
+                    {{--                            icon: 'warning',--}}
+                    {{--                            buttons: {--}}
+                    {{--                                cancel: {--}}
+                    {{--                                    text: 'Close',--}}
+                    {{--                                    value: null,--}}
+                    {{--                                    visible: true,--}}
+                    {{--                                    closeModal: true,--}}
+                    {{--                                },--}}
+                    {{--                            },--}}
+                    {{--                            closeOnClickOutside: false,--}}
+                    {{--                            closeOnEsc: false,--}}
+                    {{--                            dangerMode: true--}}
+                    {{--                        });--}}
+                    {{--                } else{--}}
+                    {{--                    toastr.error(data.error, 'Error!', {--}}
+                    {{--                        positionClass: 'toast-top-center',--}}
+                    {{--                        containerId: 'toast-top-center'--}}
+                    {{--                    });--}}
+                    {{--                }--}}
+                    {{--            });--}}
+                    {{--        }--}}
+                    {{--        else{--}}
+                    {{--            var error = 'Select at least two shipments to Consolidate';--}}
+                    {{--            toastr.error(error, 'Error!', {--}}
+                    {{--                positionClass: 'toast-top-center',--}}
+                    {{--                containerId: 'toast-top-center'--}}
+                    {{--            });--}}
+                    {{--        }--}}
+                    {{--    }--}}
+                    {{--},--}}
                     {
-                        text: '<i class="la la-plus"></i> Consolidate',
-                        className: 'btn btn-primary consolidate',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if (selected_rows.length > 1) {
-                                $.ajax({
-                                    url: '{!! route('cod.orders.consolidate.shipment_info') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        'shipment_ids': selected_rows,
-                                        '_token': '{{ csrf_token() }}'
-                                    }
-                                }).done(function (data) {
-                                    if (data.status === 1) {
-                                        $('#consolidate_shipment_ids').val(selected_rows);
-                                        var route = '{!! route('cod.tracking.index') !!}';
-                                        var html = '';
-                                        html += '<table class="table datatable text-center">';
-                                        html += '<thead><tr><th>S No.</th><th><strong>Tracking No</strong></th><th><strong>Origin</strong></th><th><strong>Destination</strong><th><strong>Consignee Name & Phone</strong></th><th><strong>Consignee Address</strong></th><th><strong>COD Amount</strong></th><th><strong>Product Type</strong></th><th><strong>Booking Date</strong></th><th><strong>Action</strong></th></tr></thead>';
-                                        html += '<tbody>';
-                                        $.each(data.shipment_info, function(index, value) {
-                                            var ind = index+1;
-                                            html += '<tr class=""><td>' + ind + '</td>';
-                                            html += '<td><u><a href='+route+'?tracking_number='+value.tracking_number+' target="_blank">'+value.tracking_number+'</a></u></td>';
-                                            // if(value.order_id != null){
-                                            //     html += '<td>' + value.order_id + '</td>';
-                                            // } else{
-                                            //     html += '<td>-</td>';
-                                            // }
-                                            html += '<td>' + value.origin + '</td>';
-                                            html += '<td>' + value.destination + '</td>';
-                                            html += '<td>' + value.consignee_name + ' | ' + value.consignee_phone_number_1 + '</td>';
-                                            // html += '<td>' + value.consignee_phone_number_1 + '</td>';
-                                            html += '<td>' + value.consignee_address + '</td>';
-                                            html += '<td>' + value.amount + '</td>';
-                                            html += '<td>' + value.product_type + '</td>';
-                                            html += '<td>' + value.created_at + '</td>';
-                                            if(index == 0){
-                                                html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '" checked="checked"><label for="default-radio">Make Default</label></td></tr>';
-                                            }
-                                            else{
-                                                html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '"><label for="default-radio">Make Default</label></td></tr>';
-                                            }
-                                        });
-                                        html += '</tbody></table>';
-
-                                        $('#ConsolidateModal .modal-body .row .consolidate_shipment_table').html(html);
-                                        $('#ConsolidateModal').modal('show');
-                                    } else if(data.status === 2){
-                                            var consolidated_html = '';
-
-                                            $.each(data.consolidated_Shipments, function(index, tracking_number) {
-                                                consolidated_html += tracking_number + '<br/>';
-                                            });
-
-                                            consolidated_html += '<br/>Above Shipment(s) are already Consolidated!';
-
-                                            content = document.createElement('div');
-                                            content.innerHTML = consolidated_html;
-
-                                            swal({
-                                                title: 'Already Consolidated',
-                                                content: content,
-                                                icon: 'warning',
-                                                buttons: {
-                                                    cancel: {
-                                                        text: 'Close',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
-                                                },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false,
-                                                dangerMode: true
-                                            });
-                                    } else{
-                                        toastr.error(data.error, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-                                    }
-                                });
-                            }
-                            else{
-                                var error = 'Select at least two shipments to Consolidate';
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        }
-                    },{
                     text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
                     enabled: false,
