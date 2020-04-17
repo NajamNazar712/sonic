@@ -8,6 +8,7 @@ use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
@@ -634,13 +635,18 @@ class RiderAPIController extends Controller {
                     $journey = $journey->first();
                     $remarks = $journey->remarks;
                 }
-                if($delivery_note_shipment->status == 0){
+                $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('shipment_id', $shipment_id);
+                if($rider_delivery->exists()){
+                    $rider_delivery = $rider_delivery->first();
+                    if($rider_delivery->delivered_status == 0){
+                        $status = 3;
+                    }else if($rider_delivery->delivered_status == 1){
+                        $status = 2;
+                    }
+                }else{
                     $status = 1;
-                }else if($delivery_note_shipment->status == 1){
-                    $status = 3;
-                }else if($delivery_note_shipment->status > 1){
-                    $status = 2;
                 }
+
 
                 $deliveries = array();
                 $deliveries['shipment_id'] = $shipment_id;
@@ -755,7 +761,7 @@ class RiderAPIController extends Controller {
         $rules = [
             'actions' => ['required', 'array', 'min:1'],
             'actions.*.logged_at' => ['required'],
-            'actions.*.type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_actions,id'],
+            'actions.*.type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_actions,id'],
             'actions.*.delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
             'actions.*.shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
         ];
@@ -796,8 +802,8 @@ class RiderAPIController extends Controller {
             'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
-            'receiver_name' => ['nullable, string, max:255'],
-            'cnic' => ['nullable, string, max:255'],
+            'receiver_name' => ['nullable', 'string', 'max:255'],
+            'cnic' => ['nullable', 'max:255'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -838,9 +844,9 @@ class RiderAPIController extends Controller {
                     $received_by .= ' | '. $request->cnic;
                 }
 
-                if($request->has('receiver_name')){
-                    $rider_delivery->receiver_name = $request->receiver_name;
-                }
+//                if($request->has('receiver_name')){
+//                    $rider_delivery->receiver_name = $request->receiver_name;
+//                }
 
                 $shipment = Shipment::find($request->shipment_id);
 
@@ -906,7 +912,7 @@ class RiderAPIController extends Controller {
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
-            'remarks' => ['nullable, string, max:255'],
+            'remarks' => ['nullable', 'string', 'max:255'],
             'picture' => ['required', 'image']
         ];
 
