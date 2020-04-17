@@ -412,9 +412,7 @@ table.page.info
                     if(rowsCount === 0) {
                         blockPagePermanently();
                         $.ajax({
-                            url:'{{route('
-admin.delivery.note.shipment.info
-')}}',
+                            url:'{{route('admin.delivery.note.shipment.info')}}',
                             type:'POST',
                             data: {
                                 'tracking':tracking,
