@@ -740,9 +740,6 @@
                                     @if (session('role_id') == 1 || in_array(104, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}">Pickup Weight Threshold</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(326, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.settings.default_weight.index')}}">Default Weight</a></li>
-                                    @endif
                                 </ul>
                             </li>
                         @endif
