@@ -75,6 +75,7 @@
                         <th class="border-primary border-darken-1">Last Rider Name</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Open Box</th>
+                        <th class="border-primary border-darken-1">Consolidation</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -362,6 +363,7 @@
                     {name: 'rider_name', class: 'align-middle rider_name', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
                     {name: 'open_box', class: 'align-middle open_box', orderable: false},
+                    {name: 'consolidation', class: 'align-middle consolidation', orderable: false},
                     {name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 initComplete: function() {
@@ -417,11 +419,19 @@
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
                                 var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
-
+                                var consolidation = '';
+                                if(data.consolidation_flag){
+                                    consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
+                                }else{
+                                    consolidation = '-';
+                                }
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                var row = table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,remove]).node().id = data.shId;
+                                var row = table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,consolidation,remove]).node().id = data.shId;
                                 table.draw(false);
                                 $('tr#'+row).attr('class',data.class);
+                                if(data.consolidation_flag){
+                                    $('tr#'+row).attr('consolidation_id',data.consolidation_details.consolidation_id);
+                                }
                                 // table.rows(row).nodes().attr("class", data.class);
                                 scan_sound(1);
                                 UnblockPagePermanently();
@@ -467,10 +477,19 @@
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                     var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
-
-                                    var row = table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,remove]).node().id = data.shId;
+                                    var consolidation = '';
+                                    if(data.consolidation_flag){
+                                        consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
+                                    }else{
+                                        consolidation = '-';
+                                    }
+                                    var row = table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks, open_box,consolidation,remove]).node().id = data.shId;
                                     table.draw(false);
                                     $('tr#'+row).attr('class',data.class);
+                                    if(data.consolidation_flag){
+                                        $('tr#'+row).attr('consolidation_id',data.consolidation_details.consolidation_id);
+                                    }
+
                                     scan_sound(1);
                                     UnblockPagePermanently();
                                     shipment_ids.push(data.shId);
