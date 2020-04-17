@@ -41,6 +41,7 @@ Route::name('api.')->group(function () {
 		Route::get('cities', 'APIController@cities')->name('cities');
 
 		Route::post('charges_calculate', 'APIController@charges_calculate')->name('charges_calculate');
+		Route::post('consolidate', 'APIController@shipment_consolidate')->name('consolidate');
 	});
 
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
@@ -58,6 +59,19 @@ Route::name('api.')->group(function () {
                 Route::post('not_pick', 'Rider\RiderAPIController@pickup_not_pick')->name('pickup_not_pick');
                 Route::post('action_log', 'Rider\RiderAPIController@pickup_action_log')->name('pickup_action_log');
 	        });
+            Route::prefix('delivery')->name('delivery.')->group(function () {
+                Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
+                Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
+                Route::post('delivered', 'Rider\RiderAPIController@shipment_delivered')->name('delivered');
+                Route::post('undelivered', 'Rider\RiderAPIController@shipment_undelivered')->name('undelivered');
+            });
+            Route::prefix('comments')->name('comments.')->group(function () {
+                Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
+            });
+
 		});
+
+
+
 	});
 });

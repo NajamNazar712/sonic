@@ -9,6 +9,7 @@ use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\ChargesModes;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\RevertStatusRequestLog;
 use App\Http\Models\Rider;
@@ -674,7 +675,12 @@ class AdminFinanceController extends Controller
                 $join->on('rsr.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
                     ->where('rsr.id', '=', DB::raw('(SELECT MAX(id) FROM revert_status_requests WHERE revert_status_requests.delivery_note_id = delivery_note_shipments.delivery_note_id AND shipment_id = s.id)'));
             })
-            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id')
+            ->leftjoin('consolidation_shipments as consolidations', function ($join){
+                $join->on('consolidations.shipment_id', '=', 's.id')
+                    ->where('consolidations.consolidation_id','=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
+            })
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id','consolidations.consolidation_id')
             ->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
 
         if (session('role_id') != 1) {
@@ -707,6 +713,13 @@ class AdminFinanceController extends Controller
                         return '';
                     }
                 },
+                'consolidation_id' => function($shipments){
+                    if($shipments->consolidation_id != null){
+                        return $shipments->consolidation_id;
+                    } else {
+                        return '';
+                    }
+                }
             ])
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -2704,7 +2717,12 @@ class AdminFinanceController extends Controller
         $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
             ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
-            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
+            ->leftjoin('consolidation_shipments as consolidations', function ($join){
+                $join->on('consolidations.shipment_id', '=', 's.id')
+                    ->where('consolidations.consolidation_id','=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
+            })
+            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable','consolidations.consolidation_id');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -2714,6 +2732,15 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($pending_payment_shipments)
+            ->setRowAttr([
+                'consolidation_id' => function($deliveries){
+                    if($deliveries->consolidation_id != null){
+                        return $deliveries->consolidation_id;
+                    } else {
+                        return '';
+                    }
+                }
+            ])
             ->addColumn('deductable', function($pending_payment_shipments) {
                 return number_format(($pending_payment_shipments->charges + $pending_payment_shipments->gst), 2);
             })
@@ -2999,11 +3026,24 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_store(Request $request) {
+
         $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
             return [$item['pending_payment_id'] => $item['id']];
         })->toArray();
 
         $done_payment_ids = array();
+//        $present_consolidation_shipments = array();
+//        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
+//            foreach ($pending_payment_shipment_ids as $shipment_id){
+//                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
+//                if($present->exists()){
+//                    $present = $present->first();
+//                    $consolidation_id = $present->consolidation_id;
+//
+//                }
+//            }
+//        }
+
 
         foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
             $total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();

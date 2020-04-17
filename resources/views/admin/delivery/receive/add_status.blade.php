@@ -1,7 +1,6 @@
 
 @extends('admin.layout.master')
 @section('title','Receive Deliveries')
-
 @section('content')
     <h1 class="mb-1">
         Receive Deliveries(Delivery Note: {{str_pad($delivery_note_id, 6, '0', STR_PAD_LEFT)}})
@@ -55,6 +54,8 @@
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
+                            <th class="border-primary border-darken-1">Rider Status</th>
+                            <th class="border-primary border-darken-1">Rider Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Address</th>
@@ -64,7 +65,8 @@
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Attempts Count</th>
                             <th class="border-primary border-darken-1">Open Box</th>
-                            <th class="border-primary border-darken-1">Clear</th>
+							<th class="border-primary border-darken-1">Consolidation</th>
+                            <th class="border-primary border-darken-1">Consolidated IDs</th>                            <th class="border-primary border-darken-1">Clear</th>
                         </tr>
                         </thead>
                     </table>
@@ -659,6 +661,8 @@
                     {data:'collection_amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status form-group statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason form-group reasonSelect',orderable: false, searchable: false},
+                    {data:'rider_status',name: 'rss.name', class: 'align-middle status form-group rider_status',orderable: false, searchable: false},
+                    {data:'rider_reason',name: 'rssr.name', class: 'align-middle reason form-group rider_reason',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
@@ -668,7 +672,8 @@
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
                     {data:'attempts' ,name: 'shipments.id', class: 'align-middle attempts'},
                     {data:'open_box' ,name: 'open_box', class: 'align-middle test-center open_box',orderable: false, searchable: false},
-                    {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
+					{data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation'},
+                    {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},                    {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -678,18 +683,45 @@
                     }
                 },
                 drawCallback: function (settings) {
-
-                    $(".reasonDrop").prepend('<option value="" selected="selected"></option>').select2({
-                        placeholder: "Select a Reason",
-                        width:'100%'
-                    });
-                    $(".statusDrop").prepend('<option value="" selected="selected"></option>').select2({
-                        placeholder: "Select a Status",
-                        width:'100%'
-                    });
                     var api = new $.fn.dataTable.Api( settings );
                     var data = api.rows( {page:'current'} ).data();
+                    var statuses = [7, 8, 9, 12, 15, 18, 56];
                     $.each(data,function (key,value) {
+                        if(value.rider_status_id != null && value.latest_rider_status_id != null ){
+                            if(statuses.includes(value.rider_status_id)){
+                                $("#statusDrop_"+value.shId).select2({
+                                    placeholder: "Select a Status",
+                                    width:'100%'
+                                });
+                                $("#reasonDrop_"+value.shId).select2({
+                                    placeholder: "Select a Reason",
+                                    width:'100%'
+                                });
+                                $('#statusSubmit').removeAttr('disabled');
+                            }
+                            else{
+                                $("#statusDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                    placeholder: "Select a Status",
+                                    width:'100%'
+                                });
+
+                                $("#reasonDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                    placeholder: "Select a Reason",
+                                    width:'100%'
+                                });
+                            }
+                        }
+                        else{
+                            $("#statusDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                placeholder: "Select a Status",
+                                width:'100%'
+                            });
+
+                            $("#reasonDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                                placeholder: "Select a Reason",
+                                width:'100%'
+                            });
+                        }
                         if(shipment_status.length !== 0){
                             $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
                         }
@@ -713,7 +745,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')|| $(header).is('.open_box')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')|| $(header).is('.open_box') || $(header).is('.consolidation')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -738,24 +770,53 @@
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
+                var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
 
-                var index = $.inArray(id, selected_rows);
+                if(con_id){
+                    table.rows().nodes().each(function(index) {
+                        var row = table.row(index);
+                        if ($(row.node()).attr('consolidation_id') == con_id) {
+                            var rid = parseInt($(row.node()).attr('id'));
+                            var rindex = $.inArray(rid, selected_rows);
 
-                if (index === -1) {
-                    selected_rows.push(id);
+                            if (rindex === -1) {
+                                selected_rows.push(rid);
+                                if(id != rid){
+
+                                    table.row(row).select();
+                                }
+                            }
+                            else {
+                                if(id != rid){
+
+                                    row.deselect();
+                                }
+                                selected_rows.splice(rindex, 1);
+                            }
+                        }
+                    });
+                }else{
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index === -1) {
+
+                        selected_rows.push(id);
+                    }
+                    else {
+                        selected_rows.splice(index, 1);
+                    }
                 }
-                else {
-                    selected_rows.splice(index, 1);
-                }
+
 
                 if (selected_rows.length > 0) {
-                    
+                    table.button('.delivered').enable();
                     $('#submit_selected_status').attr('disabled', false);
                 }
                 else {
-                    
+                    table.button('.delivered').disable();
                     $('#submit_selected_status').attr('disabled', true);
                 }
+                
             });
 
 

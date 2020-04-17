@@ -248,7 +248,7 @@
                                                         @foreach($comments as $comment)
                                                             @if($comment->comment_by == 0)
                                                                 <div id="chat_{{$comment->id}}"
-                                                                     class="chat admin {{($comment->comment_type == 1)? 'internal':'' }}">
+                                                                     class="chat admin {{($comment->comment_type == 1)? 'internal':'' }} {{($comment->comment_type == 2)? 'rider':'' }} ">
 
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-admin">
@@ -295,26 +295,48 @@
                                                                     </div>
                                                                 </div>
                                                             @else
-                                                                <div class="chat chat-left substitute-user">
+                                                                @if($comment->comment_type == 2)
+                                                                    <div id="chat_{{$comment->id}}"
+                                                                         class="chat admin rider">
 
-                                                                    <div class="chat-avatar">
-                                                                        <div class="badge block badge-substitute-user">
-                                                                            <i class="la la-user font-medium-2"></i>
-                                                                            @if($shipper != null)
-                                                                                {{$shipper}}
-                                                                            @else
-                                                                                Shipper
-                                                                            @endif
+                                                                        <div class="chat-avatar">
+                                                                            <div class="badge block badge-admin">
+                                                                                <i class="la la-user font-medium-2"></i>{{$comment->rider->name}}
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="chat-body">
+                                                                            <div class="chat-content text-left">
+                                                                                <p>{!! $comment->comment !!}</p>
+                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                            </div>
+                                                                        </div>
+
+                                                                    </div>
+                                                                    @else
+                                                                    <div class="chat chat-left substitute-user">
+
+                                                                        <div class="chat-avatar">
+                                                                            <div class="badge block badge-substitute-user">
+                                                                                <i class="la la-user font-medium-2"></i>
+                                                                                @if($shipper != null)
+                                                                                    {{$shipper}}
+                                                                                @else
+                                                                                    Shipper
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="chat-body">
+                                                                            <div class="chat-content text-left">
+                                                                                <p>{!! $comment->comment !!}</p>
+                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
 
-                                                                    <div class="chat-body">
-                                                                        <div class="chat-content text-left">
-                                                                            <p>{!! $comment->comment !!}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
+                                                                    @endif
+
 
                                                             @endif
                                                         @endforeach
@@ -335,7 +357,7 @@
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-100" placeholder="Type your message" row="4"></textarea>
+                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-2">
                                                             <fieldset
@@ -348,14 +370,23 @@
                                                             </fieldset>
                                                             @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))
                                                                 <fieldset
-                                                                        class="form-group position-relative has-icon-left m-0">
+                                                                        class="form-group position-relative has-icon-left mb-1">
                                                                     <button id="chat_send" type="button"
-                                                                            class="btn btn-block btn-default chat_send" to="0">
+                                                                            class="btn btn-block btn-outline-primary chat_send" to="0">
                                                                         <i class="la la-paper-plane-o d-lg-none"></i>
                                                                         <span class="">Shipper</span>
                                                                     </button>
                                                                 </fieldset>
                                                             @endif
+                                                            <fieldset
+                                                                    class="form-group has-icon-left">
+                                                                <button id="chat_send" type="button"
+                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i
+                                                                            class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Rider</span>
+                                                                </button>
+                                                            </fieldset>
+
                                                         </div>
                                                     </form>
                                                 </section>
@@ -379,7 +410,7 @@
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-100" placeholder="Type your message"></textarea>
+                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-2">
                                                             <fieldset
@@ -394,12 +425,20 @@
                                                             <fieldset
                                                                     class="form-group position-relative has-icon-left m-0">
                                                                 <button id="chat_send" type="button"
-                                                                        class="btn btn-block btn-default chat_send" to="0">
+                                                                        class="btn btn-block btn-outline-primary chat_send" to="0">
                                                                     <i class="la la-paper-plane-o d-lg-none"></i>
                                                                     <span class="">Shipper</span>
                                                                 </button>
                                                             </fieldset>
                                                             @endif
+                                                            <fieldset
+                                                                    class="form-group has-icon-left">
+                                                                <button id="chat_send" type="button"
+                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i
+                                                                            class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Rider</span>
+                                                                </button>
+                                                            </fieldset>
                                                         </div>
                                                     </form>
                                                 </section>
@@ -805,6 +844,14 @@
         .chat-application .chats .admin.internal .chat-body .chat-content:before {
             border-left-color: #ab45d7;
         }
+        .chat-application .chats .admin.rider .chat-content {
+            color: #ffffff;
+            background-color: #18374A;
+        }
+
+        .chat-application .chats .admin.rider .chat-body .chat-content:before {
+            border-left-color: #18374A;
+        }
     </style>
 @endsection
 
@@ -1193,8 +1240,11 @@
                 var request_id = '{{$crm_details->id}}';
                 var internal_switch = parseInt($(this).attr('to'));
                 var internal_class = '';
-                if (internal_switch) {
+
+                if (internal_switch == 1) {
                     internal_class = 'internal';
+                }else if(internal_switch === 2){
+                    internal_class = 'rider';
                 } else {
                     internal_class = '';
                 }
@@ -1217,13 +1267,16 @@
                         }
                     }).done(function (data) {
                         if (data.status) {
+
                             // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             var user = '{{Auth::user()->name}}';
                             // if($('div.chat:last-child').hasClass('admin')) {
                             //     var html = '<div class="chat-content"><p>' + comment + '</p></div>';
                             //     $('div.chat:last-child').find('.chat-body').append(html);
                             // }else{
-                            if (internal_switch) {
+                            if (internal_switch == 1) {
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                            }else if(internal_switch == 2){
                                 var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             } else {
                                 var last_comment = data.last_comment_id;
@@ -1272,8 +1325,10 @@
                                 if (data.comment.comment_type == 0) {
 
                                     var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                                } else {
+                                } else if(data.comment.comment_type == 1) {
                                     var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                }else{
+                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 }
                                 $('section.chat-app-window .chats').append(html);
 
@@ -1286,13 +1341,20 @@
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             } else {
-                                if ($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div>';
-                                    $('div.chat:last-child').find('.chat-body').append(html);
-                                } else {
-                                    var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                if(data.comment.comment_type == 0){
+                                    if ($('div.chat:last-child').hasClass('substitute-user')) {
+                                        var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div>';
+                                        $('div.chat:last-child').find('.chat-body').append(html);
+                                    } else {
+                                        var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                        $('section.chat-app-window .chats').append(html);
+                                    }
+                                }else{
+                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+
                                     $('section.chat-app-window .chats').append(html);
                                 }
+
 
                             }
                             $('#last_comment_id').val(data.comment.id);

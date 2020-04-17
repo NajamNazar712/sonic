@@ -50,6 +50,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('cancel','Shippers\ShipperDashboardController@order_cancel')->name('cancel');
         Route::post('cancel_all', 'Shippers\ShipperDashboardController@order_cancel_all')->name('cancel_all');
         Route::post('shipment_charges','Shippers\ShipperDashboardController@get_shipment_charges')->name('charges');
+		Route::prefix('consolidate')->name('consolidate.')->group(function(){
+            Route::post('shipment_info','Shippers\ShipperConsolidatedController@consolidate_shipment_info')->name('shipment_info');
+            Route::post('submit','Shippers\ShipperConsolidatedController@consolidate_shipment_submit')->name('submit');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
@@ -285,6 +289,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('logo')->name('logo.')->group(function () {
             Route::get('', 'Shippers\ShipperGlobalSettingsController@upload_logo_index')->name('index');
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@upload_logo_submit')->name('upload');
+        });
+    });
+	Route::prefix('consolidation')->name('consolidation.')->group(function () {
+        Route::prefix('history')->name('history.')->group(function () {
+            Route::get('', 'Shippers\ShipperConsolidatedController@consolidation_history_index')->name('index');
+            Route::get('list', 'Shippers\ShipperConsolidatedController@consolidation_history_list')->name('list');
         });
     });
 
@@ -573,7 +583,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
             Route::post('rider_check','Admins\DeliveryController@delivery_note_rider_check')->name('rider_check');
-
+			Route::post('consolidation_check','Admins\DeliveryController@note_consolidation_check')->name('consolidation_check');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {
@@ -1344,6 +1354,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
         });
 
+        Route::prefix('default_weight')->name('default_weight.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@default_weight_index')->name('index');
+            Route::post('list', 'Admins\GlobalSettingsController@default_weight_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@default_weight_add')->name('add');
+            Route::post('edit', 'Admins\GlobalSettingsController@default_weight_edit')->name('edit');
+        });
         Route::prefix('shipment_cancellation_cut_off_days')->name('shipment_cancellation_cut_off_days.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_store')->name('store');
@@ -1443,6 +1459,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_store')->name('store');
         });
+		Route::prefix('consolidation')->name('consolidation.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@consolidation_max_shipments_index')->name('max.index');
+            Route::post('update', 'Admins\GlobalSettingsController@consolidation_max_shipments_update')->name('max.update');
+        });
 
         Route::prefix('crm_case_nature_types')->name('crm_case_nature_types.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@crm_case_nature_types_index')->name('index');
@@ -1522,6 +1542,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\GlobalSettingsController@delay_in_delivery_massage')->name('index');
             Route::post('submit','Admins\GlobalSettingsController@delay_in_delivery_massage_store')->name('store');
         });
+
+        Route::prefix('crm_comment')->name('crm_comment.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@auto_crm_comment_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@auto_crm_comment_store')->name('store');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
@@ -1537,6 +1562,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');
             Route::get('list', 'Admins\AdminWalkInBookShipmentController@history_list')->name('walk_in_history_list');
+        });
+		Route::prefix('consolidation')->name('consolidation.')->group(function () {
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\AdminConsolidatedController@consolidation_history_index')->name('index');
+                Route::get('list', 'Admins\AdminConsolidatedController@consolidation_history_list')->name('list');
+            });
         });
     });
 
@@ -1608,6 +1639,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('scanning_history')->name('scanning_history.')->group(function (){
         Route::get('','Admins\AdminShipmentScanningHistoryController@index')->name('index');
         Route::post('details','Admins\AdminShipmentScanningHistoryController@details')->name('details');
+    });
+
+    Route::prefix('coordinates')->name('coordinates.')->group(function (){
+        Route::prefix('add')->name('add.')->group(function (){
+            Route::get('','Admins\CoordinatesController@add_index')->name('index');
+            Route::post('submit','Admins\CoordinatesController@add_submit')->name('submit');
+            Route::post('details','Admins\CoordinatesController@shipment_details')->name('shipment_details');
+            Route::post('search','Admins\CoordinatesController@address_search')->name('search.address');
+        });
     });
 });
 

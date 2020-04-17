@@ -484,6 +484,11 @@ class Permission
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
 
+            'settings.default_weight.index' => 104,
+            'settings.default_weight.list' => 104,
+            'settings.default_weight.add' => 104,
+            'settings.default_weight.editw' => 104,
+
             'settings.shipment_cancellation_cut_off_days.index' => 116,
             'settings.shipment_cancellation_cut_off_days.store' => 116,
 
@@ -528,6 +533,8 @@ class Permission
             'settings.delivery_call_verification_ratio.list' => 237,
             'settings.crm_cut_off_time_and_holidays.update' => 237,
             'settings.delivery_call_verification_ratio.add' => 237,
+			'settings.consolidation.max.index' => 256,
+            'settings.consolidation.max.update' => 256,
             'settings.crm_case_nature_types.index' => 260,
             'settings.crm_case_nature_types.list' => 260,
             'settings.crm_case_nature_types.store' => 260,
@@ -539,6 +546,9 @@ class Permission
 
             'settings.crm_reopen.index' => 274,
             'settings.crm_reopen.update' => 274,
+
+            'settings.crm_comment.index' => 325,
+            'settings.crm_comment.store' => 325,
 
             'settings.multiple_sale_tagging.index' => 279,
             'settings.multiple_sale_tagging.list' => 279,
@@ -561,6 +571,8 @@ class Permission
             'shipment.history.walk_in_history' => 209,
             'shipment.history.walk_in_history_list' => 209,
 
+			'shipment.consolidation.history.index' => 254,
+            'shipment.consolidation.history.list' => 254,
 
             'intercept.index' => 245,
             'intercept.update' => 245,
@@ -568,6 +580,11 @@ class Permission
             'scanning_history.index' => 306,
 
             'dashboard.sales.index' => 315,
+
+            'coordinates.add.index' => 324,
+            'coordinates.add.submit' => 324,
+            'coordinates.add.shipment_details' => 324,
+            'coordinates.add.search.address' => 324,
         ],
 
         'shipper' => [

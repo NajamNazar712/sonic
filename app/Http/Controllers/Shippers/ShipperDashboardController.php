@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BookingType;
+use App\Http\Models\Consolidation;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
@@ -253,6 +255,31 @@ class ShipperDashboardController extends Controller
                 $shipment = $shipment->first();
 
                 if ($shipment->shipper_status_id == 1) {
+                    //Consolidated Shipments
+                    $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
+                    if($consolidated_shipment){
+                        $consolidation_id = $consolidated_shipment->consolidation_id;
+                        ConsolidationShipments::where('id', $consolidated_shipment->id)->delete();
+                        $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+                        if(count($remaining_consolidated_shipments) == 1){
+                            ConsolidationShipments::where('consolidation_id', $consolidation_id)->delete();
+                            Consolidation::where('id', $consolidation_id)->delete();
+                        }
+                        else{
+                            foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
+                                $new_order_consolidated_shipment = ConsolidationShipments::find($remaining_consolidated_shipment->id);
+                                $new_order_consolidated_shipment->order = $index + 1;
+                                $new_order_consolidated_shipment->save();
+                            }
+                            $consolidation = Consolidation::find($consolidation_id);
+                            $consolidation->count = count($remaining_consolidated_shipments);
+                            if($consolidation->default_shipment_id == $shipment_id){
+                                $consolidation->default_shipment_id = $remaining_consolidated_shipments[0]->shipment_id;
+                            }
+                            $consolidation->save();
+                        }
+                    }
+                    //Consolidated Shipments
                     $shipment->shipper_status_id = 17;
                     $shipment->consignee_status_id = 17;
                     if($shipment->warehouse == 1){
@@ -310,6 +337,32 @@ class ShipperDashboardController extends Controller
                     $shipment = $shipment->first();
 
                     if ($shipment->shipper_status_id == 1) {
+                        //Consolidated Shipments
+                        $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id->id)->first();
+                        if($consolidated_shipment){
+                            $consolidation_id = $consolidated_shipment->consolidation_id;
+                            ConsolidationShipments::where('id', $consolidated_shipment->id)->delete();
+                            $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+
+                            if(count($remaining_consolidated_shipments) == 1){
+                                ConsolidationShipments::where('consolidation_id', $consolidation_id)->delete();
+                                Consolidation::where('id', $consolidation_id)->delete();
+                            }
+                            else{
+                                foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
+                                    $new_order_consolidated_shipment = ConsolidationShipments::find($remaining_consolidated_shipment->id);
+                                    $new_order_consolidated_shipment->order = $index + 1;
+                                    $new_order_consolidated_shipment->save();
+                                }
+                                $consolidation = Consolidation::find($consolidation_id);
+                                $consolidation->count = count($remaining_consolidated_shipments);
+                                if($consolidation->default_shipment_id == $shipment_id->id){
+                                    $consolidation->default_shipment_id = $remaining_consolidated_shipments[0]->shipment_id;
+                                }
+                                $consolidation->save();
+                            }
+                        }
+                        //Consolidated Shipments
                         $shipment->shipper_status_id = 17;
                         $shipment->consignee_status_id = 17;
                         if($shipment->warehouse == 1){
@@ -762,4 +815,5 @@ class ShipperDashboardController extends Controller
 //        }
 //        return response()->json(['status'=>1,'graph'=>$graph]);
 //    }
+
 }

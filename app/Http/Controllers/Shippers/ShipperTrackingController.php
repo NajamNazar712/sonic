@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shippers;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -141,9 +142,25 @@ class ShipperTrackingController extends Controller
                                     $journey_details['status'] .= ' (Main User)';
                                 }
                                 else if($shipment->booked_by == 2){
+                                    if($journey->reference_1_id != NULL){
+                                        $sub_user = SubstituteUser::find($journey->reference_1_id);
+                                        $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
+                                    }
+                                    else{
+                                        $journey_details['status'] .= ' (Substitute User)';
+                                    }
+                                }
+                            }
+                            if(in_array($journey->shipper_status_id, [52])){
+                                if($journey->reference_1_id != NULL){
+                                    $sub_user = SubstituteUser::find($journey->reference_1_id);
+                                    $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
+                                }
+                                else{
                                     $journey_details['status'] .= ' (Substitute User)';
                                 }
                             }
+
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
 //                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';

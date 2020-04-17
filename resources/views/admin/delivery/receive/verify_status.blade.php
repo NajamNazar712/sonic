@@ -38,6 +38,8 @@
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
+                            <th class="border-primary border-darken-1">Rider Status</th>
+                            <th class="border-primary border-darken-1">Rider Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Fake Status</th>
@@ -48,6 +50,9 @@
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Open Box</th>
+                            <th class="border-primary border-darken-1">Rider Location</th>
+                            <th class="border-primary border-darken-1">Existing Location</th>
+                            <th class="border-primary border-darken-1">Confirm Location</th>
                         </tr>
                         </thead>
                     </table>
@@ -175,6 +180,8 @@
                     {data:'amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
+                    {data:'rider_status',name: 'rss.name', class: 'align-middle status form-group rider_status',orderable: false, searchable: false},
+                    {data:'rider_reason',name: 'rssr.name', class: 'align-middle reason form-group rider_reason',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'sj.received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'fake_status',name: 'fake_status', class: 'align-middle fake_status',orderable: false, searchable: false},
@@ -184,7 +191,10 @@
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'shipper',name: 'users.name', class: 'align-middle shipper'},
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data:'open_box',name: 'open_box', class: 'align-middle text-center open_box',orderable: false, searchable: false}
+                    {data:'open_box',name: 'open_box', class: 'align-middle text-center open_box',orderable: false, searchable: false},
+                    {data:'rider_location',name: 'rider_location', class: 'align-middle text-center rider_location',orderable: false, searchable: false},
+                    {data:'existing_location',name: 'existing_location', class: 'align-middle text-center existing_location',orderable: false, searchable: false},
+                    {data:'confirm_location',name: 'confirm_location', class: 'align-middle text-center confirm_location',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

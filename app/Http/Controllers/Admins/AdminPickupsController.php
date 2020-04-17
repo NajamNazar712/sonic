@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\City;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -1260,13 +1262,20 @@ class AdminPickupsController extends Controller
                     }
                     else{
                         if ($exists) {
-                            if (empty($request->weight)) {
-                                $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
-                                $shipment->length = $request->length;
-                                $shipment->breadth = $request->breadth;
-                                $shipment->height = $request->height;
-                            } else {
-                                $shipment->actual_weight = $request->weight;
+                            $default_weight = DefaultWeight::where('user_id', $shipment->user->id);
+                            if($default_weight->exists()){
+                                $default_weight = $default_weight->first();
+                                $shipment->actual_weight = $default_weight->default_weight;
+                            }
+                            else {
+                                if (empty($request->weight)) {
+                                    $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+                                    $shipment->length = $request->length;
+                                    $shipment->breadth = $request->breadth;
+                                    $shipment->height = $request->height;
+                                } else {
+                                    $shipment->actual_weight = $request->weight;
+                                }
                             }
 
                             $shipment->save();
@@ -1316,7 +1325,14 @@ class AdminPickupsController extends Controller
                 }
                 if($shipment->booking_type_id == 3){
                     if ($exists) {
-                        $shipment->actual_weight = $request->weight;
+                        $default_weight = DefaultWeight::where('user_id', $shipment->user->id);
+                        if($default_weight->exists()){
+                            $default_weight = $default_weight->first();
+                            $shipment->actual_weight = $default_weight->default_weight;
+                        }
+                        else{
+                            $shipment->actual_weight = $request->weight;
+                        }
                         $shipment->save();
 
                         $details = array();
@@ -1471,6 +1487,45 @@ class AdminPickupsController extends Controller
           $shipment->save();
 
           ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
+
+            //Consolidated Shipments
+            $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
+            if($consolidated_shipment){
+//                $user_shipping_info = UserShippingInfo::find($shipment->pickup_address_id);
+                if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
+                    $check_all_consolidation_shipments = true;
+
+                    $shipment->shipper_status_id = 58;
+                    $shipment->consignee_status_id = 58;
+                    $shipment->save();
+
+                    ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
+
+                    $consolidation_id = $consolidated_shipment->consolidation_id;
+                    $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+
+                    foreach ($remaining_consolidated_shipments as $remaining_consolidated_shipment){
+                        $check_remaining_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
+                        if($check_remaining_consolidated_shipment->shipper_status_id != 58){
+                            $check_all_consolidation_shipments = false;
+                        }
+                    }
+
+                    if($check_all_consolidation_shipments == true){
+                        foreach ($remaining_consolidated_shipments as $update_remaining_consolidated_shipment){
+                            $update_all_consolidated_shipment = Shipment::find($update_remaining_consolidated_shipment->shipment_id);
+
+                            $update_all_consolidated_shipment->shipper_status_id = 59;
+                            $update_all_consolidated_shipment->consignee_status_id = 59;
+
+                            $update_all_consolidated_shipment->save();
+
+                            ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
+                        }
+                    }
+                }
+            }
+            //Consolidated Shipments
 
           NotificationsController::send(3, $shipment_id);
 

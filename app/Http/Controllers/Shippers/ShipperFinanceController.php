@@ -417,6 +417,8 @@ class ShipperFinanceController extends Controller
                 $type = 'Adjusted';
             }
 
+            $item = $shipment->items->first();
+
             $shipment_details .= '
                             <tr>
                               <td>' . $serial_number . '</td>
@@ -427,6 +429,7 @@ class ShipperFinanceController extends Controller
                               <td>' . $shipment->consignee_city->name . '</td>
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
+                              <td>' . $item->description . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
@@ -515,6 +518,7 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Destination</strong></td>
                               <td class="color primary"><strong>Service Type</strong></td>
                               <td class="color primary"><strong>Weight (kg)</strong></td>
+                              <td class="color primary"><strong>Item Description</strong></td>
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>

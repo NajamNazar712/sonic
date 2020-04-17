@@ -75,7 +75,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([155, 117, 209], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([155, 117, 209, 254], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([155, 209], session('permissions'))) !== 0)
@@ -92,6 +92,10 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(117, session('permissions')))
                             <li class="menu-item"><a href="{{ route('admin.cancelled_shipments.index') }}">Cancelled</a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(254, session('permissions')))
+                            <li class="menu-item"><a href="{{ route('admin.shipment.consolidation.history.index') }}">Consolidation History</a>
                             </li>
                         @endif
 
@@ -467,6 +471,10 @@
                                 Shipment Weight</a></li>
                     @endif
 
+                    @if (session('role_id') == 1 || in_array(324, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.coordinates.add.index') }}">Add Cordinates</a></li>
+                    @endif
+
                     @if (session('role_id') == 1 || in_array(306, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.scanning_history.index') }}">Scanning History</a></li>
                     @endif
@@ -704,7 +712,7 @@
 
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([116, 150, 154, 197], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([116, 150, 154, 197, 256], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Bookings</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(116, session('permissions')))
@@ -719,15 +727,21 @@
                                     @if (session('role_id') == 1 || in_array(197, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.cod_cap_zones.index') }}">COD CAP for Zone Classes</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(256, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.consolidation.max.index') }}">Maximum Consolidation Shipments</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([104], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([104, 326], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">First Mile</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(104, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}">Pickup Weight Threshold</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(326, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.default_weight.index')}}">Default Weight</a></li>
                                     @endif
                                 </ul>
                             </li>
@@ -819,7 +833,7 @@
                         @endif
 
 
-                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([188, 237, 260, 274, 320], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([188, 237, 260, 274, 320, 325], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">CRM</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))
@@ -836,6 +850,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(320, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.delay_in_delivery_massage.index') }}">Delay In Delivery Message</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(325, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.crm_comment.index') }}">Crm Comment</a></li>
                                     @endif
                                 </ul>
 

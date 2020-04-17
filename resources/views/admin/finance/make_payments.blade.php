@@ -1087,9 +1087,42 @@
 			}
 
 			$('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-				var parent = $(this).parent('tr');
 
-				calculation(parent);
+				var parent = $(this).parent('tr');
+				var selected_id = $(this).parent('tr').attr('id');
+				var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
+				if(con_id){
+					var count = 0;
+					make_payments_table.rows().nodes().each(function(index) {
+						var row = make_payments_table.row(index);
+						var consolidation_id = $(row.node()).attr('consolidation_id');
+						var row_id = $(row.node()).attr('id');
+						if(con_id == consolidation_id){
+							if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+								var parent = $(row.node());
+
+								calculation(parent);
+								if(selected_id != row_id){
+									row.select();
+								}
+								count++;
+							}else{
+								var parent = $(row.node());
+
+								calculation(parent);
+								if(selected_id != row_id){
+									row.deselect();
+								}
+								count++;
+							}
+						}
+
+					});
+
+				}else{
+					calculation(parent);
+				}
+
 			});
 
 			$('#make_payments #make_payments_form').bind('submit', function(e) {

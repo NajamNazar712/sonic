@@ -5071,7 +5071,7 @@ use Yajra\Datatables\Datatables;
         }
 
         public function crm_index(){
-            $shippers = DB::connection('reports')->table('users')->where('status', 3)->select('id','name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id','name')->get();
             $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
             $agents = DB::connection('reports')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')

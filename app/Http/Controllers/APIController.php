@@ -15,7 +15,6 @@ use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
 use Validator;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Hash;
 
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -27,8 +26,8 @@ use App\Http\Models\CityDelivery;
 use App\Http\Models\ZoneClassCity;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CorporateRateStatus;
-
-use DB;
+use App\Http\Models\Consolidation;
+use App\Http\Models\ConsolidationShipments;
 
 use Carbon\Carbon;
 
@@ -42,7 +41,6 @@ class APIController extends Controller
       'vendor' => 'Vendor',
       'phone_number' => 'Phone Number',
       'email_address' => 'Email Address',
-      'password' => 'Password',
       'address' => 'Address',
       'city_id' => 'City ID',
 
@@ -276,7 +274,7 @@ class APIController extends Controller
       if($user_type['account_type_id'] == 1) {
         $rules = [
             'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
-                $query->whereNotIn('id', [4, 5]);
+				$query->whereNotIn('id', [4, 5]);
             })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
@@ -289,7 +287,7 @@ class APIController extends Controller
             'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
             'order_id' => ['nullable', 'filled'],
-//            'package_type' => ['required_if:service_type_id,3', 'boolean'],
+            'package_type' => ['required_if:service_type_id,3', 'boolean'],
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
             'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -297,7 +295,6 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-
             'amount' => ['required_if:service_type_id,1,2,5', 'nullable', 'numeric', 'min:0'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [2, 3]);
@@ -316,7 +313,7 @@ class APIController extends Controller
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
-            'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'numeric', 'min:0'],
+			'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'numeric', 'min:0'],
             'items' => ['required_if:service_type_id,3', 'array', 'min:1', 'max:5'],
             'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,1000'],
@@ -342,7 +339,7 @@ class APIController extends Controller
             'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
             'order_id' => ['nullable', 'filled'],
-//            'package_type' => ['required_if:service_type_id,3', 'boolean'],
+            'package_type' => ['required_if:service_type_id,3', 'boolean'],
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
             'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -358,10 +355,10 @@ class APIController extends Controller
                 $query->whereIn('id', [2, 3]);
             })],
 
-            'item_product_type_id' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2,3', 'between:0,1000'],
-            'item_quantity' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
-            'item_insurance' => ['required_if:service_type_id,1,2,3', 'boolean'],
+            'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description' => ['required_if:service_type_id,1,2', 'between:0,500'],
+            'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -438,7 +435,7 @@ class APIController extends Controller
                   } else {
                       $check_zone = $class_d['setting_value'];
                   }
-                  if ((float)$request->input('amount') > $check_zone) {
+                  if ((int)$request->input('amount') > $check_zone) {
                       return response()->json(['status' => 1, 'message' => 'Amount must be smaller then or equal to ' . $check_zone]);
                   }
               } else {
@@ -531,17 +528,15 @@ class APIController extends Controller
           $same_day_timing_id = NULL;
         }
 
-        $amount = ROUND($request->input('amount'));
+        $amount = $request->input('amount');
         $payment_mode_id = $request->input('payment_mode_id');
-
-          if ($service_type_id == 3) {
+		if ($service_type_id == 3) {
               $try_and_buy_charges = $request->input('try_and_buy_charges');
               $amount = 0;
           }
           else {
               $try_and_buy_charges = NULL;
           }
-
           if($user_type['account_type_id'] == 1) {
               $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges);
           }
@@ -618,7 +613,7 @@ class APIController extends Controller
           ShipperShipmentBookController::add_item($shipment_id, $replacement_item_product_type_id, $replacement_item_description, $replacement_item_quantity, $replacement_item_price, $replacement_item_insurance, $replacement_item_type);
         }
         else if ($service_type_id == 3) {
-            $try_and_buy_cod_amount = intval($try_and_buy_charges);
+			$try_and_buy_cod_amount = intval($try_and_buy_charges);
           foreach ($request->input('items') as $item) {
             $item_product_type_id = $item['item_product_type_id'];
 
@@ -641,25 +636,22 @@ class APIController extends Controller
 
             $item_type = 2;
 
-            $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
-
+			$try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
             ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
           }
-            $shipment_try_and_buy = Shipment::find($shipment_id);
+			$shipment_try_and_buy = Shipment::find($shipment_id);
             $shipment_try_and_buy->amount = $try_and_buy_cod_amount;
             $shipment_try_and_buy->save();
         }
 
           $check = NonServiceArea::pluck('name')->toArray();
           $msg_string = null;
-          $keywords = array();
           $str_arr = null;
           $str_arr = preg_split("/[ ,]+/", $consignee_address);
           foreach ($check as $nsa) {
               foreach ($str_arr as $arr_value) {
                   if (strtolower($nsa) == strtolower($arr_value)) {
                       $con_nsa = $arr_value;
-                      $keywords[] = $arr_value;
                       if ($msg_string != null) {
                           $msg_string = $msg_string . ', ' . $arr_value;
                       } else {
@@ -672,7 +664,7 @@ class APIController extends Controller
           if ($msg_string != null) {
               NotificationsController::send(32, $shipment_id, $msg_string);
               $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.', 'non_service_area_keywords' => $keywords]);
+              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
           }
           else{
               NotificationsController::send(2, $shipment_id);
@@ -686,15 +678,11 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->whereExists(function ($query) use ($user_id) {
-            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
-          })->orWhere('user_id', $user_id);
+          $query->where('user_id', $user_id);
         })],
         'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
         'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->whereExists(function ($query) use ($user_id) {
-            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
-          })->orWhere('user_id', $user_id);
+          $query->where('user_id', $user_id);
         })]
       ];
 
@@ -756,9 +744,7 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->whereExists(function ($query) use ($user_id) {
-            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
-          })->orWhere('user_id', $user_id);
+          $query->where('user_id', $user_id);
         })],
         'type' => ['required', 'boolean']
       ];
@@ -806,9 +792,7 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->whereExists(function ($query) use ($user_id) {
-            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
-          })->orWhere('user_id', $user_id);
+          $query->where('user_id', $user_id);
         })],
         'type' => ['required', 'boolean']
       ];
@@ -915,9 +899,7 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->whereExists(function ($query) use ($user_id) {
-            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
-          })->orWhere('user_id', $user_id);
+          $query->where('user_id', $user_id);
         })]
       ];
 
@@ -1029,9 +1011,7 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->whereExists(function ($query) use ($user_id) {
-            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
-          })->orWhere('user_id', $user_id);
+          $query->where('user_id', $user_id);
         })]
       ];
 
@@ -1065,9 +1045,7 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->whereExists(function ($query) use ($user_id) {
-            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
-          })->orWhere('user_id', $user_id);
+          $query->where('user_id', $user_id);
         })]
       ];
 
@@ -1262,13 +1240,13 @@ class APIController extends Controller
 
         $shipment_ids = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
 
-        $recieving_sheet = ShipperReceivingSheetController::create($shipment_ids, $user_id);
+        $receiving_sheet = ShipperReceivingSheetController::create($shipment_ids, $user_id);
 
-        if ($recieving_sheet['status'] == 0) {
-          return response()->json(['status' => 0, 'message' => $recieving_sheet['success'], 'receiving_sheet_id' => $recieving_sheet['receiving_sheet_id']]);
+        if ($receiving_sheet['status'] == 0) {
+          return response()->json(['status' => 0, 'message' => $receiving_sheet['success'], 'receiving_sheet_id' => $receiving_sheet['receiving_sheet_id']]);
         }
         else {
-          return response()->json(['status' => 1, 'message' => $recieving_sheet['error']]);
+          return response()->json(['status' => 1, 'message' => $receiving_sheet['error']]);
         }
       }
     }
@@ -1278,9 +1256,7 @@ class APIController extends Controller
 
       $rules = [
         'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function($query) use($user_id) {
-          $query->whereExists(function ($query) use ($user_id) {
-            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = receiving_sheets.user_id', $user_id);
-          })->orWhere('user_id', $user_id);
+          $query->where('user_id', $user_id);
         })],
         'type' => ['nullable', 'boolean']
       ];
@@ -1492,9 +1468,17 @@ class APIController extends Controller
       }
     }
 
-    public function shipment_track_public(Request $request) {
+    public function shipment_consolidate(Request $request) {
+      $user_id = $request->user_id;
+
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', 'exists:shipments,tracking_number']
+        'tracking_numbers' => ['required', 'array', 'min:2'],
+        'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })],
+        'default_tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
       ];
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -1505,55 +1489,130 @@ class APIController extends Controller
         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
       }
       else {
-        $tracking_number = $request->tracking_number;
+        $tracking_numbers = $request->tracking_numbers;
+        $default_tracking_number = $request->default_tracking_number;
 
-        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
-
-        $details = array();
-
-        $details['tracking_number'] = $tracking_number;
-
-        $shipper = $shipment->user;
-
-        $details['shipper']['name'] = $shipper->name;
-
-        $pickup = $shipment->pickup_address;
-
-        $details['pickup']['origin'] = $pickup->city->name;
-
-        $details['consignee']['name'] = $shipment->consignee_name;
-        $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-        $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-        $details['consignee']['destination'] = $shipment->consignee_city->name;
-        $details['consignee']['address'] = $shipment->consignee_address;
-
-        foreach ($shipment->items as $item) {
-          $item_details = array();
-
-          $item_details['order_id'] = $shipment->order_id;
-          $item_details['product_type'] = $item->product->product_name;
-          $item_details['description'] = $item->description;
-          $item_details['quantity'] = $item->quantity;
-
-          $details['order_information']['items'][] = $item_details;
+        if (!in_array($default_tracking_number, $tracking_numbers)) {
+          $tracking_numbers[] = $default_tracking_number;
         }
 
-        foreach ($shipment->shipment_journey as $journey) {
-          if ($journey->consignee_status_id != NULL) {
-            if ($journey->verification) {
-              $journey_details = array();
+        $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->get();
 
-              $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-              $journey_details['status'] = $journey->shipment_status_consignee->name;
+        $first_shipment = $shipments[0];
 
-              $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+        $valid = TRUE;
 
-              $details['tracking_history'][] = $journey_details;
-            }
+        foreach ($shipments as $shipment) {
+          if (!($shipment->shipper_status_id == 1 && $shipment->booking_type_id == 1 && $first_shipment->booking_type_id == $shipment->booking_type_id && $first_shipment->consignee_name == $shipment->consignee_name && $first_shipment->consignee_address == $shipment->consignee_address && $first_shipment->consignee_phone_number_1 == $shipment->consignee_phone_number_1 && $first_shipment->consignee_city_id == $shipment->consignee_city_id)) {
+            $valid = FALSE;
+
+            break;
           }
         }
 
-        return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
+        if ($valid) {
+          $shipment_ids = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
+
+          $default_shipment_id = Shipment::where('tracking_number', '=', $default_tracking_number)->first()->id;
+
+          $consolidated_shipments = ConsolidationShipments::whereIn('shipment_id', $shipment_ids);
+
+          if (!$consolidated_shipments->exists()) {
+            $consolidation = new Consolidation();
+
+            $consolidation->count = count($shipment_ids);
+            $consolidation->default_shipment_id = $default_shipment_id;
+
+            $consolidation->save();
+
+            foreach ($shipment_ids as $index => $shipment_id) {
+              $consolidation_shipment = new ConsolidationShipments();
+
+              $consolidation_shipment->consolidation_id = $consolidation->id;
+              $consolidation_shipment->shipment_id = $shipment_id;
+              $consolidation_shipment->order = $index + 1;
+
+              $consolidation_shipment->save();
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Shipments Consolidated Successfully!']);
+          }
+          else {
+            $consolidated_shipment_ids = $consolidated_shipments->pluck('id')->toArray();
+
+            $tracking_numbers = Shipment::whereIn('id', $consolidated_shipment_ids)->pluck('tracking_number')->toArray();
+
+            return response()->json(['status' => 1, 'message' => 'These Shipment(s) are already in another Consolidation!', 'tracking_numbers' => $tracking_numbers]);
+          }
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'These Shipment(s) cannot be Consolidated Together!']);
+        }
       }
+    }
+
+    public function shipment_track_public(Request $request) {
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:12,20', 'exists:shipments,tracking_number']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+            $details = array();
+
+            $details['tracking_number'] = $tracking_number;
+
+            $shipper = $shipment->user;
+
+            $details['shipper']['name'] = $shipper->name;
+
+            $pickup = $shipment->pickup_address;
+
+            $details['pickup']['origin'] = $pickup->city->name;
+
+            $details['consignee']['name'] = $shipment->consignee_name;
+            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+            $details['consignee']['destination'] = $shipment->consignee_city->name;
+            $details['consignee']['address'] = $shipment->consignee_address;
+
+            foreach ($shipment->items as $item) {
+                $item_details = array();
+
+                $item_details['order_id'] = $shipment->order_id;
+                $item_details['product_type'] = $item->product->product_name;
+                $item_details['description'] = $item->description;
+                $item_details['quantity'] = $item->quantity;
+
+                $details['order_information']['items'][] = $item_details;
+            }
+
+            foreach ($shipment->shipment_journey as $journey) {
+                if ($journey->consignee_status_id != NULL) {
+                    if ($journey->verification) {
+                        $journey_details = array();
+
+                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                        $journey_details['status'] = $journey->shipment_status_consignee->name;
+
+                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+                        $details['tracking_history'][] = $journey_details;
+                    }
+                }
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
+        }
     }
 }

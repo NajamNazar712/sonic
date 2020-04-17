@@ -23,6 +23,7 @@ use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmTatHolidays;
+use App\http\Models\DefaultWeight;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\MultipleSaleLead;
@@ -1291,6 +1292,22 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+	public function consolidation_max_shipments_index(){
+        $settings = GlobalSettings::where('type', 'maximum_consolidation_shipments')->first();
+        return view('admin.settings.max_consolidation_shipments')->with(['settings' => $settings]);
+    }
+    public function consolidation_max_shipments_update(Request $request){
+        $settings = GlobalSettings::where('type', 'maximum_consolidation_shipments')->first();
+
+        $settings->setting_value = $request->max_shipments;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+
     public function crm_case_nature_types_index() {
         $case_nature = CrmRequestCaseNature::whereNotIn('id', [3])->select(['id', 'name'])->get();
 
@@ -1850,5 +1867,73 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with(['success' => 'Message added successfully!']);
         }
         return redirect()->back()->with(['error' => 'Please write a Message!']);
+    }
+
+    public function auto_crm_comment_index() {
+        $settings = GlobalSettings::where('type', 'auto_crm_comment')->first();
+
+        return view('admin.settings.crm_comment')->with('settings', $settings);
+    }
+    public function auto_crm_comment_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'auto_crm_comment')->first();
+
+        $settings->text = $request->comment;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+    public function default_weight_index() {
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
+
+        return view('admin.settings.default_weight')->with('shippers', $shippers);
+    }
+    public function default_weight_list(Request $request) {
+        $setting = DefaultWeight::leftjoin('users as u', 'u.id', '=', 'default_weights.user_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'default_weights.updated_by')
+            ->select('u.name as shipper', 'a.name as updated_by', 'default_weights.default_weight as weight', 'default_weights.id as id', 'default_weights.updated_at as updated_at');
+        return Datatables::of($setting)
+
+            ->addColumn('action', function ($requests){
+
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                $dropdown .= '<button type="button" data-target-id=' . $requests->id . ' class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                return $dropdown;
+            })->make(true);
+    }
+
+    public function default_weight_add(Request $request){
+        $shipper_id = $request->shipper;
+        $weight = $request->weight;
+
+        $default_weight = DefaultWeight::where('user_id', $shipper_id);
+        if($default_weight->exists()){
+            return response()->json(['status' => 0, 'error' => 'Shipper default weight already exists!']);
+        }
+        else{
+            $new_default_weight = new  DefaultWeight();
+            $new_default_weight->user_id = $shipper_id;
+            $new_default_weight->default_weight = $weight;
+            $new_default_weight->updated_by = Auth::id();
+            $new_default_weight->save();
+
+            return response()->json(['status' => 1, 'success' => 'Shipper default weight added successfully!']);
+        }
+    }
+
+    public function default_weight_edit(Request $request){
+        $weight_id = $request->weight_id;
+        $weight = $request->weight;
+
+        $default_weight = DefaultWeight::find($weight_id);
+        $default_weight->default_weight = $weight;
+        $default_weight->updated_by = Auth::id();
+        $default_weight->save();
+
+        return response()->json(['status' => 1, 'success' => 'Shipper default weight edited successfully!']);
     }
 }

@@ -90,7 +90,7 @@
                                 </div>
                             </div>
                             <div class="col-3 form-group">
-                                <input type="text" class="form-control" name="reason" id="reason" placeholder="Reason*" data-rule-required="true" data-msg-required="Air Waybill Print Count is required">
+                                <input type="text" class="form-control" name="reason" id="reason" placeholder="Reason*" data-rule-required="true" data-msg-required="Reason is required">
                             </div>
                         </div>
                     </form>
