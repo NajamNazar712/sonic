@@ -621,22 +621,24 @@ class RiderAPIController extends Controller {
                 $undelivered_shipments = 0;
                 $delivered_shipments = 0;
                 $updated_shipments_count = RiderDelivery::where('delivery_note_id', $delivery_note->id)->count(DB::raw('DISTINCT shipment_id'));
-                if($updated_shipments_count){
+                if($updated_shipments_count > 0){
                     $updated_shipments = $updated_shipments_count;
                 }
 
                 $undelivered_shipments_count = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 0)->count(DB::raw('DISTINCT shipment_id'));
-                if($undelivered_shipments_count){
+                if($undelivered_shipments_count > 0){
                     $undelivered_shipments = $undelivered_shipments_count;
                 }
                 
                 $delivered_shipments_count = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 1)->count(DB::raw('DISTINCT shipment_id'));
-                if($delivered_shipments_count){
+                if($delivered_shipments_count > 0){
                     $delivered_shipments = $delivered_shipments_count;
                 }
                 $information['summary']['completed']['pending'] = $total_shipments - $updated_shipments;
                 $information['summary']['completed']['undelivered'] = $undelivered_shipments;
                 $information['summary']['completed']['delivered'] = $delivered_shipments;
+            }else{
+                $information['summary']['completed']['pending'] = $total_shipments;
             }
 
             $information['summary']['requests'] = array();
