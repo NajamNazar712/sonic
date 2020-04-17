@@ -37,7 +37,7 @@ use App\Http\Models\RiderPickup;
 use App\Http\Models\RiderPickupShipment;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\RiderPickupActionLog;
-
+use DB;
 class RiderAPIController extends Controller {
     private $names = [
         'phone_number' => 'Phone Number',
@@ -610,13 +610,25 @@ class RiderAPIController extends Controller {
             $rider_deliveries = RiderDelivery::where('delivery_note_id', $delivery_note->id);
             if($rider_deliveries->exists()){
                 $updated_shipments = 0;
-                $updated_shipments_count = RiderDelivery::where('delivery_note_id', $delivery_note->id)->groupBy('shipment_id')->count();
+                $undelivered_shipments = 0;
+                $delivered_shipments = 0;
+                $updated_shipments_count = RiderDelivery::where('delivery_note_id', $delivery_note->id)->count(DB::raw('DISTINCT shipment_id'));
                 if($updated_shipments_count){
                     $updated_shipments = $updated_shipments_count;
                 }
+
+                $undelivered_shipments_count = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 0)->count(DB::raw('DISTINCT shipment_id'));
+                if($undelivered_shipments_count){
+                    $undelivered_shipments = $undelivered_shipments_count;
+                }
+                
+                $delivered_shipments_count = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 1)->count(DB::raw('DISTINCT shipment_id'));
+                if($delivered_shipments_count){
+                    $delivered_shipments = $delivered_shipments_count;
+                }
                 $information['summary']['completed']['pending'] = $total_shipments - $updated_shipments;
-                $information['summary']['completed']['undelivered'] = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 0)->groupBy('shipment_id')->orderBy('id', 'desc')->count();
-                $information['summary']['completed']['delivered'] = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 1)->groupBy('shipment_id')->orderBy('id', 'desc')->count();
+                $information['summary']['completed']['undelivered'] = $undelivered_shipments;
+                $information['summary']['completed']['delivered'] = $delivered_shipments;
             }
 
             $information['summary']['requests'] = array();
