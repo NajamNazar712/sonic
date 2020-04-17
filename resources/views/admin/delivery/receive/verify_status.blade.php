@@ -216,15 +216,15 @@
                     $.each(data,function (key,value) {
 
                         if(shipment_status.length !== 0){
-                            $('select[name="status_drop['+value.ordering+']"]').val(shipment_status[value.ordering]).trigger('change');
+                            $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
                         }else{
-                            $('select[name="status_drop['+value.ordering+']"]').val(value.current_status_id).trigger('change');
+                            $('select[name="status_drop['+value.shId+']"]').val(value.current_status_id).trigger('change');
                         }
                         if(shipment_reason.length !== 0){
-                            $('select[name="reason_drop['+value.ordering+']"]').val(shipment_reason[value.ordering]).trigger('change');
+                            $('select[name="reason_drop['+value.shId+']"]').val(shipment_reason[value.shId]).trigger('change');
                         }else{
-                            var reasonId = $('select[name="reason_drop['+value.ordering+']"]').attr('reasonId');
-                            $('select[name="reason_drop['+value.ordering+']"]').val(reasonId).trigger('change');
+                            var reasonId = $('select[name="reason_drop['+value.shId+']"]').attr('reasonId');
+                            $('select[name="reason_drop['+value.shId+']"]').val(reasonId).trigger('change');
 
                         }
                     });
