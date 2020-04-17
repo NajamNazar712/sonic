@@ -38,7 +38,7 @@
 							</form>
 
 							<div id="information" class="information text-center">
-								Hub: <span class="hub">None</span> | Shipping Mode: <span class="shipping_mode">None</span> | Scanned: <span class="scanned">0</span>/<span class="total">0</span>
+								Hub: <span class="hub">None</span> | Scanned: <span class="scanned">0</span>/<span class="total">0</span>
 							</div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -69,7 +69,6 @@
 
 											<input type="hidden" name="cargo_type" class="cargo_type">
 
-											<input type="hidden" name="shipping_mode_id" class="shipping_mode_id">
 
 											<input type="hidden" name="shipment_ids" class="shipment_ids">
 
@@ -146,6 +145,12 @@
 													<div class="col">
 														<div class="form-group">
 															<input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required">
+														</div>
+													</div>
+													<div class="col-12">
+														<div class="form-group">
+															<select name="shipping_mode_id" class="select2 shipping_mode_select" data-rule-required="true" data-msg-required="Shipping Mode is required">
+															</select>
 														</div>
 													</div>
 
@@ -320,7 +325,7 @@
 									if (shipping_mode_id == 0) {
 										shipping_mode_id = data.details.shipping_mode.id;
 
-										$('#information .shipping_mode').html(data.details.shipping_mode.name);
+										// $('#information .shipping_mode').html(data.details.shipping_mode.name);
 									}
 
 									if (cargo_type == 0) {
@@ -371,6 +376,10 @@
 					$('#cargo_consignment form .transport_mode_vendor').html('').select2('destroy');
 				}
 
+				if ($('#cargo_consignment form .shipping_mode_select').hasClass('select2-hidden-accessible')) {
+					$('#cargo_consignment form .shipping_mode_select').html('').select2('destroy');
+				}
+
 				if ($('#cargo_consignment form .receiver_id').hasClass('select2-hidden-accessible')) {
 					$('#cargo_consignment form .receiver_id').html('').select2('destroy');
 				}
@@ -393,7 +402,7 @@
                     	}
 					});
 					$('#cargo_consignment form .cargo_type').val(cargo_type);
-					$('#cargo_consignment form .shipping_mode_id').val(shipping_mode_id);
+					// $('#cargo_consignment form .shipping_mode_id').val(shipping_mode_id);
 					$('#cargo_consignment form .shipment_ids').val(shipment_ids);
 					$('#cargo_consignment form .open_box_ids').val(open_box_ids);
 
@@ -457,9 +466,15 @@
 						'min': 0.1,
 						'max': 100000
 					});
-
 					$.each(data.shipping_modes, function(index, shipping_mode) {
-						$('#cargo_consignment form .shipping_mode').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
+						$('#cargo_consignment form .shipping_mode_select').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
+					});
+
+					$('#cargo_consignment form .shipping_mode_select').prepend('<option value="" selected="selected"></option>').select2({
+						width: '100%',
+						placeholder: 'Select Shipping Mode*'
+					}).bind('change', function() {
+						$(this).valid();
 					});
 
 					$.each(data.transport_modes, function(index, transport_mode) {

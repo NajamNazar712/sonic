@@ -160,7 +160,7 @@ class LoginController extends Controller
 
         session(['packaging_charges_check' => $packaging_charges_check]);
 
-        return redirect()->route('cod.dashboard');
+        return redirect()->route('cod.welcome');
     }
 
     public function logout(Request $request)

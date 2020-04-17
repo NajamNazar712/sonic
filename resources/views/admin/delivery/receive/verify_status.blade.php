@@ -190,6 +190,17 @@
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    var status = data.shId in shipment_status;
+                    if(status == false){
+                        shipment_status[data.shId] = data.current_status_id;
+                    }
+
+                    var reason = data.shId in shipment_reason;
+                    if(reason == false){
+                        shipment_reason[data.shId] = data.reason_id;
+                    }
+
+                    // shipment_reason[data.shId] = data.current_status_id;
                 },
                 drawCallback: function (settings) {
                     $(".reasonDrop").prepend('<option value="" ></option>').select2({
@@ -286,6 +297,11 @@
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
+            });
+            $('body').on('select2:select','.reasonSelect .reasonDrop',function (e) {
+                var rowid = parseInt($(this).parents('tr').attr('id'));
+                var reasonSelection = $(this).find(':selected').val();
+                shipment_reason[rowid] = reasonSelection;
             });
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');

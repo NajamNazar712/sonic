@@ -263,7 +263,7 @@
 												</div>
 
 												<div class="form-group text-right">
-													<button data-repeater-create type="button" class="btn btn-block btn-primary">Add</button>
+													<button data-repeater-create type="button" class="btn btn-block btn-primary" id="try_and_buy_add">Add</button>
 												</div>
 											</div>
 
@@ -275,12 +275,12 @@
 												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
 											</div>
 
-											<div class="form-group">
-												<div class="form-group text-center p-1 border border-light rounded">
-													<label class="d-block">Type of Package</label>
-													<input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">
-												</div>
-											</div>
+{{--											<div class="form-group">--}}
+{{--												<div class="form-group text-center p-1 border border-light rounded">--}}
+{{--													<label class="d-block">Type of Package</label>--}}
+{{--													<input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">--}}
+{{--												</div>--}}
+{{--											</div>--}}
 										</div>
 
 										<div class="form-group input-group">
@@ -353,6 +353,11 @@
 											</div>
 
 											<input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
+										</div>
+
+
+										<div class="form-group input-group" id="try_and_buy_charges_div">
+											<input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">
 										</div>
 
 										<div class="form-group">
@@ -760,10 +765,17 @@
 
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
+				$('#try_and_buy_charges_div').addClass('d-none');
 			}
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
 				$('#try_and_buy').removeClass('d-none');
+				$('#try_and_buy_charges_div').removeClass('d-none');
+				$('#amount').prop('disabled', true);
+			}
+			else{
+				$('#amount').prop('disabled', false);
+				$('#try_and_buy_charges_div').addClass('d-none');
 			}
 
 			$('#select_service_type form #service_type').val(service_type).trigger('change');
@@ -790,10 +802,12 @@
 						$('#payment_info').removeClass('d-none');
 						$('#replacement').addClass('d-none');
 						$('#try_and_buy').addClass('d-none');
+						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#order_header_info').removeClass('mt-2');
 						$('#shipping_header_info').removeClass('mt-2');
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
+						$('#amount').prop('disabled', false);
 					}
 					else if (service_type == 2) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -810,6 +824,8 @@
 						$('#shipping_header_info').removeClass('mt-2');
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
+						$('#amount').prop('disabled', false);
+						$('#try_and_buy_charges_div').addClass('d-none');
 					}
 					else if (service_type == 3) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -826,6 +842,8 @@
 						$('#shipping_header_info').removeClass('mt-2');
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
+						$('#amount').prop('disabled', true);
+						$('#try_and_buy_charges_div').removeClass('d-none');
 					}
 					else if (service_type == 5) {
 						$('#shipping_header_div').removeClass('col col_custom');
@@ -843,6 +861,8 @@
 						$('#charges_mode_div').addClass('d-none');
 						$('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
 						$('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
+						$('#amount').prop('disabled', false);
+						$('#try_and_buy_charges_div').addClass('d-none');
 					}
 					$('#booking_form #selected_service_type').val(service_type);
 
@@ -1010,7 +1030,7 @@
 
 			$('#try_and_buy .insurance').checkboxpicker();
 
-			$('#package_type').checkboxpicker();
+			// $('#package_type').checkboxpicker();
 
 			var current_date = '{{$date}}';
 			$('#pickup_date').pickadate({
@@ -1043,10 +1063,12 @@
 			}).bind('change', function() {
 				$(this).valid();
 			});
-
+			var repeater_limit = 5;
+			var repeater_count = 1;
 			$('#try_and_buy .repeater').repeater({
 				isFirstItemUndeletable: true,
 				show: function() {
+					repeater_count++;
 					$(this).find('.select2-container--default').remove();
 
 					$(this).find('.select2').prepend('<option value="" selected="selected"></option>').select2({
@@ -1101,6 +1123,12 @@
 
 					insurance.checkboxpicker();
 
+					if(repeater_count === repeater_limit){
+
+						console.log(repeater_count);
+						$("#try_and_buy_add").hide("slow");
+					}
+
 					try_and_buy_product_numbering();
 				},
 				hide: function(delete_element) {
@@ -1129,6 +1157,11 @@
 						dangerMode: true
 					}).then(function(confirm) {
 						if (confirm) {
+							repeater_count--;
+
+							if(repeater_count < repeater_limit){
+								$("#try_and_buy_add").show("slow");
+							}
 							$(this).slideUp(delete_element);
 
 							try_and_buy_product_numbering();
@@ -1281,16 +1314,17 @@
 					}
 
 					if(present.length > 0){
-						var html = '<div class="text-left">In case of,<br/>';
+						var url = '{{asset('img/nsa_osa.png')}}';
+						var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
+						html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
+						html += '<div class="text-left">In case of,<br/>';
 						html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
 						html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
 						html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
 						content = document.createElement('div');
 						content.innerHTML = html;
 						swal({
-							title: 'A Possible Address Anomaly: ' + present + ' Detected!',
 							content: content,
-							icon: 'info',
 							buttons: {
 								cancel: {
 									text: 'Cancel',

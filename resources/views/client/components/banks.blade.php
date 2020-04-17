@@ -54,7 +54,7 @@
                         IBAN Number:
                         <span class="danger">*</span>
                     </label>
-                    <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no[]') }}" name="temp_iban_no">
+                    <input type="text" class="form-control required" placeholder="(e.g: PK37MEZN0001220100004069)" value="{{ old('iban_no[]') }}" name="temp_iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
                 </div>
 
                     <div class="form-group">

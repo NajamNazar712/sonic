@@ -39,7 +39,10 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\OverlandCargoReport',
 		'\App\Console\Commands\AccountReconciliationReportFromStart',
         '\App\Console\Commands\AccountReconciliationReportCurrent',
-		'\App\Console\Commands\BusinessProjectionAndRetention'];
+		'\App\Console\Commands\BusinessProjectionAndRetention',
+		'\App\Console\Commands\CRMDelayInDelivery',
+		'\App\Console\Commands\CRMPaymentComplains'
+        ];
 
     /**
      * Define the application's command schedule.
@@ -54,7 +57,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
         $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
-        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
+//        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
@@ -105,13 +108,15 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
         $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
 
-        $schedule->command('overnight:cargo_report')->dailyAt('00:00')->runInBackground();
-        $schedule->command('overland:cargo_report')->dailyAt('00:00')->runInBackground();
+        $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
+        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
 
 //		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
 //      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
 
 		$schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
+		$schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
+		$schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
     }
 
     /**

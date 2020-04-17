@@ -9,6 +9,7 @@ use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
 use App\Http\Models\CRFTermsConditions;
+use App\Http\Models\DuplicateUser;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Reference;
 use App\Http\Models\Shipper\User;
@@ -87,11 +88,12 @@ class RegisterController extends Controller
                 'name' => 'required|string|max:255|unique:users',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
-                'shipper_poc'=>'required|regex:/^[a-zA-Z]+$/u|max:255',
+                'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'company_address'=>'required|string|max:255',
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
                 'average_shipment' => 'required',
+                'sale_person' => 'required',
                 'average_shipment_duration' => 'required',
                 'cnic'=>'required|string|max:255',
 				'url'=>'required|string|max:255',
@@ -100,11 +102,11 @@ class RegisterController extends Controller
                 'product_name' => 'required_if:shipper_product_type, ==, 24',
                 'shipping_city.*'=>'required|string|max:255',
                 'pickup_address.*'=>'required|string|max:255',
-                'shipping_poc.*'=>'required|string|max:255',
+                'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'shipping_phone.*'=>'required|string|max:255',
                 'shipping_email.*'=>'required|string|max:255',
                 'product_type.*'=>'required|max:255',
-                'bank_city.*'=>'required|string|max:255',
+                'bank_city.*'=>'required|max:255',
                 'bank_name.*'=>'required|max:255',
                 'bank_branch.*'=>'required|string|max:255',
                 'account_no.*'=>'required|string|max:255',
@@ -123,11 +125,12 @@ class RegisterController extends Controller
                 'name' => 'required|string|max:255|unique:users',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
-                'shipper_poc'=>'required|regex:/^[a-zA-Z]+$/u|max:255',
+                'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'company_address'=>'required|string|max:255',
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
                 'average_shipment' => 'required',
+                'sale_person' => 'required',
                 'average_shipment_duration' => 'required',
                 'cnic'=>'required|string|max:255',
 				'url'=>'required|string|max:255',
@@ -136,16 +139,16 @@ class RegisterController extends Controller
                 'product_name' => 'required_if:shipper_product_type, ==, 24',
                 'shipping_city.*'=>'required|string|max:255',
                 'pickup_address.*'=>'required|string|max:255',
-                'shipping_poc.*'=>'required|string|max:255',
+                'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'shipping_phone.*'=>'required|string|max:255',
                 'shipping_email.*'=>'required|string|max:255',
                 'product_type.*'=>'required|max:255',
-                'bank_city'=>'required|string|max:255',
-                'bank_name'=>'required|max:255',
-                'bank_branch'=>'required|string|max:255',
-                'account_no'=>'required|string|max:255',
-                'account_title'=>'required|string|max:255',
-                'iban_no'=>'required|string|max:255',
+                'bank_city.*'=>'required|max:255',
+                'bank_name.*'=>'required|max:255',
+                'bank_branch.*'=>'required|string|max:255',
+                'account_no.*'=>'required|string|max:255',
+                'account_title.*'=>'required|string|max:255',
+                'iban_no.*'=>'required|string|max:255',
                 'cycle_of_payment'=>'required|string|max:255',
                 'cycle_of_invoicing' => 'required',
 //                'generation_date' => 'required_if:cycle_of_invoicing,==,1|required_if:cycle_of_invoicing,==,3|numeric',
@@ -222,6 +225,84 @@ class RegisterController extends Controller
             ?: redirect($this->redirectPath());
     }
 
+    public function duplicate_user_info($user_id, $name, $phone1, $phone2, $cnic, $ibans){
+        $new_name = explode(' ', $name);
+        $name_flag = false;
+        $phone_flag = false;
+        $cnic_flag = false;
+        $iban_flag = false;
+
+        foreach ($new_name as $n){
+            $user_name = User::where('id','<>', $user_id)->where('name', 'like', '%' . $n . '%');
+            if($user_name->exists()){
+                $name_flag = true;
+            }
+        }
+        $user_phone = NULL;
+        $phone_number = User::where('id', '<>', $user_id);
+        $phone_number = $phone_number->where(function ($query) use ($phone1) {
+            $query->where(function ($sub_query) use ($phone1) {
+                $sub_query->where('users.phone',  $phone1);
+            })
+                ->orWhere(function ($sub_query) use ($phone1) {
+                    $sub_query->where('users.phone2', $phone1);
+                });
+        });
+        if($phone_number->exists()){
+            $phone_flag = true;
+            $user_phone = $phone1;
+        }else{
+            if($phone2 != null){
+                $phone_number2 = User::where('id', '<>', $user_id);
+                $phone_number2 = $phone_number2->where(function ($query) use ($phone2) {
+                    $query->where(function ($sub_query) use ($phone2) {
+                        $sub_query->where('users.phone',  $phone2);
+                    })
+                        ->orWhere(function ($sub_query) use ($phone2) {
+                            $sub_query->where('users.phone2', $phone2);
+                        });
+                });
+                if($phone_number2->exists()){
+                    $phone_flag = true;
+                    $user_phone = $phone2;
+                }
+            }
+
+        }
+
+        $user_cnic = User::where('id','<>', $user_id)->where('cnic', $cnic);
+        if($user_cnic->exists()){
+            $cnic_flag = true;
+        }
+        $iban_no = NULL;
+        foreach ($ibans as $iban) {
+            $bank = UserBankInfo::where('user_id', '<>', $user_id)->where('iban', $iban);
+            if($bank->exists()){
+                $iban_flag = true;
+                $iban_no = $iban;
+            }
+        }
+
+        if($name_flag == true || $phone_flag == true || $cnic_flag == true || $iban_flag == true){
+
+            $duplicate = new DuplicateUser();
+            $duplicate->user_id = $user_id;
+            if($name_flag){
+                $duplicate->name = $name;
+            }
+            if($phone_flag){
+                $duplicate->phone = $user_phone;
+            }
+            if($cnic_flag){
+                $duplicate->cnic = $cnic;
+            }
+            if($iban_flag){
+                $duplicate->iban = $iban_no;
+            }
+            $duplicate->save();
+        }
+
+    }
 
     /**
      * Create a new user instance after a valid registration.
@@ -231,7 +312,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        
+
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -292,7 +373,7 @@ class RegisterController extends Controller
                 ]);
             }
         }
-
+        $iban_array = array();
         $default_bank = TRUE;
         foreach($data['bank_name'] as $rowId => $bank){
             if($data['nature_of_account'] == 1){
@@ -308,7 +389,7 @@ class RegisterController extends Controller
                         'city_id'=>$data['bank_city'][$rowId],
                         'default_bank' => 1
                     ]);
-
+                    $iban_array[] = $data['iban_no'][$rowId];
                     $default_bank = FALSE;
                 }else{
                     UserBankInfo::create([
@@ -321,6 +402,7 @@ class RegisterController extends Controller
                         'payment_cycle'=>$data['cycle_of_payment'],
                         'city_id'=>$data['bank_city'][$rowId]
                     ]);
+                    $iban_array[] = $data['iban_no'][$rowId];
                 }
 
             }else{
@@ -346,10 +428,11 @@ class RegisterController extends Controller
                     'billing_person_phone' => $data['billing_person_phone'],
                     'billing_person_email' => $data['billing_person_email'],
                     'billing_address' => $data['billing_address'],
+                    'default_bank' => 1
                 ]);
             }
         }
-        
+        self::duplicate_user_info($newUser->id, $data['name'], $data['shipper_phone'], $data['shipper_phone2'], $data['cnic'], $iban_array);
 
         $token = uniqid(base64_encode(str_random(60)));
         $crf_terms_and_conditions = new CRFTermsConditions();

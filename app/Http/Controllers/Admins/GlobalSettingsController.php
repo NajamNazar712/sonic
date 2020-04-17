@@ -12,6 +12,7 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
@@ -1541,9 +1542,21 @@ class GlobalSettingsController extends Controller
 
     public function minimum_chargeable_weight_update(Request $request){
         $on = MinimumChargeableWeightSetting::where('shipping_mode_id', 1)->update(['weight' => $request->on]);
+        $standard_on = StandardWeightCharge::where('shipping_mode_id', 1)->first();
+        $standard_on->range_up =  $request->on;
+        $standard_on->save();
         $ol = MinimumChargeableWeightSetting::where('shipping_mode_id', 2)->update(['weight' => $request->ol]);
+        $standard_ol = StandardWeightCharge::where('shipping_mode_id', 2)->first();
+        $standard_ol->range_up =  $request->ol;
+        $standard_ol->save();
         $detain = MinimumChargeableWeightSetting::where('shipping_mode_id', 3)->update(['weight' => $request->det]);
+        $standard_det = StandardWeightCharge::where('shipping_mode_id', 3)->first();
+        $standard_det->range_up =  $request->det;
+        $standard_det->save();
         $same_day = MinimumChargeableWeightSetting::where('shipping_mode_id', 4)->update(['weight' => $request->same_day]);
+        $standard_same_day = StandardWeightCharge::where('shipping_mode_id', 4)->first();
+        $standard_same_day->range_up =  $request->same_day;
+        $standard_same_day->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
@@ -1807,5 +1820,35 @@ class GlobalSettingsController extends Controller
             }
         }
         return Datatables::of($shipments)->make(true);
+    }
+
+    public function delay_in_delivery_massage(){
+        $message = '';
+        $settings = GlobalSettings::where('type', 'crm_delay_in_delivery_message')->first();
+        if($settings){
+            $message = $settings->text;
+        }
+        return view('admin.settings.CRM.crm_delay_in_delivery_message')->with(['message' => $message]);
+    }
+
+    public function delay_in_delivery_massage_store(Request $request){
+        $message = $request->delay_in_delivery_message;
+
+        if($message){
+            $setting = GlobalSettings::where('type', 'crm_delay_in_delivery_message');
+            if($setting->exists()){
+                $setting = $setting->first();
+                $setting->text = $message;
+                $setting->save();
+            }else{
+                $setting = new GlobalSettings();
+                $setting->type = 'crm_delay_in_delivery_message';
+                $setting->setting_value = 0;
+                $setting->text = $message;
+                $setting->save();
+            }
+            return redirect()->back()->with(['success' => 'Message added successfully!']);
+        }
+        return redirect()->back()->with(['error' => 'Please write a Message!']);
     }
 }

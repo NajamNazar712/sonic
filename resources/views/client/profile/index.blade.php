@@ -559,7 +559,7 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no" data-rule-required="true" data-msg-required="IBAN is required">
+                                            <input type="text" class="form-control" placeholder="(e.g: PK37MEZN0001220100004069)" name="iban_no" data-rule-required="true" data-msg-required="IBAN is required" data-rule-maxlength="24">
                                         </div>
                                 </div>
                                 <div class="col-12">
@@ -1127,18 +1127,18 @@
                     width:'100%'
                 });
         var btable = $('#bank_datatable').DataTable({
-                dom:'ltipr',
-                // dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                // buttons: [
-                // {
-                //     text: '<i class="la la-cancel"></i> Add Bank',
-                //     className: 'btn btn-primary add_bank',
-                //     enabled: true,
-                //     action: function (e, dt, node, config) {
-                //         $('#AddBankModal').modal('show');
-                //     }
-                // }
-                // ],
+                // dom:'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                {
+                    text: '<i class="la la-cancel"></i> Add Bank',
+                    className: 'btn btn-primary add_bank',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
+                        $('#AddBankModal').modal('show');
+                    }
+                }
+                ],
                 scrollX: true, scrollY: '500px',
                 processing: true,
                 language: {
