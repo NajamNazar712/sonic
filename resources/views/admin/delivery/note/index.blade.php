@@ -364,20 +364,7 @@
                     {name: 'open_box', class: 'align-middle open_box', orderable: false},
                     {name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
-                rowCallback: function(row, data, index) {
-                    // var info = 
-                    table.page.info
-                    ();
-                    //
-                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
                     this.api().table().columns.adjust();
                 }
             });
