@@ -601,8 +601,8 @@ class RiderAPIController extends Controller {
 
             $information['delivery_note_id'] = $delivery_note->id;
             $information['summary'] = array();
-
-            $information['summary']['deliveries'] = $delivery_note->shipments_count;
+            $total_shipments = $delivery_note->shipments_count;
+            $information['summary']['deliveries'] = $total_shipments;
             $information['summary']['completed'] = array();
             $information['summary']['completed']['pending'] = 0;
             $information['summary']['completed']['undelivered'] = 0;
@@ -614,7 +614,7 @@ class RiderAPIController extends Controller {
                 if($updated_shipments_count){
                     $updated_shipments = $updated_shipments_count;
                 }
-                $information['summary']['completed']['pending'] = $delivery_note->shipment_count - $updated_shipments;
+                $information['summary']['completed']['pending'] = $total_shipments - $updated_shipments;
                 $information['summary']['completed']['undelivered'] = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 0)->groupBy('shipment_id')->orderBy('id', 'desc')->count();
                 $information['summary']['completed']['delivered'] = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('delivered_status', 1)->groupBy('shipment_id')->orderBy('id', 'desc')->count();
             }
