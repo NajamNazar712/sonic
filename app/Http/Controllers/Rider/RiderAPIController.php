@@ -764,8 +764,10 @@ class RiderAPIController extends Controller {
 
     public function crm_comment_add(Request $request){
         $rules = [
-            'crm_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:crm_requests,id'],
-            'comment' => ['required', 'between:0,190'],
+            'messages' => ['required', 'array', 'min:1'],
+            'messages.*.crm_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:crm_requests,id'],
+            'messages.*.comment' => ['required', 'between:0,190'],
+            'messages.*.commented_at' => ['required'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -776,16 +778,19 @@ class RiderAPIController extends Controller {
         }
         else{
             $rider_id = $request->rider_id;
-            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-            $comment = new CrmComments();
-            $comment->crm_request_id = $request->crm_request_id;
-            $comment->comment_by_id = $rider_id;
-            $comment->comment_by = 2;
-            $comment->comment_type = 2;
-            $comment->comment = $request->comment;
-            $comment->created_at = $added_at;
-            $comment->save();
-            return response()->json(['status' => 0, 'message' => 'Comment added Successfully']);
+            foreach ($request->messages as $message){
+                $commented_at = Carbon::createFromTimestampMs($message['commented_at'])->toDateTimeString();
+                $comment = new CrmComments();
+                $comment->crm_request_id = $request->crm_request_id;
+                $comment->comment_by_id = $rider_id;
+                $comment->comment_by = 2;
+                $comment->comment_type = 2;
+                $comment->comment = $request->comment;
+                $comment->created_at = $commented_at;
+                $comment->save();
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Comment(s) Added Successfully']);
         }
     }
 
