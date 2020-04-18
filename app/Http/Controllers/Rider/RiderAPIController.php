@@ -962,7 +962,7 @@ class RiderAPIController extends Controller {
             if (RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                 return response()->json(['status' => 0, 'message' => 'Shipment is already marked as Delivered', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
             }
-            
+
             $shipment = Shipment::find($request->shipment_id);
 
             $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
