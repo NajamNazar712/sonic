@@ -778,15 +778,17 @@ class RiderAPIController extends Controller {
         }
         else{
             $rider_id = $request->rider_id;
+//            return response()->json(['status' => 0, 'rider' => $rider_id]);
             foreach ($request->messages as $message){
                 $commented_at = Carbon::createFromTimestampMs($message['commented_at'])->toDateTimeString();
                 $comment = new CrmComments();
-                $comment->crm_request_id = $request->crm_request_id;
+                $comment->crm_request_id = $message['crm_request_id'];
                 $comment->comment_by_id = $rider_id;
                 $comment->comment_by = 2;
                 $comment->comment_type = 2;
-                $comment->comment = $request->comment;
+                $comment->comment = $message['comment'];
                 $comment->created_at = $commented_at;
+                $comment->updated_at = $commented_at;
                 $comment->save();
             }
 
