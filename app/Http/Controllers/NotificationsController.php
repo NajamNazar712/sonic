@@ -4239,6 +4239,7 @@ class NotificationsController extends Controller
                         $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Negative Balance.</strong></th>';
 
                       $html .= '</tr></thead><tbody>';
+                        $total_payable = 0;
                       foreach($sale_persons as $sale_person){
                           foreach ($negative as $data) {
                             if($sale_person->user_id == $data->account_id){
@@ -4249,14 +4250,16 @@ class NotificationsController extends Controller
                                 if (strpos($body, '[shipper_name]') !== FALSE) {
                                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data->name .'</td>';
                                 }
-                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data->origin .'</td>';
-                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data->sum_payable .'</td>';
-                                      $check = true;
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data->origin .'</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data->sum_payable .'</td>';
+                                $html .= '</tr>';
+                                $check = true;
+                                $total_payable = $total_payable + $data->sum_payable;
                             }
 
                           }
                       }
-                      $html .= '</tr>';
+                      $html .= '<tr><td></td><td></td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $total_payable .'</td></tr>';
                       $html .= '</tbody></table>';
                       $body = str_replace('[account_id]', '', $body);
                       $body = str_replace('[shipper_name]', '', $body);
