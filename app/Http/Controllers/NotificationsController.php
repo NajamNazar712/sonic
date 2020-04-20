@@ -4273,7 +4273,7 @@ class NotificationsController extends Controller
                       $sale_person_email = $admin_sale_person->email;
                       $to = array_merge($to, [$sale_person_email]);
 
-                      $cc_admins = Admin::whereIn('id', [12, 32, 13]);
+                      $cc_admins = Admin::whereIn('id', [12, 32, 13, 60, 49, 174]);
                       if($cc_admins->exists()){
                         $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
                       }
