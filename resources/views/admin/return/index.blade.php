@@ -428,11 +428,6 @@
                             if(selected_rows !== ''){
                                 $('#AssignAgentModal').modal('show');
 
-                                $('#AssignAgentModal').on('shown.bs.modal',function (e) {
-                                });
-                                $('#AssignAgentModal').on('hide.bs.modal', function (e) {
-                                    $('#assign_agent').val('').trigger('change');
-                                });
                                 $('#assign_agentSubmit').on('click',function () {
                                     var assign = parseInt($('#assign_agent').val());
                                     swal({
@@ -485,6 +480,10 @@
                                                         table.rows().deselect();
 
                                                         table.draw(true);
+                                                        table.button('.assign').disable();
+                                                        table.button('.confirm').disable();
+                                                        table.button('.re-attempt').disable();
+
                                                     });
                                             } else {
                                                 var error = "Agent Not Selected!";
@@ -835,6 +834,13 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            $('#AssignAgentModal').on('shown.bs.modal',function (e) {
+            });
+            $('#AssignAgentModal').on('hide.bs.modal', function (e) {
+                $('#assign_agent').val('').trigger('change');
+            });
+
             var hub_ids = [];
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {

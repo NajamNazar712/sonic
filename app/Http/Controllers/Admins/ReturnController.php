@@ -419,7 +419,11 @@ class ReturnController extends Controller
                     $parcel->save();
 
                     ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
-
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                    if($return_assign_shipment){
+                        $return_assign_shipment->status = 0;
+                        $return_assign_shipment->save();
+                    }
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
                 }
@@ -498,6 +502,12 @@ class ReturnController extends Controller
                     $parcel->save();
 
                     ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remark, NULL, Auth::id());
+
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+                    if($return_assign_shipment){
+                        $return_assign_shipment->status = 0;
+                        $return_assign_shipment->save();
+                    }
 
                     NotificationsController::send(15, 0, $request->shipment_id);
                     NotificationsController::send(16, 0, $request->shipment_id);
