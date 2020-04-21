@@ -681,7 +681,7 @@ class AdminFinanceController extends Controller
                 $join->on('sjd.shipment_id', '=', 's.id')
                     ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
             })
-            ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->leftjoin('revert_status_request_logs as rsrl', function($join){
                 $join->on('rsrl.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
@@ -691,8 +691,7 @@ class AdminFinanceController extends Controller
                 $join->on('rsr.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
                     ->where('rsr.id', '=', DB::raw('(SELECT MAX(id) FROM revert_status_requests WHERE revert_status_requests.delivery_note_id = delivery_note_shipments.delivery_note_id AND shipment_id = s.id)'));
             })
-            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id')
-            ->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id');
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
@@ -865,13 +864,17 @@ class AdminFinanceController extends Controller
             });
 
         if ($recovery_status = $request->get('recovery_status')) {
-            if($recovery_status == 1){
-                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
-            }else if($recovery_status == 7){
+            if($recovery_status == 7){
                 $datatables->where('delivery_note_shipments.status', '=', 7);
             }else if($recovery_status == 11){
                 $datatables->where('delivery_note_shipments.status', '=', 11);
             }
+            else {
+                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+            }
+        }
+        else {
+            $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
         }
 
         if ($hub = $request->get('hub')) {
