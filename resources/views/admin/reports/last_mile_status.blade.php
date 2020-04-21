@@ -184,7 +184,7 @@
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#to_date_root').css('top', '40px');
@@ -207,90 +207,9 @@
                 }
             });
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.account_activation.list') }}',
-                        data: params,
-                        success: function (result) {
-
-                            head = [];
-
-                            head.push('S. No.');
-                            head.push('Account No.');
-                            head.push('Account Name');
-                            head.push('Sales Person Name');
-                            head.push('Activation Date');
-
-
-                            $.each(result.data, function(index, values) {
-                                row = [];
-
-                                row.push(index + 1);
-                                row.push(values.id);
-                                row.push(values.shipper);
-                                row.push(values.sale_person);
-                                row.push(values.activated_at);
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-
-                    return {body: body, header:head};
-                }
-            } );
-            /*var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                // scrollX: true, scrollY: '500px',
-                autoWidth:true,
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        className: 'btn btn-primary',
-                        title: 'Last Mile Status Report',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                    },
-                ],
-                bLengthChange : false, //thought this line could hide the LengthMenu
-                bInfo:false,
-                bPaginate: false,
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                serverSide: true,
-                deferLoading: [50, 0],
-                ajax:{
-                    url: '{{ route('admin.reports.last_mile_status.list') }}',
-                    data: function (d) {
-                        d.search_date_from = $('input[name="from_date_formatted"]').val();
-                        d.search_date_to = $('input[name="to_date_formatted"]').val();
-                        d.search_destination = $('#search_destination').val();
-                        d.search_hub = $('#search_hub').val();
-                        d.search_zone = $('#search_zone').val();
-                        d.search_rider = $('#search_rider').val();
-                    }
-                },
-                columns: [
-                    { data:'time', class: 'align-middle text-center time', sortable: false, orderable: false, searchable: false},
-                    { data:'total_status_updated', class: 'align-middle text-center total_status_updated', sortable: false, orderable: false, searchable: false},
-                    { data:'bolt_status_updated', class: 'align-middle text-center bolt_status_updated', sortable: false, orderable: false, searchable: false},
-                    { data:'bolt_status_percentage', class: 'align-middle text-center bolt_status_percentage', sortable: false, orderable: false, searchable: false},
-                    { data:'sonic_status_updated', class: 'align-middle text-center sonic_status_updated', sortable: false, orderable: false, searchable: false},
-                    { data:'sonic_status_percentage', class: 'align-middle text-center sonic_status_percentage', sortable: false, orderable: false, searchable: false}
-                ],
-                initComplete: function() {
-                    this.api().table().columns.adjust();
-                }
-            });*/
 
             var table = $('#datatable').DataTable({
-                dom: 'tp',
+                dom: 'Btp',
                 scrollX: true,
                 paging: false,
                 ordering: false,
@@ -336,7 +255,7 @@
 
 
                         $('#search_filter_btn').prop('disabled', false);
-                        // $('#export_btn').prop('disabled', false);
+
                         UnblockPagePermanently();
                     });
             }
