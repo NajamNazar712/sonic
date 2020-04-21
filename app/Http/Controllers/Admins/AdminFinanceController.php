@@ -2739,6 +2739,9 @@ class AdminFinanceController extends Controller
                     } else {
                         return '';
                     }
+                },
+                'type_id' => function($deliveries){
+                    return $deliveries->type;
                 }
             ])
             ->addColumn('deductable', function($pending_payment_shipments) {
@@ -2870,7 +2873,7 @@ class AdminFinanceController extends Controller
         $shipment_ids = array();
         $duplicate_shipment_ids = array();
         $duplicate_shipments = array();
-
+        
         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
@@ -2905,7 +2908,6 @@ class AdminFinanceController extends Controller
                         else {
                             $duplicate_shipment .= 'Adjusted';
                         }
-
                         $duplicate_shipments[] = $duplicate_shipment;
                     }
                 }
