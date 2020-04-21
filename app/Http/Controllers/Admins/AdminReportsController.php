@@ -9,6 +9,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\Excel_reports\Debriefing;
+use App\Http\Models\ShipmentsJourney;
 use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
@@ -6239,6 +6240,54 @@ use Yajra\Datatables\Datatables;
                     }
                 });
             return $datatables->make(true);
+        }
+
+        public function last_mile_status_index(){
+            
+            $cities = DB::connection('reports')->table('cities')->get(['id','name']);
+            $hubs = DB::connection('reports')->table('cities')->select(['id','name'])->where('hub',1)->get();
+            $zones = DB::connection('reports')->table('zones')->get();
+            $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+            return view('admin.reports.last_mile_status')->with(['destinations' => $cities, 'hubs' => $hubs, 'zones' => $zones, 'riders' => $riders]);
+        }
+        public function last_mile_status_list(Request $request){
+
+            $date_from = $request->get('search_date_from');
+            $date_to = $request->get('search_date_to');
+            $search_destination = $request->get('search_destination');
+            $search_hub = $request->get('search_hub');
+            $search_zone = $request->get('search_zone');
+            $search_rider = $request->get('search_rider');
+            $data = self::last_mile_status_data($date_from, $date_to, $search_destination, $search_hub, $search_zone, $search_rider);
+            return response()->json(['status' => 0, 'time_slots' => $data]);
+        }
+        public function last_mile_status_data($from, $to, $destination, $hub, $zone, $rider){
+            $data = array();
+            $time_slots = array(1 => '9 AM - 12 PM', 2 => '12 PM - 3 PM', 3 => '3 PM - 6 PM', 4 => '6 PM - 9 PM', 5 => '9 PM - 12 AM', 6 => '12 AM - 9 AM');
+            $sum_total_status_updated = 0;
+            $sum_bolt_status_updated = 0;
+            $sum_bolt_status_percentage = 0;
+            $sum_sonic_status_updated = 0;
+            $sum_sonic_status_percentage = 0;
+            foreach ($time_slots as $id => $slot){
+                $time_array = array();
+                $time_array['time'] = $slot;
+                $time_array['total_status_updated'] = 0;
+                $time_array['bolt_status_updated'] = 0;
+                $time_array['bolt_status_percentage'] = 0;
+                $time_array['sonic_status_updated'] = 0;
+                $time_array['sonic_status_percentage'] = 0;
+                $sum_total_status_updated = $sum_total_status_updated + $time_array['total_status_updated'];
+                $sum_bolt_status_updated = $sum_bolt_status_updated + $time_array['bolt_status_updated'];
+                $sum_bolt_status_percentage = $sum_bolt_status_percentage + $time_array['bolt_status_percentage'];
+                $sum_sonic_status_updated = $sum_sonic_status_updated + $time_array['sonic_status_updated'];
+                $sum_sonic_status_percentage = $sum_sonic_status_percentage + $time_array['sonic_status_percentage'];
+
+                $data[] = $time_array;
+            }
+            $data[] = array('time' => 'Total', 'total_status_updated' => $sum_total_status_updated, 'bolt_status_updated' => $sum_bolt_status_updated, 'bolt_status_percentage' => $sum_bolt_status_percentage, 'sonic_status_updated' => $sum_sonic_status_updated, 'sonic_status_percentage' => $sum_sonic_status_percentage);
+
+            return $data;
         }
     }
 

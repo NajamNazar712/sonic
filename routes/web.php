@@ -1326,6 +1326,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@cargo_short_received_shipments_list')->name('list');
         });
 
+        Route::prefix('last_mile_status')->name('last_mile_status.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@last_mile_status_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@last_mile_status_list')->name('list');
+        });
     });
 
     //Reports end
