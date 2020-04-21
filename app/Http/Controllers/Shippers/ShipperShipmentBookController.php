@@ -1958,10 +1958,6 @@ class ShipperShipmentBookController extends Controller
         $shipment->walk_in_delivery_type_id = $delivery_type_id;
         $shipment->charges_mode_id = $charges_mode_id;
 
-
-        $shipment->lat = $lat;
-        $shipment->long = $long;
-
         $shipment->booked_by = session('user_type');
         $shipment->save();
 
