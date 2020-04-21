@@ -24,6 +24,8 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 
+use App\Http\Models\ConsigneeLocation;
+use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
