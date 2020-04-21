@@ -662,9 +662,9 @@ class RiderAPIController extends Controller {
                 $cod_amount = number_format($shipment_data->amount);
                 $special_instructions = $shipment_data->special_instructions;
                 $remarks = '';
-                $journey = ShipmentsJourney::where('shipment_id', $shipment_data->id)->latest('id')->select('remarks');
+                $journey = ShipmentsJourney::where('shipment_id', $shipment_data->id)->select('remarks');
                 if($journey->exists()){
-                    $journey = $journey->first();
+                    $journey = $journey->latest()->first();
                     $remarks = $journey->remarks;
                 }
                 $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('shipment_id', $shipment_id);
