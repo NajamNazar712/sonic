@@ -1252,12 +1252,12 @@ class DeliveryController extends Controller
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.rider_id IS NOT NULL)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.rider_id IS NOT NULL)'));
             })
             ->leftJoin('shipments_journey as sjl', function ($join) {
                 $join->on('sjl.shipment_id', '=', 'shipments.id')
                     ->where('sjl.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.reference_1_id = delivery_notes.id)'));
             })
             ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sj.shipper_status_id')
             ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sj.status_reason_id')
@@ -2019,7 +2019,7 @@ class DeliveryController extends Controller
             ->leftJoin('shipments_journey as sjr', function ($join) {
                 $join->on('sjr.shipment_id', '=', 'shipments.id')
                     ->where('sjr.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.rider_id IS NOT NULL)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.rider_id IS NOT NULL)'));
             })
             ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sjr.shipper_status_id')
             ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sjr.status_reason_id')
