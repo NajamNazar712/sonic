@@ -35,7 +35,7 @@ class CoordinatesController extends Controller
         }
         else{
             $new_coordinates = new ConsigneeLocation();
-            $new_coordinates->phone_number = $consignee_phone_number_1;s
+            $new_coordinates->phone_number = $consignee_phone_number_1;
             $new_coordinates->address = $shipment->consignee_address;
             $new_coordinates->lat = $request->lat;
             $new_coordinates->long = $request->long;
