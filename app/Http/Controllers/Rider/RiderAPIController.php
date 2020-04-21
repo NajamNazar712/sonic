@@ -759,7 +759,7 @@ class RiderAPIController extends Controller {
             });
             return response()->json(['status' => 0, 'message' => 'Delivery Note Is Assigned', 'information' => $information]);
         }
-        return response()->json(['status' => 1, 'message' => 'No Delivery Note Assigned']);
+        return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
     }
 
     public function crm_comment_add(Request $request){
