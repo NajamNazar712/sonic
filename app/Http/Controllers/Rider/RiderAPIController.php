@@ -664,7 +664,7 @@ class RiderAPIController extends Controller {
                 $remarks = '';
                 $journey = ShipmentsJourney::where('shipment_id', $shipment_data->id)->select('remarks');
                 if($journey->exists()){
-                    $journey = $journey->latest()->first();
+                    $journey = $journey->orderBy('id', 'DESC')->first();
                     $remarks = $journey->remarks;
                 }
                 $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('shipment_id', $shipment_id);
