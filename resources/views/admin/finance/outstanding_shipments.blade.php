@@ -610,7 +610,7 @@
 						d.delivery_date_to = $('#search_form input[name="delivery_date_to_formatted"]').val();
 					}
 				},
-				deferRender: true,
+				deferLoading: 0,
 				rowId: 'id',
 				order: [[14, 'desc']],
 				columns: [
