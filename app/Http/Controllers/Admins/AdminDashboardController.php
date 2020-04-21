@@ -6918,7 +6918,7 @@ if(session('department_id') == 7){
                 }
                 if($result->account_type_id == 1){
                     if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
-                        if($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || session('role_id') == 4 || session('role_id') == 2) {
+                        if($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || session('role_id') == 4 || session('role_id') == 2 || session('role_id') == 7) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                         }
                     }
@@ -7162,7 +7162,7 @@ if(session('department_id') == 7){
                 if($sale_check != null && $result->status != 2) {
                     if($result->account_type_id == 1){
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                            if($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || session('role_id') == 4 || session('role_id') == 2)) {
+                            if($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || session('role_id') == 4 || session('role_id') == 2 || session('role_id') == 7)) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         } else {
