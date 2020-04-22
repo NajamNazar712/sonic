@@ -41,8 +41,22 @@ class ShipperFinanceController extends Controller
     public function payments_list(Request $request) {
       $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
         ->join('cities as c', 'u.city_id', '=', 'c.id')
-        ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
-        ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
+        ->leftJoin('user_bank_infos as ubi', function ($join) {
+            $join->on('ubi.id', '=', 'done_payments.user_bank_info_id');
+        })
+        ->leftJoin('user_bank_infos as ubi_default', function ($join) {
+            $join->on('ubi_default.user_id', '=', 'u.id')
+                ->where('ubi_default.default_bank', DB::raw(1));
+        })
+        ->leftJoin('banks_lists as ub', function ($join) {
+            $join->where(function($sub_query) {
+                $sub_query->whereNotNull('done_payments.user_bank_info_id')
+                ->where('ubi.bank_name', '=', 'ub.id');
+            })->orWhere(function($sub_query) {
+                $sub_query->whereNull('done_payments.user_bank_info_id')
+                ->where('ubi_default.bank_name', '=', 'ub.id');
+            });
+        })
         ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
         ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
         ->select('done_payments.id as id', 'u.id as user_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
