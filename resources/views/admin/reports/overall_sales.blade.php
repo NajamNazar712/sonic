@@ -148,6 +148,7 @@
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Received/Refused By</th>
                         <th class="border-primary border-darken-1">Sales Person</th>
+                        <th class="border-primary border-darken-1">Special Instructions</th>
                     </tr>
                     </thead>
                 </table>
@@ -365,6 +366,7 @@
                             head.push('Delivered/Returned Date');
                             head.push('Received/Refused By');
                             head.push('Sales Person');
+                            head.push('Special Instructions');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -408,6 +410,7 @@
                                 row.push(values.delivered_or_returned);
                                 row.push(values.received_or_refused_by);
                                 row.push(values.sales_person);
+                                row.push(values.special_instructions);
 
                                 body.push(row);
                             });
@@ -496,7 +499,8 @@
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
-                    { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'}
+                    { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
+                    { data: 'special_instructions' ,name: 'shipments.special_instructions', class: 'align-middle special_instructions'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
