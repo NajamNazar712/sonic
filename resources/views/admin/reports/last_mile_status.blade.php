@@ -209,7 +209,15 @@
 
 
             var table = $('#datatable').DataTable({
-                dom: 'Btp',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        className: 'btn btn-primary',
+                        title: 'Last Mile Status Report',
+                        text:'<i class="la la-file-excel-o"></i> Excel',
+                    },
+                ],
                 scrollX: true,
                 paging: false,
                 ordering: false,
