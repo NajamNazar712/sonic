@@ -6380,13 +6380,19 @@ use Yajra\Datatables\Datatables;
                 $time_array['sonic_status_percentage'] = round($sonic_status_percentage, 2) .'%';
                 $sum_total_status_updated = $sum_total_status_updated + $total_status_updated_count;
                 $sum_bolt_status_updated = $sum_bolt_status_updated + $bolt_status_updated_count;
-                $sum_bolt_status_percentage = $sum_bolt_status_percentage + $bolt_status_percentage;
+//                $sum_bolt_status_percentage = $sum_bolt_status_percentage + $bolt_status_percentage;
                 $sum_sonic_status_updated = $sum_sonic_status_updated + $sonic_status_updated_count;
-                $sum_sonic_status_percentage = $sum_sonic_status_percentage + $sonic_status_percentage;
+//                $sum_sonic_status_percentage = $sum_sonic_status_percentage + $sonic_status_percentage;
 
                 $data[] = $time_array;
             }
-            $data[] = array('time' => 'Total', 'total_status_updated' => $sum_total_status_updated, 'bolt_status_updated' => $sum_bolt_status_updated, 'bolt_status_percentage' => round($sum_bolt_status_percentage, 2), 'sonic_status_updated' => $sum_sonic_status_updated, 'sonic_status_percentage' => round($sum_sonic_status_percentage, 2));
+
+            if($sum_total_status_updated > 0){
+                $sum_bolt_status_percentage = ($sum_bolt_status_updated / $sum_total_status_updated) * 100;
+                $sum_sonic_status_percentage = ($sum_sonic_status_updated / $sum_total_status_updated) * 100;
+            }
+
+            $data[] = array('time' => 'Total', 'total_status_updated' => $sum_total_status_updated, 'bolt_status_updated' => $sum_bolt_status_updated, 'bolt_status_percentage' => round($sum_bolt_status_percentage, 2) . '%', 'sonic_status_updated' => $sum_sonic_status_updated, 'sonic_status_percentage' => round($sum_sonic_status_percentage, 2). '%');
 
             return $data;
         }
