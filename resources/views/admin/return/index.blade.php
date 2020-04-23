@@ -706,7 +706,6 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                     }
                 },
-                deferLoading: 0,
                 rowId: 'shId',
                 order: [[21, 'desc']],
                 columns: [
