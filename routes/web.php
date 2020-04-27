@@ -1545,6 +1545,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_crm_comment_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@auto_crm_comment_store')->name('store');
         });
+
+        Route::prefix('blacklist')->name('blacklist.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@blacklist_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@blacklist_list')->name('list');
+            Route::get('add', 'Admins\GlobalSettingsController@blacklist_add')->name('add');
+        });
+
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

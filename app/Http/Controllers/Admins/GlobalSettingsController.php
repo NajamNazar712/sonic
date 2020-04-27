@@ -16,6 +16,8 @@ use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\Blacklist\BlacklistLabeling;
+use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\City;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
@@ -1882,5 +1884,44 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function blacklist_index(){
+        return view('admin.settings.blacklist.index');
+    }
+    public function blacklist_list(Request $request){
+        $blacklist = BlacklistSetting::join('admins as a', 'a.id', '=', 'blacklist_settings.added_by')
+            ->leftjoin('admins as u', 'u.id', '=', 'blacklist_settings.updated_by')
+            ->join('blacklist_labelings as bl', 'bl.id', '=', 'blacklist_settings.labeling_id')
+            ->select('blacklist_settings.id as category_id', 'blacklist_settings.name as category_name', 'bl.name as labeling_name', 'a.name as added_by', 'u.name as updated_by', 'blacklist_settings.status', 'blacklist_settings.created_at', 'blacklist_settings.updated_at')
+            ->where('blacklist_settings.status', 1);
+        $datatable = Datatables::of($blacklist)
+            ->addColumn('action', function ($data){
+
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    if ($data->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    } else {
+                            $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+
+                    return $dropdown;
+
+            });
+
+        return  $datatable->make(true);
+    }
+
+    public function blacklist_add(){
+        $labelings = BlacklistLabeling::all(['id','name']);
+        return $labelings;
+        return view('admin.settings.blacklist.add');
     }
 }
