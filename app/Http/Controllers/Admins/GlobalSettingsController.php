@@ -16,8 +16,12 @@ use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\Blacklist\BlacklistCondition;
 use App\Http\Models\Blacklist\BlacklistLabeling;
+use App\Http\Models\Blacklist\BlacklistLogic;
+use App\Http\Models\Blacklist\BlacklistOperation;
 use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\City;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
@@ -1896,6 +1900,13 @@ class GlobalSettingsController extends Controller
             ->select('blacklist_settings.id as category_id', 'blacklist_settings.name as category_name', 'bl.name as labeling_name', 'a.name as added_by', 'u.name as updated_by', 'blacklist_settings.status', 'blacklist_settings.created_at', 'blacklist_settings.updated_at')
             ->where('blacklist_settings.status', 1);
         $datatable = Datatables::of($blacklist)
+            ->addColumn('category_status', function ($data){
+                if($data->status == 0){
+                    return 'Disable';
+                }else{
+                    return 'Enable';
+                }
+            })
             ->addColumn('action', function ($data){
 
                     $dropdown = '
@@ -1921,7 +1932,13 @@ class GlobalSettingsController extends Controller
 
     public function blacklist_add(){
         $labelings = BlacklistLabeling::all(['id','name']);
-        return $labelings;
-        return view('admin.settings.blacklist.add');
+        $conditions = BlacklistCondition::all(['id','name']);
+        $logics = BlacklistLogic::all(['id','name']);
+        $shipment_ranges = BlacklistShipmentRange::all(['id','name']);
+        $operations = BlacklistOperation::all(['id','name']);
+        return view('admin.settings.blacklist.add')->with(['labelings' => $labelings, 'conditions' => $conditions, 'logics' => $logics, 'shipment_ranges' => $shipment_ranges, 'operations' => $operations]);
+    }
+    public function blacklist_add_store(Request $request){
+        return $request;
     }
 }

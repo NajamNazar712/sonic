@@ -1550,6 +1550,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@blacklist_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@blacklist_list')->name('list');
             Route::get('add', 'Admins\GlobalSettingsController@blacklist_add')->name('add');
+            Route::post('add', 'Admins\GlobalSettingsController@blacklist_add_store')->name('add');
         });
 
     });

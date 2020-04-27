@@ -26,6 +26,7 @@
                                     <th class="border-primary border-darken-1">Added By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1">Updated by</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -61,7 +62,8 @@
                     action: function (e, dt, node, config) {
                         window.location = '{{ route('admin.settings.blacklist.add') }}';
                     }
-                },'reset'],
+                }, 'reset'],
+                @endif
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -81,6 +83,7 @@
                     {data: 'added_by', name: 'a.name', class: 'align-middle added_by'},
                     {data: 'updated_at', name: 'blacklist_settings.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
+                    {data: 'category_status', name: 'blacklist_settings.status', class: 'align-middle status'},
 
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -131,62 +134,6 @@
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-
-                @if (session('role_id') == 1 || in_array(83, session('permissions')))
-                if ($(this).hasClass('edit')) {
-                    var link = '{{ route('admin.user_management.users.update.index', ["id" => 0]) }}';
-
-                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
-                }
-                @endif
-
-                        @if (session('role_id') == 1 || in_array(84, session('permissions')))
-                if ($(this).hasClass('enable')) {
-                    $.ajax({
-                        url: '{!! route('admin.user_management.users.status') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': id,
-                            'status': 1,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status == 0) {
-                                table.draw(false);
-
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        });
-                }
-                else if ($(this).hasClass('disable')) {
-                    $.ajax({
-                        url: '{!! route('admin.user_management.users.status') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': id,
-                            'status': 0,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status == 0) {
-                                table.draw(false);
-
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        });
-                }
-                @endif
-            });
         });
     </script>
 @endsection
