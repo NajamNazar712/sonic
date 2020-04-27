@@ -64,7 +64,7 @@ class CRMController extends Controller
         $crm_request_status_history->save();
         NotificationsController::send(31, $id);
 
-        if($case_nature_id == 1 && $launched_by == 1){
+        if($case_nature_id == 1 && ($launched_by == 1 || $launched_by == 2)){
             $settings = GlobalSettings::where('type', 'auto_crm_comment');
             if($settings->exists()){
                 $settings = $settings->first();
