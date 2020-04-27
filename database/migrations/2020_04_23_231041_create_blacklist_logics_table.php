@@ -15,7 +15,7 @@ class CreateBlacklistLogicsTable extends Migration
     {
         Schema::create('blacklist_logics', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('name');
+            $table->string('name');
             $table->timestamps();
         });
     }

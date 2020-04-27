@@ -18,11 +18,11 @@ class CreateBlacklistedConsigneesTable extends Migration
             $table->integer('consignee_information_id');
             $table->integer('shipments');
             $table->integer('delivered');
-            $table->integer('delivered_ratio');
+            $table->string('delivered_ratio');
             $table->integer('undelivered');
-            $table->integer('undelivered_ratio');
+            $table->string('undelivered_ratio');
             $table->integer('return');
-            $table->integer('return_ratio');
+            $table->string('return_ratio');
             $table->integer('blacklist_setting_id');
             $table->integer('blacklist_condition_id');
             $table->timestamps();
