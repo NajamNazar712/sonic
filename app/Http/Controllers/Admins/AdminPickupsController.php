@@ -278,6 +278,8 @@ class AdminPickupsController extends Controller
     }
 
     public function pending_list(Request $request) {
+          $today = Carbon::now()->startOfDay();
+
           $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
           ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
           ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
@@ -292,7 +294,7 @@ class AdminPickupsController extends Controller
           })
           ->leftJoin('pickup_notes as pn', 'pn.id', '=', 'pnr.pickup_note_id')
           ->leftJoin('riders as r', 'r.id', '=', 'pn.rider_id')
-          ->select('pickup_requests.id','pickup_requests.id as pickup_request_id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date', 'usi.vendor', 'r.name as rider')
+          ->select('pickup_requests.id','pickup_requests.id as pickup_request_id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date', 'usi.vendor', 'r.name as rider', 'usi.created_at as pickup_address_created_at')
           ->where('pickup_requests.status', 0);
 
           if (session('role_id') != 1) {
@@ -305,9 +307,12 @@ class AdminPickupsController extends Controller
         }
       $datatables = Datatables::of($pickup_requests)
           ->setRowAttr([
-              'class' => function ($pickup_requests) {
-                  if ($pickup_requests->vendor != null) {
+              'class' => function ($pickup_request) use ($today) {
+                  if ($pickup_request->vendor != null) {
                       return 'vendor_row';
+                  }
+                  else if (Carbon::parse($pickup_request->pickup_address_created_at)->startOfDay()->diffInDays($today) <= 6) {
+                    return 'new_pickup';
                   }
               }
           ])
