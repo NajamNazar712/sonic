@@ -1640,7 +1640,7 @@ class AdminCRMController extends Controller
 //            }
 //        }
 //        elseif ($request->multiple == 1) {
-        if(!empty($request->crm_request_id)){
+        if(!empty($request->crm_request_ids)){
             foreach ($request->crm_request_ids as $crm_request_id)
             {
                 $crm_requests = CrmRequest::find($crm_request_id);
