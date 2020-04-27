@@ -38,9 +38,9 @@
                                     </div>
                                     <div class="col-md-4 col-sm-6 col-12">
                                         <div class="form-group text-center">
-                                            <p>
-                                                <input type="text" class="form-control showPaletteOnly" value="#50C1E9">
-                                            </p>
+                                            <label for="color" class="mr-1">Color</label>
+                                                <input type="text" name="color" id="color" class="form-control showPaletteOnly ">
+
                                         </div>
                                     </div>
 
@@ -84,6 +84,7 @@
                 ["#600","#783f04","#7f6000","#274e13","#0c343d","#073763","#20124d","#4c1130"]
             ];
             $(".showPaletteOnly").spectrum({
+                preferredFormat: "hex3",
                 showPaletteOnly: true,
                 showPalette:true,
                 allowEmpty: true,
