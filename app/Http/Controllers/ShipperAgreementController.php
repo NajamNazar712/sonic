@@ -249,10 +249,10 @@ class ShipperAgreementController extends Controller
                 }
                 $packaging_details .=  '</tbody>
                           </table>';
-                $rates_switch = RateStatus::where('user_id', $id)->get();
+                $rates_switch = RateStatus::where('user_id', $id)->where('status', 1)->get();
 
             }else if($shipper->account_type_id == 2){
-                $rates_switch = CorporateRateStatus::where('user_id', $id)->get();
+                $rates_switch = CorporateRateStatus::where('user_id', $id)->where('status', 1)->get();
             }
 
             $rate_details = '';

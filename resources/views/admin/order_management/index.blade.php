@@ -762,6 +762,7 @@
                         d.shipment_status_select = $('#shipment_status').val();
                     }
                 },
+                deferLoading: 0,
                 rowId: 'shipment_id',
                 order: [[12, 'desc']],
                 columns: [
