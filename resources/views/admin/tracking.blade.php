@@ -512,7 +512,7 @@
                                     shipment += '<td colspan="3"></td>'
                                 }
                                 shipment += '<td><strong>Sales Person</strong></td>';
-                                console.log(details.shipper.id);
+
                                 if (details.shipper.sales_person != null) {
                                     shipment += '<td colspan="3">' + details.shipper.sales_person + '</td>';
                                 }
@@ -915,7 +915,8 @@
                                     {name: 'user', class: 'align-middle user'},
                                     {name: 'city', class: 'align-middle city'},
                                     {name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
-                                    {name: 'ip', class: 'align-middle ip'}
+                                    {name: 'ip', class: 'align-middle ip'},
+                                    {name: 'rider', class: 'align-middle rider'}
                                 ]
                             });
 
