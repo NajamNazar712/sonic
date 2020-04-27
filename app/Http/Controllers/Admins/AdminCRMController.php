@@ -1640,6 +1640,7 @@ class AdminCRMController extends Controller
 //            }
 //        }
 //        elseif ($request->multiple == 1) {
+        if(!empty($request->crm_request_id)){
             foreach ($request->crm_request_ids as $crm_request_id)
             {
                 $crm_requests = CrmRequest::find($crm_request_id);
@@ -1654,6 +1655,7 @@ class AdminCRMController extends Controller
                 }
             }
             return ['status' => 0, 'success' => 'Request(s) has been Assigned'];
+        }
 //        }
     }
 
