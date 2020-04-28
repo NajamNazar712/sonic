@@ -247,6 +247,7 @@ class ShipperReturnController extends Controller
 {
     $shipmentId = $request->shipment_id;
     $remark = $request->remark;
+    $user_id = session('user_id');
     if ($shipmentId) {
         if (Shipment::where('id', $shipmentId)->where('shipper_status_id', '!=', 15)->exists()) {
             $consolidated_shipments = ConsolidationShipments::where('shipment_id', $shipmentId);
@@ -255,11 +256,11 @@ class ShipperReturnController extends Controller
                 $all_consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidated_shipments->consolidation_id)->pluck('shipment_id')->toArray();
                 Shipment::whereIn('id', $all_consolidation_shipments)->update(['shipper_status_id' => 15, 'consignee_status_id' => 15]);
                 foreach ($all_consolidation_shipments as $shipment) {
-                    ShipmentsJourneyController::add($shipment, 15, 15, NULL, $remark, Auth::id(), NULL);
+                    ShipmentsJourneyController::add($shipment, 15, 15, NULL, $remark, $user_id, NULL);
                 }
             } else {
                 Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 15, 'consignee_status_id' => 15]);
-                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, Auth::id(), NULL);
+                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, $user_id, NULL);
             }
             return ['status' => 0, 'success' => "Shipment status successfully updated to Shipment - On Hold for Self Collection"];
         } else {
