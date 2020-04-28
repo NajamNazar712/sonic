@@ -179,7 +179,7 @@
                 placeholder: 'Shipment Range*'
             });
             var condition = 1;
-            var row = 1;
+            var row = 2;
             $('body').on('click', '.add_criteria', function () {
                 var btn = $(this);
                 var html = '<div class="row mb-1">\n' +
