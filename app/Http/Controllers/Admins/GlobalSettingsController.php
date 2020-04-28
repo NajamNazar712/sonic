@@ -1939,6 +1939,13 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.blacklist.add')->with(['labelings' => $labelings, 'conditions' => $conditions, 'logics' => $logics, 'shipment_ranges' => $shipment_ranges, 'operations' => $operations]);
     }
     public function blacklist_add_store(Request $request){
-        return $request;
+        $conditions = $request->condition_select;
+        $name = $request->name;
+        $labeling_id = $request->labeling_select;
+        if(!empty($conditions)){
+            foreach ($conditions as $condition){
+
+            }
+        }
     }
 }

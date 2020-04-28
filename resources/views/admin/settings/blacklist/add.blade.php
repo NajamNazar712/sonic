@@ -47,61 +47,63 @@
                                 </div>
                                 <div class="row justify-content-center p-3">
                                     <div class="col"><h3>Conditions:</h3></div>
-                                    <div class="col"><button class="btn btn-black pull-right"><i class="la la-plus"></i> Add Condition</button></div>
+                                    <div class="col"><button type="button" class="btn btn-black pull-right" id="add_condition"><i class="la la-plus"></i> Add Condition</button></div>
+                                </div>
+                                <div id="multiple_conditions_div">
+                                    <div class="border border-primary p-3 mb-2 condition_div">
+                                        <div class="row mb-3">
+                                            <div class="col-2">Add Condition for</div>
+                                            <div class="col-3">
+                                                <div class="form-group">
+                                                    <select name="condition_select[1]" class="select2 form-control condition_select unique" id="condition_select_1" data-rule-required="true" data-msg-required="This field is required">
+                                                        @foreach($conditions as $condition)
+                                                            <option value="{{ $condition->id }}">{{ $condition->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="criteria_div">
+                                            <div class="row mb-1">
+                                                <div class="col-2">
+                                                    <div class="form-group">
+                                                        <select name="logic_select[1][1]" class="select2 form-control logic_select" data-rule-required="true" data-msg-required="This field is required">
+                                                            @foreach($logics as $logic)
+                                                                <option value="{{ $logic->id }}">{{ $logic->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-2">
+                                                    <div class="form-group">
+                                                        <input type="text" name="logic_percentage[1][1]" class="form-control dec-percent" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required">
+                                                    </div>
+                                                </div>
+                                                <div class="col-2">
+                                                    <div class="form-group">
+                                                        <select name="shipment_range_select[1][1]" class="select2 form-control shipment_range_select" data-rule-required="true" data-msg-required="This field is required">
+                                                            @foreach($shipment_ranges as $range)
+                                                                <option value="{{ $range->id }}">{{ $range->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-2">
+                                                    <div class="form-group">
+                                                        <input type="text" name="shipment_range[1][1]" class="form-control numeric" placeholder="Value" data-rule-required="true" data-msg-required="This field is required">
+                                                    </div>
+                                                </div>
+                                                <div class="col-2"></div>
+                                                <div class="col-2">
+                                                    <button type="button" class="btn btn-primary btm-sm add_criteria"><i class="la la-plus"></i> Add Criteria</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
 
-                                <div class="border border-primary p-3 condition_div">
-                                    <div class="row mb-3">
-                                        <div class="col-2">Add Condition for</div>
-                                        <div class="col-3">
-                                            <div class="form-group">
-                                            <select name="condition_select[0]" class="select2 form-control condition_select" data-rule-required="true" data-msg-required="This field is required">
-                                            @foreach($conditions as $condition)
-                                                <option value="{{ $condition->id }}">{{ $condition->name }}</option>
-                                            @endforeach
-                                            </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="criteria_div">
-                                        <div class="row mb-1">
-                                        <div class="col-2">
-                                            <div class="form-group">
-                                                <select name="logic_select[1][1]" class="select2 form-control logic_select" data-rule-required="true" data-msg-required="This field is required">
-                                                    @foreach($logics as $logic)
-                                                        <option value="{{ $logic->id }}">{{ $logic->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-
-                                        </div>
-                                        <div class="col-2">
-                                            <div class="form-group">
-                                            <input type="text" name="logic_percentage[1][1]" class="form-control dec-percent" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required">
-                                            </div>
-                                        </div>
-                                        <div class="col-2">
-                                            <div class="form-group">
-                                            <select name="shipment_range_select[1][1]" class="select2 form-control shipment_range_select" data-rule-required="true" data-msg-required="This field is required">
-                                                @foreach($shipment_ranges as $range)
-                                                    <option value="{{ $range->id }}">{{ $range->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-2">
-                                            <div class="form-group">
-                                            <input type="text" name="shipment_range[1][1]" class="form-control numeric" placeholder="Value" data-rule-required="true" data-msg-required="This field is required">
-                                            </div>
-                                        </div>
-                                        <div class="col-2"></div>
-                                        <div class="col-2">
-                                            <button class="btn btn-primary btm-sm add_criteria"><i class="la la-plus"></i> Add Criteria</button>
-                                        </div>
-                                    </div>
-                                    </div>
-
-                                </div>
                                 <div class="col-12">
                                     <div class="form-group text-center mt-2">
                                         <button type="submit" class="btn btn-primary">Add Category</button>
@@ -166,10 +168,7 @@
                 placeholder: 'Labeling*'
             });
 
-            $('.condition_select').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Condition*'
-            });
+
             $('.logic_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Logic*'
@@ -178,8 +177,18 @@
                 width: '100%',
                 placeholder: 'Shipment Range*'
             });
+
+
+
+            var selected_conditions = [];
             var condition = 1;
             var row = 2;
+
+            $('#condition_select_1').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Condition*'
+            });
+
             $('body').on('click', '.add_criteria', function () {
                 var btn = $(this);
                 var html = '<div class="row mb-1">\n' +
@@ -257,7 +266,109 @@
                 row++;
             });
 
+            $('#add_condition').on('click', function () {
+                condition++;
+                row = 2;
+                var html = '<div class="border border-primary p-3 mb-2 condition_div">\n' +
+                    '                                    <div class="row mb-3">\n' +
+                    '                                        <div class="col-2">Add Condition for</div>\n' +
+                    '                                        <div class="col-3">\n' +
+                    '                                            <div class="form-group">\n' +
+                    '                                            <select name="condition_select['+ condition +']" class="select2 form-control condition_select unique" id="condition_select_'+ condition +'" data-rule-required="true" data-msg-required="This field is required">\n' +
+                    '                                            @foreach($conditions as $condition)\n' +
+                    '                                                <option value="{{ $condition->id }}">{{ $condition->name }}</option>\n' +
+                    '                                            @endforeach\n' +
+                    '                                            </select>\n' +
+                    '                                            </div>\n' +
+                    '                                        </div>\n' +
+                    '                                    </div>\n' +
+                    '                                    <div class="criteria_div">\n' +
+                    '                                        <div class="row mb-1">\n' +
+                    '                                        <div class="col-2">\n' +
+                    '                                            <div class="form-group">\n' +
+                    '                                                <select name="logic_select['+ condition +']['+ row +']" id="logic_select_'+ condition + row +'" class="select2 form-control logic_select" data-rule-required="true" data-msg-required="This field is required">\n' +
+                    '                                                    @foreach($logics as $logic)\n' +
+                    '                                                        <option value="{{ $logic->id }}">{{ $logic->name }}</option>\n' +
+                    '                                                    @endforeach\n' +
+                    '                                                </select>\n' +
+                    '                                            </div>\n' +
+                    '\n' +
+                    '                                        </div>\n' +
+                    '                                        <div class="col-2">\n' +
+                    '                                            <div class="form-group">\n' +
+                    '                                            <input type="text" name="logic_percentage['+ condition +']['+ row +']" class="form-control dec-percent" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required">\n' +
+                    '                                            </div>\n' +
+                    '                                        </div>\n' +
+                    '                                        <div class="col-2">\n' +
+                    '                                            <div class="form-group">\n' +
+                    '                                            <select name="shipment_range_select['+ condition +']['+ row +']" id="shipment_range_select_'+ condition + row +'" class="select2 form-control shipment_range_select" data-rule-required="true" data-msg-required="This field is required">\n' +
+                    '                                                @foreach($shipment_ranges as $range)\n' +
+                    '                                                    <option value="{{ $range->id }}">{{ $range->name }}</option>\n' +
+                    '                                                @endforeach\n' +
+                    '                                            </select>\n' +
+                    '                                            </div>\n' +
+                    '                                        </div>\n' +
+                    '                                        <div class="col-2">\n' +
+                    '                                            <div class="form-group">\n' +
+                    '                                            <input type="text" name="shipment_range['+ condition +']['+ row +']" class="form-control numeric" placeholder="Value" data-rule-required="true" data-msg-required="This field is required">\n' +
+                    '                                            </div>\n' +
+                    '                                        </div>\n' +
+                    '                                        <div class="col-2"></div>\n' +
+                    '                                        <div class="col-2">\n' +
+                    '                                            <button type="button" class="btn btn-primary btm-sm add_criteria"><i class="la la-plus"></i> Add Criteria</button>\n' +
+                    '                                        </div>\n' +
+                    '                                    </div>\n' +
+                    '                                    </div>\n' +
+                    '\n' +
+                    '                                </div>';
+                    $('#multiple_conditions_div').append(html);
 
+                $('#condition_select_'+ condition +'').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Condition*'
+                });
+
+                $('#logic_select_'+ condition + row +'').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Select Logic*'
+                });
+                $('#shipment_range_select_'+ condition + row +'').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Shipment Range*'
+                });
+                $('#operation_select_'+ condition + row +'').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Shipment Range*'
+                });
+                $('.dec-percent').inputmask("Regex",{
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                    regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
+                });
+                $('.numeric').inputmask({
+                    'alias': 'integer',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                    'min': 0,
+                    'max': 1000000
+                });
+            });
+
+            // $.validator.addMethod('unique', function(value, element) {
+            //     var timeRepeated = 0;
+            //     var parentForm = $(element);
+            //     if (value != '') {
+            //         $(parentForm.find(':condition_select')).each(function () {
+            //             if ($(this).val() === value) {
+            //                 timeRepeated++;
+            //             }
+            //         });
+            //     }
+            //     return timeRepeated === 1 || timeRepeated === 0;
+            //
+            // }, 'Duplicate value selected');
 
             $('#category_form').validate({
                 ignore: [],
@@ -281,7 +392,7 @@
                         closeOnEsc: false
                     });
 
-                    form.submit();
+                    form.preventDefault();
                 }
             });
         });
