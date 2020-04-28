@@ -650,6 +650,23 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_list(Request $request) {
+        if ($recovery_status = $request->get('recovery_status')) {
+            if ($recovery_status == 7) {
+                $count = DeliveryNoteShipment::where('status', '=', 7);
+            }
+            else if ($recovery_status == 11) {
+                $count = DeliveryNoteShipment::where('status', '=', 7);
+            }
+            else {
+                $count = DeliveryNoteShipment::whereIn('status', [4, 5, 6]);
+            }
+        }
+        else {
+            $count = DeliveryNoteShipment::whereIn('status', [4, 5, 6]);
+        }
+
+        $count = $count->count();
+
         $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
             ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
@@ -665,7 +682,7 @@ class AdminFinanceController extends Controller
                 $join->on('sjd.shipment_id', '=', 's.id')
                     ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
             })
-            ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->leftjoin('revert_status_request_logs as rsrl', function($join){
                 $join->on('rsrl.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
@@ -680,14 +697,14 @@ class AdminFinanceController extends Controller
                     ->where('consolidations.consolidation_id','=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
-            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id','consolidations.consolidation_id')
-            ->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id','consolidations.consolidation_id');
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($shipments)
+            ->setTotalRecords($count)
             ->setRowAttr([
                 'data-dncc' => function ($shipments) {
                     return $shipments->dncc;
@@ -860,15 +877,17 @@ class AdminFinanceController extends Controller
             });
 
         if ($recovery_status = $request->get('recovery_status')) {
-            if($recovery_status == 0){
-                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
-            }else if($recovery_status == 1){
-                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
-            }else if($recovery_status == 7){
+            if($recovery_status == 7){
                 $datatables->where('delivery_note_shipments.status', '=', 7);
             }else if($recovery_status == 11){
                 $datatables->where('delivery_note_shipments.status', '=', 11);
             }
+            else {
+                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+            }
+        }
+        else {
+            $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
         }
 
         if ($hub = $request->get('hub')) {
@@ -2739,9 +2758,6 @@ class AdminFinanceController extends Controller
                     } else {
                         return '';
                     }
-                },
-                'type_id' => function($deliveries){
-                    return $deliveries->type;
                 }
             ])
             ->addColumn('deductable', function($pending_payment_shipments) {
@@ -2873,7 +2889,7 @@ class AdminFinanceController extends Controller
         $shipment_ids = array();
         $duplicate_shipment_ids = array();
         $duplicate_shipments = array();
-        
+
         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
@@ -2908,6 +2924,7 @@ class AdminFinanceController extends Controller
                         else {
                             $duplicate_shipment .= 'Adjusted';
                         }
+
                         $duplicate_shipments[] = $duplicate_shipment;
                     }
                 }
