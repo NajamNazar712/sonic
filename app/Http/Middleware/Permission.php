@@ -390,6 +390,8 @@ class Permission
             'reports.account_reconciliation.index' => 312,
             'reports.cargo_short_received_shipments.index' => 319,
             'reports.cargo_short_received_shipments.list' => 319,
+            'reports.multiple_iban.index' => 328,
+            'reports.multiple_iban.list' => 328,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

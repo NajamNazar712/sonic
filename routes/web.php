@@ -1157,6 +1157,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@cargo_received_list')->name('list');
             Route::post('shipments','Admins\AdminReportsController@cargo_shipments')->name('shipments');
         });
+        Route::prefix('multiple_iban')->name('multiple_iban.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@multiple_iban_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@multiple_iban_list')->name('list');
+        });
         Route::prefix('lead_time')->name('lead_time.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@lead_time_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@lead_time_list')->name('list');

@@ -497,6 +497,43 @@ use Yajra\Datatables\Datatables;
             return $tracking_numbers;
         }
 
+
+        public function multiple_iban_index(Request $request){
+            $iban_no = DB::connection('reports')->table('user_bank_infos')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
+            return view('admin.reports.multiple_IBAN_no_change')->with(['iban'=>$iban_no,'shippers'=>$shippers]);
+        }
+
+        public function multiple_iban_list(Request $request){
+            $iban_received = DB::connection('reports')->table('user_bank_infos')->join('users as u','u.id','=','user_bank_infos.user_id')
+            ->join('cities AS oc', 'user_bank_infos.city_id', '=', 'oc.id')
+            ->join('banks_lists AS bl', 'bl.id', '=', 'user_bank_infos.bank_name')
+            ->select(['user_bank_infos.id as account_id','u.name as shipper','bl.name as bankname',
+            'user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title',
+            'oc.name as city','user_bank_infos.iban','user_bank_infos.default_bank as default','user_bank_infos.created_at as bank_added_at'
+
+            ]);
+            $user_bank = Datatables::of($iban_received);  
+
+            if($ibanNo = $request->get('search_iban_no')){
+                $user_bank->where('user_bank_infos.iban', '=', $ibanNo);
+            }
+            if($shipper = $request->get('search_shipper')){
+                $user_bank->where('u.id', '=', $shipper);
+            }
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $user_bank->whereBetween('user_bank_infos.created_at', [$from,$to]);
+            }
+
+           
+            return $user_bank->make(true);
+        
+        }
+
+
+
         public function lead_time_index(Request $request){
     //        $shippers = User$generator::all(['id','name']);
             $cities = DB::connection('reports')->table('cities')->get(['id','name']);
@@ -787,6 +824,7 @@ use Yajra\Datatables\Datatables;
             }
             return $lead_time->make(true);
         }
+        
         public function qa_index(Request $request){
             $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
             return view('admin.reports.qa_report')->with('shipping_modes', $shipping_modes);
