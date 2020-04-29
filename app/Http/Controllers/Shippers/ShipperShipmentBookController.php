@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\ConsigneeInformationController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\ChargesModes;
@@ -139,6 +140,7 @@ class ShipperShipmentBookController extends Controller
         }
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
 
+        ConsigneeInformationController::add($consignee_phone_number_1, $consignee_name, $consignee_address, $consignee_phone_number_2, $consignee_city_id);
 
         //Existing Coordinates
         $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
@@ -1996,6 +1998,8 @@ class ShipperShipmentBookController extends Controller
             $reference_1_id = null;
         }
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
+
+        ConsigneeInformationController::add($consignee_phone_number_1, $consignee_name, $consignee_address, $consignee_phone_number_2, $consignee_city_id);
 
         return $shipment_id;
     }
