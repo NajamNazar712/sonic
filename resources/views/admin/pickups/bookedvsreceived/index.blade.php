@@ -40,7 +40,7 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group">
-                                            <select name="shipping_mode" id="shipping_mode" class="form-control select2">
+                                            <select name="shipping_mode" id="shipping_mode" class="form-control select2" data-rule-required="true" data-msg-required="Shipping Mode is required">
                                                 @foreach($shipping_modes as $shipping_mode)
                                                     <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
                                                 @endforeach
