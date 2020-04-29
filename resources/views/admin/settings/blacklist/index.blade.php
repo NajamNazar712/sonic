@@ -134,6 +134,61 @@
                 }
             });
 
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+{{--                @if (session('role_id') == 1 || in_array(83, session('permissions')))--}}
+                if ($(this).hasClass('edit')) {
+                    var link = '{{ route('admin.settings.blacklist.edit', ["id" => 0]) }}';
+
+                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+                }
+{{--                @endif--}}
+{{--                        @if (session('role_id') == 1 || in_array(84, session('permissions')))--}}
+                if ($(this).hasClass('enable')) {
+                    $.ajax({
+                        url: '{!! route('admin.settings.blacklist.status') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            'status': 1,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                table.draw(false);
+
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                }
+                else if ($(this).hasClass('disable')) {
+                    $.ajax({
+                        url: '{!! route('admin.settings.blacklist.status') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            'status': 0,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                table.draw(false);
+
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                }
+{{--                @endif--}}
+            });
         });
     </script>
 @endsection

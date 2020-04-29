@@ -21,6 +21,7 @@ use App\Http\Models\Blacklist\BlacklistLabeling;
 use App\Http\Models\Blacklist\BlacklistLogic;
 use App\Http\Models\Blacklist\BlacklistOperation;
 use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Blacklist\BlacklistSettingCondition;
 use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\City;
 use App\Http\Models\CorporateFuelSurcharge;
@@ -1897,8 +1898,7 @@ class GlobalSettingsController extends Controller
         $blacklist = BlacklistSetting::join('admins as a', 'a.id', '=', 'blacklist_settings.added_by')
             ->leftjoin('admins as u', 'u.id', '=', 'blacklist_settings.updated_by')
             ->join('blacklist_labelings as bl', 'bl.id', '=', 'blacklist_settings.labeling_id')
-            ->select('blacklist_settings.id as category_id', 'blacklist_settings.name as category_name', 'bl.name as labeling_name', 'a.name as added_by', 'u.name as updated_by', 'blacklist_settings.status', 'blacklist_settings.created_at', 'blacklist_settings.updated_at')
-            ->where('blacklist_settings.status', 1);
+            ->select('blacklist_settings.id as category_id', 'blacklist_settings.name as category_name', 'bl.name as labeling_name', 'a.name as added_by', 'u.name as updated_by', 'blacklist_settings.status', 'blacklist_settings.created_at as added_at', 'blacklist_settings.updated_at');
         $datatable = Datatables::of($blacklist)
             ->addColumn('category_status', function ($data){
                 if($data->status == 0){
@@ -1939,13 +1939,76 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.blacklist.add')->with(['labelings' => $labelings, 'conditions' => $conditions, 'logics' => $logics, 'shipment_ranges' => $shipment_ranges, 'operations' => $operations]);
     }
     public function blacklist_add_store(Request $request){
+
         $conditions = $request->condition_select;
         $name = $request->name;
         $labeling_id = $request->labeling_select;
+        $color = $request->color;
+        $message = $request->message;
+
+        if(BlacklistSetting::where('color', $color)->exists()){
+            return redirect()->back()->with('error', 'Color already selected!');
+        }
+        if(count($conditions) > count(array_flip($conditions))){
+            return redirect()->back()->with('error', 'Same condition selected multiple times!');
+        }
+
         if(!empty($conditions)){
-            foreach ($conditions as $condition){
+
+            $blacklist_setting = new BlacklistSetting();
+            $blacklist_setting->name = $name;
+            $blacklist_setting->labeling_id = $labeling_id;
+            $blacklist_setting->color = $color;
+            $blacklist_setting->message = $message;
+            $blacklist_setting->added_by = Auth::id();
+            $blacklist_setting->save();
+            $setting_id = $blacklist_setting->id;
+            foreach ($conditions as $key => $condition){
+                foreach ($request->logic_select[$key] as $row => $logic){
+                    $blacklist_setting_condition = new BlacklistSettingCondition();
+                    $blacklist_setting_condition->blacklist_setting_id = $setting_id;
+                    $blacklist_setting_condition->blacklist_condition_id = $condition;
+                    $blacklist_setting_condition->blacklist_logic_id = $logic;
+                    $blacklist_setting_condition->blacklist_logic_value = $request->logic_percentage[$key][$row];
+                    $blacklist_setting_condition->blacklist_shipment_range_id = $request->shipment_range_select[$key][$row];
+                    $blacklist_setting_condition->blacklist_shipment_range_value = $request->shipment_range[$key][$row];
+                    if($request->has('operation_select')){
+                        if(array_key_exists($key, $request->operation_select)){
+                            if(array_key_exists($row, $request->operation_select[$key])){
+                                $blacklist_setting_condition->blacklist_operation_id = $request->operation_select[$key][$row];
+                            }
+                        }
+                    }
+                    $blacklist_setting_condition->save();
+                }
 
             }
+            return redirect()->back()->with('success', 'Setting successfully added!');
+        }
+    }
+
+    public function blacklist_status(Request $request){
+        $id = $request->id;
+        $status = $request->status;
+        $blacklist_setting = BlacklistSetting::find($id);
+        if(!$blacklist_setting){
+            return response()->json(['status' => 1, 'error' => 'Setting not found!']);
+        }
+
+        if($status == 1){
+            $blacklist_setting->status = 1;
+        }else if($status == 0){
+            $blacklist_setting->status = 0;
+        }
+        $blacklist_setting->save();
+
+        return response()->json(['status' => 0, 'success' => 'Setting updated successfully!']);
+    }
+
+    public function blacklist_edit(Request $request, $id){
+        $blacklist_setting = BlacklistSetting::find($id);
+        if($blacklist_setting){
+            return $blacklist_setting->conditions;
         }
     }
 }

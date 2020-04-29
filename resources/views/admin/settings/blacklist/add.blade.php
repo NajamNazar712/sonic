@@ -103,7 +103,13 @@
 
                                     </div>
                                 </div>
-
+                                <div class="row justify-content-center">
+                                    <div class="col-8">
+                                        <div class="form-group">
+                                            <textarea name="message" id="message" class="form-control" placeholder="Enter warning message here..." cols="30" rows="6" data-rule-required="true" data-msg-required="Warning message is required"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-12">
                                     <div class="form-group text-center mt-2">
                                         <button type="submit" class="btn btn-primary">Add Category</button>
@@ -178,7 +184,9 @@
                 placeholder: 'Shipment Range*'
             });
 
-
+            $('body').on('change','#message',function() {
+                $(this).val($(this).val().trim());
+            });
 
             var selected_conditions = [];
             var condition = 1;
@@ -223,7 +231,7 @@
                     '                                        </div>\n' +
                     '                                        <div class="col-2">' +
                     '<div class="form-group">\n' +
-                    '                                            <select name="operation_select['+ condition +']['+ row +']" id="operation_select_'+ condition + row +'" class="select2 form-control operation_select" data-rule-required="true" data-msg-required="This field is required">\n' +
+                    '                                            <select name="operation_select['+ condition +']['+ row +']" id="operation_select_'+ condition + row +'" class="select2 form-control operation_select">\n' +
                     '                                                @foreach($operations as $operation)\n' +
                     '                                                    <option value="{{ $operation->id }}">{{ $operation->name }}</option>\n' +
                     '                                                @endforeach\n' +
@@ -262,13 +270,13 @@
                     'min': 0,
                     'max': 1000000
                 });
-                btn.remove();
                 row++;
+                btn.remove();
             });
 
             $('#add_condition').on('click', function () {
                 condition++;
-                row = 2;
+                row = 1;
                 var html = '<div class="border border-primary p-3 mb-2 condition_div">\n' +
                     '                                    <div class="row mb-3">\n' +
                     '                                        <div class="col-2">Add Condition for</div>\n' +
@@ -392,9 +400,11 @@
                         closeOnEsc: false
                     });
 
-                    form.preventDefault();
+                    form.submit();
                 }
             });
+
+
         });
     </script>
 @endsection
