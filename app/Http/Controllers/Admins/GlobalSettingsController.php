@@ -17,12 +17,16 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
 use App\Http\Models\Blacklist\BlacklistCondition;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
 use App\Http\Models\Blacklist\BlacklistLabeling;
 use App\Http\Models\Blacklist\BlacklistLogic;
 use App\Http\Models\Blacklist\BlacklistOperation;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\BlacklistSettingCondition;
 use App\Http\Models\Blacklist\BlacklistShipmentRange;
+use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
@@ -2010,5 +2014,74 @@ class GlobalSettingsController extends Controller
         if($blacklist_setting){
             return $blacklist_setting->conditions;
         }
+    }
+
+    public function blacklist_search_index(){
+        $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
+        return view('admin.settings.blacklist.search')->with(['blacklists' => $blacklists]);
+    }
+    public function blacklist_search_consignee(Request $request){
+        $phone = $request->phone;
+        $data = array();
+        $consignee_information = ConsigneeInformation::where('phone', $phone);
+        if($consignee_information->exists()){
+            $consignee_information = $consignee_information->first();
+            $data['consignee'] = array();
+
+            $data['consignee']['id'] = $consignee_information->id;
+            $data['consignee']['name'] = $consignee_information->name;
+            $data['consignee']['phone'] = $consignee_information->phone;
+            $data['consignee']['phone2'] = $consignee_information->phone2;
+            $data['consignee']['address'] = $consignee_information->address;
+            $data['consignee']['city'] = $consignee_information->consignee_city->name;
+            $consignee_information_id = $consignee_information->id;
+            if(BlacklistedConsignee::where('consignee_information_id', $consignee_information_id)->exists()){
+                $data['blacklist'] = array();
+                $data['blacklist']['total_shipments'] = $consignee_information->blacklisted_consignee->shipments;
+                $data['blacklist']['delivered'] = $consignee_information->blacklisted_consignee->delivered;
+                $data['blacklist']['delivered_ratio'] = $consignee_information->blacklisted_consignee->delivered_ratio;
+                $data['blacklist']['undelivered'] = $consignee_information->blacklisted_consignee->undelivered;
+                $data['blacklist']['undelivered_ratio'] = $consignee_information->blacklisted_consignee->undelivered_ratio;
+                $data['blacklist']['return'] = $consignee_information->blacklisted_consignee->return;
+                $data['blacklist']['return_ratio'] = $consignee_information->blacklisted_consignee->return_ratio;
+                $data['blacklist']['color'] = $consignee_information->blacklisted_consignee->blacklist->color;
+            }
+            return response()->json(['status' => 0, 'success' => 'Consignee information found!', 'details' => $data]);
+        }
+        return response()->json(['status' => 1, 'error' => 'Consignee not found']);
+    }
+    public function blacklist_search_update(Request $request){
+        $action = $request->action;
+        $blacklist_setting_id = $request->label_select;
+        $consignee_information_id = $request->consignee_information_id;
+        if($action == 'exclude'){
+            $blacklist = BlacklistedConsigneeManuallyExcluded::where('consignee_information_id', $consignee_information_id);
+            if($blacklist->exists()){
+                return redirect()->back()->with('error', 'Already excluded!');
+            }
+
+            $blacklist = new BlacklistedConsigneeManuallyExcluded();
+            $blacklist->consignee_information_id = $consignee_information_id;
+            $blacklist->excluded_by = Auth::id();
+            $blacklist->save();
+
+
+        }else if($action == 'label'){
+            $blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information_id);
+            if($blacklist->exists()){
+                $blacklist = $blacklist->first();
+                $blacklist->added_by = Auth::id();
+                $blacklist->blacklist_setting_id = $blacklist_setting_id;
+                $blacklist->save();
+            }else{
+                $blacklist = new BlacklistedConsigneeManuallyBlacklisted();
+                $blacklist->consignee_information_id = $consignee_information_id;
+                $blacklist->added_by = Auth::id();
+                $blacklist->blacklist_setting_id = $blacklist_setting_id;
+                $blacklist->save();
+            }
+
+        }
+        return redirect()->back()->with('success', 'Successfully updated!');
     }
 }

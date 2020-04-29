@@ -923,6 +923,9 @@
                                     @if (session('role_id') == 1 || in_array(198, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.blacklist.index') }}">Category</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(198, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.blacklist.search.index') }}">Search Consignee</a></li>
+                                    @endif
                                 </ul>
 
                             </li>
