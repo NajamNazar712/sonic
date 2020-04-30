@@ -917,13 +917,13 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([198], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([329, 330], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Blacklist</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || in_array(198, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(329, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.blacklist.index') }}">Category</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(198, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(330, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.blacklist.search.index') }}">Search Consignee</a></li>
                                     @endif
                                 </ul>
