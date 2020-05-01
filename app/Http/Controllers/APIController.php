@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Blacklist\ConsigneeInformation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
@@ -661,15 +664,38 @@ class APIController extends Controller
               }
           }
 
-          if ($msg_string != null) {
+          $blacklist_message = null;
+          $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
+          if($consignee_information->exists()){
+              $consignee_information = $consignee_information->first();
+              $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+              if($blacklist->exists()){
+                  $blacklist = $blacklist->first();
+                  $blacklist_setting_id = $blacklist->blacklist_setting_id;
+                  $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+                  if($blacklist_setting){
+                      $blacklist_message = $blacklist_setting->message;
+                  }
+              }
+          }
+
+          if ($msg_string != null && $blacklist_message == null) {
               NotificationsController::send(32, $shipment_id, $msg_string);
               $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
               return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
           }
-          else{
-              NotificationsController::send(2, $shipment_id);
-              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+          if($msg_string == null && $blacklist_message != null){
+              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_user' => $blacklist_message]);
           }
+          if ($msg_string != null && $blacklist_message != null) {
+              NotificationsController::send(32, $shipment_id, $msg_string);
+              $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
+              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.', 'blacklisted_consignee' => $blacklist_message]);
+          }
+
+          NotificationsController::send(2, $shipment_id);
+          return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+
       }
     }
 

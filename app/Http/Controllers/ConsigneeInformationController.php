@@ -6,6 +6,7 @@ use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\Shipment;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
 
@@ -64,59 +65,14 @@ class ConsigneeInformationController extends Controller
                         $condition_id = $condition->blacklist_condition_id;
 
                         $range_id = $condition->blacklist_shipment_range_id;
-                        $range = NULL;
-                        switch ($range_id) {
-                            case 1:
-                                $range = '';
-                                break;
-                            case 2:
-                                $range = '==';
-                                break;
-                            case 3:
-                                $range = '!=';
-                                break;
-                            case 4:
-                                $range = '>=';
-                                break;
-                            case 5:
-                                $range = '>';
-                                break;
-                            case 6:
-                                $range = '<=';
-                                break;
-                            case 7:
-                                $range = '<';
-                                break;
-                        }
+                        $range_value = $condition->blacklist_shipment_range_value;
 
                         $logic_id = $condition->blacklist_logic_id;
                         $logic_value = $condition->blacklist_logic_value;
                         if (strpos($logic_value, '%') !== FALSE) {
                             $logic_value = floatval(str_replace('%', '', $logic_value)) / 100;
                         }
-                        $logic = NULL;
-                        switch ($logic_id) {
-                            case 1:
-                                $logic = '==';
-                                break;
-                            case 2:
-                                $logic = '!=';
-                                break;
-                            case 3:
-                                $logic = '>=';
-                                break;
-                            case 4:
-                                $logic = '>';
-                                break;
-                            case 5:
-                                $logic = '<=';
-                                break;
-                            case 6:
-                                $logic = '<';
-                                break;
 
-                        }
-                        $range_value = $condition->blacklist_shipment_range_value;
                         if($condition_id == 1){
                             if ($range_id == 1) {
                                 if ($logic_id == 1) {
