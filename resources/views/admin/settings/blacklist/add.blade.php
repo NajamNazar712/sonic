@@ -362,6 +362,7 @@
                     'min': 0,
                     'max': 1000000
                 });
+                row++;
             });
 
             // $.validator.addMethod('unique', function(value, element) {
