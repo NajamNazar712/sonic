@@ -64,6 +64,22 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="ConsigneeInformationModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConsigneeInformationModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Consignee</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="consignee_info_div"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 @endsection
@@ -1056,6 +1072,75 @@
                             });
                         }
                     });
+                }
+            });
+            $('body').on('click', 'button.consignee_info_label', function () {
+                var phone = $(this).attr('rel');
+                if(phone){
+                    $.ajax({
+                        url: '{!! route('cod.return.pending.consignee') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'phone': phone
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                details = data.details;
+                                $('#consignee_information_id').val(details.consignee.id);
+                                var html = '<div class="row mb-1">';
+
+                                html += '<div class="col-4">Consignee Name :</div><div class="col-8">'+ details.consignee.name +'</div>';
+                                html += '<div class="col-4">Consignee Phone Number 1 :</div><div class="col-8">'+ details.consignee.phone +'</div>';
+                                var consignee_phone = '';
+                                if(details.consignee.phone2 != null){
+                                    consignee_phone = details.consignee.phone2;
+                                }
+                                html += '<div class="col-4">Consignee Phone Number 2 :</div><div class="col-8">'+ consignee_phone +'</div>';
+                                html += '<div class="col-4">Consignee Address :</div><div class="col-8">'+ details.consignee.address +'</div>';
+                                html += '<div class="col-4">Consignee City :</div><div class="col-8">'+ details.consignee.city +'</div>';
+
+                                html += '</div>';
+                                if ('blacklist' in details) {
+                                    html += '<div class="row p-1" style="background-color: '+ details.blacklist.color +'; color:white;">';
+                                    html += '<div class="col-12">';
+                                    html += '<table class="table table-sm table-bordered mb-0">';
+                                    html += '<tbody>';
+                                    html += '<tr>';
+                                    html += '<td><strong>Total Shipments</strong></td>';
+                                    html += '<td><strong>Delivered</strong></td>';
+                                    html += '<td><strong>Ratio</strong></td>';
+                                    html += '<td><strong>Undelivered</strong></td>';
+                                    html += '<td><strong>Ratio</strong></td>';
+                                    html += '<td><strong>Return Confirmed</strong></td>';
+                                    html += '<td><strong>Ratio</strong></td>';
+                                    html += '</tr>';
+                                    html += '<tr>';
+                                    html += '<td>' + details.blacklist.total_shipments + '</td>';
+                                    html += '<td>' + details.blacklist.delivered + '</td>';
+                                    html += '<td>' + details.blacklist.delivered_ratio + '</td>';
+                                    html += '<td>' + details.blacklist.undelivered + '</td>';
+                                    html += '<td>' + details.blacklist.undelivered_ratio + ' kg</td>';
+                                    html += '<td>' + details.blacklist.return + '</td>';
+                                    html += '<td>Rs. ' + details.blacklist.return_ratio + '</td>';
+                                    html += '</tr>';
+                                    html += '</tbody>';
+                                    html += '</table>';
+                                    html += '</div></div>';
+                                }
+
+                                $('#consignee_info_div').html(html);
+
+                                $('#ConsigneeInformationModal').modal('show');
+
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
                 }
             });
 
