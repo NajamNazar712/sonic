@@ -1555,6 +1555,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\GlobalSettingsController@blacklist_add_store')->name('add');
             Route::post('status', 'Admins\GlobalSettingsController@blacklist_status')->name('status');
             Route::get('edit/{id}','Admins\GlobalSettingsController@blacklist_edit')->name('edit');
+            Route::post('edit/{id}','Admins\GlobalSettingsController@blacklist_edit_submit')->name('edit');
             Route::prefix('search')->name('search.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@blacklist_search_index')->name('index');
                 Route::post('consignee', 'Admins\GlobalSettingsController@blacklist_search_consignee')->name('consignee');

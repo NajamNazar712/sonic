@@ -21,7 +21,7 @@ class CreateBlacklistSettingsTable extends Migration
             $table->string('message');
             $table->tinyInteger('status')->default(1);
             $table->integer('added_by');
-            $table->integer('updated_by');
+            $table->integer('updated_by')->nullable();
             $table->timestamps();
         });
     }

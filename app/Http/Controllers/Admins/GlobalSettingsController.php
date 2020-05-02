@@ -2012,8 +2012,73 @@ class GlobalSettingsController extends Controller
     public function blacklist_edit(Request $request, $id){
         $blacklist_setting = BlacklistSetting::find($id);
         if($blacklist_setting){
-            return $blacklist_setting->conditions;
+            $condition_ids = $blacklist_setting->conditions()->pluck('blacklist_condition_id')->toArray();
+            $condition_ids = array_unique($condition_ids);
+            $blacklist_conditions = $blacklist_setting->conditions->groupBy('blacklist_condition_id');
+            $labelings = BlacklistLabeling::all(['id','name']);
+            $conditions = BlacklistCondition::all(['id','name']);
+            $logics = BlacklistLogic::all(['id','name']);
+            $shipment_ranges = BlacklistShipmentRange::all(['id','name']);
+            $operations = BlacklistOperation::all(['id','name']);
+
+            return view('admin.settings.blacklist.edit')->with(['setting_id' => $id,'labelings' => $labelings, 'conditions' => $conditions, 'logics' => $logics, 'shipment_ranges' => $shipment_ranges, 'operations' => $operations, 'blacklist_setting' => $blacklist_setting, 'condition_ids' => $condition_ids, 'blacklist_conditions' => $blacklist_conditions]);
         }
+        else{
+            return redirect()->back()->with('error', 'Settings not found!');
+        }
+    }
+    public function blacklist_edit_submit(Request $request){
+
+        $id = $request->setting_id;
+        $conditions = $request->condition_select;
+        $name = $request->name;
+        $labeling_id = $request->labeling_select;
+        $color = $request->color;
+        $message = $request->message;
+        if(BlacklistSetting::where('color', $color)->where('id', '<>', $id)->exists()){
+            return redirect()->back()->with('error', 'Color already selected!');
+        }
+        if(count($conditions) > count(array_flip($conditions))){
+            return redirect()->back()->with('error', 'Same condition selected multiple times!');
+        }
+
+        if(!empty($conditions)){
+
+            $blacklist_setting = BlacklistSetting::find($id);
+            if($blacklist_setting){
+                $blacklist_setting->name = $name;
+                $blacklist_setting->labeling_id = $labeling_id;
+                $blacklist_setting->color = $color;
+                $blacklist_setting->message = $message;
+                $blacklist_setting->updated_by = Auth::id();
+                $blacklist_setting->save();
+                $setting_id = $id;
+                BlacklistSettingCondition::where('blacklist_setting_id', $id)->delete();
+                foreach ($conditions as $key => $condition){
+                    foreach ($request->logic_select[$key] as $row => $logic){
+                        $blacklist_setting_condition = new BlacklistSettingCondition();
+                        $blacklist_setting_condition->blacklist_setting_id = $setting_id;
+                        $blacklist_setting_condition->blacklist_condition_id = $condition;
+                        $blacklist_setting_condition->blacklist_logic_id = $logic;
+                        $blacklist_setting_condition->blacklist_logic_value = $request->logic_percentage[$key][$row];
+                        $blacklist_setting_condition->blacklist_shipment_range_id = $request->shipment_range_select[$key][$row];
+                        $blacklist_setting_condition->blacklist_shipment_range_value = $request->shipment_range[$key][$row];
+                        if($request->has('operation_select')){
+                            if(array_key_exists($key, $request->operation_select)){
+                                if(array_key_exists($row, $request->operation_select[$key])){
+                                    $blacklist_setting_condition->blacklist_operation_id = $request->operation_select[$key][$row];
+                                }
+                            }
+                        }
+                        $blacklist_setting_condition->save();
+                    }
+
+                }
+                return redirect()->back()->with('success', 'Setting successfully updated!');
+            }
+            return redirect()->back()->with('error', 'Category not found!');
+        }
+        return redirect()->back()->with('error', 'Conditions not selected!');
     }
 
     public function blacklist_search_index(){
