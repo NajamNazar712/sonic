@@ -83,7 +83,7 @@ class ConsigneeInformationController extends Controller
 
                 foreach ($blacklist_settings as $setting){
                     $blacklist_conditions = $setting->conditions->groupBy('blacklist_condition_id');
-
+                    $present_condition_return_ratio = null;
                     foreach($blacklist_conditions as $blacklist_condition){
                         foreach($blacklist_condition as $condition){
                             $condition_id = $condition->blacklist_condition_id;
@@ -92,7 +92,9 @@ class ConsigneeInformationController extends Controller
                             $range_value = $condition->blacklist_shipment_range_value;
                             $logic_id = $condition->blacklist_logic_id;
                             $logic_value = $condition->blacklist_logic_value;
+
                             if($condition_id == 1){
+                                $present_condition_return_ratio = 1;
                                 if($operation_id == null || $operation_id == 2){
                                     if ($range_id == 1) {
                                         if ($logic_id == 1) {
@@ -498,7 +500,7 @@ class ConsigneeInformationController extends Controller
 
                             }
                             if($condition_id == 2){
-                                if($match == FALSE){
+                                if(($match == FALSE) && ($present_condition_return_ratio != null)){
                                     $match_and_break = TRUE;
                                     break;
                                 }
