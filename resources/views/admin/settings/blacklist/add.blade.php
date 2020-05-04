@@ -54,7 +54,7 @@
                                             <div class="col-2">Add Condition for</div>
                                             <div class="col-3">
                                                 <div class="form-group">
-                                                    <select name="condition_select[1]" class="select2 form-control condition_select unique" id="condition_select_1" data-rule-required="true" data-msg-required="This field is required">
+                                                    <select name="condition_select[1]" class="select2 form-control condition_select" id="condition_select_1" data-rule-required="true" data-msg-required="This field is required">
                                                         @foreach($conditions as $condition)
                                                             <option value="{{ $condition->id }}">{{ $condition->name }}</option>
                                                         @endforeach
@@ -79,7 +79,7 @@
                                                 </div>
                                                 <div class="col-2">
                                                     <div class="form-group">
-                                                        <input type="text" name="logic_percentage[1][1]" class="form-control dec-percent" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required">
+                                                        <input type="text" name="logic_percentage[1][1]" class="form-control dec-percent unique-criteria" condition="1" row="1" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required">
                                                     </div>
                                                 </div>
                                                 <div class="col-2">
@@ -218,7 +218,7 @@
                     '                                        </div>\n' +
                     '                                        <div class="col-2">\n' +
                     '                                            <div class="form-group">\n' +
-                    '                                            <input type="text" name="logic_percentage['+ condition +']['+ row +']" class="form-control dec-percent" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required">\n' +
+                    '                                            <input type="text" name="logic_percentage['+ condition +']['+ row +']" class="form-control dec-percent unique-criteria" condition="'+ condition +'" row="'+ row +'"  placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required">\n' +
                     '                                            </div>\n' +
                     '                                        </div>\n' +
                     '                                        <div class="col-2">\n' +
@@ -325,7 +325,7 @@
                         '                                        </div>\n' +
                         '                                        <div class="col-2">\n' +
                         '                                            <div class="form-group">\n' +
-                        '                                            <input type="text" name="logic_percentage['+ condition +']['+ row +']" class="form-control dec-percent" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required">\n' +
+                        '                                            <input type="text" name="logic_percentage['+ condition +']['+ row +']" class="form-control dec-percent unique-criteria" condition="'+ condition +'" row="'+ row +'" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required">\n' +
                         '                                            </div>\n' +
                         '                                        </div>\n' +
                         '                                        <div class="col-2">\n' +
@@ -402,6 +402,33 @@
             //
             // }, 'Duplicate value selected');
 
+            var result;
+            $.validator.addMethod("unique-criteria",
+                function(value, element) {
+                    var c = $(element).attr('condition');
+                    var r = $(element).attr('row');
+                    var condition_select = '#condition_select_'+c;
+                    var condition = $(condition_select).val();
+                    var logic = $('select[name="logic_select['+ c +']['+ r +']"]').val();
+                    if((value.length > 1) && (condition.length != 0) && (logic.length != 0)) {
+
+                        $.ajax({
+                            type: "POST",
+                            url: '{!! route('admin.settings.blacklist.unique') !!}', // script to validate in server side
+                            data: {logic_value: value, logic_select: logic, condition:condition ,'_token': '{!! csrf_token() !!}'},
+                            success: function (data) {
+                                if(data === 'true'){
+                                    result = false;
+                                }else{
+                                    result = true;
+                                }
+                            }
+                        });
+                        return result;
+                    }
+                },
+                "Same Condition already exists."
+            );
             $('#category_form').validate({
                 ignore: [],
                 errorClass: 'danger',

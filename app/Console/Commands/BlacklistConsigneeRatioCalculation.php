@@ -38,6 +38,6 @@ class BlacklistConsigneeRatioCalculation extends Command
      */
     public function handle()
     {
-        dd(ConsigneeInformationController::calculate_ratio_for_consignees());
+        ConsigneeInformationController::calculate_ratio_for_consignees();
     }
 }

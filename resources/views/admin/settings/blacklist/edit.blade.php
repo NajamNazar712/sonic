@@ -90,7 +90,7 @@
                                                         </div>
                                                         <div class="col-2">
                                                             <div class="form-group">
-                                                                <input type="text" name="logic_percentage[{{$condition_row_id}}][{{$criteria_row_id}}]" class="form-control dec-percent" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required" value="{{$condition->blacklist_logic_value}}">
+                                                                <input type="text" name="logic_percentage[{{$condition_row_id}}][{{$criteria_row_id}}]" class="form-control dec-percent unique-criteria" condition="{{$condition_row_id}}" row="{{$criteria_row_id}}" placeholder="Percentage or Value" data-rule-required="true" data-msg-required="This field is required" value="{{$condition->blacklist_logic_value}}">
                                                             </div>
                                                         </div>
                                                         <div class="col-2">
@@ -252,8 +252,33 @@
                 @endforeach
             condition++;
             @endforeach
+            var setting_id = {{$setting_id}};
+            var result;
+            $.validator.addMethod("unique-criteria",
+                function(value, element) {
+                    var c = $(element).attr('condition');
+                    var r = $(element).attr('row');
+                    var condition = $('select[name="condition_select['+ c +']"]').val();
+                    var logic = $('select[name="logic_select['+ c +']['+ r +']"]').val();
+                    if((value.length > 1) && (condition.length != 0) && (logic.length != 0)) {
 
-
+                        $.ajax({
+                            type: "POST",
+                            url: '{!! route('admin.settings.blacklist.unique') !!}', // script to validate in server side
+                            data: {setting_id:setting_id, logic_value: value, logic_select: logic, condition:condition ,'_token': '{!! csrf_token() !!}'},
+                            success: function (data) {
+                                if(data === 'true'){
+                                    result = false;
+                                }else{
+                                    result = true;
+                                }
+                            }
+                        });
+                        return result;
+                    }
+                },
+                "Same Condition already exists."
+            );
 
             {{--condition_select.val({!! $condition->blacklist_condition_id !!}).trigger('change');--}}
             $('#category_form').validate({

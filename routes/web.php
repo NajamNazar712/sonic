@@ -1553,6 +1553,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\GlobalSettingsController@blacklist_list')->name('list');
             Route::get('add', 'Admins\GlobalSettingsController@blacklist_add')->name('add');
             Route::post('add', 'Admins\GlobalSettingsController@blacklist_add_store')->name('add');
+            Route::post('unique', 'Admins\GlobalSettingsController@blacklist_unique_criteria')->name('unique');
             Route::post('status', 'Admins\GlobalSettingsController@blacklist_status')->name('status');
             Route::get('edit/{id}','Admins\GlobalSettingsController@blacklist_edit')->name('edit');
             Route::post('edit/{id}','Admins\GlobalSettingsController@blacklist_edit_submit')->name('edit');

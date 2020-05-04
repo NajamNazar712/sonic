@@ -24,7 +24,6 @@ class CreateBlacklistedConsigneesTable extends Migration
             $table->integer('return');
             $table->string('return_ratio');
             $table->integer('blacklist_setting_id');
-            $table->integer('blacklist_condition_id');
             $table->timestamps();
         });
     }
