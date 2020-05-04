@@ -59,7 +59,7 @@ class ConsigneeInformationController extends Controller
            $delivered_statuses = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46);
            $return_statuses = array(20, 22, 24, 25, 44, 47, 48, 57, 60);
 
-           $blacklist_settings = BlacklistSetting::where('status', 1)->get();
+           $blacklist_settings = BlacklistSetting::where('labeling_id', 2)->where('status', 1)->get();
             $conditions = array();
            foreach ($filtered_consignee_information_ids as $id) {
                 $match = FALSE;
