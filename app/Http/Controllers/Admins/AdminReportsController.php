@@ -511,9 +511,15 @@ use Yajra\Datatables\Datatables;
             ->select(['user_bank_infos.id as account_id','u.name as shipper','bl.name as bankname',
             'user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title',
             'oc.name as city','user_bank_infos.iban','user_bank_infos.default_bank as default','user_bank_infos.created_at as bank_added_at'
-
             ]);
-            $user_bank = Datatables::of($iban_received);  
+            $user_bank = Datatables::of($iban_received)
+            ->editColumn('default', function ($bank){
+                if($bank->default == 0){
+                    return "No";
+                }else{
+                    return "Yes";
+                }
+            });
 
             if($ibanNo = $request->get('search_iban_no')){
                 $user_bank->where('user_bank_infos.iban', '=', $ibanNo);

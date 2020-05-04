@@ -1,4 +1,4 @@
-<div class="main-menu menu-fixed menu-light menu-accordion menu-bordered menu-shadow"
+F<div class="main-menu menu-fixed menu-light menu-accordion menu-bordered menu-shadow"
      data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
@@ -505,14 +505,10 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.pickup_note.index') }}">Pickup Notes
                                     Completed</a></li>
                         @endif
-
         
                         @if (session('role_id') == 1 || in_array(328, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.reports.multiple_iban.index') }}">Multiple IBAN Number 
-                                       Change</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.multiple_iban.index') }}">Multiple IBAN Number Change</a></li>
                         @endif
-
-                       
 
                         @if (session('role_id') == 1 || in_array(65, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.cargo_received.index') }}">Cargo
