@@ -275,6 +275,11 @@ p.comment {
 	background-color: #fd8282;
 	color: #ffffff;
 }
+
+.new_pickup {
+	background-color: aqua;
+}
+
 .marquee3k {
 	margin: 0 15px;
 	padding: 5px 0;

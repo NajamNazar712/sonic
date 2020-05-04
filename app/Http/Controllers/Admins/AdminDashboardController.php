@@ -1675,7 +1675,7 @@ if(session('department_id') == 7){
                 $same_day = $minimum_chargeable_weight->weight;
             }
         }
-        if ((($user['rate_status']>=0) && $user['status']==1) || (($user['rate_status']==0) && $user['status']==3)) {
+        if ((($user['rate_status']>=0) && ($user['status']==1 || $user['status']==5)) || (($user['rate_status']==0) && $user['status']==3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
             $weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1729,7 +1729,7 @@ if(session('department_id') == 7){
             }
 
         }
-        elseif(($user['rate_status']>=1) && $user['status']==3){
+        elseif(($user['rate_status']>=1) && ($user['status']==3)){
             $e_switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();

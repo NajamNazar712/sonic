@@ -347,45 +347,47 @@ class ShipmentChargesController extends Controller
     }
 
     static public function calculate_cash_handling($account_type_id, $user_id, $shipping_mode_id, $amount) {
-        if ($amount != 0) {
+        if ($account_type_id == 1) {
+            $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
+        }
+        else {
+            $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
+        }
+
+        if ($rate_status->exists()) {
             if ($account_type_id == 1) {
-                $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
+                $cash_handling_charge = CashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
             }
             else {
-                $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
+                $cash_handling_charge = CorporateCashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
             }
 
-            if ($rate_status->exists()) {
+            if ($cash_handling_charge->exists()) {
+                $cash_handling_charge = $cash_handling_charge->first();
+
+                $today = Carbon::today();
+
                 if ($account_type_id == 1) {
-                    $cash_handling_charge = CashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
+                    $discount_charge = DiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
                 else {
-                    $cash_handling_charge = CorporateCashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
+                    $discount_charge = CorporateDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
 
-                if ($cash_handling_charge->exists()) {
-                    $cash_handling_charge = $cash_handling_charge->first();
+                if ($discount_charge->exists()) {
+                    $discount_charge = $discount_charge->first();
 
-                    $today = Carbon::today();
+                    $discount = $discount_charge->cash;
+                }
+                else {
+                    $discount = 0;
+                }
 
-                    if ($account_type_id == 1) {
-                        $discount_charge = DiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-                    }
-                    else {
-                        $discount_charge = CorporateDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-                    }
+                $result = array();
 
-                    if ($discount_charge->exists()) {
-                        $discount_charge = $discount_charge->first();
+                $charges = $cash_handling_charge->charges;
 
-                        $discount = $discount_charge->cash;
-                    }
-                    else {
-                        $discount = 0;
-                    }
-
-                    $charges = $cash_handling_charge->charges;
-
+                if ($charges != 0) {
                     if (strpos($charges, '%') !== FALSE) {
                         $charges = (floatval(str_replace('%', '', $charges)) / 100) * $amount;
                     }
@@ -400,31 +402,25 @@ class ShipmentChargesController extends Controller
                         $discount = floatval($discount);
                     }
 
-                    $result = array();
-
                     if ($charges < $discount) {
                         $result['cash_handling_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
                         $result['cash_handling_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
-
-                    return $result;
                 }
                 else {
-                    return FALSE;
+                    $result['cash_handling_charges'] = 0;
                 }
+
+                return $result;
             }
             else {
                 return FALSE;
             }
         }
         else {
-            $result = array();
-
-            $result['cash_handling_charges'] = 0;
-
-            return $result;
+            return FALSE;
         }
     }
 
