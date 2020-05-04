@@ -9,6 +9,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\Excel_reports\Debriefing;
+use App\Http\Models\ShipmentsJourney;
 use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
@@ -496,6 +497,43 @@ use Yajra\Datatables\Datatables;
             return $tracking_numbers;
         }
 
+
+        public function multiple_iban_index(Request $request){
+            $iban_no = DB::connection('reports')->table('user_bank_infos')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
+            return view('admin.reports.multiple_IBAN_no_change')->with(['iban'=>$iban_no,'shippers'=>$shippers]);
+        }
+
+        public function multiple_iban_list(Request $request){
+            $iban_received = DB::connection('reports')->table('user_bank_infos')->join('users as u','u.id','=','user_bank_infos.user_id')
+            ->join('cities AS oc', 'user_bank_infos.city_id', '=', 'oc.id')
+            ->join('banks_lists AS bl', 'bl.id', '=', 'user_bank_infos.bank_name')
+            ->select(['user_bank_infos.id as account_id','u.name as shipper','bl.name as bankname',
+            'user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title',
+            'oc.name as city','user_bank_infos.iban','user_bank_infos.default_bank as default','user_bank_infos.created_at as bank_added_at'
+
+            ]);
+            $user_bank = Datatables::of($iban_received);  
+
+            if($ibanNo = $request->get('search_iban_no')){
+                $user_bank->where('user_bank_infos.iban', '=', $ibanNo);
+            }
+            if($shipper = $request->get('search_shipper')){
+                $user_bank->where('u.id', '=', $shipper);
+            }
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $user_bank->whereBetween('user_bank_infos.created_at', [$from,$to]);
+            }
+
+           
+            return $user_bank->make(true);
+        
+        }
+
+
+
         public function lead_time_index(Request $request){
     //        $shippers = User$generator::all(['id','name']);
             $cities = DB::connection('reports')->table('cities')->get(['id','name']);
@@ -786,6 +824,7 @@ use Yajra\Datatables\Datatables;
             }
             return $lead_time->make(true);
         }
+        
         public function qa_index(Request $request){
             $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
             return view('admin.reports.qa_report')->with('shipping_modes', $shipping_modes);
@@ -6235,6 +6274,161 @@ use Yajra\Datatables\Datatables;
                     }
                 });
             return $datatables->make(true);
+        }
+
+        public function last_mile_status_index(){
+            
+            $cities = DB::connection('reports')->table('cities')->get(['id','name']);
+            $hubs = DB::connection('reports')->table('cities')->select(['id','name'])->where('hub',1)->get();
+            $zones = DB::connection('reports')->table('zones')->get();
+            $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+            return view('admin.reports.last_mile_status')->with(['destinations' => $cities, 'hubs' => $hubs, 'zones' => $zones, 'riders' => $riders]);
+        }
+        public function last_mile_status_list(Request $request){
+
+            $date_from = $request->get('search_date_from');
+            $date_to = $request->get('search_date_to');
+            $search_destination = $request->get('search_destination');
+            $search_hub = $request->get('search_hub');
+            $search_zone = $request->get('search_zone');
+            $search_rider = $request->get('search_rider');
+            $data = self::last_mile_status_data($date_from, $date_to, $search_destination, $search_hub, $search_zone, $search_rider);
+            return response()->json(['status' => 0, 'time_slots' => $data]);
+        }
+        public function last_mile_status_data($from, $to, $destination, $hub, $zone, $rider){
+            $data = array();
+            $from = Carbon::parse($from)->toDateString();
+            $to = Carbon::parse($to)->toDateString();
+
+            if($hub != null){
+                $hub_cities = DB::connection('reports')->table('cities')->where('hub_id', $hub)->pluck('id')->toArray();
+            }
+            if($zone != null){
+                $zone_cities = DB::connection('reports')->table('cities')->where('zone_id', $zone)->pluck('id')->toArray();
+            }
+
+            $time_slots = array(1 => '9 AM - 12 PM', 2 => '12 PM - 3 PM', 3 => '3 PM - 6 PM', 4 => '6 PM - 9 PM', 5 => '9 PM - 12 AM', 6 => '12 AM - 9 AM');
+            $sum_total_status_updated = 0;
+            $sum_bolt_status_updated = 0;
+            $sum_bolt_status_percentage = 0;
+            $sum_sonic_status_updated = 0;
+            $sum_sonic_status_percentage = 0;
+            $delivery_note_status = array(7, 8, 9, 12, 15, 18, 56);
+            foreach ($time_slots as $id => $slot){
+                $total_status_updated_count = 0;
+                $bolt_status_updated_count = 0;
+                $sonic_status_updated_count = 0;
+                $start_time = NULL;
+                $end_time = NULL;
+                if($id == 1){
+                    $start_time = '09:00:01';
+                    $end_time = '12:00:00';
+                }else if($id == 2){
+                    $start_time = '12:00:01';
+                    $end_time = '15:00:00';
+                }else if($id == 3){
+                    $start_time = '15:00:01';
+                    $end_time = '18:00:00';
+                }else if($id == 4){
+                    $start_time = '18:00:01';
+                    $end_time = '21:00:00';
+                }else if($id == 5){
+                    $start_time = '21:00:01';
+                    $end_time = '00:00:00';
+                }else if($id == 6){
+                    $start_time = '00:00:01';
+                    $end_time = '09:00:00';
+                }
+                $start_time = Carbon::parse($start_time)->toTimeString();
+                $end_time = Carbon::parse($end_time)->toTimeString();
+
+                $time_array = array();
+
+                $total_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0);
+                $total_status_updated = $total_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+                $total_status_updated = $total_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+                if($destination != null){
+                    $total_status_updated = $total_status_updated->where('city_id', $destination);
+                }
+                if($hub != null){
+                    $total_status_updated = $total_status_updated->whereIn('city_id', $hub_cities);
+                }
+                if($zone != null){
+                    $total_status_updated = $total_status_updated->whereIn('city_id', $zone_cities);
+                }
+                if($rider != null){
+                    $total_status_updated = $total_status_updated->where('rider_id', $rider);
+                }
+
+                $total_status_updated_count = $total_status_updated->count();
+
+                $bolt_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0)->whereNotNull('rider_id');
+                $bolt_status_updated = $bolt_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+                $bolt_status_updated = $bolt_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+                if($destination != null){
+                    $bolt_status_updated = $bolt_status_updated->where('city_id', $destination);
+                }
+                if($hub != null){
+                    $bolt_status_updated = $bolt_status_updated->whereIn('city_id', $hub_cities);
+                }
+                if($zone != null){
+                    $bolt_status_updated = $bolt_status_updated->whereIn('city_id', $zone_cities);
+                }
+                if($rider != null){
+                    $bolt_status_updated = $bolt_status_updated->where('rider_id', $rider);
+                }
+                $bolt_status_updated_count = $bolt_status_updated->count();
+
+                $bolt_status_percentage = 0;
+                if($total_status_updated_count > 0){
+                    $bolt_status_percentage = ($bolt_status_updated_count / $total_status_updated_count) * 100;
+                }
+
+                $sonic_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0)->whereNull('rider_id');
+                $sonic_status_updated = $sonic_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+                $sonic_status_updated = $sonic_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+                if($destination != null){
+                    $sonic_status_updated = $sonic_status_updated->where('city_id', $destination);
+                }
+                if($hub != null){
+                    $sonic_status_updated = $sonic_status_updated->whereIn('city_id', $hub_cities);
+                }
+                if($zone != null){
+                    $sonic_status_updated = $sonic_status_updated->whereIn('city_id', $zone_cities);
+                }
+                if($rider != null){
+                    $sonic_status_updated = $sonic_status_updated->where('rider_id', $rider);
+                }
+                $sonic_status_updated_count = $sonic_status_updated->count();
+
+                $sonic_status_percentage = 0;
+                if($total_status_updated_count > 0){
+                    $sonic_status_percentage = ($sonic_status_updated_count / $total_status_updated_count) * 100;
+                }
+
+                $time_array['time'] = $slot;
+                $time_array['total_status_updated'] = $total_status_updated_count;
+                $time_array['bolt_status_updated'] = $bolt_status_updated_count;
+                $time_array['bolt_status_percentage'] = round($bolt_status_percentage, 2) .'%';
+                $time_array['sonic_status_updated'] = $sonic_status_updated_count;
+                $time_array['sonic_status_percentage'] = round($sonic_status_percentage, 2) .'%';
+                $sum_total_status_updated = $sum_total_status_updated + $total_status_updated_count;
+                $sum_bolt_status_updated = $sum_bolt_status_updated + $bolt_status_updated_count;
+//                $sum_bolt_status_percentage = $sum_bolt_status_percentage + $bolt_status_percentage;
+                $sum_sonic_status_updated = $sum_sonic_status_updated + $sonic_status_updated_count;
+//                $sum_sonic_status_percentage = $sum_sonic_status_percentage + $sonic_status_percentage;
+
+                $data[] = $time_array;
+            }
+
+            if($sum_total_status_updated > 0){
+                $sum_bolt_status_percentage = ($sum_bolt_status_updated / $sum_total_status_updated) * 100;
+                $sum_sonic_status_percentage = ($sum_sonic_status_updated / $sum_total_status_updated) * 100;
+            }
+
+            $data[] = array('time' => 'Total', 'total_status_updated' => $sum_total_status_updated, 'bolt_status_updated' => $sum_bolt_status_updated, 'bolt_status_percentage' => round($sum_bolt_status_percentage, 2) . '%', 'sonic_status_updated' => $sum_sonic_status_updated, 'sonic_status_percentage' => round($sum_sonic_status_percentage, 2). '%');
+
+            return $data;
         }
     }
 

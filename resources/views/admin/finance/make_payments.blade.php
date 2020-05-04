@@ -25,7 +25,7 @@
 										</div>
 									</form>
 								</div>		
-								
+
 								<div class="col-3">
 									<form id="positive_negative_filter_form" class="mb-1 justify-content-center" novalidate="novalidate">
 									<div class="form-group">
@@ -1129,7 +1129,54 @@
 				e.preventDefault();
 
 				var form = this;
+				var zero_charges = false;
+				make_payments_table.rows().nodes().each(function(index) {
+					var row = make_payments_table.row(index);
+					if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+						var type_id = parseInt($(row.node()).attr('type_id'));
+						var row_id = $(row.node()).attr('id');
+						if (type_id != 2) {
+							var amount = parseInt($(row.node()).find('td.amount').text());
+							if(amount == 0){
+								zero_charges = true;
+							}
+						}
+					}
+				});
+				if(zero_charges){
+					swal({
+						title: 'Are You Sure?',
+						text: 'Zero cod shipment selected, select yes to pay!',
+						icon: 'warning',
+						buttons: {
+							cancel: {
+								text: 'No',
+								value: null,
+								visible: true,
+								closeModal: true,
+							},
+							confirm: {
+								text: 'Yes',
+								value: true,
+								visible: true,
+								closeModal: true
+							}
+						},
+						closeOnClickOutside: false,
+						closeOnEsc: false,
+						dangerMode: true
+					}).then(function(confirm) {
+						if (confirm) {
+							verify_make_payments(form);
+						}
+					});
+				}else{
+					verify_make_payments(form);
+				}
 
+
+			});
+			function verify_make_payments(form){
 				$.ajax({
 					url: '{!! route('admin.finance.make_payments.verify') !!}',
 					method: 'POST',
@@ -1277,7 +1324,7 @@
 						});
 					}
 				});
-			});
+			}
 		});
 	</script>
 @endsection

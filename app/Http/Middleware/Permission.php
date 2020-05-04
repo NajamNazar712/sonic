@@ -390,6 +390,8 @@ class Permission
             'reports.account_reconciliation.index' => 312,
             'reports.cargo_short_received_shipments.index' => 319,
             'reports.cargo_short_received_shipments.list' => 319,
+            'reports.multiple_iban.index' => 328,
+            'reports.multiple_iban.list' => 328,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -554,6 +556,9 @@ class Permission
             'settings.sales.projection.percentage.index' => 313,
             'settings.sales.projection.reasons.index' => 314,
             'settings.sales.projection.shipment.index' => 318,
+
+            'settings.settings.blacklist.index' => 329,
+            'settings.blacklist.search.index' => 330,
 
 
             'cancelled_shipments.index' => 117,
