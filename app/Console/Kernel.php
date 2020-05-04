@@ -120,7 +120,9 @@ class Kernel extends ConsoleKernel
 		$schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
 		$schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
 
-		$schedule->command('auto:shipmentarrival')->dailyAt('10:00')->runInBackground();		$schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();    }
+		$schedule->command('auto:shipmentarrival')->dailyAt('07:00')->runInBackground();
+        $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
+    }
 
     /**
      * Register the commands for the application.
