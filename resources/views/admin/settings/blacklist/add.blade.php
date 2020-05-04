@@ -260,7 +260,7 @@
                 });
                 $('#operation_select_'+ condition + row +'').prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
-                    placeholder: 'Shipment Range'
+                    placeholder: 'Select Operation'
                 });
                 $('.dec-percent').inputmask("Regex",{
                     'allowMinus': false,
@@ -367,7 +367,7 @@
                     });
                     $('#operation_select_'+ condition + row +'').prepend('<option value="" selected="selected"></option>').select2({
                         width: '100%',
-                        placeholder: 'Shipment Range*'
+                        placeholder: 'Select Operation'
                     });
                     $('.dec-percent').inputmask("Regex",{
                         'allowMinus': false,

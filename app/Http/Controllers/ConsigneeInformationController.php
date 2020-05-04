@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\ConsigneeInformation;
+use App\Http\Models\Blacklist\ConsigneeInformationLog;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -12,11 +13,30 @@ use Illuminate\Http\Request;
 
 class ConsigneeInformationController extends Controller
 {
-   static public function add($phone, $name, $address, $phone2, $city_id){
+   static public function add($phone, $name, $address, $phone2, $city_id, $user_id = NULL){
        if(!User::where('phone', $phone)->exists()){
            if(!UserShippingInfo::where('phone', $phone)->exists()){
-               if(!ConsigneeInformation::where('phone', $phone)->exists()){
+               $consignee_information = ConsigneeInformation::where('phone', $phone);
+               if(!$consignee_information->exists()){
                    $consignee_information = new ConsigneeInformation();
+                   $consignee_information->phone = $phone;
+                   $consignee_information->phone2 = $phone2;
+                   $consignee_information->name = $name;
+                   $consignee_information->address = $address;
+                   $consignee_information->city_id = $city_id;
+                   $consignee_information->save();
+               }else{
+                   $consignee_information = $consignee_information->first();
+                   $consignee_information_log = new ConsigneeInformationLog();
+                   $consignee_information_log->consignee_information_id = $consignee_information->id;
+                   $consignee_information_log->phone = $consignee_information->phone;
+                   $consignee_information_log->phone2 = $consignee_information->phone2;
+                   $consignee_information_log->name = $consignee_information->name;
+                   $consignee_information_log->address = $consignee_information->address;
+                   $consignee_information_log->city_id = $consignee_information->city_id;
+                   $consignee_information_log->user_id = $user_id;
+                   $consignee_information_log->save();
+
                    $consignee_information->phone = $phone;
                    $consignee_information->phone2 = $phone2;
                    $consignee_information->name = $name;
@@ -59,11 +79,12 @@ class ConsigneeInformationController extends Controller
                 $delivered_shipments_ratio = ($delivered_shipments / $total_shipments) * 100;
                 $returned_shipments_ratio = ($returned_shipments / $total_shipments) * 100;
                 $undelivered_shipments_ratio = ($undelivered_shipments / $total_shipments) * 100;
+               foreach ($blacklist_settings as $setting){
+                    $blacklist_conditions = $setting->conditions->groupBy('blacklist_condition_id');
 
-                foreach ($blacklist_settings as $setting){
-                    foreach ($setting->conditions as $condition){
+                    foreach ($blacklist_conditions as $condition){
                         $condition_id = $condition->blacklist_condition_id;
-
+                        $operation_id = $condition->blacklist_operation_id;
                         $range_id = $condition->blacklist_shipment_range_id;
                         $range_value = $condition->blacklist_shipment_range_value;
 
@@ -74,254 +95,219 @@ class ConsigneeInformationController extends Controller
                         }
 
                         if($condition_id == 1){
-                            if ($range_id == 1) {
-                                if ($logic_id == 1) {
-                                    if ($returned_shipments_ratio == $logic_value) {
-                                        $match = TRUE;
-                                        break;
-                                    }
-                                }else if ($logic_id == 2){
-                                    if ($returned_shipments_ratio != $logic_value) {
-                                        $match = TRUE;
-                                        break;
-                                    }
-                                }else if ($logic_id == 3){
-                                    if ($returned_shipments_ratio >= $logic_value) {
-                                        $match = TRUE;
-                                        break;
-                                    }
-                                }else if ($logic_id == 4){
-                                    if ($returned_shipments_ratio > $logic_value) {
-                                        $match = TRUE;
-                                        break;
-                                    }
-                                }else if ($logic_id == 5){
-                                    if ($returned_shipments_ratio <= $logic_value) {
-                                        $match = TRUE;
-                                        break;
-                                    }
-                                }else if ($logic_id == 6){
-                                    if ($returned_shipments_ratio < $logic_value) {
-                                        $match = TRUE;
-                                        break;
-                                    }
-                                }
-                            }else if ($range_id == 2){
-                                if($total_shipments == $range_value){
+                            if($operation_id == null){
+                                if ($range_id == 1) {
                                     if ($logic_id == 1) {
                                         if ($returned_shipments_ratio == $logic_value) {
                                             $match = TRUE;
-                                            break;
                                         }
                                     }else if ($logic_id == 2){
                                         if ($returned_shipments_ratio != $logic_value) {
                                             $match = TRUE;
-                                            break;
                                         }
                                     }else if ($logic_id == 3){
                                         if ($returned_shipments_ratio >= $logic_value) {
                                             $match = TRUE;
-                                            break;
                                         }
                                     }else if ($logic_id == 4){
                                         if ($returned_shipments_ratio > $logic_value) {
                                             $match = TRUE;
-                                            break;
                                         }
                                     }else if ($logic_id == 5){
                                         if ($returned_shipments_ratio <= $logic_value) {
                                             $match = TRUE;
-                                            break;
                                         }
                                     }else if ($logic_id == 6){
                                         if ($returned_shipments_ratio < $logic_value) {
                                             $match = TRUE;
-                                            break;
+                                        }
+                                    }
+                                }else if ($range_id == 2){
+                                    if($total_shipments == $range_value){
+                                        if ($logic_id == 1) {
+                                            if ($returned_shipments_ratio == $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 2){
+                                            if ($returned_shipments_ratio != $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 3){
+                                            if ($returned_shipments_ratio >= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 4){
+                                            if ($returned_shipments_ratio > $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 5){
+                                            if ($returned_shipments_ratio <= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 6){
+                                            if ($returned_shipments_ratio < $logic_value) {
+                                                $match = TRUE;
+                                            }
                                         }
                                     }
                                 }
+                                else if ($range_id == 3){
+                                    if($total_shipments != $range_value){
+                                        if ($logic_id == 1) {
+                                            if ($returned_shipments_ratio == $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 2){
+                                            if ($returned_shipments_ratio != $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 3){
+                                            if ($returned_shipments_ratio >= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 4){
+                                            if ($returned_shipments_ratio > $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 5){
+                                            if ($returned_shipments_ratio <= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 6){
+                                            if ($returned_shipments_ratio < $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }
+                                    }
+                                }else if ($range_id == 4){
+                                    if($total_shipments >= $range_value){
+                                        if ($logic_id == 1) {
+                                            if ($returned_shipments_ratio == $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 2){
+                                            if ($returned_shipments_ratio != $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 3){
+                                            if ($returned_shipments_ratio >= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 4){
+                                            if ($returned_shipments_ratio > $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 5){
+                                            if ($returned_shipments_ratio <= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 6){
+                                            if ($returned_shipments_ratio < $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }
+                                    }
+                                }else if ($range_id == 5){
+                                    if($total_shipments > $range_value){
+                                        if ($logic_id == 1) {
+                                            if ($returned_shipments_ratio == $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 2){
+                                            if ($returned_shipments_ratio != $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 3){
+                                            if ($returned_shipments_ratio >= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 4){
+                                            if ($returned_shipments_ratio > $logic_value) {
+                                                $match = TRUE;
+                                                break;
+                                            }
+                                        }else if ($logic_id == 5){
+                                            if ($returned_shipments_ratio <= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 6){
+                                            if ($returned_shipments_ratio < $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }
+                                    }
+                                }else if ($range_id == 6){
+                                    if($total_shipments <= $range_value){
+                                        if ($logic_id == 1) {
+                                            if ($returned_shipments_ratio == $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 2){
+                                            if ($returned_shipments_ratio != $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 3){
+                                            if ($returned_shipments_ratio >= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 4){
+                                            if ($returned_shipments_ratio > $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 5){
+                                            if ($returned_shipments_ratio <= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 6){
+                                            if ($returned_shipments_ratio < $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }
+                                    }
+                                }else if ($range_id == 7){
+                                    if($total_shipments < $range_value){
+                                        if ($logic_id == 1) {
+                                            if ($returned_shipments_ratio == $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 2){
+                                            if ($returned_shipments_ratio != $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 3){
+                                            if ($returned_shipments_ratio >= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 4){
+                                            if ($returned_shipments_ratio > $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 5){
+                                            if ($returned_shipments_ratio <= $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }else if ($logic_id == 6){
+                                            if ($returned_shipments_ratio < $logic_value) {
+                                                $match = TRUE;
+                                            }
+                                        }
+                                    }
+                                }
+                            }else if($operation_id == 1){
+
+                            }else if($operation_id == 2){
+
                             }
-                            else if ($range_id == 3){
-                                if($total_shipments != $range_value){
-                                    if ($logic_id == 1) {
-                                        if ($returned_shipments_ratio == $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 2){
-                                        if ($returned_shipments_ratio != $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 3){
-                                        if ($returned_shipments_ratio >= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 4){
-                                        if ($returned_shipments_ratio > $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 5){
-                                        if ($returned_shipments_ratio <= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 6){
-                                        if ($returned_shipments_ratio < $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }else if ($range_id == 4){
-                                if($total_shipments >= $range_value){
-                                    if ($logic_id == 1) {
-                                        if ($returned_shipments_ratio == $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 2){
-                                        if ($returned_shipments_ratio != $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 3){
-                                        if ($returned_shipments_ratio >= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 4){
-                                        if ($returned_shipments_ratio > $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 5){
-                                        if ($returned_shipments_ratio <= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 6){
-                                        if ($returned_shipments_ratio < $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }else if ($range_id == 5){
-                                if($total_shipments > $range_value){
-                                    if ($logic_id == 1) {
-                                        if ($returned_shipments_ratio == $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 2){
-                                        if ($returned_shipments_ratio != $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 3){
-                                        if ($returned_shipments_ratio >= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 4){
-                                        if ($returned_shipments_ratio > $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 5){
-                                        if ($returned_shipments_ratio <= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 6){
-                                        if ($returned_shipments_ratio < $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }else if ($range_id == 6){
-                                if($total_shipments <= $range_value){
-                                    if ($logic_id == 1) {
-                                        if ($returned_shipments_ratio == $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 2){
-                                        if ($returned_shipments_ratio != $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 3){
-                                        if ($returned_shipments_ratio >= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 4){
-                                        if ($returned_shipments_ratio > $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 5){
-                                        if ($returned_shipments_ratio <= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 6){
-                                        if ($returned_shipments_ratio < $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }else if ($range_id == 7){
-                                if($total_shipments < $range_value){
-                                    if ($logic_id == 1) {
-                                        if ($returned_shipments_ratio == $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 2){
-                                        if ($returned_shipments_ratio != $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 3){
-                                        if ($returned_shipments_ratio >= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 4){
-                                        if ($returned_shipments_ratio > $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 5){
-                                        if ($returned_shipments_ratio <= $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }else if ($logic_id == 6){
-                                        if ($returned_shipments_ratio < $logic_value) {
-                                            $match = TRUE;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
+
                         }else if ($condition_id == 2){
 
                         }else{
 
                         }
 
-
                     }
                     if($match == TRUE){
-                        $match_setting = $setting->id;
+
                         break;
                     }
                 }

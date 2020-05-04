@@ -18,6 +18,7 @@ class CreateConsigneeInformationLogsTable extends Migration
             $table->integer('consignee_information_id');
             $table->string('name');
             $table->string('address');
+            $table->string('phone');
             $table->string('phone2')->nullable();
             $table->integer('city_id');
             $table->integer('user_id');
