@@ -117,7 +117,7 @@
                                 <div class="row mt-2">
                                     <div class="col">
                                         <div class="form-group text-center">
-                                            <button type="submit" name="book" class="btn btn-primary book" value="Book">Book</button>
+                                            <button type="submit" name="book" class="btn btn-primary book" value="Book">Book Anyway</button>
                                         </div>
                                     </div>
                                 </div>
