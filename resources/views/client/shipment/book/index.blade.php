@@ -960,6 +960,28 @@
                 return repo.full_name || repo.text;
             }
 
+			var blacklist = false;
+			var blacklist_message = '';
+			function check_consignee_return_ratio(){
+				var phone = $('input[name="consignee_phone_number_1"]').val();
+				if(phone){
+					$.ajax({
+						url:'{!! route('cod.shipment.book.check_consignee_return_ratio') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'phone': phone,
+						}
+					}).done(function (data) {
+						if(data.status == 0){
+							blacklist = true;
+							blacklist_message = data.message;
+							return true;
+						}
+					});
+				}
+			}
+
             $('#consignee_info').on('select2:select', function () {
                 var id = parseInt($(this).val());
                 if(id){
@@ -975,7 +997,7 @@
                             $('#consignee_city').val(data.details.city_id).trigger('change');
                             $('input[name="consignee_name"]').val(data.details.name);
                             $('#consignee_address').val(data.details.address);
-                            $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1);
+                            $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
                             $('input[name="consignee_phone_number_2"]').val(data.details.phone_number_2);
                             $('input[name="consignee_email_address"]').val(data.details.email);
                         }else{
@@ -985,6 +1007,14 @@
 				}
 			});
 
+			$('input[name="consignee_phone_number_1"]').bind('change paste keyup', function () {
+				var length = $(this).val().match(/\d/g).length;
+				if(length == 11){
+					check_consignee_return_ratio();
+				}
+
+
+			});
 
 			$('#information_display').checkboxpicker();
 
@@ -1272,8 +1302,11 @@
 				}
 				return true;
 			}
+
 			var breakup_rows = {};
+
 			var check = @json($check);
+
 			$('#booking_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
@@ -1284,7 +1317,7 @@
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
-
+					check_consignee_return_ratio();
 					var pressed_button = $(this.submitButton);
 
 					$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
@@ -1344,16 +1377,60 @@
 							// dangerMode: true
 						}).then(function(confirm) {
 							if(confirm) {
-								swal({
-									title: 'Please Wait!',
-									text: 'Your shipment is being booked!',
-									icon: 'info',
-									buttons: false,
-									closeOnClickOutside: false,
-									closeOnEsc: false
-								});
 
-								form.submit();
+								if(blacklist == true){
+									var html = '<div class="row justify-content-center">'+ blacklist_message +'</div>';
+									content = document.createElement('div');
+									content.innerHTML = html;
+									swal({
+										content: content,
+										buttons: {
+											cancel: {
+												text: 'Cancel',
+												value: null,
+												visible: true,
+												closeModal: true,
+											},
+											confirm: {
+												text: 'Book Anyway',
+												value: true,
+												visible: true,
+												closeModal: true
+											}
+										},
+										closeOnClickOutside: false,
+										closeOnEsc: false,
+										// dangerMode: true
+									}).then(function(confirm) {
+										if (confirm) {
+											swal({
+												title: 'Please Wait!',
+												text: 'Your shipment is being booked!',
+												icon: 'info',
+												buttons: false,
+												closeOnClickOutside: false,
+												closeOnEsc: false
+											});
+
+											form.submit();
+										}
+										else{
+											$(form).find('button[type=submit]').prop('disabled', false);
+										}
+									});
+								}else{
+									swal({
+										title: 'Please Wait!',
+										text: 'Your shipment is being booked!',
+										icon: 'info',
+										buttons: false,
+										closeOnClickOutside: false,
+										closeOnEsc: false
+									});
+
+									form.submit();
+								}
+
 							}
 							else{
 								$(form).find('button[type=submit]').prop('disabled', false);
@@ -1361,19 +1438,64 @@
 						});
 					}
 					else {
-						swal({
-							title: 'Please Wait!',
-							text: 'Your shipment is being booked!',
-							icon: 'info',
-							buttons: false,
-							closeOnClickOutside: false,
-							closeOnEsc: false
-						});
+						if(blacklist == true) {
+							var html = '<div class="row justify-content-center">' + blacklist_message + '</div>';
+							content = document.createElement('div');
+							content.innerHTML = html;
+							swal({
+								content: content,
+								buttons: {
+									cancel: {
+										text: 'Cancel',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Book Anyway',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								// dangerMode: true
+							}).then(function (confirm) {
+								if (confirm) {
+									swal({
+										title: 'Please Wait!',
+										text: 'Your shipment is being booked!',
+										icon: 'info',
+										buttons: false,
+										closeOnClickOutside: false,
+										closeOnEsc: false
+									});
 
-						form.submit();
+									form.submit();
+								}
+								else{
+									$(form).find('button[type=submit]').prop('disabled', false);
+								}
+							});
+						}else{
+							swal({
+								title: 'Please Wait!',
+								text: 'Your shipment is being booked!',
+								icon: 'info',
+								buttons: false,
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
+
+							form.submit();
+						}
+
 					}
 				}
 			});
+
+
 
 			$('.phone_number').inputmask({
 				'mask': '9999-9999999',

@@ -239,6 +239,49 @@
         </div>
     </div>
 
+
+    <div class="modal fade text-left" id="ConsigneeInformationModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConsigneeInformationModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Consignee</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="consignee_info_div"></div>
+                    <form id="label_update_form" class="mb-1 mt-2" method="POST" action="{{ route('admin.settings.blacklist.search.update') }}" novalidate="novalidate">
+                        {{ csrf_field() }}
+
+                        <input type="hidden" id="consignee_information_id" name="consignee_information_id">
+                        <div class="row justify-content-center">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <select name="label_select" id="label_select" class="form-control" data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($blacklists as $blacklist)
+                                            <option value="{{ $blacklist->id }}">{{ $blacklist->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <button type="submit" name="action" class="btn btn-primary btn-block" id="label_btn" value="label">Label</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -312,6 +355,10 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#label_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Labeling*'
+            });
             $("#assign_agent").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Agent",
                 width:'100%',
@@ -384,7 +431,7 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
+                                row.push(values.consignee_phone_number_1 + '|' + values.consignee_phone_number_2);
                                 row.push(values.consignee_address);
                                 row.push(values.amount);
                                 row.push(values.mode);
@@ -1371,6 +1418,98 @@
             });
 
 
+            $('body').on('click', 'button.consignee_info_label', function () {
+                var phone = $(this).attr('rel');
+                if(phone){
+                    $.ajax({
+                        url: '{!! route('admin.settings.blacklist.search.consignee') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'phone': phone
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                details = data.details;
+                                $('#consignee_information_id').val(details.consignee.id);
+                                var html = '<div class="row mb-1">';
+
+                                html += '<div class="col-4">Consignee Name :</div><div class="col-8">'+ details.consignee.name +'</div>';
+                                html += '<div class="col-4">Consignee Phone Number 1 :</div><div class="col-8">'+ details.consignee.phone +'</div>';
+                                var consignee_phone = '';
+                                if(details.consignee.phone2 != null){
+                                    consignee_phone = details.consignee.phone2;
+                                }
+                                html += '<div class="col-4">Consignee Phone Number 2 :</div><div class="col-8">'+ consignee_phone +'</div>';
+                                html += '<div class="col-4">Consignee Address :</div><div class="col-8">'+ details.consignee.address +'</div>';
+                                html += '<div class="col-4">Consignee City :</div><div class="col-8">'+ details.consignee.city +'</div>';
+
+                                html += '</div>';
+                                if ('blacklist' in details) {
+                                    html += '<div class="row p-1" style="background-color: '+ details.blacklist.color +'; color:white;">';
+                                    html += '<div class="col-12">';
+                                    html += '<table class="table table-sm table-bordered mb-0">';
+                                    html += '<tbody>';
+                                    html += '<tr>';
+                                    html += '<td><strong>Total Shipments</strong></td>';
+                                    html += '<td><strong>Delivered</strong></td>';
+                                    html += '<td><strong>Ratio</strong></td>';
+                                    html += '<td><strong>Undelivered</strong></td>';
+                                    html += '<td><strong>Ratio</strong></td>';
+                                    html += '<td><strong>Return Confirmed</strong></td>';
+                                    html += '<td><strong>Ratio</strong></td>';
+                                    html += '</tr>';
+                                    html += '<tr>';
+                                    html += '<td>' + details.blacklist.total_shipments + '</td>';
+                                    html += '<td>' + details.blacklist.delivered + '</td>';
+                                    html += '<td>' + details.blacklist.delivered_ratio + '</td>';
+                                    html += '<td>' + details.blacklist.undelivered + '</td>';
+                                    html += '<td>' + details.blacklist.undelivered_ratio + ' kg</td>';
+                                    html += '<td>' + details.blacklist.return + '</td>';
+                                    html += '<td>Rs. ' + details.blacklist.return_ratio + '</td>';
+                                    html += '</tr>';
+                                    html += '</tbody>';
+                                    html += '</table>';
+                                    html += '</div></div>';
+                                }
+
+                                $('#consignee_info_div').html(html);
+
+                                $('#label_select').val('').trigger('change');
+                                $('#ConsigneeInformationModal').modal('show');
+
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                $(form).find('button.search').prop('disabled', false);
+
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                }
+            });
+            $('#label_update_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Category is being added!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
         });
     </script>
 @endsection

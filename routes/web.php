@@ -71,6 +71,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('get_consignee_info', 'Shippers\ShipperShipmentBookController@get_consignee_info')->name('get_consignee_info');
 
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
+            Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
 
             Route::prefix('excel')->name('excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
@@ -159,6 +160,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('reattempt/nsa','Shippers\ShipperReturnController@return_reattempt_nsa')->name('reattempt.nsa');
             Route::post('reattempt/status/single','Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
             Route::post('marked/self_collection','Shippers\ShipperReturnController@change_status_to_self_collection')->name('marked.self_collection');
+            Route::post('consignee', 'Shippers\ShipperReturnController@blacklist_search_consignee')->name('consignee');
         });
         Route::prefix('reattempt_history')->name('reattempt_history.')->group(function (){
             Route::get('','Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');
@@ -1549,6 +1551,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_crm_comment_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@auto_crm_comment_store')->name('store');
         });
+
+        Route::prefix('blacklist')->name('blacklist.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@blacklist_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@blacklist_list')->name('list');
+            Route::get('add', 'Admins\GlobalSettingsController@blacklist_add')->name('add');
+            Route::post('add', 'Admins\GlobalSettingsController@blacklist_add_store')->name('add');
+            Route::post('unique', 'Admins\GlobalSettingsController@blacklist_unique_criteria')->name('unique');
+            Route::post('status', 'Admins\GlobalSettingsController@blacklist_status')->name('status');
+            Route::get('edit/{id}','Admins\GlobalSettingsController@blacklist_edit')->name('edit');
+            Route::post('edit/{id}','Admins\GlobalSettingsController@blacklist_edit_submit')->name('edit');
+            Route::prefix('search')->name('search.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@blacklist_search_index')->name('index');
+                Route::post('consignee', 'Admins\GlobalSettingsController@blacklist_search_consignee')->name('consignee');
+                Route::post('update', 'Admins\GlobalSettingsController@blacklist_search_update')->name('update');
+            });
+        });
+
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
