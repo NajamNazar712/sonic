@@ -7,6 +7,8 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\BookingType;
 use App\Http\Models\Consolidation;
@@ -490,6 +492,12 @@ class ShipperReturnController extends Controller
             $data['consignee']['address'] = $consignee_information->address;
             $data['consignee']['city'] = $consignee_information->consignee_city->name;
             $consignee_information_id = $consignee_information->id;
+            $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information_id);
+            $color = NULL;
+            if($manual_blacklist->exists()){
+                $manual_blacklist = $manual_blacklist->first();
+                $color = BlacklistSetting::find($manual_blacklist->blacklist_setting_id)->color;
+            }
             if(BlacklistedConsignee::where('consignee_information_id', $consignee_information_id)->exists()){
                 $data['blacklist'] = array();
                 $data['blacklist']['total_shipments'] = $consignee_information->blacklisted_consignee->shipments;
@@ -499,7 +507,11 @@ class ShipperReturnController extends Controller
                 $data['blacklist']['undelivered_ratio'] = $consignee_information->blacklisted_consignee->undelivered_ratio;
                 $data['blacklist']['return'] = $consignee_information->blacklisted_consignee->return;
                 $data['blacklist']['return_ratio'] = $consignee_information->blacklisted_consignee->return_ratio;
-                $data['blacklist']['color'] = $consignee_information->blacklisted_consignee->blacklist->color;
+                if($color == NULL){
+                    $data['blacklist']['color'] = $consignee_information->blacklisted_consignee->blacklist->color;
+                }else{
+                    $data['blacklist']['color'] = $color;
+                }
             }
             return response()->json(['status' => 0, 'success' => 'Consignee information found!', 'details' => $data]);
         }
