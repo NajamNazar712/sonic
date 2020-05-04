@@ -962,6 +962,7 @@
 
 			var blacklist = false;
 			var blacklist_message = '';
+			var blacklist_color = '';
 			function check_consignee_return_ratio(){
 				var phone = $('input[name="consignee_phone_number_1"]').val();
 				if(phone){
@@ -976,6 +977,7 @@
 						if(data.status == 0){
 							blacklist = true;
 							blacklist_message = data.message;
+							blacklist_color = data.color;
 							return true;
 						}
 					});
@@ -1379,7 +1381,7 @@
 							if(confirm) {
 
 								if(blacklist == true){
-									var html = '<div class="row justify-content-center">'+ blacklist_message +'</div>';
+									var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
 									content = document.createElement('div');
 									content.innerHTML = html;
 									swal({
@@ -1439,7 +1441,7 @@
 					}
 					else {
 						if(blacklist == true) {
-							var html = '<div class="row justify-content-center">' + blacklist_message + '</div>';
+							var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
 							content = document.createElement('div');
 							content.innerHTML = html;
 							swal({

@@ -6,6 +6,7 @@ use App\Http\Controllers\ConsigneeInformationController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\ChargesModes;
@@ -3405,17 +3406,32 @@ class ShipperShipmentBookController extends Controller
         $consignee_information = ConsigneeInformation::where('phone', $phone);
         if($consignee_information->exists()){
             $consignee_information = $consignee_information->first();
-            $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
-            if($blacklist->exists()){
-                $blacklist = $blacklist->first();
-                $blacklist_setting_id = $blacklist->blacklist_setting_id;
-                $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+            $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
+            $color = NULL;
+            if($manual_blacklist->exists()){
+                $manual_blacklist = $manual_blacklist->first();
+                $blacklist_setting = BlacklistSetting::find($manual_blacklist->blacklist_setting_id);
                 if($blacklist_setting){
                     $message = $blacklist_setting->message;
-                    return response()->json(['status' => 0, 'message' => $message]);
+                    $color = $blacklist_setting->color;
+                    return response()->json(['status' => 0, 'message' => $message, 'color' => $color]);
                 }
+            }else{
+                $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+                if($blacklist->exists()){
+                    $blacklist = $blacklist->first();
+                    $blacklist_setting_id = $blacklist->blacklist_setting_id;
+                    $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+                    if($blacklist_setting){
+                        $message = $blacklist_setting->message;
+                        $color = $blacklist_setting->color;
+                        return response()->json(['status' => 0, 'message' => $message, 'color' => $color]);
+                    }
+                }
+                return response()->json(['status' => 1]);
             }
-            return response()->json(['status' => 1]);
+
+
         }
         return response()->json(['status' => 1]);
 
