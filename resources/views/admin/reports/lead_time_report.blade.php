@@ -414,7 +414,8 @@
 
                     return {body: body, header: head};
                 }
-            } );            var index_column = 0;
+            } );          
+              var index_column = 0;
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',

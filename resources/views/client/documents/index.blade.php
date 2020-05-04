@@ -69,6 +69,59 @@
                                         </div>
                                     </div>
 
+                                  <div class="card text-white box-shadow-0 bg-gradient-y-warning">
+                                    <div class="card-header">
+                                        <h4 class="card-title text-white">Shopfiy Plugin</h4>
+                                        <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
+                                        <div class="heading-elements">
+                                            <ul class="list-inline mb-0">
+                                                <li><a href="https://shopify.sonic.pk/access?shop=test-store-trax.myshopify.com"
+                                                target="_blank" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Install</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="card-content collapse show">
+                                        <div class="card-body">
+                                            <p class="card-text">With the help of this video you can learn how to install Shopify plugin</p> 
+                                                    <a style="color: #ffffff" href="https://www.youtube.com/watch?v=DDffPPkSBMY" target="_blank">Shopify Plugin Tutorial</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div class="card text-white box-shadow-0 bg-gradient-y-primary">
+                                    <div class="card-header">
+                                        <h4 class="card-title text-white">Wordpress Plugin</h4>
+                                        <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
+                                        <div class="heading-elements">
+                                          <ul class="list-inline mb-0">
+                                                <li><a href="{{ asset('file/documents/trax-plugin-wordpress.zip') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Download</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="card-content collapse show">
+                                        <div class="card-body">
+                                            <p class="card-text">With the help of this video you can learn how to install Wordpress plugin</p> 
+                                                    <a style="color: #ffffff" href="https://www.youtube.com/watch?v=-r7j3VGHQRg" target="_blank">Wordpress Plugin Tutorial</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card text-white box-shadow-0 bg-gradient-directional-info">
+                                    <div class="card-header">
+                                        <h4 class="card-title text-white">Magento Plugin</h4>
+                                        <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
+                                        <div class="heading-elements">
+                                            <ul class="list-inline mb-0">
+                                                <li><a href="{{ asset('file/documents/trax-magento-plugin.zip') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1 city_list_download"> <i class=" ft-download"></i> Download</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="card-content collapse show">
+                                        <div class="card-body">
+                                            <p class="card-text">With the help of this video you can learn how to install Magento plugin</p> 
+                                                    <a style="color: #ffffff" href="https://www.youtube.com/watch?v=Tkz3eb_pZZw" target="_blank">Magento Plugin Tutorial</a>                               
+                                        </div>
+                                    </div>
+                                </div>
+
                                 </div>
                             </div>
                         </div>
