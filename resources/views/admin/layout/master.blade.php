@@ -7,7 +7,7 @@
       data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
 <!-- fixed-top-->
 @include('admin.layout.navbar')
-<!-- ////////////////////////////////////////////////////////////////////////////-->
+
 @include('admin.layout.sidebar')
 <div class="app-content content" id="app_content">
     <div class="content-wrapper">
