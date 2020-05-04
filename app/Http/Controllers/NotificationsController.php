@@ -4507,6 +4507,28 @@ class NotificationsController extends Controller
                     self::sms($body, $to);
                 }
             }
+//mycode
+            else if($id == 62){
+              $shipment_cancel = DB::connection('reports')->table('shipments')->where('shipper_status_id', 17);
+              if($shipment_cancel->exists()){
+                ->leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
+
+
+
+              // ->leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
+              // ->leftjoin('users as u','u.id','=','s.user_id')
+              // ->leftjoin('user_shipping_infos as usi','usi.id','=','s.pickup_address_id')
+              // ->leftjoin('cities as c','c.id','=','usi.city_id')
+              // ->select('u.id as account_id','u.name as name', 'c.name as origin', DB::raw('SUM(pending_payment_shipments.payable) as sum_payable'))
+              // ->where('payable','<',0)->groupBy('u.id')->get();
+
+              }
+  
+            }
+
+
+//end
+
         }
       }
     }

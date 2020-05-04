@@ -4,23 +4,21 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
-use App\Http\Controllers\Admins\AdminShipmentCancelController;
-
-class CancelShipment extends Command
+class CancelledShipmentEmail extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'shipment:cancel';
+    protected $signature = 'shipmentemail:cancel';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Shipments Auto Cancellation';
+    protected $description = 'Cancelled Shipment Email';
 
     /**
      * Create a new command instance.
@@ -37,8 +35,8 @@ class CancelShipment extends Command
      *
      * @return mixed
      */
-    public function handle() 
+    public function handle()
     {
-        AdminShipmentCancelController::cancel();
+        NotificationsController::send(24, 0);
     }
 }

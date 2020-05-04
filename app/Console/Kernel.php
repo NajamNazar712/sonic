@@ -124,7 +124,9 @@ class Kernel extends ConsoleKernel
 		$schedule->command('auto:shipmentarrival')->dailyAt('07:00')->runInBackground();
         $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
 
-		$schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
+        $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
+        
+        $schedule->command('shipmentemail:cancel')->dailyAt('08:00')->runInBackground();
 	}
 	 /**
      * Register the commands for the application.
