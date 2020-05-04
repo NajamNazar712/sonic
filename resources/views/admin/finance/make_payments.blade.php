@@ -1146,7 +1146,7 @@
 				if(zero_charges){
 					swal({
 						title: 'Are You Sure?',
-						text: 'Zero cod shipment selected, select yes to pay!',
+						text: 'Charges are zero for selected Shipment(s), select yes to pay!',
 						icon: 'warning',
 						buttons: {
 							cancel: {
