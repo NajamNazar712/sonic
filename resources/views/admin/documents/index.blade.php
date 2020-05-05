@@ -74,22 +74,30 @@
                                         <h4 class="card-title text-white">Shopfiy Plugin</h4>
                                         <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
                                         <div class="heading-elements">
-                                            <ul class="list-inline mb-0">
+                                            <ul class="list-unstyled mb-0 text-center">
                                                 <li><a id="shopfiy_link" onClick="setShopifyLink();" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Install</a></li>
-                                            </ul>
-                                            <ul class="list-inline mb-0">
-                                                <li><input id="shopify_text" type="text" placeholder="Plugin name"></li>
                                             </ul>
                                         </div>
                                     </div>
                                     <div class="card-content collapse show">
                                         <div class="card-body">
-                                            <p class="card-text">With the help of this video you can learn how to install Shopify plugin</p> 
-                                                    <a style="color: #ffffff" href="https://www.youtube.com/watch?v=DDffPPkSBMY" target="_blank">Shopify Plugin Tutorial</a>
+                                            <div class="row">
+                                                <div class="col-8">
+                                                    <p class="card-text">With the help of this video you can learn how to install Shopify plugin</p>
+                                                    <a class="white" href="https://www.youtube.com/watch?v=DDffPPkSBMY" target="_blank"><i class="la la-youtube"></i> Shopify Plugin Tutorial</a>
+                                                </div>
+                                                <div class="col-4">
+                                                    <ul class="list-inline text-right">
+                                                        <li><input id="shopify_text" class="form-control display-inline" type="text" placeholder="Shopify Store Name"></li>
+                                                        <li>.myshopify.com</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
-                                 <div class="card text-white box-shadow-0 bg-gradient-y-primary">
+                                <div class="card text-white box-shadow-0 bg-gradient-y-primary">
                                     <div class="card-header">
                                         <h4 class="card-title text-white">Wordpress Plugin</h4>
                                         <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
@@ -101,8 +109,8 @@
                                     </div>
                                     <div class="card-content collapse show">
                                         <div class="card-body">
-                                            <p class="card-text">With the help of this video you can learn how to install Wordpress plugin</p> 
-                                                    <a style="color: #ffffff" href="https://www.youtube.com/watch?v=-r7j3VGHQRg" target="_blank">Wordpress Plugin Tutorial</a>
+                                            <p class="card-text">With the help of this video you can learn how to install Wordpress plugin</p>
+                                            <a class="white" href="https://www.youtube.com/watch?v=-r7j3VGHQRg" target="_blank"><i class="la la-youtube"></i> Wordpress Plugin Tutorial</a>
                                         </div>
                                     </div>
                                 </div>
@@ -118,8 +126,8 @@
                                     </div>
                                     <div class="card-content collapse show">
                                         <div class="card-body">
-                                            <p class="card-text">With the help of this video you can learn how to install Magento plugin</p> 
-                                                    <a style="color: #ffffff" href="https://www.youtube.com/watch?v=Tkz3eb_pZZw" target="_blank">Magento Plugin Tutorial</a>                               
+                                            <p class="card-text">With the help of this video you can learn how to install Magento plugin</p>
+                                            <a class="white" href="https://www.youtube.com/watch?v=Tkz3eb_pZZw" target="_blank"><i class="la la-youtube"></i> Magento Plugin Tutorial</a>
                                         </div>
                                     </div>
                                 </div>
@@ -134,10 +142,12 @@
 
 @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 
 
@@ -154,20 +164,20 @@
         var shopify_text,shopfiy_link;
 
         function setShopifyLink(){
-        shopify_text= document.getElementById('shopify_text').value;
-        if(!shopify_text)
-        {
-            alert('Enter Plugin name');
-            return;
+            shopify_text= document.getElementById('shopify_text').value;
+            if(!shopify_text)
+            {
+                var error = 'Please enter Shopify Store Name';
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+            else
+            {
+                shopfiy_link="https://shopify.sonic.pk/access?shop="+shopify_text+'.myshopify.com';
+                window.open(shopfiy_link);
+                document.getElementById('shopify_text').value="";
+            }
+
         }
-        else
-        {
-            shopfiy_link="https://shopify.sonic.pk/access?shop="+shopify_text;
-            window.open(shopfiy_link);
-            document.getElementById('shopify_text').value="";
-        }
-        
-    }
 
 
     </script>
