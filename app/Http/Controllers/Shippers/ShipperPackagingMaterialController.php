@@ -244,14 +244,58 @@ class ShipperPackagingMaterialController extends Controller
             }
         }
         else{
-            if(PendingPayment::where('user_id', session('user_id'))->exists()){
-                $balance = PendingPayment::where('user_id', session('user_id'))->first()->pending_payment_shipments->sum('payable');
+            if(session('account_type') == 1){
+                if(PendingPayment::where('user_id', session('user_id'))->exists()){
+                    $balance = PendingPayment::where('user_id', session('user_id'))->first()->pending_payment_shipments->sum('payable');
 
-            }else{
-                return redirect()->back()->with('error','Can\'t  Request material!');
+                }else{
+                    return redirect()->back()->with('error','Can\'t  Request material!');
+                }
+
+                if($total_charges <= $balance){
+                    if ($request->input('address_select') == 0) {
+                        $result = PackagingMaterialRequest::create([
+                            'user_id'=>$user_id,
+                            'city_id'=>$request->new_pickup_city,
+                            'address'=>$request->new_pickup_address,
+                            'poc'=>$request->new_pickup_person_of_contact,
+                            'phone'=>$request->new_pickup_phone_number,
+                            'amount'=>$total_charges,
+                            'status_id'=>1,
+                            'packaging_payment_mode_id'=>$request->mode_of_payment
+                        ]);
+                    }
+                    else {
+                        $result = PackagingMaterialRequest::create([
+                            'user_id'=>$user_id,
+                            'city_id'=>$user_address->city_id,
+                            'address'=>$user_address->pickup_address,
+                            'poc'=>$user_address->poc,
+                            'phone'=>$user_address->phone,
+                            'amount'=>$total_charges,
+                            'status_id'=>1,
+                            'packaging_payment_mode_id'=>$request->mode_of_payment
+                        ]);
+                    }
+                    if($result){
+                        foreach ($packaging_type_ids as $index => $packaging_type_id){
+                            PackagingMaterialRequestDetail::create([
+                                'packaging_material_request_id' => $result->id,
+                                'type_id' => $packaging_type_id,
+                                'type_size_id' => $packaging_size_ids[$index],
+                                'quantity' => $packaging_quantities[$index],
+                            ]);
+                        }
+                        return redirect()->back()->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+                    }else{
+                        return redirect()->back()->with('error','Request not submitted!');
+                    }
+
+                }else{
+                    return redirect()->back()->with('error','Not enough balance!');
+                }
             }
-
-            if($total_charges <= $balance){
+            else{
                 if ($request->input('address_select') == 0) {
                     $result = PackagingMaterialRequest::create([
                         'user_id'=>$user_id,
@@ -289,9 +333,6 @@ class ShipperPackagingMaterialController extends Controller
                 }else{
                     return redirect()->back()->with('error','Request not submitted!');
                 }
-
-            }else{
-                return redirect()->back()->with('error','Not enough balance!');
             }
         }
 
