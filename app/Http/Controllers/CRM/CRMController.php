@@ -71,7 +71,7 @@ class CRMController extends Controller
                 $comment = $settings->text;
                 $comment_by = 0;
                 $comment_type = 0;
-                CRMCommentController::add($id, 61,$comment_by,$comment_type, $comment);
+                CRMCommentController::add($id, 306,$comment_by,$comment_type, $comment);
             }
         }
 

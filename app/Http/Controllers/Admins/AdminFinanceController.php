@@ -4586,8 +4586,14 @@ class AdminFinanceController extends Controller
                                 <tr>
                                     <td class="color secondary"><strong>Account No.</strong></td>
                                     <td>' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '</td>
-                                </tr>
-                                <tr>
+                                </tr>';
+                                if($account_type_id == 2){
+                                    $html .= '<tr>
+                                        <td class="color secondary"><strong>Shipper Name</strong></td>
+                                        <td>' . $shipper->name . '</td>
+                                    </tr>';
+                                }
+                                $html .= '<tr>
                                     <td class="color secondary"><strong>Name</strong></td>
                                     <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_name : $shipper->name) . '</td>
                                 </tr>
