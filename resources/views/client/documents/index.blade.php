@@ -84,7 +84,7 @@
                                             <div class="row">
                                                 <div class="col-8">
                                                     <p class="card-text">With the help of this video you can learn how to install Shopify plugin</p>
-                                                    <a class="white" href="https://www.youtube.com/watch?v=DDffPPkSBMY" target="_blank"><i class="la la-youtube"></i> Shopify Plugin Tutorial</a>
+                                                    <a class="white" href="https://www.youtube.com/watch?v=DDffPPkSBMY" target="_blank"><i class="la la-youtube-play align-text-bottom"></i> Shopify Plugin Tutorial</a>
                                                 </div>
                                                 <div class="col-4">
                                                     <ul class="list-inline text-right">
@@ -110,7 +110,7 @@
                                     <div class="card-content collapse show">
                                         <div class="card-body">
                                             <p class="card-text">With the help of this video you can learn how to install Wordpress plugin</p> 
-                                            <a class="white" href="https://www.youtube.com/watch?v=-r7j3VGHQRg" target="_blank"><i class="la la-youtube"></i> Wordpress Plugin Tutorial</a>
+                                            <a class="white" href="https://www.youtube.com/watch?v=-r7j3VGHQRg" target="_blank"><i class="la la-youtube-play align-text-bottom"></i> Wordpress Plugin Tutorial</a>
                                         </div>
                                     </div>
                                 </div>
@@ -127,7 +127,7 @@
                                     <div class="card-content collapse show">
                                         <div class="card-body">
                                             <p class="card-text">With the help of this video you can learn how to install Magento plugin</p> 
-                                            <a class="white" href="https://www.youtube.com/watch?v=Tkz3eb_pZZw" target="_blank"><i class="la la-youtube"></i> Magento Plugin Tutorial</a>
+                                            <a class="white" href="https://www.youtube.com/watch?v=Tkz3eb_pZZw" target="_blank"><i class="la la-youtube-play align-text-bottom"></i> Magento Plugin Tutorial</a>
                                         </div>
                                     </div>
                                 </div>
