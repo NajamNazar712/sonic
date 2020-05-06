@@ -561,6 +561,15 @@ class Permission
             'settings.blacklist.search.index' => 330,
 
 
+            'settings.commission.index' => 331,
+
+
+            'settings.commission.percentage.index' => 332,
+            'settings.commission.percentage.store' => 332,
+
+
+
+
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,

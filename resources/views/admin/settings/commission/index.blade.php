@@ -1,0 +1,296 @@
+@extends('admin.layout.master')
+
+@section('title', 'Sales Tier')
+
+@section('content')
+    <div class="app-content content">
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <h1 class="mb-1">
+                    Sales Tier
+                </h1>
+
+                <div class="card">
+                    <div class="card-content" aria-expanded="true">
+                        <div class="card-body">
+                            @include('admin.inc.messages')
+
+                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                <thead>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Tier Name'</th>
+                                    <th class="border-primary border-darken-1">Tier Type</th>
+                                    <th class="border-primary border-darken-1">Added At</th>
+                                    <th class="border-primary border-darken-1">Added By</th>
+                                    <th class="border-primary border-darken-1">Updated At</th>
+                                    <th class="border-primary border-darken-1">Updated by</th>
+                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Tier</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_feedback_form" action="{{route('admin.settings.commission.add')}}" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+
+                            <div class="row justify-content-center">
+                                <div class="col-6">
+                            <input  class="form-control" id="tier_name" name="tier_name" type="text" placeholder="Enter Tier Name" />
+                            </div>
+                        </div>
+                        <br>
+                         <div class="row justify-content-center">
+                                <div class="col-6">
+                            <input  class="form-control" id="tier_commission" name="tier_commission" type="text" placeholder="Enter Overall Commission" />
+                            </div>
+                        </div>
+                        <br>
+                         <div class="row justify-content-center">
+                               <div class="col-6">
+                        <fieldset class="form-group">
+                                        <select name="feedback_channel" id="tier_type" class="form-control select2">
+                                            @foreach($TierType as $type)
+                                                <option value="{{$type->id}}">{{$type->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                      </div>    
+                                       </div>    
+                        <br><br>
+                         <div class="row justify-content-center">
+                                <div class="col-6">
+                           <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Add Tier</button>
+                            </div>
+                        </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
+@endsection
+
+@section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+            $('#tier_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Enter Tier Type*'
+            });
+
+              
+         // $('#add_feedback_form').bind('submit', function (e) {
+         //        e.preventDefault();
+         //        var feedback_flag = true;
+         //        var tier_type = $('#tier_type').val();
+         //        var tier_name = $('#tier_name').val();
+         //        var tier_commission = $('#tier_commission').val();
+         //        if(!tier_name){
+         //            feedback_flag = false;
+         //            var error = "Please Enter Tier Name!";
+         //            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+         //        }
+         //         if(!tier_type){
+         //            feedback_flag = false;
+         //            var error = "Please Enter Tier Type!";
+         //            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+         //        }
+         //        if(!tier_commission){
+         //            feedback_flag = false;
+         //            var error = "Please Enter Commission";
+         //            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+         //        }
+
+         //    });
+           
+
+
+
+        $(document).ready(function() {
+
+
+            var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                @if (session('role_id') == 1 || in_array(82, session('permissions')))
+                buttons: [{
+                    text: '<i class="la la-cogs"></i> Add',
+                    className: 'btn btn-primary add',
+                    action: function (e, dt, node, config) {
+                       $('#AddRequestModal').modal('show');
+                    }
+                }, ,{
+                        extend: 'excel',
+                        title: 'Sales Tier',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },'reset'],
+                @else
+                buttons: [{
+                        extend: 'excel',
+                        title: 'Sales Tier5',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },'reset'],
+                @endif
+                scrollX: true, scrollY: '500px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: true,
+                ajax: '{{ route('admin.settings.commission.list') }}',
+                rowId: 'tier_id',
+                order: [[1, 'asc']],
+                columns: [
+                    {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'name', name: 'sales_tiers.tier_name', class: 'align-middle name'},
+                    {data: 'tier_type', name: 'tt.name', class: 'align-middle tier_type'},
+                    {data: 'added_at', name: 'sales_tiers.created_at', class: 'align-middle added_at'},
+                    {data: 'added_by', name: 'a.name', class: 'align-middle added_by'},
+                    {data: 'updated_at', name: 'sales_tiers.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
+                    {data: 'category_status', name: 'sales_tiers.status', class: 'align-middle status'},
+
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Disable</option>' +
+                        '<option value="1">Enable</option>' +
+                        '</select>';
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                            $(td).appendTo($(search));
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    this.api().table().columns.adjust();
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+{{--                @if (session('role_id') == 1 || in_array(83, session('permissions')))--}}
+                if ($(this).hasClass('edit')) {
+                    var link = '{{ route('admin.settings.blacklist.edit', ["id" => 0]) }}';
+
+                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+                }
+{{--                @endif--}}
+{{--                        @if (session('role_id') == 1 || in_array(84, session('permissions')))--}}
+                if ($(this).hasClass('enable')) {
+                    $.ajax({
+                        url: '{!! route('admin.settings.commission.status') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            'status': 1,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                table.draw(false);
+
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                }
+                else if ($(this).hasClass('disable')) {
+                    $.ajax({
+                        url: '{!! route('admin.settings.commission.status') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            'status': 0,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                table.draw(false);
+
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                }
+{{--                @endif--}}
+            });
+        });
+    </script>
+@endsection

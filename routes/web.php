@@ -1568,7 +1568,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        //commission routes
+        Route::prefix('commission')->name('commission.')->group(function () {
+            Route::get('', 'Admins\AdminCommissionController@index')->name('index');
+             Route::get('list', 'Admins\AdminCommissionController@tier_list')->name('list');
+            // Route::get('add', 'Admins\GlobalSettingsController@blacklist_add')->name('add');
+             Route::post('add', 'Admins\AdminCommissionController@add_sales_tier')->name('add');
+            // Route::post('unique', 'Admins\GlobalSettingsController@blacklist_unique_criteria')->name('unique');
+             Route::post('status', 'Admins\AdminCommissionController@commission_status')->name('status');
+            // Route::get('edit/{id}','Admins\GlobalSettingsController@blacklist_edit')->name('edit');
+            // Route::post('edit/{id}','Admins\GlobalSettingsController@blacklist_edit_submit')->name('edit');
+            Route::prefix('percentage')->name('percentage.')->group(function () {
+                    Route::get('', 'Admins\AdminCommissionController@commission_percentage_index')->name('index');
+                    Route::post('', 'Admins\AdminCommissionController@commission_percentage_update')->name('store');
+                });
+        });
+
+
+
     });
+
+
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');
