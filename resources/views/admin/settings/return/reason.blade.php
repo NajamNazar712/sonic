@@ -97,7 +97,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var table = $('#datatable').DataTable({
-                @if (session('role_id') == 1 || in_array(163, session('permissions')))
+
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     className: 'btn btn-primary mb-1',
@@ -106,10 +106,6 @@
                         $('#AddReasonModal').modal('show');
                     }
                 },'reset'],
-                @else
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: ['reset'],
-                @endif
 
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -251,20 +247,45 @@
                 var reason_id = parseInt($('#edit_reason_id').val());
 
                 if(reason != '' && reason_id != ''){
-                    $.ajax({
-                        url: '{!! route('admin.settings.return.reason.edit') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'reason_id': reason_id,
-                            'reason':reason
-                        }
-                    }).done(function(data){
-                        if(data.status == 0){
-                            table.draw(true);
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update the reason!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.settings.return.reason.edit') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'reason_id': reason_id,
+                                    'reason':reason
+                                }
+                            }).done(function(data){
+                                if(data.status == 0){
+                                    table.draw(true);
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                            $('#EditReasonModal').modal('hide');
+                                    $('#EditReasonModal').modal('hide');
+                                }
+                            });
                         }
                     });
 

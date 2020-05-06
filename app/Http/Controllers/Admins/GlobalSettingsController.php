@@ -2229,6 +2229,14 @@ class GlobalSettingsController extends Controller
         return response()->json(['status' => 1, 'error' => 'Please select reason!']);
     }
     public function return_reason_edit(Request $request){
-        return $request;
+        $reason_id = $request->reason_id;
+        $reason = $request->reason;
+        if($reason){
+            $reason_detail = ShipmentStatusReason::find($reason_id);
+            $reason_detail->name = $reason;
+            $reason_detail->save();
+            return response()->json(['status' => 0, 'success' => 'Reason updated successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
     }
 }
