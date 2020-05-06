@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Http\Controllers\NotificationsController;
 
 class CancelledShipmentEmail extends Command
 {
@@ -37,6 +38,7 @@ class CancelledShipmentEmail extends Command
      */
     public function handle()
     {
-        NotificationsController::send(24, 0);
+        $date = \Carbon\Carbon::yesterday()->format('Y-m-d');
+        NotificationsController::send(62,$date, 0);
     }
 }
