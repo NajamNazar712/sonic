@@ -12,7 +12,7 @@ class UpdateModulePermissionForReturnReasonSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-           array('id' => 331, 'name' => 'Return Reason - View', 'module_id' => 14),
+           array('id' => 333, 'name' => 'Return Reason - View', 'module_id' => 14),
         ));
     }
 }
