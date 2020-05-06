@@ -1573,6 +1573,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@return_reason_index')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@return_reason_list')->name('list');
                 Route::post('add', 'Admins\GlobalSettingsController@return_reason_add')->name('add');
+                Route::post('get', 'Admins\GlobalSettingsController@return_reason_get')->name('get');
+                Route::post('edit', 'Admins\GlobalSettingsController@return_reason_edit')->name('edit');
             });
         });
     });

@@ -2204,4 +2204,31 @@ class GlobalSettingsController extends Controller
 
         return $datatable->make(true);
     }
+    public function return_reason_add(Request $request){
+        $reason = trim($request->reason);
+        if($reason){
+            $shipment_reason = new ShipmentStatusReason();
+            $shipment_reason->name = $reason;
+            $shipment_reason->save();
+
+            DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+
+            return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
+    }
+    public function return_reason_get(Request $request){
+        $id = $request->reason_id;
+        if($id){
+            $reason = ShipmentStatusReason::find($id);
+            if($reason){
+                return response()->json(['status' => 0, 'reason' => $reason->name]);
+            }
+            return response()->json(['status' => 1, 'error' => 'Reason not found!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please select reason!']);
+    }
+    public function return_reason_edit(Request $request){
+        return $request;
+    }
 }

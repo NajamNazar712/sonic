@@ -53,26 +53,26 @@
     </div>
 
     {{--edit--}}
-    <div class="modal fade text-left" id="EditAccountTitleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditAccountTitleModal"
+    <div class="modal fade text-left" id="EditReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditReasonModal"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Edit Title Of Account</h4>
+                    <h4 class="modal-title white">Edit Reason</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <input type="hidden" id="edit_account_title_id">
+                <input type="hidden" id="edit_reason_id">
                 <div class="modal-body  text-center">
                     <div class="row mb-2 justify-content-center">
                         <div class="col-12 form-group">
-                            <input name="edit_account_title" id="edit_account_title" class="form-control edit_account_title" placeholder="Enter Head of Account">
+                            <input name="edit_reason" id="edit_reason" class="form-control edit_reason" placeholder="Enter Head of Account">
                         </div>
                     </div>
                     <div class="row justify-content-center">
                         <div class="col-12">
-                            <button id="editTitle" type="button" class="btn btn-primary btn-block">Edit</button>
+                            <button id="editReason" type="button" class="btn btn-primary btn-block">Edit</button>
                         </div>
                     </div>
 
@@ -164,31 +164,21 @@
             });
             $('body').on('click','#datatable button.edit',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                // var account_title = $(this).parents('tr').find('td.name').text();
                 if(id){
                     $.ajax({
-                        url: '{!! route('admin.settings.petty_cash.titles.info') !!}',
+                        url: '{!! route('admin.settings.return.reason.get') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'title_id': id
+                            'reason_id': id,
                         }
                     }).done(function(data){
-
-                        if(data.status){
-                            $('#edit_account_title_id').val(id);
-                            $('#EditAccountTitleModal').modal('show');
-                            $('#edit_account_title').val(data.title.name);
-                            $('#edit_head_select').val(data.heads).trigger('change');
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        if(data.status == 0){
+                            $('#edit_reason_id').val(id);
+                            $('#edit_reason').val(data.reason);
+                            $('#EditReasonModal').modal('show');
                         }
                     });
-
-
-                }else{
-                    var error = 'Head ID Not Found, Please Try again!';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
             $('body').on('change','#AddReasonModal #reason,#EditReasonModal #edit_reason',function() {
@@ -199,26 +189,50 @@
                 var reason = $('#reason').val();
                 if(reason != ''){
 
-                    $.ajax({
-                        url: '{!! route('admin.settings.return.reason.add') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'reason': reason
-                        }
-                    }).done(function(data){
-                        if(data.status){
-                            table.draw(true);
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                            $('#AddAccountModal').modal('hide');
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to add the reason!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.settings.return.reason.add') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'reason': reason
+                                }
+                            }).done(function(data){
+                                if(data.status == 0){
+                                    table.draw(true);
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    $('#AddReasonModal').modal('hide');
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
                         }
                     });
 
                 }else{
-                    var error = 'Enter Title of Account!';
+                    var error = 'Please enter reason!';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 
@@ -227,38 +241,35 @@
             $('body').on('hidden.bs.modal','#AddReasonModal',function () {
                 $('#reason').val('');
             });
-            $('body').on('hidden.bs.modal','#EditAccountTitleModal',function () {
-                $('#edit_account_title').val('');
-                $('#edit_head_select').val(null).trigger('change');
-                $('#edit_account_title_id').val('');
+            $('body').on('hidden.bs.modal','#EditReasonModal',function () {
+                $('#edit_reason').val('');
             });
 
 
-            $('body').on('click','#editTitle', function () {
-                var title = $('#edit_account_title').val();
-                var id = parseInt($('#edit_account_title_id').val());
-                var heads = $('#edit_head_select').val();
-                if(title != '' && id != '' && heads.length > 0){
+            $('body').on('click','#editReason', function () {
+                var reason = $('#edit_reason').val();
+                var reason_id = parseInt($('#edit_reason_id').val());
+
+                if(reason != '' && reason_id != ''){
                     $.ajax({
-                        url: '{!! route('admin.settings.petty_cash.titles.edit') !!}',
+                        url: '{!! route('admin.settings.return.reason.edit') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'title_id': id,
-                            'account_title':title,
-                            'heads' :heads
+                            'reason_id': reason_id,
+                            'reason':reason
                         }
                     }).done(function(data){
-                        if(data.status){
+                        if(data.status == 0){
                             table.draw(true);
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                            $('#EditAccountTitleModal').modal('hide');
+                            $('#EditReasonModal').modal('hide');
                         }
                     });
 
                 }else{
-                    var error = 'Fill all fields!';
+                    var error = 'Reason required!';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
