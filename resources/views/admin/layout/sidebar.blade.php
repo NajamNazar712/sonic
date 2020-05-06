@@ -801,6 +801,10 @@
                                     @if (session('role_id') == 1 || in_array(253, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.return_confirmation_pending_shipment_selection_time.index')}}">Return Confirmation Pending Shipment Selection Time</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(231, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.return.reason.index') }}">Return Reasons</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

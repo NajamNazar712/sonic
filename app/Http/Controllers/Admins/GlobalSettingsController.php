@@ -46,6 +46,7 @@ use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\RateStatus;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
@@ -1913,23 +1914,23 @@ class GlobalSettingsController extends Controller
             })
             ->addColumn('action', function ($data){
 
-                    $dropdown = '
+            $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+            $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-                    if ($data->status == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                    } else {
-                            $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                    }
+            if ($data->status == 1) {
+                $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Disable</div></button>';
+            } else {
+                $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            }
 
-                    return $dropdown;
+            return $dropdown;
 
-            });
+        });
 
         return  $datatable->make(true);
     }
@@ -2178,5 +2179,29 @@ class GlobalSettingsController extends Controller
 
         }
         return redirect()->back()->with('success', 'Successfully updated!');
+    }
+
+    public function return_reason_index(){
+        return view('admin.settings.return.reason');
+    }
+    public function return_reason_list(Request $request){
+        $reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->pluck('shipment_status_reason_id')->toArray();
+        $reasons = ShipmentStatusReason::whereIn('id', $reason_ids)->select('id', 'name');
+        $datatable = Datatables::of($reasons)
+            ->addColumn('action', function ($data){
+
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                return $dropdown;
+
+            });
+
+        return $datatable->make(true);
     }
 }
