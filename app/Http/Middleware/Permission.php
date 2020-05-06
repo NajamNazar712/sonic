@@ -560,8 +560,8 @@ class Permission
             'settings.settings.blacklist.index' => 329,
             'settings.blacklist.search.index' => 330,
 
-            'settings.return.reason.index' => 331,
-            'settings.return.reason.list' => 331,
+            'settings.return.reason.index' => 333,
+            'settings.return.reason.list' => 333,
 
 
             'cancelled_shipments.index' => 117,
