@@ -1884,16 +1884,23 @@ class ShipperShipmentBookController extends Controller
                         $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
                         if($consignee_information->exists()){
                             $consignee_information = $consignee_information->first();
-                            $blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
-                            if($blacklist->exists()){
-                                $blacklist = $blacklist->first();
-                                $blacklist_setting_id = $blacklist->blacklist_setting_id;
+                            $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
+                            if($manual_blacklist->exists()){
+                                $manual_blacklist = $manual_blacklist->first();
+                                $blacklist_setting_id = $manual_blacklist->blacklist_setting_id;
                                 $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
                                 if($blacklist_setting){
                                     if(!array_key_exists($blacklist_setting_id, $blacklist_found_categories)){
                                         $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
                                         $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
                                     }
+                                }
+                                $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+                                if($blacklist->exists()){
+                                    $blacklist = $blacklist->first();
+                                    $blacklist_errors[$row_id]['msg'] = 'Total Shipments: '.$blacklist->shipments. ', Delivered: '.$blacklist->delivered . '('.$blacklist->delivered_ratio.'), Undelivered: '.$blacklist->undelivered.'('. $blacklist->undelivered_ratio .'), Return Confirmed: '.$blacklist->return . '('. $blacklist->return_ratio .')';
+                                }else{
+                                    $blacklist_errors[$row_id]['msg'] = 'Total Shipments: 0, Delivered: 0, Undelivered: 0, Return Confirmed: 0';
                                 }
                             }
                             else{
@@ -1908,10 +1915,9 @@ class ShipperShipmentBookController extends Controller
                                             $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
                                         }
                                     }
+                                    $blacklist_errors[$row_id]['msg'] = 'Total Shipments: '.$blacklist->shipments. ', Delivered: '.$blacklist->delivered . '('.$blacklist->delivered_ratio.'), Undelivered: '.$blacklist->undelivered.'('. $blacklist->undelivered_ratio .'), Return Confirmed: '.$blacklist->return . '('. $blacklist->return_ratio .')';
                                 }
                             }
-                            $blacklist_errors[$row_id]['msg'] = 'Total Shipments: '.$blacklist->shipments. ', Delivered: '.$blacklist->delivered . '('.$blacklist->delivered_ratio.'), Undelivered: '.$blacklist->undelivered.'('. $blacklist->undelivered_ratio .'), Return Confirmed: '.$blacklist->return . '('. $blacklist->return_ratio .')';
-
                         }
                     }
 
@@ -3091,16 +3097,23 @@ class ShipperShipmentBookController extends Controller
                         $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
                         if($consignee_information->exists()){
                             $consignee_information = $consignee_information->first();
-                            $blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
-                            if($blacklist->exists()){
-                                $blacklist = $blacklist->first();
-                                $blacklist_setting_id = $blacklist->blacklist_setting_id;
+                            $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
+                            if($manual_blacklist->exists()){
+                                $manual_blacklist = $manual_blacklist->first();
+                                $blacklist_setting_id = $manual_blacklist->blacklist_setting_id;
                                 $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
                                 if($blacklist_setting){
                                     if(!array_key_exists($blacklist_setting_id, $blacklist_found_categories)){
                                         $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
                                         $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
                                     }
+                                }
+                                $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+                                if($blacklist->exists()){
+                                    $blacklist = $blacklist->first();
+                                    $blacklist_errors[$row_id]['msg'] = 'Total Shipments: '.$blacklist->shipments. ', Delivered: '.$blacklist->delivered . '('.$blacklist->delivered_ratio.'), Undelivered: '.$blacklist->undelivered.'('. $blacklist->undelivered_ratio .'), Return Confirmed: '.$blacklist->return . '('. $blacklist->return_ratio .')';
+                                }else{
+                                    $blacklist_errors[$row_id]['msg'] = 'Total Shipments: 0, Delivered: 0, Undelivered: 0, Return Confirmed: 0';
                                 }
                             }
                             else{
@@ -3115,10 +3128,9 @@ class ShipperShipmentBookController extends Controller
                                             $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
                                         }
                                     }
+                                    $blacklist_errors[$row_id]['msg'] = 'Total Shipments: '.$blacklist->shipments. ', Delivered: '.$blacklist->delivered . '('.$blacklist->delivered_ratio.'), Undelivered: '.$blacklist->undelivered.'('. $blacklist->undelivered_ratio .'), Return Confirmed: '.$blacklist->return . '('. $blacklist->return_ratio .')';
                                 }
                             }
-                            $blacklist_errors[$row_id]['msg'] = 'Total Shipments: '.$blacklist->shipments. ', Delivered: '.$blacklist->delivered . '('.$blacklist->delivered_ratio.'), Undelivered: '.$blacklist->undelivered.'('. $blacklist->undelivered_ratio .'), Return Confirmed: '.$blacklist->return . '('. $blacklist->return_ratio .')';
-
                         }
                     }
                 }
