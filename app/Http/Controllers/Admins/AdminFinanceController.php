@@ -2754,6 +2754,8 @@ class AdminFinanceController extends Controller
 
     public function make_payments_shipment_list(Request $request) {
         $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
             ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
             ->leftjoin('consolidation_shipments as consolidations', function ($join){
@@ -2761,7 +2763,7 @@ class AdminFinanceController extends Controller
                     ->where('consolidations.consolidation_id','=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
-            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable','consolidations.consolidation_id');
+            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable','consolidations.consolidation_id', 'oc.name as origin');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -2778,6 +2780,9 @@ class AdminFinanceController extends Controller
                     } else {
                         return '';
                     }
+                },
+                'type_id' => function($deliveries){
+                    return $deliveries->type;
                 }
             ])
             ->addColumn('deductable', function($pending_payment_shipments) {
@@ -2836,7 +2841,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable'];
+        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin', 'Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable'];
 
         $serial_number = 1;
 
@@ -2864,6 +2869,7 @@ class AdminFinanceController extends Controller
             $row[] = $serial_number;
             $row[] = $shipment->user->name;
             $row[] = $shipment->tracking_number;
+            $row[] = $shipment->pickup_address->city->name;
             $row[] = $type;
             $row[] = $shipment->status_shipper->name;
             $row[] = $pending_payment_shipment->created_at;
@@ -2909,7 +2915,7 @@ class AdminFinanceController extends Controller
         $shipment_ids = array();
         $duplicate_shipment_ids = array();
         $duplicate_shipments = array();
-
+        
         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
@@ -2944,7 +2950,6 @@ class AdminFinanceController extends Controller
                         else {
                             $duplicate_shipment .= 'Adjusted';
                         }
-
                         $duplicate_shipments[] = $duplicate_shipment;
                     }
                 }

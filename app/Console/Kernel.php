@@ -42,8 +42,9 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\BusinessProjectionAndRetention',
 		'\App\Console\Commands\CRMDelayInDelivery',
 		'\App\Console\Commands\CRMPaymentComplains',
-		'\App\Console\Commands\AutoShipmentArrival',
-		'\App\Console\Commands\RiderDeliveryImageArchive'
+		'\App\Console\Commands\RiderDeliveryImageArchive',
+		'\App\Console\Commands\BlacklistConsigneeRatioCalculation',
+		'\App\Console\Commands\AutoShipmentArrival'
         ];
 
     /**
@@ -122,9 +123,10 @@ class Kernel extends ConsoleKernel
 
 		$schedule->command('auto:shipmentarrival')->dailyAt('07:00')->runInBackground();
         $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
-    }
 
-    /**
+		$schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
+	}
+	 /**
      * Register the commands for the application.
      *
      * @return void

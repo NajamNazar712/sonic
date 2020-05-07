@@ -25,7 +25,7 @@
 										</div>
 									</form>
 								</div>		
-								
+
 								<div class="col-3">
 									<form id="positive_negative_filter_form" class="mb-1 justify-content-center" novalidate="novalidate">
 									<div class="form-group">
@@ -205,6 +205,7 @@
 														<th class="border-primary border-darken-1">S. No.</th>
 														<th class="border-primary border-darken-1">Shipper</th>
 														<th class="border-primary border-darken-1">Shipment</th>
+														<th class="border-primary border-darken-1">Origin</th>
 														<th class="border-primary border-darken-1">Type</th>
 														<th class="border-primary border-darken-1">Status</th>
 														<th class="border-primary border-darken-1">Delivery / Return Datetime</th>
@@ -779,6 +780,7 @@
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data:'shipment', name: 's.tracking_number', class: 'align-middle shipment'},
+					{data:'origin', name: 'oc.name', class: 'align-middle origin'},
 					{data:'type', name: 'type', class: 'align-middle type'},
 					{data:'status', name: 'ss.name', class: 'align-middle status'},
 					{data:'created_at', name: 'pending_payment_shipments.created_at', class: 'align-middle created_at'},
@@ -1129,7 +1131,54 @@
 				e.preventDefault();
 
 				var form = this;
+				var zero_charges = false;
+				make_payments_table.rows().nodes().each(function(index) {
+					var row = make_payments_table.row(index);
+					if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+						var type_id = parseInt($(row.node()).attr('type_id'));
+						var row_id = $(row.node()).attr('id');
+						if (type_id != 2) {
+							var amount = parseInt($(row.node()).find('td.deductable').text());
+							if(amount == 0){
+								zero_charges = true;
+							}
+						}
+					}
+				});
+				if(zero_charges){
+					swal({
+						title: 'Are You Sure?',
+						text: 'Charges are zero for selected Shipment(s), select yes to pay!',
+						icon: 'warning',
+						buttons: {
+							cancel: {
+								text: 'No',
+								value: null,
+								visible: true,
+								closeModal: true,
+							},
+							confirm: {
+								text: 'Yes',
+								value: true,
+								visible: true,
+								closeModal: true
+							}
+						},
+						closeOnClickOutside: false,
+						closeOnEsc: false,
+						dangerMode: true
+					}).then(function(confirm) {
+						if (confirm) {
+							verify_make_payments(form);
+						}
+					});
+				}else{
+					verify_make_payments(form);
+				}
 
+
+			});
+			function verify_make_payments(form){
 				$.ajax({
 					url: '{!! route('admin.finance.make_payments.verify') !!}',
 					method: 'POST',
@@ -1277,7 +1326,7 @@
 						});
 					}
 				});
-			});
+			}
 		});
 	</script>
 @endsection
