@@ -2181,7 +2181,6 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Successfully updated!');
     }
 
-<<<<<<< HEAD
      public function commission_percentage_index(){
              $settings = GlobalSettings::where('type', 'commission_percentage')->first();
             $percentage = '';
@@ -2207,7 +2206,7 @@ class GlobalSettingsController extends Controller
             }
             return redirect()->back()->with('success', 'Setting updated');
         }
-=======
+
     public function return_reason_index(){
         return view('admin.settings.return.reason');
     }
@@ -2266,5 +2265,5 @@ class GlobalSettingsController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
     }
->>>>>>> TO-2371-commissioning-module
+
 }
