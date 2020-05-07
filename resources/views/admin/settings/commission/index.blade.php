@@ -9,8 +9,8 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Sales Tier 
-                </h1> 
+                    Sales Tier
+                </h1>
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
+    <div class="modal fade text-left" id="AddTierModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddTierModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -64,40 +64,34 @@
                         <br>
                          <div class="row justify-content-center">
                                 <div class="col-6 form-group">
-                            <input  class="form-control" id="tier_commission" name="tier_commission" 
+                            <input  class="form-control" id="tier_commission" name="tier_commission"
                             data-rule-required="true" data-msg-required="" placeholder="Enter Overall Commission" />
                             </div>
                         </div>
                         <br>
                          <div class="row justify-content-center">
                                <div class="col-6 form-group">
-                        <fieldset class="form-group">
-                                        <select name="tier_type" id="tier_type" class="form-control select2" data-rule-required="true" data-msg-required="">
-                                            @foreach($TierType as $type)
-                                                <option value="{{$type->id}}">{{$type->name}}</option>
-                                            @endforeach
-                                        </select>
+                                    <fieldset class="form-group">
+                                            <select name="tier_type" id="tier_type" class="form-control select2" data-rule-required="true" data-msg-required="">
+                                                @foreach($TierType as $type)
+                                                    <option value="{{$type->id}}">{{$type->name}}</option>
+                                                @endforeach
+                                            </select>
                                     </fieldset>
-                                      </div>    
-                                       </div>   
+                               </div>
+                         </div>
 
 
-<div class="row justify-content-center">
-        <div class="col-6">
-            <label class="font-medium-2 font-weight-bold block">Relates to Sales Person</label>
-            <div class="form-group">
-                <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
-                <input type="checkbox" name="sales_person_checkbox" id="sales_person_checkbox" class=" sales_person_checkbox" data-size="sm" data-switchery="true">
-                <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
-            </div>
-        </div>
-    </div>
-
-
-
-
-
-                        <br><br>
+                        <div class="row justify-content-center">
+                                <div class="col-6">
+                                    <label class="font-medium-2 font-weight-bold block">Relates to Sales Person</label>
+                                    <div class="form-group">
+                                        <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                        <input type="checkbox" name="sales_person_checkbox" id="sales_person_checkbox" class=" sales_person_checkbox" data-size="sm" data-switchery="true">
+                                        <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
                          <div class="row justify-content-center">
                                 <div class="col-6">
                            <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Add Tier</button>
@@ -113,7 +107,7 @@
 
 
 
-    <div class="modal fade text-left" id="EditRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditRequestModal"
+    <div class="modal fade text-left" id="EditTierModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditTierModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -147,27 +141,27 @@
                          <div class="row justify-content-center">
                                <div class="col-6">
                         <fieldset class="form-group">
-                                        <select name="tier_type" id="edit_tier_type" class="form-control select2" data-rule-required="true" data-msg-required="">                                      
+                                        <select name="tier_type" id="edit_tier_type" class="form-control select2" data-rule-required="true" data-msg-required="">
                                             @foreach($TierType as $type)
                                                 <option value="{{$type->id}}">{{$type->name}}</option>
                                             @endforeach
                                         </select>
                                     </fieldset>
-                                      </div>    
-                                       </div> 
+                                      </div>
+                                       </div>
 
                                        <div class="row justify-content-center">
-        <div class="col-6">
-            <label class="font-medium-2 font-weight-bold block">Relates to Sales Person</label>
-            <div class="form-group">
-                <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+            <div class="col-6">
+                <label class="font-medium-2 font-weight-bold block">Relates to Sales Person</label>
+                <div class="form-group">
+                    <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
 
-                <input type="checkbox" name="sales_person_checkbox" id="edit_sales_person_checkbox" data-switchery="false" class="sales_person_checkbox" data-size="sm">
-                <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                    <input type="checkbox" name="sales_person_checkbox" id="edit_sales_person_checkbox" data-switchery="false" class="sales_person_checkbox" data-size="sm">
+                    <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                </div>
             </div>
         </div>
-    </div>
-   
+
                         <br><br>
                          <div class="row justify-content-center">
                                 <div class="col-6">
@@ -199,28 +193,29 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
-
-
-            $('#tier_type').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Enter Tier Type*'
-            });
-
- $("input[name='tier_commission']").inputmask({
-            'alias': 'decimal',
-            'allowMinus': false,
-            'allowPlus': false, 
-            'rightAlign': false
+    $('#tier_type').prepend('<option value="" selected="selected"></option>').select2({
+        width: '100%',
+        placeholder: 'Enter Tier Type*',
+        dropdownParent:$('#add_commission_form')
+    });
+    var commission_percentage = parseFloat({!! $commission_percentage !!});
+    $("#tier_commission").inputmask({
+        'alias': 'decimal',
+        'allowMinus': false,
+        'allowPlus': false,
+        'rightAlign': false,
+        'max': commission_percentage
      });
 
- $("input[name='edit_tier_commission']").inputmask({
-            'alias': 'integer',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false
+    $("input[name='edit_tier_commission']").inputmask({
+        'alias': 'integer',
+        'allowMinus': false,
+        'allowPlus': false,
+        'rightAlign': false,
+        'max': commission_percentage
         });
 
-              
+
          $('#add_commission_form').bind('submit', function (e) {
                 e.preventDefault();
                 var feedback_flag = true;
@@ -242,7 +237,7 @@
                     var error = "Please Enter Tier Type!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-               
+
 
             });
 
@@ -268,10 +263,10 @@
                     var error = "Please Enter Tier Type!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-               
+
 
             });
-           
+
 
 
 
@@ -333,7 +328,6 @@
                 var id = $(this).parents('tr').attr('id');
                 var type = table.row($(this).parents('tr')).data().type_id;
                  var status = table.row($(this).parents('tr')).data().sales_status;
-                console.log(status);
 
              $.ajax({
                     url: '{!! route('admin.settings.commission.details') !!}',
@@ -347,20 +341,20 @@
                             $('#sales_tier_id').val(data.salesTiers.id);
                             $('#edit_tier_name').val(data.salesTiers.tier_name);
                             $('#edit_tier_commission').val(data.salesTiers.commission);
-                         
+
                     if (status == 1)
-                    {   
+                    {
                         $('#edit_sales_person_checkbox').trigger('click');
                     }
-                    
-                          $("#edit_tier_type").select2({
+                    $("#edit_tier_type").select2({
                         width:'100%',
-                        class:'form-control'
+                        class:'form-control',
+                        dropdownParent:$('#edit_commission_form')
                     });
 
-                        $('#edit_tier_type').val(type).trigger('change');
-                    
-                        $('#EditRequestModal').modal('show');
+                    $('#edit_tier_type').val(type).trigger('change');
+
+                    $('#EditTierModal').modal('show');
 
                     }else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -377,7 +371,7 @@
                     text: '<i class="la la-cogs"></i> Add',
                     className: 'btn btn-primary add',
                     action: function (e, dt, node, config) {
-                       $('#AddRequestModal').modal('show');
+                       $('#AddTierModal').modal('show');
                     }
                 }, ,{
                         extend: 'excel',
@@ -467,15 +461,6 @@
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
-
-{{--                @if (session('role_id') == 1 || in_array(83, session('permissions')))--}}
-                if ($(this).hasClass('edit')) {
-                    var link = '{{ route('admin.settings.blacklist.edit', ["id" => 0]) }}';
-
-                   
-                }
-{{--                @endif--}}
-{{--                        @if (session('role_id') == 1 || in_array(84, session('permissions')))--}}
                 if ($(this).hasClass('enable')) {
                     $.ajax({
                         url: '{!! route('admin.settings.commission.status') !!}',
@@ -520,14 +505,13 @@
                 }
 
             });
-                $('#EditRequestModal').on('hidden.bs.modal', function() {
-                        $('#sales_tier_id').val('');
-                            $('#edit_tier_name').val('');
-                            $('#edit_tier_commission').val('');
-                            if($("#edit_sales_person_checkbox").is(":checked")){
-                                $("#edit_sales_person_checkbox").trigger('click');
+            $('#EditTierModal').on('hidden.bs.modal', function() {
+                $('#sales_tier_id').val('');
+                $('#edit_tier_name').val('');
+                $('#edit_tier_commission').val('');
+                if($("#edit_sales_person_checkbox").is(":checked")){
+                    $("#edit_sales_person_checkbox").trigger('click');
                 }
-
             });
     });
 

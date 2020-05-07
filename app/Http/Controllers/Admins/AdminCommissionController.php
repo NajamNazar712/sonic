@@ -18,15 +18,16 @@ class AdminCommissionController extends Controller
         $this->middleware('auth:admin');
 
         $this->middleware('Permission');
-    }	
+    }
 
 
     public function index(){
 
-    	 $TierType = TierType::all(['id','name']);
-         $commission_percentage = GlobalSettings::where('type',"commission_percentage")->get();
-      return view('admin.settings.commission.index')->with(['TierType'=>$TierType, 'commission_percentage'=>$commission_percentage]);
-    
+        $tier_type = TierType::all(['id','name']);
+        $commission_percentage = GlobalSettings::where('type',"commission_percentage")->first();
+        $commission_percentage = $commission_percentage->text;
+        return view('admin.settings.commission.index')->with(['TierType'=>$tier_type, 'commission_percentage'=>$commission_percentage]);
+
     }
 
      public function tier_list(Request $request){
@@ -65,46 +66,27 @@ class AdminCommissionController extends Controller
         return  $datatable->make(true);
     }
 
-
-
-
-
      public function editSalesTierView(Request $request){
 
         $salesTier = SalesTier::where('id',$request->id)->first();
         $tierType=TierType::where('id',$salesTier->tier_type)->first();
-        return response()->json(['status' => 1, 'salesTiers' => $salesTier,'tierType'=>$tierType]); 
+        return response()->json(['status' => 1, 'salesTiers' => $salesTier,'tierType'=>$tierType]);
     }
     public function editSalesTier(Request $request){
-        $tier = SalesTier::where('id',$request->id)->first();
-         $commission_percentage = GlobalSettings::where('type',"commission_percentage")->get();
-         $tier->tier_name = $request->tier_name;
-         $tier->tier_type = $request->tier_type;
-         $tier->updated_by = Auth::id();
-         $tier->sales_status = $request->has('sales_person_checkbox')? 1:0;
-         $tier->commission = $request->tier_commission;
-        
-        foreach($commission_percentage as $percentage){
-             if($percentage->setting_value >= $request->tier_commission)
-         
-            {
-                
-                 $tier->save();
-                 return redirect()->back()->with(['status'=>1,'success'=>"Tier has been Edited successfully!"]);
-            }
-            else
-            {
-                 return redirect()->back()->with(['status'=>0,'error'=>"You have enter greater value of commission percentage"]);
-            }
-             }
-        
-        
+        $tier = SalesTier::find($request->id);
+         if($tier){
+             $tier->tier_name = $request->tier_name;
+             $tier->tier_type = $request->tier_type;
+             $tier->updated_by = Auth::id();
+             $tier->sales_status = $request->has('sales_person_checkbox')? 1:0;
+             $tier->commission = $request->tier_commission;
+             $tier->save();
+             return redirect()->back()->with(['status'=>1,'success'=>"Tier has been Edited successfully!"]);
+         }
+         return redirect()->back()->with(['status'=>0,'error'=>"Sales Tier not found!"]);
     }
 
-
-
-
- public function commission_status(Request $request){
+    public function commission_status(Request $request){
         $id = $request->id;
         $status = $request->status;
         $salesTier = SalesTier::find($id);
@@ -122,30 +104,17 @@ class AdminCommissionController extends Controller
         return response()->json(['status' => 0, 'success' => 'Setting updated successfully!']);
     }
     public function add_sales_tier(Request $request){
-    	$tier = new SalesTier();
-          $commission_percentage = GlobalSettings::where('type',"commission_percentage")->get();
-        $tier->tier_name = $request->tier_name;
-         $tier->tier_type = $request->tier_type;
-         $tier->added_by = Auth::id();
-         $tier->updated_by = Auth::id();
-         // $tier->sales_status =1;
-         $tier->sales_status = $request->has('sales_person_checkbox')? 1:0;
-          $tier->commission = $request->tier_commission;
+
+            $tier = new SalesTier();
+            $tier->tier_name = $request->tier_name;
+            $tier->tier_type = $request->tier_type;
+            $tier->added_by = Auth::id();
+            $tier->updated_by = Auth::id();
+            $tier->sales_status = $request->has('sales_person_checkbox')? 1:0;
+            $tier->commission = $request->tier_commission;
             $tier->status = 1;
-         foreach($commission_percentage as $percentage){
-             if($percentage->setting_text >= $request->tier_commission)
-         
-            {
-                
-                 $tier->save();
-                 return redirect()->back()->with(['status'=>1,'success'=>"Tier has been Added successfully!"]);
-            }
-            else
-            {
-                 return redirect()->back()->with(['status'=>0,'error'=>"You have enter greater value of commission percentage"]);
-            }
-             }
-        
-        }
-       
+            $tier->save();
+            return redirect()->back()->with(['status'=>1,'success'=>"Tier has been Added successfully!"]);
+    }
+
 }
