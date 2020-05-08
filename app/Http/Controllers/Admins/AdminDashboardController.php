@@ -8,6 +8,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
@@ -16,6 +17,10 @@ use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CityHistory;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Commission\SalesCommissionExternalUser;
+use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\Commission\SalesTier;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DeliveryType;
@@ -1591,8 +1596,32 @@ class AdminDashboardController extends Controller
                     $same_day = $minimum_chargeable_weight->weight;
                 }
             }
+            $commission_percentage = '';
+            $settings = GlobalSettings::where('type', 'commission_percentage');
+            if($settings->exists()){
+                $settings = $settings->first();
+                $commission_percentage = $settings->text;
+            }
+            $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
+            $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
+            $users = array();
+            $sales = array();
+            $all_users = array();
+            foreach ($admin_users as $user){
 
-            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day]);
+                if($user->department_id != 7){
+                    $users[] = array('id' => $user->id, 'text' => $user->name);
+                }else{
+                    $sales[] = array('id' => $user->id, 'text' => $user->name);
+                }
+            }
+            $all_users['results'][0]['text'] = 'Sales';
+            $all_users['results'][0]['children'] = $sales;
+            $all_users['results'][1]['text'] = 'Admins';
+            $all_users['results'][1]['children'] = $users;
+            $all_users['pagination']['more'] = true;
+
+            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
@@ -5603,7 +5632,7 @@ if(session('department_id') == 7){
      * @return int
      */
     public function addRates(Request $request, $id){
-        
+
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -5846,6 +5875,7 @@ if(session('department_id') == 7){
         $detain_validations = array();
         $sameday_validations = array();
 
+        $shipper_id = $id;
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             $on_validations = [
                 'on_wa_range_up.*' => 'required|numeric|between:0,10000',
@@ -6725,6 +6755,49 @@ if(session('department_id') == 7){
             $rate_remark->save();
 
         }
+
+        //Sales Commisssion
+
+        if($request->has('total_commission')){
+            $total_commission = $request->total_commission;
+            $users_count = count($request->user_id);
+
+            $sales_commission = new SalesCommission();
+            $sales_commission->shipper_id = $shipper_id;
+            $sales_commission->commission_users_count = $users_count;
+            $sales_commission->commission = $total_commission;
+            $sales_commission->added_by = Auth::id();
+            $sales_commission->save();
+            $sales_commission_id = $sales_commission->id;
+            $actual_commission = 0;
+            foreach($request->tier_id as $row_id => $tier){
+                $sales_tier = SalesTier::find($tier);
+                if($sales_tier){
+                    $sales_commission_user = new SalesCommissionUser();
+                    $sales_commission_user->sales_commission_id = $sales_commission_id;
+                    $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                    $sales_commission_user->tier_id = $tier;
+                    if($sales_tier->tier_type == 1){
+                        $sales_commission_user->user_id = $request->user_id[$row_id];
+                    }else if($sales_tier->tier_type == 2){
+                        $external_user = new SalesCommissionExternalUser();
+                        $external_user->name = $request->user_id[$row_id];
+                        $external_user->shipper_id = $shipper_id;
+                        $external_user->save();
+                        $sales_commission_user->user_id = $external_user->id;
+                    }
+                    $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                    $actual_commission += $request->commission_percentage[$row_id];
+                    $sales_commission_user->save();
+                }
+            }
+            $sales_commission->commission = $actual_commission;
+            $sales_commission->save();
+        }
+
+
+        //Sales Commissison End
+
         NotificationsController::send(38, $id);
 
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
