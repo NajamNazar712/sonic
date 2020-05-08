@@ -350,6 +350,8 @@
             var shipments = [];
             var status_array = [];
             $('#status_update_form').bind('submit', function(event) {
+                    $('#statusVerifySubmit').prop('disabled', true);
+                    $('#statusUpdateSubmit').prop('disabled', true);
                 
                     var verify_form = this;
                     event.preventDefault();
@@ -419,6 +421,10 @@
                                 blockPagePermanently();
                                 verify_form.submit();
                             }
+                            else {
+                                $('#statusVerifySubmit').removeAttr('disabled');
+                                $('#statusUpdateSubmit').removeAttr('disabled');
+                            }
                         });
                     } else {
                         swal({
@@ -459,6 +465,10 @@
                                 $('#statusUpdateSubmit').prop('disabled', true);
                                 blockPagePermanently();
                                 verify_form.submit();
+                            }
+                            else {
+                                $('#statusVerifySubmit').removeAttr('disabled');
+                                $('#statusUpdateSubmit').removeAttr('disabled');
                             }
                         });
 
