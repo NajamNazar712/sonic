@@ -350,13 +350,14 @@
             var shipments = [];
             var status_array = [];
             $('#status_update_form').bind('submit', function(event) {
-                    $('#statusVerifySubmit').prop('disabled', true);
-                    $('#statusUpdateSubmit').prop('disabled', true);
-                
                     var verify_form = this;
                     event.preventDefault();
                     var btn = $(document.activeElement).attr('id');
                     $('#submit_button_id').val(btn);
+
+                    $('#statusVerifySubmit').prop('disabled', true);
+                    $('#statusUpdateSubmit').prop('disabled', true);
+                
                     $.each($('#datatable tr td.statusOnChange select'), function (key, value) {
 
                         $(this).find(':selected').removeAttr('disabled');
