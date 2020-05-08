@@ -574,6 +574,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Rider\RiderPickupsController@pickups_action_log_list')->name('list');
             });
         });
+
+        Route::prefix('quick_arrival_of_shipments')->name('quick_arrival_of_shipments.')->group(function () {
+            Route::get('', 'Admins\AdminPickupsController@quick_arrival_of_shipments_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminPickupsController@quick_arrival_of_shipments_shipment_details')->name('shipment_details');
+            Route::post('shipment_remove', 'Admins\AdminPickupsController@quick_arrival_of_shipments_remove')->name('shipment_remove');
+            Route::post('', 'Admins\AdminPickupsController@quick_arrival_of_shipments_store')->name('store');
+        });
     });
     Route::prefix('delivery')->name('delivery.')->group(function(){
         Route::prefix('pending')->name('pending.')->group(function () {

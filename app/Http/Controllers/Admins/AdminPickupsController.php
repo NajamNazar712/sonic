@@ -1800,7 +1800,7 @@ class AdminPickupsController extends Controller
         ShipmentsPickupJourneyController::add($shipment_id, 4, Auth::id(), $request->pickup_receive_pickup_note_id);
       }
 
-      NotificationsController::send(4, $request->pickup_receive_pickup_note_id, $shipment_ids);
+      NotificationsController::send(4, $shipment_ids);
 
       if (empty($print_shipment_ids)) {
         return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->pickup_receive_pickup_note_id);
@@ -2668,4 +2668,214 @@ class AdminPickupsController extends Controller
 
     }
 
+    public function quick_arrival_of_shipments_index() {
+      return view('admin.pickups.quick_arrival_of_shipments');
+    }
+
+    public function quick_arrival_of_shipments_shipment_details(Request $request) {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number)->where('booking_type_id', '!=', 3);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            if ($shipment->booking_type_id != 3) {
+              if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+                if (empty($request->weight)) {
+                  $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+                  $shipment->length = $request->length;
+                  $shipment->breadth = $request->breadth;
+                  $shipment->height = $request->height;
+                }
+                else {
+                  $shipment->actual_weight = $request->weight;
+                }
+
+                $shipment->save();
+
+                $details = array();
+
+                $details['id'] = $shipment->id;
+                $details['tracking_number'] = $shipment->tracking_number;
+                $details['receiving_sheet_no'] = ($shipment->receiving_sheet_shipment) ? str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT) : '';
+                $details['order_id'] = $shipment->order_id;
+                $details['destination'] = $shipment->consignee_city->name;
+                $details['cod_amount'] = number_format($shipment->amount);
+                $details['estimated_weight'] = floatval($shipment->estimated_weight);
+                $details['actual_weight'] = floatval($shipment->actual_weight);
+
+                ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), NULL, NULL);
+
+                return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+              }
+              else {
+                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+              }
+            }
+            else {
+              return ['status' => 1, 'error' => 'Try & Buy Shipment needs to be arrived through Normal Arrival'];
+            }
+        }
+        else {
+          return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+        }
+    }
+
+    public function quick_arrival_of_shipments_remove(Request $request) {
+      $shipment = Shipment::find($request->id);
+
+      if ($shipment) {
+        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+          $shipment->actual_weight = NULL;
+          $shipment->length = NULL;
+          $shipment->breadth = NULL;
+          $shipment->height = NULL;
+
+          $shipment->save();
+
+          return ['status' => 0, 'success' => 'Shipment has been removed'];
+        }
+        else {
+          return ['status' => 1, 'error' => 'Given Shipment ID has already been modified'];
+        }
+      }
+      else {
+        return ['status' => 1, 'error' => 'No Shipment with given ID is present'];
+      }
+    }
+
+    public function quick_arrival_of_shipments_store(Request $request) {
+      $shipment_ids = array_unique(explode(',', $request->shipment_ids));
+      $print_shipment_ids = array();
+
+      foreach ($shipment_ids as $key => $shipment_id) {
+        $shipment = Shipment::find($shipment_id);
+
+        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+          if ($shipment->shipper_status_id == 17) {
+            ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Reverted Automatically through Arrival', NULL, Auth::id());
+          }
+
+          if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
+            $receiving_sheet_shipment->status = 1;
+            $receiving_sheet_shipment->save();
+
+            $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
+
+            $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
+
+            $receiving_sheet->received = $receiving_sheet->received + 1;
+
+            $receiving_sheet->save();
+
+            if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+              $receiving_sheet_received = new ReceivingSheetReceived();
+
+              $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+              $receiving_sheet_received->user_id = $shipment->user_id;
+              $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+              $receiving_sheet_received->shipment_id = $shipment_id;
+
+              $receiving_sheet_received->save();
+            }
+          }
+          else {
+            if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+              $receiving_sheet_received = new ReceivingSheetReceived();
+
+              $receiving_sheet_received->user_id = $shipment->user_id;
+              $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+              $receiving_sheet_received->shipment_id = $shipment_id;
+
+              $receiving_sheet_received->save();
+            }
+          }
+
+          $shipment->shipper_status_id = 2;
+          $shipment->consignee_status_id = 2;
+
+          $shipment->save();
+
+          ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, 'Quick Arrival', NULL, Auth::id());
+
+          NotificationsController::send(3, $shipment_id);
+
+          ShipmentChargesController::weight($shipment_id);
+          ShipmentChargesController::cash_handling($shipment_id);
+          ShipmentChargesController::insurance($shipment_id);
+          ShipmentChargesController::fuel_surcharge($shipment_id);
+
+          if ($shipment->charges_mode_id == 2) {
+            $shipment = Shipment::find($shipment_id);
+
+            $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
+
+            $gst = Zone::find($shipment->pickup_address->city->zone_id)->gst;
+
+            $gst = ROUND(($charges * $gst), 0, PHP_ROUND_HALF_DOWN);
+
+            $shipment->amount = $shipment->amount + $charges + $gst;
+
+            $shipment->save();
+
+            $print_shipment_ids[] = $shipment_id;
+          }
+        }
+        else {
+          unset($shipment_ids[$key]);
+        }
+      }
+
+      foreach ($shipment_ids as $shipment_id) {
+        $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id)->whereIn('status', [0, 1]);
+
+        if ($pickup_request_assigned_shipment->exists()) {
+          $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
+
+          $pickup_request_assigned_shipment->status = 2;
+
+          $pickup_request_assigned_shipment->save();
+
+          $pickup_request = $pickup_request_assigned_shipment->pickup_request;
+
+          if ($pickup_request) {
+            $pickup_request->received = $pickup_request->received + 1;
+
+            $pickup_request->save();
+
+            $pickup_request_received_shipment = new PickupRequestReceivedShipment();
+
+            $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
+            $pickup_request_received_shipment->shipment_id = $shipment_id;
+
+            $pickup_request_received_shipment->save();
+
+            $pickup_note_request = $pickup_request->pickup_note_request;
+
+            if ($pickup_note_request) {
+              $pickup_note = $pickup_note_request->pickup_note;
+
+              if ($pickup_note) {
+                $pickup_note->status_id = 3;
+                $pickup_note->updated_by = Auth::id();
+
+                $pickup_note->save();
+              }
+            }
+          }
+        }
+      }
+
+      foreach ($shipment_ids as $shipment_id) {
+        ShipmentsPickupJourneyController::add($shipment_id, 4, Auth::id());
+      }
+
+      NotificationsController::send(4, $shipment_ids);
+
+      if (empty($print_shipment_ids)) {
+        return redirect()->back()->with(['success' => 'Arrival Done']);
+      }
+      else {
+        return redirect()->back()->with(['success' => 'Arrival Done', 'print_shipment_ids' => $print_shipment_ids]);
+      }
+    }
 }

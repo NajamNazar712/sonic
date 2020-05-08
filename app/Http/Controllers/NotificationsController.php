@@ -270,12 +270,20 @@ class NotificationsController extends Controller
               }
             }
 
-            $pickup_note = PickupNote::find($reference_1_id);
+            $today = Carbon::now()->toDateTimeString();
 
             $user_wise_shipments = array();
 
-            foreach ($reference_2_id as $shipment_id) {
+            $origin_hub_ids = array();
+
+            foreach ($reference_1_id as $shipment_id) {
               $shipment = Shipment::find($shipment_id);
+
+              $origin_hub_id = $shipment->pickup_address->city->hub_id;
+
+              if (!in_array($origin_hub_id, $origin_hub_ids)) {
+                $origin_hub_ids[] = $origin_hub_id;
+              }
 
               $details = array();
 
@@ -319,11 +327,11 @@ class NotificationsController extends Controller
               }
 
               if (strpos($subject, '[arrival_at]') !== FALSE) {
-                $subject = str_replace('[arrival_at]', $pickup_note->created_at, $subject);
+                $subject = str_replace('[arrival_at]', $today, $subject);
               }
 
               if (strpos($body, '[arrival_at]') !== FALSE) {
-                $body = str_replace('[arrival_at]', $pickup_note->created_at, $body);
+                $body = str_replace('[arrival_at]', $today, $body);
               }
 
 //              $to = $shipper->email;
@@ -381,10 +389,8 @@ class NotificationsController extends Controller
                 $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
               }
 
-              $origin_hub_id = $pickup_note->city->hub_id;
-
-              $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_id) {
-                $query->where('hub_id', $origin_hub_id);
+              $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
+                $query->whereIn('hub_id', $origin_hub_ids);
               });
 
               if ($related_admins->exists()) {

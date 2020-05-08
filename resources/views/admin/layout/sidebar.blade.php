@@ -134,6 +134,10 @@
                                     @if (session('role_id') == 1 || in_array(272, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.pickups.rider.action_log.index') }}">Rider Action Log</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(24, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.pickups.quick_arrival_of_shipments.index') }}">Quick Arrival of Shipments</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
