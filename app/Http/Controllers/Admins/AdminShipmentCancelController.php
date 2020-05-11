@@ -67,7 +67,7 @@ class AdminShipmentCancelController extends Controller
 
     public function index(Request $request) {
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
-        $cities = City::where('status', 1)->select('id', 'name')->get();
+        $cities = City::select('id', 'name')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $service_type = BookingType::all();
         $products = Product::select('id', 'product_name')->get();

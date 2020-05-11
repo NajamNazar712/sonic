@@ -160,7 +160,7 @@ class UserManagementController extends Controller
         else{
             $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
         }
-        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $hubs = City::where('hub', 1)->get();
 
         return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs]);
     }
@@ -199,7 +199,7 @@ class UserManagementController extends Controller
         else{
             $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
         }
-        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $hubs = City::where('hub', 1)->get();
         $user = Admin::find($id);
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
 

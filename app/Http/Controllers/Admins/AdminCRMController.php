@@ -252,7 +252,7 @@ class AdminCRMController extends Controller
             ->whereNotIn('admin_roles.department_id', [1,3])->get();
         $types = CrmRequestTaggingTypes::get();
         $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
-        $hubs = City::where('status', 1)->where('hub', 1)->get();
+        $hubs = City::where('hub', 1)->get();
         $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->first();
         $tagged_name = '';
         $tag_check = '';
@@ -714,7 +714,7 @@ class AdminCRMController extends Controller
             ->whereNotIn('admin_roles.department_id', [1,3])->get();
         $types = CrmRequestTaggingTypes::get();
         $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
-        $hubs = City::where('status', 1)->where('hub', 1)->get();
+        $hubs = City::where('hub', 1)->get();
         return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs]);
     }
 

@@ -4547,7 +4547,7 @@ class DeliveryController extends Controller
         }
     }
     public function misrouted_update_index(){
-        $cities = City::where('status', 1)->select(['id', 'name as text'])->get();
+        $cities = City::select(['id', 'name as text'])->get();
         return view('admin.delivery.misroute.update')->with('cities',$cities);
     }
     public function get_misroute_shipment_info(Request $request)

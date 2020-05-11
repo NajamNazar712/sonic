@@ -288,7 +288,7 @@ class AdminDashboardController extends Controller
             $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
         }
 
-        $cities = City::where('status',1)->select('id','name')->get();
+        $cities = City::select('id','name')->get();
         $service_type = BookingType::where('id', '!=', 3)->select('id','booking_type')->get();
 
 //        $admin = Admin::where('id', Auth::id())->first();
@@ -7310,7 +7310,7 @@ if(session('department_id') == 7){
         $products = Product::all();
         $banks = BanksList::all();
         $invoicing_cycle = InvoicingCycle::all();
-        $city_list = City::where('status',1)->get();
+        $city_list = City::all();
         $emails = ShipperNotificationEmail::where('user_id',$user->id)->select('email')->get();
         $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
@@ -7899,7 +7899,7 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRouteView(){
-        $city = City::select(['id','name'])->where('status',1)->get();
+        $city = City::select(['id','name'])->get();
         return view('admin.management.add_route_form')->with('cities',$city);
     }
     public function addRouteDetails(Request $request){
@@ -7928,7 +7928,7 @@ if(session('department_id') == 7){
         return redirect()->back()->with('success','Route added successfully');
     }
     public function editRouteView($id){
-        $citylist = City::select(['id','name'])->where('status',1)->get();
+        $citylist = City::select(['id','name'])->get();
         $route = Route::find($id);
 
         return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route]);
@@ -8040,7 +8040,7 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRiderView(){
-        $city = City::select(['id','name'])->where('status',1)->get();
+        $city = City::select(['id','name'])->get();
         $category = RiderCategory::all();
         return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
     }
@@ -8095,7 +8095,7 @@ if(session('department_id') == 7){
 
     }
     public function editRiderView($id){
-        $city = City::select(['id','name'])->where('status',1)->get();
+        $city = City::select(['id','name'])->get();
         $category = RiderCategory::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
