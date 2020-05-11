@@ -110,7 +110,7 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="OvernightDoorSwitch{{$index}}" class="switchery weightAdditionDoorOvernight" data-color="success" data-size="sm" name="on_door_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="OvernightDoorSwitch{{$index_row}}" class="switchery weightAdditionDoorOvernight" data-color="success" data-size="sm" name="on_door_wa_switch[{{$index_row}}]"/>
                                                         </div>
                                                     </div>
                                                     <div class="col-2 text-center">
@@ -118,7 +118,7 @@
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="on_door_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                       data-bts-button-up-class="btn btn-success" name="on_door_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -233,7 +233,7 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="OvernightHubSwitch{{$index}}" class="switchery weightAdditionHubOvernight" data-color="success" data-size="sm" name="on_hub_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="OvernightHubSwitch{{$index_row}}" class="switchery weightAdditionHubOvernight" data-color="success" data-size="sm" name="on_hub_wa_switch[{{$index_row}}]"/>
                                                         </div>
                                                     </div>
                                                     <div class="col-2 text-center">
@@ -241,7 +241,7 @@
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="on_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                       data-bts-button-up-class="btn btn-success" name="on_hub_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -677,7 +677,7 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" class="switchery weightAdditionDoorOverland" data-color="success" data-size="sm" name="ol_door_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="OverlandDoorSwitch{{$index_row}}" class="switchery weightAdditionDoorOverland" data-color="success" data-size="sm" name="ol_door_wa_switch[{{$index_row}}]"/>
                                                         </div>
                                                     </div>
                                                     <div class="col-2 text-center">
@@ -685,7 +685,7 @@
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="ol_door_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                       data-bts-button-up-class="btn btn-success" name="ol_door_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -797,7 +797,7 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" class="switchery weightAdditionHubOverland" data-color="success" data-size="sm" name="ol_hub_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="OverlandHubSwitch{{$index_row}}" class="switchery weightAdditionHubOverland" data-color="success" data-size="sm" name="ol_hub_wa_switch[{{$index_row}}]"/>
                                                         </div>
                                                     </div>
                                                     <div class="col-2 text-center">
@@ -805,7 +805,7 @@
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="ol_hub_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                       data-bts-button-up-class="btn btn-success" name="ol_hub_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -1236,7 +1236,7 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" class="switchery weightAdditionDoorDetain" data-color="success" data-size="sm" name="detain_door_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="DetainDoorSwitch{{$index_row}}" class="switchery weightAdditionDoorDetain" data-color="success" data-size="sm" name="detain_door_wa_switch[{{$index_row}}]"/>
                                                         </div>
                                                     </div>
                                                     <div class="col-2 text-center">
@@ -1244,7 +1244,7 @@
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="detain_door_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                       data-bts-button-up-class="btn btn-success" name="detain_door_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -1358,7 +1358,7 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" class="switchery weightAdditionHubDetain" data-color="success" data-size="sm" name="detain_hub_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="DetainDoorSwitch{{$index_row}}" class="switchery weightAdditionHubDetain" data-color="success" data-size="sm" name="detain_hub_wa_switch[{{$index_row}}]"/>
                                                         </div>
                                                     </div>
                                                     <div class="col-2 text-center">
@@ -1366,7 +1366,7 @@
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="detain_hub_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                       data-bts-button-up-class="btn btn-success" name="detain_hub_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -1790,13 +1790,13 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="SamedaySwitch{{$index}}" class="switchery weightAdditionDoorSameday" data-color="success" data-size="sm" name="sameday_door_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="SamedayDoorSwitch{{$index_row}}" class="switchery weightAdditionDoorSameday" data-color="success" data-size="sm" name="sameday_door_wa_switch[{{$index_row}}]"/>
                                                         </div>
                                                     </div>
                                                     <div class="col-2 text-center">
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_door_wa_spkg[{{$index}}]">
+                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_door_wa_spkg[{{$index_row}}]">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -1885,13 +1885,13 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="SamedaySwitch{{$index}}" class="switchery weightAdditionHubSameday" data-color="success" data-size="sm" name="sameday_hub_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="SamedayHubSwitch{{$index_row}}" class="switchery weightAdditionHubSameday" data-color="success" data-size="sm" name="sameday_hub_wa_switch[{{$index_row}}]"/>
                                                         </div>
                                                     </div>
                                                     <div class="col-2 text-center">
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_hub_wa_spkg[{{$index}}]">
+                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_hub_wa_spkg[{{$index_row}}]">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -2663,7 +2663,7 @@
         var returnChargesSwitch = document.querySelector('.switchery.returnChargesOvernight');
         var fuelChargesSwitch = document.querySelector('.switchery.fuelSurchargeOvernight');
 
-        $('.weightAdditionOvernight').on('change',function(){
+        $('.weightAdditionDoorOvernight').on('change',function(){
             var wid = $(this).attr('id');
             var wswitch = document.querySelector('#'+wid);
             if (wswitch.checked === true) {
@@ -2675,7 +2675,18 @@
 
             }
         });
+        $('.weightAdditionHubOvernight').on('change',function(){
+            var wid = $(this).attr('id');
+            var wswitch = document.querySelector('#'+wid);
+            if (wswitch.checked === true) {
 
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+
+            } else if (wswitch.checked === false) {
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+            }
+        });
 
         function masks() {
 
@@ -2749,7 +2760,6 @@
                 }
 
             };
-            masks();
 
             $("#on_door_weight_row"+on_door_count+" .validated").each(function(){
                 $( this ).rules( "add", {
@@ -2870,7 +2880,6 @@
         //Cash handling
         // cashChargesOvernight
         cashhandlingswitch.onchange = function () {
-            console.log(cashhandlingswitch);
             if(cashhandlingswitch.checked === true){
                 $('.cash-handling-div-overnight').find('input').prop('disabled',false);
                 $('.cash-handling-btn-overnight').find('button').prop('disabled',false);
@@ -2917,6 +2926,32 @@
         var returnChargesSwitchOverland = document.querySelector('.switchery.returnChargesOverland');
         var fuelChargesSwitchOL = document.querySelector('.switchery.fuelSurchargeOverland');
 
+        $('.weightAdditionDoorOverland').on('change',function() {
+            var wid = $(this).attr('id');
+
+            var wswitch = document.querySelector('#' + wid);
+            if (wswitch.checked === true) {
+
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+
+            } else if (wswitch.checked === false) {
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+            }
+        });
+        $('.weightAdditionHubOverland').on('change',function() {
+            var wid = $(this).attr('id');
+
+            var wswitch = document.querySelector('#' + wid);
+            if (wswitch.checked === true) {
+
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+
+            } else if (wswitch.checked === false) {
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+            }
+        });
         //Overland
 
 
@@ -3119,6 +3154,32 @@
         var returnChargesSwitchDetain = document.querySelector('.switchery.returnChargesDetain');
         var fuelChargesSwitchDetain = document.querySelector('.switchery.fuelSurchargeDetain');
 
+        $('.weightAdditionDoorDetain').on('change',function() {
+            var wid = $(this).attr('id');
+
+            var wswitch = document.querySelector('#' + wid);
+            if (wswitch.checked === true) {
+
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+
+            } else if (wswitch.checked === false) {
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+            }
+        });
+        $('.weightAdditionHubDetain').on('change',function() {
+            var wid = $(this).attr('id');
+
+            var wswitch = document.querySelector('#' + wid);
+            if (wswitch.checked === true) {
+
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+
+            } else if (wswitch.checked === false) {
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+            }
+        });
         //detain
 
 
@@ -3322,7 +3383,32 @@
         var insuranceChargesSwitchSameday = document.querySelector('.switchery.insuranceChargessameday');
         var returnChargesSwitchSameday = document.querySelector('.switchery.returnChargesSameday');
         var fuelChargesSwitchSameday = document.querySelector('.switchery.fuelSurchargeSameday');
+        $('.weightAdditionDoorSameday').on('change',function() {
+            var wid = $(this).attr('id');
 
+            var wswitch = document.querySelector('#' + wid);
+            if (wswitch.checked === true) {
+
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+
+            } else if (wswitch.checked === false) {
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+            }
+        });
+        $('.weightAdditionHubSameday').on('change',function() {
+            var wid = $(this).attr('id');
+
+            var wswitch = document.querySelector('#' + wid);
+            if (wswitch.checked === true) {
+
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+
+            } else if (wswitch.checked === false) {
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+            }
+        });
         //detain
 
 
