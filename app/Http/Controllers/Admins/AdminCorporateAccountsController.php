@@ -311,7 +311,7 @@ class AdminCorporateAccountsController extends Controller
             'sameday_hub_range_up.*.numeric' => 'The sameday hub range up field must be numeric or decimal.',
             'sameday_hub_range_down.*.required' => 'The sameday hub range down field is required.',
             'sameday_hub_range_down.*.numeric' => 'The sameday hub range down field must be numeric or decimal.',
-            'sameday_door_wa_spkg.*.numeric' => 'The sameday hub KG Range field must be numeric.',
+            'sameday_hub_wa_spkg.*.numeric' => 'The sameday hub KG Range field must be numeric.',
             'sameday_hub_local_charges.*.required' => 'The sameday hub local charges field is required.',
             'sameday_hub_local_charges.*.numeric' => 'The sameday hub local charges field must be numeric.',
             'sameday_hub_class_0_charges.*.required' => 'The sameday hub class A charges field is required.',
@@ -1409,6 +1409,7 @@ class AdminCorporateAccountsController extends Controller
                 'on_door_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
                 'on_door_range_down.*.required' => 'The overnight range down field is required.',
                 'on_door_range_down.*.numeric' => 'The overnight range down field must be numeric or decimal.',
+                'on_door_wa_spkg.*.numeric' => 'The overnight doorstep KG Range field must be numeric.',
                 'on_door_local_charges.*.required' => 'The overnight local charges field is required.',
                 'on_door_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
                 'on_door_class_0_charges.*.numeric' => 'The overnight class A charges field must be numeric.',
@@ -1420,6 +1421,7 @@ class AdminCorporateAccountsController extends Controller
                 'on_hub_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
                 'on_hub_range_down.*.required' => 'The overnight range down field is required.',
                 'on_hub_range_down.*.numeric' => 'The overnight range down field must be numeric or decimal.',
+                'on_hub_spkg.*.numeric' => 'The overnight hub KG Range field must be numeric.',
                 'on_hub_local_charges.*.required' => 'The overnight local charges field is required.',
                 'on_hub_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
                 'on_hub_class_0_charges.*.numeric' => 'The overnight class A charges field must be numeric.',
@@ -1466,6 +1468,7 @@ class AdminCorporateAccountsController extends Controller
                 'ol_door_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
                 'ol_door_range_down.*.required' => 'The overland range down field is required.',
                 'ol_door_range_down.*.numeric' => 'The overland range down field must be numeric or decimal.',
+                'ol_door_wa_spkg.*.numeric' => 'The overland doorstep KG Range field must be numeric.',
                 'ol_door_local_charges.*.required' => 'The overland local charges field is required.',
                 'ol_door_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
                 'ol_door_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
@@ -1477,6 +1480,7 @@ class AdminCorporateAccountsController extends Controller
                 'ol_hub_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
                 'ol_hub_range_down.*.required' => 'The overland range down field is required.',
                 'ol_hub_range_down.*.numeric' => 'The overland range down field must be numeric or decimal.',
+                'ol_hub_wa_spkg.*.numeric' => 'The overland hub KG Range field must be numeric.',
                 'ol_hub_local_charges.*.required' => 'The overland local charges field is required.',
                 'ol_hub_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
                 'ol_hub_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
@@ -1523,6 +1527,7 @@ class AdminCorporateAccountsController extends Controller
                 'detain_door_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
                 'detain_door_range_down.*.required' => 'The detain range down field is required.',
                 'detain_door_range_down.*.numeric' => 'The detain range down field must be numeric or decimal.',
+                'detain_door_wa_spkg.*.numeric' => 'The detain doorstep KG Range field must be numeric.',
                 'detain_door_local_charges.*.required' => 'The detain local charges field is required.',
                 'detain_door_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
                 'detain_door_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
@@ -1534,6 +1539,7 @@ class AdminCorporateAccountsController extends Controller
                 'detain_hub_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
                 'detain_hub_range_down.*.required' => 'The detain range down field is required.',
                 'detain_hub_range_down.*.numeric' => 'The detain range down field must be numeric or decimal.',
+                'detain_hub_wa_spkg.*.numeric' => 'The detain hub KG Range field must be numeric.',
                 'detain_hub_local_charges.*.required' => 'The detain local charges field is required.',
                 'detain_hub_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
                 'detain_hub_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
@@ -1580,6 +1586,7 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_door_range_up.*.numeric' => 'The sameday doorstep range up field must be numeric or decimal.',
                 'sameday_door_range_down.*.required' => 'The sameday doorstep range down field is required.',
                 'sameday_door_range_down.*.numeric' => 'The sameday doorstep range down field must be numeric or decimal.',
+                'sameday_door_wa_spkg.*.numeric' => 'The sameday doorstep KG Range field must be numeric.',
                 'sameday_door_local_charges.*.required' => 'The sameday doorstep local charges field is required.',
                 'sameday_door_local_charges.*.numeric' => 'The sameday doorstep local charges field must be numeric.',
                 'sameday_door_class_0_charges.*.required' => 'The sameday doorstep class A charges field is required.',
@@ -1588,6 +1595,7 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_hub_range_up.*.numeric' => 'The sameday hub range up field must be numeric or decimal.',
                 'sameday_hub_range_down.*.required' => 'The sameday hub range down field is required.',
                 'sameday_hub_range_down.*.numeric' => 'The sameday hub range down field must be numeric or decimal.',
+                'sameday_hub_wa_spkg.*.numeric' => 'The sameday hub KG Range field must be numeric.',
                 'sameday_hub_local_charges.*.required' => 'The sameday hub local charges field is required.',
                 'sameday_hub_local_charges.*.numeric' => 'The sameday hub local charges field must be numeric.',
                 'sameday_hub_class_0_charges.*.required' => 'The sameday hub class A charges field is required.',
@@ -1658,6 +1666,7 @@ class AdminCorporateAccountsController extends Controller
                     'on_hub_mcw_charges' => 'required|numeric|between:0,10000',
                     'on_door_range_up.*' => 'required|numeric|between:0,10000',
                     'on_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_door_wa_spkg.*'=>'numeric',
                     'on_door_local_charges.*' => 'required|numeric',
                     'on_door_class_0_charges.*' => 'required|numeric',
                     'on_door_class_1_charges.*' => 'required',
@@ -1665,6 +1674,7 @@ class AdminCorporateAccountsController extends Controller
                     'on_door_class_3_charges.*' => 'required',
                     'on_hub_range_up.*' => 'required|numeric|between:0,10000',
                     'on_hub_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_hub_wa_spkg.*'=>'numeric',
                     'on_hub_local_charges.*' => 'required|numeric',
                     'on_hub_class_0_charges.*' => 'required|numeric',
                     'on_hub_class_1_charges.*' => 'required',
@@ -1699,6 +1709,7 @@ class AdminCorporateAccountsController extends Controller
                     'ol_hub_mcw_charges' => 'required|numeric|between:0,10000',
                     'ol_door_range_up.*' => 'required|numeric|between:0,10000',
                     'ol_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_door_wa_spkg.*'=>'numeric',
                     'ol_door_local_charges.*' => 'required|numeric',
                     'ol_door_class_0_charges.*' => 'required|numeric',
                     'ol_door_class_1_charges.*' => 'required',
@@ -1706,6 +1717,7 @@ class AdminCorporateAccountsController extends Controller
                     'ol_door_class_3_charges.*' => 'required',
                     'ol_hub_range_up.*' => 'required|numeric|between:0,10000',
                     'ol_hub_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_hub_wa_spkg.*'=>'numeric',
                     'ol_hub_local_charges.*' => 'required|numeric',
                     'ol_hub_class_0_charges.*' => 'required|numeric',
                     'ol_hub_class_1_charges.*' => 'required',
@@ -1740,6 +1752,7 @@ class AdminCorporateAccountsController extends Controller
                     'detain_hub_mcw_charges' => 'required|numeric|between:0,10000',
                     'detain_door_range_up.*' => 'required|numeric|between:0,10000',
                     'detain_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_door_wa_spkg.*'=>'numeric',
                     'detain_door_local_charges.*' => 'required|numeric',
                     'detain_door_class_0_charges.*' => 'required|numeric',
                     'detain_door_class_1_charges.*' => 'required',
@@ -1747,6 +1760,7 @@ class AdminCorporateAccountsController extends Controller
                     'detain_door_class_3_charges.*' => 'required',
                     'detain_hub_range_up.*' => 'required|numeric|between:0,10000',
                     'detain_hub_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_hub_wa_spkg.*'=>'numeric',
                     'detain_hub_local_charges.*' => 'required|numeric',
                     'detain_hub_class_0_charges.*' => 'required|numeric',
                     'detain_hub_class_1_charges.*' => 'required',
@@ -1781,6 +1795,7 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_hub_mcw_charges' => 'required|numeric|between:0,10000',
                     'sameday_door_range_up.*' => 'required|numeric|between:0,10000',
                     'sameday_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_door_wa_spkg.*'=>'numeric',
                     'sameday_door_local_charges.*' => 'required|numeric',
                     'sameday_door_class_0_charges.*' => 'required|numeric',
                     'sameday_door_class_1_charges.*' => 'required',
@@ -1788,6 +1803,7 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_door_class_3_charges.*' => 'required',
                     'sameday_hub_range_up.*' => 'required|numeric|between:0,10000',
                     'sameday_hub_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_hub_wa_spkg.*'=>'numeric',
                     'sameday_hub_local_charges.*' => 'required|numeric',
                     'sameday_hub_class_0_charges.*' => 'required|numeric',
                     'sameday_hub_class_1_charges.*' => 'required',
@@ -1972,8 +1988,27 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->whereNotIn('id', $request->on_door_weight_record)->delete();
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     foreach ($request->on_door_weight_record as $index => $on_door_weight_record) {
-
+                        if ($request->has('on_door_wa_switch')) {
+                            if (array_key_exists($index, $request->on_door_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('on_door_wa_spkg')) {
+                            if (array_key_exists($index, $request->on_door_wa_spkg)) {
+                                $wa_spkg[$index] = $request->on_door_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         if ($request->on_door_weight_record[$index] != null) {
 
                             CorporateWeightCharge::where('id', $request->on_door_weight_record[$index])
@@ -1983,6 +2018,8 @@ class AdminCorporateAccountsController extends Controller
                                     'delivery_type_id' => 1,
                                     'range_up' => $request->on_door_range_up[$index],
                                     'range_down' => $request->on_door_range_down[$index],
+                                    'weight_addition' => $wa_switch[$index],
+                                    'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->on_door_local_charges[$index],
                                     'national_charges_class_0' => $request->on_door_class_0_charges[$index],
                                     'national_charges_class_1' => $request->on_door_class_1_charges[$index],
@@ -1997,6 +2034,8 @@ class AdminCorporateAccountsController extends Controller
                                 'delivery_type_id' => 1,
                                 'range_up' => $request->on_door_range_up[$index],
                                 'range_down' => $request->on_door_range_down[$index],
+                                'weight_addition' => $wa_switch[$index],
+                                'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->on_door_local_charges[$index],
                                 'national_charges_class_0' => $request->on_door_class_0_charges[$index],
                                 'national_charges_class_1' => $request->on_door_class_1_charges[$index],
@@ -2008,8 +2047,27 @@ class AdminCorporateAccountsController extends Controller
 
                     }
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->whereNotIn('id', $request->on_hub_weight_record)->delete();
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     foreach ($request->on_hub_weight_record as $index => $on_hub_weight_record) {
-
+                        if ($request->has('on_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->on_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('on_hub_wa_spkg')) {
+                            if (array_key_exists($index, $request->on_hub_wa_spkg)) {
+                                $wa_spkg[$index] = $request->on_hub_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         if ($request->on_hub_weight_record[$index] != null) {
 
                             CorporateWeightCharge::where('id', $request->on_hub_weight_record[$index])
@@ -2019,6 +2077,8 @@ class AdminCorporateAccountsController extends Controller
                                     'delivery_type_id' => 2,
                                     'range_up' => $request->on_hub_range_up[$index],
                                     'range_down' => $request->on_hub_range_down[$index],
+                                    'weight_addition' => $wa_switch[$index],
+                                    'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->on_hub_local_charges[$index],
                                     'national_charges_class_0' => $request->on_hub_class_0_charges[$index],
                                     'national_charges_class_1' => $request->on_hub_class_1_charges[$index],
@@ -2033,6 +2093,8 @@ class AdminCorporateAccountsController extends Controller
                                 'delivery_type_id' => 2,
                                 'range_up' => $request->on_hub_range_up[$index],
                                 'range_down' => $request->on_hub_range_down[$index],
+                                'weight_addition' => $wa_switch[$index],
+                                'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->on_hub_local_charges[$index],
                                 'national_charges_class_0' => $request->on_hub_class_0_charges[$index],
                                 'national_charges_class_1' => $request->on_hub_class_1_charges[$index],
@@ -2252,9 +2314,28 @@ class AdminCorporateAccountsController extends Controller
                             'min_chargeable_weight' => $request->ol_hub_mcw_charges
                         ]);
                     }
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 1])->whereNotIn('id', $request->ol_door_weight_record)->delete();
                     foreach ($request->ol_door_weight_record as $index => $ol_door_weight_record) {
-
+                        if ($request->has('ol_door_wa_switch')) {
+                            if (array_key_exists($index, $request->ol_door_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('ol_door_wa_spkg')) {
+                            if (array_key_exists($index, $request->ol_door_wa_spkg)) {
+                                $wa_spkg[$index] = $request->ol_door_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         if ($request->ol_door_weight_record[$index] != null) {
 
                             CorporateWeightCharge::where('id', $request->ol_door_weight_record[$index])
@@ -2264,6 +2345,8 @@ class AdminCorporateAccountsController extends Controller
                                     'delivery_type_id' => 1,
                                     'range_up' => $request->ol_door_range_up[$index],
                                     'range_down' => $request->ol_door_range_down[$index],
+                                    'weight_addition' => $wa_switch[$index],
+                                    'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->ol_door_local_charges[$index],
                                     'national_charges_class_0' => $request->ol_door_class_0_charges[$index],
                                     'national_charges_class_1' => $request->ol_door_class_1_charges[$index],
@@ -2278,6 +2361,8 @@ class AdminCorporateAccountsController extends Controller
                                 'delivery_type_id' => 1,
                                 'range_up' => $request->ol_door_range_up[$index],
                                 'range_down' => $request->ol_door_range_down[$index],
+                                'weight_addition' => $wa_switch[$index],
+                                'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->ol_door_local_charges[$index],
                                 'national_charges_class_0' => $request->ol_door_class_0_charges[$index],
                                 'national_charges_class_1' => $request->ol_door_class_1_charges[$index],
@@ -2288,9 +2373,28 @@ class AdminCorporateAccountsController extends Controller
 
 
                     }
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->whereNotIn('id', $request->ol_hub_weight_record)->delete();
                     foreach ($request->ol_hub_weight_record as $index => $ol_hub_weight_record) {
-
+                        if ($request->has('ol_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->ol_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('ol_hub_wa_spkg')) {
+                            if (array_key_exists($index, $request->ol_hub_wa_spkg)) {
+                                $wa_spkg[$index] = $request->ol_hub_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         if ($request->ol_hub_weight_record[$index] != null) {
 
                             CorporateWeightCharge::where('id', $request->ol_hub_weight_record[$index])
@@ -2300,6 +2404,8 @@ class AdminCorporateAccountsController extends Controller
                                     'delivery_type_id' => 2,
                                     'range_up' => $request->ol_hub_range_up[$index],
                                     'range_down' => $request->ol_hub_range_down[$index],
+                                    'weight_addition' => $wa_switch[$index],
+                                    'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->ol_hub_local_charges[$index],
                                     'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
                                     'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
@@ -2314,6 +2420,8 @@ class AdminCorporateAccountsController extends Controller
                                 'delivery_type_id' => 2,
                                 'range_up' => $request->ol_hub_range_up[$index],
                                 'range_down' => $request->ol_hub_range_down[$index],
+                                'weight_addition' => $wa_switch[$index],
+                                'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->ol_hub_local_charges[$index],
                                 'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
                                 'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
@@ -2537,9 +2645,28 @@ class AdminCorporateAccountsController extends Controller
                             'min_chargeable_weight' => $request->detain_hub_mcw_charges
                         ]);
                     }
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 1])->whereNotIn('id', $request->detain_door_weight_record)->delete();
                     foreach ($request->detain_door_weight_record as $index => $detain_door_weight_record) {
-
+                        if ($request->has('detain_door_wa_switch')) {
+                            if (array_key_exists($index, $request->detain_door_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('detain_door_wa_spkg')) {
+                            if (array_key_exists($index, $request->detain_door_wa_spkg)) {
+                                $wa_spkg[$index] = $request->detain_door_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         if ($request->detain_door_weight_record[$index] != null) {
 
                             CorporateWeightCharge::where('id', $request->detain_door_weight_record[$index])
@@ -2549,6 +2676,8 @@ class AdminCorporateAccountsController extends Controller
                                     'delivery_type_id' => 1,
                                     'range_up' => $request->detain_door_range_up[$index],
                                     'range_down' => $request->detain_door_range_down[$index],
+                                    'weight_addition' => $wa_switch[$index],
+                                    'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->detain_door_local_charges[$index],
                                     'national_charges_class_0' => $request->detain_door_class_0_charges[$index],
                                     'national_charges_class_1' => $request->detain_door_class_1_charges[$index],
@@ -2563,6 +2692,8 @@ class AdminCorporateAccountsController extends Controller
                                 'delivery_type_id' => 1,
                                 'range_up' => $request->detain_door_range_up[$index],
                                 'range_down' => $request->detain_door_range_down[$index],
+                                'weight_addition' => $wa_switch[$index],
+                                'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->detain_door_local_charges[$index],
                                 'national_charges_class_0' => $request->detain_door_class_0_charges[$index],
                                 'national_charges_class_1' => $request->detain_door_class_1_charges[$index],
@@ -2573,9 +2704,28 @@ class AdminCorporateAccountsController extends Controller
 
 
                     }
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->whereNotIn('id', $request->detain_hub_weight_record)->delete();
                     foreach ($request->detain_hub_weight_record as $index => $detain_hub_weight_record) {
-
+                        if ($request->has('detain_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->detain_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('detain_hub_wa_spkg')) {
+                            if (array_key_exists($index, $request->detain_hub_wa_spkg)) {
+                                $wa_spkg[$index] = $request->detain_hub_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         if ($request->detain_hub_weight_record[$index] != null) {
 
                             CorporateWeightCharge::where('id', $request->detain_hub_weight_record[$index])
@@ -2585,6 +2735,8 @@ class AdminCorporateAccountsController extends Controller
                                     'delivery_type_id' => 2,
                                     'range_up' => $request->detain_hub_range_up[$index],
                                     'range_down' => $request->detain_hub_range_down[$index],
+                                    'weight_addition' => $wa_switch[$index],
+                                    'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->detain_hub_local_charges[$index],
                                     'national_charges_class_0' => $request->detain_hub_class_0_charges[$index],
                                     'national_charges_class_1' => $request->detain_hub_class_1_charges[$index],
@@ -2599,6 +2751,8 @@ class AdminCorporateAccountsController extends Controller
                                 'delivery_type_id' => 2,
                                 'range_up' => $request->detain_hub_range_up[$index],
                                 'range_down' => $request->detain_hub_range_down[$index],
+                                'weight_addition' => $wa_switch[$index],
+                                'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->detain_hub_local_charges[$index],
                                 'national_charges_class_0' => $request->detain_hub_class_0_charges[$index],
                                 'national_charges_class_1' => $request->detain_hub_class_1_charges[$index],
@@ -2824,9 +2978,28 @@ class AdminCorporateAccountsController extends Controller
                             'min_chargeable_weight' => $request->sameday_hub_mcw_charges
                         ]);
                     }
+                    $wa_spkg = array();
+                    $wa_switch = array();
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 1])->whereNotIn('id', $request->sameday_door_weight_record)->delete();
                     foreach ($request->sameday_door_weight_record as $index => $sameday_door_weight_record) {
-
+                        if ($request->has('sameday_door_wa_switch')) {
+                            if (array_key_exists($index, $request->sameday_door_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('sameday_door_wa_spkg')) {
+                            if (array_key_exists($index, $request->sameday_door_wa_spkg)) {
+                                $wa_spkg[$index] = $request->sameday_door_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         if ($request->sameday_door_weight_record[$index] != null) {
 
                             CorporateWeightCharge::where('id', $request->sameday_door_weight_record[$index])
@@ -2836,6 +3009,8 @@ class AdminCorporateAccountsController extends Controller
                                     'delivery_type_id' => 1,
                                     'range_up' => $request->sameday_door_range_up[$index],
                                     'range_down' => $request->sameday_door_range_down[$index],
+                                    'weight_addition' => $wa_switch[$index],
+                                    'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->sameday_door_local_charges[$index],
                                     'national_charges_class_0' => $request->sameday_door_class_0_charges[$index],
                                     'national_charges_class_1' => 0,
@@ -2850,6 +3025,8 @@ class AdminCorporateAccountsController extends Controller
                                 'delivery_type_id' => 1,
                                 'range_up' => $request->sameday_door_range_up[$index],
                                 'range_down' => $request->sameday_door_range_down[$index],
+                                'weight_addition' => $wa_switch[$index],
+                                'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->sameday_door_local_charges[$index],
                                 'national_charges_class_0' => $request->sameday_door_class_0_charges[$index],
                                 'national_charges_class_1' => 0,
@@ -2860,9 +3037,28 @@ class AdminCorporateAccountsController extends Controller
 
 
                     }
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->whereNotIn('id', $request->sameday_hub_weight_record)->delete();
                     foreach ($request->sameday_hub_weight_record as $index => $sameday_hub_weight_record) {
-
+                        if ($request->has('sameday_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->sameday_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('sameday_hub_wa_spkg')) {
+                            if (array_key_exists($index, $request->sameday_hub_wa_spkg)) {
+                                $wa_spkg[$index] = $request->sameday_hub_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         if ($request->sameday_hub_weight_record[$index] != null) {
 
                             CorporateWeightCharge::where('id', $request->sameday_hub_weight_record[$index])
@@ -2872,6 +3068,8 @@ class AdminCorporateAccountsController extends Controller
                                     'delivery_type_id' => 2,
                                     'range_up' => $request->sameday_hub_range_up[$index],
                                     'range_down' => $request->sameday_hub_range_down[$index],
+                                    'weight_addition' => $wa_switch[$index],
+                                    'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->sameday_hub_local_charges[$index],
                                     'national_charges_class_0' => $request->sameday_hub_class_0_charges[$index],
                                     'national_charges_class_1' => 0,
@@ -2886,6 +3084,8 @@ class AdminCorporateAccountsController extends Controller
                                 'delivery_type_id' => 2,
                                 'range_up' => $request->sameday_hub_range_up[$index],
                                 'range_down' => $request->sameday_hub_range_down[$index],
+                                'weight_addition' => $wa_switch[$index],
+                                'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->sameday_hub_local_charges[$index],
                                 'national_charges_class_0' => $request->sameday_hub_class_0_charges[$index],
                                 'national_charges_class_1' => 0,
@@ -3192,6 +3392,7 @@ class AdminCorporateAccountsController extends Controller
                 'on_door_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
                 'on_door_range_down.*.required' => 'The overnight range down field is required.',
                 'on_door_range_down.*.numeric' => 'The overnight range down field must be numeric or decimal.',
+                'on_door_wa_spkg.*.numeric' => 'The overnight doorstep KG Range field must be numeric.',
                 'on_door_local_charges.*.required' => 'The overnight local charges field is required.',
                 'on_door_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
                 'on_door_class_0_charges.*.numeric' => 'The overnight class A charges field must be numeric.',
@@ -3203,6 +3404,7 @@ class AdminCorporateAccountsController extends Controller
                 'on_hub_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
                 'on_hub_range_down.*.required' => 'The overnight range down field is required.',
                 'on_hub_range_down.*.numeric' => 'The overnight range down field must be numeric or decimal.',
+                'on_hub_spkg.*.numeric' => 'The overnight hub KG Range field must be numeric.',
                 'on_hub_local_charges.*.required' => 'The overnight local charges field is required.',
                 'on_hub_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
                 'on_hub_class_0_charges.*.numeric' => 'The overnight class A charges field must be numeric.',
@@ -3210,6 +3412,10 @@ class AdminCorporateAccountsController extends Controller
                 'on_hub_class_1_charges.*.required' => 'The overnight class B charges field is required.',
                 'on_hub_class_2_charges.*.required' => 'The overnight class C charges field is required.',
                 'on_hub_class_3_charges.*.required' => 'The overnight class D charges field is required.',
+                'on_replacement_charges.numeric' => 'The overnight replacement charges field must be numeric.',
+                'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
+                'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
+                'on_tnb_charges.required' => 'The overnight try and buy charges field is required.',
                 'on_cash_range_up.*.required_if' => 'The overnight cash range up field is required.',
                 'on_cash_range_up.*.numeric' => 'The overnight cash range up field must be numeric.',
                 'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
@@ -3245,6 +3451,7 @@ class AdminCorporateAccountsController extends Controller
                 'ol_door_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
                 'ol_door_range_down.*.required' => 'The overland range down field is required.',
                 'ol_door_range_down.*.numeric' => 'The overland range down field must be numeric or decimal.',
+                'ol_door_wa_spkg.*.numeric' => 'The overland doorstep KG Range field must be numeric.',
                 'ol_door_local_charges.*.required' => 'The overland local charges field is required.',
                 'ol_door_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
                 'ol_door_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
@@ -3256,6 +3463,7 @@ class AdminCorporateAccountsController extends Controller
                 'ol_hub_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
                 'ol_hub_range_down.*.required' => 'The overland range down field is required.',
                 'ol_hub_range_down.*.numeric' => 'The overland range down field must be numeric or decimal.',
+                'ol_hub_wa_spkg.*.numeric' => 'The overland hub KG Range field must be numeric.',
                 'ol_hub_local_charges.*.required' => 'The overland local charges field is required.',
                 'ol_hub_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
                 'ol_hub_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
@@ -3263,6 +3471,10 @@ class AdminCorporateAccountsController extends Controller
                 'ol_hub_class_1_charges.*.required' => 'The overland class B charges field is required.',
                 'ol_hub_class_2_charges.*.required' => 'The overland class C charges field is required.',
                 'ol_hub_class_3_charges.*.required' => 'The overland class D charges field is required.',
+                'ol_replacement_charges.numeric' => 'The overland replacement charges field must be numeric.',
+                'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
+                'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
+                'ol_tnb_charges.required' => 'The overland try and buy charges field is required.',
                 'ol_cash_range_up.*.required_if' => 'The overland cash range up field is required.',
                 'ol_cash_range_up.*.numeric' => 'The overland cash range up field must be numeric.',
                 'ol_cash_range_down.*.required_if' => 'The overland cash range down field is required.',
@@ -3298,6 +3510,7 @@ class AdminCorporateAccountsController extends Controller
                 'detain_door_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
                 'detain_door_range_down.*.required' => 'The detain range down field is required.',
                 'detain_door_range_down.*.numeric' => 'The detain range down field must be numeric or decimal.',
+                'detain_door_wa_spkg.*.numeric' => 'The detain doorstep KG Range field must be numeric.',
                 'detain_door_local_charges.*.required' => 'The detain local charges field is required.',
                 'detain_door_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
                 'detain_door_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
@@ -3309,6 +3522,7 @@ class AdminCorporateAccountsController extends Controller
                 'detain_hub_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
                 'detain_hub_range_down.*.required' => 'The detain range down field is required.',
                 'detain_hub_range_down.*.numeric' => 'The detain range down field must be numeric or decimal.',
+                'detain_hub_wa_spkg.*.numeric' => 'The detain hub KG Range field must be numeric.',
                 'detain_hub_local_charges.*.required' => 'The detain local charges field is required.',
                 'detain_hub_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
                 'detain_hub_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
@@ -3316,6 +3530,10 @@ class AdminCorporateAccountsController extends Controller
                 'detain_hub_class_1_charges.*.required' => 'The detain class B charges field is required.',
                 'detain_hub_class_2_charges.*.required' => 'The detain class C charges field is required.',
                 'detain_hub_class_3_charges.*.required' => 'The detain class D charges field is required.',
+                'detain_replacement_charges.numeric' => 'The detain replacement charges field must be numeric.',
+                'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
+                'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
+                'detain_tnb_charges.required' => 'The detain try and buy charges field is required.',
                 'detain_cash_range_up.*.required_if' => 'The detain cash range up field is required.',
                 'detain_cash_range_up.*.numeric' => 'The detain cash range up field must be numeric.',
                 'detain_cash_range_down.*.required_if' => 'The detain cash range down field is required.',
@@ -3351,6 +3569,7 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_door_range_up.*.numeric' => 'The sameday doorstep range up field must be numeric or decimal.',
                 'sameday_door_range_down.*.required' => 'The sameday doorstep range down field is required.',
                 'sameday_door_range_down.*.numeric' => 'The sameday doorstep range down field must be numeric or decimal.',
+                'sameday_door_wa_spkg.*.numeric' => 'The sameday doorstep KG Range field must be numeric.',
                 'sameday_door_local_charges.*.required' => 'The sameday doorstep local charges field is required.',
                 'sameday_door_local_charges.*.numeric' => 'The sameday doorstep local charges field must be numeric.',
                 'sameday_door_class_0_charges.*.required' => 'The sameday doorstep class A charges field is required.',
@@ -3359,10 +3578,15 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_hub_range_up.*.numeric' => 'The sameday hub range up field must be numeric or decimal.',
                 'sameday_hub_range_down.*.required' => 'The sameday hub range down field is required.',
                 'sameday_hub_range_down.*.numeric' => 'The sameday hub range down field must be numeric or decimal.',
+                'sameday_hub_wa_spkg.*.numeric' => 'The sameday hub KG Range field must be numeric.',
                 'sameday_hub_local_charges.*.required' => 'The sameday hub local charges field is required.',
                 'sameday_hub_local_charges.*.numeric' => 'The sameday hub local charges field must be numeric.',
                 'sameday_hub_class_0_charges.*.required' => 'The sameday hub class A charges field is required.',
                 'sameday_hub_class_0_charges.*.numeric' => 'The sameday hub class A charges field must be numeric.',
+                'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
+                'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
+                'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
+                'sameday_tnb_charges.required' => 'The sameday try and buy charges field is required.',
                 'sameday_cash_range_up.*.required_if' => 'The sameday cash range up field is required.',
                 'sameday_cash_range_up.*.numeric' => 'The sameday cash range up field must be numeric.',
                 'sameday_cash_range_down.*.required_if' => 'The sameday cash range down field is required.',
@@ -3392,6 +3616,7 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_discount_title.required_with' => 'The sameday discount title field is required',
                 'sameday_daterange.required_with' => 'The sameday discount date field is required',
                 //sameday ends
+
 
                 //warehouse starts
                 'invoicing_cycle.*.required' => 'Invoicing Cycle field is required.',
@@ -3445,6 +3670,7 @@ class AdminCorporateAccountsController extends Controller
                     'on_hub_mcw_charges' => 'required|numeric|between:0,10000',
                     'on_door_range_up.*' => 'required|numeric|between:0,10000',
                     'on_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_door_wa_spkg.*'=>'numeric',
                     'on_door_local_charges.*' => 'required|numeric',
                     'on_door_class_0_charges.*' => 'required|numeric',
                     'on_door_class_1_charges.*' => 'required',
@@ -3452,6 +3678,7 @@ class AdminCorporateAccountsController extends Controller
                     'on_door_class_3_charges.*' => 'required',
                     'on_hub_range_up.*' => 'required|numeric|between:0,10000',
                     'on_hub_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_hub_wa_spkg.*'=>'numeric',
                     'on_hub_local_charges.*' => 'required|numeric',
                     'on_hub_class_0_charges.*' => 'required|numeric',
                     'on_hub_class_1_charges.*' => 'required',
@@ -3484,6 +3711,7 @@ class AdminCorporateAccountsController extends Controller
                     'ol_hub_mcw_charges' => 'required|numeric|between:0,10000',
                     'ol_door_range_up.*' => 'required|numeric|between:0,10000',
                     'ol_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_door_wa_spkg.*'=>'numeric',
                     'ol_door_local_charges.*' => 'required|numeric',
                     'ol_door_class_0_charges.*' => 'required|numeric',
                     'ol_door_class_1_charges.*' => 'required',
@@ -3491,6 +3719,7 @@ class AdminCorporateAccountsController extends Controller
                     'ol_door_class_3_charges.*' => 'required',
                     'ol_hub_range_up.*' => 'required|numeric|between:0,10000',
                     'ol_hub_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_hub_wa_spkg.*'=>'numeric',
                     'ol_hub_local_charges.*' => 'required|numeric',
                     'ol_hub_class_0_charges.*' => 'required|numeric',
                     'ol_hub_class_1_charges.*' => 'required',
@@ -3523,6 +3752,7 @@ class AdminCorporateAccountsController extends Controller
                     'detain_hub_mcw_charges' => 'required|numeric|between:0,10000',
                     'detain_door_range_up.*' => 'required|numeric|between:0,10000',
                     'detain_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_door_wa_spkg.*'=>'numeric',
                     'detain_door_local_charges.*' => 'required|numeric',
                     'detain_door_class_0_charges.*' => 'required|numeric',
                     'detain_door_class_1_charges.*' => 'required',
@@ -3530,6 +3760,7 @@ class AdminCorporateAccountsController extends Controller
                     'detain_door_class_3_charges.*' => 'required',
                     'detain_hub_range_up.*' => 'required|numeric|between:0,10000',
                     'detain_hub_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_hub_wa_spkg.*'=>'numeric',
                     'detain_hub_local_charges.*' => 'required|numeric',
                     'detain_hub_class_0_charges.*' => 'required|numeric',
                     'detain_hub_class_1_charges.*' => 'required',
@@ -3562,6 +3793,7 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_hub_mcw_charges' => 'required|numeric|between:0,10000',
                     'sameday_door_range_up.*' => 'required|numeric|between:0,10000',
                     'sameday_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_door_wa_spkg.*'=>'numeric',
                     'sameday_door_local_charges.*' => 'required|numeric',
                     'sameday_door_class_0_charges.*' => 'required|numeric',
                     'sameday_door_class_1_charges.*' => 'required',
@@ -3569,6 +3801,7 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_door_class_3_charges.*' => 'required',
                     'sameday_hub_range_up.*' => 'required|numeric|between:0,10000',
                     'sameday_hub_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_hub_wa_spkg.*'=>'numeric',
                     'sameday_hub_local_charges.*' => 'required|numeric',
                     'sameday_hub_class_0_charges.*' => 'required|numeric',
                     'sameday_hub_class_1_charges.*' => 'required',
@@ -3653,13 +3886,35 @@ class AdminCorporateAccountsController extends Controller
                         'delivery_type_id' => 2,
                         'min_chargeable_weight' => $request->on_hub_mcw_charges
                     ]);
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     foreach ($request->on_door_weight_record as $index => $on_door_weight_record) {
+                        if ($request->has('on_door_wa_switch')) {
+                            if (array_key_exists($index, $request->on_door_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('on_door_wa_spkg')) {
+                            if (array_key_exists($index, $request->on_door_wa_spkg)) {
+                                $wa_spkg[$index] = $request->on_door_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'delivery_type_id' => 1,
                             'range_up' => $request->on_door_range_up[$index],
                             'range_down' => $request->on_door_range_down[$index],
+                            'weight_addition' => $wa_switch[$index],
+                            'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->on_door_local_charges[$index],
                             'national_charges_class_0' => $request->on_door_class_0_charges[$index],
                             'national_charges_class_1' => $request->on_door_class_1_charges[$index],
@@ -3668,13 +3923,35 @@ class AdminCorporateAccountsController extends Controller
                         ]);
 
                     }
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     foreach ($request->on_hub_weight_record as $index => $on_hub_weight_record) {
+                        if ($request->has('on_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->on_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('on_hub_wa_spkg')) {
+                            if (array_key_exists($index, $request->on_hub_wa_spkg)) {
+                                $wa_spkg[$index] = $request->on_hub_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'delivery_type_id' => 2,
                             'range_up' => $request->on_hub_range_up[$index],
                             'range_down' => $request->on_hub_range_down[$index],
+                            'weight_addition' => $wa_switch[$index],
+                            'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->on_hub_local_charges[$index],
                             'national_charges_class_0' => $request->on_hub_class_0_charges[$index],
                             'national_charges_class_1' => $request->on_hub_class_1_charges[$index],
@@ -3808,14 +4085,35 @@ class AdminCorporateAccountsController extends Controller
                         'delivery_type_id' => 2,
                         'min_chargeable_weight' => $request->ol_hub_mcw_charges
                     ]);
-//                    dd($request->ol_replacement_charges);
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     foreach ($request->ol_door_weight_record as $index => $ol_door_weight_record) {
+                        if ($request->has('ol_door_wa_switch')) {
+                            if (array_key_exists($index, $request->ol_door_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('ol_door_wa_spkg')) {
+                            if (array_key_exists($index, $request->ol_door_wa_spkg)) {
+                                $wa_spkg[$index] = $request->ol_door_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'delivery_type_id' => 1,
                             'range_up' => $request->ol_door_range_up[$index],
                             'range_down' => $request->ol_door_range_down[$index],
+                            'weight_addition' => $wa_switch[$index],
+                            'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->ol_door_local_charges[$index],
                             'national_charges_class_0' => $request->ol_door_class_0_charges[$index],
                             'national_charges_class_1' => $request->ol_door_class_1_charges[$index],
@@ -3823,13 +4121,35 @@ class AdminCorporateAccountsController extends Controller
                             'national_charges_class_3' => $request->ol_door_class_3_charges[$index]
                         ]);
                     }
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     foreach ($request->ol_hub_weight_record as $index => $ol_hub_weight_record) {
+                        if ($request->has('ol_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->ol_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('ol_hub_wa_spkg')) {
+                            if (array_key_exists($index, $request->ol_hub_wa_spkg)) {
+                                $wa_spkg[$index] = $request->ol_hub_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'delivery_type_id' => 2,
                             'range_up' => $request->ol_hub_range_up[$index],
                             'range_down' => $request->ol_hub_range_down[$index],
+                            'weight_addition' => $wa_switch[$index],
+                            'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->ol_hub_local_charges[$index],
                             'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
                             'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
@@ -3965,14 +4285,35 @@ class AdminCorporateAccountsController extends Controller
                         'delivery_type_id' => 2,
                         'min_chargeable_weight' => $request->detain_hub_mcw_charges
                     ]);
-
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     foreach ($request->detain_door_weight_record as $index => $detain_door_weight_record) {
+                        if ($request->has('detain_door_wa_switch')) {
+                            if (array_key_exists($index, $request->detain_door_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('detain_door_wa_spkg')) {
+                            if (array_key_exists($index, $request->detain_door_wa_spkg)) {
+                                $wa_spkg[$index] = $request->detain_door_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'delivery_type_id' => 1,
                             'range_up' => $request->detain_door_range_up[$index],
                             'range_down' => $request->detain_door_range_down[$index],
+                            'weight_addition' => $wa_switch[$index],
+                            'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->detain_door_local_charges[$index],
                             'national_charges_class_0' => $request->detain_door_class_0_charges[$index],
                             'national_charges_class_1' => $request->detain_door_class_1_charges[$index],
@@ -3981,13 +4322,35 @@ class AdminCorporateAccountsController extends Controller
                         ]);
 
                     }
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     foreach ($request->detain_hub_weight_record as $index => $detain_hub_weight_record) {
+                        if ($request->has('detain_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->detain_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('detain_hub_wa_spkg')) {
+                            if (array_key_exists($index, $request->detain_hub_wa_spkg)) {
+                                $wa_spkg[$index] = $request->detain_hub_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'delivery_type_id' => 2,
                             'range_up' => $request->detain_hub_range_up[$index],
                             'range_down' => $request->detain_hub_range_down[$index],
+                            'weight_addition' => $wa_switch[$index],
+                            'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->detain_hub_local_charges[$index],
                             'national_charges_class_0' => $request->detain_hub_class_0_charges[$index],
                             'national_charges_class_1' => $request->detain_hub_class_1_charges[$index],
@@ -4120,14 +4483,35 @@ class AdminCorporateAccountsController extends Controller
                         'delivery_type_id' => 2,
                         'min_chargeable_weight' => $request->sameday_hub_mcw_charges
                     ]);
-
+                    $wa_spkg = array();
+                    $wa_switch = array();
                     foreach ($request->sameday_door_weight_record as $index => $sameday_door_weight_record) {
+                        if ($request->has('sameday_door_wa_switch')) {
+                            if (array_key_exists($index, $request->sameday_door_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('sameday_door_wa_spkg')) {
+                            if (array_key_exists($index, $request->sameday_door_wa_spkg)) {
+                                $wa_spkg[$index] = $request->sameday_door_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'delivery_type_id' => 1,
                             'range_up' => $request->sameday_door_range_up[$index],
                             'range_down' => $request->sameday_door_range_down[$index],
+                            'weight_addition' => $wa_switch[$index],
+                            'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->sameday_door_local_charges[$index],
                             'national_charges_class_0' => $request->sameday_door_class_0_charges[$index],
                             'national_charges_class_1' => 0,
@@ -4136,13 +4520,35 @@ class AdminCorporateAccountsController extends Controller
                         ]);
 
                     }
+                    $wa_switch = array();
+                    $wa_spkg = array();
                     foreach ($request->sameday_hub_weight_record as $index => $sameday_hub_weight_record) {
+                        if ($request->has('sameday_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->sameday_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
+                        } else {
+                            $wa_switch[$index] = 0;
+                        }
+                        if ($request->has('sameday_hub_wa_spkg')) {
+                            if (array_key_exists($index, $request->sameday_hub_wa_spkg)) {
+                                $wa_spkg[$index] = $request->sameday_hub_wa_spkg[$index];
+                            } else {
+                                $wa_spkg[$index] = 0;
+                            };
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'delivery_type_id' => 2,
                             'range_up' => $request->sameday_hub_range_up[$index],
                             'range_down' => $request->sameday_hub_range_down[$index],
+                            'weight_addition' => $wa_switch[$index],
+                            'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->sameday_hub_local_charges[$index],
                             'national_charges_class_0' => $request->sameday_hub_class_0_charges[$index],
                             'national_charges_class_1' => 0,
@@ -4429,6 +4835,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 1,
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
                             'national_charges_class_0' => $weight['national_charges_class_0'],
                             'national_charges_class_1' => $weight['national_charges_class_1'],
@@ -4445,6 +4853,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 1,
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
                             'national_charges_class_0' => $weight['national_charges_class_0'],
                             'national_charges_class_1' => $weight['national_charges_class_1'],
@@ -4461,6 +4871,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 1,
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
                             'national_charges_class_0' => $weight['national_charges_class_0'],
                             'national_charges_class_1' => $weight['national_charges_class_1'],
@@ -4477,6 +4889,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 1,
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
                             'national_charges_class_0' => $weight['national_charges_class_0'],
                             'national_charges_class_1' => $weight['national_charges_class_1'],
@@ -4493,6 +4907,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 2,
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
                             'national_charges_class_0' => $weight['national_charges_class_0'],
                             'national_charges_class_1' => $weight['national_charges_class_1'],
@@ -4509,6 +4925,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 2,
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
                             'national_charges_class_0' => $weight['national_charges_class_0'],
                             'national_charges_class_1' => $weight['national_charges_class_1'],
@@ -4525,6 +4943,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 2,
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
                             'national_charges_class_0' => $weight['national_charges_class_0'],
                             'national_charges_class_1' => $weight['national_charges_class_1'],
@@ -4541,6 +4961,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 2,
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
                             'national_charges_class_0' => $weight['national_charges_class_0'],
                             'national_charges_class_1' => $weight['national_charges_class_1'],
@@ -5030,6 +5452,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 1,
                             'range_up' => $pendingweight['range_up'],
                             'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
                             'national_charges_class_0' => $pendingweight['national_charges_class_0'],
                             'national_charges_class_1' => $pendingweight['national_charges_class_1'],
@@ -5046,6 +5470,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 1,
                             'range_up' => $pendingweight['range_up'],
                             'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
                             'national_charges_class_0' => $pendingweight['national_charges_class_0'],
                             'national_charges_class_1' => $pendingweight['national_charges_class_1'],
@@ -5062,6 +5488,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 1,
                             'range_up' => $pendingweight['range_up'],
                             'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
                             'national_charges_class_0' => $pendingweight['national_charges_class_0'],
                             'national_charges_class_1' => $pendingweight['national_charges_class_1'],
@@ -5078,6 +5506,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 1,
                             'range_up' => $pendingweight['range_up'],
                             'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
                             'national_charges_class_0' => $pendingweight['national_charges_class_0'],
                             'national_charges_class_1' => $pendingweight['national_charges_class_1'],
@@ -5094,6 +5524,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 2,
                             'range_up' => $pendingweight['range_up'],
                             'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
                             'national_charges_class_0' => $pendingweight['national_charges_class_0'],
                             'national_charges_class_1' => $pendingweight['national_charges_class_1'],
@@ -5110,6 +5542,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 2,
                             'range_up' => $pendingweight['range_up'],
                             'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
                             'national_charges_class_0' => $pendingweight['national_charges_class_0'],
                             'national_charges_class_1' => $pendingweight['national_charges_class_1'],
@@ -5126,6 +5560,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 2,
                             'range_up' => $pendingweight['range_up'],
                             'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
                             'national_charges_class_0' => $pendingweight['national_charges_class_0'],
                             'national_charges_class_1' => $pendingweight['national_charges_class_1'],
@@ -5142,6 +5578,8 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 2,
                             'range_up' => $pendingweight['range_up'],
                             'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
                             'national_charges_class_0' => $pendingweight['national_charges_class_0'],
                             'national_charges_class_1' => $pendingweight['national_charges_class_1'],
