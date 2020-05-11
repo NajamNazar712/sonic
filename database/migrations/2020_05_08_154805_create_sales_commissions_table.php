@@ -18,7 +18,6 @@ class CreateSalesCommissionsTable extends Migration
             $table->integer('shipper_id');
             $table->integer('commission_users_count');
             $table->double('commission');
-            $table->integer('added_by');
             $table->integer('updated_by')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
