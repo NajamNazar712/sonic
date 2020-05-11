@@ -297,7 +297,7 @@
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                min: new Date(thirtydays),
+                // min: new Date(thirtydays),
                 max : new Date(today),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
@@ -309,7 +309,11 @@
                 },
                 onSet: function(context) {
                     var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(29, 'days');
                     to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
             var to_date = $('#to_date').pickadate({
