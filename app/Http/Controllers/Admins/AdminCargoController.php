@@ -496,7 +496,7 @@ class AdminCargoController extends Controller
 
         $details = array();
 
-        $details['junctions'] = City::select(['id', 'name'])->where('hub', 1)->where('status', 1)->get();
+        $details['junctions'] = City::select(['id', 'name'])->where('hub', 1)->get();
 
         $details['transport_modes'] = TransportMode::all();
 
@@ -1237,7 +1237,7 @@ class AdminCargoController extends Controller
             $details['cargo_consignment']['transport_mode_vendor_id'] = $cargo_consignment->transport_mode_vendor_id;
             $details['cargo_consignment']['receiver_id'] = $cargo_consignment->receiver_id;
 
-            $details['junctions'] = City::select(['id', 'name'])->where('hub', 1)->where('status', 1)->get();
+            $details['junctions'] = City::select(['id', 'name'])->where('hub', 1)->get();
 
             $details['shipping_modes'] = ShippingMode::where('id', '!=', 4)->get();
 
@@ -2298,7 +2298,7 @@ class AdminCargoController extends Controller
 
     public function mapping_index()
     {
-        $junctions = City::select(['id', 'name'])->where('hub', 1)->where('status', 1)->get();
+        $junctions = City::select(['id', 'name'])->where('hub', 1)->get();
         $cities = City::all();
         $admins = Admin::where('status', 1)->select(['id', 'name'])->get();
         return view('admin.cargo.mapping')->with(['cities' => $cities, 'junctions' => $junctions, 'admins' => $admins]);
