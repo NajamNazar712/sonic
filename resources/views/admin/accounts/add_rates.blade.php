@@ -2187,7 +2187,7 @@
         var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesSwitch');
 
         $('.weightAdditionOvernight').on('change',function(){
-            var wid = $(this).attr('id');
+                var wid = $(this).attr('id');
             var wswitch = document.querySelector('#'+wid);
                 if (wswitch.checked === true) {
 
