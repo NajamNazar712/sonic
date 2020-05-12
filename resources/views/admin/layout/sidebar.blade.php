@@ -491,6 +491,22 @@
 
                         </li>
                     @endif
+
+<!-- mycode -->
+
+                    @if (session('role_id') == 1 || count(array_intersect([333,334], session('permissions'))) !== 0)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Commission</span></a>
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(333, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.dashboard.userwise') }}">Dasbboard (User Wise)</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(334, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.dashboard.overall') }}">Dashboard (Overall)</a></li>
+                                @endif
+                            </ul>
+
+                        </li>
+                    @endif
                 </ul>
             </li>
 

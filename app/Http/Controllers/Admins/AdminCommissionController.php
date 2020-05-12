@@ -17,7 +17,7 @@ class AdminCommissionController extends Controller
     public function __construct() {
         $this->middleware('auth:admin');
 
-        $this->middleware('Permission');
+        $this->middleware('Permission'); 
     }	
 
 
@@ -25,7 +25,7 @@ class AdminCommissionController extends Controller
 
     	 $TierType = TierType::all(['id','name']);
          $commission_percentage = GlobalSettings::where('type',"commission_percentage")->get();
-      return view('admin.settings.commission.index')->with(['TierType'=>$TierType, 'commission_percentage'=>$commission_percentage]);
+         return view('admin.settings.commission.index')->with(['TierType'=>$TierType, 'commission_percentage'=>$commission_percentage]);
     
     }
 
@@ -84,19 +84,19 @@ class AdminCommissionController extends Controller
          $tier->sales_status = $request->has('sales_person_checkbox')? 1:0;
          $tier->commission = $request->tier_commission;
         
-        foreach($commission_percentage as $percentage){
-             if($percentage->setting_value >= $request->tier_commission)
+        // foreach($commission_percentage as $percentage){
+        //      if($percentage->setting_value >= $request->tier_commission)
          
-            {
+        //     {
                 
                  $tier->save();
                  return redirect()->back()->with(['status'=>1,'success'=>"Tier has been Edited successfully!"]);
-            }
-            else
-            {
-                 return redirect()->back()->with(['status'=>0,'error'=>"You have enter greater value of commission percentage"]);
-            }
-             }
+          //  }
+            // else
+            // {
+            //      return redirect()->back()->with(['status'=>0,'error'=>"You have enter greater value of commission percentage"]);
+            // }
+            //  }
         
         
     }
@@ -132,20 +132,37 @@ class AdminCommissionController extends Controller
          $tier->sales_status = $request->has('sales_person_checkbox')? 1:0;
           $tier->commission = $request->tier_commission;
             $tier->status = 1;
-         foreach($commission_percentage as $percentage){
-             if($percentage->setting_text >= $request->tier_commission)
+        //  foreach($commission_percentage as $percentage){
+        //      if($percentage->setting_text >= $request->tier_commission)
          
-            {
+        //     {
                 
                  $tier->save();
                  return redirect()->back()->with(['status'=>1,'success'=>"Tier has been Added successfully!"]);
             }
-            else
-            {
-                 return redirect()->back()->with(['status'=>0,'error'=>"You have enter greater value of commission percentage"]);
-            }
-             }
+            // else
+            // {
+            //      return redirect()->back()->with(['status'=>0,'error'=>"You have enter greater value of commission percentage"]);
+            // }
+            //  }
         
-        }
+     //   }
+
+     public function dashboard_userwise_index(){
+        // $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
+        // return view('admin.commission.dashboard_userwise')->with(['shippers'=>$shippers]);
+
+        $today = Carbon::now()->endOfDay();
+            $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+            $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
+            return view('admin.commission.dashboard_userwise')->with(['shippers'=>$shippers,'today' => $today, 'thirtyday' => $thirtyDays]);
+
+     }
+
+     public function dashboard_overall_index(){
+
+        return view('admin.commission.dashboard_overall');
+
+    }
        
 }

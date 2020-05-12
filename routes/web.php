@@ -321,7 +321,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
-
+        
+         //commision dashboard routes
+    // Route::prefix('commission')->name('commission.')->group(function () {
+       // Route::prefix('dashboard')->name('dashboard.')->group(function () {
+            Route::get('userwise', 'Admins\AdminCommissionController@dashboard_userwise_index')->name('userwise');
+            Route::get('overall', 'Admins\AdminCommissionController@dashboard_overall_index')->name('overall');
+       // });
+   // });
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::get('index', 'Dashboard\BusinessProjectionRetentionController@dashboard')->name('index');
             Route::get('list', 'Dashboard\BusinessProjectionRetentionController@dashboard_list')->name('list');
@@ -886,6 +893,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
         Route::post('update', 'Admins\AdminTrackingController@cx_quick_tracking_update_consignee_info_and_special_instructions')->name('update');
     });
+    
     Route::prefix('user_management')->name('user_management.')->group(function() {
         Route::prefix('users')->name('users.')->group(function() {
             Route::get('', 'Admins\UserManagementController@user_index')->name('index');
@@ -1063,7 +1071,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add','Admins\AdminMonthClosingController@add_shipment')->name('add');
         Route::post('confirm','Admins\AdminMonthClosingController@return_confirm_shipment')->name('confirm');
         Route::post('reattempt','Admins\AdminMonthClosingController@return_reattempt_shipment')->name('reattempt');
-    });
+    });  
 
 
     Route::prefix('sameday')->name('sameday.')->group(function (){
@@ -1572,9 +1580,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         //commission routes
         Route::prefix('commission')->name('commission.')->group(function () {
             Route::get('', 'Admins\AdminCommissionController@index')->name('index');
-             Route::get('list', 'Admins\AdminCommissionController@tier_list')->name('list');
-             Route::post('add', 'Admins\AdminCommissionController@add_sales_tier')->name('add');
-             Route::post('status', 'Admins\AdminCommissionController@commission_status')->name('status');
+            Route::get('list', 'Admins\AdminCommissionController@tier_list')->name('list');
+            Route::post('add', 'Admins\AdminCommissionController@add_sales_tier')->name('add');
+            Route::post('status', 'Admins\AdminCommissionController@commission_status')->name('status');
             Route::post('details','Admins\AdminCommissionController@editSalesTierView')->name('details');
             Route::post('edit','Admins\AdminCommissionController@editSalesTier')->name('edit');
             Route::prefix('percentage')->name('percentage.')->group(function () {
@@ -1698,5 +1706,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('search','Admins\CoordinatesController@address_search')->name('search.address');
         });
     });
+     
 });
 
