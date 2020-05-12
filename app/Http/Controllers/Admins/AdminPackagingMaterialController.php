@@ -384,7 +384,7 @@ class AdminPackagingMaterialController extends Controller
                 return number_format($shipment->amount);
             })
             ->addColumn('action',function ($packaging) {
-                if (($packaging->status_id !== 4 && $packaging->status_id !== 5) && (session('role_id') == 1 || in_array(80, session('permissions')) || in_array(226, session('permissions')) || in_array(227, session('permissions')))) {
+                if ((session('role_id') == 1) || ($packaging->status_id !== 4 && $packaging->status_id !== 5) && (in_array(80, session('permissions')) || in_array(226, session('permissions')) || in_array(227, session('permissions')))) {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
