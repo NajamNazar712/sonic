@@ -402,7 +402,7 @@ class AdminPackagingMaterialController extends Controller
                     if ($packaging->status_id >= 2) {
                         $dropdown .= '<button type="button" class="dropdown-item grn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Print GRN</div></button>';
                     }
-                    if ($packaging->status_id == 2 && $packaging->shipper_status_id == 1 && (session('role_id') == 1 || in_array(80, session('permissions')))) {
+                    if ((session('role_id') == 1) || $packaging->status_id == 2 && $packaging->shipper_status_id == 1 && (in_array(80, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
                     }
                     if($packaging->confirmed_date != null){
