@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Commission\TierType;
 use App\Http\Models\Commission\SalesTier;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Commission\SalesCommissionExternalUser;
+use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\Admin\Admin;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -116,5 +121,170 @@ class AdminCommissionController extends Controller
             $tier->save();
             return redirect()->back()->with(['status'=>1,'success'=>"Tier has been Added successfully!"]);
     }
+
+    public function setCommission($ids){
+
+        $commission_percentage = '';
+        $user_ids = explode(',' , $ids);
+        $users = User::whereIn('id', $user_ids)->select('id', 'name')->get();
+        $user_names = '';
+        foreach($users as $user){
+            $user_names = $user_names . $user->name . ' (' . $user->id . ') ';
+        }
+       // dd($user_names);
+        $settings = GlobalSettings::where('type', 'commission_percentage');
+        if($settings->exists()){
+            $settings = $settings->first();
+            $commission_percentage = $settings->text;
+        }
+        $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
+        $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
+        $users = array();
+        $sales = array();
+        $all_users = array();
+        foreach ($admin_users as $u){
+            if($u->department_id != 7){
+                $users[] = array('id' => $u->id, 'text' => $u->name);
+            }else{
+                $sales[] = array('id' => $u->id, 'text' => $u->name);
+            }
+        }
+        $all_users['results'][0]['text'] = 'Sales';
+        $all_users['results'][0]['children'] = $sales;
+        $all_users['results'][1]['text'] = 'Admins';
+        $all_users['results'][1]['children'] = $users;
+        $all_users['pagination']['more'] = true;
+
+        return view('admin.settings.commission.set_commission')->with(['user_ids' => $user_ids, 'user_names' => $user_names,'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
+    } 
+    
+    public function set_commission_submit(Request $request,$ids){
+       // $user_ids = $ids;
+       $user_ids = explode(',' , $ids);
+       $users='';
+        $users = User::whereIn('id', $user_ids)->select('id', 'name')->get();
+        // $users = User::whereIn('id', $user_ids)->select('id', 'name')->get();
+        foreach($users as $user){
+          $shipper_id = $user->id;
+        // }
+        // if($request->has('user_id')){
+            $total_commission = $request->total_commission;
+            $users_count = count($request->user_id);
+
+            $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
+            if($sales_commission->exists()){
+                $sales_commission = $sales_commission->first();
+                $sales_commission->commission_users_count = $users_count;
+                $sales_commission->commission = $total_commission;
+                $sales_commission->updated_by = Auth::id();
+                $sales_commission->save();
+                $sales_commission_id = $sales_commission->id;
+                $actual_commission = 0;
+                SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
+                foreach($request->tier_id as $row_id => $tier){
+                    $sales_tier = SalesTier::find($tier);
+                    if($sales_tier){
+                        $sales_commission_user = new SalesCommissionUser();
+                        $sales_commission_user->sales_commission_id = $sales_commission_id;
+                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                        $sales_commission_user->tier_id = $tier;
+                        if($sales_tier->tier_type == 1){
+                            $sales_commission_user->user_id = $request->user_id[$row_id];
+                        }else if($sales_tier->tier_type == 2){
+                            $external_user = new SalesCommissionExternalUser();
+                            $external_user->name = $request->user_id[$row_id];
+                            $external_user->shipper_id = $shipper_id;
+                            $external_user->save();
+                            $sales_commission_user->user_id = $external_user->id;
+                        }
+                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                        $actual_commission += $request->commission_percentage[$row_id];
+                        $sales_commission_user->save();
+                    }
+                }
+                $sales_commission->commission = $actual_commission;
+                $sales_commission->save();
+
+            }else{
+                $sales_commission = new SalesCommission();
+                $sales_commission->shipper_id = $shipper_id;
+                $sales_commission->commission_users_count = $users_count;
+                $sales_commission->commission = $total_commission;
+                $sales_commission->updated_by = Auth::id();
+                $sales_commission->save();
+                $sales_commission_id = $sales_commission->id;
+                $actual_commission = 0;
+                foreach($request->tier_id as $row_id => $tier){
+                    $sales_tier = SalesTier::find($tier);
+                    if($sales_tier){
+                        $sales_commission_user = new SalesCommissionUser();
+                        $sales_commission_user->sales_commission_id = $sales_commission_id;
+                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                        $sales_commission_user->tier_id = $tier;
+                        if($sales_tier->tier_type == 1){
+                            $sales_commission_user->user_id = $request->user_id[$row_id];
+                        }else if($sales_tier->tier_type == 2){
+                            $external_user = new SalesCommissionExternalUser();
+                            $external_user->name = $request->user_id[$row_id];
+                            $external_user->shipper_id = $shipper_id;
+                            $external_user->save();
+                            $sales_commission_user->user_id = $external_user->id;
+                        }
+                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                        $actual_commission += $request->commission_percentage[$row_id];
+                        $sales_commission_user->save();
+                    }
+                }
+                $sales_commission->commission = $actual_commission;
+                $sales_commission->save();
+            }
+
+        }
+
+
+        //Sales Commissison End
+        return redirect(route('admin.accounts.pending'))->with('success','All Rates are Updated');
+    }
+    public function approveCommission($ids){
+
+        $commission_percentage = '';
+        $user_ids = explode(',' , $ids);
+        $users = User::whereIn('id', $user_ids)->select('id', 'name')->get();
+        $user_names = '';
+        foreach($users as $user){
+            $user_names = $user_names . $user->name;
+        }
+        $existing_commission_array = array();
+        foreach($user_ids  as $user_Id){
+            $sale_commission = SalesCommission::where('shipper_id', $user_Id)->first();
+            if($sale_commission){
+                $sale_commission_users = SalesCommissionUser::where('sales_commission_id', $sale_commission->id)->get();
+                if($sale_commission_users){
+                    foreach($sale_commission_users as $index => $sale_commission_user){
+                        $sales_tier = SalesTier::find($sale_commission_user->tier_id);
+                        if($sales_tier){
+                            $existing_commission_array[$user_Id][$index]['sales_commission_id'] = $sale_commission_user->sales_commission_id;
+                            $existing_commission_array[$user_Id][$index]['tier_type_id'] = $sales_tier->tier_type;
+                            $existing_commission_array[$user_Id][$index]['tier_id'] = $sale_commission_user->tier_id;
+                            $existing_commission_array[$user_Id][$index]['tier_name'] = $sales_tier->tier_name;
+                            if($sales_tier->tier_type == 1){
+                                $com_admin = Admin::find($sale_commission_user->user_id);
+                                $existing_commission_array[$user_Id][$index]['user_name'] = $com_admin->name;
+                                $existing_commission_array[$user_Id][$index]['user_id'] = $com_admin->id;
+                            }else if($sales_tier->tier_type == 2){
+                                $external_user = SalesCommissionExternalUser::find($sale_commission_user->user_id);
+                                $existing_commission_array[$user_Id][$index]['user_name'] = $external_user->name;
+                            }
+                            $existing_commission_array[$user_Id][$index]['commission'] = $sale_commission_user->commission;
+                        }
+                    } 
+                }
+            }
+            
+        }
+
+      
+        return view('admin.settings.commission.approve_commission')->with(['user_ids' => $user_ids, 'users'=>$users,'existing_commission_array' => $existing_commission_array]);
+    } 
 
 }
