@@ -66,6 +66,17 @@ class ShipmentChargesController extends Controller
             if ($weight_charge->exists()) {
                 $weight_charge = $weight_charge->first();
 
+                $base = FALSE;
+                if ($account_type_id == 2) {
+                    $base_weight_charge = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('id', '<', $weight_charge->id)->where('base', 1)->orderBy('id', 'DESC');
+
+                    if ($base_weight_charge->exists()) {
+                        $base_weight_charge = $base_weight_charge->first();
+
+                        $base = TRUE;
+                    }
+                }
+
                 $today = Carbon::today();
 
                 if ($account_type_id == 1) {
@@ -121,39 +132,70 @@ class ShipmentChargesController extends Controller
                 if ($weight_charge->weight_addition == 0 || $account_type_id == 2) {
                     if ($type_of_charges == 0) {
                         $charges = $weight_charge->local_or_6hr;
-                    }
-                    else {
+                    } else {
                         if ($class == 1) {
                             if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
                                 $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
-                            }
-                            else {
+                            } else {
                                 $charges = intval($weight_charge->national_charges_class_1);
                             }
-                        }
-                        else if ($class == 2) {
+                        } else if ($class == 2) {
                             if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
                                 $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
-                            }
-                            else {
+                            } else {
                                 $charges = intval($weight_charge->national_charges_class_2);
                             }
-                        }
-                        else if ($class == 3) {
+                        } else if ($class == 3) {
                             if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
                                 $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
-                            }
-                            else {
+                            } else {
                                 $charges = intval($weight_charge->national_charges_class_3);
                             }
-                        }
-                        else {
+                        } else {
                             $charges = $weight_charge->national_charges_class_0;
                         }
                     }
 
                     if ($account_type_id == 2) {
-                        $charges = $charges * ROUND($weight, 0);
+                        if ($base) {
+                            $weight_difference = $weight - $base_weight_charge->range_down;
+
+                            if ($weight_difference > 0) {
+                                $charges = $charges * (ROUND($weight_difference, 0));
+                            }
+                            else {
+                                $charges = 0;
+                            }
+
+                            if ($type_of_charges == 0) {
+                                $charges += $base_weight_charge->local_or_6hr;
+                            } else {
+                                if ($class == 1) {
+                                    if (strpos($base_weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                        $charges += ((floatval(str_replace('%', '', $base_weight_charge->national_charges_class_1)) / 100) * $base_weight_charge->national_charges_class_0) + $base_weight_charge->national_charges_class_0;
+                                    } else {
+                                        $charges += intval($base_weight_charge->national_charges_class_1);
+                                    }
+                                } else if ($class == 2) {
+                                    if (strpos($base_weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                        $charges += ((floatval(str_replace('%', '', $base_weight_charge->national_charges_class_2)) / 100) * $base_weight_charge->national_charges_class_0) + $base_weight_charge->national_charges_class_0;
+                                    } else {
+                                        $charges += intval($base_weight_charge->national_charges_class_2);
+                                    }
+                                } else if ($class == 3) {
+                                    if (strpos($base_weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                        $charges += ((floatval(str_replace('%', '', $base_weight_charge->national_charges_class_3)) / 100) * $base_weight_charge->national_charges_class_0) + $base_weight_charge->national_charges_class_0;
+                                    } else {
+                                        $charges += intval($base_weight_charge->national_charges_class_3);
+                                    }
+                                } else {
+                                    $charges += $base_weight_charge->national_charges_class_0;
+                                }
+                            }
+                        }
+                        else {
+                            $charges = $charges * ROUND($weight, 0);
+                        }
                     }
 
                     if (strpos($discount, '%') !== FALSE) {
