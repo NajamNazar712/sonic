@@ -3727,7 +3727,7 @@ class NotificationsController extends Controller
                $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 8, 9, 10, 20, 25, 30, 46])->where('status', 1);
 
                if ($admins->exists()) {
-                   $cc = array_merge($cc, $admins->pluck('email')->toArray());
+                   $cc = $admins->pluck('email')->toArray();
                }
 
                $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1);
