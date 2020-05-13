@@ -519,7 +519,8 @@ class AdminTrackingController extends Controller
 
                 return $dropdown;
             });
-        if($tracking = $request->get('search_tracking') || $shipper = $request->get('search_shipper') || $phone_no = $request->get('search_phone_no') || $order_id = $request->get('search_order_id')){
+        if($tracking = $request->get('search_tracking') || $shipper = $request->get('search_shipper') || $phone_no = $request->get('search_phone_no') || $order_id = $request->get('search_order_id')
+        || $search_consignee_name = $request->get('search_consignee_name')|| $search_consignee_address = $request->get('search_consignee_address')){
             if($tracking = $request->get('search_tracking')){
                 $datatable->where('shipments.tracking_number', 'LIKE', '%'. $tracking . '%');
             }
@@ -532,12 +533,20 @@ class AdminTrackingController extends Controller
             if($order_id = $request->get('search_order_id')){
                 $datatable->where('shipments.order_id', 'LIKE', '%'. $order_id . '%');
             }
+            if($order_id = $request->get('search_consignee_name')){
+                $datatable->where('shipments.consignee_name', 'LIKE', '%'. $search_consignee_name . '%');
+            }
+            if($order_id = $request->get('search_consignee_address')){
+                $datatable->where('shipments.consignee_address', 'LIKE', '%'. $search_consignee_address . '%');
+            }
         }
         else{
                 $datatable->where('shipments.tracking_number', null);
                 $datatable->where('u.id', null);
                 $datatable->where('shipments.consignee_phone_number_1', null);
                 $datatable->where('shipments.order_id', null);
+                $datatable->where('shipments.consignee_name', null);
+                $datatable->where('shipments.consignee_address', null);
         }
             return $datatable->make(true);
     }
