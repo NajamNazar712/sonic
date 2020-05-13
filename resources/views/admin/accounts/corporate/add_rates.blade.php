@@ -66,10 +66,7 @@
                                                     <label class="card-title">Range Down</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Weight Addition</label>
-                                                </div>
-                                                <div class="col-2 text-center">
-                                                    <label class="card-title">KG Range</label>
+                                                    <label class="card-title">Base</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Flat Charges/KG (Local)</label>
@@ -112,15 +109,6 @@
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="OvernightDoorSwitch{{$index_row}}" class="switchery weightAdditionDoorOvernight" data-color="success" data-size="sm" name="on_door_wa_switch[{{$index_row}}]"/>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-2 text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="on_door_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
-                                                            </div>
-                                                        </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -191,10 +179,7 @@
                                                     <label class="card-title">Range Down</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Weight Addition</label>
-                                                </div>
-                                                <div class="col-2 text-center">
-                                                    <label class="card-title">KG Range</label>
+                                                    <label class="card-title">Base</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Flat Charges/KG (Local)</label>
@@ -235,15 +220,6 @@
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="OvernightHubSwitch{{$index_row}}" class="switchery weightAdditionHubOvernight" data-color="success" data-size="sm" name="on_hub_wa_switch[{{$index_row}}]"/>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-2 text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="on_hub_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
-                                                            </div>
-                                                        </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -635,10 +611,7 @@
                                                     <label class="card-title">Range Down</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Weight Addition</label>
-                                                </div>
-                                                <div class="col-2 text-center">
-                                                    <label class="card-title">KG Range</label>
+                                                    <label class="card-title">Base</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Flat Charges/KG (Local)</label>
@@ -679,15 +652,6 @@
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="OverlandDoorSwitch{{$index_row}}" class="switchery weightAdditionDoorOverland" data-color="success" data-size="sm" name="ol_door_wa_switch[{{$index_row}}]"/>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-2 text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="ol_door_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
-                                                            </div>
-                                                        </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -755,10 +719,7 @@
                                                     <label class="card-title">Range Down</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Weight Addition</label>
-                                                </div>
-                                                <div class="col-2 text-center">
-                                                    <label class="card-title">KG Range</label>
+                                                    <label class="card-title">Base</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Flat Charges/KG (Local)</label>
@@ -799,15 +760,6 @@
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="OverlandHubSwitch{{$index_row}}" class="switchery weightAdditionHubOverland" data-color="success" data-size="sm" name="ol_hub_wa_switch[{{$index_row}}]"/>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-2 text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="ol_hub_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
-                                                            </div>
-                                                        </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -1194,10 +1146,7 @@
                                                     <label class="card-title">Range Down</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Weight Addition</label>
-                                                </div>
-                                                <div class="col-2 text-center">
-                                                    <label class="card-title">KG Range</label>
+                                                    <label class="card-title">Base</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Flat Charges/KG (Local)</label>
@@ -1238,15 +1187,6 @@
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="DetainDoorSwitch{{$index_row}}" class="switchery weightAdditionDoorDetain" data-color="success" data-size="sm" name="detain_door_wa_switch[{{$index_row}}]"/>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-2 text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="detain_door_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
-                                                            </div>
-                                                        </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -1316,10 +1256,7 @@
                                                     <label class="card-title">Range Down</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Weight Addition</label>
-                                                </div>
-                                                <div class="col-2 text-center">
-                                                    <label class="card-title">KG Range</label>
+                                                    <label class="card-title">Base</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Flat Charges/KG (Local)</label>
@@ -1360,15 +1297,6 @@
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="DetainDoorSwitch{{$index_row}}" class="switchery weightAdditionHubDetain" data-color="success" data-size="sm" name="detain_hub_wa_switch[{{$index_row}}]"/>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-2 text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="detain_hub_wa_spkg[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
-                                                            </div>
-                                                        </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -1757,10 +1685,7 @@
                                                     <label class="card-title">Range Down</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Weight Addition</label>
-                                                </div>
-                                                <div class="col-2 text-center">
-                                                    <label class="card-title">KG Range</label>
+                                                    <label class="card-title">Base</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">6hr Charges</label>
@@ -1792,13 +1717,6 @@
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="SamedayDoorSwitch{{$index_row}}" class="switchery weightAdditionDoorSameday" data-color="success" data-size="sm" name="sameday_door_wa_switch[{{$index_row}}]"/>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-2 text-center">
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_door_wa_spkg[{{$index_row}}]">
-                                                            </div>
-                                                        </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -1852,10 +1770,7 @@
                                                     <label class="card-title">Range Down</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Weight Addition</label>
-                                                </div>
-                                                <div class="col-2 text-center">
-                                                    <label class="card-title">KG Range</label>
+                                                    <label class="card-title">Base</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">6hr Charges</label>
@@ -1887,13 +1802,6 @@
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="SamedayHubSwitch{{$index_row}}" class="switchery weightAdditionHubSameday" data-color="success" data-size="sm" name="sameday_hub_wa_switch[{{$index_row}}]"/>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-2 text-center">
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_hub_wa_spkg[{{$index_row}}]">
-                                                            </div>
-                                                        </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -2663,30 +2571,7 @@
         var returnChargesSwitch = document.querySelector('.switchery.returnChargesOvernight');
         var fuelChargesSwitch = document.querySelector('.switchery.fuelSurchargeOvernight');
 
-        $('.weightAdditionDoorOvernight').on('change',function(){
-            var wid = $(this).attr('id');
-            var wswitch = document.querySelector('#'+wid);
-            if (wswitch.checked === true) {
 
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-
-            } else if (wswitch.checked === false) {
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-            }
-        });
-        $('.weightAdditionHubOvernight').on('change',function(){
-            var wid = $(this).attr('id');
-            var wswitch = document.querySelector('#'+wid);
-            if (wswitch.checked === true) {
-
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-
-            } else if (wswitch.checked === false) {
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-            }
-        });
 
         function masks() {
 
@@ -2732,7 +2617,7 @@
             var row_count = on_door_count-1;
             var on_door_range_down = parseFloat($('#on_door_range_down' + row_count).val());
             var on_door_new_range_down = on_door_range_down + 0.01;
-            let htmdiv = '<div class="row" id="on_door_weight_row'+on_door_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="on_door_range_up'+on_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="' + on_door_new_range_down + '" name="on_door_range_up['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="on_door_range_down'+on_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_range_down['+on_door_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDoorOvernight'+on_door_count+'" data-color="success" data-size="sm" name="on_door_wa_switch['+on_door_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_door_wa_spkg['+on_door_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_local_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_0_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_1_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_2_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_3_charges['+on_door_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv = '<div class="row" id="on_door_weight_row'+on_door_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="on_door_range_up'+on_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="' + on_door_new_range_down + '" name="on_door_range_up['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="on_door_range_down'+on_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_range_down['+on_door_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDoorOvernight'+on_door_count+'" data-color="success" data-size="sm" name="on_door_wa_switch['+on_door_count+']"/></div></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_local_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_0_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_1_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_2_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_3_charges['+on_door_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-overnight').append(htmdiv);
             var switches = document.querySelector('.switchery.weightAdditionDoorOvernight'+on_door_count);
@@ -2750,17 +2635,6 @@
 
             masks();
 
-            switches.onchange = function () {
-
-                if (switches.checked === true) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-                } else if (switches.checked === false) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-                }
-
-            };
-
             $("#on_door_weight_row"+on_door_count+" .validated").each(function(){
                 $( this ).rules( "add", {
                     required: true,
@@ -2776,7 +2650,7 @@
             var on_hub_range_down = parseFloat($('#on_hub_range_down' + row_count).val());
             var on_hub_new_range_down = on_hub_range_down + 0.01;
 
-            let htmdiv = '<div class="row" id="on_hub_weight_row'+on_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="on_hub_range_up'+ on_hub_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+on_hub_new_range_down+'" name="on_hub_range_up['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="on_hub_range_down'+ on_hub_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_range_down['+on_hub_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionHubOvernight'+on_hub_count+'" data-color="success" data-size="sm" name="on_hub_wa_switch['+on_hub_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_hub_wa_spkg['+on_hub_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_local_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_0_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_1_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_2_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_3_charges['+on_hub_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv = '<div class="row" id="on_hub_weight_row'+on_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="on_hub_range_up'+ on_hub_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+on_hub_new_range_down+'" name="on_hub_range_up['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="on_hub_range_down'+ on_hub_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_range_down['+on_hub_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionHubOvernight'+on_hub_count+'" data-color="success" data-size="sm" name="on_hub_wa_switch['+on_hub_count+']"/></div></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_local_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_0_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_1_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_2_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_3_charges['+on_hub_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.hub-weight-addition-overnight').append(htmdiv);
 
@@ -2794,15 +2668,7 @@
             });
 
             masks();
-            switches.onchange = function () {
-                if (switches.checked === true) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-                } else if (switches.checked === false) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
 
-                }
-
-            };
             $("#on_hub_weight_row"+on_hub_count+" .validated").each(function(){
                 $( this ).rules( "add", {
                     required: true,
@@ -2926,32 +2792,6 @@
         var returnChargesSwitchOverland = document.querySelector('.switchery.returnChargesOverland');
         var fuelChargesSwitchOL = document.querySelector('.switchery.fuelSurchargeOverland');
 
-        $('.weightAdditionDoorOverland').on('change',function() {
-            var wid = $(this).attr('id');
-
-            var wswitch = document.querySelector('#' + wid);
-            if (wswitch.checked === true) {
-
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-
-            } else if (wswitch.checked === false) {
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-            }
-        });
-        $('.weightAdditionHubOverland').on('change',function() {
-            var wid = $(this).attr('id');
-
-            var wswitch = document.querySelector('#' + wid);
-            if (wswitch.checked === true) {
-
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-
-            } else if (wswitch.checked === false) {
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-            }
-        });
         //Overland
 
 
@@ -2961,7 +2801,7 @@
             var ol_door_range_down = parseFloat($('#ol_door_range_down' + row_count).val());
             var ol_door_new_range_down = ol_door_range_down + 0.01;
 
-            let htmdiv1 = '<div class="row" id="ol_door_weight_row'+overland_door_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="ol_door_range_up'+ overland_door_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+ol_door_new_range_down+'" name="ol_door_range_down['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="ol_door_range_down'+ overland_door_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_range_down['+overland_door_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDoorOverland'+overland_door_count+'" data-color="success" data-size="sm" name="ol_door_wa_switch['+overland_door_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_door_wa_spkg['+overland_door_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_local_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_0_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_1_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_2_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_3_charges['+overland_door_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row" id="ol_door_weight_row'+overland_door_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="ol_door_range_up'+ overland_door_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+ol_door_new_range_down+'" name="ol_door_range_down['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="ol_door_range_down'+ overland_door_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_range_down['+overland_door_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDoorOverland'+overland_door_count+'" data-color="success" data-size="sm" name="ol_door_wa_switch['+overland_door_count+']"/></div></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_local_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_0_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_1_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_2_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_3_charges['+overland_door_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 ol_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-overland').append(htmdiv1);
 
@@ -2979,15 +2819,6 @@
             });
 
             masks();
-            switches.onchange = function () {
-                if (switches.checked === true) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-                } else if (switches.checked === false) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-                }
-
-            };
 
             $("#ol_weight_row"+overland_door_count+" .validated").each(function(){
                 $( this ).rules( "add", {
@@ -3003,7 +2834,7 @@
             var ol_hub_range_down = parseFloat($('#ol_hub_range_down' + row_count).val());
             var ol_hub_new_range_down = ol_hub_range_down + 0.01;
 
-            let htmdiv1 = '<div class="row" id="ol_hub_weight_row'+overland_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="ol_hub_range_up'+ overland_hub_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+ol_hub_new_range_down+'" name="ol_hub_range_up['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="ol_hub_range_down'+ overland_hub_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_range_down['+overland_hub_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionHubOverland'+overland_hub_count+'" data-color="success" data-size="sm" name="ol_hub_wa_switch['+overland_hub_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_hub_wa_spkg['+overland_hub_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_local_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_0_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_1_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_2_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_3_charges['+overland_hub_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row" id="ol_hub_weight_row'+overland_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="ol_hub_range_up'+ overland_hub_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+ol_hub_new_range_down+'" name="ol_hub_range_up['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="ol_hub_range_down'+ overland_hub_count +'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_range_down['+overland_hub_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionHubOverland'+overland_hub_count+'" data-color="success" data-size="sm" name="ol_hub_wa_switch['+overland_hub_count+']"/></div></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_local_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_0_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_1_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_2_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_3_charges['+overland_hub_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 ol_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.hub-weight-addition-overland').append(htmdiv1);
 
@@ -3021,15 +2852,6 @@
             });
 
             masks();
-            switches.onchange = function () {
-                if (switches.checked === true) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-                } else if (switches.checked === false) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-                }
-
-            };
 
             $("#ol_hub_weight_row"+overland_hub_count+" .validated").each(function(){
                 $( this ).rules( "add", {
@@ -3154,32 +2976,7 @@
         var returnChargesSwitchDetain = document.querySelector('.switchery.returnChargesDetain');
         var fuelChargesSwitchDetain = document.querySelector('.switchery.fuelSurchargeDetain');
 
-        $('.weightAdditionDoorDetain').on('change',function() {
-            var wid = $(this).attr('id');
 
-            var wswitch = document.querySelector('#' + wid);
-            if (wswitch.checked === true) {
-
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-
-            } else if (wswitch.checked === false) {
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-            }
-        });
-        $('.weightAdditionHubDetain').on('change',function() {
-            var wid = $(this).attr('id');
-
-            var wswitch = document.querySelector('#' + wid);
-            if (wswitch.checked === true) {
-
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-
-            } else if (wswitch.checked === false) {
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-            }
-        });
         //detain
 
 
@@ -3189,7 +2986,7 @@
             var detain_door_range_down = parseFloat($('#detain_door_range_down' + row_count).val());
             var detain_door_new_range_down = detain_door_range_down + 0.01;
 
-            let htmdiv1 = '<div class="row" id="detain_door_weight_row'+detain_door_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="detain_door_range_up'+detain_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+detain_door_new_range_down+'" name="detain_door_range_up['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="detain_door_range_down'+detain_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_range_down['+detain_door_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDoorDetain'+detain_door_count+'" data-color="success" data-size="sm" name="detain_door_wa_switch['+detain_door_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="detain_door_wa_spkg['+detain_door_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_local_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_0_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_1_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_2_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_3_charges['+detain_door_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row" id="detain_door_weight_row'+detain_door_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="detain_door_range_up'+detain_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+detain_door_new_range_down+'" name="detain_door_range_up['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="detain_door_range_down'+detain_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_range_down['+detain_door_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDoorDetain'+detain_door_count+'" data-color="success" data-size="sm" name="detain_door_wa_switch['+detain_door_count+']"/></div></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_local_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_0_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_1_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_2_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_3_charges['+detain_door_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="detain_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 detain_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-detain').append(htmdiv1);
 
@@ -3207,15 +3004,7 @@
             });
 
             masks();
-            switches.onchange = function () {
-                if (switches.checked === true) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-                } else if (switches.checked === false) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
 
-                }
-
-            };
 
             $("#detain_door_weight_row"+detain_door_count+" .validated").each(function(){
                 $( this ).rules( "add", {
@@ -3231,7 +3020,7 @@
             var detain_hub_range_down = parseFloat($('#detain_hub_range_down' + row_count).val());
             var detain_hub_new_range_down = detain_hub_range_down + 0.01;
 
-            let htmdiv1 = '<div class="row" id="detain_hub_weight_row'+detain_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="detain_hub_range_up'+detain_hub_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+detain_hub_new_range_down+'" name="detain_hub_range_up['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="detain_hub_range_down'+detain_hub_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_range_down['+detain_hub_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionHubDetain'+detain_hub_count+'" data-color="success" data-size="sm" name="detain_hub_wa_switch['+detain_hub_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="detain_hub_wa_spkg['+detain_hub_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_local_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_0_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_1_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_2_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_3_charges['+detain_hub_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row" id="detain_hub_weight_row'+detain_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="detain_hub_range_up'+detain_hub_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+detain_hub_new_range_down+'" name="detain_hub_range_up['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="detain_hub_range_down'+detain_hub_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_range_down['+detain_hub_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionHubDetain'+detain_hub_count+'" data-color="success" data-size="sm" name="detain_hub_wa_switch['+detain_hub_count+']"/></div></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_local_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_0_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_1_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_2_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_3_charges['+detain_hub_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="detain_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 detain_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.hub-weight-addition-detain').append(htmdiv1);
 
@@ -3249,15 +3038,7 @@
             });
 
             masks();
-            switches.onchange = function () {
-                if (switches.checked === true) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-                } else if (switches.checked === false) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
 
-                }
-
-            };
 
             $("#detain_hub_weight_row"+detain_hub_count+" .validated").each(function(){
                 $( this ).rules( "add", {
@@ -3383,32 +3164,7 @@
         var insuranceChargesSwitchSameday = document.querySelector('.switchery.insuranceChargessameday');
         var returnChargesSwitchSameday = document.querySelector('.switchery.returnChargesSameday');
         var fuelChargesSwitchSameday = document.querySelector('.switchery.fuelSurchargeSameday');
-        $('.weightAdditionDoorSameday').on('change',function() {
-            var wid = $(this).attr('id');
 
-            var wswitch = document.querySelector('#' + wid);
-            if (wswitch.checked === true) {
-
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-
-            } else if (wswitch.checked === false) {
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-            }
-        });
-        $('.weightAdditionHubSameday').on('change',function() {
-            var wid = $(this).attr('id');
-
-            var wswitch = document.querySelector('#' + wid);
-            if (wswitch.checked === true) {
-
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-
-            } else if (wswitch.checked === false) {
-                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-            }
-        });
         //detain
 
 
@@ -3418,7 +3174,7 @@
             var sameday_door_range_down = parseFloat($('#sameday_door_range_down' + row_count).val());
             var sameday_door_new_range_down = sameday_door_range_down + 0.01;
 
-            let htmdiv1 = '<div class="row" id="sameday_door_weight_row'+sameday_door_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="sameday_door_range_up'+sameday_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+sameday_door_new_range_down+'" name="sameday_door_range_up['+sameday_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="sameday_door_range_down'+sameday_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_range_down['+sameday_door_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDoorSameday'+sameday_door_count+'" data-color="success" data-size="sm" name="sameday_door_wa_switch['+sameday_door_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_door_wa_spkg['+sameday_door_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_local_charges['+sameday_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_door_class_0_charges['+sameday_door_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row" id="sameday_door_weight_row'+sameday_door_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="sameday_door_range_up'+sameday_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+sameday_door_new_range_down+'" name="sameday_door_range_up['+sameday_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="sameday_door_range_down'+sameday_door_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_range_down['+sameday_door_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDoorSameday'+sameday_door_count+'" data-color="success" data-size="sm" name="sameday_door_wa_switch['+sameday_door_count+']"/></div></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_local_charges['+sameday_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_door_class_0_charges['+sameday_door_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="sameday_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 sameday_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-sameday').append(htmdiv1);
 
@@ -3436,15 +3192,7 @@
             });
 
             masks();
-            switches.onchange = function () {
-                if (switches.checked === true) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-                } else if (switches.checked === false) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
 
-                }
-
-            };
 
             $("#sameday_door_weight_row"+sameday_door_count+" .validated").each(function(){
                 $( this ).rules( "add", {
@@ -3460,7 +3208,7 @@
             var sameday_hub_range_down = parseFloat($('#sameday_hub_range_down' + row_count).val());
             var sameday_hub_new_range_down = sameday_hub_range_down + 0.01;
 
-            let htmdiv1 = '<div class="row" id="sameday_hub_weight_row'+sameday_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="sameday_hub_range_up'+sameday_hub_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+sameday_hub_new_range_down+'" name="sameday_hub_range_up['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="sameday_hub_range_down'+sameday_hub_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_range_down['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionHubSameday'+sameday_hub_count+'" data-color="success" data-size="sm" name="sameday_hub_wa_switch['+sameday_hub_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_hub_wa_spkg['+sameday_hub_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_local_charges['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_hub_class_0_charges['+sameday_hub_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row" id="sameday_hub_weight_row'+sameday_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" id="sameday_hub_range_up'+sameday_hub_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="'+sameday_hub_new_range_down+'" name="sameday_hub_range_up['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="sameday_hub_range_down'+sameday_hub_count+'" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_range_down['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionHubSameday'+sameday_hub_count+'" data-color="success" data-size="sm" name="sameday_hub_wa_switch['+sameday_hub_count+']"/></div></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_local_charges['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_hub_class_0_charges['+sameday_hub_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="sameday_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 sameday_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.hub-weight-addition-sameday').append(htmdiv1);
 
@@ -3478,16 +3226,6 @@
             });
 
             masks();
-            switches.onchange = function () {
-                if (switches.checked === true) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-                } else if (switches.checked === false) {
-                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-
-                }
-
-            };
-
             $("#sameday_hub_weight_row"+sameday_hub_count+" .validated").each(function(){
                 $( this ).rules( "add", {
                     required: true,
