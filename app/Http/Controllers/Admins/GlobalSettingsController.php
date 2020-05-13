@@ -2181,6 +2181,32 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Successfully updated!');
     }
 
+     public function commission_percentage_index(){
+             $settings = GlobalSettings::where('type', 'commission_percentage')->first();
+            $percentage = '';
+            if($settings){
+                $percentage = $settings->text;
+            }
+            return view('admin.settings.commission.commission_percentage')->with(['commission_percentage' => $percentage]);
+        }
+
+     public function commission_percentage_update(Request $request){
+            $percentage = $request->commission_percentage;
+            $setting = GlobalSettings::where('type', 'commission_percentage');
+            if($setting->exists()){
+                $setting = $setting->first();
+                $setting->setting_value = 0;
+                $setting->text=$percentage;
+                $setting->save();
+            }else{
+                $setting = new GlobalSettings();
+                 $setting->text=$percentage;
+                $setting->type = 'commission_percentage';
+                $setting->save();
+            }
+            return redirect()->back()->with('success', 'Setting updated');
+        }
+
     public function return_reason_index(){
         return view('admin.settings.return.reason');
     }
@@ -2239,4 +2265,5 @@ class GlobalSettingsController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
     }
+
 }

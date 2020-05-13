@@ -1568,6 +1568,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+
+        //commission routes
+        Route::prefix('commission')->name('commission.')->group(function () {
+            Route::get('', 'Admins\AdminCommissionController@index')->name('index');
+             Route::get('list', 'Admins\AdminCommissionController@tier_list')->name('list');
+             Route::post('add', 'Admins\AdminCommissionController@add_sales_tier')->name('add');
+             Route::post('status', 'Admins\AdminCommissionController@commission_status')->name('status');
+            Route::post('details','Admins\AdminCommissionController@editSalesTierView')->name('details');
+            Route::post('edit','Admins\AdminCommissionController@editSalesTier')->name('edit');
+            Route::prefix('percentage')->name('percentage.')->group(function () {
+                    Route::get('', 'Admins\GlobalSettingsController@commission_percentage_index')->name('index');
+                    Route::post('', 'Admins\GlobalSettingsController@commission_percentage_update')->name('store');
+                });
+        });
+
+
         Route::prefix('return')->name('return.')->group(function () {
             Route::prefix('reason')->name('reason.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@return_reason_index')->name('index');
@@ -1577,7 +1593,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('edit', 'Admins\GlobalSettingsController@return_reason_edit')->name('edit');
             });
         });
+   
     });
+
+
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');

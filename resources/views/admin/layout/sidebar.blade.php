@@ -712,7 +712,7 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(314, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.sales.projection.reasons.index')}}">Projection Reasons</a></li>
-                                    @endif
+                                    @endif*
                                     @if (session('role_id') == 1 || in_array(318, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.sales.projection.shipments.index')}}">Projection Shipments</a></li>
                                     @endif
@@ -933,6 +933,20 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(330, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.blacklist.search.index') }}">Search Consignee</a></li>
+                                    @endif
+                                </ul>
+
+                            </li>
+                        @endif
+
+                          @if (session('role_id') == 1 || count(array_intersect([331, 332], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Commission</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(331, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.commission.index') }}">Sales Tier</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(332, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.commission.percentage.index') }}">Set Commission</a></li>
                                     @endif
                                 </ul>
 
