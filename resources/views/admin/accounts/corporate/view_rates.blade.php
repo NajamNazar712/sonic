@@ -123,7 +123,7 @@
                                                                     <div class="col text-center">
 
                                                                         <div class="form-group " style="padding-top: 8px;">
-                                                                            <input type="checkbox" class="switchery weightAdditionDoorOvernight" data-color="success" data-size="sm" {{ ($onweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
+                                                                            <input type="checkbox" class="switchery weightAdditionDoorOvernight" data-color="success" data-size="sm" {{ ($onweight->base == 1) ? 'checked' : '' }}  disabled/>
                                                                         </div>
                                                                     </div>
 
@@ -291,7 +291,7 @@
                                                                     <div class="col text-center">
 
                                                                         <div class="form-group " style="padding-top: 8px;">
-                                                                            <input type="checkbox" class="switchery weightAdditionHubOvernight" data-color="success" data-size="sm"  {{ ($onweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
+                                                                            <input type="checkbox" class="switchery weightAdditionHubOvernight" data-color="success" data-size="sm"  {{ ($onweight->base == 1) ? 'checked' : '' }}  disabled/>
                                                                         </div>
                                                                     </div>
 
@@ -971,7 +971,7 @@
                                                                     <div class="col text-center">
 
                                                                         <div class="form-group " style="padding-top: 8px;">
-                                                                            <input type="checkbox" class="switchery weightAdditionDoorOverland" data-color="success" data-size="sm" {{ ($olweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
+                                                                            <input type="checkbox" class="switchery weightAdditionDoorOverland" data-color="success" data-size="sm" {{ ($olweight->base == 1) ? 'checked' : '' }}  disabled/>
                                                                         </div>
                                                                     </div>
 
@@ -1136,7 +1136,7 @@
                                                                     <div class="col text-center">
 
                                                                         <div class="form-group " style="padding-top: 8px;">
-                                                                            <input type="checkbox" class="switchery weightAdditionHubOverland" data-color="success" data-size="sm" {{ ($olweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
+                                                                            <input type="checkbox" class="switchery weightAdditionHubOverland" data-color="success" data-size="sm" {{ ($olweight->base == 1) ? 'checked' : '' }}  disabled/>
                                                                         </div>
                                                                     </div>
 
@@ -1812,7 +1812,7 @@
                                                                     <div class="col text-center">
 
                                                                         <div class="form-group " style="padding-top: 8px;">
-                                                                            <input type="checkbox" class="switchery weightAdditionDoorDetain" data-color="success" data-size="sm" {{ ($detweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
+                                                                            <input type="checkbox" class="switchery weightAdditionDoorDetain" data-color="success" data-size="sm" {{ ($detweight->base == 1) ? 'checked' : '' }}  disabled/>
                                                                         </div>
                                                                     </div>
 
@@ -1980,7 +1980,7 @@
                                                                     <div class="col text-center">
 
                                                                         <div class="form-group " style="padding-top: 8px;">
-                                                                            <input type="checkbox" class="switchery weightAdditionHubDetain" data-color="success" data-size="sm" {{ ($detweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
+                                                                            <input type="checkbox" class="switchery weightAdditionHubDetain" data-color="success" data-size="sm" {{ ($detweight->base == 1) ? 'checked' : '' }}  disabled/>
                                                                         </div>
                                                                     </div>
 
@@ -2654,7 +2654,7 @@
                                                                     <div class="col text-center">
 
                                                                         <div class="form-group " style="padding-top: 8px;">
-                                                                            <input type="checkbox" class="switchery weightAdditionDoorSameday" data-color="success" data-size="sm" {{ ($sameweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
+                                                                            <input type="checkbox" class="switchery weightAdditionDoorSameday" data-color="success" data-size="sm" {{ ($sameweight->base == 1) ? 'checked' : '' }}  disabled/>
                                                                         </div>
                                                                     </div>
 
@@ -2781,7 +2781,7 @@
                                                                     <div class="col text-center">
 
                                                                         <div class="form-group " style="padding-top: 8px;">
-                                                                            <input type="checkbox" class="switchery weightAdditionHubSameday" data-color="success" data-size="sm" {{ ($sameweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
+                                                                            <input type="checkbox" class="switchery weightAdditionHubSameday" data-color="success" data-size="sm" {{ ($sameweight->base == 1) ? 'checked' : '' }}  disabled/>
                                                                         </div>
                                                                     </div>
 

@@ -87,7 +87,7 @@
                                             </div>
 
                                             @php
-                                                $index_row = 0;
+                                                $index_row = 1;
                                             @endphp
                                             @foreach($weight[1] as $index => $onweight)
                                                 @if($onweight->delivery_type_id == 1)
@@ -199,7 +199,7 @@
                                                 <div class="col-1"></div>
                                             </div>
                                             @php
-                                                $index_row = 0;
+                                                $index_row = 1;
                                             @endphp
                                             @foreach($weight[1] as $index => $onweight)
                                                 @if($onweight->delivery_type_id == 2)
@@ -631,7 +631,7 @@
                                                 <div class="col-1"></div>
                                             </div>
                                             @php
-                                                $index_row = 0;
+                                                $index_row = 1;
                                             @endphp
                                             @foreach($weight[2] as $index => $olweight)
                                                 @if($olweight->delivery_type_id == 1)
@@ -739,7 +739,7 @@
                                                 <div class="col-1"></div>
                                             </div>
                                             @php
-                                                $index_row = 0;
+                                                $index_row = 1;
                                             @endphp
                                             @foreach($weight[2] as $index => $olweight)
                                                 @if($olweight->delivery_type_id == 2)
@@ -1166,7 +1166,7 @@
                                                 <div class="col-1"></div>
                                             </div>
                                             @php
-                                                $index_row = 0;
+                                                $index_row = 1;
                                             @endphp
                                             @foreach($weight[3] as $index => $detweight)
                                                 @if($detweight->delivery_type_id == 1)
@@ -1276,7 +1276,7 @@
                                                 <div class="col-1"></div>
                                             </div>
                                             @php
-                                                $index_row = 0;
+                                                $index_row = 1;
                                             @endphp
                                             @foreach($weight[3] as $index => $detweight)
                                                 @if($detweight->delivery_type_id == 2)
@@ -1697,7 +1697,7 @@
 
                                             </div>
                                             @php
-                                                $index_row = 0;
+                                                $index_row = 1;
                                             @endphp
                                             @foreach($weight[4] as $index => $sameweight)
                                                 @if($sameweight->delivery_type_id == 1)
@@ -1782,7 +1782,7 @@
 
                                             </div>
                                             @php
-                                                $index_row = 0;
+                                                $index_row = 1;
                                             @endphp
                                             @foreach($weight[4] as $index => $sameweight)
                                                 @if($sameweight->delivery_type_id == 2)
@@ -2612,7 +2612,7 @@
         $('body').on('click','.on_weight_close',function () {
             $(this).parent().parent().remove();
         });
-        var on_door_count = $('.on_door_weight_row').length;
+        var on_door_count = $('.on_door_weight_row').length + 1;
         $('body').on('click','#waddition_btn',function () {
             var row_count = on_door_count-1;
             var on_door_range_down = parseFloat($('#on_door_range_down' + row_count).val());
@@ -2643,7 +2643,7 @@
             });
             on_door_count++;
         });
-        var on_hub_count = $('.on_hub_weight_row').length;
+        var on_hub_count = $('.on_hub_weight_row').length + 1;
 
         $('body').on('click','#hub_waddition_btn',function () {
             var row_count = on_hub_count-1;
@@ -2795,7 +2795,7 @@
         //Overland
 
 
-        var overland_door_count = $('.ol_door_weight_row').length;
+        var overland_door_count = $('.ol_door_weight_row').length + 1;
         $('body').on('click','#overland_door_weightadd',function () {
             var row_count = overland_door_count-1;
             var ol_door_range_down = parseFloat($('#ol_door_range_down' + row_count).val());
@@ -2828,7 +2828,7 @@
             });
             overland_door_count++;
         });
-        var overland_hub_count = $('.ol_hub_weight_row').length;
+        var overland_hub_count = $('.ol_hub_weight_row').length + 1;
         $('body').on('click','#overland_hub_weightadd',function () {
             var row_count = overland_hub_count-1;
             var ol_hub_range_down = parseFloat($('#ol_hub_range_down' + row_count).val());
@@ -2980,7 +2980,7 @@
         //detain
 
 
-        var detain_door_count = $('.detain_door_weight_row').length;
+        var detain_door_count = $('.detain_door_weight_row').length + 1;
         $('body').on('click','#detain_door_weightadd',function () {
             var row_count = detain_door_count-1;
             var detain_door_range_down = parseFloat($('#detain_door_range_down' + row_count).val());
@@ -3014,7 +3014,7 @@
             });
             detain_door_count++;
         });
-        var detain_hub_count = $('.detain_hub_weight_row').length;
+        var detain_hub_count = $('.detain_hub_weight_row').length + 1;
         $('body').on('click','#detain_hub_weightadd',function () {
             var row_count = detain_hub_count-1;
             var detain_hub_range_down = parseFloat($('#detain_hub_range_down' + row_count).val());
@@ -3168,7 +3168,7 @@
         //detain
 
 
-        var sameday_door_count = $('.sameday_door_weight_row').length;
+        var sameday_door_count = $('.sameday_door_weight_row').length + 1;
         $('body').on('click','#sameday_door_weightadd',function () {
             var row_count = sameday_door_count-1;
             var sameday_door_range_down = parseFloat($('#sameday_door_range_down' + row_count).val());
@@ -3202,7 +3202,7 @@
             });
             sameday_door_count++;
         });
-        var sameday_hub_count = $('.sameday_hub_weight_row').length;
+        var sameday_hub_count = $('.sameday_hub_weight_row').length + 1;
         $('body').on('click','#sameday_hub_weightadd',function () {
             var row_count = sameday_hub_count-1;
             var sameday_hub_range_down = parseFloat($('#sameday_hub_range_down' + row_count).val());
