@@ -382,7 +382,7 @@ class OrderManagementController extends Controller
     }
 
     public function telenor_shipments_arrival(Request $request){
-        $shipments = Shipment::where('user_id', 119)->where('shipper_status_id', 1);
+        $shipments = Shipment::where('user_id', 4213)->where('shipper_status_id', 1);
 
         if ($shipments->exists()) {
             $shipments = $shipments->get();
