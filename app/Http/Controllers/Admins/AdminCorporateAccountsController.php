@@ -351,10 +351,10 @@ class AdminCorporateAccountsController extends Controller
             'invoicing_date.*.numeric' => 'Invoicing Cycle field must be numeric.',
             'ppc_charges.required' => 'Per product charges field id required',
             'psf_charges.required' => 'Per square foot charges field id required',
-            'storage_type.*.required' => 'Storage type field is required.',
-            'storage_type_charges.*.required' => 'Storage type charges field is required',
+            'storage_type.*.required_if' => 'Storage type field is required.',
+            'storage_type_charges.*.required_if' => 'Storage type charges field is required',
             'storage_type.*.numeric' => 'Storage type field must be numeric.',
-            'storage_type_charges.*.required' => 'Storage type charges field must be numeric',
+            'storage_type_charges.*.numeric' => 'Storage type charges field must be numeric',
             'packing_type.*.required' => 'Packing type field is required',
             'packing_charges.*.required' => 'Packing charges field is required',
             'packing_charges.*.numeric' => 'Packing charges field must be numeric',
@@ -539,8 +539,8 @@ class AdminCorporateAccountsController extends Controller
                 'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
                 'ppc_charges' => 'required_if:ppc_switch,==,on',
                 'psf_charges' => 'required_if:psf_switch,==,on',
-                'storage_type.*' => 'required',
-                'storage_type_charges.*' => 'required|numeric',
+                'storage_type.*' => 'required_if:storage_charges_switch,==,on',
+                'storage_type_charges.*' => 'required_if:storage_charges_switch,==,on|numeric',
                 'packing_type.*' => 'required_if:packing_charges_switch,==,on',
                 'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
                 'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
@@ -1295,6 +1295,7 @@ class AdminCorporateAccountsController extends Controller
             $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
             $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
             $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch')) ? 1 : 0;
+            $wms_user_info->storage_charges = ($request->has('storage_charges_switch')) ? 1 : 0;
             $wms_user_info->save();
 
             if ($request->has('ppc_switch')) {
@@ -1309,14 +1310,16 @@ class AdminCorporateAccountsController extends Controller
                 $psf->charges = $request->psf_charges;
                 $psf->save();
             }
-
-            foreach ($request->storage_type as $key => $storage_type) {
-                $storage_charges = new WmsStorageTypeCharge();
-                $storage_charges->user_id = $id;
-                $storage_charges->storage_type_id = $storage_type;
-                $storage_charges->charges = $request->storage_type_charges[$key];
-                $storage_charges->save();
+            if($request->has('storage_charges_switch')){
+                foreach ($request->storage_type as $key => $storage_type) {
+                    $storage_charges = new WmsStorageTypeCharge();
+                    $storage_charges->user_id = $id;
+                    $storage_charges->storage_type_id = $storage_type;
+                    $storage_charges->charges = $request->storage_type_charges[$key];
+                    $storage_charges->save();
+                }
             }
+
 
             if ($request->has('packing_charges_switch')) {
                 foreach ($request->packing_type as $key => $packing) {
@@ -1687,10 +1690,10 @@ class AdminCorporateAccountsController extends Controller
                 'invoicing_date.*.numeric' => 'Invoicing Cycle field must be numeric.',
                 'ppc_charges.required' => 'Per product charges field id required',
                 'psf_charges.required' => 'Per square foot charges field id required',
-                'storage_type.*.required' => 'Storage type field is required.',
-                'storage_type_charges.*.required' => 'Storage type charges field is required',
+                'storage_type.*.required_if' => 'Storage type field is required.',
+                'storage_type_charges.*.required_if' => 'Storage type charges field is required',
                 'storage_type.*.numeric' => 'Storage type field must be numeric.',
-                'storage_type_charges.*.required' => 'Storage type charges field must be numeric',
+                'storage_type_charges.*.numeric' => 'Storage type charges field must be numeric',
                 'packing_type.*.required' => 'Packing type field is required',
                 'packing_charges.*.required' => 'Packing charges field is required',
                 'packing_charges.*.numeric' => 'Packing charges field must be numeric',
@@ -1875,8 +1878,8 @@ class AdminCorporateAccountsController extends Controller
                     'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
                     'ppc_charges' => 'required_if:ppc_switch,==,on',
                     'psf_charges' => 'required_if:psf_switch,==,on',
-                    'storage_type.*' => 'required',
-                    'storage_type_charges.*' => 'required|numeric',
+                    'storage_type.*' => 'required_if:storage_charges_switch,==,on',
+                    'storage_type_charges.*' => 'required_if:storage_charges_switch,==,on|numeric',
                     'packing_type.*' => 'required_if:packing_charges_switch,==,on',
                     'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
                     'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
@@ -3234,6 +3237,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
                     $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch')) ? 1 : 0;
+                    $wms_user_info->storage_charges = ($request->has('storage_charges_switch')) ? 1 : 0;
                 } else {
                     $wms_user_info = new WmsUserInformation();
                     $wms_user_info->user_id = $id;
@@ -3244,6 +3248,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
                     $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch')) ? 1 : 0;
+                    $wms_user_info->storage_charges = ($request->has('storage_charges_switch')) ? 1 : 0;
 
                 }
                 $wms_user_info->save();
@@ -3275,14 +3280,19 @@ class AdminCorporateAccountsController extends Controller
                     $psf->save();
 
                 }
-                WmsStorageTypeCharge::where('user_id', $id)->delete();
-                foreach ($request->storage_type as $key => $storage_type) {
-                    $storage_charges = new WmsStorageTypeCharge();
-                    $storage_charges->user_id = $id;
-                    $storage_charges->storage_type_id = $storage_type;
-                    $storage_charges->charges = $request->storage_type_charges[$key];
-                    $storage_charges->save();
+                if($request->has('storage_charges_switch')){
+                    WmsStorageTypeCharge::where('user_id', $id)->delete();
+                    foreach ($request->storage_type as $key => $storage_type) {
+                        $storage_charges = new WmsStorageTypeCharge();
+                        $storage_charges->user_id = $id;
+                        $storage_charges->storage_type_id = $storage_type;
+                        $storage_charges->charges = $request->storage_type_charges[$key];
+                        $storage_charges->save();
+                    }
+                }else{
+                    WmsStorageTypeCharge::where('user_id', $id)->delete();
                 }
+
 
                 if ($request->has('packing_charges_switch')) {
                     WmsPackingCharge::where('user_id', $id)->delete();
@@ -3573,10 +3583,10 @@ class AdminCorporateAccountsController extends Controller
                 'invoicing_date.*.numeric' => 'Invoicing Cycle field must be numeric.',
                 'ppc_charges.required' => 'Per product charges field id required',
                 'psf_charges.required' => 'Per square foot charges field id required',
-                'storage_type.*.required' => 'Storage type field is required.',
-                'storage_type_charges.*.required' => 'Storage type charges field is required',
+                'storage_type.*.required_if' => 'Storage type field is required.',
+                'storage_type_charges.*.required_if' => 'Storage type charges field is required',
                 'storage_type.*.numeric' => 'Storage type field must be numeric.',
-                'storage_type_charges.*.required' => 'Storage type charges field must be numeric',
+                'storage_type_charges.*.numeric' => 'Storage type charges field must be numeric',
                 'packing_type.*.required' => 'Packing type field is required',
                 'packing_charges.*.required' => 'Packing charges field is required',
                 'packing_charges.*.numeric' => 'Packing charges field must be numeric',
@@ -3774,8 +3784,8 @@ class AdminCorporateAccountsController extends Controller
                     'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
                     'ppc_charges' => 'required_if:ppc_switch,==,on',
                     'psf_charges' => 'required_if:psf_switch,==,on',
-                    'storage_type.*' => 'required',
-                    'storage_type_charges.*' => 'required|numeric',
+                    'storage_type.*' => 'required_if:storage_charges_switch,==,on',
+                    'storage_type_charges.*' => 'required_if:storage_charges_switch,==,on|numeric',
                     'packing_type.*' => 'required_if:packing_charges_switch,==,on',
                     'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
                     'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
@@ -4537,6 +4547,7 @@ class AdminCorporateAccountsController extends Controller
                 $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
                 $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
                 $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch')) ? 1 : 0;
+                $wms_user_info->storage_charges = ($request->has('storage_charges_switch')) ? 1 : 0;
                 $wms_user_info->save();
 
                 if ($request->has('ppc_switch')) {
@@ -4552,12 +4563,14 @@ class AdminCorporateAccountsController extends Controller
                     $psf->save();
                 }
 
-                foreach ($request->storage_type as $key => $storage_type) {
-                    $storage_charges = new WmsPendingStorageTypeCharge();
-                    $storage_charges->user_id = $id;
-                    $storage_charges->storage_type_id = $storage_type;
-                    $storage_charges->charges = $request->storage_type_charges[$key];
-                    $storage_charges->save();
+                if($request->has('storage_charges_switch')){
+                    foreach ($request->storage_type as $key => $storage_type) {
+                        $storage_charges = new WmsPendingStorageTypeCharge();
+                        $storage_charges->user_id = $id;
+                        $storage_charges->storage_type_id = $storage_type;
+                        $storage_charges->charges = $request->storage_type_charges[$key];
+                        $storage_charges->save();
+                    }
                 }
 
                 if ($request->has('packing_charges_switch')) {
@@ -5134,6 +5147,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
                     $wms_user_information->labelling_charges = $wms_user_info['labelling_charges'];
+                    $wms_user_information->storage_charges = $wms_user_info['storage_charges'];
                     $wms_user_information->save();
                 }
                 if ($ppc = WmsPerProductCharge::where('user_id', $id)->first()) {
@@ -5731,6 +5745,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
                     $wms_user_information->labelling_charges = $wms_user_info['labelling_charges'];
+                    $wms_user_information->storage_charges = $wms_user_info['storage_charges'];
                     $wms_user_information->save();
                 }
                 if ($ppc = WmsPendingPerProductCharge::where('user_id', $id)->first()) {
