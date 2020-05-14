@@ -108,7 +108,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('saleperson:numbers')->dailyAt('08:00')->runInBackground();
         $schedule->command('month:average')->dailyAt('08:00')->runInBackground();
         $schedule->command('hubwise:split')->dailyAt('08:00')->runInBackground();
-        $schedule->command('hubwise:split2')->dailyAt('08:05')->runInBackground();
+        $schedule->command('hubwise:split2')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
         $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
