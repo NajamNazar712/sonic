@@ -3491,9 +3491,11 @@ if(session('department_id') == 7){
 
             if($request->has('total_commission')){
                 $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                SalesCommissionExternalUser::where('shipper_id',$id)->delete();
-                SalesCommission::where('shipper_id', $id)->delete();
+                if($existing_sale_commission){
+                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                    SalesCommission::where('shipper_id', $id)->delete();
+                }
                 $total_commission = $request->total_commission;
                 $users_count = count($request->user_id);
 
@@ -5710,9 +5712,11 @@ if(session('department_id') == 7){
 
                 if($request->has('total_commission')){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
-                    SalesCommission::where('shipper_id', $id)->delete();
+                    if($existing_sale_commission){
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
+                    }
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -5761,9 +5765,11 @@ if(session('department_id') == 7){
 
             if($request->has('total_commission')){
                 $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                SalesCommissionExternalUser::where('shipper_id',$id)->delete();
-                SalesCommission::where('shipper_id', $id)->delete();
+                if($existing_sale_commission){
+                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                    SalesCommission::where('shipper_id', $id)->delete();
+                }
                 $total_commission = $request->total_commission;
                 $users_count = count($request->user_id);
 

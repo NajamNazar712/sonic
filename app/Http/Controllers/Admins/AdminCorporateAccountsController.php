@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Commission\SalesCommissionExternalUser;
+use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\Commission\SalesTier;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipper\User;
@@ -1355,6 +1361,58 @@ class AdminCorporateAccountsController extends Controller
     {
         $user = User::find($id);
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
+
+        $commission_percentage = '';
+        $settings = GlobalSettings::where('type', 'commission_percentage');
+        if($settings->exists()){
+            $settings = $settings->first();
+            $commission_percentage = $settings->text;
+        }
+        $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
+        $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
+        $users = array();
+        $sales = array();
+        $all_users = array();
+        foreach ($admin_users as $admin_user){
+
+            if($admin_user->department_id != 7){
+                $users[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
+            }else{
+                $sales[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
+            }
+        }
+        $all_users['results'][0]['text'] = 'Sales';
+        $all_users['results'][0]['children'] = $sales;
+        $all_users['results'][1]['text'] = 'Admins';
+        $all_users['results'][1]['children'] = $users;
+        $all_users['pagination']['more'] = true;
+
+        $existing_commission_array = array();
+        $sale_commission = SalesCommission::where('shipper_id', $user->id)->first();
+        if($sale_commission){
+            $sale_commission_users = SalesCommissionUser::where('sales_commission_id', $sale_commission->id)->get();
+            if($sale_commission_users){
+                foreach($sale_commission_users as $index => $sale_commission_user){
+                    $sales_tier = SalesTier::find($sale_commission_user->tier_id);
+                    if($sales_tier){
+                        $existing_commission_array[$index]['sales_commission_id'] = $sale_commission_user->sales_commission_id;
+                        $existing_commission_array[$index]['tier_type_id'] = $sales_tier->tier_type;
+                        $existing_commission_array[$index]['tier_id'] = $sale_commission_user->tier_id;
+                        $existing_commission_array[$index]['tier_name'] = $sales_tier->tier_name;
+                        if($sales_tier->tier_type == 1){
+                            $com_admin = Admin::find($sale_commission_user->user_id);
+                            $existing_commission_array[$index]['user_name'] = $com_admin->name;
+                            $existing_commission_array[$index]['user_id'] = $com_admin->id;
+                        }else if($sales_tier->tier_type == 2){
+                            $external_user = SalesCommissionExternalUser::find($sale_commission_user->user_id);
+                            $existing_commission_array[$index]['user_name'] = $external_user->name;
+                        }
+                        $existing_commission_array[$index]['commission'] = $sale_commission_user->commission;
+                    }
+                }
+            }
+        }
+
         if ((($user['rate_status'] >= 0) && $user['status'] == 1) || (($user['rate_status'] == 0) && $user['status'] == 3)) {
             $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1386,12 +1444,12 @@ class AdminCorporateAccountsController extends Controller
             $existing = 0;
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4) {
-                    return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks]);
+                    return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
                 } else {
                     return view('admin.access_denied');
                 }
             } else {
-                return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks]);
+                return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
             }
 
         } elseif (($user['rate_status'] >= 1) && $user['status'] == 3) {
@@ -1436,14 +1494,14 @@ class AdminCorporateAccountsController extends Controller
             $existing = 1;
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
-                    return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks]);
+                    return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
                 }
                 else{
                     return view('admin.access_denied');
                 }
             }
             else{
-                return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks]);
+                return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
             }
         }
     }
@@ -3328,6 +3386,49 @@ class AdminCorporateAccountsController extends Controller
                 $rate_remark->admin_id = Auth::id();
                 $rate_remark->save();
 
+            }
+
+            if($request->has('total_commission')){
+                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                if($existing_sale_commission){
+                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                    SalesCommission::where('shipper_id', $id)->delete();
+                }
+                $total_commission = $request->total_commission;
+                $users_count = count($request->user_id);
+
+                $sales_commission = new SalesCommission();
+                $sales_commission->shipper_id = $id;
+                $sales_commission->commission_users_count = $users_count;
+                $sales_commission->commission = $total_commission;
+                $sales_commission->added_by = Auth::id();
+                $sales_commission->save();
+                $sales_commission_id = $sales_commission->id;
+                $actual_commission = 0;
+                foreach($request->tier_id as $row_id => $tier){
+                    $sales_tier = SalesTier::find($tier);
+                    if($sales_tier){
+                        $sales_commission_user = new SalesCommissionUser();
+                        $sales_commission_user->sales_commission_id = $sales_commission_id;
+                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                        $sales_commission_user->tier_id = $tier;
+                        if($sales_tier->tier_type == 1){
+                            $sales_commission_user->user_id = $request->user_id[$row_id];
+                        }else if($sales_tier->tier_type == 2){
+                            $external_user = new SalesCommissionExternalUser();
+                            $external_user->name = $request->user_id[$row_id];
+                            $external_user->shipper_id = $id;
+                            $external_user->save();
+                            $sales_commission_user->user_id = $external_user->id;
+                        }
+                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                        $actual_commission += $request->commission_percentage[$row_id];
+                        $sales_commission_user->save();
+                    }
+                }
+                $sales_commission->commission = $actual_commission;
+                $sales_commission->save();
             }
             User::where('id', $id)->update(['rate_status' => 1]);
             if ($request->authorize == 1) {
@@ -5799,6 +5900,49 @@ class AdminCorporateAccountsController extends Controller
                     $rate_remark->save();
 
                 }
+
+                if($request->has('total_commission')){
+                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                    if($existing_sale_commission){
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
+                    }
+                    $total_commission = $request->total_commission;
+                    $users_count = count($request->user_id);
+
+                    $sales_commission = new SalesCommission();
+                    $sales_commission->shipper_id = $id;
+                    $sales_commission->commission_users_count = $users_count;
+                    $sales_commission->commission = $total_commission;
+                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->save();
+                    $sales_commission_id = $sales_commission->id;
+                    $actual_commission = 0;
+                    foreach($request->tier_id as $row_id => $tier){
+                        $sales_tier = SalesTier::find($tier);
+                        if($sales_tier){
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if($sales_tier->tier_type == 1){
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }else if($sales_tier->tier_type == 2){
+                                $external_user = new SalesCommissionExternalUser();
+                                $external_user->name = $request->user_id[$row_id];
+                                $external_user->shipper_id = $id;
+                                $external_user->save();
+                                $sales_commission_user->user_id = $external_user->id;
+                            }
+                            $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                            $actual_commission += $request->commission_percentage[$row_id];
+                            $sales_commission_user->save();
+                        }
+                    }
+                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->save();
+                }
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             if($request->has('rate_remarks') && $request->rate_remarks != null){
@@ -5809,6 +5953,49 @@ class AdminCorporateAccountsController extends Controller
                     $rate_remark->save();
 
                 }
+
+            if($request->has('total_commission')){
+                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                if($existing_sale_commission){
+                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                    SalesCommission::where('shipper_id', $id)->delete();
+                }
+                $total_commission = $request->total_commission;
+                $users_count = count($request->user_id);
+
+                $sales_commission = new SalesCommission();
+                $sales_commission->shipper_id = $id;
+                $sales_commission->commission_users_count = $users_count;
+                $sales_commission->commission = $total_commission;
+                $sales_commission->added_by = Auth::id();
+                $sales_commission->save();
+                $sales_commission_id = $sales_commission->id;
+                $actual_commission = 0;
+                foreach($request->tier_id as $row_id => $tier){
+                    $sales_tier = SalesTier::find($tier);
+                    if($sales_tier){
+                        $sales_commission_user = new SalesCommissionUser();
+                        $sales_commission_user->sales_commission_id = $sales_commission_id;
+                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                        $sales_commission_user->tier_id = $tier;
+                        if($sales_tier->tier_type == 1){
+                            $sales_commission_user->user_id = $request->user_id[$row_id];
+                        }else if($sales_tier->tier_type == 2){
+                            $external_user = new SalesCommissionExternalUser();
+                            $external_user->name = $request->user_id[$row_id];
+                            $external_user->shipper_id = $id;
+                            $external_user->save();
+                            $sales_commission_user->user_id = $external_user->id;
+                        }
+                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                        $actual_commission += $request->commission_percentage[$row_id];
+                        $sales_commission_user->save();
+                    }
+                }
+                $sales_commission->commission = $actual_commission;
+                $sales_commission->save();
+            }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
             return redirect()->back()->with('success', 'All Rates are updated');
         }
