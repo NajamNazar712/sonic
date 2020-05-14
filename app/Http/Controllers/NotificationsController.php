@@ -2735,7 +2735,8 @@ class NotificationsController extends Controller
                             $crm_roles = $crm_roles->pluck('email')->toArray();
                             $cc = array_merge($cc, $crm_roles);
                           }
-	                        $cc[] = 'complaints@trax.pk';
+                          $complains_email = 'complaints@trax.pk';
+	                        array_push($cc, $complains_email);
 	                        self::email($subject, $body, $to, $cc);
 	                    }
 	                    else{
@@ -3657,12 +3658,13 @@ class NotificationsController extends Controller
 
             }
             else if ($id == 48) {
+                $report_date = Carbon::yesterday()->format('Y-m-d');
                 if (strpos($subject, '[date]') !== FALSE) {
-                    $subject = str_replace('[date]', $reference_1_id, $subject);
+                    $subject = str_replace('[date]', $report_date, $subject);
                 }
 
                 if (strpos($body, '[date]') !== FALSE) {
-                    $body = str_replace('[date]', $reference_1_id, $body);
+                    $body = str_replace('[date]', $report_date, $body);
                 }
 //                $file = storage_path($reference_2_id);
 
@@ -3722,40 +3724,39 @@ class NotificationsController extends Controller
 
                 $to = array();
 
-               $cc = array();
+                $cc = array();
+                if($reference_1_id == 1){
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
 
-               $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 8, 9, 10, 20, 25, 30, 46])->where('status', 1);
+                    if ($admins->exists()) {
+                        $cc = $admins->pluck('email')->toArray();
+                    }
 
-               if ($admins->exists()) {
-                   $cc = $admins->pluck('email')->toArray();
-               }
+                    $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1);
 
-               $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1);
+                    if ($admins->exists()) {
+                        $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+                    }
 
-               if ($admins->exists()) {
-                   $to = array_merge($to, $admins->pluck('admins.email')->toArray());
-               }
+                    $ceo = Admin::find(8);
+                    if ($ceo) {
+                        array_push($cc, $ceo->email);
+                    }
+                    $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk','syed.sharique@trax.pk'];
 
-               $ceo = Admin::find(8);
-               if ($ceo) {
-                   $cc[] = $ceo->email;
-               }
-               $extra_admins = ['rahat.ali@trax.pk','muhammad.yousuf@trax.pk','syed.sharique@trax.pk'];
-               
-               $cc = array_merge($cc, $extra_admins);
+                    $cc = array_merge($cc, $extra_admins);
 
-              
+                    self::email($subject, $body, $to, $cc);
+                }
+                if($reference_1_id == 2){
+                    $admins = Admin::whereIn('role_id', [8, 9, 10, 25, 30, 46])->where('status', 1);
 
-               self::email($subject, $body, $to, $cc);
-                // $cc = array();
+                    if ($admins->exists()) {
+                        $to = $admins->pluck('email')->toArray();
+                    }
 
-                // $admins = Admin::whereIn('id', [36, 7])->where('status', 1);
-
-                // if ($admins->exists()) {
-                //     $to = array_merge($to, $admins->pluck('email')->toArray());
-                // }
-
-                // self::email($subject, $body, $to);
+                    self::email($subject, $body, $to);
+                }
             }
             else if ($id == 49) {
                 $reference_1_id = Carbon::parse($reference_1_id)->subDay()->toDateString();

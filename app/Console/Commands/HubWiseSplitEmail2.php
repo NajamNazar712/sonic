@@ -7,14 +7,14 @@ use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class HubWiseSplitEmail extends Command
+class HubWiseSplitEmail2 extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'hubwise:split';
+    protected $signature = 'hubwise:split2';
 
     /**
      * The console command description.
@@ -42,6 +42,6 @@ class HubWiseSplitEmail extends Command
     {
         $date = Carbon::yesterday()->format('Y-m-d');
         $response = AdminReportsEmailController::hub_wise_split($date . ' 00:00:00');
-        NotificationsController::send(48, 1, $response);
+        NotificationsController::send(48, 2, $response);
     }
 }
