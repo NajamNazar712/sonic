@@ -14,16 +14,13 @@ class UpdateCorporateWeightChargesTables extends Migration
     public function up()
     {
         Schema::table('corporate_weight_charges', function (Blueprint $table) {
-            $table->tinyInteger('weight_addition')->after('range_down')->default(0);
-            $table->decimal('spkg')->after('weight_addition')->nullable();
+            $table->tinyInteger('base')->after('range_down')->default(0);
         });
         Schema::table('history_corporate_weight_charges', function (Blueprint $table) {
-            $table->tinyInteger('weight_addition')->after('range_down')->default(0);
-            $table->decimal('spkg')->after('weight_addition')->nullable();
+            $table->tinyInteger('base')->after('range_down')->default(0);
         });
         Schema::table('pending_corporate_weight_charges', function (Blueprint $table) {
-            $table->tinyInteger('weight_addition')->after('range_down')->default(0);
-            $table->decimal('spkg')->after('weight_addition')->nullable();
+            $table->tinyInteger('base')->after('range_down')->default(0);
         });
     }
 
@@ -35,16 +32,13 @@ class UpdateCorporateWeightChargesTables extends Migration
     public function down()
     {
         Schema::table('corporate_weight_charges', function (Blueprint $table) {
-            $table->dropColumn('weight_addition');
-            $table->dropColumn('spkg');
+            $table->dropColumn('base');
         });
         Schema::table('history_corporate_weight_charges', function (Blueprint $table) {
-            $table->dropColumn('weight_addition');
-            $table->dropColumn('spkg');
+            $table->dropColumn('base');
         });
         Schema::table('pending_corporate_weight_charges', function (Blueprint $table) {
-            $table->dropColumn('weight_addition');
-            $table->dropColumn('spkg');
+            $table->dropColumn('base');
         });
     }
 }
