@@ -351,6 +351,7 @@
             var status_array = [];
             $('#status_update_form').bind('submit', function(event) {
                     var verify_form = this;
+                    var submitting = false;
                     event.preventDefault();
                     var btn = $(document.activeElement).attr('id');
                     $('#submit_button_id').val(btn);
@@ -406,6 +407,8 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
+                                blockPagePermanently();
+
                                 $(table.table().header()).find('input').val('');
                                 $(table.table().header()).find('select').val('').trigger('change.select2');
                                 table.columns().search('').draw();
@@ -419,8 +422,12 @@
                                 shipment.val(shipments);
                                 $('#statusVerifySubmit').prop('disabled', true);
                                 $('#statusUpdateSubmit').prop('disabled', true);
-                                blockPagePermanently();
-                                verify_form.submit();
+                                
+                                if (!submitting) {
+                                    submitting = true;
+
+                                    verify_form.submit();
+                                }
                             }
                             else {
                                 $('#statusVerifySubmit').removeAttr('disabled');
@@ -451,6 +458,8 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
+                                blockPagePermanently();
+
                                 $(table.table().header()).find('input').val('');
                                 $(table.table().header()).find('select').val('').trigger('change.select2');
                                 table.columns().search('').draw();
@@ -464,8 +473,12 @@
                                 shipment.val(shipments);
                                 $('#statusVerifySubmit').prop('disabled', true);
                                 $('#statusUpdateSubmit').prop('disabled', true);
-                                blockPagePermanently();
-                                verify_form.submit();
+
+                                if (!submitting) {
+                                    submitting = true;
+
+                                    verify_form.submit();
+                                }
                             }
                             else {
                                 $('#statusVerifySubmit').removeAttr('disabled');
