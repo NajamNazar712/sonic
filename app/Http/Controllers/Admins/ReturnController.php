@@ -14,6 +14,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\ReturnReattemptRatio;
+use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
@@ -56,13 +57,16 @@ class ReturnController extends Controller
     }
 
     public function return_view(){
+        $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
-        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', [2, 5, 8, 9, 10, 12, 19, 20, 34, 38, 39, 40, 41, 42])->select('id', 'name')->get();
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->pluck('shipment_status_reason_id')->toArray();
+
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
-        return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents]);
+        return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
@@ -191,13 +195,14 @@ class ReturnController extends Controller
                     });
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
-            ->editColumn('consignee_phone',function ($shipper){
+            ->addColumn('consignee_phone',function ($shipper){
                 $consignee_phone = '';
                 $consignee_phone .= $shipper->consignee_phone_number_1;
                 if($shipper->consignee_phone_number_2 != null){
                     $consignee_phone .= "| ".$shipper->consignee_phone_number_2;
                 }
-                return $consignee_phone;
+                return '<button type="button" class="btn btn-sm btn-outline-info align-middle consignee_info_label" rel="'. $shipper->consignee_phone_number_1 .'"><i class="la la-lg la-phone align-middle"></i> <span class="align-middle">' . $consignee_phone . '</span></button>';
+
             })
             ->filterColumn('shipper_phone',function ($query,$keyword){
                 $keyword = strtolower($keyword);

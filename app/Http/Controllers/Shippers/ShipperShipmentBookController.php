@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\ConsigneeInformationController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeLocation;
@@ -139,6 +144,7 @@ class ShipperShipmentBookController extends Controller
         }
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
 
+        ConsigneeInformationController::add($consignee_phone_number_1, $consignee_name, $consignee_address, $consignee_phone_number_2, $consignee_city_id, $user_id);
 
         //Existing Coordinates
         $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
@@ -1749,6 +1755,8 @@ class ShipperShipmentBookController extends Controller
             $order_ids = array();
             $order_id_row = array();
             $check = NonServiceArea::pluck('name')->toArray();
+            $blacklist_errors = array();
+            $blacklist_found_categories = array();
 
 
             foreach ($rows as $key => $row) {
@@ -1871,22 +1879,48 @@ class ShipperShipmentBookController extends Controller
                     if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {
                         $errors[$row_id]['consignee_city_name'] = 'Delivery is not allowed for City: ' . $consignee_city->name . ' with Service Type ID #' . $row['service_type_id'] . ' and Shipping Mode ID #' . $row['shipping_mode_id'];
                     }
+                    if(!$request->excel_blacklist){
+                        $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
+                        $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
+                        if($consignee_information->exists()){
+                            $consignee_information = $consignee_information->first();
+                            $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+                            if($blacklist->exists()){
+                                $blacklist = $blacklist->first();
+                                $blacklist_setting_id = $blacklist->blacklist_setting_id;
+                                $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+                                if($blacklist_setting){
+                                    if(!array_key_exists($blacklist_setting_id, $blacklist_found_categories)){
+                                        $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
+                                        $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
+                                    }
+                                    $blacklist_errors[$row_id]['msg'] = 'Total Shipments: '.$blacklist->shipments. ', Delivered: '.$blacklist->delivered . '('.$blacklist->delivered_ratio.'), Undelivered: '.$blacklist->undelivered.'('. $blacklist->undelivered_ratio .'), Return Confirmed: '.$blacklist->return . '('. $blacklist->return_ratio .')';
+                                }
+                            }
+                        }
+                    }
+
                 }
             }
-//                dd($nsa_error);
+//                dd($blacklist_found_categories);
 
                 if (empty($errors)) {
                     if (empty($nsa_error)) {
-                        foreach ($rows as $key => $row) {
-                            $row['user_id'] = $user_id;
-                            $row['account_type_id'] = 1;
-                            $row['nsas'] = $check;
-                            $row['nsa'] = $request->excel_nsa;
+                        if(empty($blacklist_errors)){
+                            foreach ($rows as $key => $row) {
+                                $row['user_id'] = $user_id;
+                                $row['account_type_id'] = 1;
+                                $row['nsas'] = $check;
+                                $row['nsa'] = $request->excel_nsa;
 
-                            dispatch(new ProcessShipmentBooking($row));
+                                dispatch(new ProcessShipmentBooking($row));
+                            }
+
+                            return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
                         }
-
-                        return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                        else{
+                            return view('client.shipment.book.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories]);
+                        }
                     }
                     else {
                         return view('client.shipment.book.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error]);
@@ -1926,26 +1960,6 @@ class ShipperShipmentBookController extends Controller
 
     static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id) {
 
-        //Existing Coordinates
-        $coordinates = Shipment::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
-            $sub_query->where('consignee_phone_number_1', $consignee_phone_number_1)
-                ->orwhere('consignee_phone_number_2', $consignee_phone_number_1)
-                ->orwhere('consignee_phone_number_1', $consignee_phone_number_2)
-                ->orwhere(function ($sub_sub_query) use ($consignee_phone_number_2) {
-                    $sub_sub_query->whereNotNull('consignee_phone_number_2')
-                        ->where('consignee_phone_number_2', $consignee_phone_number_2);
-                });
-        })->whereNotNull('lat')->whereNotNull('long');
-        if($coordinates->exists()){
-            $coordinates = $coordinates->first();
-            $lat = $coordinates->lat;
-            $long = $coordinates->long;
-        }
-        else{
-            $lat = NULL;
-            $long = NULL;
-        }
-        //Existing Coordinates
 
         $shipment = new Shipment();
 
@@ -1978,10 +1992,6 @@ class ShipperShipmentBookController extends Controller
         $shipment->walk_in_delivery_type_id = $delivery_type_id;
         $shipment->charges_mode_id = $charges_mode_id;
 
-
-        $shipment->lat = $lat;
-        $shipment->long = $long;
-
         $shipment->booked_by = session('user_type');
         $shipment->save();
 
@@ -1996,6 +2006,23 @@ class ShipperShipmentBookController extends Controller
             $reference_1_id = null;
         }
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
+		ConsigneeInformationController::add($consignee_phone_number_1, $consignee_name, $consignee_address, $consignee_phone_number_2, $consignee_city_id, $user_id);
+
+        //Existing Coordinates
+        $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+            $sub_query->where('phone_number', $consignee_phone_number_1)
+                ->orwhere('phone_number', $consignee_phone_number_2);
+        })->where('address', $consignee_address);
+        if($coordinates->exists()){
+            $coordinates = $coordinates->latest()->first();
+
+            $shipment_coordinates = new ConsigneeShipmentLocation();
+            $shipment_coordinates->shipment_id = $shipment_id;
+            $shipment_coordinates->previous_location_id = $coordinates->id;
+            $shipment_coordinates->current_location_id = NULL;
+            $shipment_coordinates->save();
+        }
+        //Existing Coordinates
 
         return $shipment_id;
     }
@@ -2868,8 +2895,8 @@ class ShipperShipmentBookController extends Controller
             $header_correct = TRUE;
 
             foreach ($spreadsheet[0] as $index => $header_value) {
-                if ($index == 25) {}
-                elseif ($header_value != $header[$index]) {
+                if ($index == 26) {}
+                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                     $header_correct = FALSE;
                     break;
                 }
@@ -2918,7 +2945,8 @@ class ShipperShipmentBookController extends Controller
             $nsa_error = array();
             $order_id_row = array();
             $check = NonServiceArea::pluck('name')->toArray();
-
+            $blacklist_errors = array();
+            $blacklist_found_categories = array();
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
 
@@ -3043,23 +3071,49 @@ class ShipperShipmentBookController extends Controller
                     if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {
                         $errors[$row_id]['consignee_city_name'] = 'Delivery is not allowed for City: ' . $consignee_city->name . ' with Service Type ID #' . $row['service_type_id'] . ' and Shipping Mode ID #' . $row['shipping_mode_id'];
                     }
+                    if(!$request->excel_blacklist){
+                        $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
+                        $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
+                        if($consignee_information->exists()){
+                            $consignee_information = $consignee_information->first();
+                            $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+                            if($blacklist->exists()){
+                                $blacklist = $blacklist->first();
+                                $blacklist_setting_id = $blacklist->blacklist_setting_id;
+                                $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+                                if($blacklist_setting){
+                                    if(!array_key_exists($blacklist_setting_id, $blacklist_found_categories)){
+                                        $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
+                                        $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
+                                    }
+                                    $blacklist_errors[$row_id]['msg'] = 'Total Shipments: '.$blacklist->shipments. ', Delivered: '.$blacklist->delivered . '('.$blacklist->delivered_ratio.'), Undelivered: '.$blacklist->undelivered.'('. $blacklist->undelivered_ratio .'), Return Confirmed: '.$blacklist->return . '('. $blacklist->return_ratio .')';
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
             if (empty($errors)) {
                 if (empty($nsa_error)) {
-                $tracking_numbers = array();
+                    if(empty($blacklist_errors)){
+                        $tracking_numbers = array();
 
-                foreach ($rows as $key => $row) {
-                    $row['user_id'] = $user_id;
-                    $row['account_type_id'] = 2;
-                    $row['nsas'] = $check;
-                    $row['nsa'] = $request->excel_nsa;
+                        foreach ($rows as $key => $row) {
+                            $row['user_id'] = $user_id;
+                            $row['account_type_id'] = 2;
+                            $row['nsas'] = $check;
+                            $row['nsa'] = $request->excel_nsa;
 
-                    dispatch(new ProcessShipmentBooking($row));
-                }
+                            dispatch(new ProcessShipmentBooking($row));
+                        }
 
-                return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                        return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                    }
+                    else{
+                        return view('client.shipment.book.corporate.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories]);
+                    }
+
             }
                 else{
                     return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error]);
@@ -3343,6 +3397,43 @@ class ShipperShipmentBookController extends Controller
             $invoice_item->amount = $amounts[$key];
             $invoice_item->save();
         }
+
+    }
+
+    public function check_consignee_return_ratio(Request $request){
+        $phone = $request->phone;
+        $message = '';
+        $consignee_information = ConsigneeInformation::where('phone', $phone);
+        if($consignee_information->exists()){
+            $consignee_information = $consignee_information->first();
+            $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
+            $color = NULL;
+            if($manual_blacklist->exists()){
+                $manual_blacklist = $manual_blacklist->first();
+                $blacklist_setting = BlacklistSetting::find($manual_blacklist->blacklist_setting_id);
+                if($blacklist_setting){
+                    $message = $blacklist_setting->message;
+                    $color = $blacklist_setting->color;
+                    return response()->json(['status' => 0, 'message' => $message, 'color' => $color]);
+                }
+            }else{
+                $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+                if($blacklist->exists()){
+                    $blacklist = $blacklist->first();
+                    $blacklist_setting_id = $blacklist->blacklist_setting_id;
+                    $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+                    if($blacklist_setting){
+                        $message = $blacklist_setting->message;
+                        $color = $blacklist_setting->color;
+                        return response()->json(['status' => 0, 'message' => $message, 'color' => $color]);
+                    }
+                }
+                return response()->json(['status' => 1]);
+            }
+
+
+        }
+        return response()->json(['status' => 1]);
 
     }
 }

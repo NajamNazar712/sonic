@@ -360,9 +360,9 @@ class Permission
             'reports.crm.list' => 200,
             'reports.gst.index' => 199,
             'reports.gst.list' => 199,
-            'reports.summary.index' => 206,
-            'reports.summary.data' => 206,
-            'reports.summary.list' => 206,
+            'reports.summary.index' => 210,
+            'reports.summary.data' => 210,
+            'reports.summary.list' => 210,
             'reports.account_activation.index' => 246,
             'reports.account_activation.list' => 246,
             'reports.adjustments.index' => 248,
@@ -390,6 +390,8 @@ class Permission
             'reports.account_reconciliation.index' => 312,
             'reports.cargo_short_received_shipments.index' => 319,
             'reports.cargo_short_received_shipments.list' => 319,
+            'reports.multiple_iban.index' => 328,
+            'reports.multiple_iban.list' => 328,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -554,6 +556,21 @@ class Permission
             'settings.sales.projection.percentage.index' => 313,
             'settings.sales.projection.reasons.index' => 314,
             'settings.sales.projection.shipment.index' => 318,
+
+            'settings.settings.blacklist.index' => 329,
+            'settings.blacklist.search.index' => 330,
+
+            'settings.return.reason.index' => 335,
+            'settings.return.reason.list' => 335,
+
+
+            'settings.commission.index' => 331,
+
+
+            'settings.commission.percentage.index' => 332,
+            'settings.commission.percentage.store' => 332,
+
+
 
 
             'cancelled_shipments.index' => 117,

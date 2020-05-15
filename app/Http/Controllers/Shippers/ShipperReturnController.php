@@ -6,6 +6,10 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\BookingType;
 use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
@@ -85,8 +89,8 @@ class ShipperReturnController extends Controller
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
-            ->editColumn('consignee_phone',function ($shipper){
-                return "$shipper->consignee_phone_number_1 | $shipper->consignee_phone_number_2";
+            ->editColumn('consignee_phone', function ($shipments) {
+                return '<button type="button" class="btn btn-sm btn-outline-info align-middle consignee_info_label" rel="'. $shipments->consignee_phone_number_1 .'"><i class="la la-lg la-phone align-middle"></i> <span class="align-middle">' . $shipments->consignee_phone_number_1 . '|' . $shipments->consignee_phone_number_2 .'</span></button>';
             })
             ->filterColumn('consignee_phone',function ($query,$keyword){
                 $keyword = strtolower($keyword);
@@ -247,6 +251,7 @@ class ShipperReturnController extends Controller
 {
     $shipmentId = $request->shipment_id;
     $remark = $request->remark;
+    $user_id = session('user_id');
     if ($shipmentId) {
         if (Shipment::where('id', $shipmentId)->where('shipper_status_id', '!=', 15)->exists()) {
             $consolidated_shipments = ConsolidationShipments::where('shipment_id', $shipmentId);
@@ -255,11 +260,11 @@ class ShipperReturnController extends Controller
                 $all_consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidated_shipments->consolidation_id)->pluck('shipment_id')->toArray();
                 Shipment::whereIn('id', $all_consolidation_shipments)->update(['shipper_status_id' => 15, 'consignee_status_id' => 15]);
                 foreach ($all_consolidation_shipments as $shipment) {
-                    ShipmentsJourneyController::add($shipment, 15, 15, NULL, $remark, Auth::id(), NULL);
+                    ShipmentsJourneyController::add($shipment, 15, 15, NULL, $remark, $user_id, NULL);
                 }
             } else {
                 Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 15, 'consignee_status_id' => 15]);
-                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, Auth::id(), NULL);
+                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, $user_id, NULL);
             }
             return ['status' => 0, 'success' => "Shipment status successfully updated to Shipment - On Hold for Self Collection"];
         } else {
@@ -472,5 +477,45 @@ class ShipperReturnController extends Controller
                 }
             })
             ->make(true);
+    }
+    public function blacklist_search_consignee(Request $request){
+        $phone = $request->phone;
+        $data = array();
+        $consignee_information = ConsigneeInformation::where('phone', $phone);
+        if($consignee_information->exists()){
+            $consignee_information = $consignee_information->first();
+            $data['consignee'] = array();
+
+            $data['consignee']['id'] = $consignee_information->id;
+            $data['consignee']['name'] = $consignee_information->name;
+            $data['consignee']['phone'] = $consignee_information->phone;
+            $data['consignee']['phone2'] = $consignee_information->phone2;
+            $data['consignee']['address'] = $consignee_information->address;
+            $data['consignee']['city'] = $consignee_information->consignee_city->name;
+            $consignee_information_id = $consignee_information->id;
+            $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information_id);
+            $color = NULL;
+            if($manual_blacklist->exists()){
+                $manual_blacklist = $manual_blacklist->first();
+                $color = BlacklistSetting::find($manual_blacklist->blacklist_setting_id)->color;
+            }
+            if(BlacklistedConsignee::where('consignee_information_id', $consignee_information_id)->exists()){
+                $data['blacklist'] = array();
+                $data['blacklist']['total_shipments'] = $consignee_information->blacklisted_consignee->shipments;
+                $data['blacklist']['delivered'] = $consignee_information->blacklisted_consignee->delivered;
+                $data['blacklist']['delivered_ratio'] = $consignee_information->blacklisted_consignee->delivered_ratio;
+                $data['blacklist']['undelivered'] = $consignee_information->blacklisted_consignee->undelivered;
+                $data['blacklist']['undelivered_ratio'] = $consignee_information->blacklisted_consignee->undelivered_ratio;
+                $data['blacklist']['return'] = $consignee_information->blacklisted_consignee->return;
+                $data['blacklist']['return_ratio'] = $consignee_information->blacklisted_consignee->return_ratio;
+                if($color == NULL){
+                    $data['blacklist']['color'] = $consignee_information->blacklisted_consignee->blacklist->color;
+                }else{
+                    $data['blacklist']['color'] = $color;
+                }
+            }
+            return response()->json(['status' => 0, 'success' => 'Consignee information found!', 'details' => $data]);
+        }
+        return response()->json(['status' => 1, 'error' => 'Consignee not found']);
     }
 }

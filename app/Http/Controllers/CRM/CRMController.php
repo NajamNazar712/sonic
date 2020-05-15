@@ -64,14 +64,14 @@ class CRMController extends Controller
         $crm_request_status_history->save();
         NotificationsController::send(31, $id);
 
-        if($case_nature_id == 1 && $launched_by == 1){
+        if($case_nature_id == 1 && ($launched_by == 1 || $launched_by == 2)){
             $settings = GlobalSettings::where('type', 'auto_crm_comment');
             if($settings->exists()){
                 $settings = $settings->first();
                 $comment = $settings->text;
                 $comment_by = 0;
                 $comment_type = 0;
-                CRMCommentController::add($id, 61,$comment_by,$comment_type, $comment);
+                CRMCommentController::add($id, 306,$comment_by,$comment_type, $comment);
             }
         }
 

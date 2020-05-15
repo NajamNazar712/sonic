@@ -211,7 +211,7 @@
                                                 </div>
 
                                                 <div class="form-group">
-                                                    <textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters"></textarea>
+                                                    <textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" data-toggle="tooltip" data-placement="top" title="" data-original-title="Please describe in a way that rider can understand what to collect from the consignee"></textarea>
                                                 </div>
 
                                                 <div class="form-group input-group">
@@ -425,6 +425,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tooltip/tooltip.js')}}" type="text/javascript"></script>
 
     <script>
 
@@ -813,6 +814,30 @@
                 return repo.full_name || repo.text;
             }
 
+            var blacklist = false;
+            var blacklist_message = '';
+            var blacklist_color = '';
+            function check_consignee_return_ratio(){
+                var phone = $('input[name="consignee_phone_number_1"]').val();
+                if(phone){
+                    $.ajax({
+                        url:'{!! route('cod.shipment.book.check_consignee_return_ratio') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'phone': phone,
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            blacklist = true;
+                            blacklist_message = data.message;
+                            blacklist_color = data.color;
+                            return true;
+                        }
+                    });
+                }
+            }
+
             $('#consignee_info').on('select2:select', function () {
                 var id = parseInt($(this).val());
                 if(id){
@@ -828,13 +853,20 @@
                             $('#consignee_city').val(data.details.city_id).trigger('change');
                             $('input[name="consignee_name"]').val(data.details.name);
                             $('#consignee_address').val(data.details.address);
-                            $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1);
+                            $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
                             $('input[name="consignee_phone_number_2"]').val(data.details.phone_number_2);
                             $('input[name="consignee_email_address"]').val(data.details.email);
                         }else{
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     });
+                }
+            });
+
+            $('input[name="consignee_phone_number_1"]').bind('change paste keyup', function () {
+                var length = $(this).val().match(/\d/g).length;
+                if(length == 11){
+                    check_consignee_return_ratio();
                 }
             });
 
@@ -1177,16 +1209,58 @@
                                         // dangerMode: true
                                     }).then(function(confirm) {
                                         if(confirm) {
-                                            swal({
-                                                title: 'Please Wait!',
-                                                text: 'Your shipment is being booked!',
-                                                icon: 'info',
-                                                buttons: false,
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false
-                                            });
+                                            if(blacklist == true){
+                                                var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                swal({
+                                                    content: content,
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Cancel',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                        confirm: {
+                                                            text: 'Book Anyway',
+                                                            value: true,
+                                                            visible: true,
+                                                            closeModal: true
+                                                        }
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    // dangerMode: true
+                                                }).then(function(confirm) {
+                                                    if (confirm) {
+                                                        swal({
+                                                            title: 'Please Wait!',
+                                                            text: 'Your shipment is being booked!',
+                                                            icon: 'info',
+                                                            buttons: false,
+                                                            closeOnClickOutside: false,
+                                                            closeOnEsc: false
+                                                        });
 
-                                            form.submit();
+                                                        form.submit();
+                                                    }
+                                                    else{
+                                                        $(form).find('button[type=submit]').prop('disabled', false);
+                                                    }
+                                                });
+                                            }else{
+                                                swal({
+                                                    title: 'Please Wait!',
+                                                    text: 'Your shipment is being booked!',
+                                                    icon: 'info',
+                                                    buttons: false,
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false
+                                                });
+
+                                                form.submit();
+                                            }
                                         }
                                         else{
                                             $(form).find('button[type=submit]').prop('disabled', false);
@@ -1194,16 +1268,58 @@
                                     });
                                 }
                                 else {
-                                    swal({
-                                        title: 'Please Wait!',
-                                        text: 'Your shipment is being booked!',
-                                        icon: 'info',
-                                        buttons: false,
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false
-                                    });
+                                    if(blacklist == true) {
+                                        var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+                                        swal({
+                                            content: content,
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Cancel',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                                confirm: {
+                                                    text: 'Book Anyway',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
+                                                }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            // dangerMode: true
+                                        }).then(function (confirm) {
+                                            if (confirm) {
+                                                swal({
+                                                    title: 'Please Wait!',
+                                                    text: 'Your shipment is being booked!',
+                                                    icon: 'info',
+                                                    buttons: false,
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false
+                                                });
 
-                                    form.submit();
+                                                form.submit();
+                                            }
+                                            else{
+                                                $(form).find('button[type=submit]').prop('disabled', false);
+                                            }
+                                        });
+                                    }else{
+                                        swal({
+                                            title: 'Please Wait!',
+                                            text: 'Your shipment is being booked!',
+                                            icon: 'info',
+                                            buttons: false,
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false
+                                        });
+
+                                        form.submit();
+                                    }
                                 }
                             });
                         }

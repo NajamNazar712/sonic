@@ -249,7 +249,7 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        }
+                        }  
                         else {
                             tab.document.write(data);
                             tab.document.close();

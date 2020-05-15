@@ -497,6 +497,49 @@ use Yajra\Datatables\Datatables;
             return $tracking_numbers;
         }
 
+
+        public function multiple_iban_index(Request $request){
+            $iban_no = DB::connection('reports')->table('user_bank_infos')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
+            return view('admin.reports.multiple_IBAN_no_change')->with(['iban'=>$iban_no,'shippers'=>$shippers]);
+        }
+
+        public function multiple_iban_list(Request $request){
+            $iban_received = DB::connection('reports')->table('user_bank_infos')->join('users as u','u.id','=','user_bank_infos.user_id')
+            ->join('cities AS oc', 'user_bank_infos.city_id', '=', 'oc.id')
+            ->join('banks_lists AS bl', 'bl.id', '=', 'user_bank_infos.bank_name')
+            ->select(['user_bank_infos.id as account_id','u.name as shipper','bl.name as bankname',
+            'user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title',
+            'oc.name as city','user_bank_infos.iban','user_bank_infos.default_bank as default','user_bank_infos.created_at as bank_added_at'
+            ]);
+            $user_bank = Datatables::of($iban_received)
+            ->editColumn('default', function ($bank){
+                if($bank->default == 0){
+                    return "No";
+                }else{
+                    return "Yes";
+                }
+            });
+
+            if($ibanNo = $request->get('search_iban_no')){
+                $user_bank->where('user_bank_infos.iban', '=', $ibanNo);
+            }
+            if($shipper = $request->get('search_shipper')){
+                $user_bank->where('u.id', '=', $shipper);
+            }
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $user_bank->whereBetween('user_bank_infos.created_at', [$from,$to]);
+            }
+
+           
+            return $user_bank->make(true);
+        
+        }
+
+
+
         public function lead_time_index(Request $request){
     //        $shippers = User$generator::all(['id','name']);
             $cities = DB::connection('reports')->table('cities')->get(['id','name']);
@@ -787,6 +830,7 @@ use Yajra\Datatables\Datatables;
             }
             return $lead_time->make(true);
         }
+        
         public function qa_index(Request $request){
             $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
             return view('admin.reports.qa_report')->with('shipping_modes', $shipping_modes);
@@ -3124,7 +3168,7 @@ use Yajra\Datatables\Datatables;
                         ->where('is.id','=',
                             DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id)'));
                 })
-    			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by')
+    			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions')
                 ->whereNotIn('shipments.shipper_status_id',[1,17])
                 ->whereBetween('sj.created_at', [$from,$to]);
     //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
@@ -3899,8 +3943,7 @@ use Yajra\Datatables\Datatables;
                 $from_id = DB::connection('reports')->table('shipments_journey')->select(DB::connection('reports')->raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from)->first()->id;
                 $to_id = DB::connection('reports')->table('shipments_journey')->select(DB::connection('reports')->raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to)->first()->id;
 
-                $dn_min_id = DB::connection('reports')->table('delivery_notes')->select(DB::connection('reports')->raw('MIN(id) as id'))->where('status', 1)->where('status_verified_at', '>=', $from)->first()->id;
-                $dn_max_id = DB::connection('reports')->table('delivery_notes')->select(DB::connection('reports')->raw('MAX(id) as id'))->where('status', 1)->where('status_verified_at', '<=', $to)->first()->id;
+                $dn_ids = DB::connection('reports')->table('delivery_notes')->select('id')->where('status', 1)->whereBetween('status_verified_at', [$from, $to])->get()->pluck('id');
 
                 $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_attempted', 'fake_status', 'confirmation_pending', 'delivery_note_pending', 'delivery_tomorrow'];
 
@@ -3942,12 +3985,9 @@ use Yajra\Datatables\Datatables;
                             });
                         }
                         else if ($type == 'fake_status') {
-                            $rows = $rows->join('delivery_note_shipments as dns', 's.id', '=', 'dns.shipment_id')
-                            ->join('delivery_notes as dn', function($join) use ($dn_min_id, $dn_max_id) {
-                                $join->on('dn.id', '=', 'dns.delivery_note_id')
-                                ->where('dn.status', '=', 1)
-                                ->where('dn.id', '>=', $dn_min_id)
-                                ->where('dn.id', '<=', $dn_max_id);
+                            $rows = $rows->join('delivery_note_shipments as dns', function($join) use ($dn_ids) {
+                                $join->on('s.id', '=', 'dns.shipment_id')
+                                ->whereIn('dns.delivery_note_id', $dn_ids);
                             });
                         }
                         else if ($type == 'delivery_note_pending') {

@@ -134,7 +134,7 @@
                                 row.push(values.return_charges);
                                 row.push(values.gst);
                                 row.push(values.charges);
-                                row.push(values.charges_mode);
+                                row.push(values.charges_modes);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
                                 row.push(values.updated_by);

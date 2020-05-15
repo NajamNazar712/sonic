@@ -1355,6 +1355,8 @@ class AdminCRMController extends Controller
     }
 
     public function closed_list(Request $request){
+        $count = CrmRequest::where('crm_requests.status_id', 4)->count();
+
         $closed_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
@@ -1399,8 +1401,7 @@ class AdminCRMController extends Controller
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
             ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'crm_requests.launched_by_id')
-            ->where('crm_requests.status_id', 4)
-            ->groupBy('crm_requests.id');
+            ->where('crm_requests.status_id', 4);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $closed_request = $closed_request->where(function ($sub_query) {
@@ -1432,6 +1433,7 @@ class AdminCRMController extends Controller
         }
 
         $datatables = Datatables::of($closed_request)
+            ->setTotalRecords($count)
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
@@ -1638,6 +1640,7 @@ class AdminCRMController extends Controller
 //            }
 //        }
 //        elseif ($request->multiple == 1) {
+        if(!empty($request->crm_request_ids)){
             foreach ($request->crm_request_ids as $crm_request_id)
             {
                 $crm_requests = CrmRequest::find($crm_request_id);
@@ -1652,6 +1655,7 @@ class AdminCRMController extends Controller
                 }
             }
             return ['status' => 0, 'success' => 'Request(s) has been Assigned'];
+        }
 //        }
     }
 

@@ -284,6 +284,7 @@
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                     }
                 },
+                deferLoading: 0,
                 rowId: 'id',
                 order: [[15, 'desc']],
                 columns: [

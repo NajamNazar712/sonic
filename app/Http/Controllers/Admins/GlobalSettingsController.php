@@ -16,6 +16,17 @@ use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\Blacklist\BlacklistCondition;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
+use App\Http\Models\Blacklist\BlacklistLabeling;
+use App\Http\Models\Blacklist\BlacklistLogic;
+use App\Http\Models\Blacklist\BlacklistOperation;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Blacklist\BlacklistSettingCondition;
+use App\Http\Models\Blacklist\BlacklistShipmentRange;
+use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
@@ -35,6 +46,7 @@ use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\RateStatus;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
@@ -1883,4 +1895,375 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    public function blacklist_index(){
+        return view('admin.settings.blacklist.index');
+    }
+    public function blacklist_list(Request $request){
+        $blacklist = BlacklistSetting::join('admins as a', 'a.id', '=', 'blacklist_settings.added_by')
+            ->leftjoin('admins as u', 'u.id', '=', 'blacklist_settings.updated_by')
+            ->join('blacklist_labelings as bl', 'bl.id', '=', 'blacklist_settings.labeling_id')
+            ->select('blacklist_settings.id as category_id', 'blacklist_settings.name as category_name', 'bl.name as labeling_name', 'a.name as added_by', 'u.name as updated_by', 'blacklist_settings.status', 'blacklist_settings.created_at as added_at', 'blacklist_settings.updated_at');
+        $datatable = Datatables::of($blacklist)
+            ->addColumn('category_status', function ($data){
+                if($data->status == 0){
+                    return 'Disable';
+                }else{
+                    return 'Enable';
+                }
+            })
+            ->addColumn('action', function ($data){
+
+            $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+            $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+            if ($data->status == 1) {
+                $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Disable</div></button>';
+            } else {
+                $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            }
+
+            return $dropdown;
+
+        });
+
+        return  $datatable->make(true);
+    }
+
+    public function blacklist_add(){
+        $labelings = BlacklistLabeling::all(['id','name']);
+        $conditions = BlacklistCondition::all(['id','name']);
+        $logics = BlacklistLogic::all(['id','name']);
+        $shipment_ranges = BlacklistShipmentRange::all(['id','name']);
+        $operations = BlacklistOperation::all(['id','name']);
+        return view('admin.settings.blacklist.add')->with(['labelings' => $labelings, 'conditions' => $conditions, 'logics' => $logics, 'shipment_ranges' => $shipment_ranges, 'operations' => $operations]);
+    }
+    public function blacklist_add_store(Request $request){
+
+        $conditions = $request->condition_select;
+        $name = $request->name;
+        $labeling_id = $request->labeling_select;
+        $color = $request->color;
+        $message = $request->message;
+
+        if(BlacklistSetting::where('color', $color)->exists()){
+            return redirect()->back()->with('error', 'Color already selected!');
+        }
+        if(count($conditions) > count(array_flip($conditions))){
+            return redirect()->back()->with('error', 'Same condition selected multiple times!');
+        }
+
+        if(!empty($conditions)){
+
+            $blacklist_setting = new BlacklistSetting();
+            $blacklist_setting->name = $name;
+            $blacklist_setting->labeling_id = $labeling_id;
+            $blacklist_setting->color = $color;
+            $blacklist_setting->message = $message;
+            $blacklist_setting->added_by = Auth::id();
+            $blacklist_setting->save();
+            $setting_id = $blacklist_setting->id;
+            foreach ($conditions as $key => $condition){
+                foreach ($request->logic_select[$key] as $row => $logic){
+                    $blacklist_setting_condition = new BlacklistSettingCondition();
+                    $blacklist_setting_condition->blacklist_setting_id = $setting_id;
+                    $blacklist_setting_condition->blacklist_condition_id = $condition;
+                    $blacklist_setting_condition->blacklist_logic_id = $logic;
+                    $blacklist_setting_condition->blacklist_logic_value = $request->logic_percentage[$key][$row];
+                    $blacklist_setting_condition->blacklist_shipment_range_id = $request->shipment_range_select[$key][$row];
+                    $blacklist_setting_condition->blacklist_shipment_range_value = $request->shipment_range[$key][$row];
+                    if($request->has('operation_select')){
+                        if(array_key_exists($key, $request->operation_select)){
+                            if(array_key_exists($row, $request->operation_select[$key])){
+                                $blacklist_setting_condition->blacklist_operation_id = $request->operation_select[$key][$row];
+                            }
+                        }
+                    }
+                    $blacklist_setting_condition->save();
+                }
+
+            }
+            return redirect()->back()->with('success', 'Setting successfully added!');
+        }
+    }
+
+    public function blacklist_unique_criteria(Request $request){
+        $condition_id = $request->condition;
+        $logic_id = $request->logic_select;
+        $logic_value = $request->logic_value;
+        if($request->has('category_id')){
+            $category_id = $request->category_id;
+            if(BlacklistSettingCondition::where('blacklist_setting_id', '!=', $category_id)->where('blacklist_condition_id', $condition_id)->where('blacklist_logic_id', $logic_id)->where('blacklist_logic_value', $logic_value)->exists()){
+                return "true";
+            }else{
+                return "false";
+            }
+        }
+        if(BlacklistSettingCondition::where('blacklist_condition_id', $condition_id)->where('blacklist_logic_id', $logic_id)->where('blacklist_logic_value', $logic_value)->exists()){
+            return "true";
+        }else{
+            return "false";
+        }
+
+    }
+
+    public function blacklist_status(Request $request){
+        $id = $request->id;
+        $status = $request->status;
+        $blacklist_setting = BlacklistSetting::find($id);
+        if(!$blacklist_setting){
+            return response()->json(['status' => 1, 'error' => 'Setting not found!']);
+        }
+
+        if($status == 1){
+            $blacklist_setting->status = 1;
+        }else if($status == 0){
+            $blacklist_setting->status = 0;
+        }
+        $blacklist_setting->save();
+
+        return response()->json(['status' => 0, 'success' => 'Setting updated successfully!']);
+    }
+
+    public function blacklist_edit(Request $request, $id){
+        $blacklist_setting = BlacklistSetting::find($id);
+        if($blacklist_setting){
+            $condition_ids = $blacklist_setting->conditions()->pluck('blacklist_condition_id')->toArray();
+            $condition_ids = array_unique($condition_ids);
+            $blacklist_conditions = $blacklist_setting->conditions->groupBy('blacklist_condition_id');
+            $labelings = BlacklistLabeling::all(['id','name']);
+            $conditions = BlacklistCondition::all(['id','name']);
+            $logics = BlacklistLogic::all(['id','name']);
+            $shipment_ranges = BlacklistShipmentRange::all(['id','name']);
+            $operations = BlacklistOperation::all(['id','name']);
+
+            return view('admin.settings.blacklist.edit')->with(['setting_id' => $id,'labelings' => $labelings, 'conditions' => $conditions, 'logics' => $logics, 'shipment_ranges' => $shipment_ranges, 'operations' => $operations, 'blacklist_setting' => $blacklist_setting, 'condition_ids' => $condition_ids, 'blacklist_conditions' => $blacklist_conditions]);
+        }
+        else{
+            return redirect()->back()->with('error', 'Settings not found!');
+        }
+    }
+    public function blacklist_edit_submit(Request $request){
+
+        $id = $request->setting_id;
+        $conditions = $request->condition_select;
+        $name = $request->name;
+        $labeling_id = $request->labeling_select;
+        $color = $request->color;
+        $message = $request->message;
+        if(BlacklistSetting::where('color', $color)->where('id', '<>', $id)->exists()){
+            return redirect()->back()->with('error', 'Color already selected!');
+        }
+        if(count($conditions) > count(array_flip($conditions))){
+            return redirect()->back()->with('error', 'Same condition selected multiple times!');
+        }
+
+        if(!empty($conditions)){
+
+            $blacklist_setting = BlacklistSetting::find($id);
+            if($blacklist_setting){
+                $blacklist_setting->name = $name;
+                $blacklist_setting->labeling_id = $labeling_id;
+                $blacklist_setting->color = $color;
+                $blacklist_setting->message = $message;
+                $blacklist_setting->updated_by = Auth::id();
+                $blacklist_setting->save();
+                $setting_id = $id;
+                BlacklistSettingCondition::where('blacklist_setting_id', $id)->delete();
+                foreach ($conditions as $key => $condition){
+                    foreach ($request->logic_select[$key] as $row => $logic){
+                        $blacklist_setting_condition = new BlacklistSettingCondition();
+                        $blacklist_setting_condition->blacklist_setting_id = $setting_id;
+                        $blacklist_setting_condition->blacklist_condition_id = $condition;
+                        $blacklist_setting_condition->blacklist_logic_id = $logic;
+                        $blacklist_setting_condition->blacklist_logic_value = $request->logic_percentage[$key][$row];
+                        $blacklist_setting_condition->blacklist_shipment_range_id = $request->shipment_range_select[$key][$row];
+                        $blacklist_setting_condition->blacklist_shipment_range_value = $request->shipment_range[$key][$row];
+                        if($request->has('operation_select')){
+                            if(array_key_exists($key, $request->operation_select)){
+                                if(array_key_exists($row, $request->operation_select[$key])){
+                                    $blacklist_setting_condition->blacklist_operation_id = $request->operation_select[$key][$row];
+                                }
+                            }
+                        }
+                        $blacklist_setting_condition->save();
+                    }
+
+                }
+                return redirect()->back()->with('success', 'Setting successfully updated!');
+            }
+            return redirect()->back()->with('error', 'Category not found!');
+        }
+        return redirect()->back()->with('error', 'Conditions not selected!');
+    }
+
+    public function blacklist_search_index(){
+        $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
+        return view('admin.settings.blacklist.search')->with(['blacklists' => $blacklists]);
+    }
+    public function blacklist_search_consignee(Request $request){
+        $phone = $request->phone;
+        $data = array();
+        $consignee_information = ConsigneeInformation::where('phone', $phone);
+        if($consignee_information->exists()){
+            $consignee_information = $consignee_information->first();
+            $data['consignee'] = array();
+
+            $data['consignee']['id'] = $consignee_information->id;
+            $data['consignee']['name'] = $consignee_information->name;
+            $data['consignee']['phone'] = $consignee_information->phone;
+            $data['consignee']['phone2'] = $consignee_information->phone2;
+            $data['consignee']['address'] = $consignee_information->address;
+            $data['consignee']['city'] = $consignee_information->consignee_city->name;
+            $consignee_information_id = $consignee_information->id;
+            $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information_id);
+            $color = NULL;
+            if($manual_blacklist->exists()){
+                $manual_blacklist = $manual_blacklist->first();
+                $color = BlacklistSetting::find($manual_blacklist->blacklist_setting_id)->color;
+            }
+            if(BlacklistedConsignee::where('consignee_information_id', $consignee_information_id)->exists()){
+                $data['blacklist'] = array();
+                $data['blacklist']['total_shipments'] = $consignee_information->blacklisted_consignee->shipments;
+                $data['blacklist']['delivered'] = $consignee_information->blacklisted_consignee->delivered;
+                $data['blacklist']['delivered_ratio'] = $consignee_information->blacklisted_consignee->delivered_ratio;
+                $data['blacklist']['undelivered'] = $consignee_information->blacklisted_consignee->undelivered;
+                $data['blacklist']['undelivered_ratio'] = $consignee_information->blacklisted_consignee->undelivered_ratio;
+                $data['blacklist']['return'] = $consignee_information->blacklisted_consignee->return;
+                $data['blacklist']['return_ratio'] = $consignee_information->blacklisted_consignee->return_ratio;
+                if($color == NULL){
+                    $data['blacklist']['color'] = $consignee_information->blacklisted_consignee->blacklist->color;
+                }else{
+                    $data['blacklist']['color'] = $color;
+                }
+            }
+            return response()->json(['status' => 0, 'success' => 'Consignee information found!', 'details' => $data]);
+        }
+        return response()->json(['status' => 1, 'error' => 'Consignee not found']);
+    }
+    public function blacklist_search_update(Request $request){
+        $action = $request->action;
+        $blacklist_setting_id = $request->label_select;
+        $consignee_information_id = $request->consignee_information_id;
+        if($action == 'exclude'){
+            $blacklist = BlacklistedConsigneeManuallyExcluded::where('consignee_information_id', $consignee_information_id);
+            if($blacklist->exists()){
+                return redirect()->back()->with('error', 'Already excluded!');
+            }
+
+            $blacklist = new BlacklistedConsigneeManuallyExcluded();
+            $blacklist->consignee_information_id = $consignee_information_id;
+            $blacklist->excluded_by = Auth::id();
+            $blacklist->save();
+
+
+        }else if($action == 'label'){
+            $blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information_id);
+            if($blacklist->exists()){
+                $blacklist = $blacklist->first();
+                $blacklist->added_by = Auth::id();
+                $blacklist->blacklist_setting_id = $blacklist_setting_id;
+                $blacklist->save();
+            }else{
+                $blacklist = new BlacklistedConsigneeManuallyBlacklisted();
+                $blacklist->consignee_information_id = $consignee_information_id;
+                $blacklist->added_by = Auth::id();
+                $blacklist->blacklist_setting_id = $blacklist_setting_id;
+                $blacklist->save();
+            }
+
+        }
+        return redirect()->back()->with('success', 'Successfully updated!');
+    }
+
+     public function commission_percentage_index(){
+             $settings = GlobalSettings::where('type', 'commission_percentage')->first();
+            $percentage = '';
+            if($settings){
+                $percentage = $settings->text;
+            }
+            return view('admin.settings.commission.commission_percentage')->with(['commission_percentage' => $percentage]);
+        }
+
+     public function commission_percentage_update(Request $request){
+            $percentage = $request->commission_percentage;
+            $setting = GlobalSettings::where('type', 'commission_percentage');
+            if($setting->exists()){
+                $setting = $setting->first();
+                $setting->setting_value = 0;
+                $setting->text=$percentage;
+                $setting->save();
+            }else{
+                $setting = new GlobalSettings();
+                 $setting->text=$percentage;
+                $setting->type = 'commission_percentage';
+                $setting->save();
+            }
+            return redirect()->back()->with('success', 'Setting updated');
+        }
+
+    public function return_reason_index(){
+        return view('admin.settings.return.reason');
+    }
+    public function return_reason_list(Request $request){
+        $reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->pluck('shipment_status_reason_id')->toArray();
+        $reasons = ShipmentStatusReason::whereIn('id', $reason_ids)->select('id', 'name');
+        $datatable = Datatables::of($reasons)
+            ->addColumn('action', function ($data){
+
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                return $dropdown;
+
+            });
+
+        return $datatable->make(true);
+    }
+    public function return_reason_add(Request $request){
+        $reason = trim($request->reason);
+        if($reason){
+            $shipment_reason = new ShipmentStatusReason();
+            $shipment_reason->name = $reason;
+            $shipment_reason->save();
+
+            DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+
+            return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
+    }
+    public function return_reason_get(Request $request){
+        $id = $request->reason_id;
+        if($id){
+            $reason = ShipmentStatusReason::find($id);
+            if($reason){
+                return response()->json(['status' => 0, 'reason' => $reason->name]);
+            }
+            return response()->json(['status' => 1, 'error' => 'Reason not found!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please select reason!']);
+    }
+    public function return_reason_edit(Request $request){
+        $reason_id = $request->reason_id;
+        $reason = $request->reason;
+        if($reason){
+            $reason_detail = ShipmentStatusReason::find($reason_id);
+            $reason_detail->name = $reason;
+            $reason_detail->save();
+            return response()->json(['status' => 0, 'success' => 'Reason updated successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
+    }
+
 }

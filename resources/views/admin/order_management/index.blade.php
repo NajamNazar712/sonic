@@ -583,6 +583,64 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                        @if (session('role_id') == 1 || in_array(336, session('permissions')))
+                    {
+                        text: '<i class="la la-arrow-down"></i> Telenor Arrival Button',
+                        className: 'btn btn-primary telenor_arrival',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            swal({
+                                text: 'Are you sure, you want to mark these Shipment(s) as arrive?',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function(confirm) {
+                                if (confirm) {
+                                    $.ajax({
+                                        url: '{!! route('admin.orders.telenor_shipments_arrival') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            // 'shipment_ids': selected_rows
+                                        }
+                                    })
+                                        .done(function(data) {
+                                            if (data.status == 0) {
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }
+                                            else {
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            }
+
+                                            table.button('.shipper_recall').disable();
+                                            table.button('.print').disable();
+
+                                            selected_rows = [];
+
+                                            table.rows().deselect();
+
+                                            table.draw('false');
+                                        });
+                                }
+                            });
+                        }
+                    },
+                        @endif
                         @if (session('role_id') == 1 || in_array(139, session('permissions')))
                     {
                         text: '<i class="la la-reply"></i> Shipper Recall',
@@ -626,7 +684,6 @@
                                             else {
                                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                             }
-
                                             table.button('.shipper_recall').disable();
                                             table.button('.print').disable();
 
@@ -762,6 +819,7 @@
                         d.shipment_status_select = $('#shipment_status').val();
                     }
                 },
+                deferLoading: 0,
                 rowId: 'shipment_id',
                 order: [[12, 'desc']],
                 columns: [

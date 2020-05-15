@@ -813,7 +813,7 @@ class NotificationsController extends Controller
             if($delivery_note->special_rider){
                 if (strpos($body, '[rider]') !== FALSE) {
                     if ($delivery_note_shipment->rider_information) {
-                        $body = str_replace('[rider]', $delivery_note->special_rider_name . ' (' . $delivery_note->special_rider_phone . ')', $body);
+                        $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->special_rider_name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->special_rider_phone), $body);
                     }
                     else {
                         $body = str_replace('[rider]', '', $body);
@@ -822,17 +822,16 @@ class NotificationsController extends Controller
             }else{
               if (strpos($body, '[rider]') !== FALSE) {
                   if ($delivery_note_shipment->rider_information) {
-                      $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
+                      $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->rider->name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->rider->phone), $body);
                   }
                   else {
                       $body = str_replace('[rider]', '', $body);
                   }
               }
             }
-            
 
             if (strpos($body, '[company_name]') !== FALSE) {
-              $body = str_replace('[company_name]', $shipper->name, $body);
+              $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $shipper->name), 0, 25), $body);
             }
 
             if (strpos($body, '[payment_mode]') !== FALSE) {

@@ -71,6 +71,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('get_consignee_info', 'Shippers\ShipperShipmentBookController@get_consignee_info')->name('get_consignee_info');
 
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
+            Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
 
             Route::prefix('excel')->name('excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
@@ -159,6 +160,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('reattempt/nsa','Shippers\ShipperReturnController@return_reattempt_nsa')->name('reattempt.nsa');
             Route::post('reattempt/status/single','Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
             Route::post('marked/self_collection','Shippers\ShipperReturnController@change_status_to_self_collection')->name('marked.self_collection');
+            Route::post('consignee', 'Shippers\ShipperReturnController@blacklist_search_consignee')->name('consignee');
         });
         Route::prefix('reattempt_history')->name('reattempt_history.')->group(function (){
             Route::get('','Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');
@@ -352,6 +354,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('shipment_charges','Admins\OrderManagementController@get_shipment_charges')->name('charges');
         Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
+        Route::post('telenor_shipments_arrival','Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
@@ -1078,7 +1081,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
             Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
             Route::post('check_quantity','Admins\AdminPackagingMaterialController@request_check_quantity')->name('check_quantity');
-            Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
+            Route::get('list','Admins\AdminPackagingMaterialController@request_lists')->name('list');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
             Route::post('quantity_details','Admins\AdminPackagingMaterialController@quantity_details')->name('quantity_details');
             Route::post('confirm','Admins\AdminPackagingMaterialController@request_confirm')->name('confirm');
@@ -1156,6 +1159,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_received_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_received_list')->name('list');
             Route::post('shipments','Admins\AdminReportsController@cargo_shipments')->name('shipments');
+        });
+        Route::prefix('multiple_iban')->name('multiple_iban.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@multiple_iban_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@multiple_iban_list')->name('list');
         });
         Route::prefix('lead_time')->name('lead_time.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@lead_time_index')->name('index');
@@ -1545,7 +1552,52 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_crm_comment_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@auto_crm_comment_store')->name('store');
         });
+
+        Route::prefix('blacklist')->name('blacklist.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@blacklist_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@blacklist_list')->name('list');
+            Route::get('add', 'Admins\GlobalSettingsController@blacklist_add')->name('add');
+            Route::post('add', 'Admins\GlobalSettingsController@blacklist_add_store')->name('add');
+            Route::post('unique', 'Admins\GlobalSettingsController@blacklist_unique_criteria')->name('unique');
+            Route::post('status', 'Admins\GlobalSettingsController@blacklist_status')->name('status');
+            Route::get('edit/{id}','Admins\GlobalSettingsController@blacklist_edit')->name('edit');
+            Route::post('edit/{id}','Admins\GlobalSettingsController@blacklist_edit_submit')->name('edit');
+            Route::prefix('search')->name('search.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@blacklist_search_index')->name('index');
+                Route::post('consignee', 'Admins\GlobalSettingsController@blacklist_search_consignee')->name('consignee');
+                Route::post('update', 'Admins\GlobalSettingsController@blacklist_search_update')->name('update');
+            });
+        });
+
+
+        //commission routes
+        Route::prefix('commission')->name('commission.')->group(function () {
+            Route::get('', 'Admins\AdminCommissionController@index')->name('index');
+             Route::get('list', 'Admins\AdminCommissionController@tier_list')->name('list');
+             Route::post('add', 'Admins\AdminCommissionController@add_sales_tier')->name('add');
+             Route::post('status', 'Admins\AdminCommissionController@commission_status')->name('status');
+            Route::post('details','Admins\AdminCommissionController@editSalesTierView')->name('details');
+            Route::post('edit','Admins\AdminCommissionController@editSalesTier')->name('edit');
+            Route::prefix('percentage')->name('percentage.')->group(function () {
+                    Route::get('', 'Admins\GlobalSettingsController@commission_percentage_index')->name('index');
+                    Route::post('', 'Admins\GlobalSettingsController@commission_percentage_update')->name('store');
+                });
+        });
+
+
+        Route::prefix('return')->name('return.')->group(function () {
+            Route::prefix('reason')->name('reason.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@return_reason_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@return_reason_list')->name('list');
+                Route::post('add', 'Admins\GlobalSettingsController@return_reason_add')->name('add');
+                Route::post('get', 'Admins\GlobalSettingsController@return_reason_get')->name('get');
+                Route::post('edit', 'Admins\GlobalSettingsController@return_reason_edit')->name('edit');
+            });
+        });
+   
     });
+
+
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');

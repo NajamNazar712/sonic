@@ -1136,7 +1136,7 @@
 						var type_id = parseInt($(row.node()).attr('type_id'));
 						var row_id = $(row.node()).attr('id');
 						if (type_id != 2) {
-							var amount = parseInt($(row.node()).find('td.amount').text());
+							var amount = parseInt($(row.node()).find('td.deductable').text());
 							if(amount == 0){
 								zero_charges = true;
 							}
@@ -1146,7 +1146,7 @@
 				if(zero_charges){
 					swal({
 						title: 'Are You Sure?',
-						text: 'Zero cod shipment selected, select yes to pay!',
+						text: 'Charges are zero for selected Shipment(s), select yes to pay!',
 						icon: 'warning',
 						buttons: {
 							cancel: {

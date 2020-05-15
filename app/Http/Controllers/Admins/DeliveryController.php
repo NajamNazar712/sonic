@@ -19,11 +19,14 @@ use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\BanksList;
+use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 
+use App\Http\Models\ConsigneeLocation;
+use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
@@ -1252,12 +1255,12 @@ class DeliveryController extends Controller
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.rider_id IS NOT NULL)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.rider_id IS NOT NULL)'));
             })
             ->leftJoin('shipments_journey as sjl', function ($join) {
                 $join->on('sjl.shipment_id', '=', 'shipments.id')
                     ->where('sjl.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.reference_1_id = delivery_notes.id)'));
             })
             ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sj.shipper_status_id')
             ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sj.status_reason_id')
@@ -1991,6 +1994,7 @@ class DeliveryController extends Controller
                 $verification_percentage = $setting_call_verification['verification'];
                 $verification_shipments_count = round(($total_count - $delivered_count) * ($verification_percentage/100));
             }
+
             return view('admin.delivery.receive.verify_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->status, 'percentage' => $percentage, 'verification_percentage' => $verification_percentage, 'verification_shipments_count' => $verification_shipments_count]);
         }else{
             return redirect(route('admin.delivery.receive.index'))->with('error','Delivery Note not ready for verification!');
@@ -2019,7 +2023,7 @@ class DeliveryController extends Controller
             ->leftJoin('shipments_journey as sjr', function ($join) {
                 $join->on('sjr.shipment_id', '=', 'shipments.id')
                     ->where('sjr.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.rider_id IS NOT NULL)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.rider_id IS NOT NULL)'));
             })
             ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sjr.shipper_status_id')
             ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sjr.status_reason_id')
@@ -2031,7 +2035,7 @@ class DeliveryController extends Controller
             ->leftjoin('consignee_shipment_locations as csl', 'csl.shipment_id', '=', 'shipments.id')
             ->leftjoin('consignee_locations as pcls', 'pcls.id', '=', 'csl.previous_location_id')
             ->leftjoin('consignee_locations as ccls', 'ccls.id', '=', 'csl.current_location_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -2045,6 +2049,10 @@ class DeliveryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number_link' class='tracking' target='_blank'>$shipments->tracking_number_link</a></u>";
             })
+            ->editColumn('consignee_phone', function ($shipments) {
+                return '<button type="button" class="btn btn-sm btn-outline-info align-middle consignee_info_label" rel="'. $shipments->consignee_phone_number_1 .'"><i class="la la-lg la-phone align-middle"></i> <span class="align-middle">' . $shipments->consignee_phone_number_1 . '</span></button>';
+            })
+
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
@@ -2704,6 +2712,9 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Weight</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
+                            <td class="color primary"><strong>Denomination</strong></td>
+                            <td class="color primary"><strong>Qty</strong></td>
+                            <td class="color primary"><strong>Amount</strong></td>
                           </tr>
         ';
 
