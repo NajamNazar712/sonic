@@ -3188,9 +3188,13 @@ class NotificationsController extends Controller
                 $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id','name');
                 if($hubs->exists()){
                   $hubs = $hubs->get();
+
+                  $original_subject = $subject;
+                  $original_body = $body;
+
                   $date = $reference_1_id;
                   foreach ($hubs as $hub) {
-                      $debriefing = Debriefing::where('hub', $hub->id)->first();
+                    $debriefing = Debriefing::where('hub', $hub->id)->first();
                     if (strpos($subject, '[hub]') !== FALSE) {
                       $subject = str_replace('[hub]', $hub->name, $subject);
                     }
@@ -3231,7 +3235,8 @@ class NotificationsController extends Controller
                           $body = str_replace('[preview]', $details, $body);
                       }
                     $file = Storage::disk('public')->url('/reports/debriefing/hubs/debriefing_report_'.$date.'_'. $hub->id .'.xlsx');
-                    $link = '<div class="row"><button onclick="window.open(' . $file . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">Download</button>';
+
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($subject, '[link]') !== FALSE) {
                     $subject = str_replace('[link]', $link, $subject);
@@ -3239,7 +3244,7 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $operation_admins = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admin_hubs.hub_id','=', $hub->id);
+                    $operation_admins = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $hub->id);
                     if ($operation_admins->exists()) {
                           $to = $operation_admins->pluck('admins.email')->toArray();
                     }
@@ -3253,7 +3258,8 @@ class NotificationsController extends Controller
 
                   self::email($subject, $body, $to, $cc);
 
-
+                  $subject = $original_subject;
+                  $body = $original_body;
                   }
                 }
                 
@@ -3262,6 +3268,10 @@ class NotificationsController extends Controller
                 $zones = DB::connection('reports')->table('zones')->where('status', 1)->select('id','name');
                 if($zones->exists()){
                   $zones = $zones->get();
+
+                  $original_subject = $subject;
+                  $original_body = $body;
+
                   $date = $reference_1_id;
                   foreach ($zones as $zone) {
                     $debriefings = Debriefing::where('zone_id', $zone->id)->get();
@@ -3370,14 +3380,14 @@ class NotificationsController extends Controller
                       }
                     $file = Storage::disk('public')->url('/reports/debriefing/zones/debriefing_report_'.$date.'_'. $zone->id .'.xlsx');
 
-                    $link = '<div class="row"><button onclick="window.open(' . $file . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">Download</button>';
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                     if (strpos($subject, '[link]') !== FALSE) {
                         $subject = str_replace('[link]', $link, $subject);
                     }
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $operation_admins = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->join('cities','cities.id','=','admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('cities.zone_id','=', $zone->id);
+                    $operation_admins = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->join('cities','cities.id','=','admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)->where('cities.zone_id','=', $zone->id);
                     if ($operation_admins->exists()) {
                         $to = $operation_admins->pluck('admins.email')->toArray();
                     }
@@ -3391,7 +3401,8 @@ class NotificationsController extends Controller
 
                   self::email($subject, $body, $to, $cc);
 
-
+                  $subject = $original_subject;
+                  $body = $original_body;
                   }
                 }
             }
@@ -3497,7 +3508,7 @@ class NotificationsController extends Controller
                 }
                 
                 $file = Storage::disk('public')->url('/reports/debriefing/overall/debriefing_report_'.$date.'.xlsx');
-                $link = '<div class="row"><button onclick="window.open(' . $file . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">Download</button>';
+                $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                 if (strpos($subject, '[link]') !== FALSE) {
                     $subject = str_replace('[link]', $link, $subject);
                 }
