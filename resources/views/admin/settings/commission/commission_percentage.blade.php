@@ -24,7 +24,7 @@
 
                                         <div class="form-group">
                                             <div class="input-group">
-                                                <input type="text" name="commission_percentage" class="form-control commission_percentage" placeholder="commission Percentage*" data-rule-required="true" data-msg-required="Commission Percentage in numbers is required" value="{{$commission_percentage}}">
+                                                <input type="text" id="commission_perc" name="commission_percentage" class="form-control commission_percentage" placeholder="commission Percentage*" data-rule-required="true" data-msg-required="Commission Percentage in numbers is required" value="{{(float)$commission_percentage}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
