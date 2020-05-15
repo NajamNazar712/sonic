@@ -450,7 +450,7 @@
                         d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
                     }
                 },
-                order: [[10, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
