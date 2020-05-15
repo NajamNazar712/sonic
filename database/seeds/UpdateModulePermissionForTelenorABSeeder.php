@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionForReturnReasonSeeder extends Seeder
+class UpdateModulePermissionForTelenorABSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class UpdateModulePermissionForReturnReasonSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-           array('id' => 335, 'name' => 'Return Reason - View', 'module_id' => 14),
+            array('id' => 336, 'name' => 'Telenor Arrival Button', 'module_id' => 2),
         ));
     }
 }

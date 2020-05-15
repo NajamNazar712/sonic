@@ -81,6 +81,9 @@
                                                             <label class="card-title">Range Down</label>
                                                         </div>
                                                         <div class="col text-center">
+                                                            <label class="card-title">Base</label>
+                                                        </div>
+                                                        <div class="col text-center">
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
@@ -117,6 +120,13 @@
                                                                             <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_down}}" name="on_door_range_down[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" class="switchery weightAdditionDoorOvernight" data-color="success" data-size="sm" {{ ($onweight->base == 1) ? 'checked' : '' }}  disabled/>
+                                                                        </div>
+                                                                    </div>
+
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
                                                                             <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local_or_6hr}}" disabled name="on_door_local_charges[{{$index_row}}]">
@@ -165,6 +175,13 @@
                                                                     <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_range_down[0]" disabled>
                                                                 </fieldset>
                                                             </div>
+                                                            <div class="col text-center">
+
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" class="switchery weightAdditionDoorOvernight" data-color="success" data-size="sm" name="on_wa_switch[0]" disabled/>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
                                                                     <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_local_charges[0]" disabled>
@@ -232,6 +249,9 @@
                                                             <label class="card-title">Range Down</label>
                                                         </div>
                                                         <div class="col text-center">
+                                                            <label class="card-title">Base</label>
+                                                        </div>
+                                                        <div class="col text-center">
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
@@ -268,6 +288,13 @@
                                                                             <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_down}}" name="on_hub_range_down[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" class="switchery weightAdditionHubOvernight" data-color="success" data-size="sm"  {{ ($onweight->base == 1) ? 'checked' : '' }}  disabled/>
+                                                                        </div>
+                                                                    </div>
+
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
                                                                             <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local_or_6hr}}" name="on_hub_local_charges[{{$index_row}}]" disabled>
@@ -317,6 +344,13 @@
                                                                     <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_range_down[0]" disabled>
                                                                 </fieldset>
                                                             </div>
+                                                            <div class="col text-center">
+
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" class="switchery weightAdditionHubOvernight" data-color="success" data-size="sm" name="on_wa_switch[0]" disabled/>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
                                                                     <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_local_charges[0]" disabled>
@@ -896,6 +930,9 @@
                                                             <label class="card-title">Range Down</label>
                                                         </div>
                                                         <div class="col text-center">
+                                                            <label class="card-title">Base</label>
+                                                        </div>
+                                                        <div class="col text-center">
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
@@ -931,6 +968,13 @@
                                                                             <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_down}}" name="ol_door_range_down[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" class="switchery weightAdditionDoorOverland" data-color="success" data-size="sm" {{ ($olweight->base == 1) ? 'checked' : '' }}  disabled/>
+                                                                        </div>
+                                                                    </div>
+
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
                                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_door_local_charges[{{$index_row}}]" disabled>
@@ -978,6 +1022,13 @@
                                                                     <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_range_down[0]" disabled>
                                                                 </fieldset>
                                                             </div>
+                                                            <div class="col text-center">
+
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" class="switchery weightAdditionDoorOverland" data-color="success" data-size="sm" name="on_wa_switch[0]" disabled/>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
                                                                     <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_local_charges[0]" disabled>
@@ -1044,6 +1095,9 @@
                                                             <label class="card-title">Range Down</label>
                                                         </div>
                                                         <div class="col text-center">
+                                                            <label class="card-title">Base</label>
+                                                        </div>
+                                                        <div class="col text-center">
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
@@ -1079,6 +1133,13 @@
                                                                             <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_down}}" name="ol_hub_range_down[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" class="switchery weightAdditionHubOverland" data-color="success" data-size="sm" {{ ($olweight->base == 1) ? 'checked' : '' }}  disabled/>
+                                                                        </div>
+                                                                    </div>
+
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
                                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_hub_local_charges[{{$index_row}}]" disabled>
@@ -1126,6 +1187,13 @@
                                                                     <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_range_down[0]" disabled>
                                                                 </fieldset>
                                                             </div>
+                                                            <div class="col text-center">
+
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" class="switchery weightAdditionHubOverland" data-color="success" data-size="sm" name="on_wa_switch[0]" disabled/>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
                                                                     <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_local_charges[0]" disabled>
@@ -1703,6 +1771,9 @@
                                                             <label class="card-title">Range Down</label>
                                                         </div>
                                                         <div class="col text-center">
+                                                            <label class="card-title">Base</label>
+                                                        </div>
+                                                        <div class="col text-center">
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
@@ -1738,6 +1809,13 @@
                                                                             <input type="text" class="form-control decimal"data-rule-required="true" data-msg-required="This field is required"  value="{{$detweight->range_down}}" name="detain_door_range_down[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" class="switchery weightAdditionDoorDetain" data-color="success" data-size="sm" {{ ($detweight->base == 1) ? 'checked' : '' }}  disabled/>
+                                                                        </div>
+                                                                    </div>
+
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
                                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local_or_6hr}}" name="detain_door_local_charges[{{$index_row}}]" disabled>
@@ -1787,6 +1865,13 @@
                                                                     <input type="text" class="form-control decimal"data-rule-required="true" data-msg-required="This field is required"  value="" name="detain_door_range_down[0]" disabled>
                                                                 </fieldset>
                                                             </div>
+                                                            <div class="col text-center">
+
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" class="switchery weightAdditionDoorDetain" data-color="success" data-size="sm" disabled/>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
                                                                     <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_local_charges[0]" disabled>
@@ -1853,6 +1938,9 @@
                                                             <label class="card-title">Range Down</label>
                                                         </div>
                                                         <div class="col text-center">
+                                                            <label class="card-title">Base</label>
+                                                        </div>
+                                                        <div class="col text-center">
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
@@ -1889,6 +1977,13 @@
                                                                             <input type="text" class="form-control decimal"data-rule-required="true" data-msg-required="This field is required"  value="{{$detweight->range_down}}" name="detain_hub_range_down[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" class="switchery weightAdditionHubDetain" data-color="success" data-size="sm" {{ ($detweight->base == 1) ? 'checked' : '' }}  disabled/>
+                                                                        </div>
+                                                                    </div>
+
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
                                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local_or_6hr}}" name="detain_hub_local_charges[{{$index_row}}]" disabled>
@@ -1940,6 +2035,13 @@
                                                                     <input type="text" class="form-control decimal"data-rule-required="true" data-msg-required="This field is required"  value="" name="detain_hub_range_down[0]" disabled>
                                                                 </fieldset>
                                                             </div>
+                                                            <div class="col text-center">
+
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" class="switchery weightAdditionHubDetain" data-color="success" data-size="sm" disabled/>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
                                                                     <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_local_charges[0]" disabled>
@@ -2518,6 +2620,9 @@
                                                             <label class="card-title">Range Down</label>
                                                         </div>
                                                         <div class="col text-center">
+                                                            <label class="card-title">Base</label>
+                                                        </div>
+                                                        <div class="col text-center">
                                                             <label class="card-title">6hr Charges</label>
                                                         </div>
                                                         <div class="col text-center">
@@ -2546,6 +2651,13 @@
                                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_down}}" name="sameday_door_range_down[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" class="switchery weightAdditionDoorSameday" data-color="success" data-size="sm" {{ ($sameweight->base == 1) ? 'checked' : '' }}  disabled/>
+                                                                        </div>
+                                                                    </div>
+
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
                                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_door_local_charges[{{$index_row}}]" disabled>
@@ -2580,6 +2692,13 @@
                                                                     <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_range_down[0]" disabled>
                                                                 </fieldset>
                                                             </div>
+                                                            <div class="col text-center">
+
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" class="switchery weightAdditionDoorSameday" data-color="success" data-size="sm" disabled/>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
                                                                     <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_local_charges[0]" disabled>
@@ -2629,6 +2748,9 @@
                                                             <label class="card-title">Range Down</label>
                                                         </div>
                                                         <div class="col text-center">
+                                                            <label class="card-title">Base</label>
+                                                        </div>
+                                                        <div class="col text-center">
                                                             <label class="card-title">6hr Charges</label>
                                                         </div>
                                                         <div class="col text-center">
@@ -2656,6 +2778,13 @@
                                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_down}}" name="sameday_hub_range_down[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" class="switchery weightAdditionHubSameday" data-color="success" data-size="sm" {{ ($sameweight->base == 1) ? 'checked' : '' }}  disabled/>
+                                                                        </div>
+                                                                    </div>
+
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
                                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_hub_local_charges[{{$index_row}}]" disabled>
@@ -2688,6 +2817,12 @@
                                                                 <fieldset class="form-group">
                                                                     <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_range_down[0]" disabled>
                                                                 </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" class="switchery weightAdditionHubSameday" data-color="success" data-size="sm"  disabled/>
+                                                                </div>
                                                             </div>
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
