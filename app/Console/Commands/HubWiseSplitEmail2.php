@@ -40,8 +40,8 @@ class HubWiseSplitEmail2 extends Command
      */
     public function handle()
     {
-        $date = Carbon::yesterday()->format('Y-m-d');
-        $response = AdminReportsEmailController::hub_wise_split($date . ' 00:00:00');
+        $date = Carbon::yesterday()->format('Y_m_d');
+        $response = url('/').'/reports/hub_wise_split_report_'. $date .'.xlsx';
         NotificationsController::send(48, 2, $response);
     }
 }
