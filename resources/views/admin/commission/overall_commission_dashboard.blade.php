@@ -18,7 +18,7 @@
                                 <div class="card-body">
                                     <div class="media d-flex">
                                         <div class="align-self-center">
-                                            <i class="icon-grid font-large-2 float-left"></i>
+                                            <i class="icon-hourglass font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-right">
                                             <h3 class="" id="booked">{{$stats['booked']}}</h3>
@@ -35,7 +35,7 @@
                                 <div class="card-body">
                                     <div class="media d-flex">
                                         <div class="align-self-center">
-                                            <i class="icon-grid font-large-2 float-left"></i>
+                                            <i class="icon-layers font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-right">
                                             <h3 class="" id="received">{{$stats['received']}}</h3>
@@ -52,7 +52,7 @@
                                 <div class="card-body">
                                     <div class="media d-flex">
                                         <div class="align-self-center">
-                                            <i class="icon-grid font-large-2 float-left"></i>
+                                            <i class="la la-money font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-right">
                                             <h3 class="" id="revenue">{{$stats['revenue']}}</h3>
@@ -69,7 +69,7 @@
                                 <div class="card-body">
                                     <div class="media d-flex">
                                         <div class="align-self-center">
-                                            <i class="icon-grid font-large-2 float-left"></i>
+                                            <i class="la la-money font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-right">
                                             <h3 class="" id="commission">{{$stats['commission']}}</h3>
