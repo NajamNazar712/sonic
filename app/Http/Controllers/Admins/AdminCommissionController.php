@@ -514,10 +514,20 @@ class AdminCommissionController extends Controller
 
         $date = Carbon::now();
         if($request->get('search_shipper')){
-            $sale_commission_users = SalesCommission::where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
+            if($request->get('search_admin')){
+                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.tier_id',1)->where('scu.user_id', $request->search_admin)->where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
+            }
+            else{
+                $sale_commission_users = SalesCommission::where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
+            }
         }
         else{
-            $sale_commission_users = SalesCommission::where('status', 2)->pluck('shipper_id')->toArray();
+            if($request->get('search_admin')){
+                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.tier_id',1)->where('scu.user_id', $request->search_admin)->where('status', 2)->pluck('shipper_id')->toArray();
+            }
+            else{
+                $sale_commission_users = SalesCommission::where('status', 2)->pluck('shipper_id')->toArray();
+            }
         }
         if($request->get('search_date_from')){
             $first_day = $request->search_date_from;
@@ -540,17 +550,19 @@ class AdminCommissionController extends Controller
             $total_revenue = 0;
             $total_commission = 0;
             foreach ($sale_commissions as $s_commission) {
-                $shipment = Shipment::where('user_id', $s_commission->shipper_id);
-                if ($shipment->exists()) {
-                    $sale_commission = $sale_commission + $s_commission->commission;
+                if (in_array($s_commission->shipper_id, $sale_commission_users)) {
+                    $shipment = Shipment::where('user_id', $s_commission->shipper_id);
+                    if ($shipment->exists()) {
+                        $sale_commission = $sale_commission + $s_commission->commission;
+                    }
+                    $shipment_revenue = ShipmentsJourney::leftjoin('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')->select(DB::raw('sum(s.weight_charges) as weight_charges'), DB::raw('sum(s.cash_handling_charges) as cash_handling_charges'), DB::raw('sum(s.insurance_charges) as insurance_charges'), DB::raw('sum(s.return_charges) as return_charges'), DB::raw('sum(s.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(s.replacement_charges) as replacement_charges'), DB::raw('sum(s.try_and_buy_charges) as try_and_buy_charges'), DB::raw('sum(s.packaging_material_charges) as packaging_material_charges'), DB::raw('sum(s.intercept_charges) as intercept_charges'), DB::raw('sum(s.nsa_osa_charges) as nsa_osa_charges'))->where('shipments_journey.shipper_status_id', 2)->where('s.user_id', $s_commission->shipper_id)->whereBetween('shipments_journey.created_at', [$first_day, $last_day])->first();
+
+                    $revenue = $shipment_revenue->weight_charges + $shipment_revenue->cash_handling_charges + $shipment_revenue->insurance_charges + $shipment_revenue->return_charges + $shipment_revenue->fuel_surcharge + $shipment_revenue->replacement_charges + $shipment_revenue->try_and_buy_charges + $shipment_revenue->packaging_material_charges + $shipment_revenue->intercept_charges + $shipment_revenue->nsa_osa_charges;
+
+                    $commission = $revenue * ($s_commission->commission / 100);
+                    $total_revenue = $total_revenue + $revenue;
+                    $total_commission = $total_commission + $commission;
                 }
-                $shipment_revenue = ShipmentsJourney::leftjoin('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')->select(DB::raw('sum(s.weight_charges) as weight_charges'), DB::raw('sum(s.cash_handling_charges) as cash_handling_charges'), DB::raw('sum(s.insurance_charges) as insurance_charges'), DB::raw('sum(s.return_charges) as return_charges'), DB::raw('sum(s.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(s.replacement_charges) as replacement_charges'), DB::raw('sum(s.try_and_buy_charges) as try_and_buy_charges'), DB::raw('sum(s.packaging_material_charges) as packaging_material_charges'), DB::raw('sum(s.intercept_charges) as intercept_charges'), DB::raw('sum(s.nsa_osa_charges) as nsa_osa_charges'))->where('shipments_journey.shipper_status_id', 2)->where('s.user_id', $s_commission->shipper_id)->whereBetween('shipments_journey.created_at', [$first_day, $last_day])->first();
-
-                $revenue = $shipment_revenue->weight_charges + $shipment_revenue->cash_handling_charges + $shipment_revenue->insurance_charges + $shipment_revenue->return_charges + $shipment_revenue->fuel_surcharge + $shipment_revenue->replacement_charges + $shipment_revenue->try_and_buy_charges + $shipment_revenue->packaging_material_charges + $shipment_revenue->intercept_charges + $shipment_revenue->nsa_osa_charges;
-
-                $commission = $revenue * ($s_commission->commission / 100);
-                $total_revenue = $total_revenue + $revenue;
-                $total_commission = $total_commission + $commission;
             }
 
             $stats['revenue'] = $total_revenue;

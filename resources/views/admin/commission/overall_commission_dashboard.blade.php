@@ -308,8 +308,8 @@
             var sales_tier = @json($sales_tier);
             var columns = [];
             var s_columns = [];
-            var export_col = [1,2,3];
-            var s_export_col = [1,2,3];
+            var export_col = [1,2,3,4,5,6,7];
+            var s_export_col = [1,2,3,4,5,6,7,8,9,10];
             columns.push({orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}});
             columns.push({data: 'id', name: 'u.id', class: 'align-middle id'});
             columns.push({data: 'shipper_name', name: 'u.name', class: 'align-middle text-center shipper_name'});
@@ -328,16 +328,15 @@
             s_columns.push({data: 'total_commission_amount', class: 'align-middle text-center total_commission_amount', orderable: false, searchable: false});
             $.each(sales_tier, function (index, value) {
                 var i;
-                i = index+3;
+                i = export_col.length;
                 export_col.push(i+1);
+                export_col.push(i+2);
+                export_col.push(i+3);
                 columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase(), class:'align-middle text-center counts', orderable: false, searchable: false});
                 columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'commission', class:'align-middle text-center counts', orderable: false, searchable: false});
                 columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'amount', class:'align-middle text-center counts', orderable: false, searchable: false});
             });$.each(sales_tier, function (index, value) {
                 if(value.id == 1){
-                    var i;
-                    i = index+3;
-                    s_export_col.push(i+1);
                     s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase(), class:'align-middle text-center counts', orderable: false, searchable: false});
                     s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'commission', class:'align-middle text-center counts', orderable: false, searchable: false});
                     s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'amount', class:'align-middle text-center counts', orderable: false, searchable: false});
@@ -349,7 +348,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Packaging Stock Inventory',
+                        title: 'Overall Commission Dashboard',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                         className: 'btn btn-primary',
                         exportOptions: {
@@ -418,11 +417,11 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Packaging Stock Inventory',
+                        title: 'Overall Commission Dashboard',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                         className: 'btn btn-primary',
                         exportOptions: {
-                            columns: export_col
+                            columns: s_export_col
                         }
                     },
                     'reset'
@@ -502,6 +501,7 @@
                             'search_date_from': from_date,
                             'search_date_to': to_date,
                             'search_shipper': shipper,
+                            'search_admin': admin,
                         }
                     }).done(function (data) {
                         if(data.status){
