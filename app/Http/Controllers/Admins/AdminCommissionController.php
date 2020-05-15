@@ -131,7 +131,6 @@ class AdminCommissionController extends Controller
         foreach($users as $user){
             $user_names = $user_names . $user->name . ' (' . $user->id . ') ';
         }
-       // dd($user_names);
         $settings = GlobalSettings::where('type', 'commission_percentage');
         if($settings->exists()){
             $settings = $settings->first();
@@ -149,8 +148,10 @@ class AdminCommissionController extends Controller
                 $sales[] = array('id' => $u->id, 'text' => $u->name);
             }
         }
+        $all_users['results'][0]['id'] = 'sales';
         $all_users['results'][0]['text'] = 'Sales';
         $all_users['results'][0]['children'] = $sales;
+        $all_users['results'][1]['id'] = 'admin';
         $all_users['results'][1]['text'] = 'Admins';
         $all_users['results'][1]['children'] = $users;
         $all_users['pagination']['more'] = true;

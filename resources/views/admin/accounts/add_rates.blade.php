@@ -2076,6 +2076,7 @@
                 Move this block before submit and remove add form on submit
              ****************/
             var selected_users = [];
+            var tier_sales;
             var users = @json($users);
 
             var users_data = $.map(users, function (obj) {
@@ -2086,8 +2087,16 @@
                 placeholder: "Select User",
                 width:'100%'
             }).bind('change', function () {
+                var th = $(this);
                 var id = $(this).val();
-
+                var group = $(this).find(':selected').closest('optgroup').attr('label');
+                if(group == 'Admins'){
+                    if(tier_sales == 1){
+                        th.val(null).trigger('change');
+                        var error = 'Select sales related user!';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
                 var index = $.inArray(id, selected_users);
                 if (index !== -1) {
                     var error = 'User previously selected!';
@@ -2104,6 +2113,8 @@
                 $('#user_select').attr('disabled', true);
                 $('#external_person_name').attr('disabled', true);
                 var type = $(this).find(":selected").attr('type');
+                var sales = $(this).find(":selected").attr('sales');
+                tier_sales = sales;
                if(type == 1){
                    $('#user_select').attr('disabled', false);
                }else{
