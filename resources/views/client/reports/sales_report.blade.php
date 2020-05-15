@@ -114,6 +114,9 @@
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Order ID</th>
+                        <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Consignee Phone No. 1</th>
+                        <th class="border-primary border-darken-1">Consignee Phone No. 2</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -360,6 +363,9 @@
                             head.push('Account No.');
                             head.push('Shipper');
                             head.push('Order ID');
+                            head.push('Consignee Name');
+                            head.push('Consignee Phone No. 1');
+                            head.push('Consignee Phone No. 2');
                             head.push('Status');
                             head.push('Payment Status');
                             head.push('Service Type');
@@ -384,6 +390,9 @@
                                 row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.order_id);
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_phone_number_1);
+                                row.push(values.consignee_phone_number_2);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
@@ -448,6 +457,9 @@
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
+                    { data:'consignee_name' ,name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    { data:'consignee_phone_number_1' ,name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1'},
+                    { data:'consignee_phone_number_2' ,name: 'shipments.consignee_phone_number_2', class: 'align-middle consignee_phone_number_2'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
