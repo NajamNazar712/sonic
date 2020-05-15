@@ -11,12 +11,11 @@
                     <div class="row shipperhead mt-2">
                     <h5>Commission Set For : {{$user_names}} </h5>
                     </div>
-                    @foreach($user_ids as $user_id)
-                    <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.settings.commission.set_commission.submit',['id'=>$user_id])}}" method="post" novalidate="novalidate">
+                   
+                    <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.settings.commission.set_commission.submit')}}" method="post" novalidate="novalidate">
                     @csrf
+                    <input type="hidden" name="user_ids" value="{{ $ids }}"/>
                     
-                   <input type="hidden" value="{{ $user_id }}"/>
-                    @endforeach
                             <div class="row justify-content-center mt-2" id="commission_div">
                             
                                 <div class="form-group row">

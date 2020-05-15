@@ -4,9 +4,14 @@
 
 @section('content')
     <h1>Approve Commission</h1>
-    @foreach($users as $user_id)
+
+    <form id="approveForms" class="card-body card-dashboard" action="{{route('admin.settings.commission.approve_commission.submit')}}" method="post" novalidate="novalidate">
     @csrf
-    <input type="hidden" value="{{$user_id->id}}" id="user_id"/>
+
+    @foreach($users as $user_id)
+    @if(array_key_exists($user_id->id, $existing_commission_array))
+   
+    <input type="hidden" name="user_ids" value="{{$ids}}" id="user_ids"/>
        <div class="row approve_div">
             <div class="col-12">
                 <div class="card">
@@ -25,14 +30,14 @@
                                         </tr>
                                         </thead>
                                         <tfoot>
-                                        <input type="hidden" value="0" name="total_commission" id="total_commission">
-                                        <tr><th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th><th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th></tr>
+                                        <!-- <input type="hidden" value="0" name="total_commission_{{$user_id->id}}" id="total_commission_{{$user_id->id}}"> -->
+                                        <tr><th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th><th rowspan="1" colspan="2"><span id="total_commission_value_{{$user_id->id}}">0</span>%</th></tr>
                                         <tr><td colspan="5" style="text-align:center">
-                                        <input type="radio" checked id="pending" name="gender" value="pending">
+                                        <input type="radio" checked id="pending_{{$user_id->id}}" name="rates_status[{{$user_id->id}}]" value="1">
                                         <label for="pending">Pending</label><br>
-                                        <input type="radio" id="approve" name="gender" value="approve">
+                                        <input type="radio" id="approve_{{$user_id->id}}" name="rates_status[{{$user_id->id}}]" value="2">
                                         <label for="approve">Approve</label><br>
-                                        <input type="radio" id="reject" name="gender" value="reject">
+                                        <input type="radio" id="reject_{{$user_id->id}}" name="rates_status[{{$user_id->id}}]" value="3">
                                         <label for="reject">Reject</label>
                                         </td></tr>
                                            
@@ -43,7 +48,15 @@
                 </div>
             </div>
         </div> 
+        @endif
         @endforeach
+                    <div class="text-center mt-2">
+                        <div class="form-group">
+                            <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Submit</button>
+                       </div>  
+               </div>
+        </form>
+        
 
 @endsection
 @section('css')
@@ -72,7 +85,7 @@
     <script type="text/javascript">
 
 @foreach($users as $user_id)
-var table = $('#datatable_'.user_id).DataTable({
+var table_{{$user_id->id}} = $('#datatable_{{$user_id->id}}').DataTable({
             dom: 'ltipr',
             paging: false,
             ordering:false,
@@ -96,40 +109,64 @@ var table = $('#datatable_'.user_id).DataTable({
 
             ],
             rowCallback: function (row, data, index) {
-                var info = table.page.info();
+                var info = table_{{$user_id->id}}.page.info();
 
                 $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
             },
         });
+        var selected_commision_{{$user_id->id}} = 0;
+        var existing_commissions = @json($existing_commission_array[$user_id->id]);
+        var row = 1;
+        var commision_{{$user_id->id}} =[];
+        existing_commissions.forEach(function(existing_commission){
+            selected_commision_{{$user_id->id}} = roundToTwo(selected_commision_{{$user_id->id}} + existing_commission['commission']);
+            add_commission_row_{{$user_id->id}}(existing_commission['sales_commission_id'], existing_commission['id'], existing_commission['tier_id'], existing_commission['tier_name'], existing_commission['tier_type_id'], existing_commission['user_id'], existing_commission['user_name'], existing_commission['commission'],existing_commission['sales_status'], row);
+            commision_{{$user_id->id}}[row] = existing_commission['commission'];
+            row++;
+        });
+        $('#datatable_{{$user_id->id}} tbody').on('click', 'tr td.action a.remove', function() {
+            var id = $(this).parents('tr').attr('id');
 
+          //  var commission =  parseFloat($('input[name="commission_percentage['+ id +']"]').val());
+            //commission_max = roundToTwo(commission_max + selected_commision_{{$user_id->id}});
+            console.log(commision_{{$user_id->id}});
+            console.log(id);
+            selected_commision_{{$user_id->id}} = roundToTwo(selected_commision_{{$user_id->id}} - commision_{{$user_id->id}}[id]);
+            $('#total_commission_value_{{$user_id->id}}').html(selected_commision_{{$user_id->id}});
+            // $('#total_commission_{{$user_id->id}}').val(selected_commision_{{$user_id->id}});
+            table_{{$user_id->id}}.row( $(this).parents('tr') ).remove().draw();
+        });
+        var row_{{$user_id->id}} = 1;
+            function add_commission_row_{{$user_id->id}}(sales_commission_id, id, tier_id, tier_name, tier_type, user_id, user_name, commission, sales_status, row){
+                var table = table_{{$user_id->id}};
+                if(sales_status == 0){
+                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove"><i class="la la-close"></i></a>';
+                }
+                else{
+                    var remove = '';
+                }
+                var tier = '<div><input type="hidden" name="sale_commission['+ id +']"  value="'+ sales_commission_id +'">'+ tier_name +'</div>';
+
+                var commission_percentage = '<div><input type="hidden" name="commission_percentage[{{$user_id->id}}]"  value="'+ commission +'">'+ commission +'%</div>';
+                table.row.add([row_{{$user_id->id}},user_name,tier,commission+'%',remove]).node().id = row;
+                table.draw(false);
+                // if(tier_type == 1){
+                //     selected_users.push(user_id.toString());
+                // }
+                $('#total_commission_value_{{$user_id->id}}').html(selected_commision_{{$user_id->id}});
+                // $('#total_commission_{{$user_id->id}}').val(selected_commision_{{$user_id->id}});
+                row_{{$user_id->id}}++;
+        }
         @endforeach
 
-        function add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission){
-            var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove"><i class="la la-close"></i></a>';
-            var tier = '<div><input type="hidden" name="tier_id['+ row +']"  value="'+ tier_id +'">'+ tier_name +'</div>';
-            if(tier_type == 1){
-                var name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_id +'">'+ user_name +'</div>';
-            }else{
-                var name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_name +'">'+ user_name +'</div>';
-            }
-            var commission_percentage = '<div><input type="hidden" name="commission_percentage['+ row +']"  value="'+ commission +'">'+ commission +'%</div>';
-            table.row.add([row,name,tier,commission_percentage,remove]).node().id = row;
-            table.draw(false);
-            if(tier_type == 1){
-                selected_users.push(user_id.toString());
-            }
-            $('#commission_add_button').attr('disabled', false);
-            $('#total_commission_value').html(selected_commission);
-            $('#total_commission').val(selected_commission);
-            row++;
+        function roundToTwo(num) {
+            return +(Math.round(num + "e+2")  + "e-2");
         }
 
-        var existing_commissions = @json($existing_commission_array);
-        existing_commissions.forEach(function(existing_commission){
-            selected_commission = roundToTwo(selected_commission + existing_commission['commission']);
-            add_commission_row(existing_commission['tier_id'], existing_commission['tier_name'], existing_commission['tier_type_id'], existing_commission['user_id'], existing_commission['user_name'], existing_commission['commission']);
-        });
+// console.log();
+
+       
 
         
 

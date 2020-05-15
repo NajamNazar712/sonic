@@ -155,19 +155,23 @@ class AdminCommissionController extends Controller
         $all_users['results'][1]['children'] = $users;
         $all_users['pagination']['more'] = true;
 
-        return view('admin.settings.commission.set_commission')->with(['user_ids' => $user_ids, 'user_names' => $user_names,'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
+        return view('admin.settings.commission.set_commission')->with(['user_ids' => $user_ids,'ids' => $ids, 'user_names' => $user_names,'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
     } 
     
-    public function set_commission_submit(Request $request,$ids){
+    public function set_commission_submit(Request $request){
        // $user_ids = $ids;
-       $user_ids = explode(',' , $ids);
+    
+       $user_ids =explode(',' , $request->user_ids);
        $users='';
-        $users = User::whereIn('id', $user_ids)->select('id', 'name')->get();
+     //  $status = 0;
+        $users = User::whereIn('id', $user_ids)->select('id', 'name','status')->get();
+        $users_for_status = User::whereIn('id', $user_ids)->select('id', 'name','status')->first();
+        $status= $users_for_status->status;
+
         // $users = User::whereIn('id', $user_ids)->select('id', 'name')->get();
         foreach($users as $user){
           $shipper_id = $user->id;
-        // }
-        // if($request->has('user_id')){
+          $status = $user->status;
             $total_commission = $request->total_commission;
             $users_count = count($request->user_id);
 
@@ -241,9 +245,16 @@ class AdminCommissionController extends Controller
 
         }
 
+        if($status== 3)
+        {
+            return redirect(route('admin.accounts.active'))->with('success','All Rates are Updated');
+        }
+        else{
+            return redirect(route('admin.accounts.pending'))->with('success','All Rates are Updated');
+        }
 
         //Sales Commissison End
-        return redirect(route('admin.accounts.pending'))->with('success','All Rates are Updated');
+    
     }
     public function approveCommission($ids){
 
@@ -254,6 +265,7 @@ class AdminCommissionController extends Controller
         foreach($users as $user){
             $user_names = $user_names . $user->name;
         }
+       // dd($users);
         $existing_commission_array = array();
         foreach($user_ids  as $user_Id){
             $sale_commission = SalesCommission::where('shipper_id', $user_Id)->first();
@@ -263,10 +275,12 @@ class AdminCommissionController extends Controller
                     foreach($sale_commission_users as $index => $sale_commission_user){
                         $sales_tier = SalesTier::find($sale_commission_user->tier_id);
                         if($sales_tier){
+                            $existing_commission_array[$user_Id][$index]['id'] = $sale_commission_user->id;
                             $existing_commission_array[$user_Id][$index]['sales_commission_id'] = $sale_commission_user->sales_commission_id;
                             $existing_commission_array[$user_Id][$index]['tier_type_id'] = $sales_tier->tier_type;
                             $existing_commission_array[$user_Id][$index]['tier_id'] = $sale_commission_user->tier_id;
                             $existing_commission_array[$user_Id][$index]['tier_name'] = $sales_tier->tier_name;
+                            $existing_commission_array[$user_Id][$index]['sales_status'] = $sales_tier->sales_status;
                             if($sales_tier->tier_type == 1){
                                 $com_admin = Admin::find($sale_commission_user->user_id);
                                 $existing_commission_array[$user_Id][$index]['user_name'] = $com_admin->name;
@@ -283,8 +297,50 @@ class AdminCommissionController extends Controller
             
         }
 
-      
-        return view('admin.settings.commission.approve_commission')->with(['user_ids' => $user_ids, 'users'=>$users,'existing_commission_array' => $existing_commission_array]);
+           // dd($existing_commission_array);
+        return view('admin.settings.commission.approve_commission')->with(['user_ids' => $user_ids, 'ids' => $ids,'users'=>$users,'existing_commission_array' => $existing_commission_array]);
     } 
+
+    public function approve_commission_submit(Request $request){
+        $user_ids =explode(',' , $request->user_ids);
+            $users = User::whereIn('id', $user_ids)->get();
+            if($users){
+                foreach($users as $user){
+                   if($request->rates_status != null ){
+                    if(array_key_exists($user->id, $request->rates_status)){
+                        if($request->rate_status[$user->id] != 1){
+                            $sale_commission = SalesCommission::where('shipper_id', $user->id)->first();
+                            if($sale_commission){
+                                $sale_commission_users = SalesCommissionUser::where('sales_commission_id', $sale_commission->id)->get();
+                                if($sale_commission_users){
+                                    $total_commission = 0;
+                                    foreach($sale_commission_users as $sale_commission_user){
+                                        if($request->sale_commission != NULL){
+                                            if(array_key_exists($sale_commission_user->id, $request->sale_commission)){
+                                                $total_commission = $total_commission + $sale_commission_user->commission;
+                                            }
+                                            else{
+                                                if($sale_commission_user->tier_type_id == 2){
+                                                    SalesCommissionExternalUser::where('id', $sale_commission_user->user_id)->delete();
+                                                }
+                                                SalesCommissionUser::where('id', $sale_commission_user->id)->delete();                                        
+                                            }
+                                        }
+                                    }
+                                    if($total_commission > 0){
+                                        $sale_commission->commission = $total_commission;
+                                    }
+                                    $sale_commission->status = $request->rate_status[$user->id];
+                                    $sale_commission->save();
+                                }
+                            }
+                        }
+                    }
+                   }   
+                }
+            }
+        
+            return redirect(route('admin.accounts.active'))->with('success','Commission updated successfully.');
+    }
 
 }
