@@ -39,6 +39,16 @@
                                             <input type="text" class="form-control" placeholder="Order ID" id="search_order_id">
                                         </fieldset>
                                     </div>
+                                    <div class="col-3">
+                                        <fieldset>
+                                            <input type="text" class="form-control" placeholder="Consignee Name" id="search_consignee_name">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-3">
+                                        <fieldset>
+                                            <input type="text" class="form-control" placeholder="Consignee Address" id="search_consignee_address">
+                                        </fieldset>
+                                    </div>
                                     <div class="col-2">
                                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                     </div>
@@ -526,6 +536,8 @@
                             d.search_shipper = $('#search_shipper').val();
                             d.search_phone_no = $('#search_consignee_phone_number').val();
                             d.search_order_id = $('#search_order_id').val();
+                            d.search_consignee_name = $('#search_consignee_name').val();
+                            d.search_consignee_address = $('#search_consignee_address').val();
                         }
                     },
                     rowId: 'shipment_id',
