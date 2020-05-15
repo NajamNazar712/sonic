@@ -311,16 +311,16 @@
             var export_col = [1,2,3];
             var s_export_col = [1,2,3];
             columns.push({orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}});
-            columns.push({data: 'id', name: 'users.id', class: 'align-middle id'});
-            columns.push({data: 'shipper_name', name: 'users.name', class: 'align-middle text-center shipper_name'});
+            columns.push({data: 'id', name: 'u.id', class: 'align-middle id'});
+            columns.push({data: 'shipper_name', name: 'u.name', class: 'align-middle text-center shipper_name'});
             columns.push({data: 'booked', class: 'align-middle text-center booked', orderable: false, searchable: false});
             columns.push({data: 'received', class: 'align-middle text-center received', orderable: false, searchable: false});
             columns.push({data: 'revenue', class: 'align-middle text-center revenue', orderable: false, searchable: false});
             columns.push({data: 'total_commission', class: 'align-middle text-center total_commission', orderable: false, searchable: false});
             columns.push({data: 'total_commission_amount', class: 'align-middle text-center total_commission_amount', orderable: false, searchable: false});
             s_columns.push({orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}});
-            s_columns.push({data: 'id', name: 'users.id', class: 'align-middle id'});
-            s_columns.push({data: 'shipper_name', name: 'users.name', class: 'align-middle text-center shipper_name'});
+            s_columns.push({data: 'id', name: 'u.id', class: 'align-middle id'});
+            s_columns.push({data: 'shipper_name', name: 'u.name', class: 'align-middle text-center shipper_name'});
             s_columns.push({data: 'booked', class: 'align-middle text-center booked', orderable: false, searchable: false});
             s_columns.push({data: 'received', class: 'align-middle text-center received', orderable: false, searchable: false});
             s_columns.push({data: 'revenue', class: 'align-middle text-center revenue', orderable: false, searchable: false});
@@ -330,17 +330,17 @@
                 var i;
                 i = index+3;
                 export_col.push(i+1);
-                columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase(), class:'align-middle text-center counts'});
-                columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'commission', class:'align-middle text-center counts'});
-                columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'amount', class:'align-middle text-center counts'});
+                columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase(), class:'align-middle text-center counts', orderable: false, searchable: false});
+                columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'commission', class:'align-middle text-center counts', orderable: false, searchable: false});
+                columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'amount', class:'align-middle text-center counts', orderable: false, searchable: false});
             });$.each(sales_tier, function (index, value) {
                 if(value.id == 1){
                     var i;
                     i = index+3;
                     s_export_col.push(i+1);
-                    s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase(), class:'align-middle text-center counts'});
-                    s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'commission', class:'align-middle text-center counts'});
-                    s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'amount', class:'align-middle text-center counts'});
+                    s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase(), class:'align-middle text-center counts', orderable: false, searchable: false});
+                    s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'commission', class:'align-middle text-center counts', orderable: false, searchable: false});
+                    s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'amount', class:'align-middle text-center counts', orderable: false, searchable: false});
                 }
             });
             var table = $('#datatable').DataTable({
