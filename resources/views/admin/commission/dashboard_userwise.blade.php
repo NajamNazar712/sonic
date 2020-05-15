@@ -12,11 +12,11 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div class="row mb-2 username">
-                <h3>Anum Khan-Sales Person</h3>
+                <h3>{{$currentuser}} </h3>
                 </div>
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12 ">
-                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="post" action="{{route('admin.reports.customer_sales.export_to_excel')}}">
+                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="post" action="#">
 
                             <div class="col-4">
                                 <div class="form-group pb-1">
@@ -50,7 +50,8 @@
 
                             <div class="col-2">
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
+                                    <button id = "search_filter_btn" type="button" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
+                                    <!-- <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button> -->
                                 </div>
                             </div>
                         </form>
@@ -102,7 +103,7 @@
                                                 <i class="icon-layers text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="revenue">0</h3>
+                                                <h3 class="text-white" id="revenue">{{$total_revenue}}</h3>
                                                 <span class="font-13">Revenue Earned</span>
                                             </div>
                                         </div>
@@ -118,7 +119,7 @@
                                                 <i class="icon-check text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="commission">0</h3>
+                                                <h3 class="text-white" id="commission">{{$commission_earned}}</h3>
                                                 <span>Commission Earned</span>
                                             </div>
                                         </div>
@@ -128,10 +129,9 @@
                         </div>
                     </div>
                    
-                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                    <table class="table table-bordered datatable" id="datatable" style="width:100%;z-index: 3;">
                         <thead>
                         <tr role="row" class="bg-primary white">
-
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Account ID</th>
                             <th class="border-primary border-darken-1">Shipper Name</th>
@@ -233,111 +233,106 @@
                     // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
-            $('#search_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function(form) {
-                    blockPagePermanently();
+            // $('#search_form').validate({
+            //     errorClass: 'danger',
+            //     successClass: 'success',
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
+            //     },
+            //     submitHandler: function(form) {
+            //         blockPagePermanently();
 
 
-                    var from_date = $('#search_form input[name="from_date_formatted"]').val();
-                    var to_date = $('#search_form input[name="to_date_formatted"]').val();
-                    var shipper = $('#shipper').val();
-                    $.ajax({
-                        url: '{!! route('admin.reports.summary.data') !!}',
-                        method: 'post',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'from_date': from_date,
-                            'to_date': to_date,
-                            'shipper': shipper,
-                        }
-                    }).done(function (data) {
-                       if(data.status){
-                            $('#total').text(data.stats.total);
-                            $('#booked').text(data.stats.booked);
-                            $('#received').text(data.stats.received);
-                            $('#delivered').text(data.stats.delivered);
-                            $('#in_process').text(data.stats.in_process);
-                            $('#return').text(data.stats.return);
-                            $('#canceled').text(data.stats.canceled);
-                            table.draw();
+            //        // var from_date = $('#search_form input[name="from_date_formatted"]').val();
+            //        // var to_date = $('#search_form input[name="to_date_formatted"]').val();
+            //         var shipper = $('#shipper').val();
+                    
+            //         $.ajax({
+            //             url: '{!! route('admin.dashboard.data') !!}',
+            //             method: 'post',
+            //             data: {
+            //                 '_token': '{{ csrf_token() }}',
+            //                 // 'from_date': from_date,
+            //                 // 'to_date': to_date,
+            //                 'shipper': shipper,
+            //             }
+            //         }).done(function (data) {
+            //            if(data.status){
+            //                 $('#booked').text(data.stats.booked);
+            //                // $('#received').text(data.stats.received);
+            //                // $('#revenue').text(data.stats.revenue);
+            //                // $('#commission').text(data.stats.commission);
+            //                 table.draw();
 
-                       }else{
-                           $('#total').text(0);
-                           $('#booked').text(0);
-                           $('#received').text(0);
-                           $('#delivered').text(0);
-                           $('#in_process').text(0);
-                           $('#return').text(0);
-                           $('#canceled').text(0);
-                           table.draw();
-                       }
-                        UnblockPagePermanently();
-                    });
-                    return false;
-                }
-            });
+            //            }else{
+            //                $('#booked').text(0);
+            //                //$('#received').text(0);
+            //                //$('#revenue').text(0);
+            //               // $('#commission').text(0);
+            //                table.draw();
+            //            }
+            //             UnblockPagePermanently();
+            //         });
+            //         return false;
+            //     }
+            // });
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.summary.list') }}',
-                        data: params,
-                        success: function (result) {
-                            head = [];
+            // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            //     if ( this.context.length ) {
+            //         body = [];
+            //         var params = table.ajax.params();
+            //         params.start = 0;
+            //         params.length = -1;
+            //         var jsonResult = $.ajax({
+            //             url: '{{ route('admin.reports.summary.list') }}',
+            //             data: params,
+            //             success: function (result) {
+            //                 head = [];
 
-                            head.push('S. No.');
-                            head.push('Tracking No.');
-                            head.push('Order ID');
-                            head.push('Shipper');
-                            head.push('Status');
-                            head.push('Payment Status');
-                            head.push('Service Type');
-                            head.push('Arrival Date');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Consignee Name');
-                            head.push('Consignee Contact');
-                            head.push('Consignee Address');
-                            head.push('Collection Amount');
-                            head.push('Booking Date');
+            //                 head.push('S. No.');
+            //                 head.push('Tracking No.');
+            //                 head.push('Order ID');
+            //                 head.push('Shipper');
+            //                 head.push('Status');
+            //                 head.push('Payment Status');
+            //                 head.push('Service Type');
+            //                 head.push('Arrival Date');
+            //                 head.push('Origin');
+            //                 head.push('Destination');
+            //                 head.push('Consignee Name');
+            //                 head.push('Consignee Contact');
+            //                 head.push('Consignee Address');
+            //                 head.push('Collection Amount');
+            //                 head.push('Booking Date');
 
 
-                            $.each(result.data, function(index, values) {
-                                row = [];
+            //                 $.each(result.data, function(index, values) {
+            //                     row = [];
 
-                                row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.order_id);
-                                row.push(values.shipper);
-                                row.push(values.current_status);
-                                row.push(values.payment_status);
-                                row.push(values.service_type);
-                                row.push(values.arrival_date);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
-                                row.push(values.consignee_address);
-                                row.push(values.collection_amount);
-                                row.push(values.booking_date);
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
+            //                     row.push(index + 1);
+            //                     row.push(values.tracking_number);
+            //                     row.push(values.order_id);
+            //                     row.push(values.shipper);
+            //                     row.push(values.current_status);
+            //                     row.push(values.payment_status);
+            //                     row.push(values.service_type);
+            //                     row.push(values.arrival_date);
+            //                     row.push(values.origin);
+            //                     row.push(values.destination);
+            //                     row.push(values.consignee_name);
+            //                     row.push(values.consignee_phone);
+            //                     row.push(values.consignee_address);
+            //                     row.push(values.collection_amount);
+            //                     row.push(values.booking_date);
+            //                     body.push(row);
+            //                 });
+            //             },
+            //             async: false
+            //         });
 
-                    return {body: body, header:head};
-                }
-            } );
+            //         return {body: body, header:head};
+            //     }
+            // } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -358,32 +353,26 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.summary.list') }}',
+                    url: '{{ route('admin.dashboard.list') }}',
                     data: function (d) {
                         d.search_shipper = $('#shipper').val();
-                        d.cards_filter = $('#cards_filter_input').val();
-                        d.search_date_from = $('input[name="from_date_formatted"]').val();
-                        d.search_date_to = $('input[name="to_date_formatted"]').val();
+                       // d.cards_filter = $('#cards_filter_input').val();
+                       // d.search_date_from = $('input[name="from_date_formatted"]').val();
+                       // d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[3, 'desc']],
-                // columns: [
-                //     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                //     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
-                //     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
-                //     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-                //     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
-                //     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
-                //     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
-                //     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
-                //     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
-                //     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                //     { data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                //     { data: 'phone', name: 'phone', class: 'align-middle phone'},
-                //     { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                //     { data: 'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
-                //     { data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
-                // ],
+                order: [[1, 'desc']],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'account_id' ,name: 'users.id', class: 'align-middle text-center account_id'},
+                    { data:'shipper' ,name: 'users.name', class: 'align-middle shipper'},
+                    { data:'booked' ,name: 'booked', class: 'align-middle booked'},
+                    { data:'received' ,name: 'received', class: 'align-middle received'},
+                    { data:'revenue' ,name: 'revenue', class: 'align-middle revenue'},
+                    { data:'commission' ,name: 'sc.commission', class: 'align-middle commission'},
+                     { data:'commission_amount' ,name: 'commission_amount', class: 'align-middle commission_amount'},
+                    
+                ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
@@ -392,33 +381,36 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
             function add_animation(box) {
                 $("#report_data div").removeClass("show_active");
                 box.addClass('show_active');
             }
-            $('#search_filter_btn').on('click',function () {
-                table.draw();
-            });
-            $('#shipments_booked').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('booked');
-                table.draw();
-            });
-            $('#shipments_received').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('received');
-                table.draw();
-            });
-            $('#revenue_earned').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('revenue');
-                table.draw();
-            });
-            $('#commission_earned').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('commission');
-                table.draw();
-            });
+            // $('#search_filter_btn').on('click',function () {
+            //     table.draw();
+            // });
+            // $('#shipments_booked').on('click', function () {
+            //     add_animation($(this));
+            //     $('#cards_filter_input').val('booked');
+            //     table.draw();
+            // });
+            // $('#shipments_received').on('click', function () {
+            //     add_animation($(this));
+            //     $('#cards_filter_input').val('received');
+            //     table.draw();
+            // });
+            // $('#revenue_earned').on('click', function () {
+            //     add_animation($(this));
+            //     $('#cards_filter_input').val('revenue');
+            //     table.draw();
+            // });
+            // $('#commission_earned').on('click', function () {
+            //     add_animation($(this));
+            //     $('#cards_filter_input').val('commission');
+            //     table.draw();
+            // });
            
 
         });

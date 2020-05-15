@@ -326,6 +326,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Route::prefix('commission')->name('commission.')->group(function () {
        // Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::get('userwise', 'Admins\AdminCommissionController@dashboard_userwise_index')->name('userwise');
+            Route::get('list', 'Admins\AdminCommissionController@dashboard_userwise_list')->name('list');
+            Route::post('data', 'Admins\AdminCommissionController@dashboard_userwise_data')->name('data');
             Route::get('overall', 'Admins\AdminCommissionController@dashboard_overall_index')->name('overall');
        // });
    // });
