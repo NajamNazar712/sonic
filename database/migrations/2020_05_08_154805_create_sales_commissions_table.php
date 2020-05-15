@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSalesTiersTable extends Migration
+class CreateSalesCommissionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,13 @@ class CreateSalesTiersTable extends Migration
      */
     public function up()
     {
-        Schema::create('sales_tiers', function (Blueprint $table) {
+        Schema::create('sales_commissions', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('tier_name');
-            $table->integer('tier_type');
-            $table->integer('added_by');
-            $table->integer('updated_by')->nullable();
-            $table->integer('sales_status');
+            $table->integer('shipper_id');
+            $table->integer('commission_users_count');
             $table->double('commission');
-            $table->integer('status')->default(1);
+            $table->integer('updated_by')->nullable();
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }
@@ -33,6 +31,6 @@ class CreateSalesTiersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sales_tiers');
+        Schema::dropIfExists('sales_commissions');
     }
 }

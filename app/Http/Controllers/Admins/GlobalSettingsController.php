@@ -2185,7 +2185,7 @@ class GlobalSettingsController extends Controller
              $settings = GlobalSettings::where('type', 'commission_percentage')->first();
             $percentage = '';
             if($settings){
-                $percentage = $settings->setting_text;
+                $percentage = $settings->text;
             }
             return view('admin.settings.commission.commission_percentage')->with(['commission_percentage' => $percentage]);
         }
