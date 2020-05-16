@@ -31,7 +31,6 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\SalePersonShipmentNumbers',
         '\App\Console\Commands\MonthAverageReportEmail',
         '\App\Console\Commands\HubWiseSplitEmail',
-        '\App\Console\Commands\HubWiseSplitEmail2',
         '\App\Console\Commands\PettyCashImageArchive',
         '\App\Console\Commands\DailyFakeStatusReportEmail',
         '\App\Console\Commands\NegativeBalanceShipperSalesPerson',
@@ -108,7 +107,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('saleperson:numbers')->dailyAt('08:00')->runInBackground();
         $schedule->command('month:average')->dailyAt('08:00')->runInBackground();
         $schedule->command('hubwise:split')->dailyAt('08:00')->runInBackground();
-        $schedule->command('hubwise:split2')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
         $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
