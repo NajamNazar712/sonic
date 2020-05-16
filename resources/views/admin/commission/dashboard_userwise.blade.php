@@ -16,8 +16,8 @@
                 </div>
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12 ">
-                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="post" action="#">
-
+                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                            @csrf
                             <div class="col-4">
                                 <div class="form-group pb-1">
                                     <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
@@ -34,7 +34,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{$thirtyday}}">
+                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{$first_day}}">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -44,14 +44,14 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value="{{$today}}">
+                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value="{{$last_day}}">
                                 </div>
                             </div>
 
                             <div class="col-2">
                                 <div class="form-group">
-                                    <button id = "search_filter_btn" type="button" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
-                                    <!-- <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button> -->
+                                    <!-- <button id = "search_filter_btn" type="button" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button> -->
+                                    <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
                             </div>
                         </form>
@@ -69,7 +69,7 @@
                                                 <i class="icon-grid font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="booked">0</h3>
+                                                <h3 id="booked">{{$stats['booked']}}</h3>
                                                 <span>Shipment(s) Booked</span>
                                             </div>
                                         </div>
@@ -86,7 +86,7 @@
                                                 <i class="icon-grid text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="received">0</h3>
+                                                <h3 class="text-white" id="received">{{$stats['received']}}</h3>
                                                 <span>Shipment(s) Received</span>
                                             </div>
                                         </div>
@@ -103,7 +103,7 @@
                                                 <i class="icon-layers text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="revenue">{{$total_revenue}}</h3>
+                                                <h3 class="text-white" id="revenue">{{$stats['revenue']}}</h3>
                                                 <span class="font-13">Revenue Earned</span>
                                             </div>
                                         </div>
@@ -119,7 +119,7 @@
                                                 <i class="icon-check text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="commission">{{$commission_earned}}</h3>
+                                                <h3 class="text-white" id="commission">{{$stats['commission']}}</h3>
                                                 <span>Commission Earned</span>
                                             </div>
                                         </div>
@@ -196,13 +196,10 @@
                 placeholder: 'Select Shipper',
                 allowClear:true
             });
-            var thirtydays = '{{ $thirtyday }}';
-            var today = '{{ $today }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                min: new Date(thirtydays),
-                max : new Date(today),
+                select: '{{$first_day}}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -212,14 +209,15 @@
                     $('#from_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
-                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    if (context.select) {
+                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                    }
                 }
             });
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max : new Date(today),
+                select: '{{$last_day}}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -229,53 +227,13 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
-                    // var current_date_formatted = $('input[name="to_date_formatted"]').val();
-                    // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
+                    if (context.select) {
+                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                    }
                 }
             });
-            // $('#search_form').validate({
-            //     errorClass: 'danger',
-            //     successClass: 'success',
-            //     errorPlacement: function(error, element) {
-            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
-            //     },
-            //     submitHandler: function(form) {
-            //         blockPagePermanently();
 
-
-            //        // var from_date = $('#search_form input[name="from_date_formatted"]').val();
-            //        // var to_date = $('#search_form input[name="to_date_formatted"]').val();
-            //         var shipper = $('#shipper').val();
-                    
-            //         $.ajax({
-            //             url: '{!! route('admin.dashboard.data') !!}',
-            //             method: 'post',
-            //             data: {
-            //                 '_token': '{{ csrf_token() }}',
-            //                 // 'from_date': from_date,
-            //                 // 'to_date': to_date,
-            //                 'shipper': shipper,
-            //             }
-            //         }).done(function (data) {
-            //            if(data.status){
-            //                 $('#booked').text(data.stats.booked);
-            //                // $('#received').text(data.stats.received);
-            //                // $('#revenue').text(data.stats.revenue);
-            //                // $('#commission').text(data.stats.commission);
-            //                 table.draw();
-
-            //            }else{
-            //                $('#booked').text(0);
-            //                //$('#received').text(0);
-            //                //$('#revenue').text(0);
-            //               // $('#commission').text(0);
-            //                table.draw();
-            //            }
-            //             UnblockPagePermanently();
-            //         });
-            //         return false;
-            //     }
-            // });
+           
 
             // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             //     if ( this.context.length ) {
@@ -357,19 +315,19 @@
                     data: function (d) {
                         d.search_shipper = $('#shipper').val();
                        // d.cards_filter = $('#cards_filter_input').val();
-                       // d.search_date_from = $('input[name="from_date_formatted"]').val();
-                       // d.search_date_to = $('input[name="to_date_formatted"]').val();
+                       d.search_date_from = $('input[name="from_date_formatted"]').val();
+                       d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'account_id' ,name: 'users.id', class: 'align-middle text-center account_id'},
-                    { data:'shipper' ,name: 'users.name', class: 'align-middle shipper'},
+                    { data:'account_id' ,name: 'u.id', class: 'align-middle text-center account_id'},
+                    { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'booked' ,name: 'booked', class: 'align-middle booked'},
                     { data:'received' ,name: 'received', class: 'align-middle received'},
                     { data:'revenue' ,name: 'revenue', class: 'align-middle revenue'},
-                    { data:'commission' ,name: 'sc.commission', class: 'align-middle commission'},
+                    { data:'commission' ,name: 's.commission', class: 'align-middle commission'},
                      { data:'commission_amount' ,name: 'commission_amount', class: 'align-middle commission_amount'},
                     
                 ],
@@ -388,6 +346,64 @@
                 $("#report_data div").removeClass("show_active");
                 box.addClass('show_active');
             }
+
+            $('#search_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parents('.form-group'));
+                    },
+                    submitHandler: function(form) {
+                        var from_date = $('#search_form input[name="from_date_formatted"]').val();
+                        var to_date = $('#search_form input[name="to_date_formatted"]').val();
+                        var shipper = $('#shipper').val();
+                        console.log(shipper);
+                        console.log(to_date);
+                        console.log(from_date);
+                       
+                        $.ajax({
+                            url: '{!! route('admin.dashboard.userwise.commission.data') !!}',
+                            method: 'post',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'search_date_from': from_date,
+                                'search_date_to': to_date,
+                                'search_shipper': shipper,
+                            }
+                        }).done(function (data) {
+                            if(data.status){
+                                $('#booked').text(data.stats.booked);
+                                $('#received').text(data.stats.received);
+                                $('#revenue').text(data.stats.revenue);
+                                $('#commission').text(data.stats.commission);
+                                console.log(data);
+                                table.draw();
+
+                            }else{
+                                $('#booked').text(0);
+                                $('#received').text(0);
+                                $('#revenue').text(0);
+                                $('#commission').text(0);
+                                table.draw();
+                            }
+                            UnblockPagePermanently();
+                        }); 
+                    // if(admin == null || admin == ''){
+                    //     $('#s_datatable_div').addClass('d-none');
+                    //     $('#f_datatable_div').removeClass('d-none');
+                    //     table.draw(true);
+                    // }
+                    // else{
+                    //     $('#f_datatable_div').addClass('d-none');
+                    //     $('#s_datatable_div').removeClass('d-none');
+                    //     s_table.draw(true);
+                    // }
+                }
+            });
+
+
+
+
             // $('#search_filter_btn').on('click',function () {
             //     table.draw();
             // });
