@@ -42,6 +42,6 @@ class HubWiseSplitEmail extends Command
     {
         $date = Carbon::yesterday()->format('Y-m-d');
         $response = AdminReportsEmailController::hub_wise_split($date . ' 00:00:00');
-        NotificationsController::send(48, 1, $response);
+        NotificationsController::send(48, $date, $response);
     }
 }

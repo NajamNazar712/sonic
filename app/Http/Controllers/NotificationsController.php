@@ -3669,13 +3669,13 @@ class NotificationsController extends Controller
 
             }
             else if ($id == 48) {
-                $report_date = Carbon::yesterday()->format('Y-m-d');
+
                 if (strpos($subject, '[date]') !== FALSE) {
-                    $subject = str_replace('[date]', $report_date, $subject);
+                    $subject = str_replace('[date]', $reference_1_id, $subject);
                 }
 
                 if (strpos($body, '[date]') !== FALSE) {
-                    $body = str_replace('[date]', $report_date, $body);
+                    $body = str_replace('[date]', $reference_1_id, $body);
                 }
 //                $file = storage_path($reference_2_id);
 
@@ -3736,7 +3736,7 @@ class NotificationsController extends Controller
                 $to = array();
 
                 $cc = array();
-                if($reference_1_id == 1){
+
                     $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
 
                     if ($admins->exists()) {
@@ -3758,8 +3758,7 @@ class NotificationsController extends Controller
                     $cc = array_merge($cc, $extra_admins);
 
                     self::email($subject, $body, $to, $cc);
-                }
-                if($reference_1_id == 2){
+                    $to = array();
                     $admins = Admin::whereIn('role_id', [8, 9, 10, 25, 30, 46])->where('status', 1);
 
                     if ($admins->exists()) {
@@ -3767,7 +3766,7 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                }
+
             }
             else if ($id == 49) {
                 $reference_1_id = Carbon::parse($reference_1_id)->subDay()->toDateString();
