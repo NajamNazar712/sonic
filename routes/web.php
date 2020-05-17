@@ -1079,9 +1079,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('send/submit','Admins\AdminPackagingMaterialController@send_stock')->name('send.submit');
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
+            Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
             Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
             Route::post('check_quantity','Admins\AdminPackagingMaterialController@request_check_quantity')->name('check_quantity');
-            Route::get('list','Admins\AdminPackagingMaterialController@request_lists')->name('list');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
             Route::post('quantity_details','Admins\AdminPackagingMaterialController@quantity_details')->name('quantity_details');
             Route::post('confirm','Admins\AdminPackagingMaterialController@request_confirm')->name('confirm');
@@ -1578,6 +1578,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
              Route::post('status', 'Admins\AdminCommissionController@commission_status')->name('status');
             Route::post('details','Admins\AdminCommissionController@editSalesTierView')->name('details');
             Route::post('edit','Admins\AdminCommissionController@editSalesTier')->name('edit');
+            Route::get('set_commission/{id?}','Admins\AdminCommissionController@setCommission')->name('set_commission');
+            Route::post('set_commission','Admins\AdminCommissionController@set_commission_submit')->name('set_commission.submit');
+            Route::get('approve_commission/{id?}','Admins\AdminCommissionController@approveCommission')->name('approve_commission');
+            Route::post('approve_commission','Admins\AdminCommissionController@approve_commission_submit')->name('approve_commission.submit');
             Route::prefix('percentage')->name('percentage.')->group(function () {
                     Route::get('', 'Admins\GlobalSettingsController@commission_percentage_index')->name('index');
                     Route::post('', 'Admins\GlobalSettingsController@commission_percentage_update')->name('store');

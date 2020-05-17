@@ -56,6 +56,7 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
@@ -230,19 +231,69 @@
             }
         } );
 
-
+        var selected_rows = [];
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             scrollX: true, scrollY: '500px',
             buttons: [
-                {
-                    extend: 'excel',
-                    title: 'Pending Accounts',
-                    className:'btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },
-                'reset'
+                    {
+                        text: 'Set Commission',
+                        className: 'btn btn-primary set_commission',
+                        enabled:false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to Set Commission!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        var link = '{{ route('admin.settings.commission.set_commission', ["ids" => 0]) }}';
+                                        window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;
+                                    }
+                                });
+
+
+                            }
+                            else{
+                                var error = "Something went wrong please refresh page and try again!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                            }
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        title: 'Pending Accounts',
+                        className:'btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
+                
+                    'reset'
             ],
+            select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
             lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
             pageLength: 50,
             pagingType: 'full_numbers',
@@ -264,6 +315,7 @@
                 }
             },
             columns: [
+                {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
@@ -287,8 +339,15 @@
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {
-                   var info = table.page.info();
-                   $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                var info = table.page.info();
+
+                $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                if ($.inArray(data.id, selected_rows) !== -1) {
+                    table.row(row).select();
+                }
+                   
+                //    var info = table.page.info();
+                //    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                },
             initComplete: function() {
                 var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -546,6 +605,28 @@
                     });
             }
         });
+
+
+        $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                 console.log(id);
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.set_commission').enable();
+                }
+                else {
+                    table.button('.set_commission').disable();
+                }
+        });
+
     });
 
 </script>
