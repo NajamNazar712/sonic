@@ -355,7 +355,7 @@ class AdminCommissionController extends Controller
         $date = Carbon::now();
         $first_day = Carbon::parse($date)->firstOfMonth();
         $last_day = Carbon::parse($date)->lastOfMonth();
-        //if (session('department_id') == 7){
+        if (session('department_id') == 7){
         $sales_commission_users = SalesCommissionUser::where('user_id',$userId)->where('tier_type_id',1)->count();
         $stats = array();
         if($sales_commission_users >0)
@@ -381,12 +381,10 @@ class AdminCommissionController extends Controller
                 ->select(DB::raw('count(shipments.id) AS received'))->first();
         
 
-                    $shipment_journey_booked = Shipment::where('user_id', $shippersId->shipper_id)->where('shipper_status_id','!=', 17)
-                    ->whereBetween('shipments.created_at',[$first_day, $last_day])
-                    ->select(
-                      DB::raw('count(id) AS booked'))->first();
+                $shipment_journey_booked = Shipment::where('user_id', $shippersId->shipper_id)->where('shipper_status_id','!=', 17)
+                ->whereBetween('shipments.created_at',[$first_day, $last_day])
+                ->select(DB::raw('count(id) AS booked'))->first();
 
-        
                 $sale_person_shipment =  DB::connection('reports')->table('shipments')
                 ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
                 ->where('shipments.user_id', $shippersId->shipper_id)
@@ -409,7 +407,10 @@ class AdminCommissionController extends Controller
 
             return view('admin.commission.dashboard_userwise')->with(['stats' => $stats,'currentuser'=>$user,'shippers'=>$shippers,'first_day' => $first_day, 'last_day' => $last_day]);
         }
-    // }
+     }
+     else{
+         return view('admin.access_denied');
+     }
 
     }
 
@@ -454,7 +455,6 @@ class AdminCommissionController extends Controller
     $datatable = Datatables::of($commission_data)
    
     ->addColumn('revenue',function($sale_tier_user){
-
         $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
         return $revenue;
         
