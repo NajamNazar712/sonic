@@ -17,7 +17,6 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12 ">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                            @csrf
                             <div class="col-4">
                                 <div class="form-group pb-1">
                                     <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
@@ -50,7 +49,6 @@
 
                             <div class="col-2">
                                 <div class="form-group">
-                                    <!-- <button id = "search_filter_btn" type="button" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button> -->
                                     <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
                             </div>
@@ -235,62 +233,48 @@
 
            
 
-            // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-            //     if ( this.context.length ) {
-            //         body = [];
-            //         var params = table.ajax.params();
-            //         params.start = 0;
-            //         params.length = -1;
-            //         var jsonResult = $.ajax({
-            //             url: '{{ route('admin.reports.summary.list') }}',
-            //             data: params,
-            //             success: function (result) {
-            //                 head = [];
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.dashboard.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
 
-            //                 head.push('S. No.');
-            //                 head.push('Tracking No.');
-            //                 head.push('Order ID');
-            //                 head.push('Shipper');
-            //                 head.push('Status');
-            //                 head.push('Payment Status');
-            //                 head.push('Service Type');
-            //                 head.push('Arrival Date');
-            //                 head.push('Origin');
-            //                 head.push('Destination');
-            //                 head.push('Consignee Name');
-            //                 head.push('Consignee Contact');
-            //                 head.push('Consignee Address');
-            //                 head.push('Collection Amount');
-            //                 head.push('Booking Date');
+                            head.push('S. No.');
+                            head.push('Account ID');
+                            head.push('Shipper Name');
+                            head.push('Shipment Booked');
+                            head.push('Shipment Received');
+                            head.push('Revenue');
+                            head.push('Commission');
+                            head.push('Commission Amount');
+                           
 
+                            $.each(result.data, function(index, values) {
+                                row = [];
 
-            //                 $.each(result.data, function(index, values) {
-            //                     row = [];
+                                row.push(index + 1);
+                                row.push(values.account_id);
+                                row.push(values.shipper);
+                                row.push(values.booked);
+                                row.push(values.received);
+                                row.push(values.revenue);
+                                row.push(values.commission);
+                                row.push(values.commission_amount);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
 
-            //                     row.push(index + 1);
-            //                     row.push(values.tracking_number);
-            //                     row.push(values.order_id);
-            //                     row.push(values.shipper);
-            //                     row.push(values.current_status);
-            //                     row.push(values.payment_status);
-            //                     row.push(values.service_type);
-            //                     row.push(values.arrival_date);
-            //                     row.push(values.origin);
-            //                     row.push(values.destination);
-            //                     row.push(values.consignee_name);
-            //                     row.push(values.consignee_phone);
-            //                     row.push(values.consignee_address);
-            //                     row.push(values.collection_amount);
-            //                     row.push(values.booking_date);
-            //                     body.push(row);
-            //                 });
-            //             },
-            //             async: false
-            //         });
-
-            //         return {body: body, header:head};
-            //     }
-            // } );
+                    return {body: body, header:head};
+                }
+            } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -298,7 +282,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Summary Report',
+                        title: 'Sales Commission Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -328,7 +312,7 @@
                     { data:'received' ,name: 'received', class: 'align-middle received'},
                     { data:'revenue' ,name: 'revenue', class: 'align-middle revenue'},
                     { data:'commission' ,name: 's.commission', class: 'align-middle commission'},
-                     { data:'commission_amount' ,name: 'commission_amount', class: 'align-middle commission_amount'},
+                    { data:'commission_amount' ,name: 'commission_amount', class: 'align-middle commission_amount'},
                     
                 ],
                 rowCallback: function(row, data, index) {
@@ -336,6 +320,31 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
+                   // this.api().table().columns.adjust();
+                   var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+
+                        if ($(header).is('.serial_number') || $(header).is('.booked')  || $(header).is('.received') || $(header).is('.revenue') || $(header).is('.commission') || $(header).is('.commission_amount') || $(header).is('.counts')) {
+                            $(td).appendTo($(search));
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
                     this.api().table().columns.adjust();
                 }
             });
