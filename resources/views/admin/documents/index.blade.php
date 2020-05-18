@@ -75,7 +75,7 @@
                                         <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
                                         <div class="heading-elements">
                                             <ul class="list-unstyled mb-0 text-center">
-                                                <li><a id="shopfiy_link" onClick="setShopifyLink();" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Install</a></li>
+													<li><a id="shopfiy_link" onClick="setShopifyLink();" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Install</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -160,7 +160,6 @@
             })
         });
 
-
         var shopify_text,shopfiy_link;
 
         function setShopifyLink(){
@@ -178,8 +177,6 @@
             }
 
         }
-
-
     </script>
 
 @endsection

@@ -2896,11 +2896,16 @@
                                                     </div>
 
                                                     <div class="row">
-                                                        <div class="col-12">
+                                                        <div class="col-3">
                                                             <h3 class="card-title">Storage Type Charges</h3>
                                                         </div>
-
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="storage_charges_switch" class="switchery storageCharges" data-color="info" data-size="sm" {{ ($wms_user_info->storage_charges)? 'checked':'' }} disabled/>
+                                                            </div>
+                                                        </div>
                                                         <div class="col-12" id="wms_storage_types_div">
+                                                            @if($wms_user_info->storage_charges)
                                                             @foreach($wms_storage_charges as $key => $storage)
                                                             <div class="row">
                                                                 
@@ -2921,7 +2926,7 @@
                                                                 </div>
                                                             </div>
                                                             @endforeach
-                                                            
+                                                            @endif
                                                         </div>
                                                         
                                                     </div>
@@ -3023,8 +3028,7 @@
                                         </div>
                                         
                                     </div>
-                                </div>
-                            </div>
+
                             @else
                             <div id="" class="card-header mt-1 border-primary">
                                 <div class="row">
@@ -3039,6 +3043,40 @@
 
                             </div>
                             @endisset
+
+                            @if($sales_commission)
+                                  <div class="row justify-content-center mt-2 mb-2">
+                                      <div class="col-3 border border-primary p-1"><b>Total Commission</b></div>
+                                      <div class="col-3 border border-primary p-1"><b>{{$sales_commission->commission}}%</b></div>
+
+                                      <div class="col-12 mt-1   ">
+                                          <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                              <thead>
+                                              <tr role="row" class="bg-primary white">
+                                                  <th class="border-primary border-darken-1">S. No.</th>
+                                                  <th class="border-primary border-darken-1">User Name</th>
+                                                  <th class="border-primary border-darken-1">Tier</th>
+                                                  <th class="border-primary border-darken-1">Commission Percentage</th>
+                                              </tr>
+                                              </thead>
+                                              <tbody>
+                                              @foreach($sales_commission->users as $index => $sales_user)
+                                                  <tr>
+                                                      <td>{{++$index}}</td>
+                                                      @if($sales_user->tier_type_id == 1)
+                                                        <td>{{$sales_user->sales_person->name}}</td>
+                                                      @else
+                                                          <td>{{$sales_user->sales_person_external->name}}</td>
+                                                      @endif
+                                                      <td>{{$sales_user->tier->tier_name}}</td>
+                                                      <td>{{$sales_user->commission}}%</td>
+                                                  </tr>
+                                              @endforeach
+                                              </tbody>
+                                          </table>
+                                      </div>
+                                  </div>
+                            @endif
 
                             @if(count($rate_remarks) > 0)
                                 <div class="row justify-content-center">
@@ -3154,7 +3192,14 @@
                 $('input[name="psf_charges"]').prop('disabled', true);
             }
         };
-
+        var StorageSwitch = document.querySelector('.switchery.storageCharges');
+        StorageSwitch.onchange = function () {
+            if(StorageSwitch.checked === true){
+                $('#wms_storage_types_div select, #wms_storage_types_div input').prop('disabled', false);
+            }else if(StorageSwitch.checked === false){
+                $('#wms_storage_types_div select, #wms_storage_types_div input').prop('disabled', true);
+            }
+        };
         var LabellingSwitch = document.querySelector('.switchery.labellingSwitch');
         LabellingSwitch.onchange = function () {
             if(LabellingSwitch.checked === true){

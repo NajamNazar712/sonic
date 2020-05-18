@@ -37,7 +37,7 @@ class CancelShipment extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle() 
     {
         AdminShipmentCancelController::cancel();
     }
