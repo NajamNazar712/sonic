@@ -43,36 +43,34 @@ class AutoShipmentArrival extends Command
      */
     public function handle()
     {
-        $shipments = Shipment::where('user_id', 3324)->where('shipper_status_id', 1);   //4213
+        $shipments = Shipment::where('user_id', 4213)->where('shipper_status_id', 1);
 
         if ($shipments->exists()) {
             $shipments = $shipments->get();
 
-            foreach ($shipments as $index => $shipment) {
-//                AdminPickupsController::cancel($shipment->id);
+            foreach ($shipments as $shipment) {
+                AdminPickupsController::cancel($shipment->id);
 
                 $status_id = 2;
 
-                ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 70);
+                ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
 
-//                if ($shipment->pickup_address->city_id != $shipment->consignee_city_id) {
-//                    $status_id = 4;
-//
-//                    ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
-//                }
+                if ($shipment->pickup_address->city_id != $shipment->consignee_city_id) {
+                    $status_id = 4;
+
+                    ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+                }
 
                 $shipment->shipper_status_id = $status_id;
                 $shipment->consignee_status_id = $status_id;
-                $shipment->actual_weight = 0.2; //0.5
-                $shipment->weight_charges = 120;
-                $shipment->cash_handling_charges = 15;
-                $shipment->fuel_surcharge = 12;
+                $shipment->actual_weight = 0.5;
+
                 $shipment->save();
 
-//                ShipmentChargesController::weight($shipment->id);
-//                ShipmentChargesController::cash_handling($shipment->id);
-//                ShipmentChargesController::insurance($shipment->id);
-//                ShipmentChargesController::fuel_surcharge($shipment->id);
+                ShipmentChargesController::weight($shipment->id);
+                ShipmentChargesController::cash_handling($shipment->id);
+                ShipmentChargesController::insurance($shipment->id);
+                ShipmentChargesController::fuel_surcharge($shipment->id);
             }
         }
     }
