@@ -9,6 +9,7 @@ use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Product;
 use App\Http\Models\Reference;
 use App\Http\Models\ShipmentPaymentStatus;
@@ -372,6 +373,12 @@ class ShipperDashboardController extends Controller
                         //Consolidated Shipments
                         $shipment->shipper_status_id = 17;
                         $shipment->consignee_status_id = 17;
+
+                        $packaging_material = PackagingMaterialRequest::where('tracking_number', $shipment_id->tracking_number)->first();
+                        if($packaging_material){
+                            $packaging_material->status_id = 6;
+                            $packaging_material->save();
+                        }
                         if($shipment->warehouse == 1){
                             $shipment->warehouse_order_status = 9;
                             $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->get();
