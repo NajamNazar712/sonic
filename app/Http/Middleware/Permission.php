@@ -570,7 +570,7 @@ class Permission
             'settings.commission.percentage.index' => 332,
             'settings.commission.percentage.store' => 332,
 
-            'dashboard.useruise' => 333,
+            'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
 
