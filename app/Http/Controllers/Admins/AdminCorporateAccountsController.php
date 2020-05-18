@@ -3398,7 +3398,7 @@ class AdminCorporateAccountsController extends Controller
 
             }
 
-            if($request->has('total_commission')){
+            if($request->total_commission == 1){
                 $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                 if($existing_sale_commission){
                     SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
@@ -3439,6 +3439,14 @@ class AdminCorporateAccountsController extends Controller
                 }
                 $sales_commission->commission = $actual_commission;
                 $sales_commission->save();
+            }
+            else{
+                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                if($existing_sale_commission){
+                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                    SalesCommission::where('shipper_id', $id)->delete();
+                }
             }
             User::where('id', $id)->update(['rate_status' => 1]);
             if ($request->authorize == 1) {
@@ -5916,7 +5924,7 @@ class AdminCorporateAccountsController extends Controller
 
                 }
 
-                if($request->has('total_commission')){
+                if($request->total_commission == 1){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if($existing_sale_commission){
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
@@ -5958,6 +5966,14 @@ class AdminCorporateAccountsController extends Controller
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
                 }
+                else{
+                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                    if($existing_sale_commission){
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
+                    }
+                }
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             if($request->has('rate_remarks') && $request->rate_remarks != null){
@@ -5969,7 +5985,7 @@ class AdminCorporateAccountsController extends Controller
 
                 }
 
-            if($request->has('total_commission')){
+            if($request->total_commission == 1){
                 $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                 if($existing_sale_commission){
                     SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
@@ -6011,6 +6027,14 @@ class AdminCorporateAccountsController extends Controller
                 $sales_commission->commission = $actual_commission;
                 $sales_commission->save();
             }
+            else{
+                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                if($existing_sale_commission){
+                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                    SalesCommission::where('shipper_id', $id)->delete();
+                }
+            }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
             return redirect()->back()->with('success', 'All Rates are updated');
         }
@@ -6040,9 +6064,11 @@ class AdminCorporateAccountsController extends Controller
         $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
         $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
 
+        $sales_commission = SalesCommission::where('shipper_id', $id)->first();
+
         if (session('department_id') == 7) {
             if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4) {
-                return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks]);
+                return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
             } else {
                 return view('admin.access_denied');
             }
