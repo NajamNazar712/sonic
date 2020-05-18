@@ -71,9 +71,6 @@ class AutoShipmentArrival extends Command
                 ShipmentChargesController::cash_handling($shipment->id);
                 ShipmentChargesController::insurance($shipment->id);
                 ShipmentChargesController::fuel_surcharge($shipment->id);
-                if($index == 10){
-                    break;
-                }
             }
         }
     }
