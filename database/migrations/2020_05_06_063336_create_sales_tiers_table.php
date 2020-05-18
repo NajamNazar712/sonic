@@ -18,7 +18,7 @@ class CreateSalesTiersTable extends Migration
             $table->string('tier_name');
             $table->integer('tier_type');
             $table->integer('added_by');
-            $table->integer('updated_by');
+            $table->integer('updated_by')->nullable();
             $table->integer('sales_status');
             $table->double('commission');
             $table->integer('status')->default(1);
