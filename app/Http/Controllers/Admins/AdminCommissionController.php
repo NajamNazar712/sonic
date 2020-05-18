@@ -349,7 +349,7 @@ class AdminCommissionController extends Controller
 
     public function dashboard_userwise_index(){
         $user = Auth::user()->name;
-        $userId = Auth::user()->id;
+        $userId = Auth::id();
         $shipper_ids = array();
         $shipments = array();
         $shippers =array();
@@ -364,8 +364,9 @@ class AdminCommissionController extends Controller
             
             $sales_commission_user_data = SalesCommissionUser::where('user_id',$userId)->where('tier_type_id',1)->select('sales_commission_id')->get();
               foreach($sales_commission_user_data as $sales_commission_user){
-                    $shipper_ids[] =  SalesCommission::where('id',$sales_commission_user->sales_commission_id)->select('shipper_id','commission')->first();
-                   
+                    $sales_commission =  SalesCommission::where('id',$sales_commission_user->sales_commission_id)->select('shipper_id')->first();
+                    $shipper_ids[] =  array(['shipper_id' => $sales_commission->shipper_id, 'commission' => $sales_commission_user_data->commission]);
+
               }
             $sum=0;
             $revenue=0;
