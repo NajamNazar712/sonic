@@ -296,6 +296,10 @@
                 serverSide: true,
                 ajax:{
                     url: '{{ route('admin.dashboard.list') }}',
+                    method: 'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.search_shipper = $('#shipper').val();
                        // d.cards_filter = $('#cards_filter_input').val();
