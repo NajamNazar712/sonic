@@ -43,7 +43,7 @@ class AutoShipmentArrival extends Command
      */
     public function handle()
     {
-        $shipments = Shipment::where('user_id', 4213)->where('shipper_status_id', 1);
+        $shipments = Shipment::where('user_id', 3324)->where('shipper_status_id', 1);
 
         if ($shipments->exists()) {
             $shipments = $shipments->get();
@@ -63,7 +63,7 @@ class AutoShipmentArrival extends Command
 
                 $shipment->shipper_status_id = $status_id;
                 $shipment->consignee_status_id = $status_id;
-                $shipment->actual_weight = 0.5;
+                $shipment->actual_weight = 0.2;
 
                 $shipment->save();
 
