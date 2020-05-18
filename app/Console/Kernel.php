@@ -44,7 +44,6 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\CRMPaymentComplains',
 		'\App\Console\Commands\RiderDeliveryImageArchive',
 		'\App\Console\Commands\BlacklistConsigneeRatioCalculation',
-        '\App\Console\Commands\AutoShipmentArrival',
         '\App\Console\Commands\CancelledShipmentEmail'
         ];
 

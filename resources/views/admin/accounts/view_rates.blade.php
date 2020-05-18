@@ -3028,8 +3028,7 @@
                                         </div>
                                         
                                     </div>
-                                </div>
-                            </div>
+
                             @else
                             <div id="" class="card-header mt-1 border-primary">
                                 <div class="row">
