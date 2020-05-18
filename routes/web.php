@@ -1092,9 +1092,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('send/submit','Admins\AdminPackagingMaterialController@send_stock')->name('send.submit');
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
+            Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
             Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
             Route::post('check_quantity','Admins\AdminPackagingMaterialController@request_check_quantity')->name('check_quantity');
-            Route::get('list','Admins\AdminPackagingMaterialController@request_lists')->name('list');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
             Route::post('quantity_details','Admins\AdminPackagingMaterialController@quantity_details')->name('quantity_details');
             Route::post('confirm','Admins\AdminPackagingMaterialController@request_confirm')->name('confirm');

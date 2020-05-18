@@ -2896,11 +2896,16 @@
                                                     </div>
 
                                                     <div class="row">
-                                                        <div class="col-12">
+                                                        <div class="col-3">
                                                             <h3 class="card-title">Storage Type Charges</h3>
                                                         </div>
-
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="storage_charges_switch" class="switchery storageCharges" data-color="info" data-size="sm" {{ ($wms_user_info->storage_charges)? 'checked':'' }} disabled/>
+                                                            </div>
+                                                        </div>
                                                         <div class="col-12" id="wms_storage_types_div">
+                                                            @if($wms_user_info->storage_charges)
                                                             @foreach($wms_storage_charges as $key => $storage)
                                                             <div class="row">
                                                                 
@@ -2921,7 +2926,7 @@
                                                                 </div>
                                                             </div>
                                                             @endforeach
-                                                            
+                                                            @endif
                                                         </div>
                                                         
                                                     </div>
@@ -3188,7 +3193,14 @@
                 $('input[name="psf_charges"]').prop('disabled', true);
             }
         };
-
+        var StorageSwitch = document.querySelector('.switchery.storageCharges');
+        StorageSwitch.onchange = function () {
+            if(StorageSwitch.checked === true){
+                $('#wms_storage_types_div select, #wms_storage_types_div input').prop('disabled', false);
+            }else if(StorageSwitch.checked === false){
+                $('#wms_storage_types_div select, #wms_storage_types_div input').prop('disabled', true);
+            }
+        };
         var LabellingSwitch = document.querySelector('.switchery.labellingSwitch');
         LabellingSwitch.onchange = function () {
             if(LabellingSwitch.checked === true){

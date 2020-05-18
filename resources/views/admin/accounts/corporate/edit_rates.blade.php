@@ -3610,11 +3610,16 @@
                                                     </div>
 
                                                     <div class="row">
-                                                        <div class="col-12">
+                                                        <div class="col-3">
                                                             <h3 class="card-title">Storage Type Charges</h3>
                                                         </div>
-
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="storage_charges_switch" class="switchery storageCharges" data-color="info" data-size="sm" {{ ($wms_user_info->storage_charges)? 'checked':'' }}/>
+                                                            </div>
+                                                        </div>
                                                         <div class="col-12" id="wms_storage_types_div">
+                                                            @if($wms_user_info->storage_charges)
                                                             @php
                                                                 $storage_count = count($wms_storage_charges);
                                                                 $row_count = 1;
@@ -3646,7 +3651,27 @@
                                                             </div>
                                                             @php  $row_count++ @endphp
                                                             @endforeach
-                                                            
+                                                            @else
+                                                                <div class="row storage_type_row" id="storage_type_row0">
+                                                                    <input type="hidden" id="storage_type_input0" name="storage_type[0]">
+                                                                    <div class="col-md-2 st_select">
+                                                                        <fieldset class="form-group">
+                                                                            <select class="select2 form-control storage_type" name="storage_type[0]" data-rule-required="true" data-msg-required="This field is required">
+                                                                            </select>
+                                                                        </fieldset>
+                                                                    </div>
+
+                                                                    <div class="col-md-2">
+                                                                        <fieldset class="form-group">
+                                                                            <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col actions">
+                                                                        <span id="storage_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>
+                                                                        <span class="storage_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                    </div>
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                         
                                                     </div>
@@ -3857,10 +3882,14 @@
                                                     </div>
 
                                                     <div class="row">
-                                                        <div class="col-12">
+                                                        <div class="col-3">
                                                             <h3 class="card-title">Storage Type Charges</h3>
                                                         </div>
-
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="storage_charges_switch" class="switchery storageCharges" data-color="info" data-size="sm" checked/>
+                                                            </div>
+                                                        </div>
                                                         <div class="col-12" id="wms_storage_types_div">
                                                             <div class="row storage_type_row" id="storage_type_row0">
                                                                 <input type="hidden" id="storage_type_input0" name="storage_type[0]">
@@ -5620,7 +5649,14 @@
                 $('input[name="psf_charges"]').prop('disabled', true);
             }
         };
-
+        var StorageSwitch = document.querySelector('.switchery.storageCharges');
+        StorageSwitch.onchange = function () {
+            if(StorageSwitch.checked === true){
+                $('#wms_storage_types_div select, #wms_storage_types_div input').prop('disabled', false);
+            }else if(StorageSwitch.checked === false){
+                $('#wms_storage_types_div select, #wms_storage_types_div input').prop('disabled', true);
+            }
+        };
         var LabellingSwitch = document.querySelector('.switchery.labellingSwitch');
         LabellingSwitch.onchange = function () {
             if(LabellingSwitch.checked === true){

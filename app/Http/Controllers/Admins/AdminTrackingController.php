@@ -440,6 +440,8 @@ class AdminTrackingController extends Controller
                     $details['tracking_number'] = $tracking_no;
                     $details['amount'] = $shipment->amount;
                     $details['shipper'] = $shipment->user->name;
+                    $details['consignee_name'] = $shipment->consignee_name;
+                    $details['consignee_address'] = $shipment->consignee_address;
                     $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
                     $details['status'] = $journey->shipment_status_shipper->name;
                     if ($journey->status_reason_id != null) {
@@ -538,6 +540,8 @@ class AdminTrackingController extends Controller
                 $datatable->where('u.id', null);
                 $datatable->where('shipments.consignee_phone_number_1', null);
                 $datatable->where('shipments.order_id', null);
+                $datatable->where('shipments.consignee_name', null);
+                $datatable->where('shipments.consignee_address', null);
         }
             return $datatable->make(true);
     }
