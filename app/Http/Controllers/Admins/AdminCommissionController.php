@@ -357,14 +357,14 @@ class AdminCommissionController extends Controller
         $first_day = Carbon::parse($date)->firstOfMonth();
         $last_day = Carbon::parse($date)->lastOfMonth();
 //        if (session('department_id') == 7){
-        $sales_commission_users = SalesCommissionUser::where('user_id',$userId)->where('status',2)->where('tier_type_id',1)->count();
+        $sales_commission_users = SalesCommissionUser::where('user_id',$userId)->where('tier_type_id',1)->count();
         $stats = array();
         if($sales_commission_users >0)
         {
             
             $sales_commission_user_data = SalesCommissionUser::where('user_id',$userId)->where('tier_type_id',1)->select('sales_commission_id')->get();
               foreach($sales_commission_user_data as $sales_commission_user){
-                    $shipper_ids[] =  SalesCommission::where('id',$sales_commission_user->sales_commission_id)->select('shipper_id','commission')->first();
+                    $shipper_ids[] =  SalesCommission::where('id',$sales_commission_user->sales_commission_id)->where('status',2)->select('shipper_id','commission')->first();
                    
               }
             $sum=0;
