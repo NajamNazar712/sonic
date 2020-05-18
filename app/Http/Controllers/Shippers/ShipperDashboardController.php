@@ -282,6 +282,13 @@ class ShipperDashboardController extends Controller
                     //Consolidated Shipments
                     $shipment->shipper_status_id = 17;
                     $shipment->consignee_status_id = 17;
+
+                    $packaging_material = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                    if($packaging_material){
+                        $packaging_material->status_id = 6;
+                        $packaging_material->save();
+                    }
+                    
                     if($shipment->warehouse == 1){
                         $shipment->warehouse_order_status = 9;
                         $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->get();
