@@ -353,7 +353,7 @@
                                 }else{
                                     var rowNo = table.rows().count();
 
-                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.detail.shipper,data.detail.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.detail.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                     table.draw(false);
                                     scan_sound(1);
                                 }
