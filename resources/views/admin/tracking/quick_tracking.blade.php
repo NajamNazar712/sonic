@@ -98,14 +98,6 @@
                                     <div class="col-3"><div class="card text-center">
                                         <div class="card-content">
                                             <div class="card-body">
-                                                <h4 class="card-title success">Consignee Name</h4>
-                                                <p class="card-text consignee_name">No Data</p>
-                                            </div>
-                                        </div>
-                                    </div></div>
-                                    <div class="col-3"><div class="card text-center">
-                                        <div class="card-content">
-                                            <div class="card-body">
                                                 <h4 class="card-title success">COD Amount</h4>
                                                 <p class="card-text amount">No Data</p>
                                             </div>
