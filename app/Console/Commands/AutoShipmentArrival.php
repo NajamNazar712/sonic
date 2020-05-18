@@ -48,7 +48,7 @@ class AutoShipmentArrival extends Command
         if ($shipments->exists()) {
             $shipments = $shipments->get();
 
-            foreach ($shipments as $shipment) {
+            foreach ($shipments as $index => $shipment) {
 //                AdminPickupsController::cancel($shipment->id);
 
                 $status_id = 2;
@@ -71,6 +71,9 @@ class AutoShipmentArrival extends Command
                 ShipmentChargesController::cash_handling($shipment->id);
                 ShipmentChargesController::insurance($shipment->id);
                 ShipmentChargesController::fuel_surcharge($shipment->id);
+                if($index == 10){
+                    break;
+                }
             }
         }
     }
