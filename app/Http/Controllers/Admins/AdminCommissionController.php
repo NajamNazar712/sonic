@@ -428,7 +428,7 @@ class AdminCommissionController extends Controller
     }
 
  public function dashboard_userwise_list(Request $request){
-    $userId = Auth::user()->id;
+    $userId = Auth::id();
     $date = Carbon::now();
    
     if($request->get('search_shipper')){
