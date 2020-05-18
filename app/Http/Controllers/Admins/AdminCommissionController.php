@@ -408,7 +408,7 @@ class AdminCommissionController extends Controller
 
             return view('admin.commission.dashboard_userwise')->with(['stats' => $stats,'currentuser'=>$user,'shippers'=>$shippers,'first_day' => $first_day, 'last_day' => $last_day]);
         }
-     }
+//     }
 //     else{
 //         return view('admin.access_denied');
 //     }
