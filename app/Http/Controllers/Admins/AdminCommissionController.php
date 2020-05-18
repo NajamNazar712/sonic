@@ -334,7 +334,7 @@ class AdminCommissionController extends Controller
                                     if($total_commission > 0){
                                         $sale_commission->commission = $total_commission;
                                     }
-                                    $sale_commission->status = $request->rate_status[$user->id];
+                                    $sale_commission->status = $request->rates_status[$user->id];
                                     $sale_commission->save();
                                 }
                             }
