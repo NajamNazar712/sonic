@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentsJourney;
+//use App\Http\Models\Shipment;
+//use App\Http\Models\ShipmentsJourney;
 use App\http\Models\WarehouseStock;
 use Illuminate\Http\Request;
 use App\Http\Models\Admin\GlobalSettings;
@@ -17,6 +17,8 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipment;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\DB;
 
@@ -334,7 +336,7 @@ class AdminCommissionController extends Controller
                                     if($total_commission > 0){
                                         $sale_commission->commission = $total_commission;
                                     }
-                                    $sale_commission->status = $request->rates_status[$user->id];
+                                    $sale_commission->status = $request->rate_status[$user->id];
                                     $sale_commission->save();
                                 }
                             }
@@ -356,7 +358,7 @@ class AdminCommissionController extends Controller
         $date = Carbon::now();
         $first_day = Carbon::parse($date)->firstOfMonth();
         $last_day = Carbon::parse($date)->lastOfMonth();
-//        if (session('department_id') == 7){
+       // if (session('department_id') == 7){
         $sales_commission_users = SalesCommissionUser::where('user_id',$userId)->where('tier_type_id',1)->count();
         $stats = array();
         if($sales_commission_users >0)
@@ -364,7 +366,7 @@ class AdminCommissionController extends Controller
             
             $sales_commission_user_data = SalesCommissionUser::where('user_id',$userId)->where('tier_type_id',1)->select('sales_commission_id')->get();
               foreach($sales_commission_user_data as $sales_commission_user){
-                    $shipper_ids[] =  SalesCommission::where('id',$sales_commission_user->sales_commission_id)->where('status',2)->select('shipper_id','commission')->first();
+                    $shipper_ids[] =  SalesCommission::where('id',$sales_commission_user->sales_commission_id)->select('shipper_id','commission')->first();
                    
               }
             $sum=0;
@@ -407,13 +409,11 @@ class AdminCommissionController extends Controller
             $stats['commission'] = number_format($total_commission,2,'.','');
 
             return view('admin.commission.dashboard_userwise')->with(['stats' => $stats,'currentuser'=>$user,'shippers'=>$shippers,'first_day' => $first_day, 'last_day' => $last_day]);
-        }else{
-            return redirect()->back()->with('error', 'No data found!');
         }
-//     }
-//     else{
-//         return view('admin.access_denied');
-//     }
+    //  }
+    //  else{
+    //      return view('admin.access_denied');
+    //  }
 
     }
 
@@ -534,7 +534,7 @@ class AdminCommissionController extends Controller
 }
 
     public function overall_commission_dashboard(){
-        $sale_commission_users = SalesCommission::where('status', 1)->pluck('shipper_id')->toArray();
+        $sale_commission_users = SalesCommission::where('status', 2)->pluck('shipper_id')->toArray();
         if(count($sale_commission_users) > 0){
             $sale_commissions = SalesCommission::where('status', 2)->get();
             $sale_commission = 0;
@@ -543,7 +543,7 @@ class AdminCommissionController extends Controller
             $first_day = Carbon::parse($date)->firstOfMonth();
             $last_day = Carbon::parse($date)->lastOfMonth();
             $shippers = User::whereIn('id', $sale_commission_users)->select('id', 'name')->get();
-            $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+            $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();;
             $stats['booked'] = ShipmentsJourney::leftjoin('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')->where('shipments_journey.shipper_status_id',1)->whereIn('s.user_id', $sale_commission_users)->whereBetween('shipments_journey.created_at',[$first_day, $last_day])->count();
             $stats['received'] = ShipmentsJourney::leftjoin('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')->where('shipments_journey.shipper_status_id',2)->whereIn('s.user_id', $sale_commission_users)->whereBetween('shipments_journey.created_at',[$first_day, $last_day])->count();
             $total_revenue = 0;
@@ -567,9 +567,6 @@ class AdminCommissionController extends Controller
 
             $sales_tier = SalesTier::get();
             return view('admin.commission.overall_commission_dashboard')->with(['stats' => $stats, 'sales_tier' => $sales_tier, 'shippers' => $shippers, 'first_day' => $first_day, 'last_day' => $last_day, 'admins' => $admins]);
-        }
-        else{
-            return redirect()->back()->with(['status'=>0,'error'=>"Sales Commissions does not exist!"]);
         }
     }
 
