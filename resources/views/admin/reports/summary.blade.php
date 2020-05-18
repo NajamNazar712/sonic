@@ -94,7 +94,7 @@
                                                 <h3 id="total">0</h3>
                                                 <span>Total Shipment(s)</span>
                                             </div>
-                                        </div>
+                                        </div> 
                                     </div>
                                 </div>
                             </div>

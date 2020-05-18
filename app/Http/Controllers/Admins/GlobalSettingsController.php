@@ -46,6 +46,7 @@ use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\RateStatus;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
@@ -1913,23 +1914,23 @@ class GlobalSettingsController extends Controller
             })
             ->addColumn('action', function ($data){
 
-                    $dropdown = '
+            $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+            $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-                    if ($data->status == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                    } else {
-                            $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                    }
+            if ($data->status == 1) {
+                $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Disable</div></button>';
+            } else {
+                $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            }
 
-                    return $dropdown;
+            return $dropdown;
 
-            });
+        });
 
         return  $datatable->make(true);
     }
@@ -2179,4 +2180,90 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Successfully updated!');
     }
+
+     public function commission_percentage_index(){
+             $settings = GlobalSettings::where('type', 'commission_percentage')->first();
+            $percentage = '';
+            if($settings){
+                $percentage = $settings->text;
+            }
+            return view('admin.settings.commission.commission_percentage')->with(['commission_percentage' => $percentage]);
+        }
+
+     public function commission_percentage_update(Request $request){
+            $percentage = $request->commission_percentage;
+            $setting = GlobalSettings::where('type', 'commission_percentage');
+            if($setting->exists()){
+                $setting = $setting->first();
+                $setting->setting_value = 0;
+                $setting->text=$percentage;
+                $setting->save();
+            }else{
+                $setting = new GlobalSettings();
+                 $setting->text=$percentage;
+                $setting->type = 'commission_percentage';
+                $setting->save();
+            }
+            return redirect()->back()->with('success', 'Setting updated');
+        }
+
+    public function return_reason_index(){
+        return view('admin.settings.return.reason');
+    }
+    public function return_reason_list(Request $request){
+        $reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->pluck('shipment_status_reason_id')->toArray();
+        $reasons = ShipmentStatusReason::whereIn('id', $reason_ids)->select('id', 'name');
+        $datatable = Datatables::of($reasons)
+            ->addColumn('action', function ($data){
+
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                return $dropdown;
+
+            });
+
+        return $datatable->make(true);
+    }
+    public function return_reason_add(Request $request){
+        $reason = trim($request->reason);
+        if($reason){
+            $shipment_reason = new ShipmentStatusReason();
+            $shipment_reason->name = $reason;
+            $shipment_reason->save();
+
+            DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+
+            return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
+    }
+    public function return_reason_get(Request $request){
+        $id = $request->reason_id;
+        if($id){
+            $reason = ShipmentStatusReason::find($id);
+            if($reason){
+                return response()->json(['status' => 0, 'reason' => $reason->name]);
+            }
+            return response()->json(['status' => 1, 'error' => 'Reason not found!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please select reason!']);
+    }
+    public function return_reason_edit(Request $request){
+        $reason_id = $request->reason_id;
+        $reason = $request->reason;
+        if($reason){
+            $reason_detail = ShipmentStatusReason::find($reason_id);
+            $reason_detail->name = $reason;
+            $reason_detail->save();
+            return response()->json(['status' => 0, 'success' => 'Reason updated successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
+    }
+
 }

@@ -8,6 +8,8 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\DuplicateUser;
 use App\Http\Models\InvoicingCycle;
@@ -20,6 +22,7 @@ use App\Mail\Notifications;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -345,6 +348,20 @@ class RegisterController extends Controller
             $sale_person->user_id = $newUser->id;
             $sale_person->status = 0;
             $sale_person->save();
+
+            $sales_commission = new SalesCommission();
+            $sales_commission->shipper_id = $newUser->id;
+            $sales_commission->commission_users_count = 1;
+            $sales_commission->commission = 2.5;
+            $sales_commission->save();
+            $sales_commission_id = $sales_commission->id;
+            $sales_commission_user = new SalesCommissionUser();
+            $sales_commission_user->sales_commission_id = $sales_commission_id;
+            $sales_commission_user->tier_type_id = 1;
+            $sales_commission_user->tier_id = 1;
+            $sales_commission_user->user_id = $data['sale_person'];
+            $sales_commission_user->commission = 2.5;
+            $sales_commission_user->save();
         }
         $first = TRUE;
 

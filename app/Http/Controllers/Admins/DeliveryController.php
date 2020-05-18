@@ -2712,6 +2712,9 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Weight</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
+                            <td class="color primary"><strong>Denomination</strong></td>
+                            <td class="color primary"><strong>Qty</strong></td>
+                            <td class="color primary"><strong>Amount</strong></td>
                           </tr>
         ';
 

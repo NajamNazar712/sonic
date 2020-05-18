@@ -560,6 +560,19 @@ class Permission
             'settings.settings.blacklist.index' => 329,
             'settings.blacklist.search.index' => 330,
 
+            'settings.return.reason.index' => 335,
+            'settings.return.reason.list' => 335,
+
+
+            'settings.commission.index' => 331,
+
+
+            'settings.commission.percentage.index' => 332,
+            'settings.commission.percentage.store' => 332,
+
+            'dashboard.useruise' => 333,
+            'dashboard.overall' => 334,
+
 
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
@@ -585,6 +598,10 @@ class Permission
             'coordinates.add.submit' => 324,
             'coordinates.add.shipment_details' => 324,
             'coordinates.add.search.address' => 324,
+
+            'dashboard.overall.commission' => 334,
+            'dashboard.overall.commission.list' => 334,
+            'dashboard.overall.commission.data' => 334,
         ],
 
         'shipper' => [
