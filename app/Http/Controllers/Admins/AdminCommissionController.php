@@ -17,8 +17,6 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipment;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\DB;
 
@@ -534,7 +532,7 @@ class AdminCommissionController extends Controller
 }
 
     public function overall_commission_dashboard(){
-        $sale_commission_users = SalesCommission::where('status', 2)->pluck('shipper_id')->toArray();
+        $sale_commission_users = SalesCommission::where('status', 1)->pluck('shipper_id')->toArray();
         if(count($sale_commission_users) > 0){
             $sale_commissions = SalesCommission::where('status', 2)->get();
             $sale_commission = 0;
@@ -567,6 +565,9 @@ class AdminCommissionController extends Controller
 
             $sales_tier = SalesTier::get();
             return view('admin.commission.overall_commission_dashboard')->with(['stats' => $stats, 'sales_tier' => $sales_tier, 'shippers' => $shippers, 'first_day' => $first_day, 'last_day' => $last_day, 'admins' => $admins]);
+        }
+        else{
+            return redirect()->back()->with(['status'=>0,'error'=>"Sales Commissions does not exist!"]);
         }
     }
 
