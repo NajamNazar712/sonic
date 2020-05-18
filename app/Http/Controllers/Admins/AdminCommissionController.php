@@ -357,7 +357,7 @@ class AdminCommissionController extends Controller
         $first_day = Carbon::parse($date)->firstOfMonth();
         $last_day = Carbon::parse($date)->lastOfMonth();
 //        if (session('department_id') == 7){
-        $sales_commission_users = SalesCommissionUser::where('user_id',$userId)->where('tier_type_id',1)->count();
+        $sales_commission_users = SalesCommissionUser::where('user_id',$userId)->where('status',2)->where('tier_type_id',1)->count();
         $stats = array();
         if($sales_commission_users >0)
         {
@@ -408,7 +408,7 @@ class AdminCommissionController extends Controller
 
             return view('admin.commission.dashboard_userwise')->with(['stats' => $stats,'currentuser'=>$user,'shippers'=>$shippers,'first_day' => $first_day, 'last_day' => $last_day]);
         }
-     }
+//     }
 //     else{
 //         return view('admin.access_denied');
 //     }
