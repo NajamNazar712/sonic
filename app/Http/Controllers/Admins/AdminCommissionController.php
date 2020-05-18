@@ -534,7 +534,7 @@ class AdminCommissionController extends Controller
 }
 
     public function overall_commission_dashboard(){
-        $sale_commission_users = SalesCommission::where('status', 1)->pluck('shipper_id')->toArray();
+        $sale_commission_users = SalesCommission::where('status', 2)->pluck('shipper_id')->toArray();
         if(count($sale_commission_users) > 0){
             $sale_commissions = SalesCommission::where('status', 2)->get();
             $sale_commission = 0;
