@@ -64,13 +64,15 @@ class AutoShipmentArrival extends Command
                 $shipment->shipper_status_id = $status_id;
                 $shipment->consignee_status_id = $status_id;
                 $shipment->actual_weight = 0.2; //0.5
-
+                $shipment->weight_charges = 120;
+                $shipment->cash_handling_charges = 15;
+                $shipment->fuel_surcharge = 12;
                 $shipment->save();
 
-                ShipmentChargesController::weight($shipment->id);
-                ShipmentChargesController::cash_handling($shipment->id);
-                ShipmentChargesController::insurance($shipment->id);
-                ShipmentChargesController::fuel_surcharge($shipment->id);
+//                ShipmentChargesController::weight($shipment->id);
+//                ShipmentChargesController::cash_handling($shipment->id);
+//                ShipmentChargesController::insurance($shipment->id);
+//                ShipmentChargesController::fuel_surcharge($shipment->id);
             }
         }
     }
