@@ -3495,7 +3495,7 @@ if(session('department_id') == 7){
 
             }
 
-            if($request->has('total_commission')){
+            if($request->total_commission == 1){
                 $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                 if($existing_sale_commission){
                     SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
@@ -3536,6 +3536,14 @@ if(session('department_id') == 7){
                 }
                 $sales_commission->commission = $actual_commission;
                 $sales_commission->save();
+            }
+            else{
+                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                if($existing_sale_commission){
+                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                    SalesCommission::where('shipper_id', $id)->delete();
+                }
             }
             if($request->authorize == 1){
                 User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id()]);
@@ -5720,7 +5728,7 @@ if(session('department_id') == 7){
 
 
 
-                if($request->has('total_commission')){
+                if($request->total_commission == 1){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if($existing_sale_commission){
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
@@ -5762,6 +5770,14 @@ if(session('department_id') == 7){
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
                 }
+                else{
+                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                    if($existing_sale_commission){
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
+                    }
+                }
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
@@ -5773,7 +5789,7 @@ if(session('department_id') == 7){
                 $rate_remark->save();
             }
 
-            if($request->has('total_commission')){
+            if($request->total_commission == 1){
                 $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                 if($existing_sale_commission){
                     SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
@@ -5814,6 +5830,14 @@ if(session('department_id') == 7){
                 }
                 $sales_commission->commission = $actual_commission;
                 $sales_commission->save();
+            }
+            else{
+                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                if($existing_sale_commission){
+                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                    SalesCommission::where('shipper_id', $id)->delete();
+                }
             }
 
             NotificationsController::send(34, $id, Auth::id());
