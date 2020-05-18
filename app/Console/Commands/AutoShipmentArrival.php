@@ -55,11 +55,11 @@ class AutoShipmentArrival extends Command
 
                 ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
 
-                if ($shipment->pickup_address->city_id != $shipment->consignee_city_id) {
-                    $status_id = 4;
-
-                    ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
-                }
+//                if ($shipment->pickup_address->city_id != $shipment->consignee_city_id) {
+//                    $status_id = 4;
+//
+//                    ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+//                }
 
                 $shipment->shipper_status_id = $status_id;
                 $shipment->consignee_status_id = $status_id;
