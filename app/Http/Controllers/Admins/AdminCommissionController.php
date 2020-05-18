@@ -407,6 +407,8 @@ class AdminCommissionController extends Controller
             $stats['commission'] = number_format($total_commission,2,'.','');
 
             return view('admin.commission.dashboard_userwise')->with(['stats' => $stats,'currentuser'=>$user,'shippers'=>$shippers,'first_day' => $first_day, 'last_day' => $last_day]);
+        }else{
+            return redirect()->back()->with('error', 'No data found!');
         }
 //     }
 //     else{
