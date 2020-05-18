@@ -2712,9 +2712,6 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Weight</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
-                            <td class="color primary"><strong>Denomination</strong></td>
-                            <td class="color primary"><strong>Qty</strong></td>
-                            <td class="color primary"><strong>Amount</strong></td>
                           </tr>
         ';
 
@@ -2835,9 +2832,34 @@ class DeliveryController extends Controller
                             </div>
                           </div>
                         </div>
-                        <hr>
+                        <hr>';
+                        $html .= '<div class="row justify-content-end mt-2">
+                                    <div class="col-3">
+                                    <table class="table table-sm table-bordered border">
+                                        <thead>
+                                          <tr>
+                                            <th class="color primary"><strong>Denomination</strong></th>
+                                            <th class="color primary"><strong>Qty</strong></th>
+                                            <th class="color primary"><strong>Amount</strong></th>
+                                            
+                                          </tr>
+                                          </thead>
+                                          <tbody>
+                                          <tr><td>5,000</td><td></td><td></td></tr>
+                                          <tr><td>1,000</td><td></td><td></td></tr>
+                                          <tr><td>500</td><td></td><td></td></tr>
+                                          <tr><td>100</td><td></td><td></td></tr>
+                                          <tr><td>50</td><td></td><td></td></tr>
+                                          <tr><td>20</td><td></td><td></td></tr>
+                                          <tr><td>10</td><td></td><td></td></tr>
+                                          <tr><td><b>Coins</b></td><td></td><td></td></tr>
+                                          <tr><td><b>Total</b></td><td></td><td></td></tr>
+                                          </tbody>
+                                    </table>
+                                    </div>
+                                  </div>';
                         
-                        <div class="row justify-content-center align-items-end mt-5">
+                      $html .= '<div class="row justify-content-center align-items-end mt-5">
                           <div class="col justify-content-center ">
                             <div class="text-center">
                               <span class="d-block w-200 mx-auto line"></span>

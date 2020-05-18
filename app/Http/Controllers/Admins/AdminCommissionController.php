@@ -368,7 +368,6 @@ class AdminCommissionController extends Controller
                   $shipper_ids[$sales_commission->shipper_id]['commission'] =  $sales_commission_user->commission;
               }
 
-
             $sum=0;
             $revenue=0;
             $shipment_booked=0;
@@ -419,7 +418,7 @@ class AdminCommissionController extends Controller
     }
 
  public function dashboard_userwise_list(Request $request){
-    $userId = Auth::user()->id;
+    $userId = Auth::id();
     $date = Carbon::now();
 
     if($request->get('search_date_to')){
