@@ -335,6 +335,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update_reason','Dashboard\BusinessProjectionRetentionController@update_reason')->name('update_reason');
         });
 
+        Route::get('overall/commission', 'Admins\AdminCommissionController@overall_commission_dashboard')->name('overall.commission');
+        Route::post('overall/commission/list', 'Admins\AdminCommissionController@overall_commission_dashboard_list')->name('overall.commission.list');
+        Route::post('overall/commission/data', 'Admins\AdminCommissionController@overall_commission_dashboard_data')->name('overall.commission.data');
     });
 
 
