@@ -49,11 +49,11 @@ class AutoShipmentArrival extends Command
             $shipments = $shipments->get();
 
             foreach ($shipments as $shipment) {
-                AdminPickupsController::cancel($shipment->id);
+//                AdminPickupsController::cancel($shipment->id);
 
                 $status_id = 2;
 
-                ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+                ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 70);
 
 //                if ($shipment->pickup_address->city_id != $shipment->consignee_city_id) {
 //                    $status_id = 4;
