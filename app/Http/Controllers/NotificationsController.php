@@ -4507,6 +4507,66 @@ class NotificationsController extends Controller
                     self::sms($body, $to);
                 }
             }
+
+            else if($id == 62){
+            
+             $users = User::where('status', 3)->get();
+             if($users){
+              foreach($users as $user){
+
+
+                  $date = \Carbon\Carbon::yesterday()->format('Y-m-d');
+                    $shipment_cancel = ShipmentsJourney::join('shipments as s','shipments_journey.shipment_id','=','s.id')
+                    ->leftjoin('shipment_items as si','s.id','=','si.shipment_id')
+                    ->leftjoin('user_shipping_infos as usi','s.pickup_address_id','=','usi.id')
+                   ->select('s.tracking_number as tracking_number','s.created_at as booking_date', 's.order_id as order_id','s.amount as cod','usi.vendor as vendor_name','si.description as desc')
+                   ->where('s.user_id', $user->id)
+                   ->where('shipments_journey.shipper_status_id', 17)
+                   ->where('shipments_journey.created_at','>=',$date)
+                   ->groupBy('s.id')
+                   ->get();
+                   if(count($shipment_cancel) > 0){
+
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+
+                    $cancel_shipment = '<table style="width:100%;">';
+                    $cancel_shipment .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking #</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor Name</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">COD Amount</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Booking Date</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Orde ID</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th></tr></thead>';
+                    $cancel_shipment .= '<tbody>';
+
+                         
+                foreach ($shipment_cancel as $data) {
+                   $cancel_shipment .= '<tr>';
+                   $cancel_shipment .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->tracking_number . '</td>';
+                   $cancel_shipment .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->vendor_name . '</td>';
+                   $cancel_shipment .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cod . '</td>';
+                   $cancel_shipment .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->booking_date . '</td>';
+                   $cancel_shipment .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->order_id . '</td>';
+                   $cancel_shipment .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->desc . '</td>';
+                   $cancel_shipment .= '</tr>';
+                  }
+               $cancel_shipment .= '</tbody></table>';
+
+               if (strpos($body, '[cancel_shipment]') !== FALSE) {
+                $body = str_replace('[cancel_shipment]', $cancel_shipment, $body);
+                   }
+
+              $to = $user->email;
+
+              self::email($subject, $body, $to);
+                   }
+              }
+             }
+  
+            }
+
+
         }
       }
     }
