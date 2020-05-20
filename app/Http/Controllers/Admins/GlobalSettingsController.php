@@ -2265,5 +2265,84 @@ class GlobalSettingsController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
     }
+    public function pickup_cut_off_settings_index() {
+        $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+
+        if ($settings) {
+            $pickup_request_cut_off_time = $settings->setting_value;
+        }
+        else {
+            $pickup_request_cut_off_time = 15;
+        }
+
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time')->first();
+
+        if ($settings) {
+            $pickup_arrival_cut_off_time = $settings->setting_value;
+        }
+        else {
+            $pickup_arrival_cut_off_time = 8;
+        }
+
+        $settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time')->first();
+
+        if ($settings) {
+            $rider_assignment_cut_off_time = $settings->setting_value;
+        }
+        else {
+            $rider_assignment_cut_off_time = 0;
+        }
+
+        return view('admin.settings.pickup_settings')->with(['pickup_request_cut_off_time' => $pickup_request_cut_off_time, 'pickup_arrival_cut_off_time' => $pickup_arrival_cut_off_time, 'rider_assignment_cut_off_time' => $rider_assignment_cut_off_time]);
+    }
+
+    public function pickup_cut_off_settings_store(Request $request) {
+        $request_settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+
+        if ($request_settings->exists()) {
+            $request_settings = $request_settings->first();
+        }
+        else {
+            $request_settings = new GlobalSettings();
+
+            $request_settings->type = 'pickup_request_cut_off_time';
+        }
+
+        $request_settings->setting_value = $request->request_cut_off_time;
+
+        $request_settings->save();
+
+        $request_arrival = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+
+        if ($request_arrival->exists()) {
+            $request_arrival = $request_arrival->first();
+        }
+        else {
+            $request_arrival = new GlobalSettings();
+
+            $request_arrival->type = 'pickup_arrival_cut_off_time';
+        }
+
+        $request_arrival->setting_value = $request->arrival_cut_off_time;
+
+        $request_arrival->save();
+
+        $rider_assignment = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
+
+        if ($rider_assignment->exists()) {
+            $rider_assignment = $rider_assignment->first();
+        }
+        else {
+            $rider_assignment = new GlobalSettings();
+
+            $rider_assignment->type = 'rider_assignment_cut_off_time';
+        }
+
+        $rider_assignment->setting_value = $request->rider_assignment_off_time;
+
+        $rider_assignment->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 
 }
