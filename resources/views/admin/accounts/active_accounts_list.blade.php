@@ -264,92 +264,92 @@
            dom: '<"d-inline-block"l><"pull-right"B>tipr',
            scrollX: true, scrollY: '500px',
            buttons: [
-                    {
-                        text: 'Set Commission',
-                        className: 'btn btn-primary set_commission',
-                        enabled:false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to Set Commission!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        var link = '{{ route('admin.settings.commission.set_commission', ["ids" => 0]) }}';
-                                        window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;
-                                    }
-                                });
+                    {{--{--}}
+                    {{--    text: 'Set Commission',--}}
+                    {{--    className: 'btn btn-primary set_commission',--}}
+                    {{--    enabled:false,--}}
+                    {{--    action: function (e, dt, node, config) {--}}
+                    {{--        if(selected_rows != ''){--}}
+                    {{--            swal({--}}
+                    {{--                title: 'Are You Sure?',--}}
+                    {{--                text: 'Select Yes to Set Commission!',--}}
+                    {{--                icon: 'warning',--}}
+                    {{--                buttons: {--}}
+                    {{--                    cancel: {--}}
+                    {{--                        text: 'No',--}}
+                    {{--                        value: null,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true,--}}
+                    {{--                    },--}}
+                    {{--                    confirm: {--}}
+                    {{--                        text: 'Yes',--}}
+                    {{--                        value: true,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true--}}
+                    {{--                    }--}}
+                    {{--                },--}}
+                    {{--                closeOnClickOutside: false,--}}
+                    {{--                closeOnEsc: false,--}}
+                    {{--                dangerMode: true--}}
+                    {{--            }).then(function (confirm) {--}}
+                    {{--                if (confirm) {--}}
+                    {{--                    var link = '{{ route('admin.settings.commission.set_commission', ["ids" => 0]) }}';--}}
+                    {{--                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;--}}
+                    {{--                }--}}
+                    {{--            });--}}
 
 
-                            }
-                            else{
-                                var error = "Something went wrong please refresh page and try again!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    {{--        }--}}
+                    {{--        else{--}}
+                    {{--            var error = "Something went wrong please refresh page and try again!";--}}
+                    {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                            }
-                        }
-                    },
-                    {
-                        text: 'Approve Commission',
-                        className: 'btn btn-primary approve_commission',
-                        enabled:false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to Approve Commission!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        var link = '{{ route('admin.settings.commission.approve_commission', ["ids" => 0]) }}';
-                                        window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;
-                                    }
-                                });
+                    {{--        }--}}
+                    {{--    }--}}
+                    {{--},--}}
+                    {{--{--}}
+                    {{--    text: 'Approve Commission',--}}
+                    {{--    className: 'btn btn-primary approve_commission',--}}
+                    {{--    enabled:false,--}}
+                    {{--    action: function (e, dt, node, config) {--}}
+                    {{--        if(selected_rows != ''){--}}
+                    {{--            swal({--}}
+                    {{--                title: 'Are You Sure?',--}}
+                    {{--                text: 'Select Yes to Approve Commission!',--}}
+                    {{--                icon: 'warning',--}}
+                    {{--                buttons: {--}}
+                    {{--                    cancel: {--}}
+                    {{--                        text: 'No',--}}
+                    {{--                        value: null,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true,--}}
+                    {{--                    },--}}
+                    {{--                    confirm: {--}}
+                    {{--                        text: 'Yes',--}}
+                    {{--                        value: true,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true--}}
+                    {{--                    }--}}
+                    {{--                },--}}
+                    {{--                closeOnClickOutside: false,--}}
+                    {{--                closeOnEsc: false,--}}
+                    {{--                dangerMode: true--}}
+                    {{--            }).then(function (confirm) {--}}
+                    {{--                if (confirm) {--}}
+                    {{--                    var link = '{{ route('admin.settings.commission.approve_commission', ["ids" => 0]) }}';--}}
+                    {{--                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;--}}
+                    {{--                }--}}
+                    {{--            });--}}
 
 
-                            }
-                            else{
-                                var error = "Something went wrong please refresh page and try again!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    {{--        }--}}
+                    {{--        else{--}}
+                    {{--            var error = "Something went wrong please refresh page and try again!";--}}
+                    {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                            }
-                        }
-                    },
+                    {{--        }--}}
+                    {{--    }--}}
+                    {{--},--}}
                     {
                         extend: 'excel',
                         title: 'Active Accounts',
