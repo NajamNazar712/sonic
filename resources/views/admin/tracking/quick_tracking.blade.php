@@ -33,7 +33,7 @@
                             </form>
 
                             <div id="single_div" class="d-none">
-                            <div class="row">
+                                <div class="row">
                                 {{--<div class="col-2"><div id="tracking">Tracking Number</div><div>202202000116</div></div>--}}
                                 <div class="col-3"><div class="card text-center">
                                         <div class="card-content">
@@ -94,8 +94,8 @@
                                     
                                     
                             </div>
-                            <div class="row justify-content-center">
-                                        <div class="col-3"><div class="card text-center">
+                                <div class="row justify-content-center">
+                                    <div class="col-3"><div class="card text-center">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <h4 class="card-title success">COD Amount</h4>
@@ -108,6 +108,22 @@
                                             <div class="card-body">
                                                 <h4 class="card-title success">Shipper</h4>
                                                 <p class="card-text shipper">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                    <div class="col-3"><div class="card text-center">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <h4 class="card-title success">Consignee Name</h4>
+                                                    <p class="card-text consignee_name">No Data</p>
+                                                </div>
+                                            </div>
+                                        </div></div>
+                                    <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Consignee Address</h4>
+                                                <p class="card-text consignee_address">No Data</p>
                                             </div>
                                         </div>
                                     </div></div>
@@ -127,6 +143,8 @@
                                         <th class="border-primary border-darken-1">Destination</th>
                                         <th class="border-primary border-darken-1">Amount</th>
                                         <th class="border-primary border-darken-1">Shipper Name</th>
+                                        <th class="border-primary border-darken-1">Consignee Name</th>
+                                        <th class="border-primary border-darken-1">Consignee Address</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -283,7 +301,9 @@
                         {name: 'origin', class: 'align-middle origin', orderable: false},
                         {name: 'destination', class: 'align-middle destination', orderable: false},
                         {name: 'amount', class: 'align-middle amount', orderable: false},
-                        {name: 'shipper', class: 'align-middle shipper', orderable: false}
+                        {name: 'shipper', class: 'align-middle shipper', orderable: false},
+                        {name: 'consignee_name', class: 'align-middle consignee_name', orderable: false},
+                        {name: 'consignee_address', class: 'align-middle consignee_address', orderable: false}
                     ],
                     rowCallback: function(row, data, index) {
                         var status = parseInt($(row).attr('id'));
@@ -333,7 +353,7 @@
                                 }else{
                                     var rowNo = table.rows().count();
 
-                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper]).node().id = data.details.status_id;
+                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                     table.draw(false);
                                     scan_sound(1);
                                 }
@@ -358,7 +378,7 @@
                                     }else{
                                         var rowNo = table.rows().count();
 
-                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper]).node().id = data.details.status_id;
+                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -408,6 +428,8 @@
                                 $('#single_div p.destination').text(data.details.destination);
                                 $('#single_div p.amount').text(data.details.amount);
                                 $('#single_div p.shipper').text(data.details.shipper);
+                                $('#single_div p.consignee_name').text(data.details.consignee_name);
+                                $('#single_div p.consignee_address').text(data.details.consignee_address);
                                 if(data.details.reason == null){
                                     $('#single_div p.reason').text('No Reason');
                                 }else{

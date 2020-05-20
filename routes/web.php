@@ -321,13 +321,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
-
+        
+         //commision dashboard routes
+    // Route::prefix('commission')->name('commission.')->group(function () {
+       // Route::prefix('dashboard')->name('dashboard.')->group(function () {
+            Route::get('commission/User', 'Admins\AdminCommissionController@dashboard_userwise_index')->name('userwise');
+            Route::post('commission/list', 'Admins\AdminCommissionController@dashboard_userwise_list')->name('list');
+            Route::post('commission/data', 'Admins\AdminCommissionController@dashboard_userwise_data')->name('userwise.commission.data');
+            Route::get('overall', 'Admins\AdminCommissionController@dashboard_overall_index')->name('overall');
+       // });
+   // });
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::get('index', 'Dashboard\BusinessProjectionRetentionController@dashboard')->name('index');
             Route::get('list', 'Dashboard\BusinessProjectionRetentionController@dashboard_list')->name('list');
             Route::post('update_reason','Dashboard\BusinessProjectionRetentionController@update_reason')->name('update_reason');
         });
 
+        Route::get('overall/commission', 'Admins\AdminCommissionController@overall_commission_dashboard')->name('overall.commission');
+        Route::post('overall/commission/list', 'Admins\AdminCommissionController@overall_commission_dashboard_list')->name('overall.commission.list');
+        Route::post('overall/commission/data', 'Admins\AdminCommissionController@overall_commission_dashboard_data')->name('overall.commission.data');
     });
 
 
@@ -354,6 +366,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('shipment_charges','Admins\OrderManagementController@get_shipment_charges')->name('charges');
         Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
+        Route::post('telenor_shipments_arrival','Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
@@ -893,6 +906,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
         Route::post('update', 'Admins\AdminTrackingController@cx_quick_tracking_update_consignee_info_and_special_instructions')->name('update');
     });
+    
     Route::prefix('user_management')->name('user_management.')->group(function() {
         Route::prefix('users')->name('users.')->group(function() {
             Route::get('', 'Admins\UserManagementController@user_index')->name('index');
@@ -1070,7 +1084,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add','Admins\AdminMonthClosingController@add_shipment')->name('add');
         Route::post('confirm','Admins\AdminMonthClosingController@return_confirm_shipment')->name('confirm');
         Route::post('reattempt','Admins\AdminMonthClosingController@return_reattempt_shipment')->name('reattempt');
-    });
+    });  
 
 
     Route::prefix('sameday')->name('sameday.')->group(function (){
@@ -1085,9 +1099,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('send/submit','Admins\AdminPackagingMaterialController@send_stock')->name('send.submit');
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
+            Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
             Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
             Route::post('check_quantity','Admins\AdminPackagingMaterialController@request_check_quantity')->name('check_quantity');
-            Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
             Route::post('quantity_details','Admins\AdminPackagingMaterialController@quantity_details')->name('quantity_details');
             Route::post('confirm','Admins\AdminPackagingMaterialController@request_confirm')->name('confirm');
@@ -1575,7 +1589,39 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+
+        //commission routes
+        Route::prefix('commission')->name('commission.')->group(function () {
+            Route::get('', 'Admins\AdminCommissionController@index')->name('index');
+            Route::get('list', 'Admins\AdminCommissionController@tier_list')->name('list');
+            Route::post('add', 'Admins\AdminCommissionController@add_sales_tier')->name('add');
+            Route::post('status', 'Admins\AdminCommissionController@commission_status')->name('status');
+            Route::post('details','Admins\AdminCommissionController@editSalesTierView')->name('details');
+            Route::post('edit','Admins\AdminCommissionController@editSalesTier')->name('edit');
+            Route::get('set_commission/{id?}','Admins\AdminCommissionController@setCommission')->name('set_commission');
+            Route::post('set_commission','Admins\AdminCommissionController@set_commission_submit')->name('set_commission.submit');
+            Route::get('approve_commission/{id?}','Admins\AdminCommissionController@approveCommission')->name('approve_commission');
+            Route::post('approve_commission','Admins\AdminCommissionController@approve_commission_submit')->name('approve_commission.submit');
+            Route::prefix('percentage')->name('percentage.')->group(function () {
+                    Route::get('', 'Admins\GlobalSettingsController@commission_percentage_index')->name('index');
+                    Route::post('', 'Admins\GlobalSettingsController@commission_percentage_update')->name('store');
+                });
+        });
+
+
+        Route::prefix('return')->name('return.')->group(function () {
+            Route::prefix('reason')->name('reason.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@return_reason_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@return_reason_list')->name('list');
+                Route::post('add', 'Admins\GlobalSettingsController@return_reason_add')->name('add');
+                Route::post('get', 'Admins\GlobalSettingsController@return_reason_get')->name('get');
+                Route::post('edit', 'Admins\GlobalSettingsController@return_reason_edit')->name('edit');
+            });
+        });
+   
     });
+
+
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');
@@ -1677,5 +1723,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('search','Admins\CoordinatesController@address_search')->name('search.address');
         });
     });
+     
 });
 

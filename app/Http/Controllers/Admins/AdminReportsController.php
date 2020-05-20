@@ -5377,7 +5377,7 @@ use Yajra\Datatables\Datatables;
             $stats = array();
             $shipper = $request->shipper;
             $from = $request->from_date;
-            $to = $request->to_date;
+            $to = $request->to_date; 
             $origin = $request->origin;
             $destination = $request->destination;
             if($from == null || $to == null){
