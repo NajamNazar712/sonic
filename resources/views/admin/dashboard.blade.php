@@ -7,6 +7,7 @@
         <div class="content-wrapper">
             <div class="content-header row">
             </div>
+            @include('admin.inc.messages')
             <div class="content-body">
                 <!-- Active Orders -->
                 <div class="row">
