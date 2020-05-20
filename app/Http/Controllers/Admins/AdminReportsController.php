@@ -6436,5 +6436,9 @@ use Yajra\Datatables\Datatables;
 
             return $data;
         }
+
+        public function pickup_report_index(){
+            return view('admin.reports.pickup_report');
+        }
     }
 
