@@ -11,6 +11,11 @@ class V2PickupRequestRiderStatusSeeder extends Seeder
      */
     public function run()
     {
-        //
+        DB::table('v2_pickup_request_rider_statuses')->truncate();
+
+        DB::table('v2_pickup_request_rider_statuses')->insert(array(
+            array('id' => 1, 'name' => 'Pending'),
+            array('id' => 2, 'name' => 'Assigned')
+        ));
     }
 }
