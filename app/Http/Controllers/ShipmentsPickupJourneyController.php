@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\http\Models\ShipmentsV2PickupJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -10,7 +11,7 @@ use App\Http\Models\ShipmentsPickupJourney;
 class ShipmentsPickupJourneyController extends Controller
 {
     static public function add($shipment_id, $status_id, $admin_id = NULL, $reference_1_id = NULL, $reference_2_id = NULL) {
-		$shipment_pickup_journey = new ShipmentsPickupJourney();
+		$shipment_pickup_journey = new ShipmentsV2PickupJourney();
 
 		$shipment_pickup_journey->shipment_id = $shipment_id;
 		$shipment_pickup_journey->status_id = $status_id;
