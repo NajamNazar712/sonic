@@ -30,7 +30,6 @@ class AdminCommissionController extends Controller
         $this->middleware('Permission');
     }
 
-
     public function index(){
 
         $tier_type = TierType::all(['id','name']);
@@ -40,7 +39,7 @@ class AdminCommissionController extends Controller
 
     }
 
-     public function tier_list(Request $request){
+    public function tier_list(Request $request){
         $salesTier = SalesTier::join('admins as a', 'a.id', '=', 'sales_tiers.added_by')
             ->leftjoin('admins as u', 'u.id', '=', 'sales_tiers.updated_by')
             ->join('tier_types as tt', 'tt.id', '=', 'sales_tiers.tier_type')
@@ -76,7 +75,7 @@ class AdminCommissionController extends Controller
         return  $datatable->make(true);
     }
 
-     public function editSalesTierView(Request $request){
+    public function editSalesTierView(Request $request){
 
         $salesTier = SalesTier::where('id',$request->id)->first();
         $tierType=TierType::where('id',$salesTier->tier_type)->first();
@@ -162,11 +161,11 @@ class AdminCommissionController extends Controller
         $all_users['pagination']['more'] = true;
 
         return view('admin.settings.commission.set_commission')->with(['user_ids' => $user_ids,'ids' => $ids, 'user_names' => $user_names,'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
-    } 
-    
+    }
+
     public function set_commission_submit(Request $request){
        // $user_ids = $ids;
-    
+
        $user_ids =explode(',' , $request->user_ids);
        $users='';
      //  $status = 0;
@@ -260,7 +259,7 @@ class AdminCommissionController extends Controller
         }
 
         //Sales Commissison End
-    
+
     }
     public function approveCommission($ids){
 
@@ -297,15 +296,15 @@ class AdminCommissionController extends Controller
                             }
                             $existing_commission_array[$user_Id][$index]['commission'] = $sale_commission_user->commission;
                         }
-                    } 
+                    }
                 }
             }
-            
+
         }
 
            // dd($existing_commission_array);
         return view('admin.settings.commission.approve_commission')->with(['user_ids' => $user_ids, 'ids' => $ids,'users'=>$users,'existing_commission_array' => $existing_commission_array]);
-    } 
+    }
 
     public function approve_commission_submit(Request $request){
         $user_ids =explode(',' , $request->user_ids);
@@ -314,7 +313,7 @@ class AdminCommissionController extends Controller
                 foreach($users as $user){
                    if($request->rates_status != null ){
                     if(array_key_exists($user->id, $request->rates_status)){
-                        if($request->rate_status[$user->id] != 1){
+                        if($request->rates_status[$user->id] != 1){
                             $sale_commission = SalesCommission::where('shipper_id', $user->id)->first();
                             if($sale_commission){
                                 $sale_commission_users = SalesCommissionUser::where('sales_commission_id', $sale_commission->id)->get();
@@ -329,23 +328,23 @@ class AdminCommissionController extends Controller
                                                 if($sale_commission_user->tier_type_id == 2){
                                                     SalesCommissionExternalUser::where('id', $sale_commission_user->user_id)->delete();
                                                 }
-                                                SalesCommissionUser::where('id', $sale_commission_user->id)->delete();                                        
+                                                SalesCommissionUser::where('id', $sale_commission_user->id)->delete();
                                             }
                                         }
                                     }
                                     if($total_commission > 0){
                                         $sale_commission->commission = $total_commission;
                                     }
-                                    $sale_commission->status = $request->rate_status[$user->id];
+                                    $sale_commission->status = $request->rates_status[$user->id];
                                     $sale_commission->save();
                                 }
                             }
                         }
                     }
-                   }   
+                   }
                 }
             }
-        
+
             return redirect(route('admin.accounts.active'))->with('success','Commission updated successfully.');
     }
 
@@ -370,7 +369,7 @@ class AdminCommissionController extends Controller
                   //$shipper_ids[$sales_commission->shipper_id]['shipper_id'] =   $sales_commission->shipper_id;
                   //$shipper_ids[$sales_commission->shipper_id]['commission'] =  $sales_commission_user->commission;
                   if(is_null($sales_commission)){
-                   
+
                   }
                   else{
                     $shipper_ids[]=$sales_commission;
@@ -380,7 +379,7 @@ class AdminCommissionController extends Controller
             $sum=0;
             $revenue=0;
             $shipment_booked=0;
-            $shipment_received=0; 
+            $shipment_received=0;
             $commission=0;
             $total_commission=0;
 
@@ -389,7 +388,7 @@ class AdminCommissionController extends Controller
                 $shipment_journey_received = Shipment::leftjoin('shipments_journey as s', 's.shipment_id', '=', 'shipments.id')->where('s.shipper_status_id', 2)->where('shipments.user_id',  $shippersId['shipper_id'])
                 ->whereBetween('shipments.created_at',[$first_day, $last_day])
                 ->select(DB::raw('count(shipments.id) AS received'))->first();
-        
+
 
                 $shipment_journey_booked = Shipment::where('user_id', $shippersId['shipper_id'])->where('shipper_status_id','!=', 17)
                 ->whereBetween('shipments.created_at',[$first_day, $last_day])
@@ -401,15 +400,15 @@ class AdminCommissionController extends Controller
                 ->where('sj.shipper_status_id',2)
                 ->whereBetween('shipments.created_at',[$first_day, $last_day])
                 ->select(DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.weight_charges, NULL)) as weight_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.cash_handling_charges, NULL)) as cash_handling_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.insurance_charges, NULL)) as insurance_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.return_charges, NULL)) as return_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.fuel_surcharge, NULL)) as fuel_surcharge'),DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.replacement_charges, NULL)) as replacement_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.try_and_buy_charges, NULL)) as try_and_buy_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.packaging_material_charges, NULL)) as packaging_material_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.intercept_charges, NULL)) as intercept_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.nsa_osa_charges, NULL)) as nsa_osa_charges'))->first();
-                
+
                 $sum=  $sale_person_shipment->weight_charges + $sale_person_shipment->cash_handling_charges + $sale_person_shipment->insurance_charges + $sale_person_shipment->return_charges + $sale_person_shipment->fuel_surcharge + $sale_person_shipment->replacement_charges + $sale_person_shipment->try_and_buy_charges + $sale_person_shipment->packaging_material_charges + $sale_person_shipment->intercept_charges + $sale_person_shipment->nsa_osa_charges + $sum;
                 $shipment_booked =  $shipment_journey_booked->booked + $shipment_booked;
                 $shipment_received= $shipment_received + $shipment_journey_received->received;
                 $commission = (($sale_person_shipment->weight_charges + $sale_person_shipment->cash_handling_charges + $sale_person_shipment->insurance_charges + $sale_person_shipment->return_charges + $sale_person_shipment->fuel_surcharge + $sale_person_shipment->replacement_charges + $sale_person_shipment->try_and_buy_charges + $sale_person_shipment->packaging_material_charges + $sale_person_shipment->intercept_charges + $sale_person_shipment->nsa_osa_charges) * $shippersId['commission'])/100;
-                
+
                 $total_commission = $total_commission + $commission;
             }
-            
+
             $stats['revenue']= $sum;
             $stats['booked']= $shipment_booked;
             $stats['received']= $shipment_received;
@@ -427,10 +426,10 @@ class AdminCommissionController extends Controller
 
     }
 
- public function dashboard_userwise_list(Request $request){
+    public function dashboard_userwise_list(Request $request){
     $userId = Auth::id();
     $date = Carbon::now();
-   
+
     if($request->get('search_shipper')){
         $sale_commission_users = SalesCommission::where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
     }
@@ -458,10 +457,10 @@ class AdminCommissionController extends Controller
      ->leftjoin('shipments_journey as sj','sj.shipment_id','=','sh.id')
 
      ->select(['u.id as account_id','u.name as shipper','s.commission as commission',DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.weight_charges, NULL)) as weight_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.cash_handling_charges, NULL)) as cash_handling_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.insurance_charges, NULL)) as insurance_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.return_charges, NULL)) as return_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.fuel_surcharge, NULL)) as fuel_surcharge'),DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.replacement_charges, NULL)) as replacement_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.try_and_buy_charges, NULL)) as try_and_buy_charges'),DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.packaging_material_charges, NULL)) as packaging_material_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.intercept_charges, NULL)) as intercept_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, sh.nsa_osa_charges, NULL)) as nsa_osa_charges'),
-           
+
                DB::raw('COUNT(IF(sj.shipper_status_id = 1, 1, NULL)) as booked'),
                 DB::raw('COUNT(IF(sj.shipper_status_id = 2, 1, NULL)) as received')
-             
+
      ])
 
     ->where('sales_commission_users.user_id',$userId)
@@ -473,11 +472,11 @@ class AdminCommissionController extends Controller
 
 
     $datatable = Datatables::of($commission_data)
-   
+
     ->addColumn('revenue',function($sale_tier_user){
         $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
         return $revenue;
-        
+
     })
     ->addColumn('commission_amount' ,function($sale_tier_user) {
         $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
@@ -488,11 +487,11 @@ class AdminCommissionController extends Controller
         // if($shipper = $request->get('search_shipper')){
         //     $datatable->where('sh.id', '=', $shipper);
         // }
-        
+
        return  $datatable->make(true);
  }
 
- public function dashboard_userwise_data(Request $request){
+    public function dashboard_userwise_data(Request $request){
     $date = Carbon::now();
     $userId = Auth::user()->id;
 
@@ -500,7 +499,7 @@ class AdminCommissionController extends Controller
 
     if($request->get('search_shipper')){
             $sale_commission_users = SalesCommission::where('shipper_id', $request->search_shipper)
-           
+
             ->pluck('shipper_id')->toArray();
     }
     else{
@@ -542,13 +541,13 @@ class AdminCommissionController extends Controller
                 $total_commission = $total_commission + $commission;
             }
         }
-    
+
         $stats['revenue'] = $total_revenue;
         $stats['commission'] = number_format($total_commission,2,'.','');
 
         return response()->json(['status' => 1, 'stats' => $stats]);
     }
-  
+
 }
 
     public function overall_commission_dashboard(){
@@ -585,6 +584,8 @@ class AdminCommissionController extends Controller
 
             $sales_tier = SalesTier::get();
             return view('admin.commission.overall_commission_dashboard')->with(['stats' => $stats, 'sales_tier' => $sales_tier, 'shippers' => $shippers, 'first_day' => $first_day, 'last_day' => $last_day, 'admins' => $admins]);
+        }else{
+            return redirect(route('admin.dashboard.index'))->with('error', 'No data found!');
         }
     }
 
