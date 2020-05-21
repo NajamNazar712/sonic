@@ -362,7 +362,7 @@ class ReturnController extends Controller
                     if ($parcel->booking_type_id != 4) {
                         ShipmentChargesController::return($shipment);
 
-                        if ($shipment->packaging_material_request != 1) {
+                        if ($parcel->packaging_material_request != 1) {
                             AdminFinanceController::add_payment($shipment, 1);
                         }
                     }
@@ -460,7 +460,7 @@ class ReturnController extends Controller
                 if ($parcel->booking_type_id != 4) {
                     ShipmentChargesController::return($request->shipment_id);
 
-                    if ($shipment->packaging_material_request != 1) {
+                    if ($parcel->packaging_material_request != 1) {
                         AdminFinanceController::add_payment($request->shipment_id, 1);
                     }
                 }
