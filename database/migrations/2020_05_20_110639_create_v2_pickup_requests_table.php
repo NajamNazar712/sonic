@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateV2PickupRequestsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('v2_pickup_requests', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('shipper_id');
+            $table->timestamp('requested_date');
+            $table->integer('pickup_address_id');
+            $table->integer('booked');
+            $table->integer('received')->nullable();
+            $table->integer('city_id');
+            $table->integer('status_id')->default(1);
+            $table->integer('rider_status')->default(1);
+            $table->integer('attempts')->nullable();
+            $table->integer('current_rider_id');
+            $table->integer('last_rider_id');
+            $table->integer('last_updated_by');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('v2_pickup_requests');
+    }
+}
