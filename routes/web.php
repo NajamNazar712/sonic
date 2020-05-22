@@ -595,6 +595,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\AdminPickupsController@quick_arrival_of_shipments_store')->name('store');
         });
     });
+
+    Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pending_index')->name('index');
+            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pending_list')->name('list');
+
+        });
+    });
     Route::prefix('delivery')->name('delivery.')->group(function(){
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('','Admins\DeliveryController@pending_delivery_index')->name('index');
