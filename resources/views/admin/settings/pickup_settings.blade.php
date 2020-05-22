@@ -57,6 +57,18 @@
                                             </div>
                                         </div>
 
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Global Rider ID</span>
+                                                </div>
+                                                <input type="text" name="global_rider_id" class="form-control global_rider_id" placeholder="GLobal Rider ID*" data-rule-required="true" data-msg-required="Global Rider ID is required" value="{{ $global_rider_id }}" data-rule-min="0" data-msg-min="Global Rider Id can not be less than 0">
+                                                <div class="input-group-append">
+                                                    <!-- <span class="input-group-text">hours</span> -->
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
                                 </div>
@@ -78,7 +90,7 @@
 
     <script>
         $(document).ready(function() {
-            $('#settings_form input.request_cut_off_time, #settings_form input.arrival_cut_off_time, #settings_form input.rider_assignment_off_time').inputmask({
+            $('#settings_form input.request_cut_off_time, #settings_form input.arrival_cut_off_time, #settings_form input.rider_assignment_off_time, #settings_form input.global_rider_id').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false

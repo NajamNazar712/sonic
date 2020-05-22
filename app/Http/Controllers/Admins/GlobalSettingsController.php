@@ -2292,8 +2292,16 @@ class GlobalSettingsController extends Controller
         else {
             $rider_assignment_cut_off_time = 0;
         }
+        $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
-        return view('admin.settings.pickup_settings')->with(['pickup_request_cut_off_time' => $pickup_request_cut_off_time, 'pickup_arrival_cut_off_time' => $pickup_arrival_cut_off_time, 'rider_assignment_cut_off_time' => $rider_assignment_cut_off_time]);
+        if ($settings) {
+            $global_rider_id = $settings->setting_value;
+        }
+        else {
+            $global_rider_id = 0;
+        }
+
+        return view('admin.settings.pickup_settings')->with(['pickup_request_cut_off_time' => $pickup_request_cut_off_time, 'pickup_arrival_cut_off_time' => $pickup_arrival_cut_off_time, 'rider_assignment_cut_off_time' => $rider_assignment_cut_off_time, 'global_rider_id' => $global_rider_id]);
     }
 
     public function pickup_cut_off_settings_store(Request $request) {
@@ -2341,6 +2349,21 @@ class GlobalSettingsController extends Controller
         $rider_assignment->setting_value = $request->rider_assignment_off_time;
 
         $rider_assignment->save();
+
+        $global_rider = GlobalSettings::where('type', 'global_rider_id');
+
+        if ($global_rider->exists()) {
+            $global_rider = $global_rider->first();
+        }
+        else {
+            $global_rider = new GlobalSettings();
+
+            $global_rider->type = 'global_rider_id';
+        }
+
+        $global_rider->setting_value = $request->global_rider_id;
+
+        $global_rider->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
