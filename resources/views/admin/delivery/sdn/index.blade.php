@@ -423,7 +423,7 @@
                     { data:'adjustment_date' ,name: 'station_deposit_notes.adjustment_date', class: 'align-middle adjustment_date'},
                     { data:'sdn_adjustment_amount' ,name: 'station_deposit_notes.adjustment_amount', class: 'align-middle adjustment_amount'},
                     { data:'adjustment_ref' ,name: 'station_deposit_notes.adjustment_ref', class: 'align-middle adjustment_ref',orderable: false, searchable: false},
-                    { data:'difference_amount' ,name: 'difference_amount', class: 'align-middle difference_amount'},
+                    { data:'difference_amount' ,name: 'difference_amount', class: 'align-middle difference_amount',orderable: false, searchable: false},
                     { data:'deposit_slip' ,name: 'deposit_slip', class: 'align-middle deposit_slip',orderable: false, searchable: false},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
