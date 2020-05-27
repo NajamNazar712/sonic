@@ -5515,7 +5515,7 @@ use Yajra\Datatables\Datatables;
 
             $datatable = Datatables::of($shipments)
                 ->addColumn('tracking_number_link', function ($shipments) {
-                    $route = route('cod.tracking.index');
+                    $route = route('admin.tracking.index');
                     return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
                 })
                 ->editColumn('phone',function ($shipments){

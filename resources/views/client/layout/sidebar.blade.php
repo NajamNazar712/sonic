@@ -57,6 +57,10 @@
                 <li class=" nav-item"><a href="{{ route('cod.packaging.requests.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-sticky-note-o"></i>Packaging Requests</span></a></li>
             @endif
 
+            @if (session('user_type') == 1 || in_array(12, session('permissions')))
+                <li class=" nav-item"><a href="{{ route('cod.pickup.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-sticky-note-o"></i>Pickup</span></a></li>
+            @endif
+
             @if (session('user_type') == 1 || in_array(5, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Finance</span></a>
                     <ul class="menu-content">
