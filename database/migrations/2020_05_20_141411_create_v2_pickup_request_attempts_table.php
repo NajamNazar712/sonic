@@ -23,6 +23,7 @@ class CreateV2PickupRequestAttemptsTable extends Migration
             $table->string('trax_remarks');
             $table->string('shipper_remarks');
             $table->timestamp('attempt_date');
+            $table->integer('assigned_by');
             $table->timestamps();
         });
     }

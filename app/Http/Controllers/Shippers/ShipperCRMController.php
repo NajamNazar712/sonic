@@ -19,6 +19,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -217,6 +218,51 @@ class ShipperCRMController extends Controller
                     return ['status' => 1, 'success' => 'Request(s) successfully added'];
                 }else{
                     return ['status' => 0, 'error' => 'No Payment selected!'];
+                }
+            }
+        }
+        elseif ($request->has('pickup_request')) {
+            if($request->pickup_request == 1){
+                $pickup_request_ids = $request->pickup_request_ids;
+                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                    $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
+                }
+                else{
+                    if($complaint_id == 26){
+                        $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
+                    }
+                }
+                if(!empty($pickup_request_ids)){
+                    foreach ($pickup_request_ids as $pickup_request_id){
+                        $pickup_request_shipment = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->first();
+                        $shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
+                        $shipment_id = $shipment->id;
+                        $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id)->first();
+                        if($is_shipment){
+                            if($is_shipment->case_nature_id != $nature_id){
+                                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                }
+                                else{
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                }
+                            }else{
+
+                                $present_shipments[] = $shipment->tracking_number;
+                                $flag = true;
+                            }
+                        }else{
+                            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                            }
+                            else{
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            }
+                        }
+                    }
+                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                }else{
+                    return ['status' => 0, 'error' => 'No Pickup Request selected!'];
                 }
             }
         }
