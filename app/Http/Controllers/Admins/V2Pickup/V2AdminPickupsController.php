@@ -43,12 +43,16 @@ class V2AdminPickupsController extends Controller
     }
 
     public function pending_list(Request $request) {
-        $today = Carbon::now()->startOfDay();
 
         $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
             ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
             ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
-            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.bookings', 'v2_pickup_requests.booked as bookings_link' , 'v2_pickup_requests.pending_bookings','v2_pickup_requests.pending_bookings as pending_bookings_link', 'v2_pickup_requests.total_estimated_weight', 'v2_pickup_requests.pickup_type', 'v2_pickup_requests.pickup_date', 'usi.vendor', 'r.name as rider', 'usi.created_at as pickup_address_created_at')
+            ->leftJoin('v2_rider_pickups as rp', function ($join) {
+                $join->on('rp.pickup_request_id', '=', 'v2_pickup_requests.id')
+                    ->where('rp.pickup_request_id', '=',
+                        DB::raw('(select sum(shipments) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v2_pickup_requests.id)'));
+            })
+            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' , 'v2_pickup_requests.received', 'usi.vendor')
             ->where('v2_pickup_requests.status_id', '!=', 4);
 
         if (session('role_id') != 1) {
@@ -73,32 +77,9 @@ class V2AdminPickupsController extends Controller
             ->editColumn('pickup_request_id', function ($pickup_requests) {
                 return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
             })
-
-            ->editColumn('total_estimated_weight', '{{ floatval($total_estimated_weight) }}')
-            ->editColumn('pickup_type', function($pickup_request) {
-                return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
-            })
-            ->filterColumn('pickup_type', function($query, $keyword) {
-                if($keyword == 0 || $keyword == 1){
-                    $query->where('pickup_requests.pickup_type','=',$keyword);
-                }else{
-                    $query->whereRaw('false');
-                }
-            })
-            ->editColumn('pickup_date', function($pickup_request) {
-                return Carbon::parse($pickup_request->pickup_date)->format('Y-m-d');
-            })
             ->editColumn('bookings_link', function($pickup_request) {
-                if ($pickup_request->bookings != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->bookings . '</button>';
-                }
-                else {
-                    return 0;
-                }
-            })
-            ->editColumn('pending_bookings_link', function($pickup_request) {
-                if ($pickup_request->pending_bookings != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->pending_bookings . '</button>';
+                if ($pickup_request->booked != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->booked . '</button>';
                 }
                 else {
                     return 0;

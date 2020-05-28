@@ -55,23 +55,23 @@
                                     <th class="border-primary border-darken-1">Pickup Request ID</th>
                                     <th class="border-primary border-darken-1">Requested Date</th>
                                     <th class="border-primary border-darken-1">Shipment(s) Booked</th>
-                                    <th class="border-primary border-darken-1">Shipment(s) Rider Picked</th>
+{{--                                    <th class="border-primary border-darken-1">Shipment(s) Rider Picked</th>--}}
                                     <th class="border-primary border-darken-1">Shipment(s) Received</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Contact Person</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
                                     <th class="border-primary border-darken-1">Contact No(s).</th>
                                     <th class="border-primary border-darken-1">Address</th>
-                                    <th class="border-primary border-darken-1">City</th>
-                                    <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Trax Reason</th>
-                                    <th class="border-primary border-darken-1">Trax Remark(s)</th>
-                                    <th class="border-primary border-darken-1">Shipper Remark(s)</th>
-                                    <th class="border-primary border-darken-1">Rider Status</th>
-                                    <th class="border-primary border-darken-1">Attempt Date/Time</th>
-                                    <th class="border-primary border-darken-1">Attempt(s)</th>
-                                    <th class="border-primary border-darken-1">Last Rider</th>
-                                    <th class="border-primary border-darken-1">Current Rider</th>
+{{--                                    <th class="border-primary border-darken-1">City</th>--}}
+{{--                                    <th class="border-primary border-darken-1">Status</th>--}}
+{{--                                    <th class="border-primary border-darken-1">Trax Reason</th>--}}
+{{--                                    <th class="border-primary border-darken-1">Trax Remark(s)</th>--}}
+{{--                                    <th class="border-primary border-darken-1">Shipper Remark(s)</th>--}}
+{{--                                    <th class="border-primary border-darken-1">Rider Status</th>--}}
+{{--                                    <th class="border-primary border-darken-1">Attempt Date/Time</th>--}}
+{{--                                    <th class="border-primary border-darken-1">Attempt(s)</th>--}}
+{{--                                    <th class="border-primary border-darken-1">Last Rider</th>--}}
+{{--                                    <th class="border-primary border-darken-1">Current Rider</th>--}}
                                 </tr>
                                 </thead>
                             </table>
@@ -340,20 +340,18 @@
                 {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                 {data: 'pickup_request_id', name: 'v2_pickup_requests.id', class: 'align-middle pickup_request_id'},
-                {data: 'pickup_date', name: 'v2_pickup_requests.pickup_date', class: 'align-middle pickup_date'},
-                {data: 'requested_date', name: 'v2_pickup_requests.requested_date', class: 'align-middle requested_date'},
+                {data: 'requested_date', name: 'v2_pickup_requests.created_at', class: 'align-middle requested_date'},
+                {data: 'booked', name: 'v2_pickup_requests.booked', class: 'align-middle booked'},
+                {data: 'received', name: 'v2_pickup_requests.received', class: 'align-middle received'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                 {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
                 {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
                 {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
-                {data: 'city', name: 'ci.name', class: 'align-middle city'},
-                {data: 'rider', name: 'r.name', class: 'align-middle rider'},
-                {data: 'bookings_link', name: 'v2_pickup_requests.booked', class: 'align-middle bookings_link text-center'},
-                {data: 'pending_bookings_link', name: 'v2_pickup_requests.pending_bookings', class: 'align-middle pending_bookings_link'},
-                {data: 'total_estimated_weight', name: 'v2_pickup_requests.total_estimated_weight', class: 'align-middle total_estimated_weight'},
-                {data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},
-                {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                // {data: 'city', name: 'ci.name', class: 'align-middle city'},
+                // {data: 'rider', name: 'r.name', class: 'align-middle rider'},
+                // {data: 'bookings_link', name: 'v2_pickup_requests.booked', class: 'align-middle bookings_link text-center'},
+                // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
             ],
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
