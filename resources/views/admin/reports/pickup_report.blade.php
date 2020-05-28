@@ -56,7 +56,7 @@
                                     <div class="form-group pb-1">
                                         <select name="cut_off_time" class="select2" id="cut_off_time" data-rule-required="true" data-msg-required="Shipper is required">
                                             
-                                        <option value="">Select Me</option>
+                                            <option value="">Select Me</option>
                                         
                                         </select>
                                     </div>
@@ -364,10 +364,44 @@
                 placeholder: 'Select Category',
                 allowClear:true
             });
-            $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_form #cut_off_time').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Shipper',
+                placeholder: 'Select Cut-Off-Time',
                 allowClear:true
+            });
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#from_date_root').css('top','40px');
+                },
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#to_date_root').css('top', '40px');
+                },
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                    }
+                }
             });
            
            
