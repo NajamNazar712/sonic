@@ -13,6 +13,10 @@ use App\Http\Models\RiderPickup;
 use App\Http\Models\RiderPickupShipment;
 use App\Http\Models\PickupAction;
 use App\Http\Models\RiderPickupActionLog;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 
 use Auth;
 
@@ -123,14 +127,14 @@ class RiderPickupsController extends Controller {
         }
 
 
-    	$rider_pickups = RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
-    	->join('pickup_notes as pn', 'rider_pickups.pickup_note_id', 'pn.id')
+    	$rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
+    	->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
     	->join('riders as r', 'pn.rider_id', 'r.id')
-    	->join('pickup_requests as pr', 'rider_pickups.pickup_request_id', 'pr.id')
+    	->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
     	->join('users as u', 'pr.shipper_id', 'u.id')
     	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
     	->join('cities as c', 'usi.city_id', 'c.id')
-    	->select('rider_pickups.id', 'rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'rider_pickups.pickup_type', 'rider_pickups.start_location_latitude', 'rider_pickups.start_location_longitude', 'rider_pickups.actual_location_latitude', 'rider_pickups.actual_location_longitude', 'rider_pickups.distance_from_start_to_actual', 'rider_pickups.current_location_latitude', 'rider_pickups.current_location_longitude', 'rider_pickups.distance_from_current_to_actual', 'rider_pickups.shipments', 'pnpr.name as reason', 'rider_pickups.picture_path', 'rider_pickups.pickup_note_id', 'rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked);
+    	->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked);
         
         $datatables = Datatables::of($rider_pickups)
         ->editColumn('pickup_note_id', function ($rider_pickup) {

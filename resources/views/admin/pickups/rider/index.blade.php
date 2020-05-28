@@ -174,16 +174,22 @@
      		   var switchery = new Switchery(elem);
 
 				var switchStatus = false;
-				
+				var tableUrl='{{ route('admin.pickups.rider.v2_list') }}';
+				console.log(tableUrl);
+
 				$("#old_rider_pickup_action_log").on('change', function() {
 					if ($(this).is(':checked')) {
 						switchStatus = $(this).is(':checked');
 						console.log(switchStatus);
+						tableUrl='{{ route('admin.pickups.rider.list') }}';
+						console.log(tableUrl);
 					
 					}
 					else {
 					switchStatus = $(this).is(':checked');
 					console.log(switchStatus);
+					tableUrl='{{ route('admin.pickups.rider.v2_list') }}';
+					console.log(tableUrl);
 					
 				
 					}
@@ -208,7 +214,7 @@
 				},
 				serverSide: true,
 				ajax: {
-                    url: '{{ route('admin.pickups.rider.list') }}',
+                    url: tableUrl,
                     data: function (d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
