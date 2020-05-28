@@ -177,14 +177,15 @@ class RiderPickupsController extends Controller {
     // 	return $datatables->make(true);
     // }
     public function pickups_action_log_list(Request $request) {
-    	$rider_pickup_action_logs = V2RiderPickupActionLog::join('pickup_actions as pa', 'v2_rider_pickup_action_logs.type_id', 'pa.id')
+        $rider_pickup_action_logs = V2RiderPickupActionLog::join('pickup_actions as pa', 'v2_rider_pickup_action_logs.type_id', 'pa.id')
+        ->join('v2_pickup_notes as pn', 'v2_rider_pickup_action_logs.id', 'pn.pickup_request_id')
         ->join('v2_pickup_requests as pr', 'v2_rider_pickup_action_logs.pickup_request_id', 'pr.id')
         ->join('v2_pickup_request_attempts as pra', 'pra.pickup_request_id', 'v2_rider_pickup_action_logs.id')
         ->join('users as u', 'pr.shipper_id', 'u.id')
         ->join('riders as r', 'pr.current_rider_id', 'r.id')
     	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
     	->join('cities as c', 'usi.city_id', 'c.id')
-    	->select('v2_rider_pickup_action_logs.id', 'v2_rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'v2_rider_pickup_action_logs.pickup_request_id','pr.created_at','pra.assigned_by','pr.city_id as city_id','pr.current_rider_id');
+    	->select('v2_rider_pickup_action_logs.id', 'v2_rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper','pn.id as pickup_note_id', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'v2_rider_pickup_action_logs.pickup_request_id','pr.created_at','pra.assigned_by','pr.city_id as city_id','pr.current_rider_id');
 
     	$datatables = Datatables::of($rider_pickup_action_logs)
         // ->editColumn('pickup_note_id', function ($rider_pickup_action_log) {
