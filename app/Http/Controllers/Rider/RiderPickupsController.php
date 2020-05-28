@@ -109,6 +109,82 @@ class RiderPickupsController extends Controller {
         }
     	return $datatables->make(true);
     }
+    public function pickups_list_v2(Request $request) {
+
+        
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `v2_pickup_requests` AS `rp1` where `rp1`.`status_id` = 2 and `rp1`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_picked`');
+            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `v2_pickup_requests` AS `rp` where `rp`.`status_id` = 3 and `rp`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_not_picked`');
+        }else{
+            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `v2_pickup_requests` AS `rp1` where `rp1`.`status_id` = 2) AS `pickup_picked`');
+            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `v2_pickup_requests` AS `rp` where `rp`.`status_id` = 3) AS `pickup_not_picked`');
+        }
+
+
+    	$rider_pickups = RiderPickup::leftjoin('pickup_not_pick_reasons as pnpr', 'rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
+    	->join('pickup_notes as pn', 'rider_pickups.pickup_note_id', 'pn.id')
+    	->join('riders as r', 'pn.rider_id', 'r.id')
+    	->join('pickup_requests as pr', 'rider_pickups.pickup_request_id', 'pr.id')
+    	->join('users as u', 'pr.shipper_id', 'u.id')
+    	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
+    	->join('cities as c', 'usi.city_id', 'c.id')
+    	->select('rider_pickups.id', 'rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'rider_pickups.pickup_type', 'rider_pickups.start_location_latitude', 'rider_pickups.start_location_longitude', 'rider_pickups.actual_location_latitude', 'rider_pickups.actual_location_longitude', 'rider_pickups.distance_from_start_to_actual', 'rider_pickups.current_location_latitude', 'rider_pickups.current_location_longitude', 'rider_pickups.distance_from_current_to_actual', 'rider_pickups.shipments', 'pnpr.name as reason', 'rider_pickups.picture_path', 'rider_pickups.pickup_note_id', 'rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked);
+        
+        $datatables = Datatables::of($rider_pickups)
+        ->editColumn('pickup_note_id', function ($rider_pickup) {
+            return str_pad($rider_pickup->pickup_note_id, 6, '0', STR_PAD_LEFT);
+        })
+        ->editColumn('pickup_request_id', function ($rider_pickup) {
+            return str_pad($rider_pickup->pickup_request_id, 6, '0', STR_PAD_LEFT);
+        })
+        ->editColumn('pickup_type', function ($rider_pickup) {
+			if ($rider_pickup->pickup_type == 0) {
+				return 'Not Pick';
+			}
+			else {
+				return 'Pick';
+			}
+		})
+		->editColumn('distance_from_start_to_actual', function ($rider_pickup) {
+            $distance_from_start_to_actual = $rider_pickup->distance_from_start_to_actual;
+
+            if ($distance_from_start_to_actual == 0) {
+                $distance_from_start_to_actual = 0;
+            }
+
+			return '<a class="btn btn-sm btn-outline-info align-middle" href="http://maps.google.com/maps?saddr=' . $rider_pickup->start_location_latitude . ',' . $rider_pickup->start_location_longitude . '&daddr=' . $rider_pickup->actual_location_latitude . ',' . $rider_pickup->actual_location_longitude . '" target="_blank">' . $distance_from_start_to_actual . '</a>';
+		})
+        ->editColumn('distance_from_current_to_actual', function ($rider_pickup) {
+            $distance_from_current_to_actual = $rider_pickup->distance_from_current_to_actual;
+
+            if ($distance_from_current_to_actual == 0) {
+                $distance_from_current_to_actual = 0;
+            }
+
+            if ($rider_pickup->current_location_latitude && $rider_pickup->current_location_longitude) {
+                return '<a class="btn btn-sm btn-outline-info align-middle" href="http://maps.google.com/maps?saddr=' . $rider_pickup->current_location_latitude . ',' . $rider_pickup->current_location_longitude . '&daddr=' . $rider_pickup->actual_location_latitude . ',' . $rider_pickup->actual_location_longitude . '" target="_blank">' . $distance_from_current_to_actual . '</a>';
+            }
+            else {
+                return $distance_from_current_to_actual;
+            }
+        })
+		->editColumn('picture_path', function ($rider_pickup) {
+			if ($rider_pickup->pickup_type == 0) {
+				return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('storage/' . $rider_pickup->picture_path) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+			}
+            else {
+                return '';
+            }
+		});
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rider_pickups->whereBetween('rider_pickups.created_at', [$from,$to]);
+        }
+    	return $datatables->make(true);
+    }
 
     public function pickups_shipments(Request $request) {
         $rider_pickup_shipments = RiderPickupShipment::where('rider_pickup_id', $request->rider_pickup_id);
