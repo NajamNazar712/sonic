@@ -287,16 +287,6 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-												<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-													<span class="la la-calendar-o"></span>
-												</span>
-                                            </div>
-
-                                            <input type="text" name="pickup_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="pickup_date" placeholder="Pickup Date*" data-rule-required="true" data-msg-required="Pickup Date is required">
-                                        </div>
-
                                         <div class="form-group">
                                             <textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters" rows="5"></textarea>
                                         </div>
@@ -914,22 +904,6 @@
 
             $('#package_type').checkboxpicker();
             var current_date = '{{$date}}';
-            $('#pickup_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                min: '{{ Carbon\Carbon::now() }}',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#pickup_date_root').css('top', '-350px');
-                },
-                onSet: function(context) {
-                    $('#pickup_date').valid();
-                }
-            });
-            $('#pickup_date').pickadate('picker').set({'select': new Date(current_date)},{muted: true});
             $('#replacement_product_type').select2({
                 width: '100%',
                 placeholder: 'Product Type*'
