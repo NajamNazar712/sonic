@@ -16,10 +16,22 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
+
+							<div class="row justify-content-center">
+                                <div class="col-3">
+                                    <label class="font-medium-2 font-weight-bold block">Old Rider Pickup Action Logs</label>
+                                    <div class="form-group">
+                                        <label for="old_rider_pickup_action_log" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                        <input type="checkbox" name="old_rider_pickup_action_log" id="old_rider_pickup_action_log" class=" old_rider_pickup_action_log" data-size="sm" data-switchery="true">
+                                        <label for="old_rider_pickup_action_log" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+
 							<div id="search_form" class="row mb-2 justify-content-center">
 			                    <div class="col-4">
 			                        <fieldset class="form-group">
-			                            <input type="text" class="form-control" name="search_pn_no" id="search_pn_no" placeholder="Search Pickup Request Number">
+			                            <input type="text" class="form-control" name="search_pn_no" id="search_pn_no" placeholder="Enter Pickup Number">
 			                        </fieldset>
 			                    </div>
 			                    <div class="col-4">
@@ -166,7 +178,30 @@
                 }
             });
 
+			var elem = document.querySelector('#old_rider_pickup_action_log');
+     		   var switchery = new Switchery(elem);
 
+				var switchStatus = false;
+				var tableUrl='{{ route('admin.pickups.rider.action_log.v2_list') }}';
+				console.log(tableUrl);
+
+				$("#old_rider_pickup_action_log").on('change', function() {
+					if ($(this).is(':checked')) {
+						switchStatus = $(this).is(':checked');
+						console.log(switchStatus);
+						tableUrl='{{ route('admin.pickups.rider.action_log.list') }}';
+						console.log(tableUrl);
+					}
+					else {
+					switchStatus = $(this).is(':checked');
+					console.log(switchStatus);
+					tableUrl='{{ route('admin.pickups.rider.action_log.v2_list') }}';
+					console.log(tableUrl);
+				
+					}
+				});
+	
+			
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				buttons: [{
@@ -185,7 +220,7 @@
                 },
 				serverSide: true,
 				ajax: {
-                    url: '{{ route('admin.pickups.rider.action_log.list') }}',
+                    url: tableUrl,
                     data: function (d) {
                         d.search_pn_no = $('#search_pn_no').val();
                         d.search_rider = $('#search_rider').val();
