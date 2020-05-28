@@ -16,7 +16,6 @@ class CreateV2PickupReportSummariesTable extends Migration
         Schema::create('v2_pickup_report_summaries', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamp('date');
-            $table->integer('pickup_request_id');
             $table->integer('total');
             $table->integer('pending_operations');
             $table->integer('pending_sales');
