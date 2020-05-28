@@ -25,10 +25,18 @@
                                                 <table class="table mb-0">
                                                     <tbody>
                                                     @foreach($legends as $legend)
-                                                        <tr>
-                                                            <td><button type="button" class="btn btn-sm round btn-min-width" style="background-color: {{$legend->color}}" disabled></button></td>
-                                                            <td>{{ $legend->name }}</td>
-                                                        </tr>
+                                                        @if($legend->id == 7)
+                                                            <tr>
+                                                                <td><button type="button" class="btn btn-sm round btn-min-width text-white" style="background-color: {{$legend->color}}" disabled>{{$cut_off_time}}</button></td>
+                                                                <td>{{ $legend->name }}</td>
+                                                            </tr>
+                                                            @else
+                                                            <tr>
+                                                                <td><button type="button" class="btn btn-sm round btn-min-width p-1" style="background-color: {{$legend->color}}" disabled> </button></td>
+                                                                <td class="align-middle">{{ $legend->name }}</td>
+                                                            </tr>
+                                                            @endif
+
                                                     @endforeach
                                                     </tbody>
                                                 </table>
