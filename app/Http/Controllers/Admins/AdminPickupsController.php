@@ -95,7 +95,6 @@ class AdminPickupsController extends Controller
 
         $pickup_request->shipper_id = $shipment->user_id;
         $pickup_request->pickup_address_id = $shipment->pickup_address_id;
-        $pickup_request->requested_date = Carbon::now();
         $pickup_request->city_id = $shipment->pickup_address->city_id;
         $pickup_request->booked = $shipments_count + 1;
         $pickup_request->save();
