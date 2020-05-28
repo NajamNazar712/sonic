@@ -123,7 +123,7 @@ class RiderPickupsController extends Controller {
         }
 
 
-    	$rider_pickups = RiderPickup::leftjoin('pickup_not_pick_reasons as pnpr', 'rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
+    	$rider_pickups = RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
     	->join('pickup_notes as pn', 'rider_pickups.pickup_note_id', 'pn.id')
     	->join('riders as r', 'pn.rider_id', 'r.id')
     	->join('pickup_requests as pr', 'rider_pickups.pickup_request_id', 'pr.id')
