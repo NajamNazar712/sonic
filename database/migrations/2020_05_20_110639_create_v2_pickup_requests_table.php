@@ -20,7 +20,7 @@ class CreateV2PickupRequestsTable extends Migration
             $table->integer('pickup_address_id');
             $table->integer('booked');
             $table->integer('received')->nullable();
-            $table->integer('total_estimated_weight')->nullable();
+            $table->decimal('total_estimated_weight', 16, 2)->nullable();
             $table->integer('pickup_type');
             $table->integer('city_id');
             $table->integer('status_id')->default(1);

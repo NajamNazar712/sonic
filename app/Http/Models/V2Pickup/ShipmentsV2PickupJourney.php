@@ -1,6 +1,6 @@
 <?php
 
-namespace App\http\Models;
+namespace App\http\Models\V2Pickup;
 
 use Illuminate\Database\Eloquent\Model;
 
