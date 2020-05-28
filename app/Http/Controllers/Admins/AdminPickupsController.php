@@ -6,8 +6,8 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\http\Models\DefaultWeight;
-use App\http\Models\Pickup\V2PickupRequest;
-use App\http\Models\Pickup\V2PickupRequestAssignedShipment;
+use App\http\Models\V2Pickup\V2PickupRequest;
+use App\http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
@@ -109,10 +109,10 @@ class AdminPickupsController extends Controller
 
       ShipmentsPickupJourneyController::add($shipment_id, 1, NULL, $pickup_request->id);
 
-      $pickup_request_assigned_shipment = V2PickupRequestAssignedShipment::where('shipment_id', $shipment_id);
+      $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $shipment_id);
 
       if (!$pickup_request_assigned_shipment->exists()) {
-        $pickup_request_assigned_shipment = new V2PickupRequestAssignedShipment();
+        $pickup_request_assigned_shipment = new V2PickupRequestShipment();
 
         $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
         $pickup_request_assigned_shipment->shipment_id = $shipment_id;

@@ -27,7 +27,7 @@
                                                     @foreach($legends as $legend)
                                                         @if($legend->id == 7)
                                                             <tr>
-                                                                <td><button type="button" class="btn btn-sm round btn-min-width text-white" style="background-color: {{$legend->color}}" disabled>{{$cut_off_time}}</button></td>
+                                                                <td><button type="button" class="btn btn-sm round btn-min-width text-white" style="background-color: {{$legend->color}}" disabled>{{$cut_off_time}}:00</button></td>
                                                                 <td class="align-middle">{{ $legend->name }}</td>
                                                             </tr>
                                                             @else
