@@ -38,23 +38,23 @@
                                     <div class="form-group pb-1">
                                         <select name="origin" class="select2" id="origin" data-rule-required="true" data-msg-required="Shipper is required">
                                         @foreach($origins as $origin)
-                                        <option value="{{ $origin->id }}">{{ $origin->name }}</option>
+                                            <option value="{{ $origin->id }}">{{ $origin->name }}</option>
                                         @endforeach
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group pb-1">
-                                        <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
-                                            
-                                        <option value="">Select Me</option>
-                                        
+                                        <select name="category" class="select2" id="category" data-rule-required="true" data-msg-required="Shipper is required">
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->name }}">{{ $category->name }}</option>
+                                        @endforeach
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group pb-1">
-                                        <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
+                                        <select name="cut_off_time" class="select2" id="cut_off_time" data-rule-required="true" data-msg-required="Shipper is required">
                                             
                                         <option value="">Select Me</option>
                                         
@@ -357,6 +357,11 @@
             $('#search_form #origin').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Origin',
+                allowClear:true
+            });
+            $('#search_form #category').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Category',
                 allowClear:true
             });
             $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
