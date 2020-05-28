@@ -87,7 +87,7 @@
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Type</th>
-										<th class="border-primary border-darken-1">Pickup Note ID</th>
+										<!-- <th class="border-primary border-darken-1">Pickup Note ID</th> -->
 										<th class="border-primary border-darken-1">Pickup Request ID</th>
 									</tr>
 								</thead>
@@ -203,7 +203,7 @@
 					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 					{data: 'city', name: 'c.name', class: 'align-middle city'},
 					{data: 'type', name: 'rider_pickup_action_logs.type_id', class: 'align-middle type'},
-					{data: 'pickup_note_id', name: 'rider_pickup_action_logs.pickup_note_id', class: 'align-middle pickup_note_id'},
+					// {data: 'pickup_note_id', name: 'rider_pickup_action_logs.pickup_note_id', class: 'align-middle pickup_note_id'},
 					{data: 'pickup_request_id', name: 'rider_pickup_action_logs.pickup_request_id', class: 'align-middle pickup_request_id'}
 				],
 				initComplete: function() {
