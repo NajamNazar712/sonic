@@ -24,6 +24,7 @@ class CreateV2PickupReportsTable extends Migration
             $table->integer('difference_shipments');
             $table->integer('department_id');
             $table->integer('legend_id');
+            $table->integer('category_id');
             $table->timestamps();
         });
     }
