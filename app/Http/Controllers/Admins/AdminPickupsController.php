@@ -69,6 +69,9 @@ class AdminPickupsController extends Controller
 
       $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->where('rider_status', 1)->where('status_id', 1);
 
+      $shipments_count = 0;
+      $shipments = array();
+
       if ($pickup_request->exists()) {
         $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
 
@@ -93,8 +96,6 @@ class AdminPickupsController extends Controller
         $existing_pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->orderBy('id', 'DESC')->first();
         if($existing_pickup_request){
             if($existing_pickup_request->status_id == 4 && $existing_pickup_request->renew == 0){
-                $shipments = array();
-                $shipments_count = 0;
                 $existing_pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $existing_pickup_request->id)->get();
                 if($existing_pickup_request_shipments){
                     foreach ($existing_pickup_request_shipments as $pickup_request_shipment){
