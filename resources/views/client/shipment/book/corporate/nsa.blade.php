@@ -36,7 +36,6 @@
                                             <th>Replacement Item Product Type ID</th>
                                             <th>Replacement Item Description</th>
                                             <th>Replacement Item Quantity</th>
-                                            <th>Pickup Date (YYYY-MM-DD)</th>
                                             <th>Special Instructions</th>
                                             <th>Estimated Weight (kg)</th>
                                             <th>Amount</th>
@@ -70,7 +69,6 @@
                                                     <td><input type="text" name="form[{{$no}}][replacement_item_product_type_id]" class="form-control number" value="{{$ro['replacement_item_product_type_id']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][replacement_item_description]" class="form-control text" value="{{$ro['replacement_item_description']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][replacement_item_quantity]" class="form-control number" value="{{$ro['replacement_item_quantity']}}" readonly="readonly"></td>
-                                                    <td><input type="text" name="form[{{$no}}][pickup_date]" class="form-control date" value="{{$ro['pickup_date']}}" readonly="readonly"></td>
                                                     <td><textarea type="text" name="form[{{$no}}][special_instructions]" class="form-control text" readonly="readonly">{{$ro['special_instructions']}}</textarea></td>
                                                     <td><input type="text" name="form[{{$no}}][estimated_weight]" class="form-control number" value="{{$ro['estimated_weight']}}" readonly="readonly"></td>
                                                     <input type="hidden" name="form[{{$no}}][shipping_mode_id]" value="{{$ro['shipping_mode_id']}}">
@@ -98,7 +96,6 @@
                                                     <input type="hidden" name="form[{{$no}}][replacement_item_product_type_id]" value="{{$ro['replacement_item_product_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][replacement_item_description]" value="{{$ro['replacement_item_description']}}">
                                                     <input type="hidden" name="form[{{$no}}][replacement_item_quantity]" value="{{$ro['replacement_item_quantity']}}">
-                                                    <input type="hidden" name="form[{{$no}}][pickup_date]" value="{{$ro['pickup_date']}}">
                                                     <input type="hidden" name="form[{{$no}}][special_instructions]" value="{{$ro['special_instructions']}}">
                                                     <input type="hidden" name="form[{{$no}}][estimated_weight]" value="{{$ro['estimated_weight']}}">
                                                     <input type="hidden" name="form[{{$no}}][shipping_mode_id]" value="{{$ro['shipping_mode_id']}}">

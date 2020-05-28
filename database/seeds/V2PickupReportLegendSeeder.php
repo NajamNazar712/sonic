@@ -13,11 +13,11 @@ class V2PickupReportLegendSeeder extends Seeder
     {
         DB::table('v2_pickup_report_legends')->truncate();
         DB::table('v2_pickup_report_legends')->insert(array(
-            array('id' => 1, 'name' => 'Pickup Request Picked, Shipment Difference < 10%', 'color' => '#000'),
-            array('id' => 2, 'name' => 'Pickup Request Picked, Shipment Difference > 10%', 'color' => '#000'),
-            array('id' => 3, 'name' => 'Pickup Request Attempted & Not Picked', 'color' => '#000'),
-            array('id' => 4, 'name' => 'Pickup Request Cancelled', 'color' => '#000'),
-            array('id' => 5, 'name' => 'Pickup Request Attempt Failed', 'color' => '#000')
+            array('id' => 1, 'name' => 'Pickup Request Picked, Shipment Difference < 10%', 'color' => '#228B22'),
+            array('id' => 2, 'name' => 'Pickup Request Picked, Shipment Difference > 10%', 'color' => '#98FB98'),
+            array('id' => 3, 'name' => 'Pickup Request Attempted & Not Picked', 'color' => '#FFDEAD'),
+            array('id' => 4, 'name' => 'Pickup Request Cancelled', 'color' => '#D3D3D3'),
+            array('id' => 5, 'name' => 'Pickup Request Attempt Failed', 'color' => '#FA8072')
         ));
     }
 }

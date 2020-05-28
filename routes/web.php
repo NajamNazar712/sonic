@@ -300,6 +300,16 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
     });
 
+
+    Route::prefix('pickup')->name('pickup.')->group(function () {
+        Route::get('', 'Shippers\ShipperPickupController@pickup_index')->name('index');
+        Route::get('list', 'Shippers\ShipperPickupController@pickup_list')->name('list');
+        Route::post('shipments', 'Shippers\ShipperPickupController@shipments')->name('shipments');
+        Route::post('add_remarks', 'Shippers\ShipperPickupController@add_remarks')->name('add_remarks');
+        Route::post('cancel', 'Shippers\ShipperPickupController@cancel')->name('cancel');
+        Route::post('renew', 'Shippers\ShipperPickupController@renew')->name('renew');
+    });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -593,6 +603,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_details', 'Admins\AdminPickupsController@quick_arrival_of_shipments_shipment_details')->name('shipment_details');
             Route::post('shipment_remove', 'Admins\AdminPickupsController@quick_arrival_of_shipments_remove')->name('shipment_remove');
             Route::post('', 'Admins\AdminPickupsController@quick_arrival_of_shipments_store')->name('store');
+        });
+    });
+
+    Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pending_index')->name('index');
+            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pending_list')->name('list');
+
         });
     });
     Route::prefix('delivery')->name('delivery.')->group(function(){
@@ -1383,6 +1401,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@pickup_index')->name('index');
             Route::post('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
             Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+            Route::get('pickup_settings', 'Admins\GlobalSettingsController@pickup_cut_off_settings_index')->name('pickup_settings');
+            Route::post('pickup_settings_store', 'Admins\GlobalSettingsController@pickup_cut_off_settings_store')->name('pickup_settings_store');
         });
 
         Route::prefix('shipment_cancellation_cut_off_days')->name('shipment_cancellation_cut_off_days.')->group(function () {
