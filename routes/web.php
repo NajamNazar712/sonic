@@ -1379,9 +1379,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('pickup_report')->name('pickup_report.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@pickup_report_index')->name('index');
            // Route::post('list', 'Admins\AdminReportsController@last_mile_status_list')->name('list');
-        });
-
-    });
+        });    });
 
     //Reports end
 
@@ -1407,6 +1405,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@pickup_index')->name('index');
             Route::post('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
             Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+            Route::get('pickup_settings', 'Admins\GlobalSettingsController@pickup_cut_off_settings_index')->name('pickup_settings');
+            Route::post('pickup_settings_store', 'Admins\GlobalSettingsController@pickup_cut_off_settings_store')->name('pickup_settings_store');
         });
 
         Route::prefix('shipment_cancellation_cut_off_days')->name('shipment_cancellation_cut_off_days.')->group(function () {

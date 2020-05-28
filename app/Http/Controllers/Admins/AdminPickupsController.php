@@ -54,54 +54,31 @@ class AdminPickupsController extends Controller
     }
 
     static public function generate($shipment_id) {
-      $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
-
-      if ($defined_pickup_weight->exists()) {
-        $defined_pickup_weight = $defined_pickup_weight->first();
-
-        $defined_pickup_weight = $defined_pickup_weight->setting_value;
-      }
-      else {
-        $defined_pickup_weight = 10;
-      }
-
       $shipment = Shipment::find($shipment_id);
 
       $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->where('rider_status', 1)->where('status_id', 1);
+
+      $shipments_count = 0;
+      $shipments = array();
 
       if ($pickup_request->exists()) {
         $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
 
         $bookings = $pickup_request->booked + 1;
-        $total_estimated_weight = $pickup_request->total_estimated_weight + $shipment->estimated_weight;
-
-        if ($total_estimated_weight < $defined_pickup_weight) {
-          $pickup_type = 0;
-        }
-        else {
-          $pickup_type = 1;
-        }
 
         $pickup_request->booked = $bookings;
-        $pickup_request->total_estimated_weight = $total_estimated_weight;
-        $pickup_request->pickup_type = $pickup_type;
 
         $pickup_request->save();
       }
       else {
-          $total_estimated_weight = 0;
         $existing_pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->orderBy('id', 'DESC')->first();
         if($existing_pickup_request){
             if($existing_pickup_request->status_id == 4 && $existing_pickup_request->renew == 0){
-                $shipments = array();
-                $shipments_count = 0;
                 $existing_pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $existing_pickup_request->id)->get();
                 if($existing_pickup_request_shipments){
                     foreach ($existing_pickup_request_shipments as $pickup_request_shipment){
                         $existing_shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
                         if($existing_shipment->shipper_status_id == 1){
-
-                            $total_estimated_weight = $total_estimated_weight + $existing_shipment->estimated_weight;
                             $shipments[] = $existing_shipment->id;
                             $shipments_count++;
                         }
@@ -114,22 +91,12 @@ class AdminPickupsController extends Controller
             }
         }
 
-        $total_estimated_weight = $total_estimated_weight + $shipment->estimated_weight;
         $pickup_request = new V2PickupRequest();
 
         $pickup_request->shipper_id = $shipment->user_id;
         $pickup_request->pickup_address_id = $shipment->pickup_address_id;
-        $pickup_request->requested_date = Carbon::now();
         $pickup_request->city_id = $shipment->pickup_address->city_id;
         $pickup_request->booked = $shipments_count + 1;
-        $pickup_request->total_estimated_weight = $total_estimated_weight;
-        if ($total_estimated_weight < $defined_pickup_weight) {
-            $pickup_type = 0;
-        }
-        else {
-            $pickup_type = 1;
-        }
-        $pickup_request->pickup_type = $pickup_type;
         $pickup_request->save();
       }
 

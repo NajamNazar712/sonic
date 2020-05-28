@@ -58,7 +58,6 @@
                                 <th>Item Quantity 5</th>
                                 <th>Item Insurance 5</th>
                                 <th>Item Price 5</th>
-                                <th>Pickup Date (YYYY-MM-DD)</th>
                                 <th>Special Instructions</th>
                                 <th>Estimated Weight (kg)</th>
                                 <th>Mode of Shipment ID</th>
@@ -302,11 +301,6 @@
                                     <td>{!! Form::text('form[' . $no . '][item_price_5]', $ro['item_price_5'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['item_price_5']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][item_price_5]', $ro['item_price_5'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
-                                @endif
-                                @if(isset($errors[$no]['pickup_date']))
-                                    <td>{!! Form::date('form[' . $no . '][pickup_date]',null,['class' => 'form-control','id' => 'datepicker']) !!}<font color="red">{{$errors[$no]['pickup_date']}}</font></td>
-                                @else
-                                    <td>{!! Form::text('form[' . $no . '][pickup_date]', $ro['pickup_date'],['class' => 'form-control','style'=>'width:auto','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['special_instructions']))
                                     <td>{!! Form::textarea('form[' . $no . '][special_instructions]', $ro['special_instructions'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['special_instructions']}}</font></td>

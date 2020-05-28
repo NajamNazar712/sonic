@@ -58,7 +58,6 @@ class APIController extends Controller
       'consignee_email_address' => 'Consignee Email Address',
       'order_id' => 'Order ID',
       'package_type' => 'Package Type',
-      'pickup_date' => 'Pickup Date',
       'special_instructions' => 'Special Instructions',
       'estimated_weight' => 'Estimated Weight',
       'shipping_mode_id' => 'Shipping Mode ID',
@@ -291,7 +290,6 @@ class APIController extends Controller
             'consignee_email_address' => ['nullable', 'filled', 'email'],
             'order_id' => ['nullable', 'filled'],
             'package_type' => ['required_if:service_type_id,3', 'boolean'],
-            'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
             'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
@@ -343,7 +341,6 @@ class APIController extends Controller
             'consignee_email_address' => ['nullable', 'filled', 'email'],
             'order_id' => ['nullable', 'filled'],
             'package_type' => ['required_if:service_type_id,3', 'boolean'],
-            'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
             'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
@@ -512,7 +509,6 @@ class APIController extends Controller
           $package_type = FALSE;
         }
 
-        $pickup_date = $request->input('pickup_date');
 
         if ($request->filled('special_instructions')) {
           $special_instructions = $request->input('special_instructions');
@@ -541,10 +537,10 @@ class APIController extends Controller
               $try_and_buy_charges = NULL;
           }
           if($user_type['account_type_id'] == 1) {
-              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges);
+              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges);
           }
           else {
-              $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);
+              $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);
           }
         $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
