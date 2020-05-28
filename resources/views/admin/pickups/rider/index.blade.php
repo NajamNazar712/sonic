@@ -16,6 +16,17 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
+
+							<div class="row justify-content-center">
+                                <div class="col-12">
+                                    <label class="font-medium-2 font-weight-bold block">Old Rider Pickup Action Logs</label>
+                                    <div class="form-group">
+                                        <label for="old_rider_pickup_action_log" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                        <input type="checkbox" name="old_rider_pickup_action_log" id="old_rider_pickup_action_log" class=" old_rider_pickup_action_log" data-size="sm" data-switchery="true">
+                                        <label for="old_rider_pickup_action_log" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
 							<div id="search_form" class="row mb-2 justify-content-center">
 
 		                        <div class="col-4 ">
@@ -158,6 +169,25 @@
                     }
                 }
             });
+
+			var elem = document.querySelector('#old_rider_pickup_action_log');
+     		   var switchery = new Switchery(elem);
+
+				var switchStatus = false;
+				
+				$("#old_rider_pickup_action_log").on('change', function() {
+					if ($(this).is(':checked')) {
+						switchStatus = $(this).is(':checked');
+						console.log(switchStatus);
+					
+					}
+					else {
+					switchStatus = $(this).is(':checked');
+					console.log(switchStatus);
+					
+				
+					}
+				});
 
             var summary_flag = true;
 			var table = $('#datatable').DataTable({
