@@ -36,10 +36,10 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group pb-1">
-                                        <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
-                                            
-                                        <option value="">Select Me</option>
-                                        
+                                        <select name="origin" class="select2" id="origin" data-rule-required="true" data-msg-required="Shipper is required">
+                                        @foreach($origins as $origin)
+                                        <option value="{{ $origin->id }}">{{ $origin->name }}</option>
+                                        @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -92,11 +92,11 @@
                                 <legend class="scheduler-border">Legend</legend>
                                 <div class='legend-scale'>
                                 <ul class='legend-labels'>
-                                    <li><span style='background:#8DD3C7;'></span>Pickup Request Picked.Shipment Difference < 10%</li>
-                                    <li><span style='background:#FFFFB3;'></span>Pickup Request Picked.Shipment Difference > 10%</li>
-                                    <li><span style='background:#BEBADA;'></span>Pickup Request Attempted & Not Picked</li>
-                                    <li><span style='background:#FB8072;'></span>Pickup Request Cancelled</li>
-                                    <li><span style='background:#80B1D3;'></span>Pickup Request Attempt Failed</li>
+                                    <li><span style='background:#228B22;'></span>Pickup Request Picked.Shipment Difference < 10%</li>
+                                    <li><span style='background:#98FB98;'></span>Pickup Request Picked.Shipment Difference > 10%</li>
+                                    <li><span style='background:#FFDEAD;'></span>Pickup Request Attempted & Not Picked</li>
+                                    <li><span style='background:#D3D3D3;'></span>Pickup Request Cancelled</li>
+                                    <li><span style='background:#FA8072;'></span>Pickup Request Attempt Failed</li>
                                 </ul>
                                 </div>
                             </fieldset>
@@ -109,7 +109,6 @@
                     Summary
                 </h2>
                     <div class="row">
-                   
                         <input type="hidden" id="cards_filter_input">
                         <div class="col-3">
                             <div class="card pull-up">
@@ -353,6 +352,11 @@
             $('#search_form #salesperson').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select SalesPerson',
+                allowClear:true
+            });
+            $('#search_form #origin').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Origin',
                 allowClear:true
             });
             $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({

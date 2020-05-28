@@ -6439,9 +6439,9 @@ use Yajra\Datatables\Datatables;
 
         public function pickup_report_index(){
             $department = DB::connection('reports')->table('admin_departments')->whereIn('id',[6,7])->get();
-            $salesperson = DB::connection('reports')->table('admin_roles')->where('department_id',7)->get();
-            // session('department_id') == 7
-            return view('admin.reports.pickup_report')->with(['departments'=>$department,'salespersons'=>$salesperson]);
+            $salesperson = DB::connection('reports')->table('admins')->leftjoin('admin_roles as ar', 'ar.id', '=', 'admins.role_id')->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')->select('admins.name')->where('ar.department_id',7)->get();
+            $origin = DB::connection('reports')->table('cities')->where('pickup',1)->where('status',1)->get();
+            return view('admin.reports.pickup_report')->with(['departments'=>$department,'salespersons'=>$salesperson,'origins'=>$origin]);
         }
     }
 
