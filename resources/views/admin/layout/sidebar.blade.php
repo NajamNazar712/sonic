@@ -517,7 +517,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328,337], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
 
                     <ul class="menu-content">
@@ -699,6 +699,9 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(327, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.last_mile_status.index') }}">Last Mile Status</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(337, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.pickup_report.index') }}">Pickup Report</a></li>
                         @endif
                     </ul>
                 </li>
