@@ -92,11 +92,9 @@
                                 <legend class="scheduler-border">Legend</legend>
                                 <div class='legend-scale'>
                                 <ul class='legend-labels'>
-                                    <li><span style='background:#228B22;'></span>Pickup Request Picked.Shipment Difference < 10%</li>
-                                    <li><span style='background:#98FB98;'></span>Pickup Request Picked.Shipment Difference > 10%</li>
-                                    <li><span style='background:#FFDEAD;'></span>Pickup Request Attempted & Not Picked</li>
-                                    <li><span style='background:#D3D3D3;'></span>Pickup Request Cancelled</li>
-                                    <li><span style='background:#FA8072;'></span>Pickup Request Attempt Failed</li>
+                                    @foreach($legends as $legend)
+                                        <li><span style="background-color: {{$legend->color}}"></span>{{ $legend->name }}</li>
+                                    @endforeach
                                 </ul>
                                 </div>
                             </fieldset>
@@ -126,6 +124,8 @@
                                 </div>
                             </div>
                         </div>
+                    </div>    
+                    <div class="row">    
                         <div class="col-3">
                             <div class="card pull-up">
                                 <div class="card-content border rounded" id="shipments_booked">
@@ -141,7 +141,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>    
                         <div class="col-3">
                             <div class="card pull-up">
                                 <div class="card-content border rounded" id="shipments_booked">
@@ -158,6 +158,8 @@
                                 </div>
                             </div>
                         </div>
+                    </div>    
+                    <div class="row">      
                         <div class="col-3">
                             <div class="card pull-up">
                                 <div class="card-content border rounded" id="shipments_booked">
@@ -190,6 +192,8 @@
                                 </div>
                             </div>
                         </div>
+                    </div>    
+                    <div class="row">    
                         <div class="col-3">
                             <div class="card pull-up">
                                 <div class="card-content border rounded" id="shipments_booked">

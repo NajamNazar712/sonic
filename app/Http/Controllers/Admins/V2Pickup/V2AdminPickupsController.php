@@ -7,6 +7,7 @@ use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestLegend;
+use App\Http\Models\V2Pickup\V2PickupReportLegend;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
