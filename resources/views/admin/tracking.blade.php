@@ -414,7 +414,7 @@
 
             function track(tracking_numbers) {
                 $.ajax({
-                    url: '{!! route('admin.tracking.track') !!}',
+                    url: '{!! route('admin.tracking.track_v2') !!}',
                     method: 'POST',
                     data: {
                         'tracking_numbers': tracking_numbers,
