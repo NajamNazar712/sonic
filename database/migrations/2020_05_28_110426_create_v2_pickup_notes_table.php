@@ -15,8 +15,8 @@ class CreateV2PickupNotesTable extends Migration
     {
         Schema::create('v2_pickup_notes', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('pickup_note_id');
-            $table->integer('pickup_request_id');
+            $table->integer('rider_id');
+            $table->tinyInteger('status')->default(0);
             $table->timestamps();
         });
     }
