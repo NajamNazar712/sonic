@@ -39,6 +39,7 @@ use App\Http\Models\City;
 use App\Http\Models\Invoice;
 use App\Http\Models\SMS;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\V2Pickup\V2PickupRequest;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
@@ -3873,78 +3874,78 @@ class NotificationsController extends Controller
 //
 //                 self::email($subject, $body, $to);
             }
-
+            //updated revamp status
             else if($id == 50){
-                $done = "Done";
-                $not_done = "Not Done";
-                $pickup_note = PickupNote::find($reference_1_id);
-                $pickup_request = PickupRequest::find($reference_2_id);
-                $vendor = $pickup_request->pickup_address->vendor;
-                $shipper_name = $pickup_request->shipper->name;
-                $contact_person = $pickup_request->pickup_address->poc;
-                if($pickup_request->status == 2 || $pickup_request->status == 0){
-                    if($pickup_request->status == 2){
-                        if (strpos($subject, '[status]') !== FALSE) {
-                            $subject = str_replace('[status]', $done, $subject);
-                        }
+              $done = "Done";
+              $not_done = "Not Done";
+           // $pickup_note = PickupNote::find($reference_1_id);
+              $pickup_request = V2PickupRequest::find($reference_2_id);
+              $vendor = $pickup_request->pickup_address->vendor;
+              $shipper_name = $pickup_request->shipper->name;
+              $contact_person = $pickup_request->pickup_address->poc;
+              if($pickup_request->status == 2 || $pickup_request->status == 0){
+                  if($pickup_request->status == 2){
+                      if (strpos($subject, '[status]') !== FALSE) {
+                          $subject = str_replace('[status]', $done, $subject);
+                      }
 
-                        if (strpos($body, '[status]') !== FALSE) {
-                            $body = str_replace('[status]', $done, $body);
-                        }
-                    }
-                    elseif($pickup_request->status == 0){
-                        if (strpos($subject, '[status]') !== FALSE) {
-                            $subject = str_replace('[status]', $not_done, $subject);
-                        }
+                      if (strpos($body, '[status]') !== FALSE) {
+                          $body = str_replace('[status]', $done, $body);
+                      }
+                  }
+                  elseif($pickup_request->status == 0){
+                      if (strpos($subject, '[status]') !== FALSE) {
+                          $subject = str_replace('[status]', $not_done, $subject);
+                      }
 
-                        if (strpos($body, '[status]') !== FALSE) {
-                            $body = str_replace('[status]', $not_done, $body);
-                        }
-                    }
+                      if (strpos($body, '[status]') !== FALSE) {
+                          $body = str_replace('[status]', $not_done, $body);
+                      }
+                  }
 
-                    if (strpos($subject, '[contact_person]') !== FALSE) {
-                        $subject = str_replace('[contact_person]', $contact_person, $subject);
-                    }
+                  if (strpos($subject, '[contact_person]') !== FALSE) {
+                      $subject = str_replace('[contact_person]', $contact_person, $subject);
+                  }
 
-                    if (strpos($subject, '[rider]') !== FALSE) {
-                        $subject = str_replace('[rider]', $pickup_note->rider->name, $subject);
-                    }
+                  if (strpos($subject, '[rider]') !== FALSE) {
+                      $subject = str_replace('[rider]', $pickup_request->rider->name, $subject);
+                  }
 
-                    if (strpos($subject, '[rider_phone]') !== FALSE) {
-                        $subject = str_replace('[rider_phone]', $pickup_note->rider->phone, $subject);
-                    }
+                  if (strpos($subject, '[rider_phone]') !== FALSE) {
+                      $subject = str_replace('[rider_phone]', $pickup_request->rider->phone, $subject);
+                  }
 
-                    if (strpos($subject, '[vendor]') !== FALSE) {
-                        $subject = str_replace('[vendor]', $vendor, $subject);
-                    }
+                  if (strpos($subject, '[vendor]') !== FALSE) {
+                      $subject = str_replace('[vendor]', $vendor, $subject);
+                  }
 
-                    if (strpos($subject, '[shipper_name]') !== FALSE) {
-                        $subject = str_replace('[shipper_name]', $shipper_name, $subject);
-                    }
+                  if (strpos($subject, '[shipper_name]') !== FALSE) {
+                      $subject = str_replace('[shipper_name]', $shipper_name, $subject);
+                  }
 
-                    if (strpos($body, '[contact_person]') !== FALSE) {
-                        $body = str_replace('[contact_person]', $contact_person, $body);
-                    }
+                  if (strpos($body, '[contact_person]') !== FALSE) {
+                      $body = str_replace('[contact_person]', $contact_person, $body);
+                  }
 
-                    if (strpos($body, '[rider]') !== FALSE) {
-                        $body = str_replace('[rider]', $pickup_note->rider->name, $body);
-                    }
+                  if (strpos($body, '[rider]') !== FALSE) {
+                      $body = str_replace('[rider]', $pickup_request->rider->name, $body);
+                  }
 
-                    if (strpos($body, '[rider_phone]') !== FALSE) {
-                        $body = str_replace('[rider_phone]', $pickup_note->rider->phone, $body);
-                    }
+                  if (strpos($body, '[rider_phone]') !== FALSE) {
+                      $body = str_replace('[rider_phone]', $pickup_request->rider->phone, $body);
+                  }
 
-                    if (strpos($body, '[vendor]') !== FALSE) {
-                        $body = str_replace('[vendor]', $vendor, $body);
-                    }
+                  if (strpos($body, '[vendor]') !== FALSE) {
+                      $body = str_replace('[vendor]', $vendor, $body);
+                  }
 
-                    if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipper_name, $body);
-                    }
-                    $to = $pickup_request->pickup_address->email;
-                    self::email($subject, $body, $to);
-                }
-            }
+                  if (strpos($body, '[shipper_name]') !== FALSE) {
+                      $body = str_replace('[shipper_name]', $shipper_name, $body);
+                  }
+                  $to = $pickup_request->pickup_address->email;
+                  self::email($subject, $body, $to);
+              }
+          }
             else if($id == 51){
                 $done = "Done";
                 $not_done = "Not Done";
