@@ -10,6 +10,7 @@ use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
 use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestLegend;
@@ -169,9 +170,20 @@ class V2AdminPickupsController extends Controller
     }
 
     public function pending_assign(Request $request) {
+
         $pickup_request_ids = $request->input('pickup_request_ids');
 
         $rider_id = $request->input('rider_id');
+
+        $rider_cut_off_time = NULL;
+        $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
+        if($rider_settings->exists()){
+            $rider_settings = $rider_settings->first();
+            $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+        }
+        if(Carbon::now() > $rider_cut_off_time){
+            return ['status' => 1, 'error' => 'Rider can not be assigned after cut off time!'];
+        }
 
         if (empty($pickup_request_ids)) {
             return ['status' => 1, 'error' => 'No Pickup Request Selected'];
@@ -191,7 +203,7 @@ class V2AdminPickupsController extends Controller
 
         $pickups = 0;
         $bookings = 0;
-        $total_estimated_weight = 0;
+
         $vendor_flag = FALSE;
 
         foreach ($pickup_request_ids as $pickup_request_id) {
@@ -209,7 +221,7 @@ class V2AdminPickupsController extends Controller
 
         $existing_pickup_note = FALSE;
 
-        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->whereIn('status', 0);
+        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
 
         if ($pickup_note->exists()) {
             $pickup_note = $pickup_note->first();
@@ -240,19 +252,19 @@ class V2AdminPickupsController extends Controller
 
             $pickup_request = V2PickupRequest::find($pickup_request_id);
 
-            $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
+            $assigned_shipments = $pickup_request->pickup_request_shipments;
 
-            if($pickup_request->pickup_address->vendor != NULL){
-                NotificationsController::send(43, $pickup_request->id, $pickup_request->pickup_address->id);
-            }
+//            if($pickup_request->pickup_address->vendor != NULL){
+//                NotificationsController::send(43, $pickup_request->id, $pickup_request->pickup_address->id);
+//            }
 
             if ($assigned_shipments) {
                 foreach ($assigned_shipments as $assigned_shipment) {
                     $shipment = $assigned_shipment->shipment;
 
-                    if ($shipment->shipper_status_id == 1) {
-                        ShipmentsPickupJourneyController::add($shipment->id, 2, Auth::id(), $pickup_note_id, $rider_id);
-                    }
+//                    if ($shipment->shipper_status_id == 1) {
+//                        ShipmentsPickupJourneyController::add($shipment->id, 2, Auth::id(), $pickup_note_id, $rider_id);
+//                    }
                 }
             }
         }
