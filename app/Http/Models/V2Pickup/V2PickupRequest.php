@@ -18,4 +18,10 @@ class V2PickupRequest extends Model
     public function pickup_request_shipments() {
         return $this->hasMany('App\Http\Models\V2Pickup\V2PickupRequestShipment', 'pickup_request_id');
     }
+    public function pickup_attempts(){
+        return $this->hasMany('App\Http\Models\V2Pickup\V2PickupRequestAttempt', 'pickup_request_id');
+    }
+    public function pickup_attempt_latest(){
+        return $this->hasOne('App\Http\Models\V2Pickup\V2PickupRequestAttempt', 'pickup_request_id')->latest('id');
+    }
 }

@@ -20,19 +20,19 @@
                                 <div class="col-5">
                                     <div class="card border border-lighten-5">
                                         <div class="card-content">
-                                            <div class="card-body">
-                                                <h4 class="card-title info">Legend</h4>
+                                            <div class="card-body p-1">
+                                                <h4 class=" info">Legend</h4>
                                                 <table class="table mb-0">
                                                     <tbody>
                                                     @foreach($legends as $legend)
                                                         @if($legend->id == 7)
-                                                            <tr>
-                                                                <td><button type="button" class="btn btn-sm round btn-min-width text-white" style="background-color: {{$legend->color}}" disabled>{{$cut_off_time}}:00</button></td>
-                                                                <td class="align-middle">{{ $legend->name }}</td>
+                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;">
+{{--                                                                <td><button type="button" class="btn btn-sm round btn-min-width text-white" style="background-color: {{$legend->color}}" disabled>{{$cut_off_time}}:00</button></td>--}}
+                                                                <td class="align-middle">{{ $legend->name }} <b>({{$cut_off_time}}:00)</b></td>
                                                             </tr>
                                                             @else
-                                                            <tr>
-                                                                <td><button type="button" class="btn btn-sm round btn-min-width p-1" style="background-color: {{$legend->color}}" disabled> </button></td>
+                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;">
+{{--                                                                <td><button type="button" class="btn btn-sm round btn-min-width p-1" style="background-color: {{$legend->color}}" disabled> </button></td>--}}
                                                                 <td class="align-middle">{{ $legend->name }}</td>
                                                             </tr>
                                                             @endif
@@ -106,6 +106,36 @@
                     </div>
                 </div>
 
+                <div class="modal fade" id="update_pickup_modal" role="dialog" aria-labelledby="update_pickup_modal_title" aria-hidden="true">
+                    <div class="modal-dialog modal-sm" role="document">
+                        <div class="modal-content">
+                            <form class="form-horizontal">
+                                {{ csrf_field() }}
+
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="assign_to_rider_title">Update Pickup Request</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group m-0 mb-1">
+                                        <select name="reason" class="select2 reason" data-rule-required="true" data-msg-required="Reason is required">
+                                            @foreach($not_pick_reasons as $reason)
+                                                <option value="{{ $reason->id }}">{{ $reason->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group m-0">
+                                        <textarea name="trax_remarks" id="trax_remarks" class="form-control" cols="30" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary ml-auto">Update</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <!--Shipments popup -->
                 <div class="modal fade" id="bookings_modal" data-backdrop="static" role="dialog" aria-labelledby="bookings_modal" aria-hidden="true">
                     <div class="modal-dialog modal-sm" role="document">
@@ -159,6 +189,37 @@
         .btn-min-width {
             min-width: 5.5rem;
         }
+@foreach($legends as $legend)
+    @if($legend->id == 1)
+        .new_pickup{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 2)
+        .vendor_row{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 3)
+        .try_and_buy{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 4)
+        .first_attempt{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 5)
+        .second_attempt{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 6)
+        .multiple_attempt{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 7)
+        .after_cut_off_time{
+            background-color: '{{$legend->color}}';
+        }
+    @endif
+@endforeach
     </style>
 @endsection
 
@@ -247,7 +308,17 @@
                     }
                 },
                     @endif
+                {
+                    text: 'Update',
+                    className: 'btn btn-primary update',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                        $('#update_pickup_modal .reason').val(null).trigger('change');
+                        $('#update_pickup_modal #trax_remarks').val('');
 
+                        $('#update_pickup_modal').modal('show');
+                    }
+                },
                 {
                     extend: 'excel',
                     title: 'Pending Pickups',
@@ -275,7 +346,7 @@
                                 }
 
                                 table.button('.assign').enable();
-                                table.button('.cancel').enable();
+                                table.button('.update').enable();
                             }
                         });
                     }
@@ -302,7 +373,7 @@
 
                                 if (selected_rows.length == 0) {
                                     table.button('.assign').disable();
-                                    table.button('.cancel').disable();
+                                    table.button('.update').disable();
                                 }
                             }
                         });
@@ -452,9 +523,11 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
+                    table.button('.update').enable();
                 }
                 else {
                     table.button('.assign').disable();
+                    table.button('.update').disable();
                 }
             });
 
@@ -498,7 +571,7 @@
                         selected_rows = [];
 
                         table.button('.assign').disable();
-                        // table.button('.cancel').disable();
+                        table.button('.update').disable();
 
                         table.draw('false');
 
@@ -507,6 +580,59 @@
                 }
             });
 
+            $('#update_pickup_modal .reason').select2({
+                width: '100%',
+                placeholder: 'Not Pick Reason*',
+                dropdownParent:$('#update_pickup_modal')
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
+            });
+            $('body').on('change','#update_pickup_modal #trax_remarks',function() {
+                $(this).val($(this).val().trim());
+            });
+            $('#update_pickup_modal form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    var reason_id = parseInt($(form).find('select.reason').val());
+                    var remarks = $('#trax_remarks').val();
+                    $.ajax({
+                        url: '{!! route('admin.v2_pickups.pending.update') !!}',
+                        method: 'PUT',
+                        data: {
+                            'pickup_request_ids': selected_rows,
+                            'reason_id': reason_id,
+                            'trax_remarks': remarks,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                            table.rows().deselect();
+
+                            selected_rows = [];
+
+                            table.button('.assign').disable();
+                            table.button('.update').disable();
+
+                            table.draw('false');
+
+                            $('#update_pickup_modal').modal('hide');
+                        });
+                }
+            });
         });
     </script>
 @endsection
