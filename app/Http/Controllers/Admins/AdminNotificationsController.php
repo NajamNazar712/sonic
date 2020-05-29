@@ -298,6 +298,9 @@ class AdminNotificationsController extends Controller
         else if ($id == 62){
             $details['fields'] = ['cancel_shipment'];
         }
+        else if ($id == 63){
+            $details['fields'] = ['pickup_request_ID', 'shipper', 'date'];
+        }
         return $details;
     }
 

@@ -126,6 +126,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
         
         $schedule->command('shipmentemail:cancel')->dailyAt('08:00')->runInBackground();
+        $schedule->command('pickuprequest:cancel')->dailyAt('08:00')->runInBackground();
 	}
 	 /**
      * Register the commands for the application.
