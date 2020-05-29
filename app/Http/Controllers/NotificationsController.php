@@ -40,6 +40,7 @@ use App\Http\Models\Invoice;
 use App\Http\Models\SMS;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\V2Pickup\V2PickupRequest;
+use App\Http\Models\Admin\V2Pickup\V2PickupNote;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
@@ -1877,7 +1878,7 @@ class NotificationsController extends Controller
               }
             }
 
-            $pickup_note = PickupNote::find($reference_1_id);
+            $pickup_note = V2PickupNote::find($reference_1_id);
 
             $to = $pickup_note->rider->phone;
 
