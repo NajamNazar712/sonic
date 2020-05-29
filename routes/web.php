@@ -610,7 +610,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pending_index')->name('index');
             Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pending_list')->name('list');
-
+            Route::put('assign', 'Admins\V2Pickup\V2AdminPickupsController@pending_assign')->name('assign');
         });
     });
     Route::prefix('delivery')->name('delivery.')->group(function(){
@@ -911,6 +911,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('tracking')->name('tracking.')->group(function() {
         Route::get('{tracking_number?}', 'Admins\AdminTrackingController@index')->name('index');
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
+        Route::post('track_v2', 'Admins\AdminTrackingController@track_v2')->name('track_v2');
         Route::post('rider_information', 'Admins\AdminTrackingController@rider_information')->name('rider_information');
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
     });

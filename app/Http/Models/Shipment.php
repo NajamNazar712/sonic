@@ -91,5 +91,8 @@ class Shipment extends Model
     }
     public function invoice() {
         return $this->hasMany('App\Http\Models\ShipmentInvoice');
+	}
+	public function shipments_v2_pickup_journeys(){
+	    return $this->hasMany('App\http\Models\V2Pickup\ShipmentsV2PickupJourney')->orderBy('id', 'DESC');
     }
 }
