@@ -14,6 +14,10 @@ use App\Http\Models\RiderPickupShipment;
 use App\Http\Models\PickupAction;
 use App\Http\Models\RiderPickupActionLog;
 use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 
 use Auth;
 
@@ -212,7 +216,7 @@ class RiderPickupsController extends Controller {
             $to = $request->get('search_date_to');
             $rider_pickup_action_logs->whereBetween('pr.created_at', [$from,$to]);
         }
-        
+
     	return $datatables->make(true);
     }
 }
