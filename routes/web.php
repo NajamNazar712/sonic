@@ -611,6 +611,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pending_index')->name('index');
             Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pending_list')->name('list');
             Route::put('assign', 'Admins\V2Pickup\V2AdminPickupsController@pending_assign')->name('assign');
+            Route::put('update', 'Admins\V2Pickup\V2AdminPickupsController@pending_update')->name('update');
         });
     });
     Route::prefix('delivery')->name('delivery.')->group(function(){
