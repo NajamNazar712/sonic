@@ -39,7 +39,6 @@
                                         <th>Replacement Item Product Type ID</th>
                                         <th>Replacement Item Description</th>
                                         <th>Replacement Item Quantity</th>
-                                        <th>Pickup Date (YYYY-MM-DD)</th>
                                         <th>Special Instructions</th>
                                         <th>Estimated Weight (kg)</th>
                                         <th>Mode of Shipment ID</th>
@@ -162,11 +161,6 @@
                                                 <td>{!! Form::text('form[' . $no . '][replacement_item_quantity]', $ro['replacement_item_quantity'], ['class' => 'form-control is-invalid','style'=>'width:60px']) !!}<font color="red">{{$errors[$no]['replacement_item_quantity']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][replacement_item_quantity]', $ro['replacement_item_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
-                                            @endif
-                                            @if(isset($errors[$no]['pickup_date']))
-                                                <td>{!! Form::date('form[' . $no . '][pickup_date]',null,['class' => 'form-control','id' => 'datepicker']) !!}<font color="red">{{$errors[$no]['pickup_date']}}</font></td>
-                                            @else
-                                                <td>{!! Form::text('form[' . $no . '][pickup_date]', $ro['pickup_date'],['class' => 'form-control','style'=>'width:auto','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['special_instructions']))
                                                 <td>{!! Form::textarea('form[' . $no . '][special_instructions]', $ro['special_instructions'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['special_instructions']}}</font></td>
