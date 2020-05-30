@@ -113,6 +113,25 @@ class RiderPickupsController extends Controller {
         }
     	return $datatables->make(true);
     }
+
+    public function pickups_shipments(Request $request) {
+        $rider_pickup_shipments = RiderPickupShipment::where('rider_pickup_id', $request->rider_pickup_id);
+
+        if ($rider_pickup_shipments->exists()) {
+            $rider_pickup_shipments = $rider_pickup_shipments->get();
+
+            $tracking_numbers = array();
+
+            foreach ($rider_pickup_shipments as $rider_pickup_shipment) {
+                $tracking_numbers[] = $rider_pickup_shipment->shipment->tracking_number;
+            }
+
+            return ['status' => 0, 'success' => 'Shipments Listed', 'tracking_numbers' => $tracking_numbers];
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipments'];
+        }
+    }
     public function pickups_list_v2(Request $request) {
 
         
