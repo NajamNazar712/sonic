@@ -37,7 +37,7 @@ class V2AdminPickupsController extends Controller
                 $query->whereIn('hub_id', session('hubs'));
             });
         }
-
+        $not_pick_reasons = V2PickupRequestNotPickReason::all();
         $riders = $riders->get();
 
         $legends = V2PickupRequestLegend::all();
@@ -47,7 +47,7 @@ class V2AdminPickupsController extends Controller
             $setting = $setting->first();
             $cut_off_time = $setting->setting_value;
         }
-        return view('admin.v2_pickups.pending')->with(['riders' => $riders, 'legends' => $legends, 'cut_off_time' => $cut_off_time, 'pickup_statuses' => $pickup_statuses, 'rider_statuses' => $rider_statuses]);
+        return view('admin.v2_pickups.pending')->with(['riders' => $riders, 'legends' => $legends, 'cut_off_time' => $cut_off_time, 'pickup_statuses' => $pickup_statuses, 'rider_statuses' => $rider_statuses, 'not_pick_reasons' => $not_pick_reasons]);
     }
 
     public function pending_list(Request $request) {
@@ -59,7 +59,7 @@ class V2AdminPickupsController extends Controller
             ->join('v2_pickup_request_rider_statuses as rs', 'rs.id', '=', 'v2_pickup_requests.rider_status')
             ->leftjoin('riders as cr', 'cr.id', '=', 'v2_pickup_requests.current_rider_id')
             ->leftjoin('riders as lr', 'lr.id', '=', 'v2_pickup_requests.last_rider_id')
-            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' , 'v2_pickup_requests.received', 'usi.vendor', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', DB::raw('(SELECT SUM(`rs`.`shipments`) FROM `v2_rider_pickups` AS `rs` INNER JOIN `v2_pickup_requests` AS `vpr` ON `rs`.`pickup_request_id` = `vpr`.`id` WHERE `vpr`.`id` = `rs`.`pickup_request_id`) AS `shipments_rider_picked`'))
+            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' , 'v2_pickup_requests.received', 'usi.vendor', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', DB::raw('(SELECT SUM(`rs`.`shipments`) FROM `v2_rider_pickups` AS `rs` INNER JOIN `v2_pickup_requests` AS `vpr` ON `rs`.`pickup_request_id` = `vpr`.`id` WHERE `vpr`.`id` = `rs`.`pickup_request_id`) AS `shipments_rider_picked`'))
             ->where('v2_pickup_requests.status_id', '!=', 4);
 
         if (session('role_id') != 1) {
@@ -76,10 +76,18 @@ class V2AdminPickupsController extends Controller
                     if ($pickup_request->vendor != null) {
                         return 'vendor_row';
                     }
-                    else if (Carbon::parse($pickup_request->pickup_address_created_at)->startOfDay()->diffInDays($today) <= 6) {
-                        return 'new_pickup';
-                    }else if($pickup_request->try_and_buy == 1){
+                    else if($pickup_request->try_and_buy == 1){
                         return 'try_and_buy';
+                    }else if(($pickup_request->status_id == 3)  && ($pickup_request->attempts == 1)){
+                        return 'first_attempt';
+                    }else if(($pickup_request->status_id == 3)  && ($pickup_request->attempts == 2)){
+                        return 'second_attempt';
+                    }else if(($pickup_request->status_id == 3)  && ($pickup_request->attempts > 2)){
+                        return 'multiple_attempt';
+                    }else if($pickup_request->after_cut_off_time){
+                        return 'after_cut_off_time';
+                    }else if (Carbon::parse($pickup_request->pickup_address_created_at)->startOfDay()->diffInDays($today) <= 6) {
+                        return 'new_pickup';
                     }
                 }
             ])
@@ -284,5 +292,30 @@ class V2AdminPickupsController extends Controller
         }
 
         return ['status' => 0, 'success' => 'Pickup Request(s) has been Assigned to the Rider'];
+    }
+
+    public function pending_update(Request $request){
+        $pickup_request_ids = $request->pickup_request_ids;
+        $reason_id = $request->reason_id;
+        $trax_remarks = $request->trax_remarks;
+        if(count($pickup_request_ids) > 0){
+            foreach ($pickup_request_ids as $pickup_request_id) {
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                if($pickup_request){
+                    $pickup_request_attempts = $pickup_request->pickup_attempt_latest;
+                    $pickup_request->last_updated_by = Auth::id();
+                    $pickup_request->save();
+                    if($pickup_request_attempts){
+                        $pickup_request_attempts->reason_id = $reason_id;
+                        $pickup_request_attempts->trax_remarks = $trax_remarks;
+                        $pickup_request_attempts->save();
+                    }
+
+                }
+            }
+            return ['status' => 0, 'success' => 'Pickup(s) updated successfully!'];
+        }
+        return ['status' => 1, 'error' => 'Pickup(s) not selected!'];
+
     }
 }
