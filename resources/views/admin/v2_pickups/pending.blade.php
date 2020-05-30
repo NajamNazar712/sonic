@@ -18,8 +18,15 @@
                             @include('admin.inc.messages')
                             <div class="row justify-content-end">
                                 <div class="col-5">
-                                    <div class="card border border-lighten-5">
-                                        <div class="card-content">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="heading-elements">
+                                                <ul class="list-inline mb-0">
+                                                    <li class="primary"><a data-action="collapse">Legend <i class="ft-minus"></i></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-content collapse">
                                             <div class="card-body p-1">
                                                 <h4 class=" info">Legend</h4>
                                                 <table class="table mb-0">
@@ -319,12 +326,13 @@
                         $('#update_pickup_modal').modal('show');
                     }
                 },
+                // {
+                //     extend: 'excel',
+                //     title: 'Pending Pickups',
+                //     className: 'btn btn-primary',
+                //     text: '<i class="la la-file-excel-o"></i> Excel',
+                // },
                 {
-                    extend: 'excel',
-                    title: 'Pending Pickups',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                }, {
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
