@@ -304,6 +304,7 @@
 
             buttons: [
                     @if (session('role_id') == 1 || in_array(19, session('permissions')))
+                        @if(\Carbon\Carbon::now() < $rider_cut_off_time)
                 {
                     text: 'Assign',
                     className: 'btn btn-primary assign',
@@ -314,6 +315,7 @@
                         $('#assign_to_rider').modal('show');
                     }
                 },
+                    @endif
                     @endif
                 {
                     text: 'Update',
