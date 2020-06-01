@@ -18,6 +18,7 @@ use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+
 use Auth;
 
 use Yajra\Datatables\Datatables;
@@ -114,42 +115,24 @@ class RiderPickupsController extends Controller {
     	return $datatables->make(true);
     }
 
-    public function pickups_shipments(Request $request) {
-        $rider_pickup_shipments = RiderPickupShipment::where('rider_pickup_id', $request->rider_pickup_id);
-
-        if ($rider_pickup_shipments->exists()) {
-            $rider_pickup_shipments = $rider_pickup_shipments->get();
-
-            $tracking_numbers = array();
-
-            foreach ($rider_pickup_shipments as $rider_pickup_shipment) {
-                $tracking_numbers[] = $rider_pickup_shipment->shipment->tracking_number;
-            }
-
-            return ['status' => 0, 'success' => 'Shipments Listed', 'tracking_numbers' => $tracking_numbers];
-        }
-        else {
-            return ['status' => 1, 'error' => 'No Shipments'];
-        }
-    }
     public function pickups_list_v2(Request $request) {
 
         
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `v2_pickup_requests` AS `rp1` where `rp1`.`status_id` = 2 and `rp1`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_picked`');
-            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `v2_pickup_requests` AS `rp` where `rp`.`status_id` = 3 and `rp`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_not_picked`');
+            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `v2_rider_pickups` AS `rp1` where `rp1`.`pickup_type` = 1 and `rp1`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_picked`');
+            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `v2_rider_pickups` AS `rp` where `rp`.`pickup_type` = 0 and `rp`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_not_picked`');
         }else{
-            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `v2_pickup_requests` AS `rp1` where `rp1`.`status_id` = 2) AS `pickup_picked`');
-            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `v2_pickup_requests` AS `rp` where `rp`.`status_id` = 3) AS `pickup_not_picked`');
+            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `v2_rider_pickups` AS `rp1` where `rp1`.`pickup_type` = 1) AS `pickup_picked`');
+            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `v2_rider_pickups` AS `rp` where `rp`.`pickup_type` = 0) AS `pickup_not_picked`');
         }
 
 
     	$rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
     	->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
-    	->join('riders as r', 'pn.rider_id', 'r.id')
-    	->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
+        ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
+        ->join('riders as r', 'pr.current_rider_id', 'r.id')
     	->join('users as u', 'pr.shipper_id', 'u.id')
     	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
     	->join('cities as c', 'usi.city_id', 'c.id')
@@ -204,9 +187,28 @@ class RiderPickupsController extends Controller {
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $rider_pickups->whereBetween('rider_pickups.created_at', [$from,$to]);
+            $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
         }
     	return $datatables->make(true);
+    }
+
+    public function pickups_shipments(Request $request) {
+        $rider_pickup_shipments = RiderPickupShipment::where('rider_pickup_id', $request->rider_pickup_id);
+
+        if ($rider_pickup_shipments->exists()) {
+            $rider_pickup_shipments = $rider_pickup_shipments->get();
+
+            $tracking_numbers = array();
+
+            foreach ($rider_pickup_shipments as $rider_pickup_shipment) {
+                $tracking_numbers[] = $rider_pickup_shipment->shipment->tracking_number;
+            }
+
+            return ['status' => 0, 'success' => 'Shipments Listed', 'tracking_numbers' => $tracking_numbers];
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipments'];
+        }
     }
 
     public function pickups_action_log_index() {

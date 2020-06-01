@@ -16,14 +16,13 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
-
 							<div class="row justify-content-center">
-                                <div class="col-12">
+                                <div class="col-3">
                                     <label class="font-medium-2 font-weight-bold block">Old Rider Pickup Action Logs</label>
                                     <div class="form-group">
-                                        <label for="old_rider_pickup_action_log" class="font-medium-2 text-bold-600 mr-1">No</label>
-                                        <input type="checkbox" name="old_rider_pickup_action_log" id="old_rider_pickup_action_log" class=" old_rider_pickup_action_log" data-size="sm" data-switchery="true">
-                                        <label for="old_rider_pickup_action_log" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                                        <label for="old_rider_pickup" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                        <input type="checkbox" name="old_rider_pickup" id="old_rider_pickup" class=" old_rider_pickup" data-size="sm" data-switchery="true">
+                                        <label for="old_rider_pickup" class="font-medium-2 text-bold-600 ml-1">Yes</label>
                                     </div>
                                 </div>
                             </div>
@@ -170,156 +169,172 @@
                 }
             });
 
-			var elem = document.querySelector('#old_rider_pickup_action_log');
-     		   var switchery = new Switchery(elem);
+			var elem = document.querySelector('#old_rider_pickup');
+     		var switchery = new Switchery(elem);
 
-				var switchStatus = false;
-				var tableUrl='{{ route('admin.pickups.rider.v2_list') }}';
-				console.log(tableUrl);
+			var switchStatus = false;
+			
+				// console.log(tableUrl);
+			var	tableUrl = '{{ route('admin.pickups.rider.v2_list') }}';
 
-				$("#old_rider_pickup_action_log").on('change', function() {
-					if ($(this).is(':checked')) {
-						switchStatus = $(this).is(':checked');
-						console.log(switchStatus);
-						tableUrl='{{ route('admin.pickups.rider.list') }}';
-						console.log(tableUrl);
-					
+				
+
+            var summary_flag = false;
+			var table;
+			$("#old_rider_pickup").on('change', function() {
+				tableUrl = '';
+				summary_flag = true;
+				if ($(this).is(':checked')) {
+					tableUrl = '{{ route('admin.pickups.rider.list') }}';
+					var params = table.ajax.params();
+					 table.ajax.url(tableUrl).load();
+					// table.draw();
+					// $('#datatable').DataTable({
+					// 	ajax: {
+					// 	url: tableUrl	,
+					// 	type: 'POST',
+					// 	data: this.params,
+					// },
+					// });
+				}
+				else {
+					summary_flag = false;
+					tableUrl='{{ route('admin.pickups.rider.v2_list') }}';
+					table.ajax.url(tableUrl).load();
+					// table.draw();
+				}
+			});
+		
+			
+			table = $('#datatable').DataTable({
+			dom: '<"d-inline-block"l><"pull-right"B>tipr',
+			buttons: [{
+				extend: 'excel',
+				title: 'Rider Pickups',
+				className:'btn btn-primary',
+				text: '<i class="la la-file-excel-o"></i> Excel'
+			}, 'reset'],
+			scrollX: true,
+			lengthMenu: [[10, 50, 100, 500, 1000, -1], [10, 50, 100, 500, 1000, 'All']],
+			pageLength: 10,
+			pagingType: 'full_numbers',
+			processing: true,
+			language: {
+				processing: data_table_loader
+			},
+			serverSide: true,
+			ajax: {
+				// url: '{{ route('admin.pickups.rider.v2_list') }}',
+				url: tableUrl,
+				data: function (d) {
+					d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+					d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+				}
+			},
+			rowId: 'id',
+			order: [[0, 'desc']],
+			columns: [
+				{data: 'added_at', name: 'rider_pickups.added_at', class: 'align-middle added_at'},
+				{data: 'rider', name: 'r.name', class: 'align-middle rider'},
+				{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+				{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
+				{data: 'city', name: 'c.name', class: 'align-middle city'},
+				{data: 'pickup_type', name: 'rider_pickups.pickup_type', class: 'align-middle pickup_type'},
+				{data: 'start_location_latitude', name: 'rider_pickups.start_location_latitude', class: 'align-middle start_location_latitude'},
+				{data: 'start_location_longitude', name: 'rider_pickups.start_location_longitude', class: 'align-middle start_location_longitude'},
+				{data: 'actual_location_latitude', name: 'rider_pickups.actual_location_latitude', class: 'align-middle actual_location_latitude'},
+				{data: 'actual_location_longitude', name: 'rider_pickups.actual_location_longitude', class: 'align-middle actual_location_longitude'},
+				{data: 'distance_from_start_to_actual', name: 'rider_pickups.distance_from_start_to_actual', class: 'align-middle distance_from_start_to_actual'},
+				{data: 'current_location_latitude', name: 'rider_pickups.current_location_latitude', class: 'align-middle current_location_latitude'},
+				{data: 'current_location_longitude', name: 'rider_pickups.current_location_longitude', class: 'align-middle current_location_longitude'},
+				{data: 'distance_from_current_to_actual', name: 'rider_pickups.distance_from_current_to_actual', class: 'align-middle distance_from_current_to_actual'},
+				{data: 'shipments', name: 'rider_pickups.shipments', class: 'align-middle shipments'},
+				{data: 'reason', name: 'rider_pickups.pickup_not_pick_reason_id', class: 'align-middle reason'},
+				{data: 'picture_path', name: 'rider_pickups.picture_path', class: 'align-middle picture_path', orderable: false, searchable: false},
+				{data: 'pickup_note_id', name: 'rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
+				{data: 'pickup_request_id', name: 'rider_pickups.pickup_request_id', class: 'align-middle pickup_request_id'}
+			],
+			drawCallback: function (settings) {
+				var api = new $.fn.dataTable.Api( settings );
+				var data = api.rows( {page:'current'} ).data();
+				if(data.length > 0){
+					$('#picked').text(data[0].pickup_picked);
+					$('#notpicked').text(data[0].pickup_not_picked);
+				}
+				
+			},
+			initComplete: function(settings,json) {
+				
+				var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+				var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+				var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+				var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+				var pickup_type_select = '<select name="pickup_type_select" id="pickup_type_select" class="select2 form-control"></select>';
+				var reason_select = '<select name="reason_select" id="reason_select" class="select2 form-control"></select>';
+
+				this.api().columns().every(function(column_id) {
+					var column = this;
+					var header = column.header();
+
+					if ($(header).is('.serial_number') || $(header).is('.picture_path')) {
+						$(td).appendTo($(search));
+					}
+					else if($(header).is('.pickup_type')) {
+						$(pickup_type_select).appendTo($(search)).on('change', function () {
+							column.search($(this).val(), false, false, true).draw();
+						}).wrap(td);
+					}
+					else if($(header).is('.reason')) {
+						$(reason_select).appendTo($(search)).on('change', function () {
+							column.search($(this).val(), false, false, true).draw();
+						}).wrap(td);
 					}
 					else {
-					switchStatus = $(this).is(':checked');
-					console.log(switchStatus);
-					tableUrl='{{ route('admin.pickups.rider.v2_list') }}';
-					console.log(tableUrl);
-					
-				
+						var current = $(input).appendTo($(search)).on('change', function() {
+							column.search($(this).val(), false, false, true).draw();
+						}).wrap(td).after(icon);
+
+						if (column.search()) {
+							current.val(column.search());
+						}
 					}
 				});
 
-            var summary_flag = true;
-			var table = $('#datatable').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					extend: 'excel',
-					title: 'Rider Pickups',
-					className:'btn btn-primary',
-					text: '<i class="la la-file-excel-o"></i> Excel'
-				}, 'reset'],
-				scrollX: true,
-				lengthMenu: [[10, 50, 100, 500, 1000, -1], [10, 50, 100, 500, 1000, 'All']],
-				pageLength: 10,
-				pagingType: 'full_numbers',
-				processing: true,
-				language: {
-					processing: data_table_loader
-				},
-				serverSide: true,
-				ajax: {
-                    url: tableUrl,
-                    data: function (d) {
-                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                    }
-                },
-				rowId: 'id',
-				order: [[0, 'desc']],
-				columns: [
-					{data: 'added_at', name: 'rider_pickups.added_at', class: 'align-middle added_at'},
-					{data: 'rider', name: 'r.name', class: 'align-middle rider'},
-					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
-					{data: 'city', name: 'c.name', class: 'align-middle city'},
-					{data: 'pickup_type', name: 'rider_pickups.pickup_type', class: 'align-middle pickup_type'},
-					{data: 'start_location_latitude', name: 'rider_pickups.start_location_latitude', class: 'align-middle start_location_latitude'},
-					{data: 'start_location_longitude', name: 'rider_pickups.start_location_longitude', class: 'align-middle start_location_longitude'},
-					{data: 'actual_location_latitude', name: 'rider_pickups.actual_location_latitude', class: 'align-middle actual_location_latitude'},
-					{data: 'actual_location_longitude', name: 'rider_pickups.actual_location_longitude', class: 'align-middle actual_location_longitude'},
-					{data: 'distance_from_start_to_actual', name: 'rider_pickups.distance_from_start_to_actual', class: 'align-middle distance_from_start_to_actual'},
-					{data: 'current_location_latitude', name: 'rider_pickups.current_location_latitude', class: 'align-middle current_location_latitude'},
-					{data: 'current_location_longitude', name: 'rider_pickups.current_location_longitude', class: 'align-middle current_location_longitude'},
-					{data: 'distance_from_current_to_actual', name: 'rider_pickups.distance_from_current_to_actual', class: 'align-middle distance_from_current_to_actual'},
-					{data: 'shipments', name: 'rider_pickups.shipments', class: 'align-middle shipments'},
-					{data: 'reason', name: 'rider_pickups.pickup_not_pick_reason_id', class: 'align-middle reason'},
-					{data: 'picture_path', name: 'rider_pickups.picture_path', class: 'align-middle picture_path', orderable: false, searchable: false},
-					{data: 'pickup_note_id', name: 'rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
-					{data: 'pickup_request_id', name: 'rider_pickups.pickup_request_id', class: 'align-middle pickup_request_id'}
-				],
-				drawCallback: function (settings) {
-                    var api = new $.fn.dataTable.Api( settings );
-                    var data = api.rows( {page:'current'} ).data();
-                    if(data.length > 0){
-						$('#picked').text(data[0].pickup_picked);
-						$('#notpicked').text(data[0].pickup_not_picked);
-					}
-                    
-                },
-				initComplete: function(settings,json) {
-					
-					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+				var pickup_not_pick_reasons = $.map({!! $pickup_not_pick_reasons !!}, function (obj) {
+					obj.id = obj.id;
+					obj.text = obj.name;
 
-					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-					var pickup_type_select = '<select name="pickup_type_select" id="pickup_type_select" class="select2 form-control"></select>';
-					var reason_select = '<select name="reason_select" id="reason_select" class="select2 form-control"></select>';
+					return obj;
+				});
 
-                    this.api().columns().every(function(column_id) {
-						var column = this;
-						var header = column.header();
+				$('#pickup_type_select').prepend('<option value="" selected></option>').select2({
+					data: {!! json_encode($pickup_types) !!},
+					placeholder: "Select Type",
+					width:'100%',
+					containerCssClass: 'select-xs',
+					dropdownCssClass: 'form-control-sm p-0'
+				});
 
-						if ($(header).is('.serial_number') || $(header).is('.picture_path')) {
-							$(td).appendTo($(search));
-						}
-						else if($(header).is('.pickup_type')) {
-							$(pickup_type_select).appendTo($(search)).on('change', function () {
-								column.search($(this).val(), false, false, true).draw();
-							}).wrap(td);
-						}
-						else if($(header).is('.reason')) {
-							$(reason_select).appendTo($(search)).on('change', function () {
-								column.search($(this).val(), false, false, true).draw();
-							}).wrap(td);
-						}
-						else {
-							var current = $(input).appendTo($(search)).on('change', function() {
-								column.search($(this).val(), false, false, true).draw();
-							}).wrap(td).after(icon);
+				$('#reason_select').prepend('<option value="" selected></option>').select2({
+					data: pickup_not_pick_reasons,
+					placeholder: "Select Reason",
+					width:'100%',
+					containerCssClass: 'select-xs',
+					dropdownCssClass: 'form-control-sm p-0'
+				});
 
-							if (column.search()) {
-								current.val(column.search());
-							}
-						}
-					});
-
-					var pickup_not_pick_reasons = $.map({!! $pickup_not_pick_reasons !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-
-                        return obj;
-                    });
-
-                    $('#pickup_type_select').prepend('<option value="" selected></option>').select2({
-                        data: {!! json_encode($pickup_types) !!},
-                        placeholder: "Select Type",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-
-                    $('#reason_select').prepend('<option value="" selected></option>').select2({
-                        data: pickup_not_pick_reasons,
-                        placeholder: "Select Reason",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-
-                    this.api().table().columns.adjust();
-				}
-			});
+				this.api().table().columns.adjust();
+			}
+		});
+			
+			
 			
 			$('#search_filter_btn').on('click',function () {
                 table.draw();
             });
+
+			
 
 			var route = '{!! route('admin.tracking.index') !!}';
 
