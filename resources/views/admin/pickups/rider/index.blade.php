@@ -18,7 +18,7 @@
 							@include('admin.inc.messages')
 							<div class="row justify-content-center">
                                 <div class="col-3">
-                                    <label class="font-medium-2 font-weight-bold block">Old Rider Pickup Action Logs</label>
+                                    <label class="font-medium-2 font-weight-bold block">Old Rider Pickup</label>
                                     <div class="form-group">
                                         <label for="old_rider_pickup" class="font-medium-2 text-bold-600 mr-1">No</label>
                                         <input type="checkbox" name="old_rider_pickup" id="old_rider_pickup" class=" old_rider_pickup" data-size="sm" data-switchery="true">
