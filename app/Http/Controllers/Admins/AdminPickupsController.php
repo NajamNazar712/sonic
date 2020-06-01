@@ -56,7 +56,7 @@ class AdminPickupsController extends Controller
     static public function generate($shipment_id) {
       $shipment = Shipment::find($shipment_id);
 
-      $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->where('rider_status', 1)->where('status_id', 1);
+      $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->whereIn('status_id', [1,3]);
 
       $shipments_count = 0;
       $shipments = array();
@@ -85,8 +85,8 @@ class AdminPickupsController extends Controller
                     }
                 }
                 $existing_pickup_request->renew = 1;
-                $existing_pickup_request->booked = 0;
-                $existing_pickup_request->received = 0;
+//                $existing_pickup_request->booked = 0;
+//                $existing_pickup_request->received = 0;
                 $existing_pickup_request->save();
             }
         }
@@ -102,9 +102,9 @@ class AdminPickupsController extends Controller
 
       ShipmentsPickupJourneyController::add($shipment_id, 1, NULL, $pickup_request->id);
 
-      $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $shipment_id);
-
-      if (!$pickup_request_assigned_shipment->exists()) {
+//      $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $shipment_id);
+//
+//      if (!$pickup_request_assigned_shipment->exists()) {
         $pickup_request_assigned_shipment = new V2PickupRequestShipment();
 
         $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
@@ -112,24 +112,24 @@ class AdminPickupsController extends Controller
         $pickup_request_assigned_shipment->status = 0;
 
         $pickup_request_assigned_shipment->save();
-      }
-      else {
-        $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
-
-        $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
-        $pickup_request_assigned_shipment->status = 0;
-
-        $pickup_request_assigned_shipment->save();
-      }
+//      }
+//      else {
+//        $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
+//
+//        $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
+//        $pickup_request_assigned_shipment->status = 0;
+//
+//        $pickup_request_assigned_shipment->save();
+//      }
 
       if(count($shipments) > 0){
           foreach ($shipments as $is_shipment){
 
               ShipmentsPickupJourneyController::add($is_shipment, 1, NULL, $pickup_request->id);
 
-              $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $is_shipment);
-
-              if (!$pickup_request_assigned_shipment->exists()) {
+//              $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $is_shipment);
+//
+//              if (!$pickup_request_assigned_shipment->exists()) {
                   $pickup_request_assigned_shipment = new V2PickupRequestShipment();
 
                   $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
@@ -137,15 +137,15 @@ class AdminPickupsController extends Controller
                   $pickup_request_assigned_shipment->status = 0;
 
                   $pickup_request_assigned_shipment->save();
-              }
-              else {
-                  $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
-
-                  $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
-                  $pickup_request_assigned_shipment->status = 0;
-
-                  $pickup_request_assigned_shipment->save();
-              }
+//              }
+//              else {
+//                  $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
+//
+//                  $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
+//                  $pickup_request_assigned_shipment->status = 0;
+//
+//                  $pickup_request_assigned_shipment->save();
+//              }
           }
       }
 
