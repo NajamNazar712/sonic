@@ -518,7 +518,7 @@
                     var tracking_number = $(form).find('input.scan_try_and_buy_tracking_number').val();
                     var weight = $(form).find('input.try_and_buy_weight').val();
                     $.ajax({
-                        url: '{!! route('admin.pickups.receive.try_and_buy.shipment_details') !!}',
+                        url: '{!! route('admin.v2_pickups.arrival.individual.try_and_buy.shipment_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,
@@ -537,7 +537,7 @@
 
                                 if (index === -1) {
                                     var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).draw().node();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).draw().node();
                                     $(new_row).css('color', 'white');
                                     $(new_row).css('background-color', 'orange');
                                     new_row.id = data.details.id;

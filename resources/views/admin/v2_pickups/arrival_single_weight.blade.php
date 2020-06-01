@@ -54,8 +54,6 @@
                             <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.v2_pickups.arrival.bulk.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
-                                <input type="hidden" name="pickup_receive_pickup_note_id" class="pickup_receive_pickup_note_id" value="{{ session('pickup_receive_pickup_note_id') }}">
-
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
 
                                 <div class="form-group ml-1">
@@ -114,14 +112,53 @@
                             </div>
                         </div>
 
-                        <div class="row justify-content-center">
-                            <div class="form-group col-5">
-                                <input type="text" name="try_and_buy_weight" id="try_and_buy_weight" class="form-control try_and_buy_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000" disabled="disabled">
-                            </div>
-                        </div>
-
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary try_and_buy_confirm" id="try_and_buy_confirm" disabled="disabled">Confirm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ShipmentWeightModal" data-backdrop="static" role="dialog" aria-labelledby="ShipmentWeightModal" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="delivered_shipments_modal_title">Update Weight</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_shipment_weight_form" class="form-inline mb-1 justify-content-center" method="post" action="{{ route('admin.v2_pickups.arrival.bulk.store') }}" novalidate="novalidate">
+                        {{ csrf_field() }}
+
+                        <input type="hidden" name="shipment_ids" class="shipment_ids">
+                        <div class="form-group ml-1">
+                            <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000">
+                        </div>
+
+                        <div class="form-group text-center mt-1 mb-1 ml-1 p-1 border border-light rounded">
+                            <label class="mr-1">Volumetric Weight</label>
+                            <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
+                        </div>
+
+                        <div class="form-group ml-1 volumetric_weights">
+                            <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                        </div>
+
+                        <div class="form-group ml-1 volumetric_weights">
+                            <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                        </div>
+
+                        <div class="form-group ml-1 volumetric_weights">
+                            <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                        </div>
+
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
                         </div>
                     </form>
                 </div>
@@ -233,18 +270,18 @@
                 }
             });
 
-            $('#add_shipment_form input.volumetric_weight').checkboxpicker().bind('change', function() {
+            $('#add_shipment_weight_form input.volumetric_weight').checkboxpicker().bind('change', function() {
                 var parent = $(this).parent('.form-group').prev('.form-group');
 
                 if (this.checked) {
-                    $('#add_shipment_form input.weight').val('').prop('disabled', true);
+                    $('#add_shipment_weight_form input.weight').val('').prop('disabled', true);
 
-                    $('#add_shipment_form .volumetric_weights input').val('').prop('disabled', false);
+                    $('#add_shipment_weight_form .volumetric_weights input').val('').prop('disabled', false);
                 }
                 else {
-                    $('#add_shipment_form input.weight').val('').prop('disabled', false);
+                    $('#add_shipment_weight_form input.weight').val('').prop('disabled', false);
 
-                    $('#add_shipment_form .volumetric_weights input').val('').prop('disabled', true);
+                    $('#add_shipment_weight_form .volumetric_weights input').val('').prop('disabled', true);
                 }
             });
 
@@ -264,35 +301,28 @@
                 'allowPlus': false
             });
 
-            $('#try_and_buy_weight').inputmask({
+            $('#add_shipment_weight_form input.weight').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
                 'digits': 2
             });
 
-            $('#add_shipment_form input.weight').inputmask({
+            $('#add_shipment_weight_form .volumetric_weights input.length').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
                 'digits': 2
             });
 
-            $('#add_shipment_form .volumetric_weights input.length').inputmask({
+            $('#add_shipment_weight_form .volumetric_weights input.breadth').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
                 'digits': 2
             });
 
-            $('#add_shipment_form .volumetric_weights input.breadth').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'digits': 2
-            });
-
-            $('#add_shipment_form .volumetric_weights input.height').inputmask({
+            $('#add_shipment_weight_form .volumetric_weights input.height').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
@@ -347,7 +377,6 @@
                                 }
                                 else if(data.status == 2){
                                     $('#scan_try_and_buy_tracking_number').prop('disabled', true);
-                                    $('#try_and_buy_weight').prop('disabled', true);
                                     $('#try_and_buy_confirm').prop('disabled', true);
                                     if(data.details.scanned_shipment_item){
                                         var item_index = $.inArray(parseInt(data.details.scanned_shipment_item), all_shipment_item_ids);
@@ -464,7 +493,6 @@
                     if(parseInt(shipment_items_count) !== parseInt(check)){
                         $('#try_and_buy_airwaybill').prop('disabled', true);
                         $('#scan_try_and_buy_tracking_number').prop('disabled', true);
-                        $('#try_and_buy_weight').prop('disabled', true);
                         $('#try_and_buy_confirm').prop('disabled', true);
                     }
                 }
@@ -474,7 +502,6 @@
             $('#try_and_buy_airwaybill').on('click', function () {
                 id = $('#try_and_buy_shipment_id').val();
                 $('#scan_try_and_buy_tracking_number').prop('disabled', false);
-                $('#try_and_buy_weight').prop('disabled', false);
                 $('#try_and_buy_confirm').prop('disabled', false);
                 print(id);
             });
@@ -488,16 +515,12 @@
                 submitHandler: function (form) {
                     var shipment_id = $('#try_and_buy_shipment_id').val();
                     shipment_ids.push(shipment_id);
-                    var pickup_receive_pickup_note_id = $('#add_shipment_form').find('input.pickup_receive_pickup_note_id').val();
                     var tracking_number = $(form).find('input.scan_try_and_buy_tracking_number').val();
-                    var weight = $(form).find('input.try_and_buy_weight').val();
                     $.ajax({
-                        url: '{!! route('admin.pickups.receive.try_and_buy.shipment_details') !!}',
+                        url: '{!! route('admin.v2_pickups.arrival.bulk.try_and_buy.shipment_details') !!}',
                         method: 'POST',
                         data: {
-                            'pickup_receive_pickup_note_id': pickup_receive_pickup_note_id,
                             'tracking_number': tracking_number,
-                            'weight': weight,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -512,7 +535,7 @@
 
                                 if (index === -1) {
                                     var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).draw().node();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, remove_button]).draw().node();
                                     $(new_row).css('color', 'white');
                                     $(new_row).css('background-color', 'orange');
                                     new_row.id = data.details.id;
@@ -552,7 +575,6 @@
 
             $('#tryAndbuyModal').on('hide.bs.modal', function (e) {
                 $('#scan_try_and_buy_tracking_number').val('');
-                $('#try_and_buy_weight').val('');
                 shipment_item_ids = [];
                 try_and_buy_table.clear().draw();
             });
@@ -560,8 +582,12 @@
             $('#arrival_of_shipments_form').bind('submit', function(e) {
                 e.preventDefault();
 
-                $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
+                $('#add_shipment_weight_form input.shipment_ids').val(shipment_ids);
 
+                $('#ShipmentWeightModal').modal('show');
+            });
+            $('#add_shipment_weight_form').bind('submit', function(e) {
+                e.preventDefault();
                 var form = this;
 
                 swal({
