@@ -1379,6 +1379,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@last_mile_status_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@last_mile_status_list')->name('list');
         });
+
     });
 
     //Reports end

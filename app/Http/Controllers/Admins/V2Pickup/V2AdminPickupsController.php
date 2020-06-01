@@ -47,7 +47,14 @@ class V2AdminPickupsController extends Controller
             $setting = $setting->first();
             $cut_off_time = $setting->setting_value;
         }
-        return view('admin.v2_pickups.pending')->with(['riders' => $riders, 'legends' => $legends, 'cut_off_time' => $cut_off_time, 'pickup_statuses' => $pickup_statuses, 'rider_statuses' => $rider_statuses, 'not_pick_reasons' => $not_pick_reasons]);
+
+        $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
+        if($rider_settings->exists()){
+            $rider_settings = $rider_settings->first();
+            $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+        }
+
+        return view('admin.v2_pickups.pending')->with(['riders' => $riders, 'legends' => $legends, 'cut_off_time' => $cut_off_time, 'pickup_statuses' => $pickup_statuses, 'rider_statuses' => $rider_statuses, 'not_pick_reasons' => $not_pick_reasons, 'rider_cut_off_time' => $rider_cut_off_time]);
     }
 
     public function pending_list(Request $request) {
