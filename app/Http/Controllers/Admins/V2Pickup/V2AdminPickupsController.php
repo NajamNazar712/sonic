@@ -61,7 +61,7 @@ class V2AdminPickupsController extends Controller
             $setting = $setting->first();
             $cut_off_time = $setting->setting_value;
         }
-        $rider_cut_off_time = NULL;
+
         $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
         if($rider_settings->exists()){
             $rider_settings = $rider_settings->first();
@@ -605,7 +605,6 @@ class V2AdminPickupsController extends Controller
 
         NotificationsController::send(4, $shipment_ids);
 
-        return redirect()->back()->with('success','Shipments arrived Successfully!');
         return redirect()->route('admin.v2_pickups.pending.index')->with('success','Shipments arrived Successfully!');
 
     }
