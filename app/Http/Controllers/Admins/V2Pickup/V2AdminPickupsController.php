@@ -47,7 +47,7 @@ class V2AdminPickupsController extends Controller
             $setting = $setting->first();
             $cut_off_time = $setting->setting_value;
         }
-
+        $rider_cut_off_time = NULL;
         $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
         if($rider_settings->exists()){
             $rider_settings = $rider_settings->first();
