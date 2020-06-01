@@ -51,7 +51,7 @@
                                 </thead>
                             </table>
 
-                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.pickups.receive.arrival_of_shipments.store') }}" novalidate="novalidate">
+                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.v2_pickups.arrival.bulk.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="pickup_receive_pickup_note_id" class="pickup_receive_pickup_note_id" value="{{ session('pickup_receive_pickup_note_id') }}">
