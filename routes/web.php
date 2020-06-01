@@ -613,11 +613,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pending_list')->name('list');
             Route::put('assign', 'Admins\V2Pickup\V2AdminPickupsController@pending_assign')->name('assign');
             Route::put('update', 'Admins\V2Pickup\V2AdminPickupsController@pending_update')->name('update');
+            Route::post('bookings/all','Admins\V2Pickup\V2AdminPickupsController@pending_all_bookings')->name('bookings.all');
+            Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
+
         });
         Route::prefix('arrival')->name('arrival.')->group(function () {
             Route::prefix('bulk')->name('bulk.')->group(function () {
                 Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_index')->name('index');
-                Route::post('shipment_details', 'Admins\AdminPickupsController@arrival_bulk_shipment_details')->name('shipment_details');
+                Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_shipment_details')->name('shipment_details');
             });
         });
     });

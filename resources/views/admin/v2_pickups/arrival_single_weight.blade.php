@@ -186,7 +186,7 @@
 
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                scrollX: true,
+                scrollX: false,
                 paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
@@ -211,10 +211,7 @@
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
-
-
                     });
-
                     this.api().table().columns.adjust();
                 }
             });
@@ -335,7 +332,7 @@
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
