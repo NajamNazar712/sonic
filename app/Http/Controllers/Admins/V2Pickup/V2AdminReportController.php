@@ -197,7 +197,7 @@ class V2AdminReportController extends Controller
                 else if($pickup_report->category_id == 3){
                     return 'attempt_failed';
                 }
-                else if($pickup_report->category_id == 4){
+                else if($pickup_report->status_id == 4){
                     return 'cancelled';
                 }
             }
