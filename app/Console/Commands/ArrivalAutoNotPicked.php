@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\V2Pickup\V2PickupCronController;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class ArrivalAutoNotPicked extends Command
@@ -18,7 +20,7 @@ class ArrivalAutoNotPicked extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Arrival Auto Not Picked Cron';
 
     /**
      * Create a new command instance.
@@ -37,6 +39,6 @@ class ArrivalAutoNotPicked extends Command
      */
     public function handle()
     {
-
+        dd(V2PickupCronController::arrival_not_picked());
     }
 }
