@@ -56,7 +56,8 @@
                                     <div class="form-group pb-1">
                                         <select name="cut_off_time" class="select2" id="cut_off_time" data-rule-required="true" data-msg-required="Shipper is required">
                                             
-                                            <option value="">Select Me</option>
+                                            <option value="null">Before</option>
+                                            <option value="1">After</option>
                                         
                                         </select>
                                     </div>
@@ -93,7 +94,7 @@
                                 <div class='legend-scale'>
                                 <ul class='legend-labels'>
                                     @foreach($legends as $legend)
-                                        <li><span style="background-color: {{$legend->color}}"></span>{{ $legend->name }}</li>
+                                         <li><span style="background-color: {{$legend->color}}"></span>{{ $legend->name }}</li> 
                                     @endforeach
                                 </ul>
                                 </div>
@@ -103,39 +104,45 @@
                     </div>
                 </div>
                 <div class="" id="report_data">
-                <h2 class="mb-1">
-                    Summary
-                </h2>
+                    <h2 class="mb-1">
+                        Summary
+                    </h2>
+               
                     <div class="row">
                         <input type="hidden" id="cards_filter_input">
                         <div class="col-3">
                             <div class="card pull-up">
-                                <div class="card-content border rounded" id="shipments_booked">
+                                <div class="card-content border rounded" id="totals">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="media-body text-left">
                                                 <span>Total</span>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="booked">0</h3>
+                                            @foreach($stats as $stat)
+                                                <h3 id="total">{{$stat->total}}</h3>
+                                                @endforeach  
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>    
+                    </div> 
+                     
                     <div class="row">    
                         <div class="col-3">
-                            <div class="card pull-up">
-                                <div class="card-content border rounded" id="shipments_booked">
+                            <div class="card bg-gradient-directional-primary pull-up">
+                                <div class="card-content" id="pending_operation">
                                     <div class="card-body">
                                         <div class="media d-flex">
-                                            <div class="media-body text-left">
+                                            <div class="media-body text-white text-left">
                                                 <span>Pending Operations</span>
                                             </div>
-                                            <div class="media-body text-right">
-                                                <h3 id="booked">0</h3>
+                                            <div class="media-body  text-right">
+                                            @foreach($stats as $stat)
+                                                <h3 class="text-white" id="pending_operations">{{$stat->pending_operations}}</h3>
+                                                @endforeach 
                                             </div>
                                         </div>
                                     </div>
@@ -143,15 +150,17 @@
                             </div>
                         </div>    
                         <div class="col-3">
-                            <div class="card pull-up">
-                                <div class="card-content border rounded" id="shipments_booked">
+                            <div class="card bg-gradient-directional-info pull-up">
+                                <div class="card-content" id="pending_sale">
                                     <div class="card-body">
                                         <div class="media d-flex">
-                                            <div class="media-body text-left">
+                                            <div class="media-body text-white text-left">
                                                 <span>Pending Sales</span>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="booked">0</h3>
+                                            @foreach($stats as $stat)
+                                                <h3 class="text-white" id="pending_sales">{{$stat->pending_sales}}</h3>
+                                                @endforeach 
                                             </div>
                                         </div>
                                     </div>
@@ -161,15 +170,17 @@
                     </div>    
                     <div class="row">      
                         <div class="col-3">
-                            <div class="card pull-up">
-                                <div class="card-content border rounded" id="shipments_booked">
+                            <div class="card bg-gradient-directional-booked_shipments pull-up">
+                                <div class="card-content" id="before_cut_off_times">
                                     <div class="card-body">
                                         <div class="media d-flex">
-                                            <div class="media-body text-left">
+                                            <div class="media-body text-white text-left">
                                                 <span>Before Cut-off</span>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="booked">0</h3>
+                                            @foreach($stats as $stat)
+                                                <h3 class="text-white" id="before_cut_off_time">{{$stat->before_cut_off_time}}</h3>
+                                                @endforeach 
                                             </div>
                                         </div>
                                     </div>
@@ -177,15 +188,17 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card pull-up">
-                                <div class="card-content border rounded" id="shipments_booked">
+                            <div class="card bg-gradient-directional-pending_confirmation pull-up">
+                                <div class="card-content" id="after_cut_off_times">
                                     <div class="card-body">
                                         <div class="media d-flex">
-                                            <div class="media-body text-left">
+                                            <div class="media-body text-white text-left">
                                                 <span>After Cut-off</span>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="booked">0</h3>
+                                            @foreach($stats as $stat)
+                                                <h3 class="text-white" id="after_cut_off_time">{{$stat->after_cut_off_time}}</h3>
+                                                @endforeach
                                             </div>
                                         </div>
                                     </div>
@@ -195,15 +208,17 @@
                     </div>    
                     <div class="row">    
                         <div class="col-3">
-                            <div class="card pull-up">
-                                <div class="card-content border rounded" id="shipments_booked">
+                            <div class="card bg-gradient-directional-pending_return pull-up">
+                                <div class="card-content" id="attempted_and_pick">
                                     <div class="card-body">
                                         <div class="media d-flex">
-                                            <div class="media-body text-left">
+                                            <div class="media-body text-white text-left">
                                                 <span>Attempted & Picked</span>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="booked">0</h3>
+                                            @foreach($stats as $stat)
+                                                <h3 class="text-white" id="attempted_and_picked">{{$stat->attempted_and_picked}}</h3>
+                                                @endforeach
                                             </div>
                                         </div>
                                     </div>
@@ -211,15 +226,17 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card pull-up">
-                                <div class="card-content border rounded" id="shipments_booked">
+                            <div class="card bg-gradient-directional-return_delivered pull-up">
+                                <div class="card-content " id="attempted_and_not_pick">
                                     <div class="card-body">
                                         <div class="media d-flex">
-                                            <div class="media-body text-left">
+                                            <div class="media-body text-white text-left">
                                                 <span>Attempted & Not Picked</span>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="booked">0</h3>
+                                            @foreach($stats as $stat)
+                                                <h3 class="text-white" id="attempted_and_not_picked">{{$stat->attempted_and_not_picked}}</h3>
+                                                @endforeach
                                             </div>
                                         </div>
                                     </div>
@@ -227,15 +244,17 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card pull-up">
-                                <div class="card-content border rounded" id="shipments_booked">
+                            <div class="card bg-gradient-directional-red pull-up">
+                                <div class="card-content" id="attempted_fail">
                                     <div class="card-body">
                                         <div class="media d-flex">
-                                            <div class="media-body text-left">
+                                            <div class="media-body text-white text-left">
                                                 <span>Attempted Failed</span>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="booked">0</h3>
+                                            @foreach($stats as $stat)
+                                                <h3 class="text-white" id="attempted_failed">{{$stat->attempted_failed}}</h3>
+                                                @endforeach
                                             </div>
                                         </div>
                                     </div>
@@ -247,10 +266,10 @@
                    
                     <table class="table table-bordered datatable" id="datatable" style="width:100%;z-index: 3;">
                         <thead>
-                        <tr role="row" class="bg-primary white">
+                            <tr role="row" class="bg-primary white">
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Request ID</th>
-                                <th class="border-primary border-darken-1">Reuested Date</th>
+                                <th class="border-primary border-darken-1">Requested Date</th>
                                 <th class="border-primary border-darken-1">Status</th>
                                 <th class="border-primary border-darken-1">Shipper</th>
                                 <th class="border-primary border-darken-1">Salesperson</th>
@@ -267,8 +286,7 @@
                                 <th class="border-primary border-darken-1">Contact No(s)</th>
                                 <th class="border-primary border-darken-1">Address</th>
                                 <th class="border-primary border-darken-1">City</th>
-
-                        </tr>
+                            </tr>
                         </thead>
                     </table>
                 </div>
@@ -297,6 +315,26 @@
             -webkit-border-radius: 5px;
             -moz-border-radius: 5px;
             border-radius: 5px;
+        }
+        .bg-gradient-directional-pending_confirmation {
+            background-image: linear-gradient(45deg, #6a1fa2 , #ff4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_return {
+            background-image: linear-gradient(45deg, #7d491c  , #e0b668de);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-booked_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-arrived_shipments {
+            background-image: linear-gradient(45deg, #074077, #2fbef5);
+            background-repeat: repeat-x;
         }
         fieldset.scheduler-border {
             border: 1px groove #ddd !important;
@@ -334,6 +372,36 @@
             margin-left: 0;
             /* border: 1px solid #999; */
         }
+        span{
+            font-size: 15px;
+        }
+
+    @foreach($legends as $legend)
+        @if($legend->id == 1)
+            .attempted_and_picked_less_than_ten{
+                background-color: #228B22 ;
+                color: #ffffff;
+            }
+        @elseif($legend->id == 2)
+            .attempted_and_picked_greater_than_ten{
+                background-color: #98FB98 ;
+            }
+        @elseif($legend->id == 3)
+            .attempt_and_notpicked{
+                background-color: #FFDEAD ;
+            }
+        @elseif($legend->id == 4)
+            .cancelled{
+                background-color: #D3D3D3 ;
+            }
+        @elseif($legend->id == 5)
+            .attempt_failed{
+                background-color: #FA8072 ;
+                color: #ffffff;
+            }
+        @endif
+    @endforeach
+
     </style>
 
 @endsection
@@ -412,46 +480,74 @@
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.dashboard.list') }}',
-                        data: params,
-                        success: function (result) {
-                            head = [];
+                    blockPagePermanently();
+                     body = [];
+                     var params = table.ajax.params();
+                     params.start = 0;
+                     params.length = -1;
+                        var jsonResult = $.ajax({
+                            url: '{{ route('admin.reports.pickup_report.list') }}',
+                            method: 'post',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: params,
+                            success: function (result) {
+                                head = [];
 
-                            head.push('S. No.');
-                            head.push('Account ID');
-                            head.push('Shipper Name');
-                            head.push('Shipment Booked');
-                            head.push('Shipment Received');
-                            head.push('Revenue');
-                            head.push('Commission');
-                            head.push('Commission Amount');
-                           
+                                head.push('S. No.');
+                                head.push('Request ID');
+                                head.push('Requested Date');
+                                head.push('Status');
+                                head.push('Shipper');
+                                head.push('Salesperson');
+                                head.push('Expected Shipment(s)');
+                                head.push('Received Shipments');
+                                head.push('Shipments Difference');
+                                head.push('Department');
+                                head.push('Attempt Date/Time');
+                                head.push('Trax Reason');
+                                head.push('Trax Remarks');
+                                head.push('Attempt Count');
+                                head.push('Contact Person');
+                                head.push('Vendor');
+                                head.push('Contact No(s)');
+                                head.push('Address');
+                                head.push('City');
 
-                            $.each(result.data, function(index, values) {
-                                row = [];
+                                $.each(result.data, function(index, values) {
+                                    row = [];
 
-                                row.push(index + 1);
-                                row.push(values.account_id);
-                                row.push(values.shipper);
-                                row.push(values.booked);
-                                row.push(values.received);
-                                row.push(values.revenue);
-                                row.push(values.commission);
-                                row.push(values.commission_amount);
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
+                                    row.push(index + 1);
+                                    row.push(values.pickup_request_id);
+                                    row.push(values.requested_date);
+                                    row.push(values.status);
+                                    row.push(values.shipper);
+                                    row.push(values.salesperson);
+                                    row.push(values.expected_shipments);
+                                    row.push(values.received_shipments);
+                                    row.push(values.difference_shipments);
+                                    row.push(values.department);
+                                    row.push(values.attempted_date);
+                                    row.push(values.trax_reason);
+                                    row.push(values.trax_remarks);
+                                    row.push(values.attempted_count);
+                                    row.push(values.contact_person);
+                                    row.push(values.vendor);
+                                    row.push(values.contact_number);
+                                    row.push(values.address);
+                                    row.push(values.city);
+                                    body.push(row);
+                                });
+                            },
+                            async: false
+                        });
+                        UnblockPagePermanently();
 
-                    return {body: body, header:head};
+                        return {body: body, header:head};
                 }
-            } );
+            });
+            
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -459,7 +555,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Sales Commission Report',
+                        title: 'Pickup Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -473,152 +569,132 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.dashboard.list') }}',
+                    url: '{{ route('admin.reports.pickup_report.list') }}',
                     method: 'post',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
-                        d.search_shipper = $('#shipper').val();
-                       // d.cards_filter = $('#cards_filter_input').val();
-                       d.search_date_from = $('input[name="from_date_formatted"]').val();
-                       d.search_date_to = $('input[name="to_date_formatted"]').val();
+                        d.search_department = $('#department').val();
+                        d.search_salesperson = $('#salesperson').val();
+                        d.search_origin = $('#origin').val();
+                        d.search_category = $('#category').val();
+                        d.search_cut_off_time= $('#cut_off_time').val();
+                        d.search_date_from = $('input[name="from_date_formatted"]').val();
+                        d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[1, 'desc']],
-                // columns: [
-                //     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                //     { data:'account_id' ,name: 'u.id', class: 'align-middle text-center account_id'},
-                //     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-                //     { data:'booked' ,name: 'booked', class: 'align-middle booked'},
-                //     { data:'received' ,name: 'received', class: 'align-middle received'},
-                //     { data:'revenue' ,name: 'revenue', class: 'align-middle revenue'},
-                //     { data:'commission' ,name: 's.commission', class: 'align-middle commission'},
-                //     { data:'commission_amount' ,name: 'commission_amount', class: 'align-middle commission_amount'},
+                rowId: 'pickup_request_id',
+                order: [[2, 'desc']],
+                columns: [
+                    {orderable: false, searchable: false,name: 'serial_number',class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'pickup_request_id' ,name: 'v.id', class: 'align-middle text-center pickup_request_id'},
+                    { data:'requested_date' ,name: 'v.created_at', class: 'align-middle requested_date'},
+                    { data:'status' ,name: 'vprs.name', class: 'align-middle status'},
+                    { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
+                    { data:'salesperson' ,name: 'a.name', class: 'align-middle salesperson'},
+                    { data:'expected_shipments' ,name: 'v2_pickup_reports.expected_shipments', class: 'align-middle expected_shipments'},
+                    { data:'received_shipments' ,name: 'v2_pickup_reports.received_shipments', class: 'align-middle received_shipments'},
+                    { data:'difference_shipments' ,name: 'v2_pickup_reports.difference_shipments', class: 'align-middle difference_shipments'},
+                    { data:'department' ,name: 'ad.name', class: 'align-middle department'},
+                    { data:'attempted_date' ,name: 'attempted_date', class: 'align-middle attempted_date'},
+                    { data:'trax_reason' ,name: 'trax_reason', class: 'align-middle trax_reason'},
+                    { data:'trax_remarks' ,name: 'trax_remarks', class: 'align-middle trax_remarks'},
+                    { data:'attempted_count' ,name: 'v.attempts', class: 'align-middle attempted_count'},
+                    { data:'contact_person' ,name: 'usi.poc', class: 'align-middle contact_person'},
+                    { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
+                    { data:'contact_number' ,name: 'usi.phone', class: 'align-middle contact_number'},
+                    { data:'address' ,name: 'usi.pickup_address', class: 'align-middle address'},
+                    { data:'city' ,name: 'ci.name', class: 'align-middle city'},
                     
-                // ],
+                ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                   // this.api().table().columns.adjust();
-                   var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-
-                        if ($(header).is('.serial_number') || $(header).is('.booked')  || $(header).is('.received') || $(header).is('.revenue') || $(header).is('.commission') || $(header).is('.commission_amount') || $(header).is('.counts')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
                     this.api().table().columns.adjust();
+                //    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                //     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                //     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                //     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+
+                //     this.api().columns().every(function(column_id) {
+                //         var column = this;
+                //         var header = column.header();
+
+
+                //         if ($(header).is('.serial_number') || $(header).is('.booked')  || $(header).is('.received') || $(header).is('.revenue') || $(header).is('.commission') || $(header).is('.commission_amount') || $(header).is('.counts')) {
+                //             $(td).appendTo($(search));
+                //         }
+                //         else {
+                //             var current = $(input).appendTo($(search)).on('change', function() {
+                //                 column.search($(this).val(), false, false, true).draw();
+                //             }).wrap(td).after(icon);
+
+                //             if (column.search()) {
+                //                 current.val(column.search());
+                //             }
+                //         }
+                //     });
+                //     this.api().table().columns.adjust();
                 }
             });
+
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                 table.draw();
             });
+
             function add_animation(box) {
-                $("#report_data div").removeClass("show_active");
-                box.addClass('show_active');
+                 $("#report_data div").removeClass("show_active");
+                 box.addClass('show_active');
             }
 
-            $('#search_form').validate({
-                    errorClass: 'danger',
-                    successClass: 'success',
-                    errorPlacement: function(error, element) {
-                        error.addClass('w-100').appendTo(element.parents('.form-group'));
-                    },
-                    submitHandler: function(form) {
-                        var from_date = $('#search_form input[name="from_date_formatted"]').val();
-                        var to_date = $('#search_form input[name="to_date_formatted"]').val();
-                        var shipper = $('#shipper').val();
-                        console.log(shipper);
-                        console.log(to_date);
-                        console.log(from_date);
+            // $('#search_form').validate({
+            //         errorClass: 'danger',
+            //         successClass: 'success',
+            //         errorPlacement: function(error, element) {
+            //             error.addClass('w-100').appendTo(element.parents('.form-group'));
+            //         },
+            //         submitHandler: function(form) {
+            //             var from_date = $('#search_form input[name="from_date_formatted"]').val();
+            //             var to_date = $('#search_form input[name="to_date_formatted"]').val();
+            //             var shipper = $('#shipper').val();
+            //             console.log(shipper);
+            //             console.log(to_date);
+            //             console.log(from_date);
                        
-                        $.ajax({
-                            url: '{!! route('admin.dashboard.userwise.commission.data') !!}',
-                            method: 'post',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'search_date_from': from_date,
-                                'search_date_to': to_date,
-                                'search_shipper': shipper,
-                            }
-                        }).done(function (data) {
-                            if(data.status){
-                                $('#booked').text(data.stats.booked);
-                                $('#received').text(data.stats.received);
-                                $('#revenue').text(data.stats.revenue);
-                                $('#commission').text(data.stats.commission);
-                                console.log(data);
-                                table.draw();
+            //             $.ajax({
+            //                 url: '{!! route('admin.dashboard.userwise.commission.data') !!}',
+            //                 method: 'post',
+            //                 data: {
+            //                     '_token': '{{ csrf_token() }}',
+            //                     'search_date_from': from_date,
+            //                     'search_date_to': to_date,
+            //                     'search_shipper': shipper,
+            //                 }
+            //             }).done(function (data) {
+            //                 if(data.status){
+            //                     $('#booked').text(data.stats.booked);
+            //                     $('#received').text(data.stats.received);
+            //                     $('#revenue').text(data.stats.revenue);
+            //                     $('#commission').text(data.stats.commission);
+            //                     console.log(data);
+            //                     table.draw();
 
-                            }else{
-                                $('#booked').text(0);
-                                $('#received').text(0);
-                                $('#revenue').text(0);
-                                $('#commission').text(0);
-                                table.draw();
-                            }
-                            UnblockPagePermanently();
-                        }); 
-                    // if(admin == null || admin == ''){
-                    //     $('#s_datatable_div').addClass('d-none');
-                    //     $('#f_datatable_div').removeClass('d-none');
-                    //     table.draw(true);
-                    // }
-                    // else{
-                    //     $('#f_datatable_div').addClass('d-none');
-                    //     $('#s_datatable_div').removeClass('d-none');
-                    //     s_table.draw(true);
-                    // }
-                }
-            });
+            //                 }else{
+            //                     $('#booked').text(0);
+            //                     $('#received').text(0);
+            //                     $('#revenue').text(0);
+            //                     $('#commission').text(0);
+            //                     table.draw();
+            //                 }
+            //                 UnblockPagePermanently();
+            //             }); 
+            //     }
+            // });
 
-
-
-
-            // $('#search_filter_btn').on('click',function () {
-            //     table.draw();
-            // });
-            // $('#shipments_booked').on('click', function () {
-            //     add_animation($(this));
-            //     $('#cards_filter_input').val('booked');
-            //     table.draw();
-            // });
-            // $('#shipments_received').on('click', function () {
-            //     add_animation($(this));
-            //     $('#cards_filter_input').val('received');
-            //     table.draw();
-            // });
-            // $('#revenue_earned').on('click', function () {
-            //     add_animation($(this));
-            //     $('#cards_filter_input').val('revenue');
-            //     table.draw();
-            // });
-            // $('#commission_earned').on('click', function () {
-            //     add_animation($(this));
-            //     $('#cards_filter_input').val('commission');
-            //     table.draw();
-            // });
-           
 
         });
 
