@@ -17,7 +17,9 @@ class CreateV2RiderPickupActionLogsTable extends Migration
             $table->increments('id');
             $table->timestamp('logged_at');
             $table->integer('type_id');
-            $table->integer('pickup_request_id');
+            $table->integer('pickup_request_id')->nullable();
+            $table->integer('reference_1_id')->nullable();
+            $table->integer('reference_2_id')->nullable();
             $table->timestamps();
         });
     }
