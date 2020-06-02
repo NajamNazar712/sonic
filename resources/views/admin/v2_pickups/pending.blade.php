@@ -425,9 +425,9 @@
                 {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                 {data: 'pickup_request_id', name: 'v2_pickup_requests.id', class: 'align-middle pickup_request_id'},
                 {data: 'requested_date', name: 'v2_pickup_requests.created_at', class: 'align-middle requested_date'},
-                {data: 'bookings_link', name: 'v2_pickup_requests.booked', class: 'align-middle bookings_link'},
+                {data: 'bookings_link', name: 'v2_pickup_requests.booked', class: 'align-middle text-center bookings_link'},
                 {data: 'shipments_rider_picked', name: 'shipments_rider_picked', class: 'align-middle shipments_rider_picked', orderable: false, searchable: false},
-                {data: 'received', name: 'v2_pickup_requests.received', class: 'align-middle received'},
+                {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                 {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
@@ -642,6 +642,57 @@
                             $('#update_pickup_modal').modal('hide');
                         });
                 }
+            });
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('body').on('click','#datatable tbody tr td.bookings_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#bookings_modal .modal-body').html('');
+                $('#bookings_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.pending.bookings.all') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_request_id': id
+                    }
+                })
+                .done(function(data) {
+                    if (data) {
+                        var shipments = '';
+                        if (data.booked) {
+                            $.each(data.booked, function(index, tracking_numbers) {
+                                shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                            });
+                        }
+                        $('#bookings_modal .modal-body').html(shipments);
+                    }
+                });
+            });
+            $('#datatable tbody').on('click','tr td.received_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#pending_bookings_modal .modal-body').html('');
+                $('#pending_bookings_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.pending.bookings.received') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_request_id': id
+                    }
+                })
+                .done(function(data) {
+                    if (data) {
+                        var shipments = '';
+                        if (data.booked) {
+                            $.each(data.booked, function(index, tracking_numbers) {
+                                shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                            });
+                        }
+                        $('#pending_bookings_modal .modal-body').html(shipments);
+                    }
+                });
             });
         });
     </script>

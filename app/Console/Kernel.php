@@ -47,7 +47,10 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\CancelledShipmentEmail',
         '\App\Console\Commands\ArrivalAutoNotPicked',
         '\App\Console\Commands\PickupCancel',
-        '\App\Console\Commands\PickupRegenerate'
+        '\App\Console\Commands\PickupRegenerate',
+		'\App\Console\Commands\PickupReport',
+		'\App\Console\Commands\CancelledPickupRequestEmail'
+
         ];
 
     /**
@@ -127,6 +130,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
+        
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -146,7 +150,21 @@ class Kernel extends ConsoleKernel
             })->runInBackground();
         }
 
-	}
+		$schedule->command('pickuprequest:cancel')->dailyAt('08:00')->runInBackground();
+$schedule->command('shipmentemail:cancel')->dailyAt('08:00')->runInBackground();
+
+
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $rdts_time = $settings->setting_value . ':00';
+
+            $schedule->command('pickup:report')->dailyAt($rdts_time)->runInBackground();
+          //  $schedule->command('pickup:report')->dailyAt('08:00')->runInBackground();
+        }
+    }
 	 /**
      * Register the commands for the application.
      *
