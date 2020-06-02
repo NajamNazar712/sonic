@@ -130,7 +130,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
-        
+
+        $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
+
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -144,7 +146,7 @@ class Kernel extends ConsoleKernel
             ->after(function ($schedule) {
                 $schedule->command('pickup:autocancel')->after(function ($schedule){
                     $schedule->command('pickup:regenerate')->runInBackground();
-                    $schedule->command('shipmentemail:cancel')->runInBackground();
+                    $schedule->command('pickuprequest:cancel')->runInBackground();
                 });
 
             })->runInBackground();

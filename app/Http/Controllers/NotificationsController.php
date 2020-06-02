@@ -19,11 +19,12 @@ use App\Http\Models\Rider;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminFinanceController;
-
 use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
@@ -39,13 +40,6 @@ use App\Http\Models\City;
 use App\Http\Models\Invoice;
 use App\Http\Models\SMS;
 use App\Http\Models\Admin\GlobalSettings;
-<<<<<<< HEAD
-use App\Http\Models\V2Pickup\V2PickupRequest;
-=======
-use App\Http\Models\Admin\V2Pickup\V2PickupRequest;
-use App\Http\Models\Admin\V2Pickup\V2PickupNote;
->>>>>>> sprint_44
-
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
