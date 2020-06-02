@@ -206,7 +206,6 @@ class ShipperPickupController extends Controller
     }
 
     public function renew(Request $request){
-        $total_estimated_weight = 0;
         $existing_pickup_request = V2PickupRequest::where('id', $request->pickup_request_id)->orderBy('id', 'DESC')->first();
         if($existing_pickup_request){
             if($existing_pickup_request->status_id == 4 && $existing_pickup_request->renew == 0){
@@ -225,12 +224,6 @@ class ShipperPickupController extends Controller
                 }
                 if(count($shipments) > 0){
                     $existing_pickup_request->renew = 1;
-                    if($existing_pickup_request->received != null && $existing_pickup_request->received != 0){
-                        $existing_pickup_request->booked = $existing_pickup_request->received;
-                    }
-                    else{
-                        $existing_pickup_request->booked = 0;
-                    }
                     $existing_pickup_request->save();
 
                     $pickup_request = new V2PickupRequest();
@@ -244,9 +237,9 @@ class ShipperPickupController extends Controller
 
                         ShipmentsPickupJourneyController::add($is_shipment, 1, NULL, $pickup_request->id);
 
-                        $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $is_shipment);
+//                        $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $is_shipment);
 
-                        if (!$pickup_request_assigned_shipment->exists()) {
+//                        if (!$pickup_request_assigned_shipment->exists()) {
                             $pickup_request_assigned_shipment = new V2PickupRequestShipment();
 
                             $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
@@ -254,15 +247,15 @@ class ShipperPickupController extends Controller
                             $pickup_request_assigned_shipment->status = 0;
 
                             $pickup_request_assigned_shipment->save();
-                        }
-                        else {
-                            $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
-
-                            $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
-                            $pickup_request_assigned_shipment->status = 0;
-
-                            $pickup_request_assigned_shipment->save();
-                        }
+//                        }
+//                        else {
+//                            $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
+//
+//                            $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
+//                            $pickup_request_assigned_shipment->status = 0;
+//
+//                            $pickup_request_assigned_shipment->save();
+//                        }
                     }
 
                     return ['status' => 1, 'success' => 'Pickup request renewed successfully!'];
