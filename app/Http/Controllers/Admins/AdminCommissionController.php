@@ -313,7 +313,7 @@ class AdminCommissionController extends Controller
                 foreach($users as $user){
                    if($request->rates_status != null ){
                     if(array_key_exists($user->id, $request->rates_status)){
-                        if($request->rate_status[$user->id] != 1){
+                        if($request->rates_status[$user->id] != 1){
                             $sale_commission = SalesCommission::where('shipper_id', $user->id)->first();
                             if($sale_commission){
                                 $sale_commission_users = SalesCommissionUser::where('sales_commission_id', $sale_commission->id)->get();
