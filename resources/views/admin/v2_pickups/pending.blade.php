@@ -18,21 +18,28 @@
                             @include('admin.inc.messages')
                             <div class="row justify-content-end">
                                 <div class="col-5">
-                                    <div class="card border border-lighten-5">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <h4 class="card-title info">Legend</h4>
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="heading-elements">
+                                                <ul class="list-inline mb-0">
+                                                    <li class="primary"><a data-action="collapse">Legend <i class="ft-minus"></i></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-content collapse">
+                                            <div class="card-body p-1">
+                                                <h4 class=" info">Legend</h4>
                                                 <table class="table mb-0">
                                                     <tbody>
                                                     @foreach($legends as $legend)
                                                         @if($legend->id == 7)
-                                                            <tr>
-                                                                <td><button type="button" class="btn btn-sm round btn-min-width text-white" style="background-color: {{$legend->color}}" disabled>{{$cut_off_time}}</button></td>
-                                                                <td class="align-middle">{{ $legend->name }}</td>
+                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;">
+{{--                                                                <td><button type="button" class="btn btn-sm round btn-min-width text-white" style="background-color: {{$legend->color}}" disabled>{{$cut_off_time}}:00</button></td>--}}
+                                                                <td class="align-middle">{{ $legend->name }} <b>({{$cut_off_time}}:00)</b></td>
                                                             </tr>
                                                             @else
-                                                            <tr>
-                                                                <td><button type="button" class="btn btn-sm round btn-min-width p-1" style="background-color: {{$legend->color}}" disabled> </button></td>
+                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;">
+{{--                                                                <td><button type="button" class="btn btn-sm round btn-min-width p-1" style="background-color: {{$legend->color}}" disabled> </button></td>--}}
                                                                 <td class="align-middle">{{ $legend->name }}</td>
                                                             </tr>
                                                             @endif
@@ -55,23 +62,23 @@
                                     <th class="border-primary border-darken-1">Pickup Request ID</th>
                                     <th class="border-primary border-darken-1">Requested Date</th>
                                     <th class="border-primary border-darken-1">Shipment(s) Booked</th>
-{{--                                    <th class="border-primary border-darken-1">Shipment(s) Rider Picked</th>--}}
+                                    <th class="border-primary border-darken-1">Shipment(s) Rider Picked</th>
                                     <th class="border-primary border-darken-1">Shipment(s) Received</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Contact Person</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
                                     <th class="border-primary border-darken-1">Contact No(s).</th>
                                     <th class="border-primary border-darken-1">Address</th>
-{{--                                    <th class="border-primary border-darken-1">City</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Status</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Trax Reason</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Trax Remark(s)</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Shipper Remark(s)</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Rider Status</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Attempt Date/Time</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Attempt(s)</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Last Rider</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Current Rider</th>--}}
+                                    <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Trax Reason</th>
+                                    <th class="border-primary border-darken-1">Trax Remark(s)</th>
+                                    <th class="border-primary border-darken-1">Shipper Remark(s)</th>
+                                    <th class="border-primary border-darken-1">Rider Status</th>
+                                    <th class="border-primary border-darken-1">Attempt Date/Time</th>
+                                    <th class="border-primary border-darken-1">Attempt(s)</th>
+                                    <th class="border-primary border-darken-1">Last Rider</th>
+                                    <th class="border-primary border-darken-1">Current Rider</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -100,6 +107,36 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                     <button type="submit" class="btn btn-primary ml-auto">Assign</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="update_pickup_modal" role="dialog" aria-labelledby="update_pickup_modal_title" aria-hidden="true">
+                    <div class="modal-dialog modal-sm" role="document">
+                        <div class="modal-content">
+                            <form class="form-horizontal">
+                                {{ csrf_field() }}
+
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="assign_to_rider_title">Update Pickup Request</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group m-0 mb-1">
+                                        <select name="reason" class="select2 reason" data-rule-required="true" data-msg-required="Reason is required">
+                                            @foreach($not_pick_reasons as $reason)
+                                                <option value="{{ $reason->id }}">{{ $reason->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group m-0">
+                                        <textarea name="trax_remarks" id="trax_remarks" class="form-control" cols="30" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary ml-auto">Update</button>
                                 </div>
                             </form>
                         </div>
@@ -159,6 +196,37 @@
         .btn-min-width {
             min-width: 5.5rem;
         }
+@foreach($legends as $legend)
+    @if($legend->id == 1)
+        .new_pickup{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 2)
+        .vendor_row{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 3)
+        .try_and_buy{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 4)
+        .first_attempt{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 5)
+        .second_attempt{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 6)
+        .multiple_attempt{
+            background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 7)
+        .after_cut_off_time{
+            background-color: '{{$legend->color}}';
+        }
+    @endif
+@endforeach
     </style>
 @endsection
 
@@ -169,12 +237,74 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
+        $(document).ready(function () {
+        {{--jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {--}}
+        {{--    if ( this.context.length ) {--}}
+        {{--        body = [];--}}
+        {{--        var params = table.ajax.params();--}}
+        {{--        params.start = 0;--}}
+        {{--        params.length = -1;--}}
+        {{--        var jsonResult = $.ajax({--}}
+        {{--            url: '{{ route('admin.v2_pickups.pending.list') }}',--}}
+        {{--            data: params,--}}
+        {{--            success: function (result) {--}}
+        {{--                head = [];--}}
+
+        {{--                head.push('S.No');--}}
+        {{--                head.push('Pickup Request ID');--}}
+        {{--                head.push('Pickup Date');--}}
+        {{--                head.push('Requested Datetime');--}}
+        {{--                head.push('Shipper');--}}
+        {{--                head.push('Contact Person');--}}
+        {{--                head.push('Vendor');--}}
+        {{--                head.push('Contact No(s).');--}}
+        {{--                head.push('Address');--}}
+        {{--                head.push('City');--}}
+        {{--                head.push('Booking(s)');--}}
+        {{--                head.push('Pending Booking(s)');--}}
+        {{--                head.push('Total Estimated Weight (kg)');--}}
+        {{--                head.push('Pickup Type');--}}
+        {{--                head.push('Pickup Date');--}}
+
+        {{--                $.each(result.data, function(index, values) {--}}
+        {{--                    row = [];--}}
+
+        {{--                    row.push(index + 1);--}}
+        {{--                    row.push(values.id);--}}
+        {{--                    row.push(values.pickup_date);--}}
+        {{--                    row.push(values.requested_at);--}}
+        {{--                    row.push(values.shipper);--}}
+        {{--                    row.push(values.contact_person);--}}
+        {{--                    row.push(values.vendor);--}}
+        {{--                    row.push(values.contact_number);--}}
+        {{--                    row.push(values.address);--}}
+        {{--                    row.push(values.city);--}}
+        {{--                    row.push(values.bookings);--}}
+        {{--                    row.push(values.pending_bookings);--}}
+        {{--                    row.push(values.total_estimated_weight);--}}
+        {{--                    row.push(values.pickup_type);--}}
+        {{--                    row.push(values.pickup_date);--}}
+
+
+        {{--                    body.push(row);--}}
+        {{--                });--}}
+        {{--            },--}}
+        {{--            async: false--}}
+        {{--        });--}}
+
+        {{--        return {body: body, header: head};--}}
+        {{--    }--}}
+        {{--} );--}}
+
+
+        var selected_rows = [];
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             @if (session('role_id') == 1 || count(array_intersect([18, 19], session('permissions'))) !== 0)
 
             buttons: [
                     @if (session('role_id') == 1 || in_array(19, session('permissions')))
+                        @if(\Carbon\Carbon::now() < $rider_cut_off_time)
                 {
                     text: 'Assign',
                     className: 'btn btn-primary assign',
@@ -186,71 +316,25 @@
                     }
                 },
                     @endif
-
-                    @if (session('role_id') == 1 || in_array(18, session('permissions')))
-                {
-                    text: 'Cancel',
-                    className: 'btn btn-danger cancel',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        swal({
-                            text: 'Are you sure, you want to Cancel these Pickup(s)?',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function(confirm) {
-                            if (confirm) {
-                                $.ajax({
-                                    url: '{!! route('admin.pickups.pending.multiple_cancel') !!}',
-                                    method: 'PUT',
-                                    data: {
-                                        'pickup_request_ids': selected_rows,
-                                        '_token': '{{ csrf_token() }}'
-                                    }
-                                })
-                                    .done(function(data) {
-                                        if (data.status == 0) {
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                        }
-                                        else {
-                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                        }
-
-                                        table.rows().deselect();
-
-                                        selected_rows = [];
-
-                                        table.button('.assign').disable();
-                                        table.button('.cancel').disable();
-
-                                        table.draw('false');
-                                    });
-                            }
-                        });
-                    }
-                },
                     @endif
                 {
-                    extend: 'excel',
-                    title: 'Pending Pickups',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                }, {
+                    text: 'Update',
+                    className: 'btn btn-primary update',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                        $('#update_pickup_modal .reason').val(null).trigger('change');
+                        $('#update_pickup_modal #trax_remarks').val('');
+
+                        $('#update_pickup_modal').modal('show');
+                    }
+                },
+                // {
+                //     extend: 'excel',
+                //     title: 'Pending Pickups',
+                //     className: 'btn btn-primary',
+                //     text: '<i class="la la-file-excel-o"></i> Excel',
+                // },
+                {
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
@@ -272,7 +356,7 @@
                                 }
 
                                 table.button('.assign').enable();
-                                table.button('.cancel').enable();
+                                table.button('.update').enable();
                             }
                         });
                     }
@@ -299,7 +383,7 @@
 
                                 if (selected_rows.length == 0) {
                                     table.button('.assign').disable();
-                                    table.button('.cancel').disable();
+                                    table.button('.update').disable();
                                 }
                             }
                         });
@@ -341,17 +425,24 @@
                 {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                 {data: 'pickup_request_id', name: 'v2_pickup_requests.id', class: 'align-middle pickup_request_id'},
                 {data: 'requested_date', name: 'v2_pickup_requests.created_at', class: 'align-middle requested_date'},
-                {data: 'booked', name: 'v2_pickup_requests.booked', class: 'align-middle booked'},
-                {data: 'received', name: 'v2_pickup_requests.received', class: 'align-middle received'},
+                {data: 'bookings_link', name: 'v2_pickup_requests.booked', class: 'align-middle text-center bookings_link'},
+                {data: 'shipments_rider_picked', name: 'shipments_rider_picked', class: 'align-middle shipments_rider_picked', orderable: false, searchable: false},
+                {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                 {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
                 {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
                 {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
-                // {data: 'city', name: 'ci.name', class: 'align-middle city'},
-                // {data: 'rider', name: 'r.name', class: 'align-middle rider'},
-                // {data: 'bookings_link', name: 'v2_pickup_requests.booked', class: 'align-middle bookings_link text-center'},
-                // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                {data: 'city', name: 'ci.name', class: 'align-middle city'},
+                {data: 'pickup_status', name: 'prs.id', class: 'align-middle pickup_status'},
+                {data: 'trax_reason', name: 'trax_reason', class: 'align-middle trax_reason', orderable: false, searchable: false},
+                {data: 'trax_remarks', name: 'trax_remarks', class: 'align-middle trax_remarks', orderable: false, searchable: false},
+                {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false},
+                {data: 'rider_status', name: 'rs.id', class: 'align-middle rider_status'},
+                {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
+                {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempts'},
+                {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider'},
+                {data: 'last_rider', name: 'lr.name', class: 'align-middle last_rider'}
             ],
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
@@ -368,18 +459,22 @@
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                    '<option value="0">Light</option>' +
-                    '<option value="1">Heavy</option>' +
-                    '</select>';
+                var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                var rider_status_select = '<select name="rider_status_select" id="rider_status_select" class="select2 form-control"></select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
+                    if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments_rider_picked') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action')) {
                         $(td).appendTo($(search));
-                    }else if($(header).is('.pickup_type')){
+                    }else if($(header).is('.pickup_status')){
                         $(drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }
+                    else if($(header).is('.rider_status')){
+                        $(rider_status_select).appendTo($(search))
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
@@ -394,14 +489,211 @@
                         }
                     }
                 });
+                var data = $.map({!! $pickup_statuses !!}, function (obj) {
+                    obj.id = obj.id; // replace pk with your identifier
+                    obj.text = obj.name;
+                    return obj;
+                });
+
                 $("#status_select").prepend('<option value="" selected></option>').select2({
-                    placeholder: "Select Pickup Type",
+                    data:data,
+                    placeholder: "Select Pickup Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                var rider_data = $.map({!! $rider_statuses !!}, function (obj) {
+                    obj.id = obj.id; // replace pk with your identifier
+                    obj.text = obj.name;
+                    return obj;
+                });
+                $("#rider_status_select").prepend('<option value="" selected></option>').select2({
+                    data:rider_data,
+                    placeholder: "Select Rider Status",
                     width:'100%',
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
                 this.api().table().columns.adjust();
             }
+
+        });
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.assign').enable();
+                    table.button('.update').enable();
+                }
+                else {
+                    table.button('.assign').disable();
+                    table.button('.update').disable();
+                }
+            });
+
+            $('#assign_to_rider .rider').select2({
+                width: '100%',
+                placeholder: 'Rider*'
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
+            });
+
+            $('#assign_to_rider form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var rider_id = parseInt($(form).find('select.rider').val());
+
+                    $.ajax({
+                        url: '{!! route('admin.v2_pickups.pending.assign') !!}',
+                        method: 'PUT',
+                        data: {
+                            'pickup_request_ids': selected_rows,
+                            'rider_id': rider_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                    .done(function(data) {
+                        if (data.status == 0) {
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+
+                        table.rows().deselect();
+
+                        selected_rows = [];
+
+                        table.button('.assign').disable();
+                        table.button('.update').disable();
+
+                        table.draw('false');
+
+                        $('#assign_to_rider').modal('hide');
+                    });
+                }
+            });
+
+            $('#update_pickup_modal .reason').select2({
+                width: '100%',
+                placeholder: 'Not Pick Reason*',
+                dropdownParent:$('#update_pickup_modal')
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
+            });
+            $('body').on('change','#update_pickup_modal #trax_remarks',function() {
+                $(this).val($(this).val().trim());
+            });
+            $('#update_pickup_modal form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    var reason_id = parseInt($(form).find('select.reason').val());
+                    var remarks = $('#trax_remarks').val();
+                    $.ajax({
+                        url: '{!! route('admin.v2_pickups.pending.update') !!}',
+                        method: 'PUT',
+                        data: {
+                            'pickup_request_ids': selected_rows,
+                            'reason_id': reason_id,
+                            'trax_remarks': remarks,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                            table.rows().deselect();
+
+                            selected_rows = [];
+
+                            table.button('.assign').disable();
+                            table.button('.update').disable();
+
+                            table.draw('false');
+
+                            $('#update_pickup_modal').modal('hide');
+                        });
+                }
+            });
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('body').on('click','#datatable tbody tr td.bookings_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#bookings_modal .modal-body').html('');
+                $('#bookings_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.pending.bookings.all') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_request_id': id
+                    }
+                })
+                .done(function(data) {
+                    if (data) {
+                        var shipments = '';
+                        if (data.booked) {
+                            $.each(data.booked, function(index, tracking_numbers) {
+                                shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                            });
+                        }
+                        $('#bookings_modal .modal-body').html(shipments);
+                    }
+                });
+            });
+            $('#datatable tbody').on('click','tr td.received_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#pending_bookings_modal .modal-body').html('');
+                $('#pending_bookings_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.pending.bookings.received') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_request_id': id
+                    }
+                })
+                .done(function(data) {
+                    if (data) {
+                        var shipments = '';
+                        if (data.booked) {
+                            $.each(data.booked, function(index, tracking_numbers) {
+                                shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                            });
+                        }
+                        $('#pending_bookings_modal .modal-body').html(shipments);
+                    }
+                });
+            });
         });
     </script>
 @endsection

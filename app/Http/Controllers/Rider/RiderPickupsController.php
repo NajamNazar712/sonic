@@ -13,6 +13,11 @@ use App\Http\Models\RiderPickup;
 use App\Http\Models\RiderPickupShipment;
 use App\Http\Models\PickupAction;
 use App\Http\Models\RiderPickupActionLog;
+use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 
 use Auth;
 
@@ -110,6 +115,83 @@ class RiderPickupsController extends Controller {
     	return $datatables->make(true);
     }
 
+    public function pickups_list_v2(Request $request) {
+
+        
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `v2_rider_pickups` AS `rp1` where `rp1`.`pickup_type` = 1 and `rp1`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_picked`');
+            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `v2_rider_pickups` AS `rp` where `rp`.`pickup_type` = 0 and `rp`.`created_at` Between "'.$from.'" AND "'.$to.'") AS `pickup_not_picked`');
+        }else{
+            $pickup_picked = DB::raw('(SELECT COUNT(*) FROM `v2_rider_pickups` AS `rp1` where `rp1`.`pickup_type` = 1) AS `pickup_picked`');
+            $pickup_not_picked = DB::raw('(SELECT COUNT(*) FROM `v2_rider_pickups` AS `rp` where `rp`.`pickup_type` = 0) AS `pickup_not_picked`');
+        }
+
+
+    	$rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
+    	->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
+        ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
+        ->join('riders as r', 'pr.current_rider_id', 'r.id')
+    	->join('users as u', 'pr.shipper_id', 'u.id')
+    	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
+    	->join('cities as c', 'usi.city_id', 'c.id')
+    	->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked);
+        
+        $datatables = Datatables::of($rider_pickups)
+        ->editColumn('pickup_note_id', function ($rider_pickup) {
+            return str_pad($rider_pickup->pickup_note_id, 6, '0', STR_PAD_LEFT);
+        })
+        ->editColumn('pickup_request_id', function ($rider_pickup) {
+            return str_pad($rider_pickup->pickup_request_id, 6, '0', STR_PAD_LEFT);
+        })
+        ->editColumn('pickup_type', function ($rider_pickup) {
+			if ($rider_pickup->pickup_type == 0) {
+				return 'Not Pick';
+			}
+			else {
+				return 'Pick';
+			}
+		})
+		->editColumn('distance_from_start_to_actual', function ($rider_pickup) {
+            $distance_from_start_to_actual = $rider_pickup->distance_from_start_to_actual;
+
+            if ($distance_from_start_to_actual == 0) {
+                $distance_from_start_to_actual = 0;
+            }
+
+			return '<a class="btn btn-sm btn-outline-info align-middle" href="http://maps.google.com/maps?saddr=' . $rider_pickup->start_location_latitude . ',' . $rider_pickup->start_location_longitude . '&daddr=' . $rider_pickup->actual_location_latitude . ',' . $rider_pickup->actual_location_longitude . '" target="_blank">' . $distance_from_start_to_actual . '</a>';
+		})
+        ->editColumn('distance_from_current_to_actual', function ($rider_pickup) {
+            $distance_from_current_to_actual = $rider_pickup->distance_from_current_to_actual;
+
+            if ($distance_from_current_to_actual == 0) {
+                $distance_from_current_to_actual = 0;
+            }
+
+            if ($rider_pickup->current_location_latitude && $rider_pickup->current_location_longitude) {
+                return '<a class="btn btn-sm btn-outline-info align-middle" href="http://maps.google.com/maps?saddr=' . $rider_pickup->current_location_latitude . ',' . $rider_pickup->current_location_longitude . '&daddr=' . $rider_pickup->actual_location_latitude . ',' . $rider_pickup->actual_location_longitude . '" target="_blank">' . $distance_from_current_to_actual . '</a>';
+            }
+            else {
+                return $distance_from_current_to_actual;
+            }
+        })
+		->editColumn('picture_path', function ($rider_pickup) {
+			if ($rider_pickup->pickup_type == 0) {
+				return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('storage/' . $rider_pickup->picture_path) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+			}
+            else {
+                return '';
+            }
+		});
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
+        }
+    	return $datatables->make(true);
+    }
+
     public function pickups_shipments(Request $request) {
         $rider_pickup_shipments = RiderPickupShipment::where('rider_pickup_id', $request->rider_pickup_id);
 
@@ -171,6 +253,45 @@ class RiderPickupsController extends Controller {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $rider_pickup_action_logs->whereBetween('pn.created_at', [$from,$to]);
+        }
+
+    	return $datatables->make(true);
+    }	
+    public function pickups_action_log_list_v2(Request $request) {
+        $rider_pickup_action_logs = V2RiderPickupActionLog::join('pickup_actions as pa', 'v2_rider_pickup_action_logs.type_id', 'pa.id')
+    	->join('v2_pickup_notes as pn', 'v2_rider_pickup_action_logs.pickup_note_id', 'pn.id')
+        ->join('v2_pickup_requests as pr', 'v2_rider_pickup_action_logs.pickup_request_id', 'pr.id')
+        ->join('v2_pickup_request_attempts as pra', 'pra.pickup_request_id', 'v2_rider_pickup_action_logs.id')
+        ->join('riders as r', 'pr.current_rider_id', 'r.id')
+    	->join('users as u', 'pr.shipper_id', 'u.id')
+    	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
+    	->join('cities as c', 'usi.city_id', 'c.id')
+    	->select('v2_rider_pickup_action_logs.id', 'v2_rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'v2_rider_pickup_action_logs.pickup_note_id', 'v2_rider_pickup_action_logs.pickup_request_id','pr.created_at','pra.assigned_by','pr.city_id as city_id','pr.current_rider_id');
+
+        $datatables = Datatables::of($rider_pickup_action_logs)
+        // ->editColumn('pickup_note_id', function ($rider_pickup_action_log) {
+        //     return str_pad($rider_pickup_action_log->pickup_note_id, 6, '0', STR_PAD_LEFT);
+        // })
+        ->editColumn('pickup_request_id', function ($rider_pickup_action_log) {
+            return str_pad($rider_pickup_action_log->pickup_request_id, 6, '0', STR_PAD_LEFT);
+        });
+
+        if($pn_no = $request->get('search_pn_no')){
+            $rider_pickup_action_logs->where('v2_rider_pickup_action_logs.pickup_request_id','=',$pn_no);
+        }
+        if($assigned_by = $request->get('search_assigned_by')){
+            $rider_pickup_action_logs->where('pra.assigned_by','=',$assigned_by);
+        }
+        if($rider = $request->get('search_rider')){
+            $rider_pickup_action_logs->where('pr.current_rider_id','=',$rider);
+        }
+        if($city = $request->get('search_city')){
+            $rider_pickup_action_logs->where('pr.city_id','=',$city);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rider_pickup_action_logs->whereBetween('pr.created_at', [$from,$to]);
         }
 
     	return $datatables->make(true);

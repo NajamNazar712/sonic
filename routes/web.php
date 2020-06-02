@@ -590,11 +590,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
             Route::get('', 'Rider\RiderPickupsController@pickups_index')->name('index');
             Route::get('list', 'Rider\RiderPickupsController@pickups_list')->name('list');
+             Route::get('v2_list', 'Rider\RiderPickupsController@pickups_list_v2')->name('v2_list');
             Route::get('shipments', 'Rider\RiderPickupsController@pickups_shipments')->name('shipments');
 
             Route::prefix('action_log')->name('action_log.')->group(function () {
                 Route::get('', 'Rider\RiderPickupsController@pickups_action_log_index')->name('index');
                 Route::get('list', 'Rider\RiderPickupsController@pickups_action_log_list')->name('list');
+                Route::get('v2_list', 'Rider\RiderPickupsController@pickups_action_log_list_v2')->name('v2_list');
             });
         });
 
@@ -610,7 +612,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pending_index')->name('index');
             Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pending_list')->name('list');
+            Route::put('assign', 'Admins\V2Pickup\V2AdminPickupsController@pending_assign')->name('assign');
+            Route::put('update', 'Admins\V2Pickup\V2AdminPickupsController@pending_update')->name('update');
+            Route::post('bookings/all','Admins\V2Pickup\V2AdminPickupsController@pending_all_bookings')->name('bookings.all');
+            Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
 
+        });
+        Route::prefix('arrival')->name('arrival.')->group(function () {
+            Route::prefix('bulk')->name('bulk.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_index')->name('index');
+                Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_shipment_details')->name('shipment_details');
+                Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+                    Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+                    Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_try_and_buy_shipment_details')->name('shipment_details');
+                });
+                Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@bulk_arrival_submit')->name('store');
+            });
+            Route::prefix('individual')->name('individual.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index')->name('index');
+                Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_details')->name('shipment_details');
+                Route::post('shipment_remove', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_remove')->name('shipment_remove');
+                Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+                    Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+                    Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_try_and_buy_shipment_details')->name('shipment_details');
+                });
+                Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@individual_arrival_submit')->name('store');
+            });
         });
     });
     Route::prefix('delivery')->name('delivery.')->group(function(){
@@ -911,6 +938,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('tracking')->name('tracking.')->group(function() {
         Route::get('{tracking_number?}', 'Admins\AdminTrackingController@index')->name('index');
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
+        Route::post('track_v2', 'Admins\AdminTrackingController@track_v2')->name('track_v2');
         Route::post('rider_information', 'Admins\AdminTrackingController@rider_information')->name('rider_information');
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
     });
