@@ -6437,6 +6437,5 @@ use Yajra\Datatables\Datatables;
             return $data;
         }
 
-       
     }
 

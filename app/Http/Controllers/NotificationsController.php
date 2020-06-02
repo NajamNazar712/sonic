@@ -39,8 +39,12 @@ use App\Http\Models\City;
 use App\Http\Models\Invoice;
 use App\Http\Models\SMS;
 use App\Http\Models\Admin\GlobalSettings;
+<<<<<<< HEAD
+use App\Http\Models\V2Pickup\V2PickupRequest;
+=======
 use App\Http\Models\Admin\V2Pickup\V2PickupRequest;
 use App\Http\Models\Admin\V2Pickup\V2PickupNote;
+>>>>>>> sprint_44
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
@@ -4628,6 +4632,40 @@ class NotificationsController extends Controller
              }
   
             }
+
+            else if($id == 63){
+                $date =\Carbon\Carbon::yesterday()->format('Y-m-d');
+                $pickup_requests = V2PickupRequest::where('status_id', '=',4)->where('updated_at','>=',$date)->get();
+                foreach($pickup_requests as $pickup_request){
+                      
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+
+                    $pickup_request_id = $pickup_request->id;
+                    $pickup_date = $pickup_request->updated_at;
+
+                    $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+
+                    if (strpos($subject, '[pickup_request_ID]') !== FALSE) {
+                      $subject = str_replace('[pickup_request_ID]', $pickup_request_id, $subject);
+                    }
+                    if (strpos($body, '[pickup_request_ID]') !== FALSE) {
+                      $body = str_replace('[pickup_request_ID]', $pickup_request_id, $body);
+                    }
+                    if (strpos($body, '[shipper]') !== FALSE) {
+                      $body = str_replace('[shipper]', $pickup_request->shipper->name, $body);
+                    }
+                    if (strpos($body, '[date]') !== FALSE) {
+                      $body = str_replace('[date]', $pickup_date, $body);
+                    }
+                    if (strpos($body, '[trax_logo]') !== FALSE) {
+                      $body = str_replace('[trax_logo]', $logo, $body);
+                  }
+
+                    $to = $pickup_request->shipper->email;
+                    self::email($subject, $body, $to);
+                }    
+              }
 
 
         }

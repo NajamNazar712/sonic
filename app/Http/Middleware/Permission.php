@@ -392,6 +392,8 @@ class Permission
             'reports.cargo_short_received_shipments.list' => 319,
             'reports.multiple_iban.index' => 328,
             'reports.multiple_iban.list' => 328,
+            'reports.pickup_report.index' => 337,
+            'reports.pickup_report.list' => 337,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

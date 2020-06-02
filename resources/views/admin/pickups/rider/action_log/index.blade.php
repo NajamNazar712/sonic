@@ -184,22 +184,47 @@
 				var switchStatus = false;
 				var tableUrl='{{ route('admin.pickups.rider.action_log.v2_list') }}';
 				console.log(tableUrl);
-
+				var summary_flag = false;
+				var table;
 				$("#old_rider_pickup_action_log").on('change', function() {
+					tableUrl = '';
+					summary_flag = true;
 					if ($(this).is(':checked')) {
-						switchStatus = $(this).is(':checked');
-						console.log(switchStatus);
-						tableUrl='{{ route('admin.pickups.rider.action_log.list') }}';
-						console.log(tableUrl);
+						tableUrl = '{{ route('admin.pickups.rider.action_log.list') }}';
+						var params = table.ajax.params();
+						table.ajax.url(tableUrl).load();
+						// table.draw();
+						// $('#datatable').DataTable({
+						// 	ajax: {
+						// 	url: tableUrl),
+						// 	type: 'POST',
+						// 	data: this.params,
+						// },
+						// });
 					}
 					else {
-					switchStatus = $(this).is(':checked');
-					console.log(switchStatus);
-					tableUrl='{{ route('admin.pickups.rider.action_log.v2_list') }}';
-					console.log(tableUrl);
-				
+						summary_flag = false;
+						tableUrl='{{ route('admin.pickups.rider.action_log.v2_list') }}';
+						table.ajax.url(tableUrl).load();
+						// table.draw();
 					}
 				});
+
+				// $("#old_rider_pickup_action_log").on('change', function() {
+				// 	if ($(this).is(':checked')) {
+				// 		switchStatus = $(this).is(':checked');
+				// 		console.log(switchStatus);
+				// 		tableUrl='{{ route('admin.pickups.rider.action_log.list') }}';
+				// 		console.log(tableUrl);
+				// 	}
+				// 	else {
+				// 	switchStatus = $(this).is(':checked');
+				// 	console.log(switchStatus);
+				// 	tableUrl='{{ route('admin.pickups.rider.action_log.v2_list') }}';
+				// 	console.log(tableUrl);
+				
+				// 	}
+				// });
 	
 			
 			var table = $('#datatable').DataTable({

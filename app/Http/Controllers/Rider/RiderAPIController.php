@@ -643,7 +643,7 @@ class RiderAPIController extends Controller {
                 $rider_pickup->start_location_longitude = $request->start_location_longitude;
                 $rider_pickup->actual_location_latitude = $request->actual_location_latitude;
                 $rider_pickup->actual_location_longitude = $request->actual_location_longitude;
-
+                    
                 if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
                     $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
 
