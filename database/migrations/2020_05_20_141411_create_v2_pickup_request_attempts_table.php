@@ -19,7 +19,7 @@ class CreateV2PickupRequestAttemptsTable extends Migration
             $table->integer('rider_id');
             $table->integer('shipments_picked')->nullable();
             $table->integer('shipments_received')->nullable();
-            $table->string('reason_id')->nullable();
+            $table->integer('reason_id')->nullable();
             $table->string('trax_remarks')->nullable();
             $table->string('shipper_remarks')->nullable();
             $table->timestamp('attempt_date');

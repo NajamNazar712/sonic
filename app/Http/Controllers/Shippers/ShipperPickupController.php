@@ -160,8 +160,14 @@ class ShipperPickupController extends Controller
     public function shipments(Request $request){
         $pickup_request_id = $request->input('pickup_request_id');
         $status = $request->input('status');
+        if($status == 0){
+            $pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->get();
 
-        $pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->where('status', $status)->get();
+        }
+        else{
+            $pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->where('status', $status)->get();
+
+        }
         if ($pickup_request_shipments) {
             $shipments = array();
             foreach ($pickup_request_shipments as $all_shipments) {
@@ -184,7 +190,7 @@ class ShipperPickupController extends Controller
             $pickup_request->status_id = 4;
             $pickup_request->save();
 
-            $pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id);
+            $pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('status', 0);
             if($pickup_request_shipments->exists()){
                 $pickup_request_shipments = $pickup_request_shipments->get();
                 foreach ($pickup_request_shipments as $pickup_request_shipment){
@@ -206,13 +212,12 @@ class ShipperPickupController extends Controller
             if($existing_pickup_request->status_id == 4 && $existing_pickup_request->renew == 0){
                 $shipments = array();
                 $shipments_count = 0;
-                $existing_pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $existing_pickup_request->id)->get();
+                $existing_pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $existing_pickup_request->id)->where('status', 0)->get();
                 if($existing_pickup_request_shipments){
                     foreach ($existing_pickup_request_shipments as $pickup_request_shipment){
                         $existing_shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
                         if($existing_shipment->shipper_status_id == 1){
 
-                            $total_estimated_weight = $total_estimated_weight + $existing_shipment->estimated_weight;
                             $shipments[] = $existing_shipment->id;
                             $shipments_count++;
                         }
@@ -220,36 +225,20 @@ class ShipperPickupController extends Controller
                 }
                 if(count($shipments) > 0){
                     $existing_pickup_request->renew = 1;
-                    $existing_pickup_request->booked = 0;
-                    $existing_pickup_request->received = 0;
+                    if($existing_pickup_request->received != null && $existing_pickup_request->received != 0){
+                        $existing_pickup_request->booked = $existing_pickup_request->received;
+                    }
+                    else{
+                        $existing_pickup_request->booked = 0;
+                    }
                     $existing_pickup_request->save();
-
-                    $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
-
-                    if ($defined_pickup_weight->exists()) {
-                        $defined_pickup_weight = $defined_pickup_weight->first();
-
-                        $defined_pickup_weight = $defined_pickup_weight->setting_value;
-                    }
-                    else {
-                        $defined_pickup_weight = 10;
-                    }
 
                     $pickup_request = new V2PickupRequest();
 
                     $pickup_request->shipper_id = $existing_pickup_request->shipper_id;
                     $pickup_request->pickup_address_id = $existing_pickup_request->pickup_address_id;
-                    $pickup_request->requested_date = Carbon::now();
                     $pickup_request->city_id = $existing_pickup_request->pickup_address->city_id;
                     $pickup_request->booked = $shipments_count;
-                    $pickup_request->total_estimated_weight = $total_estimated_weight;
-                    if ($total_estimated_weight < $defined_pickup_weight) {
-                        $pickup_type = 0;
-                    }
-                    else {
-                        $pickup_type = 1;
-                    }
-                    $pickup_request->pickup_type = $pickup_type;
                     $pickup_request->save();
                     foreach ($shipments as $is_shipment){
 
