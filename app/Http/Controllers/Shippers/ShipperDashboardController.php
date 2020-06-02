@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BookingType;
 use App\Http\Models\Consolidation;
@@ -16,6 +17,8 @@ use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\http\Models\WMS\WmsCurrentStock;
 use App\Http\Models\WMS\WmsPendingPicking;
 use App\Http\Models\WMS\WmsShipmentProduct;
@@ -409,7 +412,28 @@ class ShipperDashboardController extends Controller
                         }
                         $shipment->save();
 
-                        AdminPickupsController::cancel($shipment_id->id);
+
+                        ShipmentsPickupJourneyController::add($shipment->id, 4);
+
+//                        AdminPickupsController::cancel($shipment->id);
+
+                        $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
+                        $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id);
+                        if($pickup_requests->exists()){
+                            $pickup_requests = $pickup_requests->get();
+                            $flag = true;
+                            foreach ($pickup_requests as $pickup_request){
+                                $is_shipment = Shipment::find($pickup_request->shipment_id);
+                                if($is_shipment->shipper_status_id != 17){
+                                    $flag = false;
+                                }
+                            }
+                            if($flag == true){
+                                $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
+                                $pickup_request->status_id = 4;
+                                $pickup_request->save();
+                            }
+                        }
 
                         ShipmentsJourneyController::add($shipment_id->id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);
 
