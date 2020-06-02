@@ -45,6 +45,7 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\RiderDeliveryImageArchive',
 		'\App\Console\Commands\BlacklistConsigneeRatioCalculation',
         '\App\Console\Commands\CancelledShipmentEmail'
+        '\App\Console\Commands\CancelledPickupRequestEmail'
         ];
 
     /**
