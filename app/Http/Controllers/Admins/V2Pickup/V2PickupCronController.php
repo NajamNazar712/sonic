@@ -44,7 +44,7 @@ class V2PickupCronController extends Controller
             self::remove_riders();
         }
     }
-    public function remove_riders(){
+    static public function remove_riders(){
         V2PickupRequest::whereIn('status_id', [1,3])->where('rider_status', 2)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
     }
     static public function cancel_if_not_valid(){

@@ -239,63 +239,77 @@
 
     <script>
         $(document).ready(function () {
-        {{--jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {--}}
-        {{--    if ( this.context.length ) {--}}
-        {{--        body = [];--}}
-        {{--        var params = table.ajax.params();--}}
-        {{--        params.start = 0;--}}
-        {{--        params.length = -1;--}}
-        {{--        var jsonResult = $.ajax({--}}
-        {{--            url: '{{ route('admin.v2_pickups.pending.list') }}',--}}
-        {{--            data: params,--}}
-        {{--            success: function (result) {--}}
-        {{--                head = [];--}}
+        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            if ( this.context.length ) {
+                body = [];
+                var params = table.ajax.params();
+                params.start = 0;
+                params.length = -1;
+                var jsonResult = $.ajax({
+                    url: '{{ route('admin.v2_pickups.pending.list') }}',
+                    data: params,
+                    success: function (result) {
+                        head = [];
 
-        {{--                head.push('S.No');--}}
-        {{--                head.push('Pickup Request ID');--}}
-        {{--                head.push('Pickup Date');--}}
-        {{--                head.push('Requested Datetime');--}}
-        {{--                head.push('Shipper');--}}
-        {{--                head.push('Contact Person');--}}
-        {{--                head.push('Vendor');--}}
-        {{--                head.push('Contact No(s).');--}}
-        {{--                head.push('Address');--}}
-        {{--                head.push('City');--}}
-        {{--                head.push('Booking(s)');--}}
-        {{--                head.push('Pending Booking(s)');--}}
-        {{--                head.push('Total Estimated Weight (kg)');--}}
-        {{--                head.push('Pickup Type');--}}
-        {{--                head.push('Pickup Date');--}}
+                        head.push('S.No');
+                        head.push('Pickup Request ID');
+                        head.push('Requested Date');
+                        head.push('Shipment(s) Booked');
+                        head.push('Shipment(s) Rider Picked');
+                        head.push('Shipment(s) Received');
+                        head.push('Shipper');
+                        head.push('Contact Person');
+                        head.push('Vendor');
+                        head.push('Contact No(s).');
+                        head.push('Address');
+                        head.push('City');
+                        head.push('Status');
+                        head.push('Trax Reason');
+                        head.push('Trax Remark(s)');
+                        head.push('Shipper Remark(s)');
+                        head.push('Rider Status');
+                        head.push('Attempt Date');
+                        head.push('Attempt(s)');
+                        head.push('Last Rider');
+                        head.push('Current Rider');
+                        head.push('Pickup Note ID');
 
-        {{--                $.each(result.data, function(index, values) {--}}
-        {{--                    row = [];--}}
+                        $.each(result.data, function(index, values) {
+                            row = [];
 
-        {{--                    row.push(index + 1);--}}
-        {{--                    row.push(values.id);--}}
-        {{--                    row.push(values.pickup_date);--}}
-        {{--                    row.push(values.requested_at);--}}
-        {{--                    row.push(values.shipper);--}}
-        {{--                    row.push(values.contact_person);--}}
-        {{--                    row.push(values.vendor);--}}
-        {{--                    row.push(values.contact_number);--}}
-        {{--                    row.push(values.address);--}}
-        {{--                    row.push(values.city);--}}
-        {{--                    row.push(values.bookings);--}}
-        {{--                    row.push(values.pending_bookings);--}}
-        {{--                    row.push(values.total_estimated_weight);--}}
-        {{--                    row.push(values.pickup_type);--}}
-        {{--                    row.push(values.pickup_date);--}}
+                            row.push(index + 1);
+                            row.push(values.pickup_request_id);
+                            row.push(values.requested_date);
+                            row.push(values.booked);
+                            row.push(values.shipments_rider_picked);
+                            row.push(values.received);
+                            row.push(values.shipper);
+                            row.push(values.contact_person);
+                            row.push(values.vendor);
+                            row.push(values.contact_number);
+                            row.push(values.address);
+                            row.push(values.city);
+                            row.push(values.pickup_status);
+                            row.push(values.trax_reason);
+                            row.push(values.trax_remarks);
+                            row.push(values.shipper_remarks);
+                            row.push(values.rider_status);
+                            row.push(values.attempted_date);
+                            row.push(values.attempts);
+                            row.push(values.current_rider);
+                            row.push(values.last_rider);
+                            row.push(values.pickup_note_id);
 
 
-        {{--                    body.push(row);--}}
-        {{--                });--}}
-        {{--            },--}}
-        {{--            async: false--}}
-        {{--        });--}}
+                            body.push(row);
+                        });
+                    },
+                    async: false
+                });
 
-        {{--        return {body: body, header: head};--}}
-        {{--    }--}}
-        {{--} );--}}
+                return {body: body, header: head};
+            }
+        } );
 
 
         var selected_rows = [];
@@ -317,7 +331,7 @@
                     }
                 },
                     @endif
-                    @endif
+                @endif
                 {
                     text: 'Update',
                     className: 'btn btn-primary update',
@@ -329,12 +343,12 @@
                         $('#update_pickup_modal').modal('show');
                     }
                 },
-                // {
-                //     extend: 'excel',
-                //     title: 'Pending Pickups',
-                //     className: 'btn btn-primary',
-                //     text: '<i class="la la-file-excel-o"></i> Excel',
-                // },
+                {
+                    extend: 'excel',
+                    title: 'Pending Pickups',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                },
                 {
                     extend: 'selectAll',
                     text: 'Select All',
