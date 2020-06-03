@@ -55,8 +55,6 @@ class V2AdminReportController extends Controller
                     $sales_person = $sales_person->first();
                     $admin_id = $sales_person->admin_id;
                 }
-             
-                
                 $reason_id=$pickup_request->pickup_attempt_latest->reason_id;
                
                     if($reason_id == 7 || $reason_id == 8 || $reason_id == 9 ){

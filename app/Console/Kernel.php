@@ -132,7 +132,16 @@ class Kernel extends ConsoleKernel
         $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $rdts_time = $settings->setting_value . ':00';
+
+            $schedule->command('pickup:report')->dailyAt($rdts_time)->runInBackground();
+            //  $schedule->command('pickup:report')->dailyAt('08:00')->runInBackground();
+        }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -150,21 +159,6 @@ class Kernel extends ConsoleKernel
                 });
 
             })->runInBackground();
-        }
-
-		$schedule->command('pickuprequest:cancel')->dailyAt('08:00')->runInBackground();
-$schedule->command('shipmentemail:cancel')->dailyAt('08:00')->runInBackground();
-
-
-        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $rdts_time = $settings->setting_value . ':00';
-
-            $schedule->command('pickup:report')->dailyAt($rdts_time)->runInBackground();
-          //  $schedule->command('pickup:report')->dailyAt('08:00')->runInBackground();
         }
     }
 	 /**
