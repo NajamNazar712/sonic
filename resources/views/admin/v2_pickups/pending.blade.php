@@ -444,7 +444,7 @@
                 {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempts'},
                 {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider'},
                 {data: 'last_rider', name: 'lr.name', class: 'align-middle last_rider'},
-                {data: 'pickup_note_id', name: 'lr.name', class: 'align-middle pickup_note_id'}
+                {data: 'pickup_note_no', name: 'vpn.pickup_note_id', class: 'align-middle pickup_note_no'}
             ],
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
@@ -696,6 +696,40 @@
                     }
                 });
             });
+            $('#datatable tbody').on('click', 'tr td.pickup_note_no button.print', function() {
+                var pickup_note_id = parseInt($(this).attr('rel'));
+
+                print(pickup_note_id);
+            });
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.pending.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids': [id],
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
         });
     </script>
 @endsection

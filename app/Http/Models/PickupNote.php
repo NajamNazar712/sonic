@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class PickupNote extends Model
 {
 	public function pickup_note_requests() {
-		return $this->hasMany('App\Http\Models\PickupNoteRequest');
+		return $this->hasMany('App\Http\Models\V2Pickup\V2PickupNoteRequest', 'pickup_note_id');
 	}
 
 	public function rider() {
