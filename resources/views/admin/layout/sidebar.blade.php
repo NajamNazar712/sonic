@@ -149,8 +149,8 @@
                                             <li><a class="menu-item" href="{{ route('admin.v2_pickups.pending.index') }}">Pending</a></li>
                                         @endif
                                         @if (session('role_id') == 1 || in_array(24, session('permissions')))
-                                                <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Individual Arrival of Shipments</a></li>
-                                                <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk Arrival of Shipments</a></li>
+                                                <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Individual Arrival</a></li>
+                                                <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk Arrival</a></li>
                                         @endif
                                     </ul>
                                 </li>

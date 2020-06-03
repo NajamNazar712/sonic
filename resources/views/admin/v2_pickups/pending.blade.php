@@ -79,6 +79,7 @@
                                     <th class="border-primary border-darken-1">Attempt(s)</th>
                                     <th class="border-primary border-darken-1">Last Rider</th>
                                     <th class="border-primary border-darken-1">Current Rider</th>
+                                    <th class="border-primary border-darken-1">Pickup Note ID</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -442,7 +443,8 @@
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempts'},
                 {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider'},
-                {data: 'last_rider', name: 'lr.name', class: 'align-middle last_rider'}
+                {data: 'last_rider', name: 'lr.name', class: 'align-middle last_rider'},
+                {data: 'pickup_note_id', name: 'lr.name', class: 'align-middle pickup_note_id'}
             ],
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
