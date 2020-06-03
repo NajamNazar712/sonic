@@ -8,7 +8,7 @@ use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
-
+use DB;
 class V2PickupCronController extends Controller
 {
     static public function arrival_not_picked(){
@@ -30,7 +30,7 @@ class V2PickupCronController extends Controller
                         $pickup_request_attempt->pickup_request_id = $pickup_request->id;
                         $pickup_request_attempt->rider_id = $rider_id;
                         $pickup_request_attempt->attempt_date = Carbon::now();
-                        $pickup_request_attempt->assigned_by = 6;
+                        $pickup_request_attempt->assigned_by = 70;
                         $pickup_request_attempt->save();
 
                         $pickup_request_attempt->fresh();
@@ -39,8 +39,13 @@ class V2PickupCronController extends Controller
                         $pickup_request_attempt->save();
                     }
                 }
+
             }
+            self::remove_riders();
         }
+    }
+    public function remove_riders(){
+        V2PickupRequest::whereIn('status_id', [1,3])->where('rider_status', 2)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
     }
     static public function cancel_if_not_valid(){
         $pickup_requests = V2PickupRequest::where('status_id', 1);
