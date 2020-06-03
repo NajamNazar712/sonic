@@ -38,7 +38,7 @@ class ShipperReportsController extends Controller
                 ->leftJoin('shipments_journey as sj', function ($join) {
                     $join->on('sj.shipment_id', '=', 'shipments.id')
                         ->where('sj.created_at','=',
-                            DB::connection('reports')->raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
                 })
                 ->leftJoin('pending_payment_shipments as pps', function ($join) {
                     $join->on('pps.shipment_id', '=', 'shipments.id')
