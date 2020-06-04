@@ -176,6 +176,10 @@
 												<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
 											</div>
 
+											<div class="form-group input-group">
+												<input type="text" name="pieces_quantity" class="form-control text-center quantity" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required">
+											</div>
+
 											<div class="form-group text-center p-1 border border-light rounded">
 												<label class="d-block">Insurance</label>
 												<input type="checkbox" name="insurance" class="switch hidden insurance">
@@ -1107,6 +1111,7 @@
 							try_and_buy_total_quantity();
 						}
 					});
+					
 
 					$('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
 
