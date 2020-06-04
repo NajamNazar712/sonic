@@ -14,6 +14,7 @@ use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\PickupAction;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequest;
@@ -25,6 +26,8 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\V2Pickup\V2PickupRequestStatus;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\V2Pickup\V2RiderPickupShipment;
+use App\Http\Models\RiderPickupActionLog;
+use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;use App\Http\Controllers\Controller;
@@ -1206,5 +1209,51 @@ class V2AdminPickupsController extends Controller
         else {
             return ['status' => 1, 'error' => 'No Shipments'];
         }
+    }
+    public function pickups_action_log_index_v2() {
+        $pickup_actions = PickupAction::all();
+        $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+        $admins = DB::connection('reports')->table('admins')->get(['id','name']);
+        $cities = DB::connection('reports')->table('cities')->get(['id','name']);
+        return view('admin.v2_pickups.action_log.index')->with(['pickup_actions' => $pickup_actions, 'riders'=>$riders,'admins'=>$admins,'cities'=>$cities]);
+    }
+    public function pickups_action_log_list_v2(Request $request) {
+        $rider_pickup_action_logs = V2RiderPickupActionLog::join('pickup_actions as pa', 'v2_rider_pickup_action_logs.type_id', 'pa.id')
+    	->join('v2_pickup_notes as pn', 'v2_rider_pickup_action_logs.pickup_note_id', 'pn.id')
+        ->join('v2_pickup_requests as pr', 'v2_rider_pickup_action_logs.pickup_request_id', 'pr.id')
+        ->join('v2_pickup_request_attempts as pra', 'pra.pickup_request_id', 'v2_rider_pickup_action_logs.pickup_request_id')
+        ->join('riders as r', 'pr.current_rider_id', 'r.id')
+    	->join('users as u', 'pr.shipper_id', 'u.id')
+    	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
+    	->join('cities as c', 'usi.city_id', 'c.id')
+    	->select('v2_rider_pickup_action_logs.id', 'v2_rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'v2_rider_pickup_action_logs.pickup_note_id', 'v2_rider_pickup_action_logs.pickup_request_id','pr.created_at','pra.assigned_by','pr.city_id as city_id','pr.current_rider_id');
+
+        $datatables = Datatables::of($rider_pickup_action_logs)
+        // ->editColumn('pickup_note_id', function ($rider_pickup_action_log) {
+        //     return str_pad($rider_pickup_action_log->pickup_note_id, 6, '0', STR_PAD_LEFT);
+        // })
+        ->editColumn('pickup_request_id', function ($rider_pickup_action_log) {
+            return str_pad($rider_pickup_action_log->pickup_request_id, 6, '0', STR_PAD_LEFT);
+        });
+
+        if($pn_no = $request->get('search_pn_no')){
+            $rider_pickup_action_logs->where('v2_rider_pickup_action_logs.pickup_request_id','=',$pn_no);
+        }
+        if($assigned_by = $request->get('search_assigned_by')){
+            $rider_pickup_action_logs->where('pra.assigned_by','=',$assigned_by);
+        }
+        if($rider = $request->get('search_rider')){
+            $rider_pickup_action_logs->where('pr.current_rider_id','=',$rider);
+        }
+        if($city = $request->get('search_city')){
+            $rider_pickup_action_logs->where('pr.city_id','=',$city);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rider_pickup_action_logs->whereBetween('pr.created_at', [$from,$to]);
+        }
+
+    	return $datatables->make(true);
     }
 }

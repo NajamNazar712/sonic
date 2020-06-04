@@ -615,8 +615,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('shipments', 'Admins\V2Pickup\V2AdminPickupsController@pickups_shipments')->name('shipments');
         });
         Route::prefix('action_log')->name('action_log.')->group(function () {
-            Route::get('', 'Rider\RiderPickupsController@pickups_action_log_index')->name('index');
-            Route::get('v2_list', 'Rider\RiderPickupsController@pickups_action_log_list_v2')->name('list');
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_index_v2')->name('index');
+            Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_list_v2')->name('list');
         });
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pending_index')->name('index');
