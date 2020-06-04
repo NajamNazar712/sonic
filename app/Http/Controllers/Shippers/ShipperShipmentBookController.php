@@ -93,7 +93,7 @@ class ShipperShipmentBookController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces) {
 
 
         $shipment = new Shipment();
@@ -128,7 +128,7 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->try_and_buy_charges = $try_and_buy_charges;
 
-
+        $shipment->pieces = $pieces;
         $shipment->booked_by = session('user_type');
         $shipment->save();
 
@@ -175,7 +175,9 @@ class ShipperShipmentBookController extends Controller
 
         return $tracking_number;
     }
-
+    public function create_shipment_pieces($shipment_id, $pieces){
+        
+    }
     static public function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
         $shipment_item = new ShipmentItem();
 
