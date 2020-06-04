@@ -127,12 +127,12 @@ class ShipperShipmentBookController extends Controller
         $shipment->consignee_status_id = 1;
 
         $shipment->try_and_buy_charges = $try_and_buy_charges;
-
-        $shipment->pieces = $pieces;
         $shipment->booked_by = session('user_type');
         $shipment->save();
 
         $shipment_id = $shipment->id;
+
+        self::create_shipment_pieces($shipment_id,$pieces);
 
         AdminPickupsController::generate($shipment_id);
 
@@ -176,7 +176,9 @@ class ShipperShipmentBookController extends Controller
         return $tracking_number;
     }
     public function create_shipment_pieces($shipment_id, $pieces){
-        
+        if($pieces > 1){
+            
+        }
     }
     static public function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
         $shipment_item = new ShipmentItem();
