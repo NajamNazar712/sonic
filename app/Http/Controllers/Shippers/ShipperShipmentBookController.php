@@ -132,9 +132,6 @@ class ShipperShipmentBookController extends Controller
         $shipment->save();
 
         $shipment_id = $shipment->id;
-        if($service_type_id == 1){
-            self::create_shipment_pieces($shipment_id,$pieces);
-        }
 
         AdminPickupsController::generate($shipment_id);
 
@@ -468,9 +465,14 @@ class ShipperShipmentBookController extends Controller
                     else {
                         $try_and_buy_charges = NULL;
                     }
-                    if($request->piece){}
 
-                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $piece);
+                    $pieces_quantity = 1;
+
+                    if($request->has('pieces_quantity')){
+                        $pieces_quantity = $request->pieces_quantity;
+                    }
+
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity);
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 

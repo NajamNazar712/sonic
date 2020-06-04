@@ -93,7 +93,9 @@ class APIController extends Controller
 
       'receiving_sheet_id' => 'Receiving Sheet ID',
 
-      'charges_mode_id' => 'Charges Mode ID'
+      'charges_mode_id' => 'Charges Mode ID',
+
+      'pieces_quantity' => 'Pieces Quantity'
     ];
 
     private $messages = [
@@ -309,6 +311,8 @@ class APIController extends Controller
             'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+            'pieces_quantity' => ['required_if:service_type_id,1', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
@@ -564,6 +568,8 @@ class APIController extends Controller
             $item_price = NULL;
             $item_insurance = FALSE;
           }
+
+
 
           $item_type = 0;
 
