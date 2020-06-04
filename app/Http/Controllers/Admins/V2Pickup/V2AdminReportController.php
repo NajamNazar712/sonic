@@ -116,9 +116,6 @@ class V2AdminReportController extends Controller
     
                 $pickup_reports->legend_id =$legend_id;
                 $pickup_reports->save();
-    
-    
-               
             } 
             $pickup_summaries->date =$today;
             $pickup_summaries->total =$total;
@@ -176,11 +173,7 @@ class V2AdminReportController extends Controller
             'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id')
             // ->groupBy('v2_pickup_reports.pickup_request_id')
             ;
-            
-
-
         $datatables = Datatables::of($pickup_report)
-
         ->setRowAttr([
             'class' => function ($pickup_report) {
                 if (($pickup_report->difference_shipments <= 10)  && ($pickup_report->category_id == 1) ) {
