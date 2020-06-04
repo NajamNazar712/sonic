@@ -610,9 +610,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
-            Route::get('', 'Rider\RiderPickupsController@pickups_index')->name('index');
-            Route::get('v2_list', 'Rider\RiderPickupsController@pickups_list_v2')->name('list');
-            Route::get('shipments', 'Rider\RiderPickupsController@pickups_shipments')->name('shipments');
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@v2_pickups_index')->name('index');
+            Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_list_v2')->name('list');
+            Route::get('shipments', 'Admins\V2Pickup\V2AdminPickupsController@pickups_shipments')->name('shipments');
         });
         Route::prefix('action_log')->name('action_log.')->group(function () {
             Route::get('', 'Rider\RiderPickupsController@pickups_action_log_index')->name('index');
