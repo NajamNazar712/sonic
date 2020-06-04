@@ -44,6 +44,7 @@ use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\ShipmentPiece;
 
 use App\Jobs\ProcessShipmentBooking;
 
@@ -176,7 +177,16 @@ class ShipperShipmentBookController extends Controller
         return $tracking_number;
     }
     public function create_shipment_pieces($shipment_id, $pieces){
+        $total_pieces= 0;
         if($pieces > 1){
+            $shipment_piece = new ShipmentPiece();
+            $shipment_piece->shipment_id = $shipment_id;
+            foreach($pieces as $piece){
+                $total_pieces++;
+                $shipment_piece->numbering=$total_pieces;
+                $shipment_piece->tracking_number= $shipment_id . $total_pieces;
+                $shipment_piece->save();
+            }
             
         }
     }
