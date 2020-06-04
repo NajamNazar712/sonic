@@ -590,13 +590,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
             Route::get('', 'Rider\RiderPickupsController@pickups_index')->name('index');
             Route::get('list', 'Rider\RiderPickupsController@pickups_list')->name('list');
-             Route::get('v2_list', 'Rider\RiderPickupsController@pickups_list_v2')->name('v2_list');
+            //  Route::get('v2_list', 'Rider\RiderPickupsController@pickups_list_v2')->name('v2_list');
             Route::get('shipments', 'Rider\RiderPickupsController@pickups_shipments')->name('shipments');
 
             Route::prefix('action_log')->name('action_log.')->group(function () {
                 Route::get('', 'Rider\RiderPickupsController@pickups_action_log_index')->name('index');
                 Route::get('list', 'Rider\RiderPickupsController@pickups_action_log_list')->name('list');
-                Route::get('v2_list', 'Rider\RiderPickupsController@pickups_action_log_list_v2')->name('v2_list');
+                // Route::get('v2_list', 'Rider\RiderPickupsController@pickups_action_log_list_v2')->name('v2_list');
             });
         });
 
@@ -609,6 +609,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
+        Route::prefix('rider')->name('rider.')->group(function () {
+            Route::get('', 'Rider\RiderPickupsController@pickups_index')->name('index');
+            Route::get('v2_list', 'Rider\RiderPickupsController@pickups_list_v2')->name('list');
+            Route::get('shipments', 'Rider\RiderPickupsController@pickups_shipments')->name('shipments');
+        });
+        Route::prefix('action_log')->name('action_log.')->group(function () {
+            Route::get('', 'Rider\RiderPickupsController@pickups_action_log_index')->name('index');
+            Route::get('v2_list', 'Rider\RiderPickupsController@pickups_action_log_list_v2')->name('list');
+        });
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pending_index')->name('index');
             Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pending_list')->name('list');

@@ -170,7 +170,6 @@
             });
 
 			
-		
 			
 			table = $('#datatable').DataTable({
 			dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -190,7 +189,7 @@
 			},
 			serverSide: true,
 			ajax: {
-				 url: '{{ route('admin.pickups.rider.list') }}',
+				url: '{{ route('admin.v2_pickups.rider.list') }}',
 				//url: tableUrl,
 				data: function (d) {
 					d.search_date_from = $('input[name="search_date_from_formatted"]').val();
@@ -200,25 +199,25 @@
 			rowId: 'id',
 			order: [[0, 'desc']],
 			columns: [
-				{data: 'added_at', name: 'rider_pickups.added_at', class: 'align-middle added_at'},
+				{data: 'added_at', name: 'v2_rider_pickups.added_at', class: 'align-middle added_at'},
 				{data: 'rider', name: 'r.name', class: 'align-middle rider'},
 				{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 				{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 				{data: 'city', name: 'c.name', class: 'align-middle city'},
-				{data: 'pickup_type', name: 'rider_pickups.pickup_type', class: 'align-middle pickup_type'},
-				{data: 'start_location_latitude', name: 'rider_pickups.start_location_latitude', class: 'align-middle start_location_latitude'},
-				{data: 'start_location_longitude', name: 'rider_pickups.start_location_longitude', class: 'align-middle start_location_longitude'},
-				{data: 'actual_location_latitude', name: 'rider_pickups.actual_location_latitude', class: 'align-middle actual_location_latitude'},
-				{data: 'actual_location_longitude', name: 'rider_pickups.actual_location_longitude', class: 'align-middle actual_location_longitude'},
-				{data: 'distance_from_start_to_actual', name: 'rider_pickups.distance_from_start_to_actual', class: 'align-middle distance_from_start_to_actual'},
-				{data: 'current_location_latitude', name: 'rider_pickups.current_location_latitude', class: 'align-middle current_location_latitude'},
-				{data: 'current_location_longitude', name: 'rider_pickups.current_location_longitude', class: 'align-middle current_location_longitude'},
-				{data: 'distance_from_current_to_actual', name: 'rider_pickups.distance_from_current_to_actual', class: 'align-middle distance_from_current_to_actual'},
-				{data: 'shipments', name: 'rider_pickups.shipments', class: 'align-middle shipments'},
-				{data: 'reason', name: 'rider_pickups.pickup_not_pick_reason_id', class: 'align-middle reason'},
-				{data: 'picture_path', name: 'rider_pickups.picture_path', class: 'align-middle picture_path', orderable: false, searchable: false},
-				{data: 'pickup_note_id', name: 'rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
-				{data: 'pickup_request_id', name: 'rider_pickups.pickup_request_id', class: 'align-middle pickup_request_id'}
+				{data: 'pickup_type', name: 'v2_rider_pickups.pickup_type', class: 'align-middle pickup_type'},
+				{data: 'start_location_latitude', name: 'v2_rider_pickups.start_location_latitude', class: 'align-middle start_location_latitude'},
+				{data: 'start_location_longitude', name: 'v2_rider_pickups.start_location_longitude', class: 'align-middle start_location_longitude'},
+				{data: 'actual_location_latitude', name: 'v2_rider_pickups.actual_location_latitude', class: 'align-middle actual_location_latitude'},
+				{data: 'actual_location_longitude', name: 'v2_rider_pickups.actual_location_longitude', class: 'align-middle actual_location_longitude'},
+				{data: 'distance_from_start_to_actual', name: 'v2_rider_pickups.distance_from_start_to_actual', class: 'align-middle distance_from_start_to_actual'},
+				{data: 'current_location_latitude', name: 'v2_rider_pickups.current_location_latitude', class: 'align-middle current_location_latitude'},
+				{data: 'current_location_longitude', name: 'v2_rider_pickups.current_location_longitude', class: 'align-middle current_location_longitude'},
+				{data: 'distance_from_current_to_actual', name: 'v2_rider_pickups.distance_from_current_to_actual', class: 'align-middle distance_from_current_to_actual'},
+				{data: 'shipments', name: 'v2_rider_pickups.shipments', class: 'align-middle shipments'},
+				{data: 'reason', name: 'v2_rider_pickups.pickup_not_pick_reason_id', class: 'align-middle reason'},
+				{data: 'picture_path', name: 'v2_rider_pickups.picture_path', class: 'align-middle picture_path', orderable: false, searchable: false},
+				{data: 'pickup_note_id', name: 'v2_rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
+				{data: 'pickup_request_id', name: 'v2_rider_pickups.pickup_request_id', class: 'align-middle pickup_request_id'}
 			],
 			drawCallback: function (settings) {
 				var api = new $.fn.dataTable.Api( settings );
@@ -310,7 +309,7 @@
 				$('#shipments_modal .modal-body').html('');
 
 				$.ajax({
-					url: '{!! route('admin.pickups.rider.shipments') !!}',
+					url: '{!! route('admin.v2_pickups.rider.shipments') !!}',
 					method: 'GET',
 					data: {
 						'_token': '{{ csrf_token() }}',
