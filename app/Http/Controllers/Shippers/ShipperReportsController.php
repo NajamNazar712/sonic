@@ -37,18 +37,18 @@ class ShipperReportsController extends Controller
                 ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
                 ->leftJoin('shipments_journey as sj', function ($join) {
                     $join->on('sj.shipment_id', '=', 'shipments.id')
-                        ->where('sj.created_at','=',
+                        ->where('sj.id','=',
                             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
                 })
                 ->leftJoin('pending_payment_shipments as pps', function ($join) {
                     $join->on('pps.shipment_id', '=', 'shipments.id')
-                        ->where('pps.created_at','=',
-                            DB::connection('reports')->raw('(select max(created_at) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
+                        ->where('pps.id','=',
+                            DB::connection('reports')->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
                 })
                 ->leftJoin('done_payment_shipments as dps', function ($join) {
                     $join->on('dps.shipment_id', '=', 'shipments.id')
-                        ->where('dps.created_at','=',
-                            DB::connection('reports')->raw('(select max(created_at) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
+                        ->where('dps.id','=',
+                            DB::connection('reports')->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
                 })
                 ->leftjoin('shipment_items as si', function ($join) {
                     $join->on('si.shipment_id', '=', 'shipments.id')
