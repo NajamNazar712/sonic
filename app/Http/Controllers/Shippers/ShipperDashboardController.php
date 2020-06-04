@@ -418,7 +418,9 @@ class ShipperDashboardController extends Controller
 //                        AdminPickupsController::cancel($shipment->id);
 
                         $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
-                        $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id);
+                        $pickup_request_id = $pickup_request_shipment->pickup_request_id;
+
+                        $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id);
                         if($pickup_requests->exists()){
                             $pickup_requests = $pickup_requests->get();
                             $flag = true;
@@ -428,11 +430,12 @@ class ShipperDashboardController extends Controller
                                     $flag = false;
                                 }
                             }
+                            $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
                             if($flag == true){
-                                $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
                                 $pickup_request->status_id = 4;
-                                $pickup_request->save();
                             }
+                            $pickup_request->booking = $pickup_request->booking - 1;
+                            $pickup_request->save();
                         }
 
                         ShipmentsJourneyController::add($shipment_id->id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);

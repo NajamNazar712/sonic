@@ -208,8 +208,7 @@ class V2AdminReportController extends Controller
                 $reason_ids = $attempts->pluck('reason_id')->toArray();
                 if(count($reason_ids) > 0){
                     foreach ($reason_ids as $reason_id) {
-                        $reasons .= V2PickupRequestNotPickReason::find($reason_id)->name;
-                        $reasons .= '<br>';
+                        $reasons .= V2PickupRequestNotPickReason::find($reason_id)->name . PHP_EOL;
                     }
                 }
             }
@@ -222,8 +221,7 @@ class V2AdminReportController extends Controller
                 $trax_remarks_rows = $attempts->pluck('trax_remarks')->toArray();
                 if(count($trax_remarks_rows) > 0){
                     foreach ($trax_remarks_rows as $remark) {
-                        $trax_remarks .= $remark;
-                        $trax_remarks .= '<br>';
+                        $trax_remarks .= $remark . PHP_EOL;
                     }
                 }
             }
@@ -236,8 +234,7 @@ class V2AdminReportController extends Controller
                 $attempted_date_rows = $attempts->pluck('attempt_date')->toArray();
                 if(count($attempted_date_rows) > 0){
                     foreach ($attempted_date_rows as $attempt_date) {
-                        $attempted_date .= $attempt_date;
-                        $attempted_date .= '<br>';
+                        $attempted_date .= $attempt_date . PHP_EOL;
                     }
                 }
             }
