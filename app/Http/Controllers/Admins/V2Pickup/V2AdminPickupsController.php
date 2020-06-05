@@ -946,7 +946,14 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->save();
             }
         }
-
+        foreach ($pickup_request_ids as $pickup_request_id) {
+            $pickup_request = V2PickupRequest::find($pickup_request_id);
+            $count = $pickup_request->pickup_request_shipments->where('status', 1)->count();
+            if($count > 0){
+                $pickup_request->status_id = 2;
+                $pickup_request->save();
+            }
+        }
         NotificationsController::send(4, $shipment_ids);
 
             return redirect()->route('admin.v2_pickups.pending.index')->with('success','Shipments arrived Successfully!');
