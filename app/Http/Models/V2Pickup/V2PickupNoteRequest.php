@@ -11,6 +11,6 @@ class V2PickupNoteRequest extends Model
 	}
 
 	public function pickup_note() {
-		return $this->belongsTo('App\Http\Models\V2Pickup\V2PickupNote');
+		return $this->belongsTo('App\Http\Models\V2Pickup\V2PickupNote','pickup_note_id');
 	}
 }

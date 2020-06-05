@@ -1362,7 +1362,7 @@ class RiderAPIController extends Controller {
 
                 $pickup_request->status_id = 3;
                 $pickup_request->save();
-                $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id);
+                $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id)->first();
                 $pickup_request_attempt->reason_id = $request->reason_id;
                 $pickup_request_attempt->save();
 
