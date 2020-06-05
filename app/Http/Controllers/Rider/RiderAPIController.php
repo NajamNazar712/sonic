@@ -34,7 +34,6 @@ use App\Http\Models\PickupRequest;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
 use App\Http\Models\RiderPickup;
-use App\Http\Models\RiderPickupShipment;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\RiderPickupActionLog;
 use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
