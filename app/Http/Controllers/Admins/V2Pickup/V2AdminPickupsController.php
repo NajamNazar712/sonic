@@ -332,8 +332,6 @@ class V2AdminPickupsController extends Controller
                     $rider_id = $pickup_request->current_rider_id;
                     if($rider_id == NULL){
                         $this->generate_trax_pickup($pickup_request->id);
-                    }else{
-
                     }
                     $pickup_request_attempts = $pickup_request->pickup_attempt_latest;
                     $pickup_request->last_updated_by = Auth::id();
