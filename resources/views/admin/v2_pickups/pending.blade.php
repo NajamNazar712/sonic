@@ -77,8 +77,8 @@
                                     <th class="border-primary border-darken-1">Rider Status</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
                                     <th class="border-primary border-darken-1">Attempt(s)</th>
-                                    <th class="border-primary border-darken-1">Last Rider</th>
                                     <th class="border-primary border-darken-1">Current Rider</th>
+                                    <th class="border-primary border-darken-1">Last Rider</th>
                                     <th class="border-primary border-darken-1">Pickup Note ID</th>
                                 </tr>
                                 </thead>

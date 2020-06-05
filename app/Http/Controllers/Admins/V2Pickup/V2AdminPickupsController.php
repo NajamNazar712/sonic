@@ -338,6 +338,13 @@ class V2AdminPickupsController extends Controller
         if(count($pickup_request_ids) > 0){
             foreach ($pickup_request_ids as $pickup_request_id) {
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
+
+                if ($pickup_request->current_rider_id == NULL) {
+                    return ['status' => 1, 'error' => 'One of the Pickup Request(s) has not been assigned!'];
+                }
+            }
+            foreach ($pickup_request_ids as $pickup_request_id) {
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request){
                     $pickup_request_attempts = $pickup_request->pickup_attempt_latest;
                     $pickup_request->last_updated_by = Auth::id();
@@ -607,6 +614,14 @@ class V2AdminPickupsController extends Controller
 
                 $pickup_request->received = $pickup_request->received + 1;
 
+                $pickup_request->save();
+            }
+        }
+        foreach ($pickup_request_ids as $pickup_request_id) {
+            $pickup_request = V2PickupRequest::find($pickup_request_id);
+            $count = $pickup_request->pickup_request_shipments->where('status', 1)->count();
+            if($count > 0){
+                $pickup_request->status_id = 2;
                 $pickup_request->save();
             }
         }

@@ -1353,7 +1353,14 @@ class RiderAPIController extends Controller {
 
             if (!V2RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 0)->where('added_at', $added_at)->exists()) {
                 $pickup_request = V2PickupRequest::find($request->pickup_request_id);
+
                 $pickup_address = $pickup_request->pickup_address;
+
+                $pickup_request->status_id = 3;
+                $pickup_request->save();
+                $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id);
+                $pickup_request_attempt->reason_id = $request->reason_id;
+                $pickup_request_attempt->save();
 
                 $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
