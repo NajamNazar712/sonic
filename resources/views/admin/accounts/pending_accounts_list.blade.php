@@ -236,49 +236,49 @@
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             scrollX: true, scrollY: '500px',
             buttons: [
-                    {
-                        text: 'Set Commission',
-                        className: 'btn btn-primary set_commission',
-                        enabled:false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to Set Commission!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        var link = '{{ route('admin.settings.commission.set_commission', ["ids" => 0]) }}';
-                                        window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;
-                                    }
-                                });
+                    {{--{--}}
+                    {{--    text: 'Set Commission',--}}
+                    {{--    className: 'btn btn-primary set_commission',--}}
+                    {{--    enabled:false,--}}
+                    {{--    action: function (e, dt, node, config) {--}}
+                    {{--        if(selected_rows != ''){--}}
+                    {{--            swal({--}}
+                    {{--                title: 'Are You Sure?',--}}
+                    {{--                text: 'Select Yes to Set Commission!',--}}
+                    {{--                icon: 'warning',--}}
+                    {{--                buttons: {--}}
+                    {{--                    cancel: {--}}
+                    {{--                        text: 'No',--}}
+                    {{--                        value: null,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true,--}}
+                    {{--                    },--}}
+                    {{--                    confirm: {--}}
+                    {{--                        text: 'Yes',--}}
+                    {{--                        value: true,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true--}}
+                    {{--                    }--}}
+                    {{--                },--}}
+                    {{--                closeOnClickOutside: false,--}}
+                    {{--                closeOnEsc: false,--}}
+                    {{--                dangerMode: true--}}
+                    {{--            }).then(function (confirm) {--}}
+                    {{--                if (confirm) {--}}
+                    {{--                    var link = '{{ route('admin.settings.commission.set_commission', ["ids" => 0]) }}';--}}
+                    {{--                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;--}}
+                    {{--                }--}}
+                    {{--            });--}}
 
 
-                            }
-                            else{
-                                var error = "Something went wrong please refresh page and try again!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    {{--        }--}}
+                    {{--        else{--}}
+                    {{--            var error = "Something went wrong please refresh page and try again!";--}}
+                    {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                            }
-                        }
-                    },
+                    {{--        }--}}
+                    {{--    }--}}
+                    {{--},--}}
                     {
                         extend: 'excel',
                         title: 'Pending Accounts',
@@ -315,7 +315,7 @@
                 }
             },
             columns: [
-                {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
@@ -373,7 +373,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.rate_status') || $(header).is('.duplicate')) {
+                    if ($(header).is('.select') || $(header).is('.action') || $(header).is('.serial_number') || $(header).is('.rate_status') || $(header).is('.duplicate')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
