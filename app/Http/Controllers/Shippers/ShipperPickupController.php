@@ -35,7 +35,8 @@ class ShipperPickupController extends Controller
             ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
             ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
             ->join('v2_pickup_request_statuses as vprs', 'vprs.id', '=', 'v2_pickup_requests.status_id')
-            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_at', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.received', 'v2_pickup_requests.attempts', 'v2_pickup_requests.status_id', 'v2_pickup_requests.rider_status', 'usi.vendor', 'vprs.name as status', 'v2_pickup_requests.renew as renew');
+            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_at', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.received', 'v2_pickup_requests.attempts', 'v2_pickup_requests.status_id', 'v2_pickup_requests.rider_status', 'usi.vendor', 'vprs.name as status', 'v2_pickup_requests.renew as renew')
+        ->where('v2_pickup_requests.shipper_id', session('user_id'));
 
 
         return Datatables::of($pickups)
@@ -59,17 +60,12 @@ class ShipperPickupController extends Controller
                 }
             })
             ->addColumn('reason', function($pickup_request) {
-                $reasons = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id);
+                $attempt_reasons = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id);
                 $all_reason = '';
-                if($reasons->exists()){
-                    $reasons = $reasons->get();
-                    foreach ($reasons as $reason){
-                        if($all_reason == ''){
-                            $all_reason = $reason->reason->name;
-                        }
-                        else{
-                            $all_reason = $all_reason . '<br/>' . $reason->reason->name;
-                        }
+                if($attempt_reasons->exists()){
+                    $attempts = $attempt_reasons->get();
+                    foreach ($attempts as $attempt){
+                        $all_reason .= $attempt->reason->name . PHP_EOL;
                     }
                 }
                 return $all_reason;
