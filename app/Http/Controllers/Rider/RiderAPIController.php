@@ -1173,7 +1173,7 @@ class RiderAPIController extends Controller {
     public function pickup_summary_v2(Request $request) {
         $rider_id = $request->rider_id;
 
-        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->whereIn('status', [2, 3]);
+        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
 
         if ($pickup_note->exists()) {
             $pickup_note = $pickup_note->latest('id')->first();
@@ -1320,6 +1320,10 @@ class RiderAPIController extends Controller {
                 $rider_pickup->save();
 
                 V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
+                $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('status', 0)->count();
+                if($pickup_note_requests_count == 0){
+                    V2PickupNote::where('id', $request->pickup_note_id)->update(['status' => 1]);
+                }
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
@@ -1412,6 +1416,10 @@ class RiderAPIController extends Controller {
                 $rider_pickup->save();
 
                 V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
+                $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('status', 0)->count();
+                if($pickup_note_requests_count == 0){
+                    V2PickupNote::where('id', $request->pickup_note_id)->update(['status' => 1]);
+                }
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Not Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);

@@ -209,6 +209,7 @@ class V2AdminPickupsController extends Controller
         return $datatables->make(true);
     }
 
+
     public function pending_assign(Request $request) {
 
         $pickup_request_ids = $request->input('pickup_request_ids');
@@ -244,22 +245,12 @@ class V2AdminPickupsController extends Controller
         $pickups = 0;
         $bookings = 0;
 
-        $vendor_flag = FALSE;
-
         foreach ($pickup_request_ids as $pickup_request_id) {
             $pickup_request = V2PickupRequest::find($pickup_request_id);
-            if($pickup_request->pickup_address->vendor != NULL){
-                $vendor_flag = TRUE;
-            }
-
             $pickup_request->rider_status = 2;
             $pickup_request->attempts = $pickup_request->attempts + 1;
             $pickup_request->current_rider_id = $rider_id;
             $pickup_request->last_updated_by = Auth::id();
-            if($vendor_flag){
-                $pickup_request->vendor = 1;
-                $vendor_flag = FALSE;
-            }
             $pickup_request->save();
 
             $pickup_request_attempt = new V2PickupRequestAttempt();
@@ -305,10 +296,9 @@ class V2AdminPickupsController extends Controller
             $pickup_request = V2PickupRequest::find($pickup_request_id);
             $assigned_shipments = $pickup_request->pickup_request_shipments;
             NotificationsController::send(42, $rider_id, $pickup_request->shipper_id);
-            if($pickup_request->pickup_address->vendor != NULL){
+            if($pickup_request->vendor == 1){
                 NotificationsController::send(43, $pickup_request->id, $pickup_request->pickup_address->id);
             }
-
 
             if ($assigned_shipments) {
                 foreach ($assigned_shipments as $assigned_shipment) {
@@ -338,14 +328,13 @@ class V2AdminPickupsController extends Controller
         if(count($pickup_request_ids) > 0){
             foreach ($pickup_request_ids as $pickup_request_id) {
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
-
-                if ($pickup_request->current_rider_id == NULL) {
-                    return ['status' => 1, 'error' => 'One of the Pickup Request(s) has not been assigned!'];
-                }
-            }
-            foreach ($pickup_request_ids as $pickup_request_id) {
-                $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request){
+                    $rider_id = $pickup_request->current_rider_id;
+                    if($rider_id == NULL){
+                        $this->generate_trax_pickup($pickup_request->id);
+                    }else{
+
+                    }
                     $pickup_request_attempts = $pickup_request->pickup_attempt_latest;
                     $pickup_request->last_updated_by = Auth::id();
                     $pickup_request->save();
@@ -633,7 +622,6 @@ class V2AdminPickupsController extends Controller
     }
 
     public function generate_trax_pickup($pickup_request_id){
-        $vendor_flag = FALSE;
         $pickup_request = V2PickupRequest::find($pickup_request_id);
         $settings = GlobalSettings::where('type', 'global_rider_id');
         if($settings->exists()){
@@ -646,16 +634,10 @@ class V2AdminPickupsController extends Controller
             $pickup_request_attempt->assigned_by = Auth::id();
             $pickup_request_attempt->save();
 
-            if($pickup_request->pickup_address->vendor != NULL){
-                $vendor_flag = TRUE;
-            }
             $pickup_request->rider_status = 2;
             $pickup_request->attempts = $pickup_request->attempts + 1;
             $pickup_request->current_rider_id = $rider_id;
             $pickup_request->last_updated_by = Auth::id();
-            if($vendor_flag){
-                $pickup_request->vendor = 1;
-            }
             $pickup_request->save();
         }
     }
