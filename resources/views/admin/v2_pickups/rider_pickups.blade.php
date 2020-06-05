@@ -303,36 +303,7 @@
 
 			var route = '{!! route('admin.tracking.index') !!}';
 
-			$('#datatable tbody').on('click','tr td.shipments button', function () {
-				var id = parseInt($(this).parents('tr').attr('id'));
-
-				$('#shipments_modal .modal-body').html('');
-
-				$.ajax({
-					url: '{!! route('admin.v2_pickups.rider.shipments') !!}',
-					method: 'GET',
-					data: {
-						'_token': '{{ csrf_token() }}',
-						'rider_pickup_id': id
-					}
-				})
-				.done(function(data) {
-					if (data.status == 0) {
-						var tracking_numbers = '';
-
-						$.each(data.tracking_numbers, function (index, tracking_number) {
-							tracking_numbers += '<u><a href="' + route + '?tracking_number=' + tracking_number + '" target="_blank">' + tracking_number + '</u><br/>';
-						});
-
-						$('#shipments_modal .modal-body').html(tracking_numbers);
-
-						$('#shipments_modal').modal('show');
-					}
-					else {
-						toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-					}
-				});
-			});
+	
 		});
 	</script>
 @endsection
