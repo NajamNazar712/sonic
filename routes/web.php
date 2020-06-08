@@ -1785,6 +1785,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('search','Admins\CoordinatesController@address_search')->name('search.address');
         });
     });
+
+    Route::prefix('handover')->name('handover.')->group(function () {
+        Route::prefix('responsibles')->name('responsibles.')->group(function () {
+            Route::get('', 'AdminShipmentHandoverController@responsibles_index')->name('index');
+            Route::get('list', 'AdminShipmentHandoverController@responsibles_list')->name('list');
+            Route::post('add', 'AdminShipmentHandoverController@responsibles_add')->name('add');
+        });
+    });    
      
 });
 
