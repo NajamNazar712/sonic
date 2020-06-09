@@ -179,7 +179,7 @@ class ShipperShipmentBookController extends Controller
         if($pieces > 1){
             $shipment_piece = new ShipmentPiece();
             $shipment_piece->shipment_id = $shipment_id;
-            foreach($pieces as $piece){
+            for($i=1; $i<=$pieces; $i++){
                 $total_pieces++;
                 $shipment_piece->numbering=$total_pieces;
                 $shipment_piece->tracking_number= $shipment_id . $total_pieces;
