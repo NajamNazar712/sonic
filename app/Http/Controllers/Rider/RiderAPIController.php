@@ -34,7 +34,6 @@ use App\Http\Models\PickupRequest;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
 use App\Http\Models\RiderPickup;
-use App\Http\Models\RiderPickupShipment;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\RiderPickupActionLog;
 use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
@@ -1173,7 +1172,7 @@ class RiderAPIController extends Controller {
     public function pickup_summary_v2(Request $request) {
         $rider_id = $request->rider_id;
 
-        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->whereIn('status', [2, 3]);
+        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
 
         if ($pickup_note->exists()) {
             $pickup_note = $pickup_note->latest('id')->first();
@@ -1320,6 +1319,10 @@ class RiderAPIController extends Controller {
                 $rider_pickup->save();
 
                 V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
+                $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('status', 0)->count();
+                if($pickup_note_requests_count == 0){
+                    V2PickupNote::where('id', $request->pickup_note_id)->update(['status' => 1]);
+                }
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
@@ -1353,7 +1356,14 @@ class RiderAPIController extends Controller {
 
             if (!V2RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 0)->where('added_at', $added_at)->exists()) {
                 $pickup_request = V2PickupRequest::find($request->pickup_request_id);
+
                 $pickup_address = $pickup_request->pickup_address;
+
+                $pickup_request->status_id = 3;
+                $pickup_request->save();
+                $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id)->first();
+                $pickup_request_attempt->reason_id = $request->reason_id;
+                $pickup_request_attempt->save();
 
                 $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
@@ -1405,6 +1415,10 @@ class RiderAPIController extends Controller {
                 $rider_pickup->save();
 
                 V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
+                $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('status', 0)->count();
+                if($pickup_note_requests_count == 0){
+                    V2PickupNote::where('id', $request->pickup_note_id)->update(['status' => 1]);
+                }
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Not Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);

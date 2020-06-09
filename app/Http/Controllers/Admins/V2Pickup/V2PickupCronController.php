@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admins\V2Pickup;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use Carbon\Carbon;
@@ -15,12 +17,22 @@ class V2PickupCronController extends Controller
         $pickup_requests = V2PickupRequest::where('status_id', 1);
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
+            $pickup_request_ids = array();
             foreach ($pickup_requests as $pickup_request) {
                 $pickup_request->status_id = 3;
+                $pickup_request->save();
                 if($pickup_request->current_rider_id != null){
                     $pickup_request_attempt = $pickup_request->pickup_attempt_latest;
                     $pickup_request_attempt->reason_id = 7;
                     $pickup_request_attempt->save();
+                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request->id)->latest('id')->first();
+                    if($pickup_note_request->status == 0){
+                        $pickup_note_request->status = 1;
+                        $pickup_note_request->save();
+                    }
+                    if(!in_array($pickup_request->id, $pickup_request_ids)){
+                        $pickup_request_ids[] = $pickup_request->id;
+                    }
                 }else{
                     $setting = GlobalSettings::where('type', 'global_rider_id');
                     if($setting->exists()){
@@ -40,6 +52,16 @@ class V2PickupCronController extends Controller
                     }
                 }
 
+            }
+            if(!empty($pickup_request_ids)){
+                $pickup_note_ids = array();
+                foreach ($pickup_request_ids as $pickup_request_id) {
+                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->first();
+                    if(!in_array($pickup_note_request->pickup_note_id, $pickup_note_ids)){
+                        $pickup_note_ids[] = $pickup_note_request->pickup_note_id;
+                    }
+                }
+                V2PickupNote::whereIn('id', $pickup_note_ids)->update(['status' => 1]);
             }
             self::remove_riders();
         }
@@ -61,7 +83,7 @@ class V2PickupCronController extends Controller
         }
     }
     static public function pickup_re_generate(){
-        $pickup_requests = V2PickupRequest::where('status_id', 1);
+        $pickup_requests = V2PickupRequest::where('status_id', 2);
         if($pickup_requests->exists()) {
             $pickup_requests = $pickup_requests->get();
             foreach ($pickup_requests as $pickup_request) {

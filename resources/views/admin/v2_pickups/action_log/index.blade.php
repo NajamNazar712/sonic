@@ -17,7 +17,7 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<!-- <div class="row justify-content-center">
+						<!-- <div class="row justify-content-center">
                                 <div class="col-3">
                                     <label class="font-medium-2 font-weight-bold block">Old Rider Pickup Action Logs</label>
                                     <div class="form-group">
@@ -199,7 +199,7 @@
                 },
 				serverSide: true,
 				ajax: {
-                    url: '{{ route('admin.pickups.rider.action_log.list') }}',
+                    url: '{{ route('admin.v2_pickups.action_log.list') }}',
                     data: function (d) {
                         d.search_pn_no = $('#search_pn_no').val();
                         d.search_rider = $('#search_rider').val();
@@ -211,14 +211,14 @@
                 },
 				order: [[0, 'desc']],
 				columns: [
-					{data: 'logged_at', name: 'rider_pickup_action_logs.logged_at', class: 'align-middle logged_at'},
+					{data: 'logged_at', name: 'v2_rider_pickup_action_logs.logged_at', class: 'align-middle logged_at'},
 					{data: 'rider', name: 'r.name', class: 'align-middle rider'},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 					{data: 'city', name: 'c.name', class: 'align-middle city'},
-					{data: 'type', name: 'rider_pickup_action_logs.type_id', class: 'align-middle type'},
+					{data: 'type', name: 'v2_rider_pickup_action_logs.type_id', class: 'align-middle type'},
 					 {data: 'pickup_note_id', name: 'pn.id', class: 'align-middle pickup_note_id'},
-					{data: 'pickup_request_id', name: 'rider_pickup_action_logs.pickup_request_id', class: 'align-middle pickup_request_id'}
+					{data: 'pickup_request_id', name: 'v2_rider_pickup_action_logs.pickup_request_id', class: 'align-middle pickup_request_id'}
 				],
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());

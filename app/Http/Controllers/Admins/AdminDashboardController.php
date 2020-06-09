@@ -1526,7 +1526,7 @@ class AdminDashboardController extends Controller
     public function viewBankInfo($id){
         $user = User::find($id);
         $banks = $user->bank;
-//        return $bank;
+//        return $banks;
         $returnHTML = view('admin/components/bank')->with(['banks'=>$banks,'user'=>$user])->render();
         return response()->json($returnHTML);
     }

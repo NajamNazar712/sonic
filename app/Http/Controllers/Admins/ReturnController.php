@@ -362,7 +362,9 @@ class ReturnController extends Controller
                     if ($parcel->booking_type_id != 4) {
                         ShipmentChargesController::return($shipment);
 
-                        AdminFinanceController::add_payment($shipment, 1);
+                        if ($parcel->packaging_material_request != 1) {
+                            AdminFinanceController::add_payment($shipment, 1);
+                        }
                     }
                     else {
                         ShipmentChargesController::walk_in_return($shipment);
@@ -458,7 +460,9 @@ class ReturnController extends Controller
                 if ($parcel->booking_type_id != 4) {
                     ShipmentChargesController::return($request->shipment_id);
 
-                    AdminFinanceController::add_payment($request->shipment_id, 1);
+                    if ($parcel->packaging_material_request != 1) {
+                        AdminFinanceController::add_payment($request->shipment_id, 1);
+                    }
                 }
                 else {
                     ShipmentChargesController::walk_in_return($request->shipment_id);

@@ -152,6 +152,13 @@
                                                 <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Individual Arrival</a></li>
                                                 <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk Arrival</a></li>
                                         @endif
+                                        @if (session('role_id') == 1 || in_array(271, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.v2_pickups.rider.index') }}">Rider</a></li>
+                                        @endif
+
+                                        @if (session('role_id') == 1 || in_array(272, session('permissions')))
+                                            <li><a class="menu-item" href="{{ route('admin.v2_pickups.action_log.index') }}">Rider Action Log</a></li>
+                                        @endif
                                     </ul>
                                 </li>
                             @endif

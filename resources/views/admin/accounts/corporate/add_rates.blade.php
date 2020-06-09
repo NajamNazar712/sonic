@@ -2473,58 +2473,58 @@
                 var value = $(this).val();
                 var maxvalue = parseFloat(value);
                 var minvalue = maxvalue + 0.01;
-                $('input[name="on_door_range_down[0]"]').val(maxvalue);
-                $('input[name="on_door_range_up[1]"]').val(minvalue);
+                $('input[name="on_door_range_down[1]"]').val(maxvalue);
+                $('input[name="on_door_range_up[2]"]').val(minvalue);
             });
 
             $('input[name="on_hub_mcw_charges"]').on('change', function () {
                 var value = $(this).val();
                 var maxvalue = parseFloat(value);
                 var minvalue = maxvalue + 0.01;
-                $('input[name="on_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="on_hub_range_up[1]"]').val(minvalue);
+                $('input[name="on_hub_range_down[1]"]').val(maxvalue);
+                $('input[name="on_hub_range_up[2]"]').val(minvalue);
             });
             $('input[name="ol_door_mcw_charges"]').on('change', function () {
                 var value = $(this).val();
                 var maxvalue = parseFloat(value);
                 var minvalue = maxvalue + 0.01;
-                $('input[name="ol_door_range_down[0]"]').val(maxvalue);
-                $('input[name="ol_door_range_up[1]"]').val(minvalue);
+                $('input[name="ol_door_range_down[1]"]').val(maxvalue);
+                $('input[name="ol_door_range_up[2]"]').val(minvalue);
             });
             $('input[name="ol_hub_mcw_charges"]').on('change', function () {
                 var value = $(this).val();
                 var maxvalue = parseFloat(value);
                 var minvalue = maxvalue + 0.01;
-                $('input[name="ol_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="ol_hub_range_up[1]"]').val(minvalue);
+                $('input[name="ol_hub_range_down[1]"]').val(maxvalue);
+                $('input[name="ol_hub_range_up[2]"]').val(minvalue);
             });
             $('input[name="detain_door_mcw_charges"]').on('change', function () {
                 var value = $(this).val();
                 var maxvalue = parseFloat(value);
                 var minvalue = maxvalue + 0.01;
-                $('input[name="detain_door_range_down[0]"]').val(maxvalue);
-                $('input[name="detain_door_range_up[1]"]').val(minvalue);
+                $('input[name="detain_door_range_down[1]"]').val(maxvalue);
+                $('input[name="detain_door_range_up[2]"]').val(minvalue);
             });
             $('input[name="detain_hub_mcw_charges"]').on('change', function () {
                 var value = $(this).val();
                 var maxvalue = parseFloat(value);
                 var minvalue = maxvalue + 0.01;
-                $('input[name="detain_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="detain_hub_range_up[1]"]').val(minvalue);
+                $('input[name="detain_hub_range_down[1]"]').val(maxvalue);
+                $('input[name="detain_hub_range_up[2]"]').val(minvalue);
             });
             $('input[name="sameday_door_mcw_charges"]').on('change', function () {
                 var value = $(this).val();
                 var maxvalue = parseFloat(value);
                 var minvalue = maxvalue + 0.01;
-                $('input[name="sameday_door_range_down[0]"]').val(maxvalue);
-                $('input[name="sameday_door_range_up[1]"]').val(minvalue);
+                $('input[name="sameday_door_range_down[1]"]').val(maxvalue);
+                $('input[name="sameday_door_range_up[2]"]').val(minvalue);
             });
             $('input[name="sameday_hub_mcw_charges"]').on('change', function () {
                 var value = $(this).val();
                 var maxvalue = parseFloat(value);
                 var minvalue = maxvalue + 0.01;
-                $('input[name="sameday_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="sameday_hub_range_up[1]"]').val(minvalue);
+                $('input[name="sameday_hub_range_down[1]"]').val(maxvalue);
+                $('input[name="sameday_hub_range_up[2]"]').val(minvalue);
             });
 
             // var on_main_switch = document.querySelector('#on_main_switch');
