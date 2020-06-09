@@ -105,8 +105,13 @@ class ProcessShipmentBooking implements ShouldQueue
         else {
             $try_and_buy_charges = NULL;
         }
+        $pieces_quantity = 1;
+
+        if($service_type_id == 1){
+            $pieces_quantity = $this->booking['pieces_quantity'];
+        }
         if ($this->booking['account_type_id'] == 1) {
-            $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges);
+            $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges,$pieces_quantity);
         }
         else {
             $delivery_type_id = $this->booking['delivery_type_id'];
@@ -115,7 +120,7 @@ class ProcessShipmentBooking implements ShouldQueue
                 $consignee_address = 'TRAX Office ' . $this->booking['consignee_city_name'];
             }
 
-            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);
+            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity);
         }
 
         $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
@@ -142,6 +147,9 @@ class ProcessShipmentBooking implements ShouldQueue
             $item_type = 0;
 
             ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            if($service_type_id == 1 && $pieces_quantity > 1){
+                ShipperShipmentBookController::create_shipment_pieces($shipment_id, $pieces_quantity);
+            }
         }
         else if ($service_type_id == 2) {
             $item_product_type_id = $this->booking['item_product_type_id'];

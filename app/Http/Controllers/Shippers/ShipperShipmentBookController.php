@@ -129,6 +129,7 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->try_and_buy_charges = $try_and_buy_charges;
         $shipment->booked_by = session('user_type');
+        $shipment->pieces = $pieces;
         $shipment->save();
 
         $shipment_id = $shipment->id;
@@ -174,12 +175,13 @@ class ShipperShipmentBookController extends Controller
 
         return $tracking_number;
     }
-    public function create_shipment_pieces($shipment_id, $pieces){
+    static public function create_shipment_pieces($shipment_id, $pieces){
         $total_pieces= 0;
         if($pieces > 1){
-            $shipment_piece = new ShipmentPiece();
-            $shipment_piece->shipment_id = $shipment_id;
+
             for($i=1; $i<=$pieces; $i++){
+                $shipment_piece = new ShipmentPiece();
+                $shipment_piece->shipment_id = $shipment_id;
                 $total_pieces++;
                 $shipment_piece->numbering=$total_pieces;
                 $shipment_piece->tracking_number= $shipment_id . $total_pieces;
@@ -468,7 +470,7 @@ class ShipperShipmentBookController extends Controller
 
                     $pieces_quantity = 1;
 
-                    if($request->has('pieces_quantity')){
+                    if($service_type_id == 1){
                         $pieces_quantity = $request->pieces_quantity;
                     }
 
@@ -500,6 +502,9 @@ class ShipperShipmentBookController extends Controller
                         $type = 0;
 
                         $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+                        if($service_type_id == 1 && $pieces_quantity > 1){
+                            $this->create_shipment_pieces($shipment_id, $pieces_quantity);
+                        }
                     }
                     else if ($service_type_id == 2) {
                         $product_type_id = $request->input('product_type');
@@ -1609,7 +1614,8 @@ class ShipperShipmentBookController extends Controller
             'try_and_buy_charges' => 'Try and Buy Charges',
             'amount' => 'Collection Amount',
             'payment_mode_id' => 'Payment Mode ID',
-            'charges_mode_id' => 'Charges Mode ID'
+            'charges_mode_id' => 'Charges Mode ID',
+            'pieces_quantity' => 'Pieces',
         ];
 
         $messages = [
@@ -1703,10 +1709,12 @@ class ShipperShipmentBookController extends Controller
             })],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [4]);
-            })]
+            })],
+            'pieces_quantity' => ['required_if:service_type_id,1','nullable', 'integer', 'digits_between:1,10', 'between:1,10']
+
         ];
 
-        $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'item_product_type_id_1', 19 => 'item_description_1', 20 => 'item_quantity_1', 21 => 'item_insurance_1', 22 => 'item_price_1', 23 => 'item_product_type_id_2', 24 => 'item_description_2', 25 => 'item_quantity_2', 26 => 'item_insurance_2', 27 => 'item_price_2', 28 => 'item_product_type_id_3', 29 => 'item_description_3', 30 => 'item_quantity_3', 31 => 'item_insurance_3', 32 => 'item_price_3', 33 => 'item_product_type_id_4', 34 => 'item_description_4', 35 => 'item_quantity_4', 36 => 'item_insurance_4', 37 => 'item_price_4', 38 => 'item_product_type_id_5', 39 => 'item_description_5', 40 => 'item_quantity_5', 41 => 'item_insurance_5', 42 => 'item_price_5', 43 => 'special_instructions', 44 => 'estimated_weight', 45 => 'shipping_mode_id', 46 => 'same_day_timing_id', 47 => 'try_and_buy_charges', 48 => 'amount', 49 => 'payment_mode_id', 50 => 'charges_mode_id'];
+        $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'item_product_type_id_1', 19 => 'item_description_1', 20 => 'item_quantity_1', 21 => 'item_insurance_1', 22 => 'item_price_1', 23 => 'item_product_type_id_2', 24 => 'item_description_2', 25 => 'item_quantity_2', 26 => 'item_insurance_2', 27 => 'item_price_2', 28 => 'item_product_type_id_3', 29 => 'item_description_3', 30 => 'item_quantity_3', 31 => 'item_insurance_3', 32 => 'item_price_3', 33 => 'item_product_type_id_4', 34 => 'item_description_4', 35 => 'item_quantity_4', 36 => 'item_insurance_4', 37 => 'item_price_4', 38 => 'item_product_type_id_5', 39 => 'item_description_5', 40 => 'item_quantity_5', 41 => 'item_insurance_5', 42 => 'item_price_5', 43 => 'special_instructions', 44 => 'estimated_weight', 45 => 'shipping_mode_id', 46 => 'same_day_timing_id', 47 => 'try_and_buy_charges', 48 => 'amount', 49 => 'payment_mode_id', 50 => 'charges_mode_id', 51 => 'pieces_quantity'];
 //        $form= $request->shipments;
 //        dd($form);
         if($file = $request->file('shipments')) {
@@ -1715,7 +1723,7 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Try and Buy Item Product Type ID 1', 'Try and Buy Item Description 1', 'Try and Buy Item Quantity 1', 'Try and Buy Item Insurance 1', 'Try and Buy Product Value 1', 'Try and Buy Item Product Type ID 2', 'Try and Buy Item Description 2', 'Try and Buy Item Quantity 2', 'Try and Buy Item Insurance 2', 'Try and Buy Product Value 2', 'Try and Buy Item Product Type ID 3', 'Try and Buy Item Description 3', 'Try and Buy Item Quantity 3', 'Try and Buy Item Insurance 3', 'Try and Buy Product Value 3', 'Try and Buy Item Product Type ID 4', 'Try and Buy Item Description 4', 'Try and Buy Item Quantity 4', 'Try and Buy Item Insurance 4', 'Try and Buy Product Value 4', 'Try and Buy Item Product Type ID 5', 'Try and Buy Item Description 5', 'Try and Buy Item Quantity 5', 'Try and Buy Item Insurance 5', 'Try and Buy Product Value 5', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Try and Buy Charges', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
+            $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Try and Buy Item Product Type ID 1', 'Try and Buy Item Description 1', 'Try and Buy Item Quantity 1', 'Try and Buy Item Insurance 1', 'Try and Buy Product Value 1', 'Try and Buy Item Product Type ID 2', 'Try and Buy Item Description 2', 'Try and Buy Item Quantity 2', 'Try and Buy Item Insurance 2', 'Try and Buy Product Value 2', 'Try and Buy Item Product Type ID 3', 'Try and Buy Item Description 3', 'Try and Buy Item Quantity 3', 'Try and Buy Item Insurance 3', 'Try and Buy Product Value 3', 'Try and Buy Item Product Type ID 4', 'Try and Buy Item Description 4', 'Try and Buy Item Quantity 4', 'Try and Buy Item Insurance 4', 'Try and Buy Product Value 4', 'Try and Buy Item Product Type ID 5', 'Try and Buy Item Description 5', 'Try and Buy Item Quantity 5', 'Try and Buy Item Insurance 5', 'Try and Buy Product Value 5', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Try and Buy Charges', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID', 'Pieces'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
@@ -1995,7 +2003,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id) {
+    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces) {
 
 
         $shipment = new Shipment();
@@ -2029,6 +2037,7 @@ class ShipperShipmentBookController extends Controller
         $shipment->charges_mode_id = $charges_mode_id;
 
         $shipment->booked_by = session('user_type');
+        $shipment->pieces = $pieces;
         $shipment->save();
 
         $shipment_id = $shipment->id;
@@ -2223,7 +2232,11 @@ class ShipperShipmentBookController extends Controller
 
                 $amount = str_replace(',', '', $request->input('amount'));
 
-                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);
+                $pieces_quantity = 1;
+                if($service_type_id == 1){
+                    $pieces_quantity = $request->pieces_quantity;
+                }
+                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity);
 
                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
                 $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
@@ -2251,6 +2264,9 @@ class ShipperShipmentBookController extends Controller
                     $type = 0;
 
                     $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+                    if($service_type_id == 1 && $pieces_quantity > 1){
+                        $this->create_shipment_pieces($shipment_id, $pieces_quantity);
+                    }
                 }
                 else if ($service_type_id == 2) {
                     $product_type_id = $request->input('product_type');
@@ -2835,6 +2851,8 @@ class ShipperShipmentBookController extends Controller
             'item_insurance' => 'Item Insurance',
             'item_price' => 'Product Value',
 
+            'pieces_quantity' => 'Pieces',
+
             'replacement_item_product_type_id' => 'Replacement Item Product Type ID',
             'replacement_item_description' => 'Replacement Item Description',
             'replacement_item_quantity' =>'Replacement Item Quantity',
@@ -2896,6 +2914,8 @@ class ShipperShipmentBookController extends Controller
             'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
+            'pieces_quantity' => ['required_if:service_type_id,1', 'integer', 'digits_between:1,10', 'between:1,10'],
+
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
@@ -2912,7 +2932,7 @@ class ShipperShipmentBookController extends Controller
             })]
         ];
 
-        $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'delivery_type_id', 3 => 'information_display', 4 => 'consignee_city_name', 5 => 'consignee_name', 6 => 'consignee_address', 7 => 'consignee_phone_number_1', 8 => 'consignee_phone_number_2', 9 => 'consignee_email_address', 10 => 'order_id', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'replacement_item_product_type_id', 17 => 'replacement_item_description', 18 => 'replacement_item_quantity', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id'];
+        $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'delivery_type_id', 3 => 'information_display', 4 => 'consignee_city_name', 5 => 'consignee_name', 6 => 'consignee_address', 7 => 'consignee_phone_number_1', 8 => 'consignee_phone_number_2', 9 => 'consignee_email_address', 10 => 'order_id', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'replacement_item_product_type_id', 17 => 'replacement_item_description', 18 => 'replacement_item_quantity', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id', 26 => 'pieces_quantity'];
 //        $form= $request->shipments;
 //        dd($form);
         if($file = $request->file('shipments')) {
@@ -2921,7 +2941,7 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Service Type ID', 'Pickup Address ID', 'Delivery Type ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
+            $header = ['Service Type ID', 'Pickup Address ID', 'Delivery Type ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID', 'Pieces'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
