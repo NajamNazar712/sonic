@@ -1441,6 +1441,7 @@ class ShipperShipmentBookController extends Controller
                         </div>';
                             }
                             $logo_invoice .= $invoice_items;
+                            $logo_invoice .= '</div>';
                             $shipment_details .= $logo_invoice;
                         }
 
