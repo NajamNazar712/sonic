@@ -201,7 +201,7 @@
             var id = $(this).parents('tr').attr('id');
             // var hub= $(this).parents('tr').attr('hub');
             var hub = table.row($(this).parents('tr')).data().hub;
-            var status = table.row($(this).parents('tr')).data().status;
+            //var status = table.row($(this).parents('tr')).data().status;
             console.log(hub);
 
             $.ajax({
@@ -223,7 +223,7 @@
                         });
 
                         $('#edit_hub').val(hub).trigger('change');
-
+                
                         $('#EditResponsibleModal').modal('show');
 
                     }
