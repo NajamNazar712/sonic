@@ -19,7 +19,7 @@ class CreateHandoverResponsibilitiesTable extends Migration
             $table->string('name');
             $table->integer('created_by');
             $table->integer('updated_by');
-            $table->integer('status_id');
+            $table->integer('status');
             $table->timestamps();
         });
 

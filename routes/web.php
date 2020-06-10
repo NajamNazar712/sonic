@@ -1791,6 +1791,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@responsibles_index')->name('index');
             Route::get('list', 'AdminShipmentHandoverController@responsibles_list')->name('list');
             Route::post('add', 'AdminShipmentHandoverController@responsibles_add')->name('add');
+            Route::post('status', 'AdminShipmentHandoverController@responsibles_status')->name('status');
+            Route::post('details','AdminShipmentHandoverController@responsibles_editview')->name('details');
+            Route::post('edit','AdminShipmentHandoverController@responsibles_edit')->name('edit');
         });
     });    
      

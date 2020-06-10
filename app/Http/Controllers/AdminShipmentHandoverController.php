@@ -26,10 +26,9 @@ class AdminShipmentHandoverController extends Controller
     public function responsibles_list(){
 
         $responsibles_list = HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
-        //->leftjoin('handover_statuses as hos','hos.id','=','handover_responsibilities.status_id')
         ->join('admins as a', 'a.id', '=', 'handover_responsibilities.created_by')
         ->leftjoin('admins as u', 'u.id', '=', 'handover_responsibilities.updated_by')
-        ->select('handover_responsibilities.name as name','c.name as hub','a.name as created','u.name as updated','handover_responsibilities.status_id as status')
+        ->select('handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','a.name as created','u.name as updated','handover_responsibilities.status as status')
         ->get();
 
         $datatable = Datatables::of($responsibles_list)
@@ -70,8 +69,44 @@ class AdminShipmentHandoverController extends Controller
         $responsibles->hub_id = $request->hub;
         $responsibles->created_by = Auth::id();
         $responsibles->updated_by = Auth::id();
-        $responsibles->status_id = 1;
+        $responsibles->status = 1;
         $responsibles->save();
         return redirect()->back()->with(['status'=>1,'success'=>"Responsible has been Added successfully!"]);
+    }
+
+    public function responsibles_status(Request $request){
+        $id = $request->id;
+        $status = $request->status;
+        $responsible = HandoverResponsibilities::find($id);
+        if(!$responsible){
+            return response()->json(['status' => 1, 'error' => 'Not found!']);
+        }
+
+        if($status == 1){
+            $responsible->status = 1;
+        }else if($status == 0){
+            $responsible->status = 0;
+        }
+        $responsible->save();
+
+        return response()->json(['status' => 0, 'success' => 'Status updated successfully!']);
+    }
+
+    public function responsibles_editview(Request $request){
+
+        $responsible_id = HandoverResponsibilities::where('id',$request->id)->first();
+        // $hub_id=HandoverResponsibilities::where('hub_id',$responsible_id->hub)->first();
+        return response()->json(['status' => 1, 'responsible' => $responsible_id]);
+    }
+    public function responsibles_edit(Request $request){
+        $responsible = HandoverResponsibilities::find($request->id);
+         if($responsible){
+             $responsible->name = $request->name;
+             $responsible->hub_id = $request->hub;
+             $responsible->updated_by = Auth::id();
+             $responsible->save();
+             return redirect()->back()->with(['status'=>1,'success'=>"Responsible has been Edited successfully!"]);
+         }
+         return redirect()->back()->with(['status'=>0,'error'=>"Responsible not found!"]);
     }
 }

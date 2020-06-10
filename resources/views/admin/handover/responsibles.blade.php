@@ -17,7 +17,7 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                            <table class="table table-bordered datatable" id="datatable" style="width:100%;z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
@@ -37,7 +37,7 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="AddTierModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddTierModal" aria-hidden="true">
+    <div class="modal fade text-left" id="AddResponsibleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddTierModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
@@ -48,7 +48,7 @@
                 </div>
                 
                 <div class="modal-body text-center">
-                    <form id="add_commission_form" action="{{route('admin.handover.responsibles.add')}}" method="post">
+                    <form id="add_responsible_form" action="{{route('admin.handover.responsibles.add')}}" method="post">
                         @method('POST')
                         @csrf
                         <div class="container">
@@ -73,7 +73,7 @@
                             <br>
                             <div class="row justify-content-center">
                                 <div class="col-6">
-                                        <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Add Tier</button>
+                                        <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Add Responsible</button>
                                 </div>
                             </div>
                         </div>
@@ -85,75 +85,54 @@
 
 
 
-    <!-- <div class="modal fade text-left" id="EditTierModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditTierModal"
-         aria-hidden="true">
+    <div class="modal fade text-left" id="EditResponsibleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditTierModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Edit Tier</h4>
+                    <h4 class="modal-title white">Edit Responsible</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="edit_commission_form" action="{{route('admin.settings.commission.edit')}}" method="post">
+                    <form id="edit_responsible_form" action="{{route('admin.handover.responsibles.edit')}}" method="post">
                         @method('POST')
                         @csrf
                         <div class="container">
-
                             <div class="row justify-content-center">
-                                <div class="col-6" id="TierNameDiv">
-                                    <input type="hidden" id="sales_tier_id" name="id">
-                          <input  class="form-control" id="edit_tier_name" name="tier_name" type="text" placeholder="Enter Tier Name"
-                            data-rule-required="true" data-msg-required="" />
+                                <div class="col-6">
+                                    <input type="hidden" id="responsible_id" name="id">
+                                    <input  class="form-control" id="edit_name" name="name" type="text" placeholder="Enter Tier Name"
+                                        data-rule-required="true" data-msg-required="" />
+                                </div>
                             </div>
-                        </div>
-                        <br>
-                         <div class="row justify-content-center">
-                                <div class="col-6" id="TierCommissionDiv">
-                           <input  class="form-control" id="edit_tier_commission" name="tier_commission" type="text"
-                            data-rule-required="true" data-msg-required="" placeholder="Enter Overall Commission" />
-                            </div>
-                        </div>
-                        <br>
+                            <br>
                             <div class="row justify-content-center">
                                <div class="col-6">
                                     <fieldset class="form-group">
-                                        <select name="tier_type" id="edit_tier_type" class="form-control select2" data-rule-required="true" data-msg-required="">
-                                           
+                                        <select name="hub" id="edit_hub" class="form-control select2" data-rule-required="true" data-msg-required="">
+                                            @foreach($hubs as $hub)
+                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                            @endforeach
                                         </select>
                                     </fieldset>
                                 </div>
                             </div>
-
-                                       <div class="row justify-content-center">
-            <div class="col-6">
-                <label class="font-medium-2 font-weight-bold block">Relates to Sales Person</label>
-                <div class="form-group">
-                    <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
-
-                    <input type="checkbox" name="sales_person_checkbox" id="edit_sales_person_checkbox" data-switchery="false" class="sales_person_checkbox" data-size="sm">
-                    <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
-                </div>
-            </div>
-        </div>
-
-                        <br><br>
-                         <div class="row justify-content-center">
+                            <br><br>
+                            <div class="row justify-content-center">
                                 <div class="col-6">
-                           <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Edit Tier</button>
+                                    <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Edit Responsible</button>
+                                </div>
                             </div>
-                        </div>
 
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-    </div> -->
+    </div>
+
 @endsection
-
-
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -173,86 +152,86 @@
         $('#hub').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder: 'Select Hub',
-            dropdownParent:$('#add_commission_form')
+            dropdownParent:$('#add_responsible_form')
         });
-       
-        // $("#tier_commission").inputmask({
-        //     'alias': 'decimal',
-        //     'allowMinus': false,
-        //     'allowPlus': false,
-        //     'rightAlign': false,
-        //     'max': commission_percentage
-        // });
 
-        // $("input[name='edit_tier_commission']").inputmask({
-        //     'alias': 'integer',
-        //     'allowMinus': false,
-        //     'allowPlus': false,
-        //     'rightAlign': false,
-        //     'max': commission_percentage
-        // });
+        $( "#add_responsible_form" ).validate({
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-
-
-
-        // $( "#edit_commission_form" ).validate({
-        //     errorClass:"danger",
-        //     errorPlacement: function(error, element) {
-        //             error.addClass('w-100').appendTo(element.parent('.form-group'));
-        //     },
-        //         submitHandler: function(form) {
-        //             $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-        //             swal({
-        //                 title: 'Please Wait!',
-        //                 text: 'Tier is being Edited!',
-        //                 icon: 'info',
-        //                 buttons: false,
-        //                 closeOnClickOutside: false,
-        //                 closeOnEsc: false
-        //             });
-        //             form.submit();
-        //         }
-        // });
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Responsible is being added!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+            }
+        });
 
 
-        // $('body').on('click','button.edit',function () {
-        //     var id = $(this).parents('tr').attr('id');
-        //     var type = table.row($(this).parents('tr')).data().type_id;
-        //     var status = table.row($(this).parents('tr')).data().sales_status;
+        $( "#edit_responsible_form" ).validate({
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-        //     $.ajax({
-        //             //url: '{!! route('admin.settings.commission.details') !!}',
-        //             method: 'POST',
-        //             data: {
-        //                 'id': id,
-        //                 '_token': '{{ csrf_token() }}'
-        //             }
-        //         }).done(function (data) {
-        //             if(data.status === 1){
-        //                     $('#sales_tier_id').val(data.salesTiers.id);
-        //                     $('#edit_tier_name').val(data.salesTiers.tier_name);
-        //                     $('#edit_tier_commission').val(data.salesTiers.commission);
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Responsible is being Edited!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+        });
 
-        //             if (status == 1)
-        //             {
-        //                 $('#edit_sales_person_checkbox').trigger('click');
-        //             }
-        //             $("#edit_tier_type").select2({
-        //                 width:'100%',
-        //                 class:'form-control',
-        //                 dropdownParent:$('#edit_commission_form')
-        //             });
 
-        //             $('#edit_tier_type').val(type).trigger('change');
+        $('body').on('click','button.edit',function () {
+            var id = $(this).parents('tr').attr('id');
+            // var hub= $(this).parents('tr').attr('hub');
+            var hub = table.row($(this).parents('tr')).data().hub;
+            var status = table.row($(this).parents('tr')).data().status;
+            console.log(hub);
 
-        //             $('#EditTierModal').modal('show');
+            $.ajax({
+                    url: '{!! route('admin.handover.responsibles.details') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        $('#responsible_id').val(data.responsible.id);
+                        $('#edit_name').val(data.responsible.name);
+                       
+                        $("#edit_hub").select2({
+                            width:'100%',
+                            class:'form-control',
+                            dropdownParent:$('#edit_responsible_form')
+                        });
 
-        //             }else{
-        //                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-        //             }
-        //         });
-        // });
+                        $('#edit_hub').val(hub).trigger('change');
+
+                        $('#EditResponsibleModal').modal('show');
+
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+            });
+        });
 
 
         var table = $('#datatable').DataTable({
@@ -261,12 +240,12 @@
                 text: '<i class="la la-cogs"></i> Add',
                 className: 'btn btn-primary add',
                 action: function (e, dt, node, config) {
-                $('#AddTierModal').modal('show');
+                $('#AddResponsibleModal').modal('show');
                 }
             }, 
             {
                 extend: 'excel',
-                title: 'Sales Tier',
+                title: 'Responsibles Sheet',
                 className: 'btn btn-primary',
                 text: '<i class="la la-file-excel-o"></i> Excel',
             },'reset'],
@@ -280,7 +259,7 @@
             },
             serverSide: true,
             ajax: '{{ route('admin.handover.responsibles.list') }}',
-            rowId: 'name',
+            rowId: 'responsible_id',
             order: [[1, 'asc']],
             columns: [
                 {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -288,7 +267,7 @@
                 {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                 {data: 'created', name: 'a.name', class: 'align-middle created'},
                 {data: 'updated', name: 'u.name', class: 'align-middle updated'},
-                {data: 'status', name: 'handover_responsibilities.status_id', class: 'align-middle status'},
+                {data: 'status', name: 'handover_responsibilities.status', class: 'align-middle status'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
             ],
             rowCallback: function(row, data, index) {
@@ -317,6 +296,7 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
+                            
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -326,6 +306,7 @@
                         if (column.search()) {
                             current.val(column.search());
                         }
+                        
                     }
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
@@ -343,7 +324,7 @@
             var id = parseInt($(this).parents('tr').attr('id'));
             if ($(this).hasClass('enable')) {
                 $.ajax({
-                    //url: '{!! route('admin.settings.commission.status') !!}',
+                    url: '{!! route('admin.handover.responsibles.status') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -364,7 +345,7 @@
             }
             else if ($(this).hasClass('disable')) {
                 $.ajax({
-                    //url: '{!! route('admin.settings.commission.status') !!}',
+                    url: '{!! route('admin.handover.responsibles.status') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -385,13 +366,9 @@
             }
 
         });
-        $('#EditTierModal').on('hidden.bs.modal', function() {
-            $('#sales_tier_id').val('');
-            $('#edit_tier_name').val('');
-            $('#edit_tier_commission').val('');
-            if($("#edit_sales_person_checkbox").is(":checked")){
-                $("#edit_sales_person_checkbox").trigger('click');
-            }
+        $('#EditResponsibleModal').on('hidden.bs.modal', function() {
+            $('#responsible_id').val('');
+            $('#edit_name').val('');
         });
     });
 
