@@ -44,7 +44,7 @@ class ShipperPickupController extends Controller
             ->editColumn('pickup_request_id', function($pickup_request) {
                 return str_pad($pickup_request->pickup_request_id, 6, '0', STR_PAD_LEFT);
             })
-            ->editColumn('booked', function($pickup_request) {
+            ->editColumn('booked_button', function($pickup_request) {
                 if ($pickup_request->booked != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->booked . '</button>';
                 }
@@ -52,7 +52,7 @@ class ShipperPickupController extends Controller
                     return 0;
                 }
             })
-            ->editColumn('received', function($pickup_request) {
+            ->editColumn('received_button', function($pickup_request) {
                 if ($pickup_request->received != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received . '</button>';
                 }

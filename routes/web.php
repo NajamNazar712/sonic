@@ -880,6 +880,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('consignment_details', 'Admins\AdminCargoController@create_consignment_details')->name('consignment_details');
             Route::get('seal_number', 'Admins\AdminCargoController@create_consignment_seal_number')->name('seal_number');
             Route::post('', 'Admins\AdminCargoController@create_store')->name('store');
+            Route::post('piece_details', 'Admins\AdminCargoController@cargo_piece_details')->name('piece_details');
         });
 
         Route::prefix('in_transit')->name('in_transit.')->group(function () {
