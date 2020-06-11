@@ -384,7 +384,6 @@ class AdminCargoController extends Controller
                                     $destination = $shipment->pickup_address->city;
                                 }
                                 if(!$request->has('pieces_confirm')){
-
                                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                                         $details = array();
                                         $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
@@ -394,7 +393,7 @@ class AdminCargoController extends Controller
                                         $details['pieces_count'] = $shipment->pieces;
                                         $details['pieces_tracking_numbers'] = $shipment_pieces;
                                         ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
-                                        return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                        return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                                     }
                                 }
                               $details['id'] = $shipment->id;
@@ -476,6 +475,28 @@ class AdminCargoController extends Controller
         }
         else {
             return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+        }
+    }
+
+
+    public function cargo_piece_details(Request $request){
+        $shipment_id = $request->shipment_id;
+        $shipment_piece_id = $request->piece_id;
+
+        $shipment_piece = ShipmentPiece::where('tracking_number',$shipment_piece_id);
+        if($shipment_piece->exists()){
+            $shipment_piece = $shipment_piece->first();
+            if($shipment_piece->shipment_id == $shipment_id){
+                $scanned_shipment_piece = $shipment_piece->tracking_number;
+                return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
+            }
+            else{
+                return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
+            }
+
+        }
+        else{
+            return ['status' => 1, 'error' => 'No Shipment Item with given Item ID is present'];
         }
     }
 
