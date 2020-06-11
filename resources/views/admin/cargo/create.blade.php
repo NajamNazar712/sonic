@@ -815,7 +815,7 @@
 						var shipment_tracking_number = $('#piece_tracking_number').val();
 						var shipment_piece_count = $('#piece_shipment_count').val();
 						$.ajax({
-							url: '{!! route('admin.cargo.create.piece_details') !!}',
+							url: '{!! route('admin.cargo.piece_details') !!}',
 							method: 'POST',
 							data: {
 								'shipment_id': shipment_id,

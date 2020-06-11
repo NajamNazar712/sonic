@@ -392,7 +392,6 @@ class AdminCargoController extends Controller
                                         $details['tracking_number'] = $shipment->tracking_number;
                                         $details['pieces_count'] = $shipment->pieces;
                                         $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                                         return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                                     }
                                 }
@@ -1435,6 +1434,18 @@ class AdminCargoController extends Controller
 
                         $consignee_city = $shipment->consignee_city;
 
+                        if(!$request->has('pieces_confirm')){
+                            if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                                $details = array();
+                                $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                $details['id'] = $shipment->id;
+                                $details['tracking_number'] = $shipment->tracking_number;
+                                $details['pieces_count'] = $shipment->pieces;
+                                $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                            }
+                        }
                         $details = array();
 
                         $details['id'] = $shipment->id;
