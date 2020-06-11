@@ -60,7 +60,8 @@ class AdminPickupsController extends Controller
 
               $shipments_count = 0;
               $shipments = array();
-
+              $try_and_buy = FALSE;
+              $vendor = FALSE;
               if ($pickup_request->exists()) {
                 $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
 
@@ -81,12 +82,16 @@ class AdminPickupsController extends Controller
                                 if($existing_shipment->shipper_status_id == 1){
                                     $shipments[] = $existing_shipment->id;
                                     $shipments_count++;
+                                    if($existing_shipment->booking_type_id == 3){
+                                        $try_and_buy = TRUE;
+                                    }
+                                    if(($vendor == FALSE) && ($existing_shipment->pickup_address->vendor != NULL)){
+                                        $vendor = TRUE;
+                                    }
                                 }
                             }
                         }
                         $existing_pickup_request->renew = 1;
-        //                $existing_pickup_request->booked = 0;
-        //                $existing_pickup_request->received = 0;
                         $existing_pickup_request->save();
                     }
                 }
@@ -97,7 +102,16 @@ class AdminPickupsController extends Controller
                 $pickup_request->pickup_address_id = $shipment->pickup_address_id;
                 $pickup_request->city_id = $shipment->pickup_address->city_id;
                 $pickup_request->booked = $shipments_count + 1;
-                if($shipment->pickup_address->vendor != NULL){
+                if(($vendor == FALSE) && ($shipment->pickup_address->vendor != NULL)){
+                    $vendor = TRUE;
+                }
+                if($shipment->booking_type_id == 3){
+                    $try_and_buy = TRUE;
+                }
+                if($try_and_buy){
+                    $pickup_request->try_and_buy = 1;
+                }
+                if($vendor){
                     $pickup_request->vendor = 1;
                 }
                 $pickup_request->save();
@@ -140,6 +154,7 @@ class AdminPickupsController extends Controller
                           $pickup_request_assigned_shipment->status = 0;
 
                           $pickup_request_assigned_shipment->save();
+
         //              }
         //              else {
         //                  $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();

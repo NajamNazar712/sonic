@@ -806,6 +806,9 @@ class ShipperShipmentBookController extends Controller
                             page-break-after: always;
                             page-break-inside: avoid;
                         }
+                        .piece_number{
+                            font-size: 2.5rem;
+                        }
                     </style>
                   </head>
                   <body>
@@ -1320,7 +1323,8 @@ class ShipperShipmentBookController extends Controller
                                 <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
                                 <td class="color secondary border twice-top"><strong>Quantity</strong></td>
                                 <td>' . $item->quantity . '</td>
-                                <td colspan="2" class="border twice-top"></td>
+                                <td colspan="1" class="color secondary border twice-top">Piece(s)</td>
+                                <td>1</td>
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
@@ -1392,6 +1396,44 @@ class ShipperShipmentBookController extends Controller
                               </tr>';
                         $shipment_details .= $table_end;
 
+                    }
+
+                    if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                        $shipment_pieces = '';
+
+                        foreach ($shipment->shipment_pieces as $piece){
+                            $shipment_pieces .= '<table class="table table-sm table-bordered border twice">
+                        <tbody><tr>';
+                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto">' . $print_details . '</td>';
+                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $piece->tracking_number . '</strong></span>
+                                </td>
+                                <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
+                                <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
+                                <td rowspan="1" class="color primary border "><strong>Destination</strong></td>
+                                <td rowspan="1" class="border">' . $shipment->consignee_city->name . '</td>
+                                
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <span><strong>' . $shipment->tracking_number . '</strong></span>
+                            </td>
+                            <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right"><span class="piece_number"><strong>' . $piece->numbering. '/' .$shipment->pieces . '</strong></span>
+                            </td>
+                                </tr>
+                                <tr>
+                                <td class="color primary border twice-left"><strong>Shipper</strong></td>
+                                <td class="border">'. $shipment->user->name .'</td>
+                                <td class="color primary border "><strong>Booking Date</strong></td>
+                                <td class="border">'. $shipment->created_at .'</td>
+</tr>
+                              ';
+                            $shipment_pieces .= '</tbody></table>';
+
+                        }
+
+
+                        $shipment_details .= $shipment_pieces;
                     }
 
                     if ($shipment->user->logo_status) {

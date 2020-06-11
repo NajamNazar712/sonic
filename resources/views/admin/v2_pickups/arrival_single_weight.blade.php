@@ -166,6 +166,58 @@
         </div>
     </div>
 
+    <div class="modal fade" id="ShipmentPiecesModal" data-backdrop="static" role="dialog" aria-labelledby="ShipmentPiecesModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="delivered_shipments_modal_title">Shipment Piece(s)</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_shipment_pieces_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        <input type="hidden" name="piece_shipment_id" id="piece_shipment_id">
+                        <input type="hidden" name="piece_tracking_number" id="piece_tracking_number">
+                        <input type="hidden" name="piece_shipment_count" id="piece_shipment_count">
+                        <div class="row justify-content-center">
+                            <div class="form-group col-5">
+                                <input type="text" name="scan_piece" id="scan_piece" class="form-control scan_piece" placeholder="Scan Piece">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="row">
+                                <p id="total_item_count"></p>
+                            </div>
+                        </div>
+                        <table class="table table-bordered datatable" id="piece_datatable" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Piece ID</th>
+                                <th class="border-primary border-darken-1">Tracking Number</th>
+                                <th class="border-primary border-darken-1"></th>
+                            </tr>
+                            </thead>
+                        </table>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-secondary" id="piece_airwaybill" disabled="disabled">Print Air Waybill</button>
+                        </div>
+
+                        <div class="row justify-content-center">
+                            <div class="form-group col-5">
+                                <input type="text" name="scan_piece_tracking_number" id="scan_piece_tracking_number" class="form-control scan_piece_tracking_number" placeholder="Scan Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required" disabled="disabled">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary piece_confirm" id="piece_confirm" disabled="disabled">Confirm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -218,7 +270,8 @@
             var shipment_ids = [];
             var shipment_item_ids = [];
             var all_shipment_item_ids = [];
-
+            var shipment_piece_ids = [];
+            var all_shipment_piece_ids = [];
             $('#add_shipment_form input.tracking_number').focus();
 
             var table = $('#datatable').DataTable({
@@ -291,6 +344,11 @@
                 'allowPlus': false
             });
             $('#add_try_and_buy_shipment_form input.scan_item').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+            $('#add_shipment_pieces_form input.scan_piece').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
@@ -380,8 +438,6 @@
                                     $('#try_and_buy_confirm').prop('disabled', true);
                                     if(data.details.scanned_shipment_item){
                                         var item_index = $.inArray(parseInt(data.details.scanned_shipment_item), all_shipment_item_ids);
-                                        console.log(data.scanned_shipment_item);
-                                        console.log(data.all_shipment_item_ids);
                                         if (item_index === -1) {
                                             var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
                                             var try_rowNo = try_and_buy_table.rows().count();
@@ -412,6 +468,47 @@
                                         $('#try_and_buy_shipment_items_count').val(data.details.shipment_items_count);
                                         $('#total_item_count').html('Total Shipment Items: ' + data.details.shipment_items_count);
                                         $('#tryAndbuyModal').modal('show');
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    $('#add_shipment_form button.add').prop('disabled', false);
+
+                                    $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+                                }
+                                else if(data.status == 3){
+                                    $('#scan_piece_tracking_number').prop('disabled', true);
+                                    $('#piece_confirm').prop('disabled', true);
+                                    if(data.details.scanned_shipment_piece){
+                                        var piece_index = $.inArray(parseInt(data.details.scanned_shipment_piece), all_shipment_piece_ids);
+                                        if (piece_index === -1) {
+                                            var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+                                            var piece_rowNo = piece_table.rows().count();
+                                            piece_table.row.add([piece_rowNo + 1, data.details.scanned_shipment_piece, data.details.tracking_number, piece_remove_button]).node().id = data.details.scanned_shipment_piece;
+                                            piece_table.draw(false);
+                                            piece_table.columns.adjust().draw();
+                                            scan_sound(1);
+                                            shipment_piece_ids.push(data.details.scanned_shipment_piece);
+                                            $('#piece_shipment_id').val(data.details.id);
+                                            $('#piece_tracking_number').val(data.details.tracking_number);
+                                            $('#piece_shipment_count').val(data.details.pieces);
+                                            $('#total_piece_count').html('Total Shipment Piece(s): ' + data.details.pieces);
+                                            // all_shipment_item_ids.push(data.scanned_shipment_item);
+                                            var check = parseInt(piece_rowNo) + 1;
+                                            if(parseInt(data.details.piece) === parseInt(check)){
+                                                $('#piece_airwaybill').prop('disabled', false);
+                                            }
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            $('#ShipmentPiecesModal').modal('show');
+                                        }
+                                        else{
+                                            toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }
+                                    }
+                                    else{
+                                        $('#piece_shipment_id').val(data.details.id);
+                                        $('#piece_tracking_number').val(data.details.tracking_number);
+                                        $('#piece_shipment_count').val(data.details.pieces_count);
+                                        $('#total_piece_count').html('Total Shipment Pieces: ' + data.details.pieces_count);
+                                        $('#ShipmentPiecesModal').modal('show');
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                     $('#add_shipment_form button.add').prop('disabled', false);
@@ -673,6 +770,161 @@
                     camera_scanning_stop();
                 }
             });
+
+            $('#add_shipment_pieces_form input.scan_piece').focus();
+
+            var piece_table = $('#piece_datatable').DataTable({
+                dom: 'ltipr',
+                paging:false,
+                autoWidth: false,
+                columns: [
+                    {orderable: false, searchable: false, name: 'piece_serial_number', class: 'align-middle serial_number'},
+                    {name: 'piece_id', class: 'align-middle piece_id', orderable: false, searchable: false},
+                    {name: 'piece_tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+                    {name: 'piece_remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
+                ],
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+            $('#scan_piece').on('change', function () {
+                var item = parseInt($(this).val());
+                $('#scan_piece').val('').focus();
+                if(item){
+                    var new_item_index = $.inArray(item, shipment_piece_ids);
+                    if (new_item_index === -1) {
+                        var shipment_id = $('#piece_shipment_id').val();
+                        var shipment_tracking_number = $('#piece_tracking_number').val();
+                        var shipment_piece_count = $('#piece_shipment_count').val();
+                        $.ajax({
+                            url: '{!! route('admin.v2_pickups.arrival.bulk.piece.piece_details') !!}',
+                            method: 'POST',
+                            data: {
+                                'shipment_id': shipment_id,
+                                'piece_id': item,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function(data) {
+                            if(data.status == 0){
+                                var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+                                var piece_rowNo = piece_table.rows().count();
+                                piece_table.row.add([piece_rowNo + 1, data.scanned_shipment_piece, shipment_tracking_number, piece_remove_button]).node().id = data.scanned_shipment_piece;
+                                piece_table.draw(false);
+                                piece_table.columns.adjust().draw();
+                                scan_sound(1);
+                                shipment_piece_ids.push(data.scanned_shipment_piece);
+                                var check = parseInt(piece_rowNo) + 1;
+                                if(parseInt(shipment_piece_count) === parseInt(check)){
+                                    $('#piece_airwaybill').prop('disabled', false);
+                                }
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                    else{
+                        toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+            });
+            $('#piece_datatable tbody').on('click', 'tr td.remove button', function() {
+                var parent = $(this).parents('tr');
+                var id = parseInt(parent.attr('id'));
+                var index = $.inArray(id, shipment_piece_ids);
+                if (index !== -1) {
+                    piece_table.row(parent).remove();
+                    piece_table.draw(false);
+                    var piece_rowNo = piece_table.rows().count();
+                    shipment_piece_ids.splice(index, 1);
+                    var shipment_piece_count = $('#piece_shipment_count').val();
+                    var check = parseInt(piece_rowNo);
+                    if(parseInt(shipment_piece_count) !== parseInt(check)){
+                        $('#piece_airwaybill').prop('disabled', true);
+                        $('#scan_piece_tracking_number').prop('disabled', true);
+                        $('#piece_confirm').prop('disabled', true);
+                    }
+                }
+            });
+
+
+            $('#piece_airwaybill').on('click', function () {
+                id = $('#piece_shipment_id').val();
+                $('#scan_piece_tracking_number').prop('disabled', false);
+                $('#piece_confirm').prop('disabled', false);
+                print(id);
+            });
+
+            $('#add_shipment_pieces_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+                    var shipment_id = $('#piece_shipment_id').val();
+                    shipment_ids.push(shipment_id);
+                    var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
+                    $.ajax({
+                        url: '{!! route('admin.v2_pickups.arrival.bulk.piece.shipment_details') !!}',
+                        method: 'POST',
+                        data: {
+                            'tracking_number': tracking_number,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            form.reset();
+                            remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+
+                            if (data.status == 0) {
+                                var id = data.details.id;
+
+                                var index = $.inArray(id, shipment_ids);
+
+                                if (index === -1) {
+                                    var rowNo = table.rows().count();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, remove_button]).draw().node();
+                                    new_row.id = data.details.id;
+                                    table.draw(false);
+                                    table.order([0, 'desc']).draw();
+// console.log($(new_row).parent('tr'));
+                                    scan_sound(1);
+                                    shipment_ids.push(data.details.id);
+                                    if(all_shipment_item_ids.length == 0){
+                                        all_shipment_piece_ids = shipment_piece_ids;
+                                    }
+                                    else{
+                                        all_shipment_piece_ids.concat(shipment_piece_ids);
+                                    }
+                                    $('#add_shipment_form button.add').prop('disabled', false);
+
+                                    $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
+                                $('#ShipmentPiecesModal').modal('hide');
+                            }
+                            else{
+                                $('#add_shipment_form button.add').prop('disabled', false);
+                                scan_sound(2);
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        })
+                }
+            });
+
+            $('#ShipmentPiecesModal').on('hide.bs.modal', function (e) {
+                $('#scan_piece_tracking_number').val('');
+                shipment_piece_ids = [];
+                piece_table.clear().draw();
+            });
+
+
         });
 
         function camera_scan_detected(tracking_number) {
