@@ -55,7 +55,12 @@ class AdminPickupsController extends Controller
 
     static public function generate($shipment_id) {
               $shipment = Shipment::find($shipment_id);
-
+              if($shipment->shipper_status_id == 17){
+                  $shipment->shipper_status_id == 1;
+                  $shipment->consignee_status_id == 1;
+                  $shipment->save();
+//                  ShipmentsJourneyController::add($shipment_id,1,1,NULL,'Pickup generated',NULL,6);
+              }
               $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->whereIn('status_id', [1,3]);
 
               $shipments_count = 0;

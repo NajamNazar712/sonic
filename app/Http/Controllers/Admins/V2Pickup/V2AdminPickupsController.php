@@ -441,7 +441,8 @@ class V2AdminPickupsController extends Controller
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         $pickup_request = V2PickupRequest::find($pickup_request_id);
                         if($pickup_request->current_rider_id == NULL){
-                            $this->generate_trax_pickup($pickup_request_id);
+                            $rider_id = $this->generate_trax_pickup($pickup_request_id);
+                            $rider = Rider::find($rider_id)->name;
                         }else{
                             $rider = $pickup_request->rider->name;
                         }
@@ -682,6 +683,7 @@ class V2AdminPickupsController extends Controller
             $pickup_request->current_rider_id = $rider_id;
             $pickup_request->last_updated_by = Auth::id();
             $pickup_request->save();
+            return $rider_id;
         }
     }
 
@@ -731,8 +733,8 @@ class V2AdminPickupsController extends Controller
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         $pickup_request = V2PickupRequest::find($pickup_request_id);
                         if($pickup_request->current_rider_id == NULL){
-                            $this->generate_trax_pickup($pickup_request_id);
-                            $rider = 'Trax Rider';
+                            $rider_id = $this->generate_trax_pickup($pickup_request_id);
+                            $rider = Rider::find($rider_id)->name;
                         }else{
                             $rider = $pickup_request->rider->name;
                         }
@@ -823,8 +825,8 @@ class V2AdminPickupsController extends Controller
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         $pickup_request = V2PickupRequest::find($pickup_request_id);
                         if($pickup_request->current_rider_id == NULL){
-                            $this->generate_trax_pickup($pickup_request_id);
-                            $rider = 'Trax Rider';
+                            $rider_id = $this->generate_trax_pickup($pickup_request_id);
+                            $rider = Rider::find($rider_id)->name;
                         }else{
                             $rider = $pickup_request->rider->name;
                         }
@@ -1364,8 +1366,8 @@ class V2AdminPickupsController extends Controller
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         $pickup_request = V2PickupRequest::find($pickup_request_id);
                         if($pickup_request->current_rider_id == NULL){
-                            $this->generate_trax_pickup($pickup_request_id);
-                            $rider = 'Trax Rider';
+                            $rider_id = $this->generate_trax_pickup($pickup_request_id);
+                            $rider = Rider::find($rider_id)->name;
                         }else{
                             $rider = $pickup_request->rider->name;
                         }
