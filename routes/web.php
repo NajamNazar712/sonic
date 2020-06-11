@@ -662,6 +662,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('note')->name('note.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
             Route::post('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
+            Route::post('shipment/piece_details', 'Admins\DeliveryController@get_piece_details')->name('shipment.piece_details');
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
             Route::post('rider_check','Admins\DeliveryController@delivery_note_rider_check')->name('rider_check');
 			Route::post('consolidation_check','Admins\DeliveryController@note_consolidation_check')->name('consolidation_check');
@@ -836,6 +837,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
             Route::post('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
+            Route::post('shipment/piece_details', 'Admins\ReturnController@get_piece_details')->name('shipment.piece_details');
+
             Route::post('note/submit','Admins\ReturnController@return_note_create')->name('note.submit');
         });
         Route::prefix('receive')->name('receive.')->group(function (){
@@ -880,7 +883,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('consignment_details', 'Admins\AdminCargoController@create_consignment_details')->name('consignment_details');
             Route::get('seal_number', 'Admins\AdminCargoController@create_consignment_seal_number')->name('seal_number');
             Route::post('', 'Admins\AdminCargoController@create_store')->name('store');
-            Route::post('piece_details', 'Admins\AdminCargoController@cargo_piece_details')->name('piece_details');
         });
 
         Route::prefix('in_transit')->name('in_transit.')->group(function () {
@@ -906,6 +908,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('short_received', 'Admins\AdminCargoController@receive_short_received')->name('short_received');
             Route::post('', 'Admins\AdminCargoController@receive_store')->name('store');
         });
+        Route::post('piece_details', 'Admins\AdminCargoController@cargo_piece_details')->name('piece_details');
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@history_index')->name('index');
             Route::get('list', 'Admins\AdminCargoController@history_list')->name('list');
