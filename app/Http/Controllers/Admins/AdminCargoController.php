@@ -11,6 +11,7 @@ use App\Http\Models\DraftCargo;
 use App\Http\Models\DraftCargoShipment;
 use App\Http\Models\JunctionMapping;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\WarehouseStockRequest;
 use http\Env\Response;
@@ -382,7 +383,20 @@ class AdminCargoController extends Controller
                                 else {
                                     $destination = $shipment->pickup_address->city;
                                 }
+                                if(!$request->has('pieces_confirm')){
 
+                                    if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                                        $details = array();
+                                        $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                        $details['id'] = $shipment->id;
+                                        $details['tracking_number'] = $shipment->tracking_number;
+                                        $details['pieces_count'] = $shipment->pieces;
+                                        $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                                        return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                    }
+                                }
                               $details['id'] = $shipment->id;
                               $details['tracking_number'] = $shipment->tracking_number;
                               $details['order_id'] = $shipment->order_id;
