@@ -10,6 +10,7 @@ use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\Handover\HandoverResponsibilities;
 use App\Http\Models\Handover\HandoverStatus;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
@@ -115,6 +116,37 @@ class AdminShipmentHandoverController extends Controller
 //receive
     public function handover_receive_index(){
          return view('admin.handover.receive');
+    }
+    public function bulk_handover_submit_receive(Request $request){
+        $shipment_ids = explode(',', $request->shipment_ids);
+        $today = Carbon::now();
+
+        foreach ($shipment_ids as $shipment_id) {
+            HandoverShipments::where('shipment_id', $shipment_id)->update(['status' => 1]);
+        }
+   
+
+        $received_counts =DB::table('handover_shipments')->where('status',1)->select('handover_id', DB::raw('count(*) as total_received'))
+        ->groupBy(DB::raw('handover_id'))->get();
+
+        foreach ($received_counts as $received_count){
+
+            $created_counts =DB::table('handovers')->select('id','shipments')
+            ->where('id',$received_count->handover_id)
+            ->first();
+
+            if(($received_count->total_received < $created_counts->shipments) && ($received_count->total_received >0))
+            {
+                Handover::where('id', $created_counts->id)->update(['status_id' => 3]);
+                Handover::where('id', $created_counts->id)->update(['received' => $received_count->total_received, 'received_at' => $today,'received_by' => Auth::id()]);
+            }
+            else if($received_count->total_received == $created_counts->shipments){
+                Handover::where('id', $created_counts->id)->update(['status_id' => 4]);
+                Handover::where('id', $created_counts->id)->update(['received' => $received_count->total_received, 'received_at' => $today,'received_by' => Auth::id()]);      
+            }
+        }
+        return redirect()->route('admin.handover.receive.index')->with('success','Handover Note Received Successfully!');
+
     }
 
 //list

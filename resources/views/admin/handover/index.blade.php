@@ -75,7 +75,6 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Shipment ID.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Phone No</th>
@@ -181,7 +180,6 @@
                 paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
-                    {name: 'id', class: 'align-middle id', orderable: false, searchable: false},
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
                     {name: 'shipper', class: 'align-middle shipper', orderable: false, searchable: false},
                     {name: 'phone_number', class: 'align-middle phone_number', orderable: false, searchable: false},
@@ -251,7 +249,7 @@
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1, data.details.id,data.details.tracking_number, data.details.shipper, data.details.phone_number, data.details.pickup_date,data.details.special_instructions, remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.phone_number, data.details.pickup_date,data.details.special_instructions, remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
