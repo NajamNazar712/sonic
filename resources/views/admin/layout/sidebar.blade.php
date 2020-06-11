@@ -997,11 +997,17 @@
             @endif
 
             <!-- Handover -->
-            @if (session('role_id') == 1 || count(array_intersect([339, 340], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([339, 340,341,342], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la-hands-helping"></i>Shipment Handover</span></a>
                     <ul class="menu-content">
                             @if (session('role_id') == 1 || in_array(339, session('permissions')))
-                                <li><a class="menu-item" href="#">Index</a></li>
+                                <li><a class="menu-item" href="{{ route('admin.handover.create.index')}}">Create</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(341, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.handover.receive.index')}}">Receive</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(342, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.handover.list.index')}}">List</a></li>
                             @endif
                             @if (session('role_id') == 1 || in_array(340, session('permissions')))
                                 <li><a class="menu-item" href="{{ route('admin.handover.responsibles.index')}}">Responsibles</a></li>

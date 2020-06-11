@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Models\City;
+use App\Http\Models\Shipment;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\Handover\HandoverResponsibilities;
 use App\Http\Models\Handover\HandoverStatus;
 use Carbon\Carbon;
@@ -18,6 +21,109 @@ class AdminShipmentHandoverController extends Controller
         $this->middleware('Permission');
     }
 
+    public function handover_create_index(){
+        $hub=HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
+        ->select(['c.id','c.name'])->groupBy('handover_responsibilities.hub_id')->get();
+        return view('admin.handover.index')->with(['hubs'=>$hub]);
+    }
+
+    public function handover_dropdown_val_fetch_from(Request $request){
+        $value = $request->get('value');
+        $dependent = $request->get('dependent');
+        $data = HandoverResponsibilities::where('hub_id',$value)->get();
+        $output = '<option value ="">Select ' .ucfirst($dependent). '</option> ';
+        foreach($data as $row){
+            $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
+        }
+        echo $output;
+    }
+    public function handover_dropdown_val_fetch_to(Request $request){
+        $value = $request->get('value');
+        $dependent = $request->get('dependent');
+        $data = HandoverResponsibilities::where('id',$value)->get();
+        $output = '<option value ="">Select ' .ucfirst($dependent). '</option> ';
+        foreach($data as $row){
+            $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
+        }
+        echo $output;
+    }
+
+    public function arrival_bulk_shipment_details(Request $request){
+
+            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                $phone_no = NULL;
+                $pickup_date = NULL;
+                $special_instructions = NULL;
+                // if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+                  
+                        $details = array();
+
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['shipper'] = $shipment->user->name;
+                        $details['phone_number'] = $shipment->user->phone;
+                        $details['pickup_date'] = $shipment->pickup_date;
+                        $details['special_instructions'] = $shipment->special_instructions;
+
+                        return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+
+                // } else {
+                //     return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                // }
+            } else {
+                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+            }
+    }
+
+    public function bulk_handover_submit(Request $request){
+        $shipment_ids = explode(',', $request->shipment_ids);
+        // $hub_id = explode(',', $request->hub);
+        $total= '';
+        foreach ($shipment_ids as $shipment_id) {
+            $shipment = Shipment::find($shipment_id);
+            $total++;
+        }
+            $handover = new Handover;
+            $handover->created_by = Auth::id();
+            $handover->from = $request->from;
+            $handover->to = $request->to;
+            $handover->hub = $request->hub_id;
+            $handover->status_id = 1 ;
+            $handover->shipments =$total;
+
+            $handover->save();
+
+            foreach ($shipment_ids as $shipment_id) {
+            $handover_id = Handover::latest('id')->first();
+
+            $handover_shipments = new HandoverShipments;
+
+            $handover_shipments->handover_id=$handover_id->id;
+            $handover_shipments->shipment_id= $shipment_id;
+            $handover_shipments->status=0;
+
+            $handover_shipments->save();
+        }
+
+        return redirect()->route('admin.handover.create.index')->with('success','Handover Note created Successfully!');
+
+    }
+
+//receive
+    public function handover_receive_index(){
+         return view('admin.handover.receive');
+    }
+
+//list
+    public function handover_list_index(){
+        return view('admin.handover.list');   
+    }
+
+
+//Responsible
     public function responsibles_index(){
         $hubs = City::select(['id','name'])->where('hub',1)->get();
         return view('admin.handover.responsibles')->with(['hubs'=>$hubs]);

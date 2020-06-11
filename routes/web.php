@@ -1787,6 +1787,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('handover')->name('handover.')->group(function () {
+        Route::prefix('create')->name('create.')->group(function () {
+            Route::get('', 'AdminShipmentHandoverController@handover_create_index')->name('index');
+            Route::post('fetch', 'AdminShipmentHandoverController@handover_dropdown_val_fetch_from')->name('fetch');
+            Route::post('fetch1', 'AdminShipmentHandoverController@handover_dropdown_val_fetch_to')->name('fetch1');
+            Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details')->name('shipment_details');
+            Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit')->name('store');
+        });
+        Route::prefix('receive')->name('receive.')->group(function () {
+            Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
+        });
+        Route::prefix('list')->name('list.')->group(function () {
+            Route::get('', 'AdminShipmentHandoverController@handover_list_index')->name('index');
+        });
         Route::prefix('responsibles')->name('responsibles.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@responsibles_index')->name('index');
             Route::get('list', 'AdminShipmentHandoverController@responsibles_list')->name('list');
