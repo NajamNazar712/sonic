@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateHandoverShipmentsTable extends Migration
+class CreateHandoverShipmentsJourneysTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,13 @@ class CreateHandoverShipmentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('handover_shipments', function (Blueprint $table) {
+        Schema::create('handover_shipments_journeys', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('handover_id');
             $table->integer('shipment_id');
-            $table->integer('status')->default(1);
+            $table->integer('handover_id');
+            $table->integer('status');
+            $table->integer('from');
+            $table->integer('to');
             $table->timestamps();
         });
     }
@@ -29,6 +31,6 @@ class CreateHandoverShipmentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('handover_shipments');
+        Schema::dropIfExists('handover_shipments_journeys');
     }
 }
