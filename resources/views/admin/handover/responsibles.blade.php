@@ -200,9 +200,14 @@
         $('body').on('click','button.edit',function () {
             var id = $(this).parents('tr').attr('id');
             // var hub= $(this).parents('tr').attr('hub');
-            var hub = table.row($(this).parents('tr')).data().hub;
+            var hub = $(this).parents('tr').attr('hub'); 
+            // var hub = $(this).find(':selected');
+            // var hub_id =  $('#edit_hub :selected').val();
+
+            // var hub = $(this).find(':selected');
+            //     var hub_id = hub.val();
             //var status = table.row($(this).parents('tr')).data().status;
-            console.log(hub);
+            
 
             $.ajax({
                     url: '{!! route('admin.handover.responsibles.details') !!}',

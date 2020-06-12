@@ -10,9 +10,9 @@ use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\Handover\HandoverResponsibilities;
 use App\Http\Models\Handover\HandoverStatus;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
+use Illuminate\Support\Facades\DB;
 
 class AdminShipmentHandoverController extends Controller
 {
@@ -30,6 +30,7 @@ class AdminShipmentHandoverController extends Controller
 
     public function handover_dropdown_val_fetch_from(Request $request){
         $value = $request->get('value');
+        $dependent = $request->get('dependent');
         $dependent = "select Person";
         $data = HandoverResponsibilities::where('hub_id',$value)->get();
         $output = '<option value ="">' .ucfirst($dependent). '</option> ';
@@ -41,7 +42,7 @@ class AdminShipmentHandoverController extends Controller
     public function handover_dropdown_val_fetch_to(Request $request){
         $value = $request->get('value');
         $dependent = $request->get('dependent');
-        $data = HandoverResponsibilities::where('hub_id',$value)->get();
+        $data = HandoverResponsibilities::where('id',$value)->get();
         $output = '<option value ="">Select ' .ucfirst($dependent). '</option> ';
         foreach($data as $row){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
@@ -155,6 +156,83 @@ class AdminShipmentHandoverController extends Controller
         return view('admin.handover.list');   
     }
 
+    public function handover_list(Request $request){
+        $handover_list = Handover::leftjoin('cities as c','c.id','=','handovers.hub')
+        ->join('admins as a', 'a.id', '=', 'handovers.created_by')
+        ->join('admins as ad', 'ad.id', '=', 'handovers.received_by')
+        ->leftjoin('handover_statuses as hs','hs.id','=','handovers.status_id')
+        ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
+        ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
+        ->select(['handovers.id','handovers.id as handover_id','a.name as created_by','ad.name as received_by','hr.name as from','hor.name as to','c.name as hub',
+        'handovers.shipments as shipment_count','hs.name as status','handovers.received as received_shipments',
+        'handovers.received_at as received_at']);
+
+        $datatable = Datatables::of($handover_list)
+
+        ->editColumn('shipment_count', function($handover_list) {
+            if ($handover_list->shipment_count != 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $handover_list->shipment_count . '</button>';
+            }
+            else {
+                return 0;
+            }
+            });
+
+            if ($tracking_number = $request->get('search_tracking')) {
+                $datatable->join('handover_shipments as hsh', 'hsh.handover_id', '=', 'handovers.id')
+                ->join('shipments as s', 'hsh.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+                
+            }
+    
+           
+            
+            
+        return  $datatable->make(true);
+
+    }
+
+    public function handover_shipments_count(Request $request){
+
+        $handover_id = $request->input('id');
+        $handover_shipments = HandoverShipments::where('handover_id', $handover_id)->get();
+        $shipments = array();
+        if($handover_shipments->count() != 0){
+            foreach ($handover_shipments as $handover_shipment){
+                $shipment = Shipment::find($handover_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+                return ['status' => 0, 'success' => 'Handover Note Shipments', 'shipments' => $shipments];
+        }else{
+                return ['status' => 0, 'success' => 'No Handover Note Shipments', 'shipments' => FALSE];
+        }
+    }
+
+    public function handover_shipments_delivered(Request $request){
+
+        $handover_ids = $request->input('handover_ids');
+        //$handover_ids = explode(',', $request->handover_ids);
+
+        foreach ($handover_ids as $handover_id) {
+          $handover_request = Handover::find($handover_id);
+  
+          if ($handover_request->status_id == 2) {
+            return ['status' => 1, 'error' => 'One of the Handover has already been modified'];
+          }
+        }
+  
+        foreach ($handover_ids as $handover_id) {
+          $handover_request = Handover::find($handover_id);
+  
+          $handover_request->status_id = 2;
+  
+          $handover_request->save();
+        }
+  
+        return ['status' => 0, 'success' => 'Handover Shipments has been Delivered'];
+    }
+
+
 
 //Responsible
     public function responsibles_index(){
@@ -167,10 +245,14 @@ class AdminShipmentHandoverController extends Controller
         $responsibles_list = HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
         ->join('admins as a', 'a.id', '=', 'handover_responsibilities.created_by')
         ->leftjoin('admins as u', 'u.id', '=', 'handover_responsibilities.updated_by')
-        ->select('handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','a.name as created','u.name as updated','handover_responsibilities.status as status')
-        ->get();
+        ->select('handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','c.id as hub_id','a.name as created','u.name as updated','handover_responsibilities.status as status');
 
         $datatable = Datatables::of($responsibles_list)
+        ->setRowAttr([
+            'hub' => function ($data) {
+                return $data->hub_id;
+            }
+        ])
             ->addColumn('status', function ($data){
                 if($data->status == 0){
                     return 'Disable';
