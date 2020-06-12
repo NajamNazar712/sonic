@@ -152,10 +152,7 @@ class AdminShipmentHandoverController extends Controller
                 ->where('s.tracking_number', '=', $tracking_number);
                 
             }
-    
-           
-            
-            
+
         return  $datatable->make(true);
 
     }
@@ -198,6 +195,212 @@ class AdminShipmentHandoverController extends Controller
         }
   
         return ['status' => 0, 'success' => 'Handover Shipments has been Delivered'];
+    }
+
+    public function handover_print(Request $request) {
+        $handover_note_ids = $request->ids;
+        //dd($handover_note_ids);
+        //$view =array();
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+        foreach ($handover_note_ids as $handover_note_id) {
+            $handover_notes = Handover::find($handover_note_id);
+            // dd($handover_notes);
+            
+            $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Handover Note</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      td.replacement span {
+                        width: 22px;
+                      }
+
+                      td.replacement span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
+
+                      td.try_and_buy span {
+                        width: 22px;
+                      }
+
+                      td.try_and_buy span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
+                      
+                      td.complaint {
+                            background: #09262e !important;
+                            color: #ffffff;
+                       }
+                      td.details_changed {
+                            background: #000000 !important;
+                            color: #ffffff;
+                       }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+            ';
+            foreach($handover_notes as $handover_note){
+            $total_shipments = 0;
+            $shipments = HandoverShipments::where('handover_id', $handover_note)->select('shipment_id')->orderBy('shipment_id','asc')->get();
+
+            $shipment_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="color primary"><strong>S. No.</strong></td>
+                            <td class="color primary"><strong>Shipment ID</strong></td>
+                            <td class="color primary"><strong>Tracking No.</strong></td>
+                            <td class="color primary"><strong>Shipper</strong></td>
+                            <td class="color primary"><strong>Status</strong></td>
+                          </tr>
+            ';
+
+
+            foreach ($shipments as $parcel) {
+                $total_shipments++;
+                $shipment = Shipment::find($parcel->shipment_id);
+                $handover_id = HandoverShipments::find($parcel->handover_id);
+                $class = null;
+                $status_check = $parcel->status;
+                if($status_check == 1){
+                    $status = 'Received';
+                }
+                else{
+                    $status = 'Not Received';
+                }
+
+                $shipment_details_row_start = '
+                          <tr>
+                            <td class="'.$class.'">' . $total_shipments . '</td>
+                            <td class="'.$class.'">' . $shipment->id . '</td>
+                            <td class="'.$class.'">' . $shipment->tracking_number . '</td>
+                            <td class="'.$class .'">' . $shipment->user->name . '</td>
+                            <td class="'.$class .'">' . $status . '</td>
+                ';
+
+                $shipment_details .= $shipment_details_row_start;
+
+             
+            }
+            $shipment_details .= '
+                        </tbody>
+                      </table>
+            ';
+            $handover_note_details = Handover::where('id', $handover_note_id)->first();
+            //$status = $handover_note_details->status->name;
+            $main_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>
+                            <td class="text-center align-middle color secondary">Created at ' . $handover_note_details->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Created By</strong></td>
+                            <td>' . ucfirst(Auth::user()->name) . '</td>
+                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($handover_note_id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($handover_note_id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Shipments</strong></td>
+                            <td>' . $handover_note_details->shipments . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Received Shipments</strong></td>
+                            <td>' . $handover_note_details->received . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Received At</strong></td>
+                            <td>' . $handover_note_details->received_at . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Status</strong></td>
+                            <td>' . $handover_note_details->status_id . '</td>
+                          </tr>
+                        </tbody>
+                      </table>
+            ';
+        }
+            $html .= $main_details;
+            $html .= $shipment_details;
+           
+      
+
+        $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+      
+        }
+
+        //$view[]=$html;
+        return $html;
     }
 
 

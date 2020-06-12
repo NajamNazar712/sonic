@@ -132,34 +132,36 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            // function print(id) {
-            //     $.ajax({
-            //         url: '{!! route('admin.cargo.in_transit.print') !!}',
-            //         method: 'POST',
-            //         data: {
-            //             'id': id,
-            //             '_token': '{{ csrf_token() }}'
-            //         }
-            //     })
-            //         .done(function(data) {
-            //             var tab = window.open('', '_blank');
+            function print(ids) {
+				$.ajax({
+					url: '{!! route('admin.handover.list.print') !!}',
+					method: 'POST',
+					data: {
+						'ids': ids,
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+				.done(function(data) {
+					var tab = window.open('','', '_blank');
 
-            //             if(!tab) {
-            //                 swal({
-            //                     title: 'Popup Blocker Enabled!',
-            //                     text: 'Please add this site to your exception list.',
-            //                     icon: 'error',
-            //                     closeOnClickOutside: false,
-            //                     closeOnEsc: false
-            //                 });
-            //             }  
-            //             else {
-            //                 tab.document.write(data);
-            //                 tab.document.close();
-            //                 tab.focus();
-            //             }
-            //         });
-            // }
+					if(!tab) {
+						swal({
+							title: 'Popup Blocker Enabled!',
+							text: 'Please add this site to your exception list.',
+							icon: 'error',
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+					}
+					else {
+						tab.document.write(data);
+						tab.document.close();
+						tab.focus();
+					}
+
+					table.draw('false');
+				});
+			}
             $('#search_tracking').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -233,6 +235,46 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                         buttons: [{
+						text: '<i class="la la-print"></i> Print',
+						className: 'btn btn-primary print',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							swal({
+								text: 'Are you sure, you want to Dispatch these Handover Notes?',
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									print(selected_rows);
+
+									table.rows().deselect();
+
+									selected_rows = [];
+
+									table.button('.print').disable();
+
+									table.draw('false');
+								}
+							});
+						}
+					},
+                            {
 							text: 'Mark as Delivered',
 							className: 'btn btn-success text-white cancel',
 							enabled: false,
@@ -421,11 +463,11 @@
 				}
 
 				if (selected_rows.length > 0) {
-					//table.button('.assign').enable();
+					table.button('.print').enable();
 					table.button('.cancel').enable();
 				}
 				else {
-					//table.button('.assign').disable();
+					table.button('.print').disable();
 					table.button('.cancel').disable();
 				}
 			});
