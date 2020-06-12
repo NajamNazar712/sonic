@@ -30,9 +30,9 @@ class AdminShipmentHandoverController extends Controller
 
     public function handover_dropdown_val_fetch_from(Request $request){
         $value = $request->get('value');
-        $dependent = $request->get('dependent');
+        $dependent = "select Person";
         $data = HandoverResponsibilities::where('hub_id',$value)->get();
-        $output = '<option value ="">Select ' .ucfirst($dependent). '</option> ';
+        $output = '<option value ="">' .ucfirst($dependent). '</option> ';
         foreach($data as $row){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
         }
@@ -41,7 +41,7 @@ class AdminShipmentHandoverController extends Controller
     public function handover_dropdown_val_fetch_to(Request $request){
         $value = $request->get('value');
         $dependent = $request->get('dependent');
-        $data = HandoverResponsibilities::where('id',$value)->get();
+        $data = HandoverResponsibilities::where('hub_id',$value)->get();
         $output = '<option value ="">Select ' .ucfirst($dependent). '</option> ';
         foreach($data as $row){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
@@ -145,6 +145,7 @@ class AdminShipmentHandoverController extends Controller
                 Handover::where('id', $created_counts->id)->update(['received' => $received_count->total_received, 'received_at' => $today,'received_by' => Auth::id()]);      
             }
         }
+
         return redirect()->route('admin.handover.receive.index')->with('success','Handover Note Received Successfully!');
 
     }

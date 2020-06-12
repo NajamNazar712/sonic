@@ -41,7 +41,7 @@
 
                                 <div class="col-3">
                                     <fieldset class="form-group">
-                                        <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from"
+                                        <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from" 
                                          required >
                                             <option value="">Select Hub</option>
                                             @foreach($hubs as $hub)
@@ -50,11 +50,21 @@
                                         </select>
                                         <div class="danger" id="hub_error" style="display:none;">This field is required</div>
                                     </fieldset>
+                                    <!-- <fieldset class="form-group">
+                                        <select name="hub1" id="hub1" class="form-control select2 dynamic1" data-dependent="to" 
+                                         required >
+                                            <option value="">Select Hub</option>
+                                            @foreach($hubs as $hub)
+                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                            @endforeach
+                                        </select>
+                                         <div class="danger" id="hub_error" style="display:none;">This field is required</div> 
+                                    </fieldset> -->
                                 </div>
                                 <div class="col-3">
                                     <fieldset class="form-group">
-                                        <select name="from" id="from" class="form-control select2 dynamic1" data-dependent="to" required >
-                                                <option value="">Select From</option>
+                                        <select name="from" id="from" class="form-control select2" required >
+                                                <!-- <option value="">Select Person</option> -->
                                         </select>
                                         <div class="danger" id="from_error" style="display:none;">This field is required</div>
                                     </fieldset>
@@ -62,8 +72,8 @@
                                 
                                 <div class="col-3">
                                     <fieldset class="form-group">
-                                        <select name="to" id="to" class="form-control select2 dynamic1" required >
-                                            <option value="">Select To</option>
+                                        <select name="to" id="to" class="form-control select2" required >
+                                            <!-- <option value="">Select Person</option> -->
                                         </select>
                                         <div class="danger" id="to_error" style="display:none;">This field is required</div>
                                     </fieldset>
@@ -122,8 +132,12 @@
 
     <script>
         $(document).ready(function() {
-
+          
             //dropdown
+            $('#hub').on('change',function(){
+            $('#hub1').val($('#hub :selected').val());
+            });
+
             $('.dynamic').change(function(){
                 if($(this).val() != '')
                 {
@@ -138,28 +152,67 @@
                         data:{value:value, _token:_token,dependent:dependent},
                         success:function(result){
                             $('#'+dependent).html(result);
+                            $('#to').empty()
+                            $('#from option').clone().appendTo('#to');  
                         }
                     })
                 }
             });
-            $('.dynamic1').change(function(){
-                if($(this).val() != '')
-                {
-                    //var select = $(this).attr("id");
-                    var value = $(this).val();
-                    var dependent = $(this).data('dependent');
-                    console.log(value);
-                    var _token = $('input[name="_token"]').val();
-                    $.ajax({
-                        url: '{!! route('admin.handover.create.fetch1') !!}',
-                        method:"POST",
-                        data:{value:value, _token:_token,dependent:dependent},
-                        success:function(result){
-                            $('#'+dependent).html(result);
-                        }
-                    })
-                }
-            });
+            // $('.dynamic1').change(function(){
+            //     if($(this).val() != '')
+            //     {
+            //         //var select = $(this).attr("id");
+            //         var value = $(this).val();
+            //         var dependent = $(this).data('dependent');
+            //         console.log(value);
+            //         var _token = $('input[name="_token"]').val();
+            //         $.ajax({
+            //             url: '{!! route('admin.handover.create.fetch1') !!}',
+            //             method:"POST",
+            //             data:{value:value, _token:_token,dependent:dependent},
+            //             success:function(result){
+            //                 $('#'+dependent).html(result);
+            //             }
+            //         })
+            //     }
+            // });
+            $('#from option').clone().appendTo('#to');
+            // $('.dynamic').change(function(){
+            //     if($(this).val() != '')
+            //     {
+            //         //var select = $(this).attr("id");
+            //         var value =  hub_id1 =  $('#hub :selected').val();
+            //         var dependent = $(this).data('dependent');
+            //         console.log(value);
+            //         var _token = $('input[name="_token"]').val();
+            //         $.ajax({
+            //             url: '{!! route('admin.handover.create.fetch') !!}',
+            //             method:"POST",
+            //             data:{value:value, _token:_token,dependent:dependent},
+            //             success:function(result){
+            //                 $('#'+dependent).html(result);
+            //             }
+            //         })
+            //     }
+            // });
+            // $('.dynamic2').change(function(){
+            //     if($(this).val() != '')
+            //     {
+            //         //var select = $(this).attr("id");
+            //         var value = $(this).val();
+            //         var dependent = $(this).data('dependent');
+            //         console.log(value);
+            //         var _token = $('input[name="_token"]').val();
+            //         $.ajax({
+            //             url: '{!! route('admin.handover.create.fetch1') !!}',
+            //             method:"POST",
+            //             data:{value:value, _token:_token,dependent:dependent},
+            //             success:function(result){
+            //                 $('#'+dependent).html(result);
+            //             }
+            //         })
+            //     }
+            // });
             $('#hub').change(function(){
             $('#from').val('');
             });
