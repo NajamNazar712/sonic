@@ -1590,7 +1590,6 @@ class DeliveryController extends Controller
 
                                 }
                             }
-
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
                     }else if($selected_status == 56){

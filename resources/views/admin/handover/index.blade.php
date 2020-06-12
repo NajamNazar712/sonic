@@ -41,7 +41,7 @@
 
                                 <div class="col-3">
                                     <fieldset class="form-group">
-                                        <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from"
+                                        <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from" 
                                          required >
                                             <option value="">Select Hub</option>
                                             @foreach($hubs as $hub)
@@ -50,11 +50,21 @@
                                         </select>
                                         <div class="danger" id="hub_error" style="display:none;">This field is required</div>
                                     </fieldset>
+                                    <!-- <fieldset class="form-group">
+                                        <select name="hub1" id="hub1" class="form-control select2 dynamic1" data-dependent="to" 
+                                         required >
+                                            <option value="">Select Hub</option>
+                                            @foreach($hubs as $hub)
+                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                            @endforeach
+                                        </select>
+                                         <div class="danger" id="hub_error" style="display:none;">This field is required</div> 
+                                    </fieldset> -->
                                 </div>
                                 <div class="col-3">
                                     <fieldset class="form-group">
-                                        <select name="from" id="from" class="form-control select2 dynamic1" data-dependent="to" required >
-                                                <option value="">Select From</option>
+                                        <select name="from" id="from" class="form-control select2" required >
+                                                <!-- <option value="">Select Person</option> -->
                                         </select>
                                         <div class="danger" id="from_error" style="display:none;">This field is required</div>
                                     </fieldset>
@@ -62,8 +72,8 @@
                                 
                                 <div class="col-3">
                                     <fieldset class="form-group">
-                                        <select name="to" id="to" class="form-control select2 dynamic1" required >
-                                            <option value="">Select To</option>
+                                        <select name="to" id="to" class="form-control select2" required >
+                                            <!-- <option value="">Select Person</option> -->
                                         </select>
                                         <div class="danger" id="to_error" style="display:none;">This field is required</div>
                                     </fieldset>
@@ -75,7 +85,6 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Shipment ID.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Phone No</th>
@@ -123,8 +132,12 @@
 
     <script>
         $(document).ready(function() {
-
+          
             //dropdown
+            $('#hub').on('change',function(){
+            $('#hub1').val($('#hub :selected').val());
+            });
+
             $('.dynamic').change(function(){
                 if($(this).val() != '')
                 {
@@ -139,28 +152,67 @@
                         data:{value:value, _token:_token,dependent:dependent},
                         success:function(result){
                             $('#'+dependent).html(result);
+                            $('#to').empty()
+                            $('#from option').clone().appendTo('#to');  
                         }
                     })
                 }
             });
-            $('.dynamic1').change(function(){
-                if($(this).val() != '')
-                {
-                    //var select = $(this).attr("id");
-                    var value = $(this).val();
-                    var dependent = $(this).data('dependent');
-                    console.log(value);
-                    var _token = $('input[name="_token"]').val();
-                    $.ajax({
-                        url: '{!! route('admin.handover.create.fetch1') !!}',
-                        method:"POST",
-                        data:{value:value, _token:_token,dependent:dependent},
-                        success:function(result){
-                            $('#'+dependent).html(result);
-                        }
-                    })
-                }
-            });
+            // $('.dynamic1').change(function(){
+            //     if($(this).val() != '')
+            //     {
+            //         //var select = $(this).attr("id");
+            //         var value = $(this).val();
+            //         var dependent = $(this).data('dependent');
+            //         console.log(value);
+            //         var _token = $('input[name="_token"]').val();
+            //         $.ajax({
+            //             url: '{!! route('admin.handover.create.fetch1') !!}',
+            //             method:"POST",
+            //             data:{value:value, _token:_token,dependent:dependent},
+            //             success:function(result){
+            //                 $('#'+dependent).html(result);
+            //             }
+            //         })
+            //     }
+            // });
+            $('#from option').clone().appendTo('#to');
+            // $('.dynamic').change(function(){
+            //     if($(this).val() != '')
+            //     {
+            //         //var select = $(this).attr("id");
+            //         var value =  hub_id1 =  $('#hub :selected').val();
+            //         var dependent = $(this).data('dependent');
+            //         console.log(value);
+            //         var _token = $('input[name="_token"]').val();
+            //         $.ajax({
+            //             url: '{!! route('admin.handover.create.fetch') !!}',
+            //             method:"POST",
+            //             data:{value:value, _token:_token,dependent:dependent},
+            //             success:function(result){
+            //                 $('#'+dependent).html(result);
+            //             }
+            //         })
+            //     }
+            // });
+            // $('.dynamic2').change(function(){
+            //     if($(this).val() != '')
+            //     {
+            //         //var select = $(this).attr("id");
+            //         var value = $(this).val();
+            //         var dependent = $(this).data('dependent');
+            //         console.log(value);
+            //         var _token = $('input[name="_token"]').val();
+            //         $.ajax({
+            //             url: '{!! route('admin.handover.create.fetch1') !!}',
+            //             method:"POST",
+            //             data:{value:value, _token:_token,dependent:dependent},
+            //             success:function(result){
+            //                 $('#'+dependent).html(result);
+            //             }
+            //         })
+            //     }
+            // });
             $('#hub').change(function(){
             $('#from').val('');
             });
@@ -181,7 +233,6 @@
                 paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
-                    {name: 'id', class: 'align-middle id', orderable: false, searchable: false},
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
                     {name: 'shipper', class: 'align-middle shipper', orderable: false, searchable: false},
                     {name: 'phone_number', class: 'align-middle phone_number', orderable: false, searchable: false},
@@ -251,7 +302,7 @@
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1, data.details.id,data.details.tracking_number, data.details.shipper, data.details.phone_number, data.details.pickup_date,data.details.special_instructions, remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.phone_number, data.details.pickup_date,data.details.special_instructions, remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);

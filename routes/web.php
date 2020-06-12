@@ -1796,6 +1796,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
+            Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details')->name('shipment_details');
+            Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit_receive')->name('store');
         });
         Route::prefix('list')->name('list.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_list_index')->name('index');

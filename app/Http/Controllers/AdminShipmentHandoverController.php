@@ -31,8 +31,9 @@ class AdminShipmentHandoverController extends Controller
     public function handover_dropdown_val_fetch_from(Request $request){
         $value = $request->get('value');
         $dependent = $request->get('dependent');
+        $dependent = "select Person";
         $data = HandoverResponsibilities::where('hub_id',$value)->get();
-        $output = '<option value ="">Select ' .ucfirst($dependent). '</option> ';
+        $output = '<option value ="">' .ucfirst($dependent). '</option> ';
         foreach($data as $row){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
         }
@@ -42,7 +43,6 @@ class AdminShipmentHandoverController extends Controller
         $value = $request->get('value');
         $dependent = $request->get('dependent');
         $data = HandoverResponsibilities::where('id',$value)->get();
-        //$datas = HandoverResponsibilities::where('hub_id',$data)->get();
         $output = '<option value ="">Select ' .ucfirst($dependent). '</option> ';
         foreach($data as $row){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
@@ -118,6 +118,38 @@ class AdminShipmentHandoverController extends Controller
     public function handover_receive_index(){
          return view('admin.handover.receive');
     }
+    public function bulk_handover_submit_receive(Request $request){
+        $shipment_ids = explode(',', $request->shipment_ids);
+        $today = Carbon::now();
+
+        foreach ($shipment_ids as $shipment_id) {
+            HandoverShipments::where('shipment_id', $shipment_id)->update(['status' => 1]);
+        }
+   
+
+        $received_counts =DB::table('handover_shipments')->where('status',1)->select('handover_id', DB::raw('count(*) as total_received'))
+        ->groupBy(DB::raw('handover_id'))->get();
+
+        foreach ($received_counts as $received_count){
+
+            $created_counts =DB::table('handovers')->select('id','shipments')
+            ->where('id',$received_count->handover_id)
+            ->first();
+
+            if(($received_count->total_received < $created_counts->shipments) && ($received_count->total_received >0))
+            {
+                Handover::where('id', $created_counts->id)->update(['status_id' => 3]);
+                Handover::where('id', $created_counts->id)->update(['received' => $received_count->total_received, 'received_at' => $today,'received_by' => Auth::id()]);
+            }
+            else if($received_count->total_received == $created_counts->shipments){
+                Handover::where('id', $created_counts->id)->update(['status_id' => 4]);
+                Handover::where('id', $created_counts->id)->update(['received' => $received_count->total_received, 'received_at' => $today,'received_by' => Auth::id()]);      
+            }
+        }
+
+        return redirect()->route('admin.handover.receive.index')->with('success','Handover Note Received Successfully!');
+
+    }
 
 //list
     public function handover_list_index(){
@@ -126,8 +158,8 @@ class AdminShipmentHandoverController extends Controller
 
     public function handover_list(Request $request){
         $handover_list = Handover::leftjoin('cities as c','c.id','=','handovers.hub')
-        ->join('admins as a', 'a.id', '=', 'handovers.created_by')
-        ->join('admins as ad', 'ad.id', '=', 'handovers.received_by')
+        ->leftjoin('admins as a', 'a.id', '=', 'handovers.created_by')
+        ->leftjoin('admins as ad', 'ad.id', '=', 'handovers.received_by')
         ->leftjoin('handover_statuses as hs','hs.id','=','handovers.status_id')
         ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
