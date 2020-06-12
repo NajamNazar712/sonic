@@ -158,8 +158,8 @@ class AdminShipmentHandoverController extends Controller
 
     public function handover_list(Request $request){
         $handover_list = Handover::leftjoin('cities as c','c.id','=','handovers.hub')
-        ->join('admins as a', 'a.id', '=', 'handovers.created_by')
-        ->join('admins as ad', 'ad.id', '=', 'handovers.received_by')
+        ->leftjoin('admins as a', 'a.id', '=', 'handovers.created_by')
+        ->leftjoin('admins as ad', 'ad.id', '=', 'handovers.received_by')
         ->leftjoin('handover_statuses as hs','hs.id','=','handovers.status_id')
         ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
