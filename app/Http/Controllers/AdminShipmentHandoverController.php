@@ -202,10 +202,11 @@ class AdminShipmentHandoverController extends Controller
         //dd($handover_note_ids);
         //$view =array();
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-        foreach ($handover_note_ids as $handover_note_id) {
-            $handover_notes = Handover::find($handover_note_id);
+        
+            //$handover_notes = Handover::find($handover_note_id);
             // dd($handover_notes);
             
+            $html='';
             $html = '
                 <!doctype html>
                 <html lang="en">
@@ -289,15 +290,23 @@ class AdminShipmentHandoverController extends Controller
                             background: #000000 !important;
                             color: #ffffff;
                        }
+                       div.page
+                        {
+                            page-break-after: always;
+                            page-break-inside: avoid;
+                        }
                     </style>
                   </head>
                   <body>
                     <div>
+                    
             ';
-            foreach($handover_notes as $handover_note){
+            
+        foreach ($handover_note_ids as $handover_note_id) {
+            $html .= '<div class="page text-center">';
             $total_shipments = 0;
-            $shipments = HandoverShipments::where('handover_id', $handover_note)->select('shipment_id')->orderBy('shipment_id','asc')->get();
-
+            $shipments = HandoverShipments::where('handover_id', $handover_note_id)->select('shipment_id')->orderBy('shipment_id','asc')->get();
+            
             $shipment_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -341,14 +350,17 @@ class AdminShipmentHandoverController extends Controller
                         </tbody>
                       </table>
             ';
+            
+            
+           
             $handover_note_details = Handover::where('id', $handover_note_id)->first();
-            //$status = $handover_note_details->status->name;
+            $status = $handover_note_details->status->name;
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
-                            <td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>
+                            <td class="text-center align-middle color primary"><strong>Handover Note</strong></td>
                             <td class="text-center align-middle color secondary">Created at ' . $handover_note_details->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
@@ -374,18 +386,23 @@ class AdminShipmentHandoverController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Status</strong></td>
-                            <td>' . $handover_note_details->status_id . '</td>
+                            <td>' . $status . '</td>
                           </tr>
                         </tbody>
                       </table>
             ';
-        }
+        
             $html .= $main_details;
             $html .= $shipment_details;
-           
-      
 
+            $html .= '
+            </div>
+            ';
+      
+        }
+        
         $html .= '
+       
                     </div>
 
                     <script>
@@ -395,9 +412,10 @@ class AdminShipmentHandoverController extends Controller
                     </script>
                   </body>
                 </html>
-      ';
+        ';
+       
       
-        }
+        
 
         //$view[]=$html;
         return $html;

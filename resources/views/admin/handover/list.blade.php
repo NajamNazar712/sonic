@@ -142,7 +142,7 @@
 					}
 				})
 				.done(function(data) {
-					var tab = window.open('','', '_blank');
+					var tab = window.open('', '_blank');
 
 					if(!tab) {
 						swal({
@@ -168,68 +168,54 @@
                 'allowPlus': false
             });
        
-            // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-            //     if ( this.context.length ) {
-            //         blockPagePermanently();
-            //         body = [];
-            //         var params = table.ajax.params();
-            //         params.start = 0;
-            //         params.length = -1;
-            //         var jsonResult = $.ajax({
-            //             url: '{{ route('admin.reports.cargo_received.list') }}',
-            //             data: params,
-            //             success: function (result) {
-            //                 head = [];
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    blockPagePermanently();
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.handover.list.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
 
-            //                 head.push('S. No');
-            //                 head.push('Cargo No.');
-            //                 head.push('Seal No.');
-            //                 head.push('Origin');
-            //                 head.push('Destination');
-            //                 head.push('Shipment(s)');
-            //                 head.push('Shipping Mode');
-            //                 head.push('Cargo Type');
-            //                 head.push('Shipments Weight');
-            //                 head.push('Chargeable Weight');
-            //                 head.push('Actual Weight');
-            //                 head.push('Vendor Weight');
-            //                 head.push('Transitted By');
-            //                 head.push('Transit Date');
-            //                 head.push('Received By');
-            //                 head.push('Received Date');
-            //                 head.push('Aging');
-            //                 $.each(result.data, function(index, values) {
-            //                     row = [];
+                            head.push('S. No');
+                            head.push('Created By');
+                            head.push('Received By');
+                            head.push('From');
+                            head.push('To');
+                            head.push('Hub');
+                            head.push('Shipment(s)');
+                            head.push('Status');
+                            head.push('Received Shipment(s)');
+                            head.push('Received At');
+                            $.each(result.data, function(index, values) {
+                                row = [];
 
-            //                     row.push(index + 1);
-            //                     row.push(values.cargo_id);
-            //                     row.push(values.seal_number);
-            //                     row.push(values.origin);
-            //                     row.push(values.destination);
-            //                     row.push(values.shipments);
-            //                     row.push(values.shipping_mode);
-            //                     row.push(values.cargo_type);
-            //                     row.push(values.shipments_weight);
-            //                     row.push(values.chargeable_weight);
-            //                     row.push(values.actual_weight);
-            //                     row.push(values.vendor_weight);
-            //                     row.push(values.transit_by);
-            //                     row.push(values.transit_at);
-            //                     row.push(values.received_by);
-            //                     row.push(values.received_at);
-            //                     row.push(values.aging);
+                                row.push(index + 1);
+                                row.push(values.created_by);
+                                row.push(values.received_by);
+                                row.push(values.from);
+                                row.push(values.to);
+                                row.push(values.hub);
+                                row.push(values.shipment_count);
+                                row.push(values.status);
+                                row.push(values.received_shipments);
+                                row.push(values.received_at);
 
-            //                     body.push(row);
-            //                 });
-            //             },
-            //             async: false
-            //         });
-            //         UnblockPagePermanently();
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+                    UnblockPagePermanently();
 
-            //         return {body: body, header: head};
-            //     }
-            // } );
-            //var index_column = 0;
+                    return {body: body, header: head};
+                }
+            } );
+            
             var selected_rows = [];
            
             var table = $('#datatable').DataTable({
@@ -275,8 +261,8 @@
 						}
 					},
                             {
-							text: 'Mark as Delivered',
-							className: 'btn btn-success text-white cancel',
+							text: '<i class="la la-check"></i> Mark as Delivered',
+							className: 'btn btn-success text-white delivered',
 							enabled: false,
 							action: function (e, dt, node, config) {
 								swal({
@@ -322,7 +308,7 @@
 											selected_rows = [];
 
 											//table.button('.delivered').disable();
-											 table.button('.cancel').disable();
+											 table.button('.delivered').disable();
 
 											table.draw('false');
 										});
@@ -331,59 +317,61 @@
 								});
 							}
 						},
-                //     {
-                //   extend: 'selectAll',
-                //   text: 'Select All',
-                //   className: 'select_all',
-                //   action : function(e) {
-                //     e.preventDefault();
+                    {
+                  extend: 'selectAll',
+                  text: 'Select All',
+                  className: 'select_all',
+                  action : function(e) {
+                    e.preventDefault();
 
-                //     table.rows().nodes().each(function(index) {
-                //       var row = table.row(index);
+                    table.rows().nodes().each(function(index) {
+                      var row = table.row(index);
 
-                //       if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                //         row.select();
+                      if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                        row.select();
 
-                //         id = parseInt(row.id());
+                        id = parseInt(row.id());
 
-                //         var index = $.inArray(id, selected_rows);
+                        var index = $.inArray(id, selected_rows);
 
-                //         if (index === -1) {
-                //           selected_rows.push(id);
-                //         }
+                        if (index === -1) {
+                          selected_rows.push(id);
+                        }
 
-                //         table.button('.delivered').enable();
-                //       }
-                //     });
-                //   }
-                // }, {
-                //   extend: 'selectNone',
-                //   text: 'Select None',
-                //   className: 'select_none',
-                //   action : function(e) {
-                //     e.preventDefault();
+                        table.button('.delivered').enable();
+                        table.button('.print').enable();
+                      }
+                    });
+                  }
+                }, {
+                  extend: 'selectNone',
+                  text: 'Select None',
+                  className: 'select_none',
+                  action : function(e) {
+                    e.preventDefault();
 
-                //     table.rows().nodes().each(function(index) {
-                //       var row = table.row(index);
+                    table.rows().nodes().each(function(index) {
+                      var row = table.row(index);
 
-                //       if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                //         row.deselect();
+                      if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                        row.deselect();
 
-                //         id = parseInt(row.id());
+                        id = parseInt(row.id());
 
-                //         var index = $.inArray(id, selected_rows);
+                        var index = $.inArray(id, selected_rows);
 
-                //         if (index !== -1) {
-                //             selected_rows.splice(index, 1);
-                //         }
+                        if (index !== -1) {
+                            selected_rows.splice(index, 1);
+                        }
 
-                //         if (selected_rows.length == 0) {
-                //             table.button('.delivered').disable();
-                //         }
-                //       }
-                //     });
-                //   }
-                // },  
+                        if (selected_rows.length == 0) {
+                            table.button('.delivered').disable();
+                            table.button('.print').disable();
+                        }
+                      }
+                    });
+                  }
+                },  
                 {
                     extend: 'excelHtml5',
                     title: 'Received Cargo Report',
@@ -464,20 +452,13 @@
 
 				if (selected_rows.length > 0) {
 					table.button('.print').enable();
-					table.button('.cancel').enable();
+					table.button('.delivered').enable();
 				}
 				else {
 					table.button('.print').disable();
-					table.button('.cancel').disable();
+					table.button('.delivered').disable();
 				}
 			});
-
-            // $('#datatable tbody').on('click', 'tr td a.cargo_print', function() {
-            //     var id = parseInt($(this).parents('tr').attr('id'));
-            //     if(id){
-            //         print(id);
-            //     }
-            // });
 
             var route = '{!! route('admin.tracking.index') !!}';
 			$('#datatable tbody').on('click','tr td.shipment_count button',function () {
