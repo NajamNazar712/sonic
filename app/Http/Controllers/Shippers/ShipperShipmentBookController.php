@@ -1324,7 +1324,7 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color secondary border twice-top"><strong>Quantity</strong></td>
                                 <td>' . $item->quantity . '</td>
                                 <td colspan="1" class="color secondary border twice-top">Piece(s)</td>
-                                <td>1</td>
+                                <td>'. $shipment->pieces .'</td>
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
