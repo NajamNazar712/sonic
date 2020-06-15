@@ -28,7 +28,8 @@ class UserManagementController extends Controller
     }
 
     public function user_index() {
-      return view('admin.user_management.user.index');
+      $hubs=City::select('id','name')->where('hub',1)->get();
+      return view('admin.user_management.user.index')->with(['hubs'=>$hubs]);
     }
 
     public function user_list(Request $request) {

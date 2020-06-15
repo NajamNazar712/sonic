@@ -12,6 +12,44 @@
 					Users
 				</h1>
 
+				<div class="modal fade text-left" id="AddTierModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddTierModal"
+					aria-hidden="true">
+					<div class="modal-dialog modal-lg" role="document">
+						<div class="modal-content">
+							<div class="modal-header bg-primary white">
+								<h4 class="modal-title white">Assign Hubs</h4>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+							<!-- {{route('admin.settings.commission.add')}} -->
+								<form id="add_commission_form" action="#" method="post">
+									@method('POST')
+									@csrf
+									<div class="container">
+
+										<div class="col-12 form-group">
+                                            <select name="roles[]" id="roles_select" class="form-control select2" multiple="multiple">
+                                                @foreach($hubs as $hub)
+                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+										<div class="row justify-content-center">
+											<div class="col-6">
+												<button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Add Tier</button>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
 				<div class="card">
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
@@ -20,6 +58,7 @@
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
+										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Name</th>
 										<th class="border-primary border-darken-1">Phone Number</th>
@@ -56,6 +95,11 @@
 
 	<script type="text/javascript">
 		$(document).ready(function() {
+			$('#roles_select').select2({
+                placeholder:'Select Role',
+                width:'100%',
+                allowClear:true
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -98,7 +142,8 @@
 
                     return {body: body, header: head};
                 }
-            } );
+			} );
+			var selected_rows = [];
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || in_array(82, session('permissions')))
@@ -107,6 +152,13 @@
 						className: 'btn btn-primary add',
 						action: function (e, dt, node, config) {
 							window.location = '{{ route('admin.user_management.users.add.index') }}';
+						}
+					},{
+						text: '<i class="la la-cogs"></i> Assign Hub(s)',
+						className: 'btn btn-primary assign',
+						enabled:false,
+						action: function (e, dt, node, config) {
+						$('#AddTierModal').modal('show');
 						}
 					},{
                         extend: 'excel',
@@ -129,12 +181,19 @@
 				processing: true,
                 language: {
                     processing: data_table_loader
+				},
+				select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
                 },
 				serverSide: true,
 				ajax: '{{ route('admin.user_management.users.list') }}',
 				rowId: 'id',
 				order: [[8, 'desc']],
 				columns: [
+					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'admins.name', class: 'align-middle name'},
 					{data: 'phone_number', name: 'admins.phone_number', class: 'align-middle phone_number'},
@@ -149,9 +208,16 @@
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
+					// var info = table.page.info();
+
+					// $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
 					var info = table.page.info();
 
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
+					if ($.inArray(data.id, selected_rows) !== -1) {
+						table.row(row).select();
+					}
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -167,7 +233,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select-checkbox')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -251,6 +317,47 @@
 					}
 				@endif
 			});
+            //bulk assigning of hub work start
+			$('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                 console.log(id);
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.assign').enable();
+                }
+                else {
+                    table.button('.assign').disable();
+                }
+			});
+			
+			$( "#add_commission_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'New Tier is being added!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                }
+            });
 		});
 	</script>
 @endsection
