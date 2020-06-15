@@ -239,6 +239,8 @@
 
     <script>
         $(document).ready(function () {
+
+
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -319,7 +321,7 @@
 
             buttons: [
                     @if (session('role_id') == 1 || in_array(19, session('permissions')))
-                        
+
                 {
                     text: 'Assign',
                     className: 'btn btn-primary assign',

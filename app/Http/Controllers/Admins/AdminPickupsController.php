@@ -1287,6 +1287,7 @@ class AdminPickupsController extends Controller
     }
 
     public function receive_arrival_of_shipments_index() {
+        return redirect()->to(route('admin.dashboard.index'))->with('error', 'Receive shipments through new arrival screen!');
       if (session('pickup_receive_pickup_note_id')) {
         return view('admin.pickups.receive.arrival_of_shipments');
       }

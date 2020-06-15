@@ -11,6 +11,7 @@ use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\PickupRequest;
+use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
@@ -546,6 +547,41 @@ class V2AdminPickupsController extends Controller
                     $shipment->actual_weight = $request->weight;
                 }
 
+                if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
+                    $receiving_sheet_shipment->status = 1;
+                    $receiving_sheet_shipment->save();
+
+                    $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
+
+                    $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
+
+                    $receiving_sheet->received = $receiving_sheet->received + 1;
+
+                    $receiving_sheet->save();
+
+                    if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+                        $receiving_sheet_received = new ReceivingSheetReceived();
+
+                        $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+                        $receiving_sheet_received->user_id = $shipment->user_id;
+                        $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+                        $receiving_sheet_received->shipment_id = $shipment_id;
+
+                        $receiving_sheet_received->save();
+                    }
+                }
+                else {
+                    if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+                        $receiving_sheet_received = new ReceivingSheetReceived();
+
+                        $receiving_sheet_received->user_id = $shipment->user_id;
+                        $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+                        $receiving_sheet_received->shipment_id = $shipment_id;
+
+                        $receiving_sheet_received->save();
+                    }
+                }
+
                 $shipment->shipper_status_id = 2;
                 $shipment->consignee_status_id = 2;
 
@@ -673,8 +709,13 @@ class V2AdminPickupsController extends Controller
         Log::info('Hello Pakistani');
 
         NotificationsController::send(4, $shipment_ids);
-
-        return redirect()->route('admin.v2_pickups.pending.index')->with('success','Shipments arrived Successfully!');
+        if (empty($print_shipment_ids)) {
+            return redirect()->back()->with(['success' => 'Arrival Done']);
+        }
+        else {
+            return redirect()->back()->with(['success' => 'Arrival Done', 'print_shipment_ids' => $print_shipment_ids]);
+        }
+//        return redirect()->route('admin.v2_pickups.pending.index')->with('success','Shipments arrived Successfully!');
 
     }
 
@@ -946,6 +987,41 @@ class V2AdminPickupsController extends Controller
                     $reference_1_id = NULL;
                 }
 
+                if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
+                    $receiving_sheet_shipment->status = 1;
+                    $receiving_sheet_shipment->save();
+
+                    $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
+
+                    $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
+
+                    $receiving_sheet->received = $receiving_sheet->received + 1;
+
+                    $receiving_sheet->save();
+
+                    if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+                        $receiving_sheet_received = new ReceivingSheetReceived();
+
+                        $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+                        $receiving_sheet_received->user_id = $shipment->user_id;
+                        $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+                        $receiving_sheet_received->shipment_id = $shipment_id;
+
+                        $receiving_sheet_received->save();
+                    }
+                }
+                else {
+                    if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+                        $receiving_sheet_received = new ReceivingSheetReceived();
+
+                        $receiving_sheet_received->user_id = $shipment->user_id;
+                        $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+                        $receiving_sheet_received->shipment_id = $shipment_id;
+
+                        $receiving_sheet_received->save();
+                    }
+                }
+
                 $shipment->shipper_status_id = 2;
                 $shipment->consignee_status_id = 2;
 
@@ -1038,6 +1114,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->received = $pickup_request->received + 1;
 
                 $pickup_request->save();
+
             }
         }
         $pickup_note_ids = array();
@@ -1070,7 +1147,13 @@ class V2AdminPickupsController extends Controller
         }
         NotificationsController::send(4, $shipment_ids);
 
-        return redirect()->route('admin.v2_pickups.pending.index')->with('success','Shipments arrived Successfully!');
+        if (empty($print_shipment_ids)) {
+            return redirect()->back()->with(['success' => 'Arrival Done']);
+        }
+        else {
+            return redirect()->back()->with(['success' => 'Arrival Done', 'print_shipment_ids' => $print_shipment_ids]);
+        }
+//        return redirect()->route('admin.v2_pickups.pending.index')->with('success','Shipments arrived Successfully!');
 
     }
 
