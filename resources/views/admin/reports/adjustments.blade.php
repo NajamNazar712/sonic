@@ -81,7 +81,8 @@
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Adjustment Type</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
-                        <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Created At</th>
@@ -236,7 +237,8 @@
                             head.push('Shipper Name');
                             head.push('Adjustment Type');
                             head.push('Adjusted Amount');
-                            head.push('Hub');
+                            head.push('Origin');
+                            head.push('Destination');
                             head.push('Payment ID');
                             head.push('Remarks');
                             head.push('Created At');
@@ -249,7 +251,8 @@
                                 row.push(values.shipper_name);
                                 row.push(values.adjustment_type);
                                 row.push(values.adjustment_amount);
-                                row.push(values.hub);
+                                row.push(values.origin);
+                                row.push(values.destination);
                                 row.push(values.done_payment_id);
                                 row.push(values.remarks);
                                 row.push(values.created_at);
@@ -303,7 +306,8 @@
                     { data:'shipper_name' ,name: 'u.name', class: 'align-middle shipper_name'},
                     { data:'adjustment_type' ,name: 'at.name', class: 'align-middle adjustment_type'},
                     { data:'adjustment_amount' ,name: 'adjustment_logs.adjustment_amount', class: 'align-middle adjustment_amount'},
-                    { data:'hub' ,name: 'c.name', class: 'align-middle hub'},
+                    { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
+                    { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'done_payment_link' ,name: 'dps.done_payment_id', class: 'align-middle done_payment_id'},
                     { data:'remarks' ,name: 'adjustment_logs.remarks', class: 'align-middle remarks'},
                     { data:'created_at' ,name: 'adjustment_logs.created_at', class: 'align-middle created_at'},
