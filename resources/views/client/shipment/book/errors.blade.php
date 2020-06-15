@@ -30,14 +30,19 @@
                                 <th>Consignee Phone Number 2 (03000000000)</th>
                                 <th>Consignee Email Address</th>
                                 <th>Order ID</th>
-                                <th>Replacement Item Product Type ID</th>
-                                <th>Replacement Item Description</th>
-                                <th>Replacement Item Quantity</th>
                                 <th>Item Product Type ID</th>
                                 <th>Item Description</th>
                                 <th>Item Quantity</th>
                                 <th>Item Insurance</th>
                                 <th>Item Price</th>
+                                <th>Replacement Item Product Type ID</th>
+                                <th>Replacement Item Description</th>
+                                <th>Replacement Item Quantity</th>
+                                <th>Item Product Type ID 1</th>
+                                <th>Item Description 1</th>
+                                <th>Item Quantity 1</th>
+                                <th>Item Insurance 1</th>
+                                <th>Item Price 1</th>
                                 <th>Item Product Type ID 2</th>
                                 <th>Item Description 2</th>
                                 <th>Item Quantity 2</th>
@@ -326,11 +331,11 @@
                                 @if(isset($errors[$no]['same_day_timing_id']) && ($check_sameday == 1))
                                     <td>{!! Form::select('form[' . $no . '][same_day_timing_id]',$shipping_mode_same_day_timings,null,['class' => 'form-control is-invalid same_day_timing_id select2','id'=>'same_day_timing_id', 'style'=>'width:100px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['same_day_timing_id']}}</font></td>
                                 @else
-                                    @if($check_sameday == 1)
-                                        <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', $ro['same_day_timing_id'] ,['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
-                                    @else
-                                        <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', null,['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
-                                    @endif
+                                @if($check_sameday == 1)
+                                    <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', $ro['same_day_timing_id'] ,['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', null,['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                @endif
                                 @endif
                                 @if(isset($errors[$no]['try_and_buy_charges']))
                                     <td>{!! Form::text('form[' . $no . '][try_and_buy_charges]', $ro['try_and_buy_charges'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['try_and_buy_charges']}}</font></td>
