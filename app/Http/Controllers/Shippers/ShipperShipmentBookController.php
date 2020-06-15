@@ -1753,7 +1753,7 @@ class ShipperShipmentBookController extends Controller
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [4]);
             })],
-            'pieces_quantity' => ['required_if:service_type_id,1','nullable', 'integer', 'digits_between:1,10', 'between:1,10']
+            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10']
 
         ];
 
@@ -1832,7 +1832,16 @@ class ShipperShipmentBookController extends Controller
                 if (!isset($row['charges_mode_id'])) {
                   $rows[$key]['charges_mode_id'] = 4;
                 }
-
+//                dd($row);
+                if($row['service_type_id'] == 1 && isset($row['pieces_quantity'])){
+                    if($row['pieces_quantity'] != null){
+                        $rows[$key]['pieces_quantity'] = $row['pieces_quantity'];
+                    }else{
+                        $rows[$key]['pieces_quantity'] = 1;
+                    }
+                }else{
+                    $rows[$key]['pieces_quantity'] = 1;
+                }
                 $validate = Validator::make($row, $rules, $messages);
 
                 $validate->setAttributeNames($names);
@@ -1991,7 +2000,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
 //                dd($blacklist_found_categories);
-
+//            dd($rows);
                 if (empty($errors)) {
                     if (empty($nsa_error)) {
                         if(empty($blacklist_errors)){
@@ -2957,7 +2966,7 @@ class ShipperShipmentBookController extends Controller
             'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
-            'pieces_quantity' => ['required_if:service_type_id,1', 'integer', 'digits_between:1,10', 'between:1,10'],
+            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
@@ -3047,6 +3056,15 @@ class ShipperShipmentBookController extends Controller
 
                 if (!isset($row['charges_mode_id'])) {
                   $rows[$key]['charges_mode_id'] = 3;
+                }
+                if($row['service_type_id'] == 1 && isset($row['pieces_quantity'])){
+                    if($row['pieces_quantity'] != null){
+                        $row[$key]['pieces_quantity'] = $row['pieces_quantity'];
+                    }else{
+                        $row[$key]['pieces_quantity'] = 1;
+                    }
+                }else{
+                    $row[$key]['pieces_quantity'] = 1;
                 }
 
                 $validate = Validator::make($row, $rules, $messages);

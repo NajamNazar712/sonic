@@ -312,7 +312,7 @@ class APIController extends Controller
             'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
-            'pieces_quantity' => ['required_if:service_type_id,1', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'pieces_quantity' => ['nullable','integer', 'digits_between:1,10', 'between:1,10'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
@@ -325,7 +325,6 @@ class APIController extends Controller
             'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
             'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
-            'pieces_quantity' => ['required_if:service_type_id,1', 'integer', 'digits_between:1,10', 'between:1,10']
         ];
       }
       else {
@@ -376,7 +375,7 @@ class APIController extends Controller
             'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
             'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
-            'pieces_quantity' => ['required_if:service_type_id,1', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10']
+            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10']
         ];
       }
 
@@ -543,8 +542,12 @@ class APIController extends Controller
               $try_and_buy_charges = NULL;
           }
           $pieces_quantity = 1;
-          if($service_type_id == 1){
-              $pieces_quantity = $request->input('pieces');
+          if($service_type_id == 1 && $request->has('pieces')){
+              if($request->input('pieces') != null){
+                  $pieces_quantity = $request->input('pieces');
+              }else{
+                  $pieces_quantity = 1;
+              }
           }
           if($user_type['account_type_id'] == 1) {
               $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity);
