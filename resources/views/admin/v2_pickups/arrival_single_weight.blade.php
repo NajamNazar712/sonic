@@ -143,7 +143,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="form-group text-center mt-1 mb-1 ml-1 p-1 border border-light rounded">
+                                <div class="form-group text-center  mb-1 p-1 border border-light rounded">
                                     <label class="mr-1">Volumetric Weight</label>
                                     <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
                                 </div>
