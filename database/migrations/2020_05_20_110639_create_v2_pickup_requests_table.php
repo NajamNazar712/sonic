@@ -16,7 +16,6 @@ class CreateV2PickupRequestsTable extends Migration
         Schema::create('v2_pickup_requests', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shipper_id');
-            $table->timestamp('requested_date');
             $table->integer('pickup_address_id');
             $table->integer('booked');
             $table->integer('received')->nullable();
