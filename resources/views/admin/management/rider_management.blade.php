@@ -19,6 +19,7 @@
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Phone No</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
@@ -75,6 +76,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('City Name');
+                            head.push('Hub Name');
                             head.push('Rider Name');
                             head.push('Phone No.');
                             head.push('CNIC');
@@ -90,6 +92,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.city);
+                                row.push(values.hub);
                                 row.push(values.rider);
                                 row.push(values.phone);
                                 row.push(values.cnic);
@@ -151,6 +154,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'hub', name: 'cities.name', class: 'align-middle hub'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle name'},
                     {data: 'phone', name: 'riders.phone', class: 'align-middle phone'},
                     {data: 'cnic', name: 'riders.cnic', class: 'align-middle cnic'},

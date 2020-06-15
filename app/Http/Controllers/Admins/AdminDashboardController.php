@@ -8312,7 +8312,7 @@ if(session('department_id') == 7){
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
-            ->select(['cities.name as city','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
+            ->select(['cities.name as city','cities.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
