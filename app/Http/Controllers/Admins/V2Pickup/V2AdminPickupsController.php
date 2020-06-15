@@ -343,7 +343,14 @@ class V2AdminPickupsController extends Controller
                         $pickup_request_attempts->trax_remarks = $trax_remarks;
                         $pickup_request_attempts->save();
                     }
-                    V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->orderBy('id', 'desc')->update(['status' => 1]);
+                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->orderBy('id', 'desc')->first();
+                    $pickup_note_id = $pickup_note_request->pickup_note_id;
+                    $pickup_note_request->status = 1;
+                    $pickup_note_request->save();
+                    $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
+                    if($pickup_note_requests_count == 0){
+                        V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
+                    }
 
                 }
             }
