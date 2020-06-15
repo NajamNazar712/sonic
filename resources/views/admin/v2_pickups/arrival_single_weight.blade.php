@@ -730,7 +730,6 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function (form) {
-                    var form = this;
 
                     swal({
                         text: 'Are you sure, you want to Receive these Shipments?',
