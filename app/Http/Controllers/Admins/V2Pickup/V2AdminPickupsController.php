@@ -1543,7 +1543,7 @@ class V2AdminPickupsController extends Controller
             $pickup_request_assigned_shipment->delete();
 
             if ($bookings == 0) {
-                $pickup_request->status = 4;
+                $pickup_request->status_id = 4;
 
                 $pickup_request->save();
 

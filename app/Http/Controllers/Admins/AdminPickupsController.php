@@ -61,8 +61,8 @@ class AdminPickupsController extends Controller
                   $shipment->consignee_status_id == 1;
 //                  ShipmentsJourneyController::add($shipment_id,1,1,NULL,'Pickup generated',NULL,6);
               }
-                $shipment->pickup_date = Carbon::now();
-                $shipment->save();
+              $shipment->pickup_date = Carbon::now();
+              $shipment->save();
               $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->whereIn('status_id', [1,3]);
 
               $shipments_count = 0;
