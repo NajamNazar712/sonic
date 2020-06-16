@@ -224,11 +224,16 @@ class V2AdminPickupsController extends Controller
         $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
         if($rider_settings->exists()){
             $rider_settings = $rider_settings->first();
-            $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+            if($rider_settings->setting_value != 0 && $rider_settings->setting_value != null){
+                $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+            }
         }
-        if(Carbon::now() > $rider_cut_off_time){
-            return ['status' => 1, 'error' => 'Rider can not be assigned after cut off time!'];
+        if($rider_cut_off_time != null){
+            if(Carbon::now() > $rider_cut_off_time){
+                return ['status' => 1, 'error' => 'Rider can not be assigned after cut off time!'];
+            }
         }
+
 
         if (empty($pickup_request_ids)) {
             return ['status' => 1, 'error' => 'No Pickup Request Selected'];
