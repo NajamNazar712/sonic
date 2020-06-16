@@ -10,7 +10,7 @@ class ShipmentsV2PickupJourney extends Model
 	protected $fillable = ['shipment_id', 'status_id', 'admin_id'];
 
     public function status() {
-    	return $this->belongsTo('App\Http\Models\ShipmentPickupStatus', 'status_id', 'id');
+    	return $this->belongsTo('App\Http\Models\V2Pickup\V2PickupRequestStatus', 'status_id', 'id');
     }
 
     public function admin() {
