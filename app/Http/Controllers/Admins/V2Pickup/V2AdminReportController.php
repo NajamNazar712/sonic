@@ -57,9 +57,14 @@ class V2AdminReportController extends Controller
                     $sales_person = $sales_person->first();
                     $admin_id = $sales_person->admin_id;
                 }
-                $reason = $pickup_request->pickup_attempt_latest->whereNotNull('reason_id')->first();
-                $reason_id = $reason->reason_id;
-              
+                $reason_id = null;
+                if($pickup_request->status_id == 3){
+                    $reason = $pickup_request->pickup_attempt_latest->whereNotNull('reason_id')->first();
+                    if($reason){
+                        $reason_id = $reason->reason_id;
+                    }
+                }
+
                     // if($reason_id == 7 || $reason_id == 8 || $reason_id == 9 ){
                     //     $department_id=6;
                     //     $operations_total++;
@@ -72,7 +77,7 @@ class V2AdminReportController extends Controller
                 $total++;
                 $id = $pickup_request->id;
            
-                 $status_id = $pickup_request->status_id;
+                $status_id = $pickup_request->status_id;
                 $booked=$pickup_request->booked;
                 $received=$pickup_request->received;
                 $difference = ($booked - $received)/$booked;
@@ -138,7 +143,7 @@ class V2AdminReportController extends Controller
                 //     $attempted_failed++;
                 // }
     
-                if($pickup_request->after_cut_off_time == 1){
+                if($pickup_request->after_cut_off_time == null){
                     $before_cut_off_total++;
                 } 
                 else{
