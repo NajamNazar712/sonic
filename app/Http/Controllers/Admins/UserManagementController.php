@@ -203,7 +203,7 @@ class UserManagementController extends Controller
         // dd($request->input('hubs'));
         
         foreach($user_ids as $user_id){
-          
+            
                 foreach($request->input('hubs') as $hub_id) {
                     $admin_hub = new AdminHub();
                     
@@ -213,6 +213,7 @@ class UserManagementController extends Controller
                     $admin_hub->save();
                     
                 } 
+                
         }
     }
 
