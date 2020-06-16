@@ -75,6 +75,7 @@ class V2PickupCronController extends Controller
             $pickup_requests = $pickup_requests->get();
             foreach ($pickup_requests as $pickup_request) {
                 $count = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereIn('reason_id', [1,2,3,4,5,6])->count();
+                return $count;
                 if($count >= 3){
                     $pickup_request->status_id = 4;
                     $pickup_request->save();
