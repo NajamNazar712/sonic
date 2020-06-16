@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BookingType;
@@ -323,7 +324,7 @@ class ShipperDashboardController extends Controller
                     }
                     $shipment->save();
 
-                    AdminPickupsController::cancel($shipment_id);
+                    V2AdminPickupsController::cancel($shipment_id);
 
                     ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);
 
@@ -415,7 +416,7 @@ class ShipperDashboardController extends Controller
 
                         ShipmentsPickupJourneyController::add($shipment->id, 4);
 
-//                        AdminPickupsController::cancel($shipment->id);
+                        V2AdminPickupsController::cancel($shipment->id);
 
                         $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
