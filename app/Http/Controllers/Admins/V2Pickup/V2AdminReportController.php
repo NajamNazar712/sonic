@@ -42,6 +42,7 @@ class V2AdminReportController extends Controller
         $total = $attempted_and_picked = $attempted_and_not_picked = $attempted_failed = $operations_total ='';
         $sales_total = $before_cut_off_total = $after_cut_off_total = $department_id='';
         $legend_id = '';
+        $status_id = $category_id = '';
         $pickup_requests = V2PickupRequest::whereDate('created_at', $yesterday);
         
         if($pickup_requests->exists()){
@@ -71,23 +72,25 @@ class V2AdminReportController extends Controller
                 $total++;
                 $id = $pickup_request->id;
            
-                // $category_id = $pickup_request->category_id;
+                 $status_id = $pickup_request->status_id;
                 $booked=$pickup_request->booked;
                 $received=$pickup_request->received;
                 $difference = ($booked - $received)/$booked;
                 $difference_shipments= 100 - $difference;
                 
                 $attempted=$pickup_request->attempts;
-                if(($status_id == 2) && ($attempted > 0) ){
-                    $category_id == 1;
+                if($status_id == 2 && $attempted > 0){
+                    // if(){
+                    $category_id = 1;
                     $attempted_and_picked++;
+                // }
                 }
-                if(($status_id == 3) && ($attempted > 0) ){
-                    $category_id == 2;
+                if($status_id == 3 && $attempted > 0 ){
+                    $category_id = 2;
                     $attempted_and_not_picked++;
                 }
-                if(($status_id == 4) && ($attempted > 0) ){
-                    $category_id == 3;
+                if($status_id == 4 && $attempted > 0 ){
+                    $category_id = 3;
                     $attempted_failed++;
                 }
 
