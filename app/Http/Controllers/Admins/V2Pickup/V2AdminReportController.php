@@ -75,7 +75,7 @@ class V2AdminReportController extends Controller
                 $booked=$pickup_request->booked;
                 $received=$pickup_request->received;
                 $difference = ($booked - $received)/$booked;
-                $difference_shipments= 100 - $difference;
+                $difference_shipments = 100 - $difference;
                 if($difference_shipments <= 10 && $category_id == 1){
                     $legend_id=1;
                     $attempted_and_picked++;
