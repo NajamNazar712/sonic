@@ -42,6 +42,7 @@ class V2AdminReportController extends Controller
         $total = $attempted_and_picked = $attempted_and_not_picked = $attempted_failed = $operations_total ='';
         $sales_total = $before_cut_off_total = $after_cut_off_total = $department_id='';
         $legend_id = '';
+        $status_id = $category_id = '';
         $pickup_requests = V2PickupRequest::whereDate('created_at', $yesterday);
         
         if($pickup_requests->exists()){
@@ -58,43 +59,84 @@ class V2AdminReportController extends Controller
                 }
                 $reason = $pickup_request->pickup_attempt_latest->whereNotNull('reason_id')->first();
                 $reason_id = $reason->reason_id;
-               
-                    if($reason_id == 7 || $reason_id == 8 || $reason_id == 9 ){
-                        $department_id=6;
-                        $operations_total++;
-                    }
-                    if($reason_id == 1 || $reason_id == 2 || $reason_id == 3 || $reason_id == 4 || $reason_id == 5 || $reason_id == 6 ){
-                        $department_id=7;
-                        $sales_total++;
-                    }
+              
+                    // if($reason_id == 7 || $reason_id == 8 || $reason_id == 9 ){
+                    //     $department_id=6;
+                    //     $operations_total++;
+                    // }
+                    // if($reason_id == 1 || $reason_id == 2 || $reason_id == 3 || $reason_id == 4 || $reason_id == 5 || $reason_id == 6 ){
+                    //     $department_id=7;
+                    //     $sales_total++;
+                    // }
               
                 $total++;
                 $id = $pickup_request->id;
-                $category_id = $pickup_request->category_id;
-                $status_id=$pickup_request->status_id;
+           
+                 $status_id = $pickup_request->status_id;
                 $booked=$pickup_request->booked;
                 $received=$pickup_request->received;
                 $difference = ($booked - $received)/$booked;
-                $difference_shipments = 100 - $difference;
-                if($difference_shipments <= 10 && $category_id == 1){
-                    $legend_id=1;
+                $difference_shipments= 100 - $difference;
+                
+                $attempted=$pickup_request->attempts;
+                if($status_id == 2 && $attempted > 0){
+                    // if(){
+                    $category_id = 1;
                     $attempted_and_picked++;
+                // }
                 }
-                else if($difference_shipments > 10 && $category_id == 1){
-                    $legend_id =2;
-                    $attempted_and_picked++;
-                }
-                else if($category_id ==2 ){
-                    $legend_id = 3;
+                if($status_id == 3 && $attempted > 0 ){
+                    $category_id = 2;
                     $attempted_and_not_picked++;
                 }
-                else if($category_id == 4){
-                    $legend_id =4;
-                }
-                else if($category_id == 3){
-                    $legend_id =5;
+                if($status_id == 4 && $attempted > 0 ){
+                    $category_id = 3;
                     $attempted_failed++;
                 }
+
+                if(($status_id == 2) && ($attempted > 0) && ($difference_shipments <= 10)){
+                    $legend_id=1;
+                }
+                if(($status_id == 2) && ($attempted > 0) && ($difference_shipments > 10)){
+                    $legend_id=2;
+                    $department_id=7;
+                    $sales_total++;
+                }
+                if(($status_id == 3) && ($attempted > 0)){
+                    $legend_id=3;
+                    $department_id=7;
+                    $sales_total++;
+                }
+                if($status_id == 4){
+                    $legend_id=4;
+                    $department_id=7;
+                    $sales_total++;
+                }
+                if($reason_id == 7 || $reason_id == 8 || $reason_id == 9 ){
+                    $legend_id=5;
+                    $department_id=6;
+                    $sales_total++;
+                }
+                
+                // if($difference_shipments <= 10 && $category_id == 1){
+                //     $legend_id=1;
+                //     $attempted_and_picked++;
+                // }
+                // else if($difference_shipments > 10 && $category_id == 1){
+                //     $legend_id =2;
+                //     $attempted_and_picked++;
+                // }
+                // else if($category_id ==2 ){
+                //     $legend_id = 3;
+                //     $attempted_and_not_picked++;
+                // }
+                // else if($category_id == 4){
+                //     $legend_id =4;
+                // }
+                // else if($category_id == 3){
+                //     $legend_id =5;
+                //     $attempted_failed++;
+                // }
     
                 if($pickup_request->after_cut_off_time == 1){
                     $before_cut_off_total++;
@@ -107,15 +149,12 @@ class V2AdminReportController extends Controller
                 $pickup_reports->pickup_request_id =$id;
                 $pickup_reports->category_id =$category_id;
                 $pickup_reports->status_id =$status_id;
-    
                 $pickup_reports->sale_person_id =$admin_id;
-    
                 $pickup_reports->expected_shipments =$booked;
                 $pickup_reports->received_shipments =$received;
                 $pickup_reports->difference_shipments =$difference_shipments;
-    
+
                 $pickup_reports->department_id = $department_id;
-    
                 $pickup_reports->legend_id =$legend_id;
                 $pickup_reports->save();
             } 
