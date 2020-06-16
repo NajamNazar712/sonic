@@ -756,7 +756,7 @@ class AdminTrackingController extends Controller
                             $journey_details = array();
                             $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                            if($journey->payment_id == null){
+                        if($journey->payment_id == null){
                                 $journey_details['status'] = $journey->status->name;
                             }
                             else{
@@ -809,6 +809,21 @@ class AdminTrackingController extends Controller
                             $details['pickup_history'][] = $journey_details;
                         }
                     }
+
+                    $handover_shipment_journey = $shipment->handover_shipments_journeys;
+
+                    if ($handover_shipment_journey) {
+                        foreach ($handover_shipment_journey as $journey) {
+                            $journey_details = array();
+                        
+                            $journey_details['handover_id'] = $journey->handover_id;
+                            $journey_details['status'] = $journey->status->name;
+                            $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
+
+                            $details['handover_history'][] = $journey_details;
+                        }
+                    }
+
 
                     $shipment_amount_log = $shipment->amount_change_log;
 

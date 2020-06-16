@@ -18,8 +18,6 @@ class CreateHandoverShipmentsJourneysTable extends Migration
             $table->integer('shipment_id');
             $table->integer('handover_id');
             $table->integer('status');
-            $table->integer('from');
-            $table->integer('to');
             $table->timestamps();
         });
     }

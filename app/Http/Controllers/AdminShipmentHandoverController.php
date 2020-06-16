@@ -9,6 +9,8 @@ use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\Handover\HandoverResponsibilities;
 use App\Http\Models\Handover\HandoverStatus;
+use App\Http\Models\Handover\HandoverShipmentsJourney;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
@@ -30,7 +32,7 @@ class AdminShipmentHandoverController extends Controller
 
     public function handover_dropdown_val_fetch_from(Request $request){
         $value = $request->get('value');
-        $dependent = $request->get('dependent');
+        // $dependent = $request->get('dependent');-
         $dependent = "select Person";
         $data = HandoverResponsibilities::where('hub_id',$value)->get();
         $output = '<option value ="">' .ucfirst($dependent). '</option> ';
@@ -105,9 +107,11 @@ class AdminShipmentHandoverController extends Controller
 
             $handover_shipments->handover_id=$handover_id->id;
             $handover_shipments->shipment_id= $shipment_id;
-            $handover_shipments->status=0;
+            $handover_shipments->status=1;
 
             $handover_shipments->save();
+
+            HandoverShipmentJourneyController::add($shipment_id,$handover_id->id,1);
         }
 
         return redirect()->route('admin.handover.create.index')->with('success','Handover Note created Successfully!');
@@ -123,11 +127,13 @@ class AdminShipmentHandoverController extends Controller
         $today = Carbon::now();
 
         foreach ($shipment_ids as $shipment_id) {
-            HandoverShipments::where('shipment_id', $shipment_id)->update(['status' => 1]);
+            HandoverShipments::where('shipment_id', $shipment_id)->update(['status' => 2]);
+            $handover_shipments = HandoverShipments::where('shipment_id', $shipment_id)->first();
+            HandoverShipmentJourneyController::add( $shipment_id,$handover_shipments->handover_id,2);
         }
    
 
-        $received_counts =DB::table('handover_shipments')->where('status',1)->select('handover_id', DB::raw('count(*) as total_received'))
+        $received_counts =DB::table('handover_shipments')->where('status',2)->select('handover_id', DB::raw('count(*) as total_received'))
         ->groupBy(DB::raw('handover_id'))->get();
 
         foreach ($received_counts as $received_count){
