@@ -417,7 +417,7 @@ class ShipperDashboardController extends Controller
                         ShipmentsPickupJourneyController::add($shipment->id, 4);
 
                         V2AdminPickupsController::cancel($shipment->id);
-                        
+
                         $correct = TRUE;
                     }
                 }
