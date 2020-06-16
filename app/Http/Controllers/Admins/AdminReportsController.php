@@ -5614,10 +5614,12 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
                 ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
                 ->leftjoin('users as u', 'u.id', '=', 's.user_id')
-                ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
+                ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+                ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+                ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
                 ->leftjoin('adjustment_types as at', 'at.id', '=', 'adjustment_logs.adjustment_type_id')
                 ->leftjoin('admins as a', 'a.id', '=', 'adjustment_logs.admin_id')
-                ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 'adjustment_logs.created_at as created_at', 'a.name as created_by', 'u.name as shipper_name', 'dps.done_payment_id as done_payment_id','c.name as hub')
+                ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 'adjustment_logs.created_at as created_at', 'a.name as created_by', 'u.name as shipper_name', 'dps.done_payment_id as done_payment_id','oc.name as origin', 'dc.name as destination')
                 ->whereIn('adjustment_logs.type', [1,2]);
             $datatable = Datatables::of($adjustments)
                 ->addColumn('adjustment_id_padded', function ($adjustment) {

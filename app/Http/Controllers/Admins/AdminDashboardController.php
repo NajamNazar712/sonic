@@ -8310,7 +8310,7 @@ if(session('department_id') == 7){
     }
     public function riderListAjax(){
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
-            ->join('cities as c','riders.city_id','=','c.hub_id')
+            ->join('cities as c','cities.hub_id','=','c.id')
             ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);

@@ -285,7 +285,8 @@ class AdminCRMController extends Controller
 
         $launched_by  = '';
         if($crm_request->launched_by == 0){
-            $launched_by = $launched_by = $crm_request->launched_by_admin->name;
+            // $launched_by = $launched_by = $crm_request->launched_by_admin->name;
+            $launched_by = $launched_by = $crm_request->launched_by_admin->id."(Admin)";
         }else if($crm_request->launched_by == 1){
             $launched_by = User::find($crm_request->launched_by_id)->name;
         }else if($crm_request->launched_by == 2){
