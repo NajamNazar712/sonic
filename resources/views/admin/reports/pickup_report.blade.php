@@ -110,7 +110,7 @@
                
                     <div class="row">
                         <input type="hidden" id="cards_filter_input">
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card pull-up">
                                 <div class="card-content border rounded" id="totals">
                                     <div class="card-body">
@@ -131,7 +131,7 @@
                     </div> 
                      
                     <div class="row">    
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-primary pull-up">
                                 <div class="card-content" id="pending_operation">
                                     <div class="card-body">
@@ -149,7 +149,7 @@
                                 </div>
                             </div>
                         </div>    
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-info pull-up">
                                 <div class="card-content" id="pending_sale">
                                     <div class="card-body">
@@ -169,7 +169,7 @@
                         </div>
                     </div>    
                     <div class="row">      
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-booked_shipments pull-up">
                                 <div class="card-content" id="before_cut_off_times">
                                     <div class="card-body">
@@ -187,7 +187,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-pending_confirmation pull-up">
                                 <div class="card-content" id="after_cut_off_times">
                                     <div class="card-body">
@@ -207,7 +207,7 @@
                         </div>
                     </div>    
                     <div class="row">    
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-pending_return pull-up">
                                 <div class="card-content" id="attempted_and_pick">
                                     <div class="card-body">
@@ -225,7 +225,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-return_delivered pull-up">
                                 <div class="card-content " id="attempted_and_not_pick">
                                     <div class="card-body">
@@ -243,7 +243,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-red pull-up">
                                 <div class="card-content" id="attempted_fail">
                                     <div class="card-body">
