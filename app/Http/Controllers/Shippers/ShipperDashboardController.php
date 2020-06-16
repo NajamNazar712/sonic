@@ -324,7 +324,7 @@ class ShipperDashboardController extends Controller
                     }
                     $shipment->save();
 
-                    V2AdminPickupsController::cancel($shipment_id);
+                    AdminPickupsController::cancel($shipment_id);
 
                     ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);
 
@@ -417,29 +417,6 @@ class ShipperDashboardController extends Controller
                         ShipmentsPickupJourneyController::add($shipment->id, 4);
 
                         V2AdminPickupsController::cancel($shipment->id);
-
-                        $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
-                        $pickup_request_id = $pickup_request_shipment->pickup_request_id;
-
-                        $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id);
-                        if($pickup_requests->exists()){
-                            $pickup_requests = $pickup_requests->get();
-                            $flag = true;
-                            foreach ($pickup_requests as $pickup_request){
-                                $is_shipment = Shipment::find($pickup_request->shipment_id);
-                                if($is_shipment->shipper_status_id != 17){
-                                    $flag = false;
-                                }
-                            }
-                            $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
-                            if($flag == true){
-                                $pickup_request->status_id = 4;
-                            }
-                            $pickup_request->booking = $pickup_request->booking - 1;
-                            $pickup_request->save();
-                        }
-
-                        ShipmentsJourneyController::add($shipment_id->id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);
 
                         $correct = TRUE;
                     }
