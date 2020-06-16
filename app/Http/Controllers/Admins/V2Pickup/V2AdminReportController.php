@@ -112,10 +112,10 @@ class V2AdminReportController extends Controller
                     $department_id=7;
                     $sales_total++;
                 }
-                if($reason_id == 7 || $reason_id == 8 || $reason_id == 9 ){
+                if(($status_id == 3) && ($reason_id == 7 || $reason_id == 8 || $reason_id == 9) ){
                     $legend_id=5;
                     $department_id=6;
-                    $sales_total++;
+                    $operations_total++;
                 }
                 
                 // if($difference_shipments <= 10 && $category_id == 1){
@@ -211,25 +211,25 @@ class V2AdminReportController extends Controller
             'a.name as salesperson','v2_pickup_reports.expected_shipments as expected_shipments',
             'v2_pickup_reports.received_shipments as received_shipments','v2_pickup_reports.difference_shipments as difference_shipments',
             'ad.name as department','v.attempts as attempted_count','usi.poc AS contact_person', 'usi.vendor as vendor',
-            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id')
+            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id')
             // ->groupBy('v2_pickup_reports.pickup_request_id')
             ;
         $datatables = Datatables::of($pickup_report)
         ->setRowAttr([
             'class' => function ($pickup_report) {
-                if (($pickup_report->difference_shipments <= 10)  && ($pickup_report->category_id == 1) ) {
+                if ($pickup_report->legend_id == 1 ) {
                     return 'attempted_and_picked_less_than_ten';
                 }
-                else if(($pickup_report->difference_shipments > 10)  && ($pickup_report->category_id == 1) ){
+                else if($pickup_report->legend_id == 2 ){
                     return 'attempted_and_picked_greater_than_ten';
                 }
-                else if($pickup_report->category_id == 2){
+                else if($pickup_report->legend_id == 3 ){
                     return 'attempt_and_notpicked';
                 }
-                else if($pickup_report->category_id == 3){
+                else if($pickup_report->legend_id == 5 ){
                     return 'attempt_failed';
                 }
-                else if($pickup_report->status_id == 4){
+                else if($pickup_report->legend_id == 4 ){
                     return 'cancelled';
                 }
             }
