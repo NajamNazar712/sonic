@@ -43,7 +43,7 @@ use Auth;
 class V2AdminPickupsController extends Controller
 {
     public function __construct() {
-        $this->middleware('auth:admin');
+        $this->middleware('auth:admin')->except('cancel');
 
 
         $this->middleware('Permission');
