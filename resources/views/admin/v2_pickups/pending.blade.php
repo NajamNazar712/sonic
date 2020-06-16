@@ -169,7 +169,7 @@
                     <div class="modal-dialog modal-sm" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h4 class="modal-title" id="pending_bookings_modal_title">Pending Booking Shipment(s)</h4>
+                                <h4 class="modal-title" id="pending_bookings_modal_title">Received Shipment(s)</h4>
 
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">×</span>
