@@ -67,7 +67,7 @@ class ShipperPickupController extends Controller
                     $attempts = $attempt_reasons->pluck('reason_id')->toArray();
                     if(count($attempts) > 0){
                         foreach ($attempts as $reason_id) {
-                            $reason = V2PickupRequestNotPickReason::find(7)->name;
+                            $reason = V2PickupRequestNotPickReason::find($reason_id)->name;
                             $all_reason .= $reason .'. <br />';
                         }
                     }

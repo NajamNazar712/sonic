@@ -137,7 +137,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary ml-auto">Update</button>
+                                    <button type="submit" class="btn btn-primary ml-auto" id="update_pickup_request_btn_submit">Update</button>
                                 </div>
                             </form>
                         </div>
@@ -659,6 +659,7 @@
 
                             $('#update_pickup_modal').modal('hide');
                         });
+                    $('#update_pickup_request_btn_submit').attr('disabled', false);
                 }
             });
             var route = '{!! route('admin.tracking.index') !!}';
