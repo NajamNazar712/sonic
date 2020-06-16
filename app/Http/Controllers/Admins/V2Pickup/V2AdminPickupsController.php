@@ -1535,7 +1535,7 @@ class V2AdminPickupsController extends Controller
     }
 
     static public function cancel($shipment_id) {
-        $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $shipment_id)->whereIn('status', [0, 1]);
+        $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $shipment_id)->where('status', 0)->orderBy('id', 'desc');
 
         if ($pickup_request_assigned_shipment->exists()) {
             $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
