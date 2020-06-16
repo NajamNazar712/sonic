@@ -783,7 +783,6 @@
                 var id = $(this).parents('tr').attr('id');
                 if(id != ''){
                     $('#add_remarks_modal #remarks_pickup_request_id').val(id);
-                    console.log( $('#add_remarks_modal #remarks_pickup_request_id').val());
                     $('#add_remarks_modal').modal('show');
                 }
             });
@@ -849,6 +848,7 @@
 
                             });
                         }
+                        $('#add_remarks_modal').modal('hide');
                     });
                 }
             });

@@ -19,6 +19,7 @@ use App\Http\Models\PickupAction;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestLegend;
@@ -391,21 +392,21 @@ class V2AdminPickupsController extends Controller
         }
     }
 
-    public function pending_bookings(Request $request){
+
+    public function pending_received_bookings(Request $request){
         $pickup_request_id = $request->input('pickup_request_id');
 
-        $pickup_request = PickupRequest::find($pickup_request_id);
+        $pickup_request = V2PickupRequest::find($pickup_request_id);
 
-        $pickup_request_all_booked_shipments = $pickup_request->pickup_request_shipments()->where('status',1)->get();
+        $pickup_request_all_booked_shipments = $pickup_request->pickup_request_received_shipments;
 
         if ($pickup_request_all_booked_shipments->count() != 0) {
             $bookings = array();
             foreach ($pickup_request_all_booked_shipments as $all_shipments) {
                 $shipment = $all_shipments->shipment_id;
                 $shipment_details = Shipment::find($shipment);
-                if ($shipment_details->shipper_status_id == 1) {
-                    $bookings[] = $shipment_details->tracking_number;
-                }
+                $bookings[] = $shipment_details->tracking_number;
+
             }
 
             return ['status' => 0, 'success' => 'Pending Booked Shipments', 'booked' => $bookings];
@@ -414,7 +415,6 @@ class V2AdminPickupsController extends Controller
             return ['status' => 0, 'success' => 'No Pending Booked Shipments', 'booked' => FALSE];
         }
     }
-
     public function arrival_bulk_index(Request $request){
         return view('admin.v2_pickups.arrival_single_weight');
     }
@@ -672,8 +672,13 @@ class V2AdminPickupsController extends Controller
 
             if ($pickup_request_shipment->exists()) {
                 $pickup_request_shipment = $pickup_request_shipment->first();
+                $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                 $pickup_request_shipment->status = 1;
                 $pickup_request_shipment->save();
+                $pickup_request_received_shipment = new V2PickupReceivedShipment();
+                $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
+                $pickup_request_received_shipment->shipment_id = $shipment->id;
+                $pickup_request_received_shipment->save();
                 ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request_shipment->pickup_request->id);
 
                 $pickup_request = $pickup_request_shipment->pickup_request;
