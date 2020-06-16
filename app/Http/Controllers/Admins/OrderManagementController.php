@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -388,7 +389,7 @@ class OrderManagementController extends Controller
             $shipments = $shipments->get();
 
             foreach ($shipments as $shipment) {
-                AdminPickupsController::cancel($shipment->id);
+                V2AdminPickupsController::cancel($shipment->id);
 
                 $status_id = 2;
 

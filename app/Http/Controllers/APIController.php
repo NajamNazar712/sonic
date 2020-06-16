@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistSetting;
@@ -1247,7 +1248,7 @@ class APIController extends Controller
 
           $shipment->save();
 
-          AdminPickupsController::cancel($shipment->id);
+          V2AdminPickupsController::cancel($shipment->id);
 
           ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Cancelled by Shipper', $user_id, NULL);
 

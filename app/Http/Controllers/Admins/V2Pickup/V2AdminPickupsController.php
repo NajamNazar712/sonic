@@ -10,7 +10,9 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupRequest;
+use App\Http\Models\PickupRequestAssignedShipment;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
@@ -1524,6 +1526,56 @@ class V2AdminPickupsController extends Controller
             }
         } else {
             return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+        }
+    }
+
+    static public function cancel($shipment_id) {
+        $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $shipment_id)->whereIn('status', [0, 1]);
+
+        if ($pickup_request_assigned_shipment->exists()) {
+            $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
+
+            $pickup_request = $pickup_request_assigned_shipment->pickup_request;
+
+            $bookings = $pickup_request->booked - 1;
+
+            $pickup_request->booked = $bookings;
+
+            $pickup_request->save();
+
+            ShipmentsPickupJourneyController::add($shipment_id, 6, NULL, $pickup_request->id);
+
+            $pickup_request_assigned_shipment->delete();
+
+            if ($bookings == 0) {
+                $pickup_request->status = 4;
+
+                $pickup_request->save();
+
+                if ($pickup_request->pickup_note_request) {
+                    $pickup_note = $pickup_request->pickup_note_request->pickup_note;
+
+                    if ($bookings == 0) {
+                        V2PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
+                    }
+
+                    $pickup_note_requests = V2PickupNoteRequest::where('pickup_note_id', $pickup_note->id);
+
+                    if ($pickup_note_requests->exists()) {
+                        if ($bookings == 0) {
+                            $pickup_note->pickups = $pickup_note->pickups - 1;
+                        }
+
+                        $pickup_note->save();
+                    }
+                    else {
+                        $pickup_note->pickups = 0;
+                        $pickup_note->status = 1;
+
+                        $pickup_note->save();
+                    }
+                }
+            }
         }
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
@@ -61,7 +62,7 @@ class AdminShipmentCancelController extends Controller
                         $shipment->save();
                         ShipmentsPickupJourneyController::add($shipment->id, 4);
 
-//                        AdminPickupsController::cancel($shipment->id);
+                        V2AdminPickupsController::cancel($shipment->id);
 
                         $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
                         $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id);
