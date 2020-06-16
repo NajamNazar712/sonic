@@ -1033,7 +1033,6 @@
                 submitHandler: function (form) {
                     var shipment_id = $('#piece_shipment_id').val();
                     var hub_id = $('#hub_id').val();
-                    shipment_ids.push(shipment_id);
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     if(hub_id == null || hub_id == ''){
                         $.ajax({
