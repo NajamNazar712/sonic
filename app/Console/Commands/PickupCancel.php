@@ -38,6 +38,6 @@ class PickupCancel extends Command
      */
     public function handle()
     {
-        dd(V2PickupCronController::cancel_if_not_valid());
+        V2PickupCronController::cancel_if_not_valid();
     }
 }
