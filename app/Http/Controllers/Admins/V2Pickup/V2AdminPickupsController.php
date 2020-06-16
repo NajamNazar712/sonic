@@ -10,9 +10,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupRequest;
-use App\Http\Models\PickupRequestAssignedShipment;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
@@ -29,8 +27,6 @@ use App\Http\Models\V2Pickup\V2PickupRequestRiderStatus;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\V2Pickup\V2PickupRequestStatus;
 use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\V2Pickup\V2RiderPickupShipment;
-use App\Http\Models\RiderPickupActionLog;
 use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
@@ -668,7 +664,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_request_shipment = $pickup_request_shipment->first();
                 $pickup_request_shipment->status = 1;
                 $pickup_request_shipment->save();
-                ShipmentsPickupJourneyController::add($shipment_id, 4, Auth::id(), $pickup_request_shipment->pickup_request->id);
+                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request_shipment->pickup_request->id);
 
                 $pickup_request = $pickup_request_shipment->pickup_request;
 
@@ -1108,7 +1104,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_request_shipment = $pickup_request_shipment->first();
                 $pickup_request_shipment->status = 1;
                 $pickup_request_shipment->save();
-                ShipmentsPickupJourneyController::add($shipment_id, 4, Auth::id(), $pickup_request_shipment->pickup_request->id);
+                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request_shipment->pickup_request->id);
 
                 $pickup_request = $pickup_request_shipment->pickup_request;
 
@@ -1542,12 +1538,12 @@ class V2AdminPickupsController extends Controller
 
             $pickup_request->save();
 
-            ShipmentsPickupJourneyController::add($shipment_id, 6, NULL, $pickup_request->id);
+            ShipmentsPickupJourneyController::add($shipment_id, 4, NULL, $pickup_request->id);
 
             $pickup_request_assigned_shipment->delete();
 
             if ($bookings == 0) {
-                $pickup_request->status = 4;
+                $pickup_request->status_id = 4;
 
                 $pickup_request->save();
 
