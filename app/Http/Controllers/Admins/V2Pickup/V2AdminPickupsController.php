@@ -976,6 +976,7 @@ class V2AdminPickupsController extends Controller
             return ['status' => 1, 'error' => 'No Shipment with given ID is present'];
         }
     }
+
     public function individual_arrival_submit(Request $request) {
         $shipment_ids = explode(',', $request->shipment_ids);
 
@@ -1117,8 +1118,13 @@ class V2AdminPickupsController extends Controller
 
             if ($pickup_request_shipment->exists()) {
                 $pickup_request_shipment = $pickup_request_shipment->first();
+                $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                 $pickup_request_shipment->status = 1;
                 $pickup_request_shipment->save();
+                $pickup_request_received_shipment = new V2PickupReceivedShipment();
+                $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
+                $pickup_request_received_shipment->shipment_id = $shipment->id;
+                $pickup_request_received_shipment->save();
                 ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request_shipment->pickup_request->id);
 
                 $pickup_request = $pickup_request_shipment->pickup_request;
