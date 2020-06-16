@@ -1327,7 +1327,7 @@ class DeliveryController extends Controller
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('received_or_refused_by', function ($deliveries) {
-                    $receiver = explode('|',$deliveries->received_or_refused_by);
+                    $receiver = $deliveries->received_or_refused_by;
 
                      $received_refused_input = '<input class="form-control form-control-sm" name="received_refused_input[' . $deliveries->shId . ']" placeholder="Enter Name" value="'. $receiver[0] .'">';
                      return $received_refused_input;
