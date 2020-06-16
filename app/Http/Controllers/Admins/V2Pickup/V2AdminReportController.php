@@ -38,9 +38,9 @@ class V2AdminReportController extends Controller
         $today = Carbon::now()->startOfDay();
         $pickup_reports = new V2PickupReport;
         $pickup_summaries = new V2PickupReportSummary;
-        $total = $attempted_and_picked = $attempted_and_not_picked= $attempted_failed= $operations_total ='';
-        $sales_total= $before_cut_off_total=$after_cut_off_total=$department_id='';
-
+        $total = $attempted_and_picked = $attempted_and_not_picked = $attempted_failed = $operations_total ='';
+        $sales_total = $before_cut_off_total = $after_cut_off_total = $department_id='';
+        $legend_id = '';
         $pickup_requests = V2PickupRequest::whereDate('created_at', $today);
         
         if($pickup_requests->exists()){
@@ -67,8 +67,8 @@ class V2AdminReportController extends Controller
                     }
               
                 $total++;
-                $id=$pickup_request->id;
-                $category_id=$pickup_request->category_id;
+                $id = $pickup_request->id;
+                $category_id = $pickup_request->category_id;
                 $status_id=$pickup_request->status_id;
                 $booked=$pickup_request->booked;
                 $received=$pickup_request->received;
