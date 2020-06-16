@@ -193,6 +193,25 @@ class UserManagementController extends Controller
         return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been added!']);
     }
 
+    public function user_assign_hub(Request $request){
+        //$admin = new Admin();
+        $ids =  $request->id;
+        // dd($ids);
+        foreach($ids as $id){
+            if($request->has('hubs')){
+                foreach($request->input('hubs') as $hub_id) {
+                    $admin_hub = new AdminHub();
+
+                    $admin_hub->admin_id = $id;
+                    $admin_hub->hub_id = $hub_id;
+
+                    $admin_hub->save();
+                    
+                }
+            }
+        }
+    }
+
     public function user_update_index($id) {
         if (session('role_id') != 1) {
             $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();

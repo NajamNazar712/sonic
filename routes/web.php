@@ -977,6 +977,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
             Route::get('email', 'Admins\UserManagementController@user_email')->name('email');
             Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
+            Route::post('assign_hubs', 'Admins\UserManagementController@user_assign_hub')->name('assign_hubs');
 
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@user_add_index')->name('index');

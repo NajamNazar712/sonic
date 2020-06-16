@@ -23,14 +23,14 @@
 								</button>
 							</div>
 							<div class="modal-body text-center">
-							<!-- {{route('admin.settings.commission.add')}} -->
-								<form id="add_commission_form" action="#" method="post">
+							
+								<form id="add_commission_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
 									@method('POST')
 									@csrf
 									<div class="container">
-
+									    <input type="hidden" name="id"/>
 										<div class="col-12 form-group">
-                                            <select name="roles[]" id="roles_select" class="form-control select2" multiple="multiple">
+                                            <select name="hubs[]" id="hub_select" class="form-control select2" multiple="multiple">
                                                 @foreach($hubs as $hub)
                                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                                 @endforeach
@@ -38,7 +38,7 @@
                                         </div>
 										<div class="row justify-content-center">
 											<div class="col-6">
-												<button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Add Tier</button>
+												<button id="edit" type="submit" class="btn btn-primary btn-block">Assign Hub</button>
 											</div>
 										</div>
 									</div>
@@ -92,11 +92,12 @@
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+	<script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$('#roles_select').select2({
-                placeholder:'Select Role',
+			$('#hub_select').select2({
+                placeholder:'Select Hub',
                 width:'100%',
                 allowClear:true
             });
@@ -158,7 +159,10 @@
 						className: 'btn btn-primary assign',
 						enabled:false,
 						action: function (e, dt, node, config) {
+							console.log(selected_rows);
+							$('input:hidden[name=id]').val(selected_rows);
 						$('#AddTierModal').modal('show');
+
 						}
 					},{
                         extend: 'excel',
@@ -317,11 +321,12 @@
 					}
 				@endif
 			});
+
             //bulk assigning of hub work start
 			$('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                var id = parseInt($(this).parent('tr').attr('id'));
-                 console.log(id);
-                var index = $.inArray(id, selected_rows);
+				var id = parseInt($(this).parent('tr').attr('id'));
+                console.log(id);
+				var index = $.inArray(id, selected_rows);
 
                 if (index === -1) {
                     selected_rows.push(id);
@@ -337,6 +342,28 @@
                     table.button('.assign').disable();
                 }
 			});
+			// $('#add_commission_form').on('click', 'button[type=submit]', function() {
+			// 	var id = parseInt($(this).parent('tr').attr('id'));
+			// 	//console.log(id);
+			// 	$.ajax({
+			// 		url: '{!! route('admin.user_management.users.assign_hubs') !!}',
+			// 		method: 'POST',
+			// 		data: {
+			// 			'id': id,
+			// 			'_token': '{{ csrf_token() }}'
+			// 		}
+			// 	})
+			// 	.done(function(data) {
+			// 		if (data.status == 0) {
+
+			// 			toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+			// 		}
+			// 		else {
+			// 			toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+			// 		}
+			// 	});
+				
+			// });
 			
 			$( "#add_commission_form" ).validate({
                 errorClass:"danger",
@@ -357,7 +384,29 @@
 
                         form.submit();
                 }
-            });
+			});
+			
+			// $('#edit').on('click', function (){
+			// 	var id = parseInt($(this).parents('tr').attr('id'));
+			// 	$.ajax({
+			// 		url: '{!! route('admin.user_management.users.assign_hubs') !!}',
+			// 		method: 'POST',
+			// 		data: {
+			// 			'id': id,
+			// 			'_token': '{{ csrf_token() }}'
+			// 		}
+			// 	})
+			// 	.done(function(data) {
+			// 		if (data.status == 0) {
+
+			// 			toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+			// 		}
+			// 		else {
+			// 			toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+			// 		}
+			// 	});
+			// });
+
 		});
 	</script>
 @endsection
