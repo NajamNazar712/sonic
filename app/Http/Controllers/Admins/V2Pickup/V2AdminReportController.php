@@ -70,7 +70,7 @@ class V2AdminReportController extends Controller
               
                 $total++;
                 $id = $pickup_request->id;
-                $category_id = $pickup_request->category_id;
+                // $category_id = $pickup_request->category_id;
                 $status_id=$pickup_request->status_id;
                 $booked=$pickup_request->booked;
                 $received=$pickup_request->received;
