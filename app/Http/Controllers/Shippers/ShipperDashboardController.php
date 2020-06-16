@@ -415,7 +415,7 @@ class ShipperDashboardController extends Controller
 
                         ShipmentsPickupJourneyController::add($shipment->id, 4);
 
-//                        AdminPickupsController::cancel($shipment->id);
+                        AdminPickupsController::cancel($shipment->id);
 
                         $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
