@@ -195,20 +195,24 @@ class UserManagementController extends Controller
 
     public function user_assign_hub(Request $request){
         //$admin = new Admin();
-        $ids =  $request->id;
-        // dd($ids);
-        foreach($ids as $id){
-            if($request->has('hubs')){
+        //$ids =  $request->input('id');
+        //dd($ids);
+
+        $user_ids =explode(',' , $request->id);
+        // dd($user_ids);
+        // dd($request->input('hubs'));
+        
+        foreach($user_ids as $user_id){
+          
                 foreach($request->input('hubs') as $hub_id) {
                     $admin_hub = new AdminHub();
-
-                    $admin_hub->admin_id = $id;
+                    
                     $admin_hub->hub_id = $hub_id;
+                    $admin_hub->admin_id = $user_id;
 
                     $admin_hub->save();
                     
-                }
-            }
+                } 
         }
     }
 
