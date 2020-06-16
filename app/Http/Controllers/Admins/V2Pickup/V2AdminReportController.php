@@ -35,13 +35,14 @@ class V2AdminReportController extends Controller
     }
 
     public static function insertReportData(){
+        $yesterday = Carbon::yesterday();
         $today = Carbon::now()->startOfDay();
-        $pickup_reports = new V2PickupReport;
-        $pickup_summaries = new V2PickupReportSummary;
+        $pickup_reports = new V2PickupReport();
+        $pickup_summaries = new V2PickupReportSummary();
         $total = $attempted_and_picked = $attempted_and_not_picked = $attempted_failed = $operations_total ='';
         $sales_total = $before_cut_off_total = $after_cut_off_total = $department_id='';
         $legend_id = '';
-        $pickup_requests = V2PickupRequest::whereDate('created_at', $today);
+        $pickup_requests = V2PickupRequest::whereDate('created_at', $yesterday);
         
         if($pickup_requests->exists()){
            
@@ -55,7 +56,7 @@ class V2AdminReportController extends Controller
                     $sales_person = $sales_person->first();
                     $admin_id = $sales_person->admin_id;
                 }
-                $reason_id=$pickup_request->pickup_attempt_latest->reason_id;
+                $reason_id = $pickup_request->pickup_attempt_latest->reason_id;
                
                     if($reason_id == 7 || $reason_id == 8 || $reason_id == 9 ){
                         $department_id=6;
