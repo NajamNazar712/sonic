@@ -338,6 +338,7 @@ class V2AdminPickupsController extends Controller
                         $this->generate_trax_pickup($pickup_request->id);
                     }
                     $pickup_request_attempts = $pickup_request->pickup_attempt_latest;
+                    $pickup_request->status_id = 3;
                     $pickup_request->last_updated_by = Auth::id();
                     $pickup_request->save();
                     if($pickup_request_attempts){
