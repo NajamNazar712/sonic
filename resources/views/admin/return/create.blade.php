@@ -673,7 +673,7 @@
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     if(hub_id == null || hub_id == ''){
                         $.ajax({
-                            url: '{!! route('admin.return.create.shipment.piece_details') !!}',
+                            url: '{!! route('admin.return.create.shipment_details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking': tracking_number,
@@ -710,7 +710,7 @@
                         blockPagePermanently();
                         // $('#hub_id').val('');
                         $.ajax({
-                            url:'{{route('admin.return.create.shipment.piece_details')}}',
+                            url:'{{route('admin.return.create.shipment_details')}}',
                             type:'POST',
                             data: {
                                 'tracking':tracking,
