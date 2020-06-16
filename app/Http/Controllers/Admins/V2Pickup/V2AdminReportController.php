@@ -58,7 +58,7 @@ class V2AdminReportController extends Controller
                 }
                 $reason = $pickup_request->pickup_attempt_latest->whereNotNull('reason_id')->first();
                 $reason_id = $reason->reason_id;
-               
+              
                     // if($reason_id == 7 || $reason_id == 8 || $reason_id == 9 ){
                     //     $department_id=6;
                     //     $operations_total++;
@@ -70,12 +70,13 @@ class V2AdminReportController extends Controller
               
                 $total++;
                 $id = $pickup_request->id;
+           
                 // $category_id = $pickup_request->category_id;
                 $booked=$pickup_request->booked;
                 $received=$pickup_request->received;
                 $difference = ($booked - $received)/$booked;
                 $difference_shipments= 100 - $difference;
-                $status_id=$pickup_request->status_id;
+                
                 $attempted=$pickup_request->attempts;
                 if(($status_id == 2) && ($attempted > 0) ){
                     $category_id == 1;
@@ -149,6 +150,7 @@ class V2AdminReportController extends Controller
                 $pickup_reports->expected_shipments =$booked;
                 $pickup_reports->received_shipments =$received;
                 $pickup_reports->difference_shipments =$difference_shipments;
+
                 $pickup_reports->department_id = $department_id;
                 $pickup_reports->legend_id =$legend_id;
                 $pickup_reports->save();

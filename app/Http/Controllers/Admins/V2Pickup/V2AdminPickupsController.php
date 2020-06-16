@@ -81,7 +81,11 @@ class V2AdminPickupsController extends Controller
             ->join('v2_pickup_request_rider_statuses as rs', 'rs.id', '=', 'v2_pickup_requests.rider_status')
             ->leftjoin('riders as cr', 'cr.id', '=', 'v2_pickup_requests.current_rider_id')
             ->leftjoin('riders as lr', 'lr.id', '=', 'v2_pickup_requests.last_rider_id')
-            ->leftjoin('v2_pickup_note_requests as vpn', 'vpn.pickup_request_id', '=', 'v2_pickup_requests.id')
+            ->leftJoin('v2_pickup_note_requests as vpn', function ($join) {
+                $join->on('vpn.pickup_request_id', '=', 'v2_pickup_requests.id')
+                    ->where('vpn.id', '=',
+                        DB::raw('(select max(id) from v2_pickup_note_requests where v2_pickup_note_requests.pickup_request_id = v2_pickup_requests.id)'));
+            })
             ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' , 'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', DB::raw('(SELECT SUM(`rs`.`shipments`) FROM `v2_rider_pickups` AS `rs` INNER JOIN `v2_pickup_requests` AS `vpr` ON `rs`.`pickup_request_id` = `vpr`.`id` WHERE `vpr`.`id` = `rs`.`pickup_request_id`) AS `shipments_rider_picked`'))
             ->where('v2_pickup_requests.status_id', '!=', 4);
 
@@ -140,7 +144,7 @@ class V2AdminPickupsController extends Controller
                     $reason_ids = $attempts->pluck('reason_id')->toArray();
                     if(count($reason_ids) > 0){
                         foreach ($reason_ids as $reason_id) {
-                            $reasons .= V2PickupRequestNotPickReason::find($reason_id)->name . PHP_EOL;
+                            $reasons .= V2PickupRequestNotPickReason::find($reason_id)->name . ',' . PHP_EOL;
                         }
                     }
                 }
@@ -153,7 +157,7 @@ class V2AdminPickupsController extends Controller
                     $trax_remarks_rows = $attempts->pluck('trax_remarks')->toArray();
                     if(count($trax_remarks_rows) > 0){
                         foreach ($trax_remarks_rows as $remark) {
-                            $trax_remarks .= $remark . PHP_EOL;
+                            $trax_remarks .= $remark . ',' . PHP_EOL;
                         }
                     }
                 }
@@ -166,7 +170,7 @@ class V2AdminPickupsController extends Controller
                     $shipper_remarks_rows = $attempts->pluck('shipper_remarks')->toArray();
                     if(count($shipper_remarks_rows) > 0){
                         foreach ($shipper_remarks_rows as $remark) {
-                            $shipper_remarks .= $remark . PHP_EOL;
+                            $shipper_remarks .= $remark . ',' . PHP_EOL;
                         }
                     }
                 }
@@ -178,8 +182,8 @@ class V2AdminPickupsController extends Controller
                 if($attempts->exists()){
                     $attempted_date_rows = $attempts->pluck('attempt_date')->toArray();
                     if(count($attempted_date_rows) > 0){
-                        foreach ($attempted_date_rows as $attempt_date) {
-                            $attempted_date .= $attempt_date . PHP_EOL;
+                        foreach ($attempted_date_rows as $index => $attempt_date) {
+                            $attempted_date .= $attempt_date . ',' . PHP_EOL;
                         }
                     }
                 }
@@ -220,11 +224,16 @@ class V2AdminPickupsController extends Controller
         $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
         if($rider_settings->exists()){
             $rider_settings = $rider_settings->first();
-            $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+            if($rider_settings->setting_value != 0 && $rider_settings->setting_value != null){
+                $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+            }
         }
-        if(Carbon::now() > $rider_cut_off_time){
-            return ['status' => 1, 'error' => 'Rider can not be assigned after cut off time!'];
+        if($rider_cut_off_time != null){
+            if(Carbon::now() > $rider_cut_off_time){
+                return ['status' => 1, 'error' => 'Rider can not be assigned after cut off time!'];
+            }
         }
+
 
         if (empty($pickup_request_ids)) {
             return ['status' => 1, 'error' => 'No Pickup Request Selected'];
@@ -334,6 +343,7 @@ class V2AdminPickupsController extends Controller
                         $this->generate_trax_pickup($pickup_request->id);
                     }
                     $pickup_request_attempts = $pickup_request->pickup_attempt_latest;
+//                    $pickup_request->status_id = 3;
                     $pickup_request->last_updated_by = Auth::id();
                     $pickup_request->save();
                     if($pickup_request_attempts){
