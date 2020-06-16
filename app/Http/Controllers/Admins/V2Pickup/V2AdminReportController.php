@@ -80,9 +80,15 @@ class V2AdminReportController extends Controller
                 $status_id = $pickup_request->status_id;
                 $booked=$pickup_request->booked;
                 $received=$pickup_request->received;
-                $difference = ($booked - $received)/$booked;
-                $difference_shipments= 100 - $difference;
-                
+                if($booked > 0){
+                    $difference = ($booked - $received)/$booked;
+                    $difference_shipments= 100 - $difference;
+
+                }else{
+                    $difference = 0;
+                    $difference_shipments = 0;
+                }
+
                 $attempted=$pickup_request->attempts;
                 if($status_id == 2 && $attempted > 0){
                     // if(){
