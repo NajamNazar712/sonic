@@ -414,7 +414,7 @@
                                 row.push(values.address);
                                 row.push(values.city);
                                 row.push(values.status);
-                                row.push(values.reason);
+                                row.push(values.reason.replace('<br/>', '\r\n'));
                                 row.push(values.remarks.replace('<br/>', '\r\n'));
                                 row.push(values.shipper_remarks.replace('<br/>', '\r\n'));
                                 row.push(values.attempt_date_time.replace('<br/>', '\r\n'));
@@ -435,7 +435,6 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-
                     {
                         text: 'Complain',
                         className: 'btn btn-danger complain',
