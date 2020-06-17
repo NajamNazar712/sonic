@@ -244,13 +244,13 @@ class V2AdminPickupsController extends Controller
             return ['status' => 1, 'error' => 'No Rider Selected'];
         }
 
-        foreach ($pickup_request_ids as $pickup_request_id) {
-            $pickup_request = V2PickupRequest::find($pickup_request_id);
-
-            if ($pickup_request->status_id != 1) {
-                return ['status' => 1, 'error' => 'One of the Pickup Request(s) has already been modified'];
-            }
-        }
+//        foreach ($pickup_request_ids as $pickup_request_id) {
+//            $pickup_request = V2PickupRequest::find($pickup_request_id);
+//
+//            if ($pickup_request->status_id != 1) {
+//                return ['status' => 1, 'error' => 'One of the Pickup Request(s) has already been modified'];
+//            }
+//        }
 
         $pickups = 0;
         $bookings = 0;
