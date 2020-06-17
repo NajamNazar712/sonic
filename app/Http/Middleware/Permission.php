@@ -114,6 +114,12 @@ class Permission
             'cargo.mapping.store' => 198,
             'cargo.mapping.edit' => 198,
             'cargo.mapping.update' => 198,
+            'cargo.receive.quick.index' => 31,
+            'cargo.receive.quick.shipment_details' => 31,
+            'cargo.receive.quick.store' => 31,
+            'cargo.receive.quick.list.index' => 124,
+            'cargo.receive.quick.list.details' => 124,
+            'cargo.receive.quick.list.ajax' => 124,
             'sameday.index' => 32,
             'sameday.list' => 32,
 

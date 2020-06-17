@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateCargoConsignmentShipmentExcelsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('cargo_consignment_shipment_excels', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('cargo_consignment_excel_id');
+            $table->integer('cargo_consignment_id');
+            $table->integer('shipment_id');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('cargo_consignment_shipment_excels');
+    }
+}

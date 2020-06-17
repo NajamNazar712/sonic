@@ -3807,6 +3807,16 @@ class DeliveryController extends Controller
         $total_amount = 0;
         foreach($deposit_rows as $row){
             $total_amount += $request->amount[$row];
+        }
+        if( $sdn->sdn_amount>= $total_amount)
+        {
+            $sdn->sdn_deposit_amount = $total_amount;
+        }
+        else{
+            return redirect()->back()->with(['status' => 0, 'error' => 'Deposit Amount cannot be less than DNCC Amount!']);
+        }
+        foreach($deposit_rows as $row){
+           
             $file_name = 'deposit_slip_'.$row;
             $deposit_details = new StationDepositNoteSlip();
             $deposit_details->station_deposit_note_id = $sdn_id;
@@ -5353,22 +5363,35 @@ class DeliveryController extends Controller
         $sdn_id = $request->sdn_id;
         if($sdn_id){
             $sdn = StationDepositNote::find($sdn_id);
-            $sdn->adjustment_amount = $request->adjustment_amount;
-            $sdn->adjustment_date = $request->adjustment_date_formatted;
-            $sdn->adjustment_ref = $request->adjustment_ref;
-            $sdn->adjusted = 1;
-            // if($request->petty_cash_select != ''){
-            $sdn->petty_cash_statement_id = $request->petty_cash_select;
-            // }
-            $sdn->save();
+            $dncc_amount= $sdn->sdn_amount;
+            $deposit_amount= $sdn->sdn_deposit_amount;
+            $adjustment_amount =  $request->adjustment_amount;
 
-            $petty_details = PettyCashStatement::find($request->petty_cash_select);
-            if($petty_details) {
-                $petty_details->status = 5;
-                $petty_details->save();
+            $total =$deposit_amount + $adjustment_amount;
+            if($dncc_amount>= $total){
+                $sdn->adjustment_amount = $request->adjustment_amount;
+                $sdn->adjustment_date = $request->adjustment_date_formatted;
+                $sdn->adjustment_ref = $request->adjustment_ref;
+                $sdn->adjusted = 1;
+                $sdn->sdn_net_amount = $dncc_amount - $deposit_amount - $adjustment_amount;
+                // if($request->petty_cash_select != ''){
+                $sdn->petty_cash_statement_id = $request->petty_cash_select;
+                // }
+                $sdn->save();
+
+                $petty_details = PettyCashStatement::find($request->petty_cash_select);
+                if($petty_details) {
+                    $petty_details->status = 5;
+                    $petty_details->save();
+                }
+
+                return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
+
+            }
+            else{
+                return redirect()->back()->with(['error' => 'DNCC cannot be less than sum of adjustment amount & deposit amount']);
             }
 
-            return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
         }else{
             return redirect()->back()->with(['error' => 'Station Deposit Note ID not found!']);
         }

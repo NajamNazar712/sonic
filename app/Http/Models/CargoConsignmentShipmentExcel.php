@@ -1,0 +1,16 @@
+<?php
+
+namespace App\http\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class CargoConsignmentShipmentExcel extends Model
+{
+    public function shipment() {
+        return $this->belongsTo('App\Http\Models\Shipment');
+    }
+
+    public function cargo() {
+        return $this->belongsTo('App\Http\Models\CargoConsignmentExcel', 'cargo_consignment_id', 'id');
+    }
+}
