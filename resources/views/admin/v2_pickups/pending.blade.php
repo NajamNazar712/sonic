@@ -287,7 +287,7 @@
                             row.push(values.received);
                             row.push(values.shipper);
                             row.push(values.contact_person);
-                            row.push(values.vendor);
+                            row.push(values.vendor_name);
                             row.push(values.contact_number);
                             row.push(values.address);
                             row.push(values.city);
@@ -447,7 +447,7 @@
                 {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
-                {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
+                {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
                 {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
                 {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
                 {data: 'city', name: 'ci.name', class: 'align-middle city'},
