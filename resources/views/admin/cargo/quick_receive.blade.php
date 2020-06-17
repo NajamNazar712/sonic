@@ -56,9 +56,6 @@
 
                             <form id="receive_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.cargo.receive.quick.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
-
-                                <input type="hidden" name="short_received" class="short_received">
-
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
                                 <input type="hidden" name="open_box_ids" class="open_box_ids">
 
@@ -305,70 +302,36 @@
                     }
                 });
                 $('#receive_form input.open_box_ids').val(open_box_ids);
+                var html = 'Are you sure, you want to confirm Cargo Shipment(s) as received?';
 
-                blockPagePermanently();
-                $.ajax({
-                    url: '{!! route('admin.cargo.receive.quick.short_received') !!}',
-                    method: 'POST',
-                    data: {
-                        'shipment_ids': shipment_ids,
-                        '_token': '{{ csrf_token() }}'
+                content = document.createElement('div');
+                content.innerHTML = html;
+
+                swal({
+                    content: content,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        form.submit();
                     }
-                })
-                    .done(function(data) {
-                        if (data.status == 0) {
-                            UnblockPagePermanently();
-                            if (data.short_received) {
-                                var html = 'There are shipments that are short received from Cargo No#' + cargo_consignment_id + ':<br/>';
-
-                                $.each(data.short_received, function(index, tracking_number) {
-                                    html += tracking_number + '<br/>';
-                                });
-
-                                html += 'Are you sure, you want to confirm this Cargo Shipments received?';
-
-                                $('#receive_form input.short_received').val(1);
-                            }
-                            else {
-                                var html = 'Are you sure, you want to confirm Cargo No#' + cargo_consignment_id + ' as received?';
-
-                                $('#receive_form input.short_received').val(0);
-                            }
-
-                            content = document.createElement('div');
-                            content.innerHTML = html;
-
-                            swal({
-                                content: content,
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function(confirm) {
-                                if (confirm) {
-                                    form.submit();
-                                }
-                            });
-                        }
-                        else {
-                            UnblockPagePermanently();
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                    });
+                });
             });
 
             $('#camera_scan_initiate').bind('click', function() {

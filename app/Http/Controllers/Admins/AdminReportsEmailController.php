@@ -71,7 +71,8 @@ class AdminReportsEmailController extends Controller
             }
         }
 
-        $sale_person_array['header'] = ['S. No.','Admin', 'Achieved Shipments', 'Target Shipments', 'Target Achieved %', 'Achieved Revenue','Target Revenue', 'Target Revenue Achieved %', 'Avg Revenue/Parcel', 'Contribution'];        $serial = 1;
+        $sale_person_array['header'] = ['S. No.','Admin', 'Achieved Shipments', 'Target Shipments', 'Target Achieved %', 'Achieved Revenue','Target Revenue', 'Target Revenue Achieved %', 'Avg Revenue/Parcel', 'Contribution'];
+        $serial = 1;
 
         $total_shipments_count = 0;
         $total_avg_revenue_count = 0;
