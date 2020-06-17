@@ -655,7 +655,6 @@
                 },
                 submitHandler: function (form) {
                     var shipment_id = $('#try_and_buy_shipment_id').val();
-                    shipment_ids.push(shipment_id);
                     var tracking_number = $(form).find('input.scan_try_and_buy_tracking_number').val();
                     var weight = $(form).find('input.try_and_buy_weight').val();
                     $.ajax({
