@@ -817,7 +817,7 @@ class AdminTrackingController extends Controller
                             $journey_details = array();
                         
                             $journey_details['handover_id'] = $journey->handover_id;
-                            $journey_details['status'] = $journey->status;
+                            $journey_details['status'] = $journey->my_status->name;
                             // $journey_details['status'] = "adf>name";
                             $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
 
