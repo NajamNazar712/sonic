@@ -8872,6 +8872,17 @@ if(session('department_id') == 7){
         }
 
     }
+    public function userDocumentsEdit(Request $request){
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        
+        //dd($user_attachment);
+        // if($user_attachment == null){
+        //     $user_attachment = false;
+        //  }
+        // else{
+            return response()->json(['status' => 1, 'user_attachment' => $user_attachment]);
+       // }
+    }
     public function uploadDocuments(Request $request){
         $validation = [
             'filled_and_signed_pdf' => 'mimes:pdf|max:5120',

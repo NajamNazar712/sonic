@@ -127,7 +127,7 @@
                         <div class="col">
                             <div class="form-group">
                                 <label for="filled_and_signed_image">
-                                    Pdf of filled and signed document:
+                                    Pdf of filled and signed document: 
                                 </label>
                                 <input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf">
                             </div>
@@ -135,25 +135,25 @@
                                 <label for="signed_acknowledgement_image">
                                     Pdf of signed Acknowledgement form:
                                 </label>
-                                <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf" id="signed_acknowledgement_pdf">
+                                <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf"  id="signed_acknowledgement_pdf">
                             </div>
                             <div class="form-group">
                                 <label for="cnic_front_image">
                                     Picture of CNIC (Front):
                                 </label>
-                                <input class="form-control form-control-sm" type="file" name="cnic_front_image" id="cnic_front_image">
+                                <input class="form-control form-control-sm" type="file" name="cnic_front_image"  id="cnic_front_image">
                             </div>
                             <div class="form-group">
                                 <label for="cnic_back_image">
                                     Picture of CNIC (Back):
                                 </label>
-                                <input class="form-control form-control-sm" type="file" name="cnic_back_image" id="cnic_back_image">
+                                <input class="form-control form-control-sm" type="file" name="cnic_back_image"  id="cnic_back_image">
                             </div>
                             <div class="form-group">
                                 <label for="blank_cheque_image">
                                     Picture of Blank cheque:
                                 </label>
-                                <input class="form-control form-control-sm" type="file" name="blank_cheque_image" id="blank_cheque_image">
+                                <input class="form-control form-control-sm" type="file" name="blank_cheque_image"  id="blank_cheque_image">
                             </div>
                         </div>
                     </div>
@@ -192,8 +192,29 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('.edit').on('click', function() {
-                $('#upload_modal').modal('show');
+                
+                var user_id = {!! $id !!};
+                console.log(user_id);
+                $.ajax({
+                    url: '{!! route('admin.accounts.documents.edit') !!}',
+                    method: 'POST',
+                    data: {
+                        'user_id': user_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        $('#filled_and_signed_pdf').val(data.user_attachment.filled_and_signed_pdf);
+                        $('#signed_acknowledgement_pdf').val(data.user_attachment.signed_acknowledgement_pdf);
+                        $('#cnic_front_image').val(data.user_attachment.cnic_front_image);
+                        $('#cnic_back_image').val(data.user_attachment.cnic_back_image);
+                        $('#blank_cheque_image').val(data.user_attachment.blank_cheque_image);
+                        $('#upload_modal').modal('show');
+                    }
+                });     
+                
             });
+
             $('#upload_modal').on('hide.bs.modal', function (e) {
                 $('#upload_documents_form')[0].reset();
                 $('#filled_and_signed_pdf').val('');
