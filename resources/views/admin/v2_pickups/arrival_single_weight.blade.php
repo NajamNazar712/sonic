@@ -948,7 +948,6 @@
                 },
                 submitHandler: function (form) {
                     var shipment_id = $('#piece_shipment_id').val();
-                    shipment_ids.push(shipment_id);
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     $.ajax({
                         url: '{!! route('admin.v2_pickups.arrival.bulk.piece.shipment_details') !!}',
