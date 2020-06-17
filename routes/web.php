@@ -907,6 +907,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_details', 'Admins\AdminCargoController@receive_shipment_details')->name('shipment_details');
             Route::post('short_received', 'Admins\AdminCargoController@receive_short_received')->name('short_received');
             Route::post('', 'Admins\AdminCargoController@receive_store')->name('store');
+
+            Route::prefix('quick')->name('quick.')->group(function () {
+                Route::get('', 'Admins\AdminCargoController@quick_receive_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminCargoController@quick_receive_shipment_details')->name('shipment_details');
+                Route::post('', 'Admins\AdminCargoController@quick_receive_store')->name('store');
+                Route::get('list/index', 'Admins\AdminCargoController@quick_receive_list_index')->name('list.index');
+                Route::get('list/ajax', 'Admins\AdminCargoController@quick_receive_list_ajax')->name('list.ajax');
+                Route::post('list/ajax', 'Admins\AdminCargoController@quick_receive_list_details')->name('list.details');
+            });
         });
         Route::post('piece_details', 'Admins\AdminCargoController@cargo_piece_details')->name('piece_details');
         Route::prefix('history')->name('history.')->group(function () {
@@ -977,6 +986,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
             Route::get('email', 'Admins\UserManagementController@user_email')->name('email');
             Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
+            Route::post('assign_hubs', 'Admins\UserManagementController@user_assign_hub')->name('assign_hubs');
 
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@user_add_index')->name('index');
