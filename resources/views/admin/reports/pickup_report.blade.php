@@ -116,7 +116,7 @@
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="media-body text-left">
-                                                <span>Total</span>
+                                                <span>Total Pickups</span>
                                             </div>
                                             <div class="media-body text-right">
                                             @foreach($stats as $stat)

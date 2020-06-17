@@ -195,12 +195,7 @@ class V2AdminReportController extends Controller
         $pickup_report = V2PickupReport::join('v2_pickup_requests as v', 'v2_pickup_reports.pickup_request_id', '=', 'v.id')
              ->leftjoin('v2_pickup_request_statuses as vprs','vprs.id','=','v2_pickup_reports.status_id')
              ->leftjoin('users as u','u.id','=','v.shipper_id')
-
-            ->leftjoin('sale_person_tags as spt','spt.id','=','v2_pickup_reports.sale_person_id')
-            ->leftjoin('admins as a', function ($join) {
-                $join->on('a.id', '=', 'spt.admin_id')
-                    ->where('spt.status','=',0);
-            })
+             ->leftjoin('admins as a','a.id','=','v2_pickup_reports.sale_person_id')
             ->leftjoin('admin_departments as ad','ad.id','=','v2_pickup_reports.department_id')
             ->join('user_shipping_infos as usi', 'v.pickup_address_id', '=', 'usi.id')
             ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
@@ -239,7 +234,7 @@ class V2AdminReportController extends Controller
                 $reason_ids = $attempts->pluck('reason_id')->toArray();
                 if(count($reason_ids) > 0){
                     foreach ($reason_ids as $reason_id) {
-                        $reasons .= V2PickupRequestNotPickReason::find($reason_id)->name . PHP_EOL;
+                        $reasons .= V2PickupRequestNotPickReason::find($reason_id)->name . ',' . PHP_EOL;
                     }
                 }
             }
@@ -252,7 +247,7 @@ class V2AdminReportController extends Controller
                 $trax_remarks_rows = $attempts->pluck('trax_remarks')->toArray();
                 if(count($trax_remarks_rows) > 0){
                     foreach ($trax_remarks_rows as $remark) {
-                        $trax_remarks .= $remark . PHP_EOL;
+                        $trax_remarks .= $remark . ',' . PHP_EOL;
                     }
                 }
             }
@@ -265,7 +260,7 @@ class V2AdminReportController extends Controller
                 $attempted_date_rows = $attempts->pluck('attempt_date')->toArray();
                 if(count($attempted_date_rows) > 0){
                     foreach ($attempted_date_rows as $attempt_date) {
-                        $attempted_date .= $attempt_date . PHP_EOL;
+                        $attempted_date .= $attempt_date . ',' . PHP_EOL;
                     }
                 }
             }
