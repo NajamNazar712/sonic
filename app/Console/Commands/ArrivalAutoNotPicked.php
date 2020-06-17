@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Http\Controllers\Admins\V2Pickup\V2PickupCronController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class ArrivalAutoNotPicked extends Command
 {
@@ -39,6 +40,7 @@ class ArrivalAutoNotPicked extends Command
      */
     public function handle()
     {
+        Log::info('Auto not picked');
         V2PickupCronController::arrival_not_picked();
     }
 }

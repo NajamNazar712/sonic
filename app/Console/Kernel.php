@@ -139,19 +139,26 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
 
 //            $arrival_cut_off_time = $settings->setting_value . ':00';
-            $arrival_cut_off_time = '18:30';
+            $arrival_cut_off_time = '21:48';
 
-            $schedule->command('arrival:autonotpicked')
-            ->dailyAt($arrival_cut_off_time)
-            ->after(function ($schedule) {
-                $schedule->command('pickup:autocancel')->after(function ($schedule){
-                    $schedule->command('pickup:regenerate')->runInBackground();
-                    $schedule->command('pickuprequest:cancel')->runInBackground();
-                })->after(function ($schedule){
-                    $schedule->command('pickup:report')->runInBackground();
-                });
+//            $schedule->command('arrival:autonotpicked')
+//            ->dailyAt($arrival_cut_off_time)
+//            ->after(function ($schedule) {
+//                $schedule->command('pickup:autocancel')->after(function ($schedule){
+//                    $schedule->command('pickup:regenerate')->runInBackground();
+//                    $schedule->command('pickuprequest:cancel')->runInBackground();
+//                })->after(function ($schedule){
+//                    $schedule->command('pickup:report')->runInBackground();
+//                });
+//
+//            })->runInBackground();
+            $schedule->command('arrival:autonotpicked')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
+//            $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
 
-            })->runInBackground();
+
 
         }
     }

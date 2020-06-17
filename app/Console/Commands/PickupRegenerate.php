@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\V2Pickup\V2PickupCronController;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class PickupRegenerate extends Command
 {
@@ -38,6 +39,8 @@ class PickupRegenerate extends Command
      */
     public function handle()
     {
+        Log::info('Auto regenerate');
+
         V2PickupCronController::pickup_re_generate();
 
     }

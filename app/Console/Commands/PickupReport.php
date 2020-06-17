@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminReportController;
+use Illuminate\Support\Facades\Log;
 
 class PickupReport extends Command
 {
@@ -39,6 +40,8 @@ class PickupReport extends Command
      */
     public function handle()
     {
+        Log::info('Pickup Report');
+
         V2AdminReportController::insertReportData();
     }
 }
