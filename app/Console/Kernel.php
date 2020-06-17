@@ -132,16 +132,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
-        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $rdts_time = $settings->setting_value . ':00';
-
-            $schedule->command('pickup:report')->dailyAt($rdts_time)->runInBackground();
-            //  $schedule->command('pickup:report')->dailyAt('08:00')->runInBackground();
-        }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -149,16 +139,11 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
 
             $arrival_cut_off_time = $settings->setting_value . ':00';
-
-            $schedule->command('arrival:autonotpicked')
-            ->dailyAt($arrival_cut_off_time)
-            ->after(function ($schedule) {
-                $schedule->command('pickup:autocancel')->after(function ($schedule){
-                    $schedule->command('pickup:regenerate')->runInBackground();
-                    $schedule->command('pickuprequest:cancel')->runInBackground();
-                });
-
-            })->runInBackground();
+            $schedule->command('arrival:autonotpicked')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
         }
     }
 	 /**

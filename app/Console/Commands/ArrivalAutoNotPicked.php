@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\V2Pickup\V2PickupCronController;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class ArrivalAutoNotPicked extends Command
