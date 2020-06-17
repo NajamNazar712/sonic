@@ -194,27 +194,29 @@ class UserManagementController extends Controller
     }
 
     public function user_assign_hub(Request $request){
-        //$admin = new Admin();
-        //$ids =  $request->input('id');
-        //dd($ids);
-
         $user_ids =explode(',' , $request->id);
-        // dd($user_ids);
-        // dd($request->input('hubs'));
-        
         foreach($user_ids as $user_id){
-            
-                foreach($request->input('hubs') as $hub_id) {
-                    $admin_hub = new AdminHub();
-                    
-                    $admin_hub->hub_id = $hub_id;
-                    $admin_hub->admin_id = $user_id;
 
-                    $admin_hub->save();
-                    
-                } 
-                
+                foreach($request->input('hubs') as $hub_id) {
+                    $admin_hub_exist = AdminHub::where('admin_id',$user_id)->where('hub_id',$hub_id)->first();
+                   
+                    if($admin_hub_exist)
+                    {
+                    break;
+                        // dd($admin_hub_exist);
+                       
+                    }
+                    else{
+                        $admin_hub = new AdminHub();
+
+                        $admin_hub->hub_id = $hub_id;
+                        $admin_hub->admin_id = $user_id;
+    
+                        $admin_hub->save();
+                    }
+                }     
         }
+        return redirect()->back()->with(['status'=>1,'success'=>"Hubs has been Assigned successfully!"]);  
     }
 
     public function user_update_index($id) {

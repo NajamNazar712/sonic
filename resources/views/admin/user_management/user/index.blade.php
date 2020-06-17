@@ -12,7 +12,7 @@
 					Users
 				</h1>
 
-				<div class="modal fade text-left" id="AddTierModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddTierModal"
+				<div class="modal fade text-left" id="AssignHubModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddTierModal"
 					aria-hidden="true">
 					<div class="modal-dialog modal-lg" role="document">
 						<div class="modal-content">
@@ -24,7 +24,7 @@
 							</div>
 							<div class="modal-body text-center">
 							
-								<form id="add_commission_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
+								<form id="assign_hub_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
 									@method('POST')
 									@csrf
 									<div class="container">
@@ -161,7 +161,7 @@
 						action: function (e, dt, node, config) {
 							console.log(selected_rows);
 							$('input:hidden[name=id]').val(selected_rows);
-						$('#AddTierModal').modal('show');
+						$('#AssignHubModal').modal('show');
 
 						}
 					},{
@@ -342,30 +342,8 @@
                     table.button('.assign').disable();
                 }
 			});
-			// $('#add_commission_form').on('click', 'button[type=submit]', function() {
-			// 	var id = parseInt($(this).parent('tr').attr('id'));
-			// 	//console.log(id);
-			// 	$.ajax({
-			// 		url: '{!! route('admin.user_management.users.assign_hubs') !!}',
-			// 		method: 'POST',
-			// 		data: {
-			// 			'id': id,
-			// 			'_token': '{{ csrf_token() }}'
-			// 		}
-			// 	})
-			// 	.done(function(data) {
-			// 		if (data.status == 0) {
-
-			// 			toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-			// 		}
-			// 		else {
-			// 			toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-			// 		}
-			// 	});
-				
-			// });
 			
-			$( "#add_commission_form" ).validate({
+			$( "#assign_hub_form" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
@@ -375,37 +353,17 @@
 
                         swal({
                             title: 'Please Wait!',
-                            text: 'New Tier is being added!',
+                            text: 'Multiple Hub has been assigned!',
                             icon: 'info',
                             buttons: false,
                             closeOnClickOutside: false,
                             closeOnEsc: false
-                        });
-
+						});
+						
                         form.submit();
                 }
 			});
 			
-			// $('#edit').on('click', function (){
-			// 	var id = parseInt($(this).parents('tr').attr('id'));
-			// 	$.ajax({
-			// 		url: '{!! route('admin.user_management.users.assign_hubs') !!}',
-			// 		method: 'POST',
-			// 		data: {
-			// 			'id': id,
-			// 			'_token': '{{ csrf_token() }}'
-			// 		}
-			// 	})
-			// 	.done(function(data) {
-			// 		if (data.status == 0) {
-
-			// 			toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-			// 		}
-			// 		else {
-			// 			toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-			// 		}
-			// 	});
-			// });
 
 		});
 	</script>
