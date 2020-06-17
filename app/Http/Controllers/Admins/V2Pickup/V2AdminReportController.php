@@ -284,7 +284,11 @@ class V2AdminReportController extends Controller
         }
 
         if($cut_off_time = $request->get('search_cut_off_time')){
-            $datatables->where('v.after_cut_off_time', '=', $cut_off_time);
+            if($cut_off_time == 0){
+                $datatables->whereNull('v.after_cut_off_time');
+            }else if($cut_off_time == 1){
+                $datatables->where('v.after_cut_off_time', '=', $cut_off_time);
+            }
         }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {

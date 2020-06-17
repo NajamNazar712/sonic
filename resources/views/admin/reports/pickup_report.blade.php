@@ -56,7 +56,7 @@
                                     <div class="form-group pb-1">
                                         <select name="cut_off_time" class="select2" id="cut_off_time" data-rule-required="true" data-msg-required="Shipper is required">
                                             
-                                            <option value="null">Before</option>
+                                            <option value="0">Before</option>
                                             <option value="1">After</option>
                                         
                                         </select>
