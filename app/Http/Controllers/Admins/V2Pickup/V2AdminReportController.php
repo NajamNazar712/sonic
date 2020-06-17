@@ -182,9 +182,9 @@ class V2AdminReportController extends Controller
        // $stats=V2PickupReportSummary::all();
         $legends = V2PickupReportLegend::all();
         $department = DB::connection('reports')->table('admin_departments')->whereIn('id',[6,7])->get();
-        $salesperson = DB::connection('reports')->table('admins')->leftjoin('admin_roles as ar', 'ar.id', '=', 'admins.role_id')->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')->select('admins.name')->where('ar.department_id',7)->get();
+        $salesperson = DB::connection('reports')->table('admins')->leftjoin('admin_roles as ar', 'ar.id', '=', 'admins.role_id')->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')->select('admins.id','admins.name')->where('ar.department_id',7)->get();
         $origin = DB::connection('reports')->table('cities')->where('pickup',1)->where('status',1)->get();
-        $category = DB::connection('reports')->table('v2_pickup_report_categories')->get();
+        $category = DB::connection('reports')->table('v2_pickup_report_categories')->select('id', 'name')->get();
 
         return view('admin.reports.pickup_report')->with(['stats'=>$stats,'legends'=>$legends,'departments'=>$department,'salespersons'=>$salesperson,'origins'=>$origin,'categories'=>$category]);
     }

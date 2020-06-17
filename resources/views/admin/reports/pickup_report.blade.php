@@ -29,7 +29,7 @@
                                     <div class="form-group pb-1">
                                         <select name="salesperson" class="select2" id="salesperson" data-rule-required="true" data-msg-required="Shipper is required">
                                         @foreach($salespersons as $salesperson)  
-                                            <option value="{{ $salesperson->name }}">{{ $salesperson->name }}</option>
+                                            <option value="{{ $salesperson->id }}">{{ $salesperson->name }}</option>
                                         @endforeach
                                         </select>
                                     </div>
@@ -47,7 +47,7 @@
                                     <div class="form-group pb-1">
                                         <select name="category" class="select2" id="category" data-rule-required="true" data-msg-required="Shipper is required">
                                         @foreach($categories as $category)
-                                            <option value="{{ $category->name }}">{{ $category->name }}</option>
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
                                         @endforeach
                                         </select>
                                     </div>
@@ -464,7 +464,7 @@
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#to_date_root').css('top', '40px');
@@ -487,10 +487,6 @@
                      params.length = -1;
                         var jsonResult = $.ajax({
                             url: '{{ route('admin.reports.pickup_report.list') }}',
-                            method: 'post',
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
                             data: params,
                             success: function (result) {
                                 head = [];
@@ -570,10 +566,6 @@
                 serverSide: true,
                 ajax:{
                     url: '{{ route('admin.reports.pickup_report.list') }}',
-                    method: 'post',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
                     data: function (d) {
                         d.search_department = $('#department').val();
                         d.search_salesperson = $('#salesperson').val();
