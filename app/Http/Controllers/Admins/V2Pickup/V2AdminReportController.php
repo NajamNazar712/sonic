@@ -29,14 +29,11 @@ class V2AdminReportController extends Controller
 {
     public function __construct() {
         $this->middleware('auth:admin');
-
-
         $this->middleware('Permission');
     }
 
     public static function insertReportData(){
-//        $yesterday = Carbon::yesterday();
-        $yesterday = Carbon::today();
+        $yesterday = Carbon::yesterday();
         $today = Carbon::now()->startOfDay();
 
         $total_pickups = 0;
@@ -48,9 +45,10 @@ class V2AdminReportController extends Controller
         $attempted_and_not_picked = 0;
         $attempted_failed = 0;
 
-        $report = V2PickupReport::whereDate('created_at', $yesterday);
+        $report = V2PickupReport::whereDate('today', $today);
         if($report->exists()){
             $report->delete();
+            V2PickupReportSummary::whereDate('date', $today)->delete();
         }
         $pickup_requests = V2PickupRequest::whereDate('created_at', $yesterday);
         

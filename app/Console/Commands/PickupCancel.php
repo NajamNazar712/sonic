@@ -39,8 +39,6 @@ class PickupCancel extends Command
      */
     public function handle()
     {
-        Log::info('Cancelled schedule');
-
         V2PickupCronController::cancel_if_not_valid();
     }
 }
