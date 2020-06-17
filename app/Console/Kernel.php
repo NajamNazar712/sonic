@@ -61,94 +61,85 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('sms:clear')->everyTenMinutes()->withoutOverlapping()->runInBackground();
-        $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
-        $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
-        $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
-        $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
-//        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
-        $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
-
-        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $time = $settings->setting_value . ':00';
-
-            $schedule->command('email:dailypickupsalesreport')->dailyAt($time)->runInBackground();
-        }
-
-        $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $time = $settings->setting_value . ':00';
-
-            $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
-        }
-
-        // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
-
-        $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
-
-        $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
-
-        $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
-		$schedule->command('email:debriefingemail')->dailyAt('00:00')->runInBackground();
-
-        $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $rdts_time = $settings->setting_value . ':00';
-
-            $schedule->command('email:returndeliveredtoshipper')->dailyAt($rdts_time)->runInBackground();
-        }
-
-        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
-        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
-        $schedule->command('saleperson:numbers')->dailyAt('08:00')->runInBackground();
-        $schedule->command('month:average')->dailyAt('08:00')->runInBackground();
-        $schedule->command('hubwise:split')->dailyAt('08:00')->runInBackground();
-
-        $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
-        $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
-
-        $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
-        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
-
-//		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
-//      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
-
-		$schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
-		$schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
-		$schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
-
-        $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
-
-        $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
-
-        $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
-        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $rdts_time = $settings->setting_value . ':00';
-
-            $schedule->command('pickup:report')->dailyAt($rdts_time)->runInBackground();
-            //  $schedule->command('pickup:report')->dailyAt('08:00')->runInBackground();
-        }
+//        $schedule->command('sms:clear')->everyTenMinutes()->withoutOverlapping()->runInBackground();
+//        $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
+//        $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
+//        $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
+//        $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
+////        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
+//        $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
+//
+//        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
+//
+//        if ($settings->exists()) {
+//            $settings = $settings->first();
+//
+//            $time = $settings->setting_value . ':00';
+//
+//            $schedule->command('email:dailypickupsalesreport')->dailyAt($time)->runInBackground();
+//        }
+//
+//        $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
+//
+//        if ($settings->exists()) {
+//            $settings = $settings->first();
+//
+//            $time = $settings->setting_value . ':00';
+//
+//            $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
+//        }
+//
+//        // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
+//
+//        $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
+//
+//        $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
+//
+//        $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
+//		$schedule->command('email:debriefingemail')->dailyAt('00:00')->runInBackground();
+//
+//        $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
+//
+//        if ($settings->exists()) {
+//            $settings = $settings->first();
+//
+//            $rdts_time = $settings->setting_value . ':00';
+//
+//            $schedule->command('email:returndeliveredtoshipper')->dailyAt($rdts_time)->runInBackground();
+//        }
+//
+//        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
+//        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
+//        $schedule->command('saleperson:numbers')->dailyAt('08:00')->runInBackground();
+//        $schedule->command('month:average')->dailyAt('08:00')->runInBackground();
+//        $schedule->command('hubwise:split')->dailyAt('08:00')->runInBackground();
+//
+//        $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
+//        $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
+//
+//        $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
+//        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
+//
+////		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
+////      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
+//
+//		$schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
+//		$schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
+//		$schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
+//
+//        $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
+//
+//        $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
+//
+//        $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
         if ($settings->exists()) {
             $settings = $settings->first();
 
-            $arrival_cut_off_time = $settings->setting_value . ':00';
+//            $arrival_cut_off_time = $settings->setting_value . ':00';
+            $arrival_cut_off_time = '18:30';
 
             $schedule->command('arrival:autonotpicked')
             ->dailyAt($arrival_cut_off_time)
@@ -156,9 +147,12 @@ class Kernel extends ConsoleKernel
                 $schedule->command('pickup:autocancel')->after(function ($schedule){
                     $schedule->command('pickup:regenerate')->runInBackground();
                     $schedule->command('pickuprequest:cancel')->runInBackground();
+                })->after(function ($schedule){
+                    $schedule->command('pickup:report')->runInBackground();
                 });
 
             })->runInBackground();
+
         }
     }
 	 /**

@@ -35,150 +35,136 @@ class V2AdminReportController extends Controller
     }
 
     public static function insertReportData(){
-        $yesterday = Carbon::yesterday();
+//        $yesterday = Carbon::yesterday();
+        $yesterday = Carbon::today();
         $today = Carbon::now()->startOfDay();
-        $pickup_reports = new V2PickupReport();
-        $pickup_summaries = new V2PickupReportSummary();
-        $total = $attempted_and_picked = $attempted_and_not_picked = $attempted_failed = $operations_total ='';
-        $sales_total = $before_cut_off_total = $after_cut_off_total = $department_id='';
-        $legend_id = '';
-        $status_id = $category_id = '';
+
+        $total_pickups = 0;
+        $total_operations = 0;
+        $total_sales = 0;
+        $total_cut_off_time_before = 0;
+        $total_cut_off_time_after = 0;
+        $attempted_and_picked = 0;
+        $attempted_and_not_picked = 0;
+        $attempted_failed = 0;
+
+        $report = V2PickupReport::whereDate('created_at', $yesterday);
+        if($report->exists()){
+            $report->delete();
+        }
         $pickup_requests = V2PickupRequest::whereDate('created_at', $yesterday);
         
         if($pickup_requests->exists()){
            
            $pickup_requests = $pickup_requests->get();
      
+           if(!empty($pickup_requests)){
+               foreach ($pickup_requests as $pickup_request) {
+                   $department_id = NULL;
+                   $category_id = NULL;
+                   $legend_id = NULL;
+                   $booked = 0;
+                   $received = 0;
+                   $attempts = 0;
 
-            foreach($pickup_requests as $pickup_request){
-                $shipper_id = $pickup_request->shipper_id;
-                $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0);
-                if($sales_person->exists()){
-                    $sales_person = $sales_person->first();
-                    $admin_id = $sales_person->admin_id;
-                }
-                $reason_id = null;
-                if($pickup_request->status_id == 3){
-                    $reason = $pickup_request->pickup_attempt_latest->whereNotNull('reason_id')->first();
-                    if($reason){
-                        $reason_id = $reason->reason_id;
-                    }
-                }
+                   $total_pickups++;
+                   $shipper_id = $pickup_request->shipper_id;
+                   $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0);
+                   if($sales_person->exists()){
+                       $sales_person = $sales_person->first();
+                       $admin_id = $sales_person->admin_id;
+                   }
+                   $reason_id = null;
 
-                    // if($reason_id == 7 || $reason_id == 8 || $reason_id == 9 ){
-                    //     $department_id=6;
-                    //     $operations_total++;
-                    // }
-                    // if($reason_id == 1 || $reason_id == 2 || $reason_id == 3 || $reason_id == 4 || $reason_id == 5 || $reason_id == 6 ){
-                    //     $department_id=7;
-                    //     $sales_total++;
-                    // }
-              
-                $total++;
-                $id = $pickup_request->id;
-           
-                $status_id = $pickup_request->status_id;
-                $booked=$pickup_request->booked;
-                $received=$pickup_request->received;
-                if($booked > 0){
-                    $difference = ($booked - $received)/$booked;
-                    $difference_shipments= 100 - $difference;
+                   $pickup_request_id = $pickup_request->id;
+                   $status_id = $pickup_request->status_id;
+                   $booked = $pickup_request->booked;
+                   if($pickup_request->received !== null){
+                       $received = $pickup_request->received;
+                   }
+                   if($booked > 0){
+                       $difference = ($booked - $received)/$booked;
+                       $difference_shipments = 100 - $difference;
 
-                }else{
-                    $difference = 0;
-                    $difference_shipments = 0;
-                }
+                   }else{
+                       $difference = 0;
+                       $difference_shipments = 0;
+                   }
+                   $attempts = $pickup_request->attempts;
+                   if(($status_id == 2) && ($attempts >= 1) && ($difference_shipments <= 10)){
+                       $legend_id = 1;
+                       $category_id = 1;
+                       $attempted_and_picked++;
+                   }
+                   if(($status_id == 2) && ($attempts >= 1) && ($difference_shipments > 10)){
+                       $legend_id = 2;
+                       $department_id = 7;
+                       $category_id = 1;
+                       $total_sales++;
+                       $attempted_and_picked++;
+                   }
+                   if(($status_id == 3) && ($attempts >= 1)){
+                       $department_id = 7;
+                       $legend_id = 3;
+                       $category_id = 2;
+                       $total_sales++;
+                       $attempted_and_not_picked++;
+                   }
+                   if($status_id == 4){
+                       $legend_id = 4;
+                       $department_id = 7;
+                       $category_id = 3;
+                       $attempted_failed++;
+                   }
+                   $pickup_attempts = $pickup_request->pickup_attempts;
+                   $pickup_attempt_flag = FALSE;
+                   $pickup_attempt_operation_status = array(7,8,9);
+                   if(count($pickup_attempts) > 0){
+                       foreach ($pickup_attempts as $pickup_attempt){
+                            if(in_array($pickup_attempt->reason_id, $pickup_attempt_operation_status)){
+                                $pickup_attempt_flag = TRUE;
+                            }
+                       }
+                   }
+                   if($pickup_attempt_flag){
+                       $department_id = 6;
+                       $legend_id = 5;
+                       $total_operations++;
+                   }
+                   if($pickup_request->after_cut_off_time == null){
+                       $total_cut_off_time_before++;
+                   }
+                   else{
+                       $total_cut_off_time_after++;
+                   }
 
-                $attempted=$pickup_request->attempts;
-                if($status_id == 2 && $attempted > 0){
-                    // if(){
-                    $category_id = 1;
-                    $attempted_and_picked++;
-                // }
-                }
-                if($status_id == 3 && $attempted > 0 ){
-                    $category_id = 2;
-                    $attempted_and_not_picked++;
-                }
-                if($status_id == 4 && $attempted > 0 ){
-                    $category_id = 3;
-                    $attempted_failed++;
-                }
+                   $pickup_report = new V2PickupReport();
+                   $pickup_report->date = $today;
+                   $pickup_report->pickup_request_id = $pickup_request_id;
+                   $pickup_report->category_id = $category_id;
+                   $pickup_report->status_id = $status_id;
+                   $pickup_report->sale_person_id = $admin_id;
+                   $pickup_report->expected_shipments = $booked;
+                   $pickup_report->received_shipments = $received;
+                   $pickup_report->difference_shipments = $difference_shipments;
+                   $pickup_report->department_id = $department_id;
+                   $pickup_report->legend_id = $legend_id;
+                   $pickup_report->save();
 
-                if(($status_id == 2) && ($attempted > 0) && ($difference_shipments <= 10)){
-                    $legend_id=1;
-                }
-                if(($status_id == 2) && ($attempted > 0) && ($difference_shipments > 10)){
-                    $legend_id=2;
-                    $department_id=7;
-                    $sales_total++;
-                }
-                if(($status_id == 3) && ($attempted > 0)){
-                    $legend_id=3;
-                    $department_id=7;
-                    $sales_total++;
-                }
-                if($status_id == 4){
-                    $legend_id=4;
-                    $department_id=7;
-                    $sales_total++;
-                }
-                if(($status_id == 3) && ($reason_id == 7 || $reason_id == 8 || $reason_id == 9) ){
-                    $legend_id=5;
-                    $department_id=6;
-                    $operations_total++;
-                }
-                
-                // if($difference_shipments <= 10 && $category_id == 1){
-                //     $legend_id=1;
-                //     $attempted_and_picked++;
-                // }
-                // else if($difference_shipments > 10 && $category_id == 1){
-                //     $legend_id =2;
-                //     $attempted_and_picked++;
-                // }
-                // else if($category_id ==2 ){
-                //     $legend_id = 3;
-                //     $attempted_and_not_picked++;
-                // }
-                // else if($category_id == 4){
-                //     $legend_id =4;
-                // }
-                // else if($category_id == 3){
-                //     $legend_id =5;
-                //     $attempted_failed++;
-                // }
-    
-                if($pickup_request->after_cut_off_time == null){
-                    $before_cut_off_total++;
-                } 
-                else{
-                    $after_cut_off_total++;
-                }  
-    
-                $pickup_reports->date =$today;
-                $pickup_reports->pickup_request_id =$id;
-                $pickup_reports->category_id =$category_id;
-                $pickup_reports->status_id =$status_id;
-                $pickup_reports->sale_person_id =$admin_id;
-                $pickup_reports->expected_shipments =$booked;
-                $pickup_reports->received_shipments =$received;
-                $pickup_reports->difference_shipments =$difference_shipments;
+               }
+               $pickup_report_summary = new V2PickupReportSummary();
+               $pickup_report_summary->date = $today;
+               $pickup_report_summary->total = $total_pickups;
+               $pickup_report_summary->pending_operations = $total_operations;
+               $pickup_report_summary->pending_sales = $total_sales;
+               $pickup_report_summary->before_cut_off_time = $total_cut_off_time_before;
+               $pickup_report_summary->after_cut_off_time = $total_cut_off_time_after;
+               $pickup_report_summary->attempted_and_picked = $attempted_and_picked;
+               $pickup_report_summary->attempted_and_not_picked = $attempted_and_not_picked;
+               $pickup_report_summary->attempted_failed = $attempted_failed;
+               $pickup_report_summary->save();
+           }
 
-                $pickup_reports->department_id = $department_id;
-                $pickup_reports->legend_id =$legend_id;
-                $pickup_reports->save();
-            } 
-            $pickup_summaries->date =$today;
-            $pickup_summaries->total =$total;
-            $pickup_summaries->pending_operations =$operations_total;
-            $pickup_summaries->pending_sales =$sales_total;
-            $pickup_summaries->before_cut_off_time =$before_cut_off_total;
-            $pickup_summaries->after_cut_off_time =$after_cut_off_total;
-            $pickup_summaries->attempted_and_picked =$attempted_and_picked;
-            $pickup_summaries->attempted_and_not_picked =$attempted_and_not_picked;
-            $pickup_summaries->attempted_failed =$attempted_failed;
-            $pickup_summaries->save();
 
         }
         
