@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -18,6 +19,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
@@ -1590,7 +1592,6 @@ class DeliveryController extends Controller
 
                                 }
                             }
-
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
                     }else if($selected_status == 56){
@@ -1715,7 +1716,13 @@ class DeliveryController extends Controller
                         } else {
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                         }
+                        
+                        $handover_shipments = HandoverShipments::where('shipment_id',$shipment)->where('status','!=',3)->first();
+                        $handover_shipments->status = 3;
+                        $handover_shipments ->save();
 
+                        HandoverShipmentJourneyController::add( $shipment,$handover_shipments->handover_id,3);
+                        
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
 
