@@ -247,11 +247,11 @@
         $(document).ready(function() {
             @if (session('print_shipment_ids'))
             $.ajax({
-                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                url: '{!! route('admin.v2_pickups.pending.print') !!}',
                 method: 'POST',
                 data: {
-                    'ids': {!! json_encode(session('print_shipment_ids')) !!},
-                    'admin': true,
+                    'ids': ids,
+                    'dispatch': 1,
                     '_token': '{{ csrf_token() }}'
                 }
             })
@@ -272,6 +272,8 @@
                         tab.document.close();
                         tab.focus();
                     }
+
+                    table.draw('false');
                 });
             @endif
 
