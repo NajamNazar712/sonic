@@ -799,7 +799,7 @@ class V2AdminPickupsController extends Controller
             if ($pickup_note->exists()) {
                 $pickup_note = $pickup_note->first();
 
-                $pickup_note->pickups += $pickup_note->pickups + 1;
+                $pickup_note->pickups += 1;
 
                 $pickup_note->save();
 
