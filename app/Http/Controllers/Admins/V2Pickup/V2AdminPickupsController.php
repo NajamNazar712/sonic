@@ -293,9 +293,6 @@ class V2AdminPickupsController extends Controller
                 $existing_pickup_request_attempt->rider_id = $rider_id;
                 $existing_pickup_request_attempt->assigned_by = Auth::id();
                 $existing_pickup_request_attempt->save();
-                if(!in_array($pickup_request_id, $allowed_pickup_requests)){
-                    $allowed_pickup_requests[] = $pickup_request_id;
-                }
             }
         }
         if(count($allowed_pickup_requests) > 0){
