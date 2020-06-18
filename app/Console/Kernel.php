@@ -139,11 +139,11 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
 
             $arrival_cut_off_time = $settings->setting_value . ':00';
-            $schedule->command('arrival:autonotpicked')->dailyAt($arrival_cut_off_time);
-            $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
-            $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
-            $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
-            $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
+//            $schedule->command('arrival:autonotpicked')->dailyAt($arrival_cut_off_time);
+//            $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
+//            $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
+//            $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
+//            $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
         }
     }
 	 /**
