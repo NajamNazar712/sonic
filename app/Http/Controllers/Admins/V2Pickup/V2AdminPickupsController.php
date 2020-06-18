@@ -255,10 +255,11 @@ class V2AdminPickupsController extends Controller
         $pickups = 0;
         $bookings = 0;
 
-        $date = Carbon::now();
+        $start_date = Carbon::now()->startOfDay();
+        $end_date = Carbon::now()->endOfDay();
         $allowed_pickup_requests = array();
         foreach ($pickup_request_ids as $pickup_request_id) {
-            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('rider_id', $rider_id)->whereDate('attempt_date', $date);
+            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('rider_id', $rider_id)->whereBetween('attempt_date', [$start_date, $end_date]);
             if(!$existing_pickup_request_attempt->exists()){
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 $pickup_request->rider_status = 2;
