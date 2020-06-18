@@ -9,4 +9,7 @@ class HandoverShipments extends Model
     public function handover_id_latest(){
         return $this->hasOne('App\Http\Models\Handover\Handover', 'handover_id')->latest('id');
     }
+    public function my_status() {
+        return $this->hasOne('App\Http\Models\Handover\HandoverStatus', 'id', 'status');
+    }
 }
