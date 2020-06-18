@@ -9,6 +9,7 @@ use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\Shipment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -43,7 +44,7 @@ class ShipperPickupController extends Controller
             ->editColumn('pickup_request_id', function($pickup_request) {
                 return str_pad($pickup_request->pickup_request_id, 6, '0', STR_PAD_LEFT);
             })
-            ->editColumn('booked', function($pickup_request) {
+            ->editColumn('booked_button', function($pickup_request) {
                 if ($pickup_request->booked != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->booked . '</button>';
                 }
@@ -51,7 +52,7 @@ class ShipperPickupController extends Controller
                     return 0;
                 }
             })
-            ->editColumn('received', function($pickup_request) {
+            ->editColumn('received_button', function($pickup_request) {
                 if ($pickup_request->received != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received . '</button>';
                 }
@@ -60,18 +61,21 @@ class ShipperPickupController extends Controller
                 }
             })
             ->addColumn('reason', function($pickup_request) {
-                $attempt_reasons = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id);
+                $attempt_reasons = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereNotNull('reason_id');
                 $all_reason = '';
                 if($attempt_reasons->exists()){
-                    $attempts = $attempt_reasons->get();
-                    foreach ($attempts as $attempt){
-                        $all_reason .= $attempt->reason->name . PHP_EOL;
+                    $attempts = $attempt_reasons->pluck('reason_id')->toArray();
+                    if(count($attempts) > 0){
+                        foreach ($attempts as $reason_id) {
+                            $reason = V2PickupRequestNotPickReason::find(7)->name;
+                            $all_reason .= $reason .'. <br />';
+                        }
                     }
                 }
                 return $all_reason;
             })
             ->addColumn('remarks', function($pickup_request) {
-                $remarks = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id);
+                $remarks = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereNotNull('trax_remarks');;
                 $all_remarks = '';
                 if($remarks->exists()){
                     $remarks = $remarks->get();
@@ -87,7 +91,7 @@ class ShipperPickupController extends Controller
                 return $all_remarks;
             })
             ->addColumn('shipper_remarks', function($pickup_request) {
-                $shipper_remarks = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id);
+                $shipper_remarks = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereNotNull('shipper_remarks');
                 $all_shipper_remarks = '';
                 if($shipper_remarks->exists()){
                     $shipper_remarks = $shipper_remarks->get();

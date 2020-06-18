@@ -378,55 +378,47 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('cod.return.pending.list') }}',
+                        url: '{{ route('cod.pickup.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Tracking No.');
-                            head.push('Order ID');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Hub');
-                            head.push('Consignee Name');
-                            head.push('Consignee Phone');
+                            head.push('Request ID.');
+                            head.push('Request Date');
+                            head.push('No. of Shipments Booked');
+                            head.push('No. of Shipments Received');
+                            head.push('Contact Person');
+                            head.push('Vendor');
+                            head.push('Contact No(s)');
                             head.push('Address');
-                            head.push('Collection Amount');
-                            head.push('Shipping Mode');
-                            head.push('Service Type');
+                            head.push('City');
                             head.push('Status');
-                            head.push('Reason');
-                            head.push('Remarks');
-                            head.push('OSA Estimated Charges');
-                            head.push('Arrival Date');
-                            head.push('Status Date');
-                            head.push('Consolidation');
-                            head.push('Consolidation ID');
+                            head.push('Trax Reason');
+                            head.push('Trax Remarks');
+                            head.push('Shipper Remarks');
+                            head.push('Attempt Date/Time');
+                            head.push('Attempt Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.tracking);
-                                row.push(values.order_id);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
-                                row.push(values.consignee_address);
-                                row.push(values.amount);
-                                row.push(values.mode);
-                                row.push(values.service_type);
+                                row.push(values.pickup_request_id);
+                                row.push(values.requested_at);
+                                row.push(values.booked);
+                                row.push(values.received);
+                                row.push(values.contact_person);
+                                row.push(values.vendor);
+                                row.push(values.contact_number);
+                                row.push(values.address);
+                                row.push(values.city);
                                 row.push(values.status);
                                 row.push(values.reason);
-                                row.push(values.remarks);
-                                row.push(values.nsa_osa_estimated_charges);
-                                row.push(values.arrival);
-                                row.push(values.last_status_date);
-                                row.push(values.consolidation);
-                                row.push(values.consolidation_id);
+                                row.push(values.remarks.replace('<br/>', '\r\n'));
+                                row.push(values.shipper_remarks.replace('<br/>', '\r\n'));
+                                row.push(values.attempt_date_time.replace('<br/>', '\r\n'));
+                                row.push(values.attempts);
 
                                 body.push(row);
                             });
@@ -468,7 +460,7 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'Return Confirmation Pending',
+                        title: 'Pickup History',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }, {
@@ -547,8 +539,8 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'pickup_request_id', name: 'v2_pickup_requests.id', class: 'align-middle pickup_request_id'},
                     {data: 'requested_at', name: 'v2_pickup_requests.created_at', class: 'align-middle requested_at'},
-                    {data: 'booked', name: 'v2_pickup_requests.booked', class: 'text-center align-middle booked'},
-                    {data: 'received', name: 'v2_pickup_requests.received', class: 'text-center align-middle received'},
+                    {data: 'booked_button', name: 'v2_pickup_requests.booked', class: 'text-center align-middle booked'},
+                    {data: 'received_button', name: 'v2_pickup_requests.received', class: 'text-center align-middle received'},
                     {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                     {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
                     {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},

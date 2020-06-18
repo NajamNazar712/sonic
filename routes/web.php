@@ -403,11 +403,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
         Route::post('edit/emails','Admins\AdminDashboardController@edit_notification_emails')->name('edit.emails');
         Route::post('add/emails','Admins\AdminDashboardController@add_notification_emails')->name('add.emails');
-        Route::get('/{id}/documents','Admins\AdminDashboardController@userDocuments')->name('documents');
+        Route::get('/{id}/documents','Admins\AdminDashboardController@P')->name('documents');
         Route::get('/{id}/{check}/{pdf}/documents','Admins\AdminDashboardController@viewUserDocuments')->name('documents.view');
         Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
         Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
         Route::post('/documents/confirm', 'Admins\AdminDashboardController@userDocumentsConfirm')->name('documents.confirm');
+        //my route
+        Route::post('/documents/edit', 'Admins\AdminDashboardController@userDocumentsEdit')->name('documents.edit');
 
         Route::prefix('sister_account')->name('sister_account.')->group(function(){
             Route::get('{id}/add/','Admins\AdminDashboardController@add_sister_account_view')->name('add.account');
@@ -636,6 +638,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
                     Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_try_and_buy_shipment_details')->name('shipment_details');
                 });
+                Route::prefix('piece')->name('piece.')->group(function () {
+                    Route::post('piece_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_details')->name('piece_details');
+                    Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_shipment_details')->name('shipment_details');
+                });
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@bulk_arrival_submit')->name('store');
             });
             Route::prefix('individual')->name('individual.')->group(function () {
@@ -658,6 +664,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('note')->name('note.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
             Route::post('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
+            Route::post('shipment/piece_details', 'Admins\DeliveryController@get_piece_details')->name('shipment.piece_details');
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
             Route::post('rider_check','Admins\DeliveryController@delivery_note_rider_check')->name('rider_check');
 			Route::post('consolidation_check','Admins\DeliveryController@note_consolidation_check')->name('consolidation_check');
@@ -832,6 +839,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
             Route::post('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
+            Route::post('shipment/piece_details', 'Admins\ReturnController@get_piece_details')->name('shipment.piece_details');
+
             Route::post('note/submit','Admins\ReturnController@return_note_create')->name('note.submit');
         });
         Route::prefix('receive')->name('receive.')->group(function (){
@@ -900,7 +909,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_details', 'Admins\AdminCargoController@receive_shipment_details')->name('shipment_details');
             Route::post('short_received', 'Admins\AdminCargoController@receive_short_received')->name('short_received');
             Route::post('', 'Admins\AdminCargoController@receive_store')->name('store');
+
+            Route::prefix('quick')->name('quick.')->group(function () {
+                Route::get('', 'Admins\AdminCargoController@quick_receive_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminCargoController@quick_receive_shipment_details')->name('shipment_details');
+                Route::post('', 'Admins\AdminCargoController@quick_receive_store')->name('store');
+                Route::get('list/index', 'Admins\AdminCargoController@quick_receive_list_index')->name('list.index');
+                Route::get('list/ajax', 'Admins\AdminCargoController@quick_receive_list_ajax')->name('list.ajax');
+                Route::post('list/ajax', 'Admins\AdminCargoController@quick_receive_list_details')->name('list.details');
+            });
         });
+        Route::post('piece_details', 'Admins\AdminCargoController@cargo_piece_details')->name('piece_details');
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@history_index')->name('index');
             Route::get('list', 'Admins\AdminCargoController@history_list')->name('list');
@@ -969,6 +988,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
             Route::get('email', 'Admins\UserManagementController@user_email')->name('email');
             Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
+            Route::post('assign_hubs', 'Admins\UserManagementController@user_assign_hub')->name('assign_hubs');
 
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@user_add_index')->name('index');

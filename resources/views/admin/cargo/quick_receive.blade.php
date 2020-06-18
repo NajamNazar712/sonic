@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Receive Cargo
+                    Quick Receive Cargo
                 </h1>
 
                 <div class="card">
@@ -37,10 +37,6 @@
                                 </div>
                             </form>
 
-                            <div id="information" class="information text-center">
-                                Cargo No #{{ str_pad(session('cargo_consignment_id'), 6, '0', STR_PAD_LEFT) }} | Scanned: <span class="scanned">0</span>/<span class="total">{{ $total }}</span>
-                            </div>
-
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -58,13 +54,8 @@
                                 </thead>
                             </table>
 
-                            <form id="receive_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.cargo.receive.store') }}" novalidate="novalidate">
+                            <form id="receive_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.cargo.receive.quick.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
-
-                                <input type="hidden" name="cargo_consignment_id" class="cargo_consignment_id" value="{{ session('cargo_consignment_id') }}">
-
-                                <input type="hidden" name="short_received" class="short_received">
-
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
                                 <input type="hidden" name="open_box_ids" class="open_box_ids">
 
@@ -145,10 +136,8 @@
     <script>
         $(document).ready(function() {
             @if(session('errors'))
-                scan_sound(2);
-             @endif
-            var cargo_consignment_id = {{ session('cargo_consignment_id') }};
-
+            scan_sound(2);
+                    @endif
             $('#add_shipment_pieces_form input.scan_piece').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -207,11 +196,10 @@
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         blockPagePermanently();
                         $.ajax({
-                            url: '{!! route('admin.cargo.receive.shipment_details') !!}',
+                            url: '{!! route('admin.cargo.receive.quick.shipment_details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
-                                'cargo_consignment_id': cargo_consignment_id,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -230,8 +218,6 @@
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
                                         shipment_ids.push(data.details.id);
-
-                                        $('#information .scanned').html(shipment_ids.length);
 
                                         $('#add_shipment_form button.add').prop('disabled', false);
 
@@ -316,71 +302,36 @@
                     }
                 });
                 $('#receive_form input.open_box_ids').val(open_box_ids);
+                var html = 'Are you sure, you want to confirm Cargo Shipment(s) as received?';
 
-                blockPagePermanently();
-                $.ajax({
-                    url: '{!! route('admin.cargo.receive.short_received') !!}',
-                    method: 'POST',
-                    data: {
-                        'cargo_consignment_id': cargo_consignment_id,
-                        'shipment_ids': shipment_ids,
-                        '_token': '{{ csrf_token() }}'
+                content = document.createElement('div');
+                content.innerHTML = html;
+
+                swal({
+                    content: content,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        form.submit();
                     }
-                })
-                    .done(function(data) {
-                        if (data.status == 0) {
-                            UnblockPagePermanently();
-                            if (data.short_received) {
-                                var html = 'There are shipments that are short received from Cargo No#' + cargo_consignment_id + ':<br/>';
-
-                                $.each(data.short_received, function(index, tracking_number) {
-                                    html += tracking_number + '<br/>';
-                                });
-
-                                html += 'Are you sure, you want to confirm this Cargo received?';
-
-                                $('#receive_form input.short_received').val(1);
-                            }
-                            else {
-                                var html = 'Are you sure, you want to confirm Cargo No#' + cargo_consignment_id + ' as received?';
-
-                                $('#receive_form input.short_received').val(0);
-                            }
-
-                            content = document.createElement('div');
-                            content.innerHTML = html;
-
-                            swal({
-                                content: content,
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function(confirm) {
-                                if (confirm) {
-                                    form.submit();
-                                }
-                            });
-                        }
-                        else {
-                            UnblockPagePermanently();
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                    });
+                });
             });
 
             $('#camera_scan_initiate').bind('click', function() {
@@ -485,11 +436,10 @@
                     shipment_ids.push(shipment_id);
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     $.ajax({
-                        url: '{!! route('admin.cargo.receive.shipment_details') !!}',
+                        url: '{!! route('admin.cargo.receive.quick.shipment_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,
-                            'cargo_consignment_id': cargo_consignment_id,
                             'pieces_confirm': 1,
                             '_token': '{{ csrf_token() }}'
                         }
@@ -509,8 +459,6 @@
                                     table.order([0, 'desc']).draw();
                                     scan_sound(1);
                                     shipment_ids.push(data.details.id);
-
-                                    $('#information .scanned').html(shipment_ids.length);
 
                                     $('#add_shipment_form button.add').prop('disabled', false);
 

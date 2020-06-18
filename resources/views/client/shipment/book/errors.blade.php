@@ -66,6 +66,7 @@
                                 <th>Amount</th>
                                 <th>Mode of Payment ID</th>
                                 <th>Charges Mode ID</th>
+                                <th>Pieces</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -345,6 +346,11 @@
                                     <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['pieces_quantity']))
+                                    <td>{!! Form::text('form[' . $no . '][pieces_quantity]', $ro['pieces_quantity'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['pieces_quantity']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][pieces_quantity]', $ro['pieces_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
                             </tr>
 

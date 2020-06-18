@@ -176,6 +176,10 @@
 												<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
 											</div>
 
+											<div id="pieces_quantity" class="form-group input-group d-none">
+												<input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" >
+											</div>
+
 											<div class="form-group text-center p-1 border border-light rounded">
 												<label class="d-block">Insurance</label>
 												<input type="checkbox" name="insurance" class="switch hidden insurance">
@@ -543,6 +547,21 @@
 
 		$(document).ready(function() {
 
+
+			$(this).find('.pieces').TouchSpin({
+						min: 1,
+						max: 10,
+						buttondown_class: 'btn btn-primary rounded-left',
+						buttonup_class: 'btn btn-primary rounded-right',
+						buttondown_txt: '<i class="ft-minus"></i>',
+						buttonup_txt: '<i class="ft-plus"></i>'
+					}).bind('input change', function() {
+						if ($(this).hasClass('danger')) {
+							$(this).valid();
+						}
+					});
+
+
 			@if (session('print'))
 			$.ajax({
 				url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
@@ -752,11 +771,15 @@
 			@if (!Session::has('service_type_id'))
 			$('#select_service_type').modal('show');
 			@else
-					service_type = '{{ Session::get('service_type_id') }}';
+			service_type = '{{ Session::get('service_type_id') }}';
 
+				if(service_type == 1){
+					$('#pieces_quantity').removeClass('d-none');
+				}
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
 				$('#try_and_buy_charges_div').addClass('d-none');
+			
 			}
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
@@ -799,6 +822,7 @@
 						$('#shipper_header_info').html('Shipper Information');
 						$('#consignee_header_info').html('Consignee Information');
 						$('#amount').prop('disabled', false);
+						$('#pieces_quantity').removeClass('d-none');
 					}
 					else if (service_type == 2) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -1107,6 +1131,9 @@
 							try_and_buy_total_quantity();
 						}
 					});
+
+					
+					
 
 					$('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
 

@@ -45,6 +45,7 @@ use App\Http\Models\Route;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -363,6 +364,18 @@ class DeliveryController extends Controller
                         if ($request->has('hub_id')) {
                             $hub_id = $shipment->consignee_city->hub_id;
                             if ($request->hub_id == $hub_id) {
+                                if(!$request->has('pieces_confirm')){
+                                    if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                                        $details = array();
+                                        $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                        $details['id'] = $shipment->id;
+                                        $details['tracking_number'] = $shipment->tracking_number;
+                                        $details['pieces_count'] = $shipment->pieces;
+                                        $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                        return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                    }
+                                }
                                 $destination = $shipment->consignee_city->name;
                                 $hub = City::find($shipment->consignee_city->hub_id)->name;
                                 $service = $shipment->booking_type->booking_type;
@@ -390,6 +403,7 @@ class DeliveryController extends Controller
                                 if($consolidation_details){
                                     $consolidation_flag = TRUE;
                                 }
+
                                 return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details]);
 
                             } else {
@@ -397,6 +411,18 @@ class DeliveryController extends Controller
                             }
 
                         } else {
+                            if(!$request->has('pieces_confirm')){
+                                if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                                    $details = array();
+                                    $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                    $details['id'] = $shipment->id;
+                                    $details['tracking_number'] = $shipment->tracking_number;
+                                    $details['pieces_count'] = $shipment->pieces;
+                                    $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                    return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                }
+                            }
                             $destination = $shipment->consignee_city->name;
                             $hub = City::find($shipment->consignee_city->hub_id)->id;
                             $service = $shipment->booking_type->booking_type;
@@ -426,7 +452,6 @@ class DeliveryController extends Controller
                                 $consolidation_flag = TRUE;
                             }
 
-
                             return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details]);
                         }
                     } else {
@@ -441,6 +466,27 @@ class DeliveryController extends Controller
             }
 
 
+        }
+    }
+
+
+    public function get_piece_details(Request $request)
+    {
+        $shipment_id = $request->shipment_id;
+        $shipment_piece_id = $request->piece_id;
+
+        $shipment_piece = ShipmentPiece::where('tracking_number', $shipment_piece_id);
+        if ($shipment_piece->exists()) {
+            $shipment_piece = $shipment_piece->first();
+            if ($shipment_piece->shipment_id == $shipment_id) {
+                $scanned_shipment_piece = $shipment_piece->tracking_number;
+                return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
+            } else {
+                return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
+            }
+
+        } else {
+            return ['status' => 1, 'error' => 'No Shipment Item with given Item ID is present'];
         }
     }
 
@@ -460,7 +506,6 @@ class DeliveryController extends Controller
         return response()->json(['flag' => $flag , 'delivery_note' => $delivery_note_details]);
     }
     public function create_delivery_note(Request $request){
-        
         $shipments = explode(',',$request->shipment_ids);
         $open_box_ids = explode(',',$request->open_box_ids);
         $notifications = explode(',',$request->notification_ids);
@@ -3769,6 +3814,16 @@ class DeliveryController extends Controller
         $total_amount = 0;
         foreach($deposit_rows as $row){
             $total_amount += $request->amount[$row];
+        }
+        if( $sdn->sdn_amount>= $total_amount)
+        {
+            $sdn->sdn_deposit_amount = $total_amount;
+        }
+        else{
+            return redirect()->back()->with(['status' => 0, 'error' => 'Deposit Amount cannot be less than DNCC Amount!']);
+        }
+        foreach($deposit_rows as $row){
+           
             $file_name = 'deposit_slip_'.$row;
             $deposit_details = new StationDepositNoteSlip();
             $deposit_details->station_deposit_note_id = $sdn_id;
@@ -5315,22 +5370,35 @@ class DeliveryController extends Controller
         $sdn_id = $request->sdn_id;
         if($sdn_id){
             $sdn = StationDepositNote::find($sdn_id);
-            $sdn->adjustment_amount = $request->adjustment_amount;
-            $sdn->adjustment_date = $request->adjustment_date_formatted;
-            $sdn->adjustment_ref = $request->adjustment_ref;
-            $sdn->adjusted = 1;
-            // if($request->petty_cash_select != ''){
-            $sdn->petty_cash_statement_id = $request->petty_cash_select;
-            // }
-            $sdn->save();
+            $dncc_amount= $sdn->sdn_amount;
+            $deposit_amount= $sdn->sdn_deposit_amount;
+            $adjustment_amount =  $request->adjustment_amount;
 
-            $petty_details = PettyCashStatement::find($request->petty_cash_select);
-            if($petty_details) {
-                $petty_details->status = 5;
-                $petty_details->save();
+            $total =$deposit_amount + $adjustment_amount;
+            if($dncc_amount>= $total){
+                $sdn->adjustment_amount = $request->adjustment_amount;
+                $sdn->adjustment_date = $request->adjustment_date_formatted;
+                $sdn->adjustment_ref = $request->adjustment_ref;
+                $sdn->adjusted = 1;
+                $sdn->sdn_net_amount = $dncc_amount - $deposit_amount - $adjustment_amount;
+                // if($request->petty_cash_select != ''){
+                $sdn->petty_cash_statement_id = $request->petty_cash_select;
+                // }
+                $sdn->save();
+
+                $petty_details = PettyCashStatement::find($request->petty_cash_select);
+                if($petty_details) {
+                    $petty_details->status = 5;
+                    $petty_details->save();
+                }
+
+                return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
+
+            }
+            else{
+                return redirect()->back()->with(['error' => 'DNCC cannot be less than sum of adjustment amount & deposit amount']);
             }
 
-            return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
         }else{
             return redirect()->back()->with(['error' => 'Station Deposit Note ID not found!']);
         }

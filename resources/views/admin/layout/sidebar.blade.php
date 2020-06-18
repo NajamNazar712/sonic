@@ -187,8 +187,17 @@
                                     @if (session('role_id') == 1 || in_array(27, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a></li>
                                     @endif
+
                                     @if (session('role_id') == 1 || in_array(124, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo.history.index') }}">History</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(31, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.cargo.receive.quick.index') }}">Quick Receive</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(124, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.cargo.receive.quick.list.index') }}">Quick Receive List</a></li>
                                     @endif
 
                                 </ul>

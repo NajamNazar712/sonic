@@ -10,6 +10,9 @@ class Shipment extends Model
 	public function items() {
 		return $this->hasMany('App\Http\Models\ShipmentItem');
 	}
+    public function shipment_pieces() {
+        return $this->hasMany('App\Http\Models\ShipmentPiece');
+    }
 
 	public function booking_type() {
 		return $this->belongsTo('App\Http\Models\BookingType');
