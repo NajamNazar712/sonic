@@ -2763,7 +2763,7 @@ class AdminFinanceController extends Controller
                     ->where('consolidations.consolidation_id','=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
-            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable','consolidations.consolidation_id', 'oc.name as origin');
+            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable','consolidations.consolidation_id', 'oc.name as origin','u.account_type_id');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -2783,6 +2783,9 @@ class AdminFinanceController extends Controller
                 },
                 'type_id' => function($deliveries){
                     return $deliveries->type;
+                },
+                'account_type' => function($deliveries){
+                    return $deliveries->account_type_id;
                 }
             ])
             ->addColumn('deductable', function($pending_payment_shipments) {
