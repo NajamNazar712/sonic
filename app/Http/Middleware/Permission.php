@@ -604,6 +604,30 @@ class Permission
             'dashboard.overall.commission' => 334,
             'dashboard.overall.commission.list' => 334,
             'dashboard.overall.commission.data' => 334,
+             
+            //handover module
+            'handover.create.index' => 339,
+            'handover.create.fetch' => 339,
+            'handover.create.fetch1' => 339,
+            'handover.create.shipment_details' => 339,
+            'handover.create.store' => 339,
+
+            'handover.receive.index' => 341,
+            'handover.receive.shipment_details' => 341,
+            'handover.receive.store' => 341,
+
+            'handover.list.index' => 342,
+            'handover.list.list' => 342,
+            'handover.list.shipments' => 342,
+            'handover.list.delivered' => 342,
+            'handover.list.print' => 342,
+
+            'handover.responsibles.index' => 340,
+            'handover.responsibles.list' => 340,
+            'handover.responsibles.add' => 340,
+            'handover.responsibles.status' => 340,
+            'handover.responsibles.details' => 340,
+            'handover.responsibles.edit' => 340,
         ],
 
         'shipper' => [
