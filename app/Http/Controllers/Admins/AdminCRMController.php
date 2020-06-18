@@ -2027,7 +2027,8 @@ class AdminCRMController extends Controller
     }
 
     public function crm_index(){
-        return view('admin.crm.index');
+        $departments = AdminDepartment::where('id', '!=', 1)->get(['id', 'name']);
+        return view('admin.crm.index')->with(['departments' => $departments]);
     }
 
     public function crm_list(){

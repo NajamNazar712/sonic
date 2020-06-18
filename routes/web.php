@@ -291,6 +291,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('logo')->name('logo.')->group(function () {
             Route::get('', 'Shippers\ShipperGlobalSettingsController@upload_logo_index')->name('index');
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@upload_logo_submit')->name('upload');
+            Route::post('remove', 'Shippers\ShipperGlobalSettingsController@remove_logo')->name('remove');
         });
     });
 	Route::prefix('consolidation')->name('consolidation.')->group(function () {
