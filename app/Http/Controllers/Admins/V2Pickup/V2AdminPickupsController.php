@@ -256,23 +256,27 @@ class V2AdminPickupsController extends Controller
         $bookings = 0;
 
         foreach ($pickup_request_ids as $pickup_request_id) {
-            $pickup_request = V2PickupRequest::find($pickup_request_id);
-            $pickup_request->rider_status = 2;
-            $pickup_request->attempts = $pickup_request->attempts + 1;
-            $pickup_request->current_rider_id = $rider_id;
-            $pickup_request->last_updated_by = Auth::id();
-            $pickup_request->save();
+            $date = Carbon::now();
+            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('rider_id', $rider_id)->whereDate('attempt_date', $date);
+            if(!$existing_pickup_request_attempt->exists()){
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                $pickup_request->rider_status = 2;
+                $pickup_request->attempts = $pickup_request->attempts + 1;
+                $pickup_request->current_rider_id = $rider_id;
+                $pickup_request->last_updated_by = Auth::id();
+                $pickup_request->save();
 
-            $pickup_request_attempt = new V2PickupRequestAttempt();
-            $pickup_request_attempt->pickup_request_id = $pickup_request_id;
-            $pickup_request_attempt->rider_id = $rider_id;
-            $pickup_request_attempt->attempt_date = Carbon::now();
-            $pickup_request_attempt->assigned_by = Auth::id();
-            $pickup_request_attempt->save();
-            $pickup_request->save();
+                $pickup_request_attempt = new V2PickupRequestAttempt();
+                $pickup_request_attempt->pickup_request_id = $pickup_request_id;
+                $pickup_request_attempt->rider_id = $rider_id;
+                $pickup_request_attempt->attempt_date = Carbon::now();
+                $pickup_request_attempt->assigned_by = Auth::id();
+                $pickup_request_attempt->save();
+                $pickup_request->save();
 
-            $pickups++;
-            $bookings += $pickup_request->booked;
+                $pickups++;
+                $bookings += $pickup_request->booked;
+            }
         }
 
         $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
