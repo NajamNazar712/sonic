@@ -4019,6 +4019,14 @@ class AdminFinanceController extends Controller
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
+            $change_shipment_weight_log=ChangeShipmentWeightLog::where('shipment_id', $shipment->user_id)->first();
+            if($change_shipment_weight_log){
+                $shipment_weight=$change_shipment_weight_log->old_weight;
+            }
+            else{
+               $shipment_weight= $shipment->actual_weight;
+            }
+
             if ($done_payment_shipment->type == 0) {
                 $type = 'Delivered';
             }
@@ -4040,7 +4048,7 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->shipping_mode->mode . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
                               <td>' . $shipment->booking_type->booking_type . '</td>
-                              <td>' . $shipment->actual_weight . '</td>
+                              <td>' . $shipment_weight   . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
