@@ -350,6 +350,8 @@ class V2AdminPickupsController extends Controller
             }
 
             return ['status' => 0, 'success' => 'Pickup Request(s) has been Assigned to the Rider'];
+        }else{
+            return ['status' => 0, 'success' => 'Pickup Request(s) rider updated / assigned!'];
         }
         return ['status' => 1, 'error' => 'Pickup Request(s) already assigned'];
 
@@ -737,14 +739,16 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->status_id = 2;
                 $pickup_request->save();
                 $pickup_note_request = $pickup_request->pickup_note_request;
-                $pickup_note_id = $pickup_note_request->pickup_note_id;
-                $pickup_note_request->status = 1;
-                $pickup_note_request->save();
-                $pickup_note = V2PickupNote::find($pickup_note_id);
-                if($pickup_note){
-                    if($pickup_note->status == 0){
-                        if(!in_array($pickup_note_id, $pickup_note_ids)){
-                            $pickup_note_ids[] = $pickup_note_id;
+                if($pickup_note_request){
+                    $pickup_note_id = $pickup_note_request->pickup_note_id;
+                    $pickup_note_request->status = 1;
+                    $pickup_note_request->save();
+                    $pickup_note = V2PickupNote::find($pickup_note_id);
+                    if($pickup_note){
+                        if($pickup_note->status == 0){
+                            if(!in_array($pickup_note_id, $pickup_note_ids)){
+                                $pickup_note_ids[] = $pickup_note_id;
+                            }
                         }
                     }
                 }
@@ -759,7 +763,6 @@ class V2AdminPickupsController extends Controller
                 Log::info('Pickup note id: '.$pickup_note_id);
             }
         }
-        Log::info('Hello Pakistani');
 
         NotificationsController::send(4, $shipment_ids);
         if (empty($print_shipment_ids)) {
@@ -830,6 +833,7 @@ class V2AdminPickupsController extends Controller
     public function arrival_individual_shipment_details(Request $request)
     {
         $shipment = Shipment::where('tracking_number',$request->tracking_number);
+
         if($shipment->exists()) {
             $shipment = $shipment->first();
             $pickup_request_id = NULL;
@@ -1215,14 +1219,16 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->status_id = 2;
                 $pickup_request->save();
                 $pickup_note_request = $pickup_request->pickup_note_request;
-                $pickup_note_id = $pickup_note_request->pickup_note_id;
-                $pickup_note_request->status = 1;
-                $pickup_note_request->save();
-                $pickup_note = V2PickupNote::find($pickup_note_id);
-                if($pickup_note){
-                    if($pickup_note->status == 0){
-                        if(!in_array($pickup_note_id, $pickup_note_ids)){
-                            $pickup_note_ids[] = $pickup_note_id;
+                if($pickup_note_request){
+                    $pickup_note_id = $pickup_note_request->pickup_note_id;
+                    $pickup_note_request->status = 1;
+                    $pickup_note_request->save();
+                    $pickup_note = V2PickupNote::find($pickup_note_id);
+                    if($pickup_note){
+                        if($pickup_note->status == 0){
+                            if(!in_array($pickup_note_id, $pickup_note_ids)){
+                                $pickup_note_ids[] = $pickup_note_id;
+                            }
                         }
                     }
                 }
