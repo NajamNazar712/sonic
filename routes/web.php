@@ -408,6 +408,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
         Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
         Route::post('/documents/confirm', 'Admins\AdminDashboardController@userDocumentsConfirm')->name('documents.confirm');
+        //my route
+        Route::post('/documents/edit', 'Admins\AdminDashboardController@userDocumentsEdit')->name('documents.edit');
 
         Route::prefix('sister_account')->name('sister_account.')->group(function(){
             Route::get('{id}/add/','Admins\AdminDashboardController@add_sister_account_view')->name('add.account');
