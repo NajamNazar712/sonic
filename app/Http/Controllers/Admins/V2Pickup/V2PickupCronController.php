@@ -42,7 +42,7 @@ class V2PickupCronController extends Controller
                         $pickup_request_attempt->pickup_request_id = $pickup_request->id;
                         $pickup_request_attempt->rider_id = $rider_id;
                         $pickup_request_attempt->attempt_date = Carbon::now();
-                        $pickup_request_attempt->assigned_by = 70;
+                        $pickup_request_attempt->assigned_by = 346;
                         $pickup_request_attempt->save();
 
                         $pickup_request_attempt->fresh();
