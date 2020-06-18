@@ -170,14 +170,20 @@ class V2AdminReportController extends Controller
 
     public function pickup_report_index(){
         
-        $stats=V2PickupReportSummary::select([ DB::raw('SUM(total) as total'),
-        DB::raw('SUM(pending_operations) as pending_operations'),DB::raw('SUM(pending_sales) as pending_sales'),
-        DB::raw('SUM(before_cut_off_time) as before_cut_off_time'),
-        DB::raw('SUM(after_cut_off_time) as after_cut_off_time'),DB::raw('SUM(attempted_and_picked) as attempted_and_picked'),
-        DB::raw('SUM(attempted_and_not_picked) as attempted_and_not_picked'),
-        DB::raw('SUM(attempted_failed) as attempted_failed')
-        ])->get();
-       // $stats=V2PickupReportSummary::all();
+        $stats = array();
+        $today = Carbon::today();  
+        
+
+        $report_summary_data=V2PickupReportSummary::whereDate('created_at',$today)->first();
+        $stats['total']= $report_summary_data->total;
+        $stats['pending_operations']= $report_summary_data->pending_operations;
+        $stats['pending_sales']= $report_summary_data->pending_sales;
+        $stats['before_cut_off_time'] = $report_summary_data->before_cut_off_time;
+        $stats['after_cut_off_time'] = $report_summary_data->after_cut_off_time;
+        $stats['attempted_and_picked'] = $report_summary_data->attempted_and_picked;
+        $stats['attempted_and_not_picked'] = $report_summary_data->attempted_and_not_picked;
+        $stats['attempted_failed'] = $report_summary_data->attempted_failed;
+
         $legends = V2PickupReportLegend::all();
         $department = DB::connection('reports')->table('admin_departments')->whereIn('id',[6,7])->get();
         $salesperson = DB::connection('reports')->table('admins')->leftjoin('admin_roles as ar', 'ar.id', '=', 'admins.role_id')->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')->select('admins.id','admins.name')->where('ar.department_id',7)->get();
@@ -188,8 +194,7 @@ class V2AdminReportController extends Controller
     }
 
     public function pickup_report_list(Request $request){
-        $today = Carbon::now()->startOfDay();
-
+        $today = Carbon::today();
         $pickup_report = V2PickupReport::join('v2_pickup_requests as v', 'v2_pickup_reports.pickup_request_id', '=', 'v.id')
              ->leftjoin('v2_pickup_request_statuses as vprs','vprs.id','=','v2_pickup_reports.status_id')
              ->leftjoin('users as u','u.id','=','v.shipper_id')
@@ -202,7 +207,7 @@ class V2AdminReportController extends Controller
             'v2_pickup_reports.received_shipments as received_shipments','v2_pickup_reports.difference_shipments as difference_shipments',
             'ad.name as department','v.attempts as attempted_count','usi.poc AS contact_person', 'usi.vendor as vendor',
             'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id')
-            // ->groupBy('v2_pickup_reports.pickup_request_id')
+            ->whereDate('v2_pickup_reports.created_at',$today)
             ;
         $datatables = Datatables::of($pickup_report)
         ->setRowAttr([
@@ -296,7 +301,45 @@ class V2AdminReportController extends Controller
         }
 
         return $datatables->make(true);
-    } 
+    }
+    
+    public function pickup_report_data(Request $request){
+        $stats = array();
+        $date = Carbon::now();
+        if($request->get('search_date_from')){
+            $first_day = $request->search_date_from;
+        }
+        else{
+            $first_day= Carbon::today();
+                
+        }
+        if($request->get('search_date_to')){
+            $last_day = $request->search_date_to;
+        }
+        else{
+            $last_day= Carbon::today();
+        }
+
+        $report_summary_data=V2PickupReportSummary::select([ DB::raw('SUM(total) as total'),
+        DB::raw('SUM(pending_operations) as pending_operations'),DB::raw('SUM(pending_sales) as pending_sales'),
+        DB::raw('SUM(before_cut_off_time) as before_cut_off_time'),DB::raw('SUM(after_cut_off_time) as after_cut_off_time'),
+        DB::raw('SUM(attempted_and_picked) as attempted_and_picked'),DB::raw('SUM(attempted_and_not_picked) as attempted_and_not_picked'),
+        DB::raw('SUM(attempted_failed) as attempted_failed')
+        ])
+        ->whereBetween('created_at',[$first_day, $last_day])->first();
+        $stats['total']= $report_summary_data->total;
+        $stats['pending_operations']= $report_summary_data->pending_operations;
+        $stats['pending_sales']= $report_summary_data->pending_sales;
+        $stats['before_cut_off_time'] = $report_summary_data->before_cut_off_time;
+        $stats['after_cut_off_time'] = $report_summary_data->after_cut_off_time;
+        $stats['attempted_and_picked'] = $report_summary_data->attempted_and_picked;
+        $stats['attempted_and_not_picked'] = $report_summary_data->attempted_and_not_picked;
+        $stats['attempted_failed'] = $report_summary_data->attempted_failed;
+
+        return response()->json(['status' => 1, 'stats' => $stats]);
+
+
+    }
     
     
    

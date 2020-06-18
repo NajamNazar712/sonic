@@ -1426,6 +1426,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('pickup_report')->name('pickup_report.')->group(function (){
             Route::get('', 'Admins\V2Pickup\V2AdminReportController@pickup_report_index')->name('index');
             Route::get('list', 'Admins\V2Pickup\V2AdminReportController@pickup_report_list')->name('list');
+            Route::post('/data', 'Admins\V2Pickup\V2AdminReportController@pickup_report_data')->name('data');
         });
     });
 
