@@ -33,7 +33,7 @@ class AdminShipmentHandoverController extends Controller
     public function handover_dropdown_val_fetch_from(Request $request){
         $value = $request->get('value');
         // $dependent = $request->get('dependent');-
-        $dependent = "select Person";
+        $dependent = "select From Person";
         $data = HandoverResponsibilities::where('hub_id',$value)->get();
         $output = '<option value ="">' .ucfirst($dependent). '</option> ';
         foreach($data as $row){
@@ -41,16 +41,16 @@ class AdminShipmentHandoverController extends Controller
         }
         echo $output;
     }
-    public function handover_dropdown_val_fetch_to(Request $request){
-        $value = $request->get('value');
-        $dependent = $request->get('dependent');
-        $data = HandoverResponsibilities::where('id',$value)->get();
-        $output = '<option value ="">Select ' .ucfirst($dependent). '</option> ';
-        foreach($data as $row){
-            $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
-        }
-        echo $output;
-    }
+    // public function handover_dropdown_val_fetch_to(Request $request){
+    //     $value = $request->get('value');
+    //     $dependent = $request->get('dependent');
+    //     $data = HandoverResponsibilities::where('id',$value)->get();
+    //     $output = '<option value ="">Select ' .ucfirst($dependent). '</option> ';
+    //     foreach($data as $row){
+    //         $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
+    //     }
+    //     echo $output;
+    // }
 
     public function arrival_bulk_shipment_details(Request $request){
 
