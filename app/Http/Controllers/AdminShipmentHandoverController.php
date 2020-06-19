@@ -248,7 +248,7 @@ class AdminShipmentHandoverController extends Controller
             $handover_request->save();
           }
           else{
-            return ['status' => 1, 'error' => 'All shipments of handover has not been received yet'];
+            return ['status' => 1, 'error' => 'Handover note already updated!'];
           }
         }
   
