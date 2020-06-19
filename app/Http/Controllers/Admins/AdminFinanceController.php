@@ -4019,7 +4019,7 @@ class AdminFinanceController extends Controller
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
-            $change_shipment_weight_log=ChangeShipmentWeightLog::where('shipment_id', $shipment->user_id)->first();
+            $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->user_id)->first();
             if($change_shipment_weight_log){
                 $shipment_weight=$change_shipment_weight_log->old_weight;
             }
