@@ -64,7 +64,7 @@
                                 <div class="col-3">
                                     <fieldset class="form-group">
                                         <select name="from" id="from" class="form-control select2" required >
-                                                <!-- <option value="">Select Person</option> -->
+                                                <option value="">Select From Person</option>
                                         </select>
                                         <div class="danger" id="from_error" style="display:none;">This field is required</div>
                                     </fieldset>
@@ -73,7 +73,7 @@
                                 <div class="col-3">
                                     <fieldset class="form-group">
                                         <select name="to" id="to" class="form-control select2" required >
-                                            <!-- <option value="">Select Person</option> -->
+                                            <option value="">Select To Person</option>
                                         </select>
                                         <div class="danger" id="to_error" style="display:none;">This field is required</div>
                                     </fieldset>
@@ -134,9 +134,9 @@
         $(document).ready(function() {
           
             //dropdown
-            $('#hub').on('change',function(){
-            $('#hub1').val($('#hub :selected').val());
-            });
+            // $('#hub').on('change',function(){
+            // $('#hub1').val($('#hub :selected').val());
+            // });
 
             $('.dynamic').change(function(){
                 if($(this).val() != '')
@@ -144,7 +144,7 @@
                     //var select = $(this).attr("id");
                     var value = $(this).val();
                     var dependent = $(this).data('dependent');
-                    console.log(value);
+                    console.log(dependent);
                     var _token = $('input[name="_token"]').val();
                     $.ajax({
                         url: '{!! route('admin.handover.create.fetch') !!}',
@@ -152,73 +152,37 @@
                         data:{value:value, _token:_token,dependent:dependent},
                         success:function(result){
                             $('#'+dependent).html(result);
-                            $('#to').empty()
+                            $('#to').empty();
                             $('#from option').clone().appendTo('#to');  
+                            $('#to').find('option').get(0).remove();
+                            $("#to").prepend("<option value='' selected='selected'>Select To Person</option>");
+                            // $('#to').find('option').get(0).remove();
                         }
                     })
                 }
+                
             });
-            // $('.dynamic1').change(function(){
-            //     if($(this).val() != '')
-            //     {
-            //         //var select = $(this).attr("id");
-            //         var value = $(this).val();
-            //         var dependent = $(this).data('dependent');
-            //         console.log(value);
-            //         var _token = $('input[name="_token"]').val();
-            //         $.ajax({
-            //             url: '{!! route('admin.handover.create.fetch1') !!}',
-            //             method:"POST",
-            //             data:{value:value, _token:_token,dependent:dependent},
-            //             success:function(result){
-            //                 $('#'+dependent).html(result);
-            //             }
-            //         })
-            //     }
+
+
+           
+            $("#from").change(function()
+           {    
+               $('#to').empty();
+                 $('#from option').clone().appendTo('#to');
+                 $('#to').find('option').get(0).remove();
+                 $("#to").prepend("<option value='' selected='selected'>Select To Person</option>");
+                
+                 var value = $(this).val();
+                $("#to option[value='"+value+"']").remove();
+             });
+
+            
+            // $('#hub').change(function(){
+            // $('#from').val('');
             // });
-            $('#from option').clone().appendTo('#to');
-            // $('.dynamic').change(function(){
-            //     if($(this).val() != '')
-            //     {
-            //         //var select = $(this).attr("id");
-            //         var value =  hub_id1 =  $('#hub :selected').val();
-            //         var dependent = $(this).data('dependent');
-            //         console.log(value);
-            //         var _token = $('input[name="_token"]').val();
-            //         $.ajax({
-            //             url: '{!! route('admin.handover.create.fetch') !!}',
-            //             method:"POST",
-            //             data:{value:value, _token:_token,dependent:dependent},
-            //             success:function(result){
-            //                 $('#'+dependent).html(result);
-            //             }
-            //         })
-            //     }
+            // $('#from').change(function(){
+            // $('#to').val('');
             // });
-            // $('.dynamic2').change(function(){
-            //     if($(this).val() != '')
-            //     {
-            //         //var select = $(this).attr("id");
-            //         var value = $(this).val();
-            //         var dependent = $(this).data('dependent');
-            //         console.log(value);
-            //         var _token = $('input[name="_token"]').val();
-            //         $.ajax({
-            //             url: '{!! route('admin.handover.create.fetch1') !!}',
-            //             method:"POST",
-            //             data:{value:value, _token:_token,dependent:dependent},
-            //             success:function(result){
-            //                 $('#'+dependent).html(result);
-            //             }
-            //         })
-            //     }
-            // });
-            $('#hub').change(function(){
-            $('#from').val('');
-            });
-            $('#from').change(function(){
-            $('#to').val('');
-            });
 
             //end
 

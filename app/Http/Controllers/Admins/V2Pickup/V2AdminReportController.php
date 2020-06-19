@@ -72,7 +72,7 @@ class V2AdminReportController extends Controller
                    $received = 0;
                    $attempts = 0;
 
-                   $total_pickups++;
+   $total_pickups++;
                    $shipper_id = $pickup_request->shipper_id;
                    $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0);
                    if($sales_person->exists()){
@@ -81,7 +81,7 @@ class V2AdminReportController extends Controller
                    }
                    $reason_id = null;
 
-                   $pickup_request_id = $pickup_request->id;
+					$pickup_request_id = $pickup_request->id;
                    $status_id = $pickup_request->status_id;
                    $booked = $pickup_request->booked;
                    if($pickup_request->received !== null){
