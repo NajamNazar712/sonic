@@ -80,7 +80,12 @@
                                                 <button type="button" class="btn btn-outline-success mr-1 confirm">Confirm</button>
                                         </div>
                                         @endif
-                                   
+                                @elseif($document_status == 2)
+                                @if(session('role_id') == 1 || in_array(277, session('permissions')))
+                                        <div class="mr-1">
+                                            <button type="button" class="btn btn-outline-primary mr-1 edit">Edit</button>
+                                        </div>
+                                    @endif
                                 @elseif($document_status == 1)
                                     @if(session('role_id') == 1 || in_array(278, session('permissions')))
                                         <div class="mr-1">
