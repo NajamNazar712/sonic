@@ -27,9 +27,11 @@ class V2PickupCronController extends Controller
             $setting = $setting->first();
             $rider_id = $setting->setting_value;
         }
-        $pickup_requests = V2PickupRequest::where('status_id', 1)->whereDate('created_at', '<=', Carbon::today())->whereTime('created_at', '<=', $arrival_time);
+        $today = Carbon::today();
+        $pickup_requests = V2PickupRequest::where('status_id', 1)->whereDate('created_at', '<=', $today)->whereTime('created_at', '<=', $arrival_time);
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
+            return $pickup_requests;
             $pickup_request_ids = array();
             foreach ($pickup_requests as $pickup_request) {
                 $pickup_request->status_id = 3;
