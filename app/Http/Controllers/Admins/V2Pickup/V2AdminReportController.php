@@ -45,7 +45,7 @@ class V2AdminReportController extends Controller
         $attempted_and_not_picked = 0;
         $attempted_failed = 0;
 
-        $report = V2PickupReport::whereDate('today', $today);
+        $report = V2PickupReport::whereDate('date', $today);
         if($report->exists()){
             $report->delete();
             V2PickupReportSummary::whereDate('date', $today)->delete();
