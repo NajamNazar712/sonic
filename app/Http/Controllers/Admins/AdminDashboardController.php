@@ -8860,6 +8860,7 @@ if(session('department_id') == 7){
             $user->documents_status_reason = null;
             $user->save();
             return redirect()->back()->with(['success' => 'Files approved successfully']);
+            
         }
         else if($approve == 0){
             $user->documents_status = 3;
