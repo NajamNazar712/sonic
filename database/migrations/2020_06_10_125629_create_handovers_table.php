@@ -16,14 +16,14 @@ class CreateHandoversTable extends Migration
         Schema::create('handovers', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('created_by');
-            $table->integer('received_by');
+            $table->integer('received_by')->nullable();
             $table->integer('from');
             $table->integer('to');
             $table->integer('hub');
             $table->integer('status_id');
             $table->integer('shipments');
-            $table->integer('received');
-            $table->timestamp('received_at');
+            $table->integer('received')->nullable();
+            $table->timestamp('received_at')->nullable();
             $table->timestamps();
         });
     }
