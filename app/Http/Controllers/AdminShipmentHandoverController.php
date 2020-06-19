@@ -128,7 +128,6 @@ class AdminShipmentHandoverController extends Controller
     }
     public function bulk_handover_submit_receive(Request $request){
         $shipment_ids = explode(',', $request->shipment_ids);
-        $today = Carbon::now();
         $handover_ids = array();
         foreach ($shipment_ids as $shipment_id) {
             $handover_shipments = HandoverShipments::where('shipment_id', $shipment_id)->where('status',1);
@@ -237,18 +236,15 @@ class AdminShipmentHandoverController extends Controller
           $handover_request = Handover::find($handover_id);
   
           if ($handover_request->status_id == 2) {
-            return ['status' => 1, 'error' => 'One of the Handover has already been modified'];
+            return ['status' => 1, 'error' => 'Handover No # '. $handover_request->id .' has already been modified'];
           }
         }
   
         foreach ($handover_ids as $handover_id) {
-          $handover_request = Handover::where('id',$handover_id)->where('status_id', 4)->first();
+          $handover_request = Handover::where('id',$handover_id)->where('status_id', 1)->first();
 
-          if($handover_request)
-          {
-  
+          if($handover_request) {
             $handover_request->status_id = 2;
-  
             $handover_request->save();
           }
           else{
@@ -261,12 +257,8 @@ class AdminShipmentHandoverController extends Controller
 
     public function handover_print(Request $request) {
       $handover_note_ids = $request->ids;
-      //dd($handover_note_ids);
-      //$view =array();
+
       $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-      
-          //$handover_notes = Handover::find($handover_note_id);
-          // dd($handover_notes);
           
           $html='';
           $html = '
