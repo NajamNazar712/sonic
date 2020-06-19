@@ -4018,13 +4018,13 @@ class AdminFinanceController extends Controller
       $total_payable = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
-
-            $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->user_id)->first();
-            if($change_shipment_weight_log){
-                $shipment_weight=$change_shipment_weight_log->old_weight;
-            }
-            else{
-               $shipment_weight= $shipment->actual_weight;
+            $shipment_weight= $shipment->actual_weight;
+            if($done_payment_shipment->type == 0){
+                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+                if($change_shipment_weight_log->exists()){
+                    $change_shipment_weight_log = $change_shipment_weight_log->first();
+                    $shipment_weight = $change_shipment_weight_log->old_weight;
+                }
             }
 
             if ($done_payment_shipment->type == 0) {
