@@ -1950,7 +1950,8 @@ class AdminCargoController extends Controller
     public function quick_receive_list_ajax(Request $request){
         $cargo_consignment_excel = CargoConsignmentExcel::leftjoin('cargo_consignment_shipment_excels as ccse', 'ccse.cargo_consignment_excel_id', '=', 'cargo_consignment_excels.id')
             ->leftjoin('admins as a', 'a.id', '=', 'cargo_consignment_excels.created_by')
-            ->select('cargo_consignment_excels.id', 'cargo_consignment_excels.created_at as created_at', 'a.name as created_by', 'cargo_consignment_excels.shipments as shipments', 'cargo_consignment_excels.cargoes as cargoes', 'cargo_consignment_excels.excel as excel');
+            ->select('cargo_consignment_excels.id', 'cargo_consignment_excels.created_at as created_at', 'a.name as created_by', 'cargo_consignment_excels.shipments as shipments', 'cargo_consignment_excels.cargoes as cargoes', 'cargo_consignment_excels.excel as excel')
+            ->groupBy('cargo_consignment_excels.id');
 
         $datatables = Datatables::of($cargo_consignment_excel)
             ->addColumn('shipments_button', function ($cargo_consignment) {

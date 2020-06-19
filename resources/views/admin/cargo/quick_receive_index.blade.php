@@ -280,7 +280,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[2, 'desc']],
+                order: [[1, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'created_at', name: 'cargo_consignment_excels.created_at', class: 'align-middle text-center created_at'},
