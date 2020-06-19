@@ -417,7 +417,7 @@
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'received_shipments', name: 'handovers.received', class: 'align-middle received_shipments'},
                     {data: 'received_by', name: 'a.name', class: 'align-middle received_by'},
-                    {data: 'received_at', name: 'handovers.received_at', class: 'align-middle received_at', orderable: false, searchable: false},
+                    {data: 'received_at', name: 'handovers.received_at', class: 'align-middle received_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     // var info = table.page.info();
