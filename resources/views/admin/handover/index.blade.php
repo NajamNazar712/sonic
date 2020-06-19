@@ -3,116 +3,91 @@
 @section('title', 'Create Handover Note')
 
 @section('content')
-    <div class="app-content content">
-        <div class="content-wrapper">
-            <div class="content-header row">
-            </div>
-            <div class="content-body">
-                <h1 class="mb-1">
-                    Create Handover Note
-                </h1>
 
-                <div class="card">
-                    <div class="card-content" aria-expanded="true">
-                        <div class="card-body">
-                            @include('admin.inc.messages')
 
-                            <!-- <div id="camera_scan" class="d-none">
-                                <div id="camera_view" class="camera_view"></div>
-                            </div> -->
 
-                            <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+        <h1 class="mb-1">
+            Create Handover Note
+        </h1>
 
-                                <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+        <div class="card">
+            <div class="card-content" aria-expanded="true">
+                <div class="card-body">
+                    @include('admin.inc.messages')
 
-                                    <!-- <div class="d-inline-block ml-1">
-                                        <a href="#" id="camera_scan_initiate" tabindex="-1">
-                                            <i class="ft-camera h1"></i>
-                                        </a>
-                                    </div> -->
-                                </div>
+                    <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
-                                <div class="form-group ml-1">
-                                    <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
-                                </div>
-                            </form>
-                            <div class="row mb-2 justify-content-center">
+                        <div class="form-group">
+                            <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 
-                                <div class="col-3">
-                                    <fieldset class="form-group">
-                                        <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from" 
-                                         required >
-                                            <option value="">Select Hub</option>
-                                            @foreach($hubs as $hub)
-                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="danger" id="hub_error" style="display:none;">This field is required</div>
-                                    </fieldset>
-                                    <!-- <fieldset class="form-group">
-                                        <select name="hub1" id="hub1" class="form-control select2 dynamic1" data-dependent="to" 
-                                         required >
-                                            <option value="">Select Hub</option>
-                                            @foreach($hubs as $hub)
-                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                            @endforeach
-                                        </select>
-                                         <div class="danger" id="hub_error" style="display:none;">This field is required</div> 
-                                    </fieldset> -->
-                                </div>
-                                <div class="col-3">
-                                    <fieldset class="form-group">
-                                        <select name="from" id="from" class="form-control select2" required >
-                                                <option value="">Select From Person</option>
-                                        </select>
-                                        <div class="danger" id="from_error" style="display:none;">This field is required</div>
-                                    </fieldset>
-                                </div>
-                                
-                                <div class="col-3">
-                                    <fieldset class="form-group">
-                                        <select name="to" id="to" class="form-control select2" required >
-                                            <option value="">Select To Person</option>
-                                        </select>
-                                        <div class="danger" id="to_error" style="display:none;">This field is required</div>
-                                    </fieldset>
-                                </div>
-                                {{ csrf_field() }}
-                            </div>
-
-                            <table class="table table-bordered datatable" id="datatable" style="width:100%; z-index: 3;">
-                                <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Tracking Number</th>
-                                    <th class="border-primary border-darken-1">Shipper</th>
-                                    <th class="border-primary border-darken-1">Phone No</th>
-                                    <th class="border-primary border-darken-1">Pickup Date</th>
-                                    <th class="border-primary border-darken-1">Special Instruction</th>
-                                    <th class="border-primary border-darken-1"></th>
-                                </tr>
-                                </thead>
-                            </table>
-
-                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.handover.create.store') }}" novalidate="novalidate">
-                                {{ csrf_field() }}
-    
-                                <input type="hidden" name="shipment_ids" class="shipment_ids">
-                                <input type="hidden" name="hub_id" class="hub_id">
-                                <input type="hidden" name="from" class="from">
-                                <input type="hidden" name="to" class="to">
-
-                                <div class="form-group ml-1">
-                                    <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
-                                </div>
-                            </form>
                         </div>
+
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                        </div>
+                    </form>
+                    <div class="row mb-2 justify-content-center">
+
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from"
+                                 required>
+                                    @foreach($hubs as $hub)
+                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                    @endforeach
+                                </select>
+                                <div class="danger" id="hub_error" style="display:none;">This field is required</div>
+                            </fieldset>
+
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="from" id="from" class="form-control select2" required>
+                                </select>
+                                <div class="danger" id="from_error" style="display:none;">This field is required</div>
+                            </fieldset>
+                        </div>
+
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="to" id="to" class="form-control select2" required>
+                                </select>
+                                <div class="danger" id="to_error" style="display:none;">This field is required</div>
+                            </fieldset>
+                        </div>
+                        {{ csrf_field() }}
                     </div>
+
+                    <table class="table table-bordered datatable" id="datatable" style="width:100%; z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking Number</th>
+                            <th class="border-primary border-darken-1">Shipper</th>
+                            <th class="border-primary border-darken-1">Phone No</th>
+                            <th class="border-primary border-darken-1">Pickup Date</th>
+                            <th class="border-primary border-darken-1">Special Instruction</th>
+                            <th class="border-primary border-darken-1"></th>
+                        </tr>
+                        </thead>
+                    </table>
+
+                    <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.handover.create.store') }}" novalidate="novalidate">
+                        {{ csrf_field() }}
+
+                        <input type="hidden" name="shipment_ids" class="shipment_ids">
+                        <input type="hidden" name="hub_id" class="hub_id">
+                        <input type="hidden" name="from" class="from">
+                        <input type="hidden" name="to" class="to">
+
+                        <div class="form-group ml-1">
+                            <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
+
 
    
 @endsection
@@ -120,9 +95,11 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -132,19 +109,22 @@
 
     <script>
         $(document).ready(function() {
-          
-            //dropdown
-            // $('#hub').on('change',function(){
-            // $('#hub1').val($('#hub :selected').val());
-            // });
+
+            $('#hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Hub*',
+            });
+            $('#from').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select From Person*',
+            });
+            $('#to').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select To Person*',
+            });
 
             $('.dynamic').change(function(){
                 if($(this).val() != '')
                 {
-                    //var select = $(this).attr("id");
                     var value = $(this).val();
                     var dependent = $(this).data('dependent');
-                    console.log(dependent);
                     var _token = $('input[name="_token"]').val();
                     $.ajax({
                         url: '{!! route('admin.handover.create.fetch') !!}',
