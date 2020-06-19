@@ -889,8 +889,7 @@ class AdminTrackingController extends Controller
                             $crm_request_journey['status'] = $crm_request->status;
                             if($crm_request->status_id == 1){
                                 if($crm_request->launched_added_by == 0){
-                                       // $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
-                                       $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
+                                       $crm_request_journey['created_by'] = $crm_request->launched_by_admin . ' (Admin)';
                                 }
                                 else if($crm_request->launched_added_by == 1){
                                     $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';
