@@ -26,9 +26,11 @@ class V2PickupCronController extends Controller
                     $pickup_request_attempt->reason_id = 7;
                     $pickup_request_attempt->save();
                     $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request->id)->latest('id')->first();
-                    if($pickup_note_request->status == 0){
-                        $pickup_note_request->status = 1;
-                        $pickup_note_request->save();
+                    if($pickup_note_request){
+                        if($pickup_note_request->status == 0){
+                            $pickup_note_request->status = 1;
+                            $pickup_note_request->save();
+                        }
                     }
                     if(!in_array($pickup_request->id, $pickup_request_ids)){
                         $pickup_request_ids[] = $pickup_request->id;
