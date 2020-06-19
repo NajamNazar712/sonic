@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -18,6 +19,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
@@ -1309,7 +1311,7 @@ class DeliveryController extends Controller
             })
             ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sj.shipper_status_id')
             ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sj.status_reason_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering','consolidations.consolidation_id', 'sj.shipper_status_id as rider_status_id', 'sj.status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.shipper_status_id as latest_rider_status_id'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering','consolidations.consolidation_id', 'sj.shipper_status_id as rider_status_id', 'sj.status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.shipper_status_id as latest_rider_status_id','sjl.received_or_refused_by'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -1372,8 +1374,9 @@ class DeliveryController extends Controller
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('received_or_refused_by', function ($deliveries) {
+                    $receiver = $deliveries->received_or_refused_by;
 
-                     $received_refused_input = '<input class="form-control form-control-sm" name="received_refused_input[' . $deliveries->shId . ']" placeholder="Enter Name" >';
+                     $received_refused_input = '<input class="form-control form-control-sm" name="received_refused_input[' . $deliveries->shId . ']" placeholder="Enter Name" value="'. $receiver .'">';
                      return $received_refused_input;
 
             })
@@ -1635,7 +1638,6 @@ class DeliveryController extends Controller
 
                                 }
                             }
-
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
                     }else if($selected_status == 56){
@@ -1760,7 +1762,13 @@ class DeliveryController extends Controller
                         } else {
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                         }
+                        
+                        $handover_shipments = HandoverShipments::where('shipment_id',$shipment)->where('status','!=',3)->first();
+                        $handover_shipments->status = 3;
+                        $handover_shipments ->save();
 
+                        HandoverShipmentJourneyController::add( $shipment,$handover_shipments->handover_id,3);
+                        
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
 
@@ -3807,6 +3815,16 @@ class DeliveryController extends Controller
         $total_amount = 0;
         foreach($deposit_rows as $row){
             $total_amount += $request->amount[$row];
+        }
+        if( $sdn->sdn_amount>= $total_amount)
+        {
+            $sdn->sdn_deposit_amount = $total_amount;
+        }
+        else{
+            return redirect()->back()->with(['status' => 0, 'error' => 'Deposit Amount cannot be less than DNCC Amount!']);
+        }
+        foreach($deposit_rows as $row){
+           
             $file_name = 'deposit_slip_'.$row;
             $deposit_details = new StationDepositNoteSlip();
             $deposit_details->station_deposit_note_id = $sdn_id;
@@ -5353,22 +5371,35 @@ class DeliveryController extends Controller
         $sdn_id = $request->sdn_id;
         if($sdn_id){
             $sdn = StationDepositNote::find($sdn_id);
-            $sdn->adjustment_amount = $request->adjustment_amount;
-            $sdn->adjustment_date = $request->adjustment_date_formatted;
-            $sdn->adjustment_ref = $request->adjustment_ref;
-            $sdn->adjusted = 1;
-            // if($request->petty_cash_select != ''){
-            $sdn->petty_cash_statement_id = $request->petty_cash_select;
-            // }
-            $sdn->save();
+            $dncc_amount= $sdn->sdn_amount;
+            $deposit_amount= $sdn->sdn_deposit_amount;
+            $adjustment_amount =  $request->adjustment_amount;
 
-            $petty_details = PettyCashStatement::find($request->petty_cash_select);
-            if($petty_details) {
-                $petty_details->status = 5;
-                $petty_details->save();
+            $total =$deposit_amount + $adjustment_amount;
+            if($dncc_amount>= $total){
+                $sdn->adjustment_amount = $request->adjustment_amount;
+                $sdn->adjustment_date = $request->adjustment_date_formatted;
+                $sdn->adjustment_ref = $request->adjustment_ref;
+                $sdn->adjusted = 1;
+                $sdn->sdn_net_amount = $dncc_amount - $deposit_amount - $adjustment_amount;
+                // if($request->petty_cash_select != ''){
+                $sdn->petty_cash_statement_id = $request->petty_cash_select;
+                // }
+                $sdn->save();
+
+                $petty_details = PettyCashStatement::find($request->petty_cash_select);
+                if($petty_details) {
+                    $petty_details->status = 5;
+                    $petty_details->save();
+                }
+
+                return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
+
+            }
+            else{
+                return redirect()->back()->with(['error' => 'DNCC cannot be less than sum of adjustment amount & deposit amount']);
             }
 
-            return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
         }else{
             return redirect()->back()->with(['error' => 'Station Deposit Note ID not found!']);
         }

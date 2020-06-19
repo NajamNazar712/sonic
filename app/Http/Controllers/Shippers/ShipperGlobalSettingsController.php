@@ -63,14 +63,15 @@ class ShipperGlobalSettingsController extends Controller
 }
 
     public function upload_logo_index(){
-        $logo = Storage::url('shippers_logo/logo_' . Auth::id() . '.png');
-        return view('client.settings.logo')->with(['logo'=>$logo]);
+        $logo = Storage::url('shippers_logo/logo_' . session('user_id') . '.png');
+        $shipper = User::find(session('user_id'));
+        return view('client.settings.logo')->with(['logo'=>$logo, 'logo_status'=>$shipper->logo_status]);
     }
 
     public function upload_logo_submit(Request $request){
         if ($request->hasFile('upload_logo')) {
-            $shipper = User::find(Auth::id());
-            $filename = 'logo_' . Auth::id() . '.png';
+            $shipper = User::find(session('user_id'));
+            $filename = 'logo_' . session('user_id') . '.png';
 
             $file = $request->file('upload_logo');
 
@@ -80,5 +81,18 @@ class ShipperGlobalSettingsController extends Controller
             $shipper->save();
             return redirect()->back()->with('success', 'Logo Successfully Updated!');
         }
+    }
+
+    public function remove_logo(Request $request){
+        $user_id = session('user_id');
+        $shipper = User::find($user_id);
+        $shipper->logo_status = 0;
+        $shipper->logo = '';
+        $shipper->save();
+
+        $filename = 'logo_' . session('user_id') . '.png';
+        Storage::disk('public')->delete('shippers_logo/'.$filename);
+
+        return redirect()->back()->with('success', 'Logo successfully removed!');
     }
 }

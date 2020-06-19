@@ -8310,9 +8310,10 @@ if(session('department_id') == 7){
     }
     public function riderListAjax(){
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
+            ->join('cities as c','cities.hub_id','=','c.id')
             ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
-            ->select(['cities.name as city','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
+            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -8870,6 +8871,15 @@ if(session('department_id') == 7){
             return redirect()->back()->with(['error' => 'Something went wrong']);
         }
 
+    }
+    public function userDocumentsEdit(Request $request){
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if($user_attachment){
+            return response()->json(['status' => 1, 'user_attachment' => $user_attachment]);
+         }
+        else{  
+             return response()->json(['status' => 0]);
+        }
     }
     public function uploadDocuments(Request $request){
         $validation = [

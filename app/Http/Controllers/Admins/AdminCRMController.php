@@ -227,93 +227,94 @@ class AdminCRMController extends Controller
 
     public function request_details(Request $request,$id){
         $crm_request = CrmRequest::find($id);
-        $shipment_status = null;
-        $shipment_status_date = null;
-        $shipper = null;
-        $arrival_date = '';
-        if($crm_request->shipment_id != null) {
-            $shipment_status = Shipment::find($crm_request->shipment_id);
-            $shipment_status = $shipment_status->status_shipper->name;
-            $journey = ShipmentsJourney::where('shipment_id', $crm_request->shipment_id)->where('shipper_status_id', '=', 2);
-            if($journey->exists()){
-                $journey = $journey->latest()->first();
-                $arrival_date = $journey->created_at;
-            }
-            $shipment_status_journey = ShipmentsJourney::where('shipment_id', $crm_request->shipment_id)->latest('id')->first();
-            $shipment_status_date = $shipment_status_journey->created_at;
-        }
-        
-        if($crm_request->shipper_id != null){
-            $shipper = User::find($crm_request->shipper_id);
-            $shipper = $shipper->name;
-        }
-        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
-            ->select('a.id as id', 'a.name as name')
-            ->whereNotIn('admin_roles.department_id', [1,3])->get();
-        $types = CrmRequestTaggingTypes::get();
-        $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
-        $hubs = City::where('hub', 1)->get();
-        $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->first();
-        $tagged_name = '';
-        $tag_check = '';
-        $tag_permission = '';
-        if($tagged){
-            if($tagged['crm_request_tagging_type_id'] == 1){
-                $tag_check = Auth::user()->role_id;
-                $tag = AdminRole::where('id', $tag_check)->first();
-                $tag_permission = $tag->department_id;
-                $tagged_name = AdminDepartment::find($tagged['tagged_id'])->name;
-            }
-            else if($tagged['crm_request_tagging_type_id'] == 2){
-                $tagged_name = Admin::find($tagged['tagged_id'])->name;
-            }
-        }
-        $agent = Admin::where('id', $crm_request['agent_id'])->first();
-        $agent_name = '';
-        if($agent){
-            $agent_name = $agent['name'];
-        }
-
-        $crm_comments = array();
-        $last_comment = null;
-        $crm_comments = CrmComments::where('crm_request_id', $id);
-        if($crm_comments->exists()){
-            $crm_comments = $crm_comments->orderBy('created_at','asc')->get();
-            $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
-            $last_comment = $last_comment->id;
-        }
-
-        $launched_by  = '';
-        if($crm_request->launched_by == 0){
-            $launched_by = $launched_by = $crm_request->launched_by_admin->name;
-        }else if($crm_request->launched_by == 1){
-            $launched_by = User::find($crm_request->launched_by_id)->name;
-        }else if($crm_request->launched_by == 2){
-            $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
-        }
-        $crm_tagging = array();
-        $crm_tagging_details = CrmRequestTagging::where('crm_request_id', $id)->first();
-        if($crm_tagging_details){
-            $crm_tagging = $crm_tagging_details;
-        }
-        $crm_agent_history = CrmRequestAgentHistory::where('crm_request_id', $id)->get();
-        $crm_request_ids = array();
-        if($crm_request->shipment_id){
-            $all_crm_request_ids_for_shipment = CrmRequest::where('shipment_id',$crm_request->shipment_id)->pluck('id')->toArray();
-            $crm_request_ids = $all_crm_request_ids_for_shipment;
-        }else{
-            $crm_request_ids = [$id];
-        }
-        $crm_status_history = CrmRequestStatusHistory::whereIn('crm_request_id', $crm_request_ids)->get();
-        $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
-        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-
-        $sale_person = SalePersonTag::where('user_id', $crm_request->shipper_id)->where('status', 0)->first();
-
         if($crm_request){
+            $shipment_status = null;
+            $shipment_status_date = null;
+            $shipper = null;
+            $arrival_date = '';
+            if($crm_request->shipment_id != null) {
+                $shipment_status = Shipment::find($crm_request->shipment_id);
+                $shipment_status = $shipment_status->status_shipper->name;
+                $journey = ShipmentsJourney::where('shipment_id', $crm_request->shipment_id)->where('shipper_status_id', '=', 2);
+                if($journey->exists()){
+                    $journey = $journey->latest()->first();
+                    $arrival_date = $journey->created_at;
+                }
+                $shipment_status_journey = ShipmentsJourney::where('shipment_id', $crm_request->shipment_id)->latest('id')->first();
+                $shipment_status_date = $shipment_status_journey->created_at;
+            }
+
+            if($crm_request->shipper_id != null){
+                $shipper = User::find($crm_request->shipper_id);
+                $shipper = $shipper->name;
+            }
+            $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
+                ->select('a.id as id', 'a.name as name')
+                ->whereNotIn('admin_roles.department_id', [1,3])->get();
+            $types = CrmRequestTaggingTypes::get();
+            $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
+            $hubs = City::where('hub', 1)->get();
+            $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->first();
+            $tagged_name = '';
+            $tag_check = '';
+            $tag_permission = '';
+            if($tagged){
+                if($tagged['crm_request_tagging_type_id'] == 1){
+                    $tag_check = Auth::user()->role_id;
+                    $tag = AdminRole::where('id', $tag_check)->first();
+                    $tag_permission = $tag->department_id;
+                    $tagged_name = AdminDepartment::find($tagged['tagged_id'])->name;
+                }
+                else if($tagged['crm_request_tagging_type_id'] == 2){
+                    $tagged_name = Admin::find($tagged['tagged_id'])->name;
+                }
+            }
+            $agent = Admin::where('id', $crm_request['agent_id'])->first();
+            $agent_name = '';
+            if($agent){
+                $agent_name = $agent['name'];
+            }
+
+            $crm_comments = array();
+            $last_comment = null;
+            $crm_comments = CrmComments::where('crm_request_id', $id);
+            if($crm_comments->exists()){
+                $crm_comments = $crm_comments->orderBy('created_at','asc')->get();
+                $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
+                $last_comment = $last_comment->id;
+            }
+
+            $launched_by  = '';
+            if($crm_request->launched_by == 0){
+                $launched_by = $launched_by = $crm_request->launched_by_admin->name."(Admin)";
+            }else if($crm_request->launched_by == 1){
+                $launched_by = User::find($crm_request->launched_by_id)->name;
+            }else if($crm_request->launched_by == 2){
+                $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
+            }
+            $crm_tagging = array();
+            $crm_tagging_details = CrmRequestTagging::where('crm_request_id', $id)->first();
+            if($crm_tagging_details){
+                $crm_tagging = $crm_tagging_details;
+            }
+            $crm_agent_history = CrmRequestAgentHistory::where('crm_request_id', $id)->get();
+            $crm_request_ids = array();
+            if($crm_request->shipment_id){
+                $all_crm_request_ids_for_shipment = CrmRequest::where('shipment_id',$crm_request->shipment_id)->pluck('id')->toArray();
+                $crm_request_ids = $all_crm_request_ids_for_shipment;
+            }else{
+                $crm_request_ids = [$id];
+            }
+            $crm_status_history = CrmRequestStatusHistory::whereIn('crm_request_id', $crm_request_ids)->get();
+            $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
+            $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
+            $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+            $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+            $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+
+            $sale_person = SalePersonTag::where('user_id', $crm_request->shipper_id)->where('status', 0)->first();
+
+
             return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
@@ -2027,7 +2028,8 @@ class AdminCRMController extends Controller
     }
 
     public function crm_index(){
-        return view('admin.crm.index');
+        $departments = AdminDepartment::where('id', '!=', 1)->get(['id', 'name']);
+        return view('admin.crm.index')->with(['departments' => $departments]);
     }
 
     public function crm_list(){

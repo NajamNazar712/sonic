@@ -255,7 +255,7 @@
 
                         swal({
                             title: 'Please Wait!',
-                            text: 'Tier is being Edited!',
+                            text: 'Responsible is being Edited!',
                             icon: 'info',
                             buttons: false,
                             closeOnClickOutside: false,

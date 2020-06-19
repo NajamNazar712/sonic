@@ -97,5 +97,8 @@ class Shipment extends Model
 	}
 	public function shipments_v2_pickup_journeys(){
 	    return $this->hasMany('App\Http\Models\V2Pickup\ShipmentsV2PickupJourney')->orderBy('id', 'DESC');
+	}
+	public function handover_shipments_journeys(){
+	    return $this->hasMany('App\Http\Models\Handover\HandoverShipmentsJourney')->orderBy('id', 'DESC');
     }
 }

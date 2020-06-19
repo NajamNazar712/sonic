@@ -16,11 +16,21 @@
             <div class="card-body">
                 @include('client.inc.messages')
 
-                <div class="row justify-content-center">
-                    <div class="col-3 mb-3">
-                        <img class="" src="{{asset($logo)}}" alt="" title="" style="max-width: 100%"/>
+                @if($logo_status == 1)
+                    <div class="row justify-content-center">
+                        <div class="col-3 mb-1">
+                            <img class="" src="{{asset($logo)}}" alt="" title="" style="max-width: 100%"/>
+                        </div>
                     </div>
-                </div>
+                    <form id="remove_logo_form" class="form" action="{{route('cod.settings.logo.remove')}}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <div class="row justify-content-center">
+                            <div class="col-1 mb-3">
+                                <button id="remove" type="submit" class="btn btn-sm btn-danger btn-block">Remove</button>
+                            </div>
+                        </div>
+                    </form>
+                @endif
                 <div class="row justify-content-center">
                         <form id="upload_logo_form" class="form" action="{{route('cod.settings.logo.upload')}}" method="post" enctype="multipart/form-data">
                             @csrf
@@ -83,9 +93,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
             $('#upload_logo_form').validate({
-
                 errorClass: 'danger',
                 successClass: 'success',
                 normalizer: function(value) {
@@ -95,8 +103,6 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
                     swal({
                         title: 'Please Wait!',
                         text: 'logo is being uploaded!',
@@ -108,6 +114,54 @@
                     form.submit();
                 }
             });
+
+            @if($logo_status == 1)
+                $('#remove_logo_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    normalizer: function(value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function(form) {
+                        swal({
+                            text: 'Are you sure, you want to remove current logo?',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function(confirm) {
+                            if (confirm) {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'logo is being Removed!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                                form.submit();
+                            }
+                        });
+                    }
+                });
+            @endif
         });
     </script>
 @endsection

@@ -655,11 +655,11 @@ class AdminPettyCashController extends Controller
                 }
                 $petty_detail->save();
                 if($request->hasFile('upload_image'.$petty_detail->id)) {
-                    $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.png';
+                    $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id;
+                    Storage::disk('public')->delete('petty_cash_statement_details/'.$filename) . '.png';
 
                     $file = $request->file('upload_image'.$petty_detail->id);
 
-                    Storage::disk('public')->delete('petty_cash_statement_details/'.$filename);
                     Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
 
                     $petty_detail->reference_document = $filename;

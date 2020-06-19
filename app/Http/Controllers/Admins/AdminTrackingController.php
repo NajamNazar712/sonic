@@ -756,7 +756,7 @@ class AdminTrackingController extends Controller
                             $journey_details = array();
                             $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                            if($journey->payment_id == null){
+                        if($journey->payment_id == null){
                                 $journey_details['status'] = $journey->status->name;
                             }
                             else{
@@ -810,6 +810,22 @@ class AdminTrackingController extends Controller
                         }
                     }
 
+                    $handover_shipment_journey = $shipment->handover_shipments_journeys;
+
+                    if ($handover_shipment_journey) {
+                        foreach ($handover_shipment_journey as $journey) {
+                            $journey_details = array();
+                        
+                            $journey_details['handover_id'] = $journey->handover_id;
+                            $journey_details['status'] = $journey->my_status->name;
+                            // $journey_details['status'] = "adf>name";
+                            $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
+
+                            $details['handover_history'][] = $journey_details;
+                        }
+                    }
+
+
                     $shipment_amount_log = $shipment->amount_change_log;
 
                     if ($shipment_amount_log) {
@@ -853,11 +869,13 @@ class AdminTrackingController extends Controller
                     }
 
                     $crm_requests = CrmRequest::leftjoin('crm_request_status_histories as crsh', 'crsh.crm_request_id', '=', 'crm_requests.id')
-                        ->leftjoin('admins as a', 'a.id', '=', 'crsh.agent_id')
+                        ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.agent_id')
                         ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
                         ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
                         ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crsh.status_id')
-                        ->select('crm_requests.id as id', 'crs.name as status', 'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user', 'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by')
+                        ->select('crm_requests.id as id', 'crs.name as status', 'a.id as admin_id',
+                        'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user',
+                         'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by')
                         ->where('crm_requests.shipment_id', $shipment->id);
 
                     if($crm_requests->exists()){
@@ -871,7 +889,8 @@ class AdminTrackingController extends Controller
                             $crm_request_journey['status'] = $crm_request->status;
                             if($crm_request->status_id == 1){
                                 if($crm_request->launched_added_by == 0){
-                                    $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
+                                       // $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
+                                       $crm_request_journey['created_by'] = $crm_request->admin_id . ' (Admin)';
                                 }
                                 else if($crm_request->launched_added_by == 1){
                                     $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';

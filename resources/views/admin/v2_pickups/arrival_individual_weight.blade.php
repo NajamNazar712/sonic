@@ -227,11 +227,11 @@
 
             @if (session('print_shipment_ids'))
             $.ajax({
-                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                url: '{!! route('admin.v2_pickups.pending.print') !!}',
                 method: 'POST',
                 data: {
-                    'ids': {!! json_encode(session('print_shipment_ids')) !!},
-                    'admin': true,
+                    'ids': ids,
+                    'dispatch': 1,
                     '_token': '{{ csrf_token() }}'
                 }
             })
@@ -252,6 +252,8 @@
                         tab.document.close();
                         tab.focus();
                     }
+
+                    table.draw('false');
                 });
             @endif
 
@@ -655,7 +657,6 @@
                 },
                 submitHandler: function (form) {
                     var shipment_id = $('#try_and_buy_shipment_id').val();
-                    shipment_ids.push(shipment_id);
                     var tracking_number = $(form).find('input.scan_try_and_buy_tracking_number').val();
                     var weight = $(form).find('input.try_and_buy_weight').val();
                     $.ajax({
@@ -909,7 +910,6 @@
                 },
                 submitHandler: function (form) {
                     var shipment_id = $('#piece_shipment_id').val();
-                    shipment_ids.push(shipment_id);
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     var weight = $(form).find('input.pieces_weight').val();
                     $.ajax({

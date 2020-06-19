@@ -28,7 +28,8 @@ class UserManagementController extends Controller
     }
 
     public function user_index() {
-      return view('admin.user_management.user.index');
+      $hubs=City::select('id','name')->where('hub',1)->get();
+      return view('admin.user_management.user.index')->with(['hubs'=>$hubs]);
     }
 
     public function user_list(Request $request) {
@@ -190,6 +191,32 @@ class UserManagementController extends Controller
         }
 
         return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been added!']);
+    }
+
+    public function user_assign_hub(Request $request){
+        $user_ids =explode(',' , $request->id);
+        foreach($user_ids as $user_id){
+
+                foreach($request->input('hubs') as $hub_id) {
+                    $admin_hub_exist = AdminHub::where('admin_id',$user_id)->where('hub_id',$hub_id)->first();
+                   
+                    if($admin_hub_exist)
+                    {
+                    break;
+                        // dd($admin_hub_exist);
+                       
+                    }
+                    else{
+                        $admin_hub = new AdminHub();
+
+                        $admin_hub->hub_id = $hub_id;
+                        $admin_hub->admin_id = $user_id;
+    
+                        $admin_hub->save();
+                    }
+                }     
+        }
+        return redirect()->back()->with(['status'=>1,'success'=>"Hubs has been Assigned successfully!"]);  
     }
 
     public function user_update_index($id) {
