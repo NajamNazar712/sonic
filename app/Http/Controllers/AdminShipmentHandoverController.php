@@ -82,6 +82,38 @@ class AdminShipmentHandoverController extends Controller
             }
     }
 
+    public function arrival_bulk_shipment_details_receive(Request $request){
+
+      $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+      if ($shipment->exists()) {
+          $shipment = $shipment->first();
+          $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id);
+          if($handover_shipments->exists()){
+            $phone_no = NULL;
+            $pickup_date = NULL;
+            $special_instructions = NULL;
+  
+                    $details = array();
+  
+                    $details['id'] = $shipment->id;
+                    $details['tracking_number'] = $shipment->tracking_number;
+                    $details['shipper'] = $shipment->user->name;
+                    $details['phone_number'] = $shipment->user->phone;
+                    $details['pickup_date'] = $shipment->pickup_date;
+                    $details['special_instructions'] = $shipment->special_instructions;
+  
+                    return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+          }
+          else {
+            return ['status' => 1, 'error' => 'Handover Id is not present of given shipment'];
+          }
+         }
+         else {
+          return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+      }
+}
+
     public function bulk_handover_submit(Request $request){
         $shipment_ids = explode(',', $request->shipment_ids);
         // $hub_id = explode(',', $request->hub);
@@ -127,7 +159,7 @@ class AdminShipmentHandoverController extends Controller
         $today = Carbon::now();
 
         foreach ($shipment_ids as $shipment_id) {
-            HandoverShipments::where('shipment_id', $shipment_id)->update(['status' => 2]);
+            HandoverShipments::where('shipment_id', $shipment_id)->where('status',1)->update(['status' => 4]);
             $handover_shipments = HandoverShipments::where('shipment_id', $shipment_id)->first();
             if($handover_shipments){
             HandoverShipmentJourneyController::add( $shipment_id,$handover_shipments->handover_id,2);
@@ -135,7 +167,7 @@ class AdminShipmentHandoverController extends Controller
         }
    
 
-        $received_counts =DB::table('handover_shipments')->where('status',2)->select('handover_id', DB::raw('count(*) as total_received'))
+        $received_counts =DB::table('handover_shipments')->where('status',4)->select('handover_id', DB::raw('count(*) as total_received'))
         ->groupBy(DB::raw('handover_id'))->get();
 
         foreach ($received_counts as $received_count){
@@ -235,11 +267,18 @@ class AdminShipmentHandoverController extends Controller
         }
   
         foreach ($handover_ids as $handover_id) {
-          $handover_request = Handover::find($handover_id);
+          $handover_request = Handover::where('id',$handover_id)->where('status_id', 4)->first();
+
+          if($handover_request)
+          {
   
-          $handover_request->status_id = 2;
+            $handover_request->status_id = 2;
   
-          $handover_request->save();
+            $handover_request->save();
+          }
+          else{
+            return ['status' => 1, 'error' => 'All shipments of handover has not been received yet'];
+          }
         }
   
         return ['status' => 0, 'success' => 'Handover Shipments has been Delivered'];
