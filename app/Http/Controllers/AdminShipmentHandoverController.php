@@ -129,7 +129,9 @@ class AdminShipmentHandoverController extends Controller
         foreach ($shipment_ids as $shipment_id) {
             HandoverShipments::where('shipment_id', $shipment_id)->update(['status' => 2]);
             $handover_shipments = HandoverShipments::where('shipment_id', $shipment_id)->first();
+            if($handover_shipments){
             HandoverShipmentJourneyController::add( $shipment_id,$handover_shipments->handover_id,2);
+            }
         }
    
 
@@ -182,7 +184,15 @@ class AdminShipmentHandoverController extends Controller
             else {
                 return 0;
             }
-            });
+            })
+            ->editColumn('received_at', function($handover_list) {
+              if ($handover_list->received_at) {
+                return $handover_list->received_at;
+              }
+              else {
+                return '';
+              }
+              });
 
             if ($tracking_number = $request->get('search_tracking')) {
                 $datatable->join('handover_shipments as hsh', 'hsh.handover_id', '=', 'handovers.id')

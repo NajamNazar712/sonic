@@ -29,13 +29,13 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Created By</th>
-                        <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1">From</th>
                         <th class="border-primary border-darken-1">To</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Received Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1">Received At</th>
                     </tr>
                     </thead>
@@ -183,26 +183,26 @@
 
                             head.push('S. No');
                             head.push('Created By');
-                            head.push('Received By');
                             head.push('From');
                             head.push('To');
                             head.push('Hub');
                             head.push('Shipment(s)');
                             head.push('Status');
                             head.push('Received Shipment(s)');
+                            head.push('Received By');
                             head.push('Received At');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
                                 row.push(values.created_by);
-                                row.push(values.received_by);
                                 row.push(values.from);
                                 row.push(values.to);
                                 row.push(values.hub);
                                 row.push(values.shipment_count);
                                 row.push(values.status);
                                 row.push(values.received_shipments);
+                                row.push(values.received_by);
                                 row.push(values.received_at);
 
                                 body.push(row);
@@ -406,13 +406,13 @@
                     {data: 'handover_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
-                    {data: 'received_by', name: 'a.name', class: 'align-middle received_by'},
                     {data: 'from', name: 'hr.name', class: 'align-middle from'},
                     {data: 'to', name: 'hor.name', class: 'align-middle to'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
                     {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'received_shipments', name: 'handovers.received', class: 'align-middle received_shipments'},
+                    {data: 'received_by', name: 'a.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'handovers.received_at', class: 'align-middle received_at', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
