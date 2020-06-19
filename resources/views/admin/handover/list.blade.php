@@ -202,7 +202,7 @@
                                 row.push(values.from);
                                 row.push(values.to);
                                 row.push(values.hub);
-                                row.push(values.shipment_count);
+                                row.push(values.total_shipments);
                                 row.push(values.status);
                                 row.push(values.received_shipments);
                                 row.push(values.received_by);
