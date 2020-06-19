@@ -4020,7 +4020,7 @@ class AdminFinanceController extends Controller
             $shipment = $done_payment_shipment->shipment;
             $shipment_weight= $shipment->actual_weight;
             if($done_payment_shipment->type == 0){
-                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->user_id);
+                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if($change_shipment_weight_log->exists()){
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
                     $shipment_weight = $change_shipment_weight_log->old_weight;
