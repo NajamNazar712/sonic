@@ -22,7 +22,7 @@
                                         <div class="card-header">
                                             <div class="heading-elements">
                                                 <ul class="list-inline mb-0">
-                                                    <li class="primary"><a data-action="collapse">Legend <i class="ft-minus"></i></a></li>
+                                                    <li class="primary border-primary round"><a data-action="collapse">Legend <i class="ft-minus"></i></a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -61,6 +61,9 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Pickup Request ID</th>
                                     <th class="border-primary border-darken-1">Requested Date</th>
+                                    <th class="border-primary border-darken-1">Current Rider</th>
+                                    <th class="border-primary border-darken-1">Last Rider</th>
+                                    <th class="border-primary border-darken-1">Pickup Note ID</th>
                                     <th class="border-primary border-darken-1">Shipment(s) Booked</th>
                                     <th class="border-primary border-darken-1">Shipment(s) Rider Picked</th>
                                     <th class="border-primary border-darken-1">Shipment(s) Received</th>
@@ -77,9 +80,6 @@
                                     <th class="border-primary border-darken-1">Rider Status</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
                                     <th class="border-primary border-darken-1">Attempt(s)</th>
-                                    <th class="border-primary border-darken-1">Current Rider</th>
-                                    <th class="border-primary border-darken-1">Last Rider</th>
-                                    <th class="border-primary border-darken-1">Pickup Note ID</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -137,7 +137,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary ml-auto">Update</button>
+                                    <button type="submit" class="btn btn-primary ml-auto" id="update_pickup_request_btn_submit">Update</button>
                                 </div>
                             </form>
                         </div>
@@ -169,7 +169,7 @@
                     <div class="modal-dialog modal-sm" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h4 class="modal-title" id="pending_bookings_modal_title">Pending Booking Shipment(s)</h4>
+                                <h4 class="modal-title" id="pending_bookings_modal_title">Received Shipment(s)</h4>
 
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">×</span>
@@ -239,6 +239,8 @@
 
     <script>
         $(document).ready(function () {
+
+
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -254,6 +256,9 @@
                         head.push('S.No');
                         head.push('Pickup Request ID');
                         head.push('Requested Date');
+                        head.push('Current Rider');
+                        head.push('Last Rider');
+                        head.push('Pickup Note ID');
                         head.push('Shipment(s) Booked');
                         head.push('Shipment(s) Rider Picked');
                         head.push('Shipment(s) Received');
@@ -270,9 +275,7 @@
                         head.push('Rider Status');
                         head.push('Attempt Date');
                         head.push('Attempt(s)');
-                        head.push('Last Rider');
-                        head.push('Current Rider');
-                        head.push('Pickup Note ID');
+
 
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -280,12 +283,15 @@
                             row.push(index + 1);
                             row.push(values.pickup_request_id);
                             row.push(values.requested_date);
+                            row.push(values.current_rider);
+                            row.push(values.last_rider);
+                            row.push(values.pickup_note_id);
                             row.push(values.booked);
                             row.push(values.shipments_rider_picked);
                             row.push(values.received);
                             row.push(values.shipper);
                             row.push(values.contact_person);
-                            row.push(values.vendor);
+                            row.push(values.vendor_name);
                             row.push(values.contact_number);
                             row.push(values.address);
                             row.push(values.city);
@@ -296,9 +302,7 @@
                             row.push(values.rider_status);
                             row.push(values.attempted_date);
                             row.push(values.attempts);
-                            row.push(values.current_rider);
-                            row.push(values.last_rider);
-                            row.push(values.pickup_note_id);
+
 
 
                             body.push(row);
@@ -319,7 +323,7 @@
 
             buttons: [
                     @if (session('role_id') == 1 || in_array(19, session('permissions')))
-                        @if(\Carbon\Carbon::now() < $rider_cut_off_time)
+
                 {
                     text: 'Assign',
                     className: 'btn btn-primary assign',
@@ -330,7 +334,7 @@
                         $('#assign_to_rider').modal('show');
                     }
                 },
-                    @endif
+
                 @endif
                 {
                     text: 'Update',
@@ -440,12 +444,15 @@
                 {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                 {data: 'pickup_request_id', name: 'v2_pickup_requests.id', class: 'align-middle pickup_request_id'},
                 {data: 'requested_date', name: 'v2_pickup_requests.created_at', class: 'align-middle requested_date'},
+                {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider'},
+                {data: 'last_rider', name: 'lr.name', class: 'align-middle last_rider'},
+                {data: 'pickup_note_no', name: 'vpn.pickup_note_id', class: 'align-middle pickup_note_no'},
                 {data: 'bookings_link', name: 'v2_pickup_requests.booked', class: 'align-middle text-center bookings_link'},
                 {data: 'shipments_rider_picked', name: 'shipments_rider_picked', class: 'align-middle shipments_rider_picked', orderable: false, searchable: false},
                 {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
-                {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
+                {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
                 {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
                 {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
                 {data: 'city', name: 'ci.name', class: 'align-middle city'},
@@ -456,9 +463,7 @@
                 {data: 'rider_status', name: 'rs.id', class: 'align-middle rider_status'},
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempts'},
-                {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider'},
-                {data: 'last_rider', name: 'lr.name', class: 'align-middle last_rider'},
-                {data: 'pickup_note_no', name: 'vpn.pickup_note_id', class: 'align-middle pickup_note_no'}
+
             ],
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
@@ -657,6 +662,7 @@
 
                             $('#update_pickup_modal').modal('hide');
                         });
+                    $('#update_pickup_request_btn_submit').attr('disabled', false);
                 }
             });
             var route = '{!! route('admin.tracking.index') !!}';

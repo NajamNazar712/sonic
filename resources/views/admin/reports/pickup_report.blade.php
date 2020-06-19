@@ -18,7 +18,7 @@
                             <div  class="row">   
                                 <div class="col-4">
                                     <div class="form-group pb-1">
-                                        <select name="department" class="select2" id="department" data-rule-required="true" data-msg-required="Shipper is required">
+                                        <select name="department" class="select2" id="department" >
                                         @foreach($departments as $department)
                                             <option value="{{ $department->id }}">{{ $department->name }}</option>
                                         @endforeach
@@ -27,16 +27,16 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group pb-1">
-                                        <select name="salesperson" class="select2" id="salesperson" data-rule-required="true" data-msg-required="Shipper is required">
+                                        <select name="salesperson" class="select2" id="salesperson" >
                                         @foreach($salespersons as $salesperson)  
-                                            <option value="{{ $salesperson->name }}">{{ $salesperson->name }}</option>
+                                            <option value="{{ $salesperson->id }}">{{ $salesperson->name }}</option>
                                         @endforeach
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group pb-1">
-                                        <select name="origin" class="select2" id="origin" data-rule-required="true" data-msg-required="Shipper is required">
+                                        <select name="origin" class="select2" id="origin">
                                         @foreach($origins as $origin)
                                             <option value="{{ $origin->id }}">{{ $origin->name }}</option>
                                         @endforeach
@@ -45,18 +45,18 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group pb-1">
-                                        <select name="category" class="select2" id="category" data-rule-required="true" data-msg-required="Shipper is required">
+                                        <select name="category" class="select2" id="category">
                                         @foreach($categories as $category)
-                                            <option value="{{ $category->name }}">{{ $category->name }}</option>
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
                                         @endforeach
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group pb-1">
-                                        <select name="cut_off_time" class="select2" id="cut_off_time" data-rule-required="true" data-msg-required="Shipper is required">
+                                        <select name="cut_off_time" class="select2" id="cut_off_time">
                                             
-                                            <option value="null">Before</option>
+                                            <option value="0">Before</option>
                                             <option value="1">After</option>
                                         
                                         </select>
@@ -83,7 +83,8 @@
                                     </div>
                                 </div>
                                 <div class="col-2">
-                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                <!-- <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button> -->
+                                    <button type="submit" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
 
                             </div>
@@ -110,18 +111,18 @@
                
                     <div class="row">
                         <input type="hidden" id="cards_filter_input">
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card pull-up">
                                 <div class="card-content border rounded" id="totals">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="media-body text-left">
-                                                <span>Total</span>
+                                                <span>Total Pickups</span>
                                             </div>
                                             <div class="media-body text-right">
-                                            @foreach($stats as $stat)
-                                                <h3 id="total">{{$stat->total}}</h3>
-                                                @endforeach  
+                                            
+                                                <h3 id="total">{{$stats['total']}}</h3>
+                                             
                                             </div>
                                         </div>
                                     </div>
@@ -131,7 +132,7 @@
                     </div> 
                      
                     <div class="row">    
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-primary pull-up">
                                 <div class="card-content" id="pending_operation">
                                     <div class="card-body">
@@ -140,16 +141,16 @@
                                                 <span>Pending Operations</span>
                                             </div>
                                             <div class="media-body  text-right">
-                                            @foreach($stats as $stat)
-                                                <h3 class="text-white" id="pending_operations">{{$stat->pending_operations}}</h3>
-                                                @endforeach 
+                                           
+                                                <h3 class="text-white" id="pending_operations">{{$stats['pending_operations']}}</h3>
+                                            
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>    
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-info pull-up">
                                 <div class="card-content" id="pending_sale">
                                     <div class="card-body">
@@ -158,9 +159,9 @@
                                                 <span>Pending Sales</span>
                                             </div>
                                             <div class="media-body text-right">
-                                            @foreach($stats as $stat)
-                                                <h3 class="text-white" id="pending_sales">{{$stat->pending_sales}}</h3>
-                                                @endforeach 
+                                            
+                                                <h3 class="text-white" id="pending_sales">{{$stats['pending_sales']}}</h3>
+                                            
                                             </div>
                                         </div>
                                     </div>
@@ -169,7 +170,7 @@
                         </div>
                     </div>    
                     <div class="row">      
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-booked_shipments pull-up">
                                 <div class="card-content" id="before_cut_off_times">
                                     <div class="card-body">
@@ -178,16 +179,16 @@
                                                 <span>Before Cut-off</span>
                                             </div>
                                             <div class="media-body text-right">
-                                            @foreach($stats as $stat)
-                                                <h3 class="text-white" id="before_cut_off_time">{{$stat->before_cut_off_time}}</h3>
-                                                @endforeach 
+                                            
+                                                <h3 class="text-white" id="before_cut_off_time">{{$stats['before_cut_off_time']}}</h3>
+                                             
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-pending_confirmation pull-up">
                                 <div class="card-content" id="after_cut_off_times">
                                     <div class="card-body">
@@ -196,9 +197,9 @@
                                                 <span>After Cut-off</span>
                                             </div>
                                             <div class="media-body text-right">
-                                            @foreach($stats as $stat)
-                                                <h3 class="text-white" id="after_cut_off_time">{{$stat->after_cut_off_time}}</h3>
-                                                @endforeach
+                                            
+                                                <h3 class="text-white" id="after_cut_off_time">{{$stats['after_cut_off_time']}}</h3>
+                                            
                                             </div>
                                         </div>
                                     </div>
@@ -207,7 +208,7 @@
                         </div>
                     </div>    
                     <div class="row">    
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-pending_return pull-up">
                                 <div class="card-content" id="attempted_and_pick">
                                     <div class="card-body">
@@ -216,16 +217,16 @@
                                                 <span>Attempted & Picked</span>
                                             </div>
                                             <div class="media-body text-right">
-                                            @foreach($stats as $stat)
-                                                <h3 class="text-white" id="attempted_and_picked">{{$stat->attempted_and_picked}}</h3>
-                                                @endforeach
+                                            
+                                                <h3 class="text-white" id="attempted_and_picked">{{$stats['attempted_and_picked']}}</h3>
+                                               
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-return_delivered pull-up">
                                 <div class="card-content " id="attempted_and_not_pick">
                                     <div class="card-body">
@@ -234,16 +235,16 @@
                                                 <span>Attempted & Not Picked</span>
                                             </div>
                                             <div class="media-body text-right">
-                                            @foreach($stats as $stat)
-                                                <h3 class="text-white" id="attempted_and_not_picked">{{$stat->attempted_and_not_picked}}</h3>
-                                                @endforeach
+                                            
+                                                <h3 class="text-white" id="attempted_and_not_picked">{{$stats['attempted_and_not_picked']}}</h3>
+                                                
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="card bg-gradient-directional-red pull-up">
                                 <div class="card-content" id="attempted_fail">
                                     <div class="card-body">
@@ -252,9 +253,9 @@
                                                 <span>Attempted Failed</span>
                                             </div>
                                             <div class="media-body text-right">
-                                            @foreach($stats as $stat)
-                                                <h3 class="text-white" id="attempted_failed">{{$stat->attempted_failed}}</h3>
-                                                @endforeach
+                                           
+                                                <h3 class="text-white" id="attempted_failed">{{$stats['attempted_failed']}}</h3>
+                                               
                                             </div>
                                         </div>
                                     </div>
@@ -464,7 +465,7 @@
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#to_date_root').css('top', '40px');
@@ -487,10 +488,6 @@
                      params.length = -1;
                         var jsonResult = $.ajax({
                             url: '{{ route('admin.reports.pickup_report.list') }}',
-                            method: 'post',
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
                             data: params,
                             success: function (result) {
                                 head = [];
@@ -570,10 +567,6 @@
                 serverSide: true,
                 ajax:{
                     url: '{{ route('admin.reports.pickup_report.list') }}',
-                    method: 'post',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
                     data: function (d) {
                         d.search_department = $('#department').val();
                         d.search_salesperson = $('#salesperson').val();
@@ -651,49 +644,51 @@
                  box.addClass('show_active');
             }
 
-            // $('#search_form').validate({
-            //         errorClass: 'danger',
-            //         successClass: 'success',
-            //         errorPlacement: function(error, element) {
-            //             error.addClass('w-100').appendTo(element.parents('.form-group'));
-            //         },
-            //         submitHandler: function(form) {
-            //             var from_date = $('#search_form input[name="from_date_formatted"]').val();
-            //             var to_date = $('#search_form input[name="to_date_formatted"]').val();
-            //             var shipper = $('#shipper').val();
-            //             console.log(shipper);
-            //             console.log(to_date);
-            //             console.log(from_date);
+            $('#search_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                var from_date = $('#search_form input[name="from_date_formatted"]').val();
+                var to_date = $('#search_form input[name="to_date_formatted"]').val();
                        
-            //             $.ajax({
-            //                 url: '{!! route('admin.dashboard.userwise.commission.data') !!}',
-            //                 method: 'post',
-            //                 data: {
-            //                     '_token': '{{ csrf_token() }}',
-            //                     'search_date_from': from_date,
-            //                     'search_date_to': to_date,
-            //                     'search_shipper': shipper,
-            //                 }
-            //             }).done(function (data) {
-            //                 if(data.status){
-            //                     $('#booked').text(data.stats.booked);
-            //                     $('#received').text(data.stats.received);
-            //                     $('#revenue').text(data.stats.revenue);
-            //                     $('#commission').text(data.stats.commission);
-            //                     console.log(data);
-            //                     table.draw();
+                    $.ajax({
+                        url: '{!! route('admin.reports.pickup_report.data') !!}',
+                        method: 'post',
+                        data: {
+                             '_token': '{{ csrf_token() }}',
+                             'search_date_from': from_date,
+                             'search_date_to': to_date,
+                            }
+                    }).done(function (data) {
+                            if(data.status){
+                                $('#total').text(data.stats.total);
+                                $('#pending_operations').text(data.stats.pending_operations);
+                                $('#pending_sales').text(data.stats.pending_sales);
+                                $('#before_cut_off_time').text(data.stats.before_cut_off_time);
+                                $('#after_cut_off_time').text(data.stats.after_cut_off_time);
+                                $('#attempted_and_picked').text(data.stats.attempted_and_picked);
+                                $('#attempted_and_not_picked').text(data.stats.attempted_and_not_picked);
+                                $('#attempted_failed').text(data.stats.attempted_failed);
+                                table.draw();
 
-            //                 }else{
-            //                     $('#booked').text(0);
-            //                     $('#received').text(0);
-            //                     $('#revenue').text(0);
-            //                     $('#commission').text(0);
-            //                     table.draw();
-            //                 }
-            //                 UnblockPagePermanently();
-            //             }); 
-            //     }
-            // });
+                            }else{
+                                $('#total').text(0);
+                                $('#pending_operations').text(0);
+                                $('#pending_sales').text(0);
+                                $('#before_cut_off_time').text(0);
+                                $('#after_cut_off_time').text(0);
+                                $('#attempted_and_picked').text(0);
+                                $('#attempted_and_not_picked').text(0);
+                                $('#attempted_failed').text(0);
+                                table.draw();
+                            }
+                            UnblockPagePermanently();
+                    }); 
+                }
+            });
 
 
         });

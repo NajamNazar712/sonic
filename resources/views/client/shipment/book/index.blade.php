@@ -841,6 +841,7 @@
 						$('#consignee_header_info').html('Consignee Information');
 						$('#amount').prop('disabled', false);
 						$('#try_and_buy_charges_div').addClass('d-none');
+						$('#pieces_quantity').addClass('d-none');
 					}
 					else if (service_type == 3) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -859,6 +860,7 @@
 						$('#consignee_header_info').html('Consignee Information');
 						$('#amount').prop('disabled', true);
 						$('#try_and_buy_charges_div').removeClass('d-none');
+						$('#pieces_quantity').addClass('d-none');
 					}
 					else if (service_type == 5) {
 						$('#shipping_header_div').removeClass('col col_custom');
@@ -878,6 +880,7 @@
 						$('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
 						$('#amount').prop('disabled', false);
 						$('#try_and_buy_charges_div').addClass('d-none');
+						$('#pieces_quantity').addClass('d-none');
 					}
 					$('#booking_form #selected_service_type').val(service_type);
 

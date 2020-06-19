@@ -55,12 +55,14 @@ class AdminPickupsController extends Controller
 
     static public function generate($shipment_id) {
               $shipment = Shipment::find($shipment_id);
+
               if($shipment->shipper_status_id == 17){
                   $shipment->shipper_status_id == 1;
                   $shipment->consignee_status_id == 1;
-                  $shipment->save();
 //                  ShipmentsJourneyController::add($shipment_id,1,1,NULL,'Pickup generated',NULL,6);
               }
+              $shipment->pickup_date = Carbon::now();
+              $shipment->save();
               $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->whereIn('status_id', [1,3]);
 
               $shipments_count = 0;
@@ -253,7 +255,7 @@ class AdminPickupsController extends Controller
 
         $pickup_request->save();
 
-        ShipmentsPickupJourneyController::add($shipment_id, 6, NULL, $pickup_request->id);
+        ShipmentsPickupJourneyController::add($shipment_id, 4, NULL, $pickup_request->id);
 
         $pickup_request_assigned_shipment->delete();
 
@@ -611,7 +613,7 @@ class AdminPickupsController extends Controller
             $shipment = $assigned_shipment->shipment;
 
             if ($shipment->shipper_status_id == 1) {
-              ShipmentsPickupJourneyController::add($shipment->id, 2, Auth::id(), $pickup_note_id, $rider_id);
+              ShipmentsPickupJourneyController::add($shipment->id, 3, Auth::id(), $pickup_note_id, $rider_id);
             }
           }
         }
@@ -645,7 +647,7 @@ class AdminPickupsController extends Controller
             $shipment = $assigned_shipment->shipment;
 
             if ($shipment->shipper_status_id == 1) {
-              ShipmentsPickupJourneyController::add($shipment->id, 6, Auth::id(), $pickup_request->id);
+              ShipmentsPickupJourneyController::add($shipment->id, 4, Auth::id(), $pickup_request->id);
             }
           }
         }
@@ -671,7 +673,7 @@ class AdminPickupsController extends Controller
             $shipment = $assigned_shipment->shipment;
 
             if ($shipment->shipper_status_id == 1) {
-              ShipmentsPickupJourneyController::add($shipment->id, 6, Auth::id(), $pickup_request->id);
+              ShipmentsPickupJourneyController::add($shipment->id, 4, Auth::id(), $pickup_request->id);
             }
           }
         }
@@ -851,7 +853,7 @@ class AdminPickupsController extends Controller
               $shipment = $assigned_shipment->shipment;
 
               if ($shipment->shipper_status_id == 1) {
-                ShipmentsPickupJourneyController::add($shipment->id, 7, Auth::id(), $pickup_note_id);
+                ShipmentsPickupJourneyController::add($shipment->id, 4, Auth::id(), $pickup_note_id);
               }
             }
           }
@@ -976,9 +978,9 @@ class AdminPickupsController extends Controller
               foreach ($assigned_shipments as $assigned_shipment) {
                 $shipment = $assigned_shipment->shipment;
 
-                if ($shipment->shipper_status_id == 1) {
-                  ShipmentsPickupJourneyController::add($shipment->id, 3, Auth::id(), $pickup_note->id);
-                }
+//                if ($shipment->shipper_status_id == 1) {
+//                  ShipmentsPickupJourneyController::add($shipment->id, 1, Auth::id(), $pickup_note->id);
+//                }
 
                 if ($shipment->booking_type_id == 5) {
                   NotificationsController::send(52, $pickup_note->id, $shipment->id);
@@ -1287,6 +1289,7 @@ class AdminPickupsController extends Controller
     }
 
     public function receive_arrival_of_shipments_index() {
+        return redirect()->to(route('admin.dashboard.index'))->with('error', 'Receive shipments through new arrival screen!');
       if (session('pickup_receive_pickup_note_id')) {
         return view('admin.pickups.receive.arrival_of_shipments');
       }

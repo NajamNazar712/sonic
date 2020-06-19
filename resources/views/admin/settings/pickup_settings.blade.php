@@ -50,7 +50,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Rider Assignment-Off Time</span>
                                                 </div>
-                                                <input type="text" name="rider_assignment_off_time" class="form-control rider_assignment_off_time" placeholder="Rider Assignment-Off Time Start*" data-rule-required="true" data-msg-required="Rider Assignment-Off Time Start is required" value="{{ $rider_assignment_cut_off_time }}" data-rule-min="0" data-msg-min="Rider Assignment-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Rider Assignment-Off Time can not be more than 23">
+                                                <input type="text" name="rider_assignment_off_time" class="form-control rider_assignment_off_time" placeholder="Rider Assignment-Off Time Start"  value="{{ $rider_assignment_cut_off_time }}" data-rule-min="0" data-msg-min="Rider Assignment-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Rider Assignment-Off Time can not be more than 23">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">hours</span>
                                                 </div>

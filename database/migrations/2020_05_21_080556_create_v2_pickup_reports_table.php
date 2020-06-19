@@ -22,9 +22,9 @@ class CreateV2PickupReportsTable extends Migration
             $table->integer('expected_shipments');
             $table->integer('received_shipments');
             $table->integer('difference_shipments');
-            $table->integer('department_id');
+            $table->integer('department_id')->nullable();
             $table->integer('legend_id');
-            $table->integer('category_id');
+            $table->integer('category_id')->nullable();
             $table->timestamps();
         });
     }

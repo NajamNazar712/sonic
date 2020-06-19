@@ -2345,8 +2345,12 @@ class GlobalSettingsController extends Controller
 
             $rider_assignment->type = 'rider_assignment_cut_off_time';
         }
-
-        $rider_assignment->setting_value = $request->rider_assignment_off_time;
+        if($request->rider_assignment_off_time != NULL ){
+            $rider_assignment->setting_value = $request->rider_assignment_off_time;
+        }
+        else{
+            $rider_assignment->setting_value = 0;
+        }
 
         $rider_assignment->save();
 

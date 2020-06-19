@@ -224,6 +224,39 @@
 
     <script>
         $(document).ready(function() {
+
+            @if (session('print_shipment_ids'))
+            $.ajax({
+                url: '{!! route('admin.v2_pickups.pending.print') !!}',
+                method: 'POST',
+                data: {
+                    'ids': ids,
+                    'dispatch': 1,
+                    '_token': '{{ csrf_token() }}'
+                }
+            })
+                .done(function(data) {
+                    var tab = window.open('', '_blank');
+
+                    if(!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    }
+                    else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+
+                    table.draw('false');
+                });
+            @endif
+
             function print(id) {
                 var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
 
@@ -624,7 +657,6 @@
                 },
                 submitHandler: function (form) {
                     var shipment_id = $('#try_and_buy_shipment_id').val();
-                    shipment_ids.push(shipment_id);
                     var tracking_number = $(form).find('input.scan_try_and_buy_tracking_number').val();
                     var weight = $(form).find('input.try_and_buy_weight').val();
                     $.ajax({
@@ -878,7 +910,6 @@
                 },
                 submitHandler: function (form) {
                     var shipment_id = $('#piece_shipment_id').val();
-                    shipment_ids.push(shipment_id);
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     var weight = $(form).find('input.pieces_weight').val();
                     $.ajax({

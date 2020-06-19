@@ -400,6 +400,7 @@ class Permission
             'reports.multiple_iban.list' => 328,
             'reports.pickup_report.index' => 337,
             'reports.pickup_report.list' => 337,
+            'reports.pickup_report.data' => 337,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

@@ -14,7 +14,21 @@ use DB;
 class V2PickupCronController extends Controller
 {
     static public function arrival_not_picked(){
-        $pickup_requests = V2PickupRequest::where('status_id', 1);
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+        $arrival_cut_off_time = '08:00';
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $arrival_cut_off_time = $settings->setting_value . ':00';
+        }
+        $arrival_time = Carbon::parse($arrival_cut_off_time)->toTimeString();
+        $rider_id = 1837;
+        $setting = GlobalSettings::where('type', 'global_rider_id');
+        if($setting->exists()){
+            $setting = $setting->first();
+            $rider_id = $setting->setting_value;
+        }
+        $today = Carbon::today()->toDateString();
+        $pickup_requests = V2PickupRequest::where('status_id', 1)->whereDate('created_at', '<=', $today)->whereTime('created_at', '<=', $arrival_time);
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
             $pickup_request_ids = array();
@@ -26,30 +40,24 @@ class V2PickupCronController extends Controller
                     $pickup_request_attempt->reason_id = 7;
                     $pickup_request_attempt->save();
                     $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request->id)->latest('id')->first();
-                    if($pickup_note_request->status == 0){
-                        $pickup_note_request->status = 1;
-                        $pickup_note_request->save();
+                    if($pickup_note_request){
+                        if($pickup_note_request->status == 0){
+                            $pickup_note_request->status = 1;
+                            $pickup_note_request->save();
+                        }
                     }
                     if(!in_array($pickup_request->id, $pickup_request_ids)){
                         $pickup_request_ids[] = $pickup_request->id;
                     }
                 }else{
-                    $setting = GlobalSettings::where('type', 'global_rider_id');
-                    if($setting->exists()){
-                        $setting = $setting->first();
-                        $rider_id = $setting->setting_value;
-                        $pickup_request_attempt = new V2PickupRequestAttempt();
-                        $pickup_request_attempt->pickup_request_id = $pickup_request->id;
-                        $pickup_request_attempt->rider_id = $rider_id;
-                        $pickup_request_attempt->attempt_date = Carbon::now();
-                        $pickup_request_attempt->assigned_by = 70;
-                        $pickup_request_attempt->save();
+                    $pickup_request_attempt = new V2PickupRequestAttempt();
+                    $pickup_request_attempt->pickup_request_id = $pickup_request->id;
+                    $pickup_request_attempt->rider_id = $rider_id;
+                    $pickup_request_attempt->reason_id = 7;
+                    $pickup_request_attempt->attempt_date = Carbon::now();
+                    $pickup_request_attempt->assigned_by = 346;
+                    $pickup_request_attempt->save();
 
-                        $pickup_request_attempt->fresh();
-
-                        $pickup_request_attempt->reason_id = 7;
-                        $pickup_request_attempt->save();
-                    }
                 }
 
             }
