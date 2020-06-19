@@ -1933,8 +1933,8 @@ class AdminCargoController extends Controller
         $writer->save($file_name);
 
         $file = Storage::disk('public')->url('/reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
-//        Storage::disk('s3')->put( 'cargo_consignment_excels/'.'cargo_consignment_excel_'. 1 .'.xlsx', $file);
-//        Storage::disk('public')->delete('reports/cargo_consignment_excel_'. 1 .'.xlsx');
+        Storage::disk('s3')->put( 'cargo_consignment_excels/'.'cargo_consignment_excel_'. 1 .'.xlsx', $file);
+        Storage::disk('public')->delete('reports/cargo_consignment_excel_'. 1 .'.xlsx');
 
         $cargo_consignment_excel->cargoes = count($cargo_consignment_ids);
         $cargo_consignment_excel->excel = 'cargo_consignment_excel_' . $cargo_consignment_excel->id  . '.xlsx';
@@ -1960,7 +1960,7 @@ class AdminCargoController extends Controller
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_consignment->cargoes . '</button>';
             })
             ->addColumn('excel_button', function ($cargo_consignment) {
-                $file = Storage::disk('public')->url('/reports/'.$cargo_consignment->excel);
+                $file = Storage::disk('s3')->temporaryUrl('cargo_consignment_excels/'.$cargo_consignment->excel, now()->addMinutes(60));
 
                 return '<a href="' . $file . '" target="_blank"><button class="btn btn-sm btn-info align-middle">Download</button></a>';
             });
