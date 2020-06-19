@@ -303,7 +303,7 @@
                 },
             serverSide: true,
             rowId: 'id',
-            order: [[1, 'desc']],
+            order: [[2, 'desc']],
             ajax: {
                 url: '{{ route('admin.accounts.pending.ajax') }}',
                 data: function (d) {
