@@ -373,7 +373,7 @@
                 },
             serverSide: true,
             rowId: 'id',
-            order: [[1, 'desc']],
+            order: [[2, 'desc']],
             ajax: {
                url: '{{ route('admin.accounts.active.ajax') }}',
                data: function (d) {
