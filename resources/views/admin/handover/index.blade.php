@@ -42,29 +42,17 @@
                                 <div class="col-3">
                                     <fieldset class="form-group">
                                         <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from" 
-                                         required >
-                                            <option value="">Select Hub</option>
+                                         required>
                                             @foreach($hubs as $hub)
                                                 <option value="{{$hub->id}}">{{$hub->name}}</option>
                                             @endforeach
                                         </select>
                                         <div class="danger" id="hub_error" style="display:none;">This field is required</div>
                                     </fieldset>
-                                    <!-- <fieldset class="form-group">
-                                        <select name="hub1" id="hub1" class="form-control select2 dynamic1" data-dependent="to" 
-                                         required >
-                                            <option value="">Select Hub</option>
-                                            @foreach($hubs as $hub)
-                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                            @endforeach
-                                        </select>
-                                         <div class="danger" id="hub_error" style="display:none;">This field is required</div> 
-                                    </fieldset> -->
                                 </div>
                                 <div class="col-3">
                                     <fieldset class="form-group">
-                                        <select name="from" id="from" class="form-control select2" required >
-                                                <!-- <option value="">Select Person</option> -->
+                                        <select name="from" id="from" class="form-control select2" required>
                                         </select>
                                         <div class="danger" id="from_error" style="display:none;">This field is required</div>
                                     </fieldset>
@@ -72,8 +60,7 @@
                                 
                                 <div class="col-3">
                                     <fieldset class="form-group">
-                                        <select name="to" id="to" class="form-control select2" required >
-                                            <!-- <option value="">Select Person</option> -->
+                                        <select name="to" id="to" class="form-control select2" required>
                                         </select>
                                         <div class="danger" id="to_error" style="display:none;">This field is required</div>
                                     </fieldset>
