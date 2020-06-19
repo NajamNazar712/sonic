@@ -14,7 +14,7 @@ use DB;
 class V2PickupCronController extends Controller
 {
     static public function arrival_not_picked(){
-        $pickup_requests = V2PickupRequest::where('status_id', 1)->whereDate('updated_at', Carbon::yesterday());
+        $pickup_requests = V2PickupRequest::where('status_id', 1);
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
             $pickup_request_ids = array();
