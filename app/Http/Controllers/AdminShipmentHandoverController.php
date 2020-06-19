@@ -180,7 +180,7 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->select(['handovers.id','handovers.id as handover_id','a.name as created_by','ad.name as received_by','hr.name as from','hor.name as to','c.name as hub',
         'handovers.shipments as shipment_count','hs.name as status','handovers.received as received_shipments',
-        'handovers.received_at as received_at']);
+        'handovers.received_at as received_at','handovers.created_at']);
 
         $datatable = Datatables::of($handover_list)
 

@@ -28,6 +28,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">From</th>
                         <th class="border-primary border-darken-1">To</th>
@@ -182,6 +183,7 @@
                             head = [];
 
                             head.push('S. No');
+                            head.push('Created At');
                             head.push('Created By');
                             head.push('From');
                             head.push('To');
@@ -195,6 +197,7 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.from);
                                 row.push(values.to);
@@ -401,10 +404,11 @@
                     }
                 },
                 rowId: 'handover_id',
-                order: [[1, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                     {data: 'handover_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'from', name: 'hr.name', class: 'align-middle from'},
                     {data: 'to', name: 'hor.name', class: 'align-middle to'},
