@@ -50,16 +50,7 @@
                                         </select>
                                         <div class="danger" id="hub_error" style="display:none;">This field is required</div>
                                     </fieldset>
-                                    <!-- <fieldset class="form-group">
-                                        <select name="hub1" id="hub1" class="form-control select2 dynamic1" data-dependent="to" 
-                                         required >
-                                            <option value="">Select Hub</option>
-                                            @foreach($hubs as $hub)
-                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                            @endforeach
-                                        </select>
-                                         <div class="danger" id="hub_error" style="display:none;">This field is required</div> 
-                                    </fieldset> -->
+                                   
                                 </div>
                                 <div class="col-3">
                                     <fieldset class="form-group">
