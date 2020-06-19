@@ -255,64 +255,85 @@ class V2AdminPickupsController extends Controller
         $pickups = 0;
         $bookings = 0;
 
+        $start_date = Carbon::now()->startOfDay();
+        $end_date = Carbon::now()->endOfDay();
+        $today = Carbon::today();
+        $allowed_pickup_requests = array();
         foreach ($pickup_request_ids as $pickup_request_id) {
-            $pickup_request = V2PickupRequest::find($pickup_request_id);
-            $pickup_request->rider_status = 2;
-            $pickup_request->attempts = $pickup_request->attempts + 1;
-            $pickup_request->current_rider_id = $rider_id;
-            $pickup_request->last_updated_by = Auth::id();
-            $pickup_request->save();
+//            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('rider_id', $rider_id)->whereBetween('attempt_date', [$start_date, $end_date]);
+            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->whereDate('attempt_date', $today);
+            if(!$existing_pickup_request_attempt->exists()){
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                $pickup_request->rider_status = 2;
+                $pickup_request->attempts = $pickup_request->attempts + 1;
+                $pickup_request->current_rider_id = $rider_id;
+                $pickup_request->last_updated_by = Auth::id();
+                $pickup_request->save();
 
-            $pickup_request_attempt = new V2PickupRequestAttempt();
-            $pickup_request_attempt->pickup_request_id = $pickup_request_id;
-            $pickup_request_attempt->rider_id = $rider_id;
-            $pickup_request_attempt->attempt_date = Carbon::now();
-            $pickup_request_attempt->assigned_by = Auth::id();
-            $pickup_request_attempt->save();
-            $pickup_request->save();
+                $pickup_request_attempt = new V2PickupRequestAttempt();
+                $pickup_request_attempt->pickup_request_id = $pickup_request_id;
+                $pickup_request_attempt->rider_id = $rider_id;
+                $pickup_request_attempt->attempt_date = Carbon::now();
+                $pickup_request_attempt->assigned_by = Auth::id();
+                $pickup_request_attempt->save();
 
-            $pickups++;
-            $bookings += $pickup_request->booked;
+                if(!in_array($pickup_request_id, $allowed_pickup_requests)){
+                    $allowed_pickup_requests[] = $pickup_request_id;
+                }
+
+                $pickups++;
+                $bookings += $pickup_request->booked;
+            }else{
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                $pickup_request->current_rider_id = $rider_id;
+                $pickup_request->last_updated_by = Auth::id();
+                $pickup_request->save();
+                $existing_pickup_request_attempt = $existing_pickup_request_attempt->latest()->first();
+
+                $existing_pickup_request_attempt->rider_id = $rider_id;
+                $existing_pickup_request_attempt->assigned_by = Auth::id();
+                $existing_pickup_request_attempt->save();
+            }
         }
+        if(count($allowed_pickup_requests) > 0){
+            $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
 
-        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
+            if ($pickup_note->exists()) {
+                $pickup_note = $pickup_note->first();
 
-        if ($pickup_note->exists()) {
-            $pickup_note = $pickup_note->first();
+                $pickup_note->pickups += $pickups;
 
-            $pickup_note->pickups += $pickups;
+                $pickup_note->save();
 
-            $pickup_note->save();
+                $pickup_note_id = $pickup_note->id;
+            }
+            else {
+                $pickup_note = new V2PickupNote();
 
-            $pickup_note_id = $pickup_note->id;
-        }
-        else {
-            $pickup_note = new V2PickupNote();
+                $pickup_note->rider_id = $rider_id;
+                $pickup_note->pickups = $pickups;
+                $pickup_note->save();
 
-            $pickup_note->rider_id = $rider_id;
-            $pickup_note->pickups = $pickups;
-            $pickup_note->save();
-
-            $pickup_note_id = $pickup_note->id;
-        }
-
-        foreach ($pickup_request_ids as $pickup_request_id) {
-            $pickup_note_request = new V2PickupNoteRequest();
-
-            $pickup_note_request->pickup_note_id = $pickup_note_id;
-            $pickup_note_request->pickup_request_id = $pickup_request_id;
-
-            $pickup_note_request->save();
-            $pickup_request = V2PickupRequest::find($pickup_request_id);
-            $assigned_shipments = $pickup_request->pickup_request_shipments;
-            NotificationsController::send(42, $rider_id, $pickup_request->shipper_id);
-            if($pickup_request->vendor == 1){
-                NotificationsController::send(43, $pickup_request->id, $pickup_request->pickup_address->id);
+                $pickup_note_id = $pickup_note->id;
             }
 
-            if ($assigned_shipments) {
-                foreach ($assigned_shipments as $assigned_shipment) {
-                    $shipment = $assigned_shipment->shipment;
+            foreach ($allowed_pickup_requests as $pickup_request_id) {
+                $pickup_note_request = new V2PickupNoteRequest();
+
+                $pickup_note_request->pickup_note_id = $pickup_note_id;
+                $pickup_note_request->pickup_request_id = $pickup_request_id;
+
+                $pickup_note_request->save();
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                $assigned_shipments = $pickup_request->pickup_request_shipments;
+                NotificationsController::send(42, $rider_id, $pickup_request->shipper_id);
+                if($pickup_request->vendor == 1){
+                    NotificationsController::send(43, $pickup_request->id, $pickup_request->pickup_address->id);
+                }
+
+                if ($assigned_shipments) {
+                    foreach ($assigned_shipments as $assigned_shipment) {
+                        $shipment = $assigned_shipment->shipment;
 //                    if ($shipment->booking_type_id == 3) {
 //                        $pickup_request = V2PickupRequest::find($pickup_request_id);
 //                        if($pickup_request->try_and_buy == NULL){
@@ -320,15 +341,20 @@ class V2AdminPickupsController extends Controller
 //                            $pickup_request->save();
 //                        }
 //                    }
-                    if ($shipment->booking_type_id == 5) {
-                        NotificationsController::send(52, $pickup_note_id, $shipment->id);
+                        if ($shipment->booking_type_id == 5) {
+                            NotificationsController::send(52, $pickup_note_id, $shipment->id);
+                        }
                     }
                 }
+
             }
 
+            return ['status' => 0, 'success' => 'Pickup Request(s) has been Assigned to the Rider'];
+        }else{
+            return ['status' => 0, 'success' => 'Pickup Request(s) rider updated / assigned!'];
         }
+        return ['status' => 1, 'error' => 'Pickup Request(s) already assigned'];
 
-        return ['status' => 0, 'success' => 'Pickup Request(s) has been Assigned to the Rider'];
     }
 
     public function pending_update(Request $request){
@@ -713,14 +739,16 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->status_id = 2;
                 $pickup_request->save();
                 $pickup_note_request = $pickup_request->pickup_note_request;
-                $pickup_note_id = $pickup_note_request->pickup_note_id;
-                $pickup_note_request->status = 1;
-                $pickup_note_request->save();
-                $pickup_note = V2PickupNote::find($pickup_note_id);
-                if($pickup_note){
-                    if($pickup_note->status == 0){
-                        if(!in_array($pickup_note_id, $pickup_note_ids)){
-                            $pickup_note_ids[] = $pickup_note_id;
+                if($pickup_note_request){
+                    $pickup_note_id = $pickup_note_request->pickup_note_id;
+                    $pickup_note_request->status = 1;
+                    $pickup_note_request->save();
+                    $pickup_note = V2PickupNote::find($pickup_note_id);
+                    if($pickup_note){
+                        if($pickup_note->status == 0){
+                            if(!in_array($pickup_note_id, $pickup_note_ids)){
+                                $pickup_note_ids[] = $pickup_note_id;
+                            }
                         }
                     }
                 }
@@ -735,7 +763,6 @@ class V2AdminPickupsController extends Controller
                 Log::info('Pickup note id: '.$pickup_note_id);
             }
         }
-        Log::info('Hello Pakistani');
 
         NotificationsController::send(4, $shipment_ids);
         if (empty($print_shipment_ids)) {
@@ -772,7 +799,7 @@ class V2AdminPickupsController extends Controller
             if ($pickup_note->exists()) {
                 $pickup_note = $pickup_note->first();
 
-                $pickup_note->pickups += $pickup_note->pickups + 1;
+                $pickup_note->pickups += 1;
 
                 $pickup_note->save();
 
@@ -806,6 +833,7 @@ class V2AdminPickupsController extends Controller
     public function arrival_individual_shipment_details(Request $request)
     {
         $shipment = Shipment::where('tracking_number',$request->tracking_number);
+
         if($shipment->exists()) {
             $shipment = $shipment->first();
             $pickup_request_id = NULL;
@@ -1191,14 +1219,16 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->status_id = 2;
                 $pickup_request->save();
                 $pickup_note_request = $pickup_request->pickup_note_request;
-                $pickup_note_id = $pickup_note_request->pickup_note_id;
-                $pickup_note_request->status = 1;
-                $pickup_note_request->save();
-                $pickup_note = V2PickupNote::find($pickup_note_id);
-                if($pickup_note){
-                    if($pickup_note->status == 0){
-                        if(!in_array($pickup_note_id, $pickup_note_ids)){
-                            $pickup_note_ids[] = $pickup_note_id;
+                if($pickup_note_request){
+                    $pickup_note_id = $pickup_note_request->pickup_note_id;
+                    $pickup_note_request->status = 1;
+                    $pickup_note_request->save();
+                    $pickup_note = V2PickupNote::find($pickup_note_id);
+                    if($pickup_note){
+                        if($pickup_note->status == 0){
+                            if(!in_array($pickup_note_id, $pickup_note_ids)){
+                                $pickup_note_ids[] = $pickup_note_id;
+                            }
                         }
                     }
                 }
@@ -1659,4 +1689,5 @@ class V2AdminPickupsController extends Controller
             }
         }
     }
+
 }

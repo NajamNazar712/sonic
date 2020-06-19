@@ -45,12 +45,19 @@ class V2AdminReportController extends Controller
         $attempted_and_not_picked = 0;
         $attempted_failed = 0;
 
-        $report = V2PickupReport::whereDate('today', $today);
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+        $arrival_cut_off_time = '08:00';
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $arrival_cut_off_time = $settings->setting_value . ':00';
+        }
+        $arrival_time = Carbon::parse($arrival_cut_off_time)->toTimeString();
+        $report = V2PickupReport::whereDate('date', $today);
         if($report->exists()){
             $report->delete();
             V2PickupReportSummary::whereDate('date', $today)->delete();
         }
-        $pickup_requests = V2PickupRequest::whereDate('created_at', $yesterday);
+        $pickup_requests = V2PickupRequest::whereDate('created_at', '<=', Carbon::today())->whereTime('created_at', '<=', $arrival_time);;
         
         if($pickup_requests->exists()){
            

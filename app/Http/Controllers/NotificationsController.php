@@ -3202,7 +3202,7 @@ class NotificationsController extends Controller
                           $body = str_replace('[vendor]', $vendor, $body);
                       }
 
-                      $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
+                      $assigned_shipments = $pickup_request->pickup_request_shipments;
                       $shipment_details = '<table style="width:100%;">';
                       $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
                       $shipment_details .= '<tbody>';
