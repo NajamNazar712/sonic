@@ -1433,6 +1433,10 @@ class AdminCargoController extends Controller
                         $cargo_consignment_shipment = $cargo_consignment_shipment->first();
 
                         $consignee_city = $shipment->consignee_city;
+                        $shipment_origin = $shipment->pickup_address->city_id;
+                        if(!in_array($shipment_origin, session('hubs'))){
+                            return ['status' => 1, 'error' => 'You can not do arrival of this hub\'s shipment'];
+                        }
 
                         if(!$request->has('pieces_confirm')){
                             if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
