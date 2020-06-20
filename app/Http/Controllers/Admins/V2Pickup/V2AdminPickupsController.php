@@ -288,7 +288,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->current_rider_id = $rider_id;
                 $pickup_request->last_updated_by = Auth::id();
                 $pickup_request->save();
-                $existing_pickup_request_attempt = $existing_pickup_request_attempt->latest()->first();
+                $existing_pickup_request_attempt = $existing_pickup_request_attempt->latest('id')->first();
 
                 $existing_pickup_request_attempt->rider_id = $rider_id;
                 $existing_pickup_request_attempt->assigned_by = Auth::id();
@@ -481,7 +481,7 @@ class V2AdminPickupsController extends Controller
                     }
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
                     if($pickup_request_shipment->exists()){
-                        $pickup_request_shipment = $pickup_request_shipment->latest()->first();
+                        $pickup_request_shipment = $pickup_request_shipment->latest('id')->first();
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         $pickup_request = V2PickupRequest::find($pickup_request_id);
                         if($pickup_request->current_rider_id == NULL){
@@ -496,7 +496,7 @@ class V2AdminPickupsController extends Controller
 
                         $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
                         if($pickup_request_shipment->exists()){
-                            $pickup_request_shipment = $pickup_request_shipment->latest()->first();
+                            $pickup_request_shipment = $pickup_request_shipment->latest('id')->first();
                             $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                             $pickup_request = V2PickupRequest::find($pickup_request_id);
                             if($pickup_request->current_rider_id == NULL){
@@ -869,7 +869,7 @@ class V2AdminPickupsController extends Controller
                     }
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
                     if($pickup_request_shipment->exists()){
-                        $pickup_request_shipment = $pickup_request_shipment->latest()->first();
+                        $pickup_request_shipment = $pickup_request_shipment->latest('id')->first();
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         $pickup_request = V2PickupRequest::find($pickup_request_id);
                         if($pickup_request->current_rider_id == NULL){
@@ -884,7 +884,7 @@ class V2AdminPickupsController extends Controller
 
                         $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
                         if($pickup_request_shipment->exists()){
-                            $pickup_request_shipment = $pickup_request_shipment->latest()->first();
+                            $pickup_request_shipment = $pickup_request_shipment->latest('id')->first();
                             $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                             $pickup_request = V2PickupRequest::find($pickup_request_id);
                             if($pickup_request->current_rider_id == NULL){
@@ -922,46 +922,49 @@ class V2AdminPickupsController extends Controller
                 return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
             }
         }
+        else {
+            $shipment_item = ShipmentItem::find($request->tracking_number);
+            if($shipment_item){
+                $shipment = Shipment::find($shipment_item->shipment_id);
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+                    $details = array();
+                    $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+                    $shipment_items_count = count($shipment_items);
 
-        $shipment_item = ShipmentItem::find($request->tracking_number);
-        if($shipment_item){
-            $shipment = Shipment::find($shipment_item->shipment_id);
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
-                $details = array();
-                $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
-                $shipment_items_count = count($shipment_items);
+                    $details['id'] = $shipment->id;
+                    $details['tracking_number'] = $shipment->tracking_number;
+                    $details['shipment_items'] = $shipment_items;
+                    $details['shipment_items_count'] = $shipment_items_count;
+                    $details['scanned_shipment_item'] = $shipment_item->id;
 
-                $details['id'] = $shipment->id;
-                $details['tracking_number'] = $shipment->tracking_number;
-                $details['shipment_items'] = $shipment_items;
-                $details['shipment_items_count'] = $shipment_items_count;
-                $details['scanned_shipment_item'] = $shipment_item->id;
-
-                ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
-                return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
-            } else {
-                return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
+                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
+                } else {
+                    return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
+                }
+            }
+            else {
+                $shipment_pieces = ShipmentPiece::where('tracking_number', $request->tracking_number);
+                if($shipment_pieces->exists()){
+                    $shipment_pieces = $shipment_pieces->first();
+                    $shipment = Shipment::find($shipment_pieces->shipment_id);
+                    if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+                        $details = array();
+                        $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['pieces'] = $shipment->pieces;
+                        $details['pieces_tracking_numbers'] = $shipment_all_pieces;
+                        $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                    } else {
+                        return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
+                    }
+                }
             }
         }
 
-        $shipment_pieces = ShipmentPiece::where('tracking_number', $request->tracking_number);
-        if($shipment_pieces->exists()){
-            $shipment_pieces = $shipment_pieces->first();
-            $shipment = Shipment::find($shipment_pieces->shipment_id);
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
-                $details = array();
-                $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
-                $details['id'] = $shipment->id;
-                $details['tracking_number'] = $shipment->tracking_number;
-                $details['pieces'] = $shipment->pieces;
-                $details['pieces_tracking_numbers'] = $shipment_all_pieces;
-                $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
-                ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
-                return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
-            } else {
-                return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
-            }
-        }
         return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
     }
 
@@ -977,7 +980,7 @@ class V2AdminPickupsController extends Controller
                     }
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
                     if($pickup_request_shipment->exists()){
-                        $pickup_request_shipment = $pickup_request_shipment->latest()->first();
+                        $pickup_request_shipment = $pickup_request_shipment->latest('id')->first();
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         $pickup_request = V2PickupRequest::find($pickup_request_id);
                         if($pickup_request->current_rider_id == NULL){
@@ -992,7 +995,7 @@ class V2AdminPickupsController extends Controller
 
                         $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
                         if($pickup_request_shipment->exists()){
-                            $pickup_request_shipment = $pickup_request_shipment->latest()->first();
+                            $pickup_request_shipment = $pickup_request_shipment->latest('id')->first();
                             $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                             $pickup_request = V2PickupRequest::find($pickup_request_id);
                             if($pickup_request->current_rider_id == NULL){
@@ -1586,7 +1589,7 @@ class V2AdminPickupsController extends Controller
                     }
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
                     if($pickup_request_shipment->exists()){
-                        $pickup_request_shipment = $pickup_request_shipment->latest()->first();
+                        $pickup_request_shipment = $pickup_request_shipment->latest('id')->first();
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         $pickup_request = V2PickupRequest::find($pickup_request_id);
                         if($pickup_request->current_rider_id == NULL){
@@ -1601,7 +1604,7 @@ class V2AdminPickupsController extends Controller
 
                         $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
                         if($pickup_request_shipment->exists()){
-                            $pickup_request_shipment = $pickup_request_shipment->latest()->first();
+                            $pickup_request_shipment = $pickup_request_shipment->latest('id')->first();
                             $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                             $pickup_request = V2PickupRequest::find($pickup_request_id);
                             if($pickup_request->current_rider_id == NULL){
