@@ -8972,6 +8972,10 @@ if(session('department_id') == 7){
 
             
         }
+        $user = User::find($request->user_id);
+        $user->documents_status = 0;
+        $user->documents_status_reason = null;
+        $user->save();
 
         return redirect()->back()->with(['success' => 'Files uploaded successfully']);
     }
