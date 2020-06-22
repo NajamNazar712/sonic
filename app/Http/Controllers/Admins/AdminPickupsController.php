@@ -2218,7 +2218,7 @@ class AdminPickupsController extends Controller
         if ($received_shipments) {
           foreach ($received_shipments as $received_shipment) {
             $shipment = $received_shipment->shipment;
-            ShipmentsPickupJourneyController::add($shipment->id, 5, Auth::id(), $pickup_note->id);
+//            ShipmentsPickupJourneyController::add($shipment->id, 5, Auth::id(), $pickup_note->id);
           }
         }
         $vendor = $pickup_request->pickup_address->vendor;

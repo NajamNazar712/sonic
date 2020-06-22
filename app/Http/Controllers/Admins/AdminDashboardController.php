@@ -7493,7 +7493,7 @@ if(session('department_id') == 7){
                 {
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                 }
-                if($result->status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
+                if($result->status == 2 && $result->documents_status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
                     $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
                 }
