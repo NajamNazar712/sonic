@@ -56,7 +56,7 @@ class UpdateIndexTablesForUnindexedColumns extends Migration
             $table->index('updated_at');
         });
         Schema::table('cargo_consignment_shipment_excels', function (Blueprint $table) {
-            $table->index('cargo_consignment_excel_id');
+            $table->index('cargo_consignment_excel_id', 'cargo_consignment_excel_id_index');
             $table->index('cargo_consignment_id');
             $table->index('shipment_id');
             $table->index('created_at');
