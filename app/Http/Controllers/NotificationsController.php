@@ -27,6 +27,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\PickupNote;
@@ -4665,6 +4666,56 @@ class NotificationsController extends Controller
                     $to = $pickup_request->shipper->email;
                     self::email($subject, $body, $to);
                 }    
+              }
+
+              else if($id == 64){
+
+                $to = array();
+                $cc = array();
+                $user = User::find($reference_1_id);
+
+                if($user){
+
+                  array_push($to,$user->email);
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    // $user_bank_info = UserBankInfo::where('user_id', $user->id)->first();
+
+                    $account_id = $user->id;
+                    $shipper_name = $user->name;
+
+                    $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+
+                    if (strpos($subject, '[account_id]') !== FALSE) {
+                      $subject = str_replace('[account_id]', $account_id, $subject);
+                    }
+                    if (strpos($subject, '[name]') !== FALSE) {
+                      $subject = str_replace('[name]', $shipper_name, $subject);
+                    }
+
+                    if (strpos($body, '[account_id]') !== FALSE) {
+                      $body = str_replace('[account_id]', $account_id, $body);
+                    }
+                    if (strpos($body, '[name]') !== FALSE) {
+                      $body = str_replace('[name]', $shipper_name, $body);
+                    }
+                    if (strpos($body, '[trax_logo]') !== FALSE) {
+                      $body = str_replace('[trax_logo]', $logo, $body);
+                    }
+
+                    $admins_sales = Admin::where('role_id',4)->where('status', 1);
+                    $admins_finance = Admin::where('role_id',2)->where('status', 1);
+     
+                    if ($admins_sales->exists()) {
+                        $to = array_merge($to, $admins_sales->pluck('email')->toArray());
+                    }
+                    if ($admins_finance->exists()) {
+                      $cc = array_merge($cc, $admins_finance->pluck('email')->toArray());
+                  }
+
+                    self::email($subject, $body, $to,$cc);
+                }
+             
               }
 
 
