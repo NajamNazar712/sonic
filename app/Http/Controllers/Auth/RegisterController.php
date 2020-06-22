@@ -457,6 +457,19 @@ class RegisterController extends Controller
         $crf_terms_and_conditions->token = $token;
         $crf_terms_and_conditions->save();
 
+
+        $banks_infos =array();
+        $user_bank_infos = UserBankInfo::where('user_id', $newUser->id)->get();
+        foreach($user_bank_infos  as $user_bank_info)
+        {
+            if($user_bank_info)
+            {
+                $banks_infos['account_no'] = $user_bank_info->account_no;
+                $banks_infos['account_title'] = $user_bank_info->account_title;
+                $banks_infos['bank_branch'] = $user_bank_info->account_title;
+            }
+        } 
+
         $route = route('cod.email.verified', ['user_id' => $newUser->id]);
 
         $subject = 'Sonic - Account Verification';
@@ -468,8 +481,22 @@ class RegisterController extends Controller
                     </div>';
         $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
                     <h3 style="margin-top: 0px; margin-bottom: 0px;">Thank you for choosing Trax Logistics</h3>
-                    <p>Dear '. $newUser->name .','. PHP_EOL .'You are almost ready to start working with us.'. PHP_EOL .'To finish signing up, simply click below to verify your email address.</p>
-                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around;">
+                    <p>Dear '. $newUser->name .','. PHP_EOL .'You are almost ready to start working with us.'. PHP_EOL .'You have entered Your Contact number is: '. $newUser->phone .', address: '. $newUser->address .''. PHP_EOL .'Your Bank information is:';
+                    $html .='<table style="width:100%;">'; 
+                    $html .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account #</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account Title</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Branch Name</th></tr></thead><tbody>';
+                    foreach($banks_infos as $banks_info){
+                        $html .='<tr>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->account_no.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->account_title.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->bank_branch.'</td>';
+                        $html .='</tr>';
+                    }
+
+                    $html .= '</tbody></table>';
+                    'To finish signing up, simply click below to verify your email address.</p>  <div align="center" style="overflow: hidden; display: flex; justify-content:space-around;">
                         <a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
                     </div>
                 </div>
