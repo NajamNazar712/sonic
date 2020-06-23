@@ -1932,12 +1932,12 @@ class AdminCargoController extends Controller
         $file_name_without_path = "/reports/cargo_consignment_excel_" . $cargo_consignment_excel->id . ".xlsx";
         $file_name = public_path() . "/reports/cargo_consignment_excel_" . $cargo_consignment_excel->id . ".xlsx";
         $writer->save($file_name);
-        $files = File::glob(public_path().$file_name_without_path);
+//        $files = File::glob(public_path().$file_name_without_path);
 
-        if (is_file($files[0])) {
-            Storage::disk('s3')->put( 'cargo_consignment_excels/'.'cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx', file_get_contents($files[0]));
-        }
-        Storage::disk('public')->delete('reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
+//        if (is_file($files[0])) {
+            Storage::disk('s3')->put( 'cargo_consignment_excels/'.'cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx', file_get_contents($file_name));
+            Storage::disk('public')->delete('reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
+//        }
 
         $cargo_consignment_excel->cargoes = count($cargo_consignment_ids);
         $cargo_consignment_excel->excel = 'cargo_consignment_excel_' . $cargo_consignment_excel->id  . '.xlsx';
