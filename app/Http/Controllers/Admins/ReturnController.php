@@ -12,6 +12,7 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\Blacklist\BlacklistSetting;
@@ -2535,14 +2536,14 @@ class ReturnController extends Controller
                     if(file_exists($url)){
                         $img = asset('uploads/return_notes/' . $deliveries->image);
                         return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                    }else{
-                        $exists = Storage::disk('s3')->exists('return_note_images/'.$deliveries->image);
-                        if($exists){
-                            $img = Storage::disk('s3')->temporaryUrl('return_note_images/'.$deliveries->image, now()->addMinutes(5));
-                            return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                        }else{
-                            return "-";
-                        }
+//                    }else{
+//                        $exists = Storage::disk('s3')->exists('return_note_images/'.$deliveries->image);
+//                        if($exists){
+//                            $img = Storage::disk('s3')->temporaryUrl('return_note_images/'.$deliveries->image, now()->addMinutes(5));
+//                            return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
+//                        }else{
+//                            return "-";
+//                        }
                     }
 
                 }
@@ -2608,46 +2609,41 @@ class ReturnController extends Controller
     }
 
     public function receive_return_note_image_upload(Request $request){
-
+        $flag = FALSE;
         $return_note_id = $request->image_return_note_id;
-        $return_note_image = $request->return_note_image;
-
-        $messages = [
-            'return_note_image.required' => 'No Image file selected!.',
-            'return_note_image.mimes' => 'Image file not supported!.',
-            'return_note_image.size' => 'Image file size exceded!.',
-        ];
-        $validation = [
-            'return_note_image' => 'required | mimes:jpeg,png,jpg | max:2048',
-        ];
-        $validate = Validator::make($request->all(), $validation, $messages);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 0, 'error' => $validate->errors()]);
+        $image_ids = explode(',', $request->selected_ids);
+        if(count($image_ids) == 0){
+            return redirect()->back()->with('error', 'No images selected!');
         }
-
-        if($return_note_id){
-            $return_note = ReturnNote::find($return_note_id);
+        $return_note = ReturnNote::find($return_note_id);
+        if($return_note){
             if($return_note->status == 3){
-                $image = $request->file('return_note_image');
-                $imageName = $image->getClientOriginalName();
+                foreach ($image_ids as $id){
+                    $file_name = 'return_note_image_'.$id;
+                    $image = $request->file($file_name);
+                    $imageName = $image->getClientOriginalName();
 
-                //$imageName = explode('.', $imageName);
-                $extension = $image->getClientOriginalExtension();
-                $random = rand(1000, 100000);
-                $now = Carbon::now();
-                $time = $now->year . '_' . $now->month;
-                $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-                $image->move(public_path('uploads/return_notes'), $generated_image_name);
-
-
-                $return_note->image = $generated_image_name;
-                $return_note->updated_by = Auth::id();
-                $return_note->status = 1;
-                $return_note->save();
-
-
+                    //$imageName = explode('.', $imageName);
+                    $extension = $image->getClientOriginalExtension();
+                    $random = rand(1000, 100000);
+                    $now = Carbon::now();
+                    $time = $now->year . '_' . $now->month;
+                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('uploads/return_notes'), $generated_image_name);
+                    $return_note_image = new ReturnNoteImage();
+                    $return_note_image->return_note_id = $return_note_id;
+                    $return_note_image->image = $generated_image_name;
+                    $return_note_image->save();
+                    $flag = TRUE;
+                }
+                if($flag){
+                    $return_note->updated_by = Auth::id();
+                    $return_note->status = 1;
+                    $return_note->save();
+                    return redirect()->back()->with(['status' => 1, 'success' => 'Return Note updated successfully']);
+                }
                 return redirect()->back()->with(['status' => 1, 'success' => 'Return Note updated successfully']);
+
             }
             else{
                 return redirect()->back()->with(['status' => 0, 'error' => 'Return Note not updated yet!']);

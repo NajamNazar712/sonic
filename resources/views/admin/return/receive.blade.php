@@ -90,6 +90,7 @@
                     <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>
+                        <input type="hidden" name="selected_ids" id="selected_ids"/>
                         <table class="table table-bordered datatable" id="return_upload_table" style="z-index: 3;">
                             <thead>
                             <tr role="row" class="bg-primary white">
@@ -509,7 +510,7 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
+                    $('#selected_ids').val(selected_rows);
                     swal({
                         title: 'Please Wait!',
                         text: 'Image is being uploaded!',
