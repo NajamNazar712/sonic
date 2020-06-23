@@ -627,6 +627,7 @@ class DeliveryController extends Controller
                         if($handover_count == 0){
                             $handover = Handover::find($handover_shipments->handover_id);
                             $handover->received_by = Auth::id();
+                            $handover->received_at = Carbon::now();
                             $handover->received = $handover->received + 1;
                             $handover->status_id = 4;
                             $handover->save();
