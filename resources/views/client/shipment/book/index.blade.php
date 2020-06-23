@@ -211,7 +211,7 @@
 												</div>
 
 												<div class="form-group">
-													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" data-toggle="tooltip" data-placement="top" title="" data-original-title="Please describe in a way that rider can understand what to collect from the consignee"></textarea>
+													<textarea name="replacement_item_description" class="form-control" placeholder="Please enter another flyer  with the airway bill*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" data-toggle="tooltip" data-placement="top" title="" data-original-title="Please describe in a way that rider can understand what to collect from the consignee"></textarea>
 												</div>
 
 												<div class="form-group input-group">
