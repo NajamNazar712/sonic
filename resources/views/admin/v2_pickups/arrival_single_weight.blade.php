@@ -446,9 +446,18 @@
                             data: {
                                 'tracking_number': tracking_number,
                                 '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function(data) {
+                            },
+                            timeout: 5000,
+                            error: function (data) {
+                                form.reset();
+
+                                $('#add_shipment_form input.tracking_number').val('').focus();
+
+                                $('#add_shipment_form button.add').prop('disabled', false);
+                                scan_sound(2);
+                                toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            },
+                            success: function(data) {
                                 form.reset();
 
                                 $('#add_shipment_form input.tracking_number').val('').focus();
@@ -562,7 +571,8 @@
                                     scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
-                            });
+                            }
+                        });
                     }
                     else {
                         $('#add_shipment_form button.add').prop('disabled', false);
@@ -590,24 +600,29 @@
                                 'shipment_id': shipment_id,
                                 'item_id': item,
                                 '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function(data) {
-                            if(data.status == 0){
-                                var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
-                                var try_rowNo = try_and_buy_table.rows().count();
-                                try_and_buy_table.row.add([try_rowNo + 1, data.scanned_shipment_item, shipment_tracking_number, try_remove_button]).node().id = data.scanned_shipment_item;
-                                try_and_buy_table.draw(false);
-                                try_and_buy_table.columns.adjust().draw();
-                                scan_sound(1);
-                                shipment_item_ids.push(data.scanned_shipment_item);
-                                var check = parseInt(try_rowNo) + 1;
-                                if(parseInt(shipment_items_count) === parseInt(check)){
-                                    $('#try_and_buy_airwaybill').prop('disabled', false);
+                            },
+                            timeout: 5000,
+                            error: function (data) {
+                                toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            },
+                            success: function (data) {
+                                if(data.status == 0){
+                                    var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+                                    var try_rowNo = try_and_buy_table.rows().count();
+                                    try_and_buy_table.row.add([try_rowNo + 1, data.scanned_shipment_item, shipment_tracking_number, try_remove_button]).node().id = data.scanned_shipment_item;
+                                    try_and_buy_table.draw(false);
+                                    try_and_buy_table.columns.adjust().draw();
+                                    scan_sound(1);
+                                    shipment_item_ids.push(data.scanned_shipment_item);
+                                    var check = parseInt(try_rowNo) + 1;
+                                    if(parseInt(shipment_items_count) === parseInt(check)){
+                                        $('#try_and_buy_airwaybill').prop('disabled', false);
+                                    }
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
                             }
                         });
                     }
@@ -660,9 +675,12 @@
                         data: {
                             'tracking_number': tracking_number,
                             '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function (data) {
+                        },
+                        timeout: 5000,
+                        error: function (data) {
+                            toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        },
+                        success: function (data) {
                             form.reset();
                             remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
 
@@ -705,7 +723,8 @@
                                 scan_sound(2);
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
-                        })
+                        }
+                    });
                 }
             });
 
@@ -818,9 +837,12 @@
                     data: {
                         'id': id,
                         '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
+                    },
+                    timeout: 5000,
+                    error: function (data) {
+                        toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    },
+                    success: function (data) {
                         if (data.status == 0) {
                             table.row(parent).remove();
                             table.draw(false);
@@ -840,7 +862,8 @@
                         else {
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
-                    });
+                    }
+                });
             });
 
             $('#camera_scan_initiate').bind('click', function() {
@@ -888,24 +911,29 @@
                                 'shipment_id': shipment_id,
                                 'piece_id': item,
                                 '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function(data) {
-                            if(data.status == 0){
-                                var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
-                                var piece_rowNo = piece_table.rows().count();
-                                piece_table.row.add([piece_rowNo + 1, data.scanned_shipment_piece, shipment_tracking_number, piece_remove_button]).node().id = data.scanned_shipment_piece;
-                                piece_table.draw(false);
-                                piece_table.columns.adjust().draw();
-                                scan_sound(1);
-                                shipment_piece_ids.push(data.scanned_shipment_piece);
-                                var check = parseInt(piece_rowNo) + 1;
-                                if(parseInt(shipment_piece_count) === parseInt(check)){
-                                    $('#piece_airwaybill').prop('disabled', false);
+                            },
+                            timeout: 5000,
+                            error: function (data) {
+                                toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            },
+                            success: function (data) {
+                                if(data.status == 0){
+                                    var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+                                    var piece_rowNo = piece_table.rows().count();
+                                    piece_table.row.add([piece_rowNo + 1, data.scanned_shipment_piece, shipment_tracking_number, piece_remove_button]).node().id = data.scanned_shipment_piece;
+                                    piece_table.draw(false);
+                                    piece_table.columns.adjust().draw();
+                                    scan_sound(1);
+                                    shipment_piece_ids.push(data.scanned_shipment_piece);
+                                    var check = parseInt(piece_rowNo) + 1;
+                                    if(parseInt(shipment_piece_count) === parseInt(check)){
+                                        $('#piece_airwaybill').prop('disabled', false);
+                                    }
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
                             }
                         });
                     }
@@ -956,9 +984,15 @@
                         data: {
                             'tracking_number': tracking_number,
                             '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function (data) {
+                        },
+                        timeout: 5000,
+                        error: function (data) {
+                            form.reset();
+                            $('#add_shipment_form button.add').prop('disabled', false);
+                            scan_sound(2);
+                            toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        },
+                        success: function (data) {
                             form.reset();
                             remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
 
@@ -973,7 +1007,7 @@
                                     new_row.id = data.details.id;
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();
-// console.log($(new_row).parent('tr'));
+
                                     scan_sound(1);
                                     shipment_ids.push(data.details.id);
                                     if(all_shipment_item_ids.length == 0){
@@ -998,7 +1032,8 @@
                                 scan_sound(2);
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
-                        })
+                        }
+                    });
                 }
             });
 
