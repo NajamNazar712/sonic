@@ -596,7 +596,7 @@
                                                                                     <span class="danger">*</span>
                                                                                 </label>
                                                                                 <div>
-                                                                                    <select name="bank_city" id="bank_city[]" class="select2 form-control required" style="width: 100%">
+                                                                                    <select name="bank_city[]" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                                         @foreach($all_cities as $bank_city)
                                                                                            <option value="{{$bank_city->id}}"  {{ (collect(old('bank_city.'.$b))->contains($bank_city->id)) ? 'selected' : '' }} >{{$bank_city->name}}</option>
                                                                                         @endforeach
