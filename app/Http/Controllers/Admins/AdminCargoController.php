@@ -36,6 +36,7 @@ use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use Auth;
 use DB;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -1931,8 +1932,8 @@ class AdminCargoController extends Controller
         $file_name_without_path = "reports/cargo_consignment_excel_" . $cargo_consignment_excel->id . ".xlsx";
         $file_name = public_path() . "/reports/cargo_consignment_excel_" . $cargo_consignment_excel->id . ".xlsx";
         $writer->save($file_name);
-
-        $file = Storage::disk('public')->url('/reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
+        $file = File::glob(public_path().'/reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
+//        $file = Storage::disk('public')->url('/reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
         Storage::disk('s3')->put( 'cargo_consignment_excels/'.'cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx', file_get_contents($file));
         Storage::disk('public')->delete('reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
 
