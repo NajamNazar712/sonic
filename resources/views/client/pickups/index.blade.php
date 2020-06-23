@@ -4,6 +4,7 @@
 @section('content')
     <h1 class="mb-1">
         Pickups History
+        <span class="pull-right">Pickup Helpline No. 0348-1115858</span>
     </h1>
 
     <div class="card">
