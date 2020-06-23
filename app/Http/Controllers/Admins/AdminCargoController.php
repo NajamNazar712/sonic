@@ -1737,12 +1737,7 @@ class AdminCargoController extends Controller
         $cargo_consignment_excel->save();
 
         $cargo_consignment_ids = array();
-        $cargo_consignment_excel_array = array();
-        $cargo_consignment_excel_array['header'] = ['S. No.','Cargo Consignment ID', 'Tracking Number'];
-        $cargo_consignment_excel_array[] = ['serial' => '', 'Cargo Consignment ID' => '', 'Tracking Number' => ''];
-        $serial = 0;
         foreach ($shipment_ids as $shipment_id) {
-            $serial++;
             $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_id)->where('status', 0)->first();
             $cargo_consignment_shipment->status = 1;
 
@@ -1848,8 +1843,6 @@ class AdminCargoController extends Controller
             $cargo_consignment_shipment_excel->shipment_id = $shipment_id;
             $cargo_consignment_shipment_excel->save();
 
-            $cargo_consignment_excel_array[] = ['serial' => $serial, 'Cargo Consignment ID' => strval(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT)), 'Tracking Number' => strval($shipment->tracking_number)];
-
 
             NotificationsController::send(7, $cargo_consignment->id, $shipment_id);
 
@@ -1858,6 +1851,12 @@ class AdminCargoController extends Controller
         }
 
         $all_cargo_consignment_ids = '';
+
+        $cargo_consignment_excel_array = array();
+        $cargo_consignment_excel_array['header'] = ['S. No.','Cargo Consignment ID', 'Tracking Number', 'Origin Hub', 'Destination Hub', 'Status'];
+        $cargo_consignment_excel_array[] = ['serial' => '', 'Cargo Consignment ID' => '', 'Tracking Number' => '', 'Origin Hub' => '', 'Destination Hub' => '', 'Status' => ''];
+        $serial = 0;
+        $total_shipments = 0;
         foreach ($cargo_consignment_ids as $cargo_consignment_id){
             $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
             $cargo_consignment->received_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 1)->count();
@@ -1909,7 +1908,21 @@ class AdminCargoController extends Controller
             else{
                 $all_cargo_consignment_ids .= ', ' . $cargo_consignment_id;
             }
+
+            foreach ($cargo_consignment->cargo_consignment_shipments as $cargo_shipment){
+                $serial++;
+                if($cargo_shipment->status == 0){
+                    $status = 'Short Received';
+                }else{
+                    $status = 'Received';
+                }
+                $cargo_consignment_excel_array[] = ['serial' => $serial, 'Cargo Consignment ID' => strval(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT)), 'Tracking Number' => strval($cargo_shipment->shipment->tracking_number), 'Origin Hub' => $cargo_consignment->origin_hub->name, 'Destination Hub' => $cargo_consignment->destination_hub->name, 'Status' => $status];
+            }
+            $total_shipments = $total_shipments + count($cargo_consignment->cargo_consignment_shipments);
         }
+
+        $cargo_consignment_excel->shipments = $total_shipments;
+        $cargo_consignment_excel->save();
         $cell_st = [
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -1920,11 +1933,11 @@ class AdminCargoController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($cargo_consignment_excel_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
         $sheet->getStyle("C2:C50000")->getNumberFormat()
             ->setFormatCode(
                 \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
             );
+        $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
         $sheet->setTitle('Quick Cargo Received');
         $writer = new Xlsx($spreadsheet);
 
@@ -1981,15 +1994,16 @@ class AdminCargoController extends Controller
         $cargo_excel_id = $request->input('cargo_excel_id');
         $status = $request->input('shipments');
         $details = array();
-        $cargo_shipment_excels = CargoConsignmentShipmentExcel::where('cargo_consignment_excel_id', $cargo_excel_id);
+        $cargo_shipment_excels = CargoConsignmentShipmentExcel::where('cargo_consignment_excel_id', $cargo_excel_id)->groupBy('cargo_consignment_id')->get();
         if($status == 1){
-            $cargo_shipment_excels = $cargo_shipment_excels->get();
             foreach ($cargo_shipment_excels as $cargo_shipment_excel){
-                $details[] = $cargo_shipment_excel->shipment->tracking_number;
+                $cargo_consignment = CargoConsignment::find($cargo_shipment_excel->cargo_consignment_id);
+                foreach ($cargo_consignment->cargo_consignment_shipments as $cargo_shipment) {
+                    $details[] = $cargo_shipment->shipment->tracking_number;
+                }
             }
         }
         else{
-            $cargo_shipment_excels = $cargo_shipment_excels->groupBy('cargo_consignment_id')->get();
             foreach ($cargo_shipment_excels as $cargo_shipment_excel){
                 $details[] = str_pad($cargo_shipment_excel->cargo_consignment_id, 6, '0', STR_PAD_LEFT);
             }
