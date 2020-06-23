@@ -616,6 +616,16 @@ class DeliveryController extends Controller
                     }
 
                     ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+
+                    $handover_shipments = HandoverShipments::where('shipment_id',$shipment)->whereIn('status',[1,3]);
+                    if($handover_shipments->exists()){
+                        $handover_shipments = $handover_shipments->first();
+                        $handover_shipments->status = 2;
+                        $handover_shipments ->save();
+
+                        HandoverShipmentJourneyController::add( $shipment,$handover_shipments->handover_id,2);
+                    }
+
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
@@ -1762,12 +1772,6 @@ class DeliveryController extends Controller
                         } else {
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                         }
-                        
-                        $handover_shipments = HandoverShipments::where('shipment_id',$shipment)->where('status','!=',3)->first();
-                        $handover_shipments->status = 3;
-                        $handover_shipments ->save();
-
-                        HandoverShipmentJourneyController::add( $shipment,$handover_shipments->handover_id,3);
                         
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
