@@ -1933,11 +1933,9 @@ class AdminCargoController extends Controller
         $file_name = public_path() . "/reports/cargo_consignment_excel_" . $cargo_consignment_excel->id . ".xlsx";
         $writer->save($file_name);
         $files = File::glob(public_path().$file_name_without_path);
-//        $file = Storage::disk('public')->url('/reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
-        foreach ($files as $file){
-            if (is_file($file)) {
-                Storage::disk('s3')->put( 'cargo_consignment_excels/'.'cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx', file_get_contents($file));
-            }
+
+        if (is_file($files[0])) {
+            Storage::disk('s3')->put( 'cargo_consignment_excels/'.'cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx', file_get_contents($files[0]));
         }
         Storage::disk('public')->delete('reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
 
