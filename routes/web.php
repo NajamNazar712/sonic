@@ -915,7 +915,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminCargoController@quick_receive_index')->name('index');
                 Route::post('shipment_details', 'Admins\AdminCargoController@quick_receive_shipment_details')->name('shipment_details');
                 Route::post('', 'Admins\AdminCargoController@quick_receive_store')->name('store');
-                Route::get('list/index', 'Admins\AdminCargoController@quick_receive_list_index')->name('list.index');
+                Route::get('list', 'Admins\AdminCargoController@quick_receive_list_index')->name('list.index');
                 Route::get('list/ajax', 'Admins\AdminCargoController@quick_receive_list_ajax')->name('list.ajax');
                 Route::post('list/ajax', 'Admins\AdminCargoController@quick_receive_list_details')->name('list.details');
             });
