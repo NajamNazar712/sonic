@@ -477,9 +477,15 @@
                 }
                 return_image_table.row.add([0, return_image,remove]).node().id = rows_count;
                 return_image_table.draw(true);
-                $('#DepositSlipButton').attr('disabled', false);
+                $('#ReturnNoteImageSubmitButton').attr('disabled', false);
                 selected_rows.push(rows_count);
             }
+
+            $('#uploadReturnNote').on('hidden.bs.modal', function () {
+                $('#image_return_note_id').val('');
+                return_image_table.clear();
+                selected_rows = [];
+            });
 
             $('body').on('click', 'a.remove_row',function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
@@ -488,7 +494,6 @@
                 if (index !== -1) {
                     selected_rows.splice(index, 1);
                 }
-                console.log(selected_rows);
                 return_image_table.row( $(this).parents('tr') ).remove().draw();
             });
 
