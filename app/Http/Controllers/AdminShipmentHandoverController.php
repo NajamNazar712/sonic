@@ -48,7 +48,10 @@ class AdminShipmentHandoverController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-
+            $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
+            if($handover_shipment->exists()){
+                return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
+            }
             $details = array();
 
             $details['id'] = $shipment->id;
@@ -71,7 +74,7 @@ class AdminShipmentHandoverController extends Controller
       if ($shipment->exists()) {
           $shipment = $shipment->first();
           $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id)->whereIn('status', [1,3]);
-          if(!$handover_shipments->exists()){
+          if($handover_shipments->exists()){
             $details = array();
             $details['id'] = $shipment->id;
             $details['tracking_number'] = $shipment->tracking_number;
@@ -83,7 +86,7 @@ class AdminShipmentHandoverController extends Controller
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
           }
           else {
-            return ['status' => 1, 'error' => 'Shipment not in Handover/ not ready to update!'];
+            return ['status' => 1, 'error' => 'Shipment not in Handover / not ready to update!'];
           }
          }
          else {
