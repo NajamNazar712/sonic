@@ -1703,7 +1703,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('edit', 'Admins\GlobalSettingsController@return_reason_edit')->name('edit');
             });
         });
-   
+
+        Route::prefix('escalation')->name('escalation.')->group(function () {
+            Route::prefix('launched')->name('launched.')->group(function () {
+                Route::get('', 'Admins\AdminCrmSettingsController@escalation_launched_index')->name('index');
+                Route::get('/list', 'Admins\AdminCrmSettingsController@escalation_launched_list')->name('index');
+//                Route::post('consignee', 'Admins\AdminCrmSettingsController@blacklist_search_consignee')->name('consignee');
+//                Route::post('update', 'Admins\AdminCrmSettingsController@blacklist_search_update')->name('update');
+            });
+        });
     });
 
 

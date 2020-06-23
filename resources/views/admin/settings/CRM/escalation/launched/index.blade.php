@@ -80,19 +80,19 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.settings.commission.list') }}',
-                rowId: 'tier_id',
+                ajax: '{{ route('admin.settings.escalation.launched.list') }}',
+                rowId: 'id',
                 order: [[1, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'name', name: 'sales_tiers.tier_name', class: 'align-middle name'},
-                    {data: 'tier_type', name: 'tt.name', class: 'align-middle tier_type'},
-                    {data: 'added_at', name: 'sales_tiers.created_at', class: 'align-middle added_at'},
-                    {data: 'added_by', name: 'a.name', class: 'align-middle added_by'},
-                    {data: 'updated_at', name: 'sales_tiers.updated_at', class: 'align-middle updated_at'},
-                    {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
-                    {data: 'category_status', name: 'sales_tiers.status', class: 'align-middle status'},
-
+                    {data: 'case_nature', name: 'crcn.name', class: 'align-middle case_nature'},
+                    {data: 'case_nature_type', name: 'crcnt.type', class: 'align-middle case_nature_type'},
+                    {data: 'tat', name: 'crm_escalations.tat', class: 'align-middle added_at'},
+                    {data: 'mark_as', name: 'crm_escalations.mark_as', class: 'align-middle mark_as'},
+                    {data: 'comment', name: 'crm_escalations.comment', class: 'align-middle comment'},
+                    {data: 'updated_at', name: 'crm_escalations.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
+                    {data: 'status', name: 'crm_escalations.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -106,6 +106,10 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var mark_as_select = '<select name="mark_as_select" id="mark_as_select" class="select2 form-control">' +
+                        '<option value="0">In-Valid</option>' +
+                        '<option value="1">Valid</option>' +
+                        '</select>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '<option value="0">Disable</option>' +
                         '<option value="1">Enable</option>' +
@@ -116,6 +120,11 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
                                 .on( 'change', function () {
@@ -132,6 +141,12 @@
                             }
                         }
                     });
+                    $("#mark_as_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Mark as",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
                         width:'100%',
@@ -141,7 +156,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
@@ -188,14 +202,6 @@
                         });
                 }
 
-            });
-            $('#EditTierModal').on('hidden.bs.modal', function() {
-                $('#sales_tier_id').val('');
-                $('#edit_tier_name').val('');
-                $('#edit_tier_commission').val('');
-                if($("#edit_sales_person_checkbox").is(":checked")){
-                    $("#edit_sales_person_checkbox").trigger('click');
-                }
             });
         });
     </script>
