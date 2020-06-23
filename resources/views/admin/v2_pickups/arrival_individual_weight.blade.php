@@ -183,9 +183,6 @@
                             </tr>
                             </thead>
                         </table>
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary" id="piece_airwaybill" disabled="disabled">Print Air Waybill</button>
-                        </div>
 
                         <div class="row justify-content-center">
                             <div class="form-group col-5">
@@ -547,7 +544,9 @@
                                             // all_shipment_item_ids.push(data.scanned_shipment_item);
                                             var check = parseInt(piece_rowNo) + 1;
                                             if(parseInt(data.details.piece) === parseInt(check)){
-                                                $('#piece_airwaybill').prop('disabled', false);
+                                                $('#scan_piece_tracking_number').prop('disabled', false);
+                                                $('#pieces_weight').prop('disabled', false);
+                                                $('#piece_confirm').prop('disabled', false);
                                             }
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             $('#ShipmentPiecesModal').modal('show');
@@ -889,7 +888,9 @@
                                     shipment_piece_ids.push(data.scanned_shipment_piece);
                                     var check = parseInt(piece_rowNo) + 1;
                                     if(parseInt(shipment_piece_count) === parseInt(check)){
-                                        $('#piece_airwaybill').prop('disabled', false);
+                                        $('#scan_piece_tracking_number').prop('disabled', false);
+                                        $('#pieces_weight').prop('disabled', false);
+                                        $('#piece_confirm').prop('disabled', false);
                                     }
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
@@ -916,21 +917,11 @@
                     var shipment_piece_count = $('#piece_shipment_count').val();
                     var check = parseInt(piece_rowNo);
                     if(parseInt(shipment_piece_count) !== parseInt(check)){
-                        $('#piece_airwaybill').prop('disabled', true);
                         $('#scan_piece_tracking_number').prop('disabled', true);
                         $('#pieces_weight').prop('disabled', true);
                         $('#piece_confirm').prop('disabled', true);
                     }
                 }
-            });
-
-
-            $('#piece_airwaybill').on('click', function () {
-                id = $('#piece_shipment_id').val();
-                $('#scan_piece_tracking_number').prop('disabled', false);
-                $('#pieces_weight').prop('disabled', false);
-                $('#piece_confirm').prop('disabled', false);
-                print(id);
             });
 
             $('#add_shipment_pieces_form').validate({
