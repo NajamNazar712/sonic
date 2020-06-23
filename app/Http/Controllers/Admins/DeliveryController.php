@@ -19,6 +19,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
 use App\Http\Models\Blacklist\BlacklistSetting;
@@ -622,7 +623,14 @@ class DeliveryController extends Controller
                         $handover_shipments = $handover_shipments->first();
                         $handover_shipments->status = 2;
                         $handover_shipments ->save();
-
+                        $handover_count = HandoverShipments::where('status', 1)->where('handover_id', $handover_shipments->handover_id)->count();
+                        if($handover_count == 0){
+                            $handover = Handover::find($handover_shipments->handover_id);
+                            $handover->received_by = Auth::id();
+                            $handover->received = $handover->received + 1;
+                            $handover->status_id = 4;
+                            $handover->save();
+                        }
                         HandoverShipmentJourneyController::add( $shipment,$handover_shipments->handover_id,2);
                     }
 
