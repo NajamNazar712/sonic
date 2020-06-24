@@ -864,6 +864,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\ReturnController@history_index')->name('index');
             Route::get('list', 'Admins\ReturnController@history_list')->name('list');
             Route::post('shipments', 'Admins\ReturnController@history_shipments')->name('shipments');
+            Route::post('get_images', 'Admins\ReturnController@history_get_images')->name('get_images');
+            Route::post('delete_image', 'Admins\ReturnController@history_delete_image')->name('delete_image');
 
         });
         Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
