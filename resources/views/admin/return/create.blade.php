@@ -715,7 +715,7 @@
                             url:'{{route('admin.return.create.shipment_details')}}',
                             type:'POST',
                             data: {
-                                'tracking':tracking,
+                                'tracking':tracking_number,
                                 'hub_id':hub_id,
                                 'pieces_confirm':1,
                                 '_token':'{!! csrf_token() !!}'

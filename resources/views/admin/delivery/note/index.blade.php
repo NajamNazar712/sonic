@@ -460,7 +460,7 @@
                         blockPagePermanently();
                         $.ajax({
                             url:'{{route('admin.delivery.note.shipment.info')}}',
-                            type:'POST',
+                            method:'POST',
                             data: {
                                 'tracking':tracking,
                                 '_token': '{{ csrf_token() }}'
@@ -559,7 +559,7 @@
                             // $('#hub_id').val('');
                             $.ajax({
                                 url:'{{route('admin.delivery.note.shipment.info')}}',
-                                type:'POST',
+                                method:'POST',
                                 data: {
                                     'tracking':tracking,
                                     'hub_id':hub_id,
@@ -723,7 +723,7 @@
 
                     $.ajax({
                         url: '{{route('admin.delivery.note.consolidation_check')}}',
-                        type: 'POST',
+                        method: 'POST',
                         data: {
                             'consolidation_ids': consolidation_ids,
                             'shipment_ids': shipment_ids,
@@ -1034,6 +1034,8 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function (form) {
+
+                    $('#add_shipment_pieces_form button[type="submit"]').attr('disabled', 'disabled');
                     var shipment_id = $('#piece_shipment_id').val();
                     var hub_id = $('#hub_id').val();
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
@@ -1089,9 +1091,9 @@
                         // $('#hub_id').val('');
                         $.ajax({
                             url:'{{route('admin.delivery.note.shipment.info')}}',
-                            type:'POST',
+                            method:'POST',
                             data: {
-                                'tracking':tracking,
+                                'tracking':tracking_number,
                                 'hub_id':hub_id,
                                 'pieces_confirm':1,
                                 '_token':'{!! csrf_token() !!}'
@@ -1134,10 +1136,11 @@
                         });
                     }
                     $('#ShipmentPiecesModal').modal('hide');
+                    return false;
                 }
             });
 
-            $('#ShipmentPiecesModal').on('hide.bs.modal', function (e) {
+            $('#ShipmentPiecesModal').on('hidden.bs.modal', function (e) {
                 $('#scan_piece_tracking_number').val('');
                 shipment_piece_ids = [];
                 piece_table.clear().draw();
