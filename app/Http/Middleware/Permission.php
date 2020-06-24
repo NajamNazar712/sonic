@@ -117,9 +117,9 @@ class Permission
             'cargo.receive.quick.index' => 31,
             'cargo.receive.quick.shipment_details' => 31,
             'cargo.receive.quick.store' => 31,
-            'cargo.receive.quick.list.index' => 124,
-            'cargo.receive.quick.list.details' => 124,
-            'cargo.receive.quick.list.ajax' => 124,
+            'cargo.receive.quick.list.index' => 31,
+            'cargo.receive.quick.list.details' => 31,
+            'cargo.receive.quick.list.ajax' => 31,
             'sameday.index' => 32,
             'sameday.list' => 32,
 
