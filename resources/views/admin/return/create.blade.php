@@ -747,6 +747,7 @@
                             });
                     }
                     $('#ShipmentPiecesModal').modal('hide');
+                    return false;
                 }
             });
 
