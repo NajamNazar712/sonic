@@ -2527,31 +2527,7 @@ class ReturnController extends Controller
                 return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('image', function ($deliveries) {
-                $now = Carbon::now();
-                if($deliveries->image == null){
-                    $return_note_image = ReturnNoteImage::where('return_note_id', $deliveries->return_note_id);
-                    if($return_note_image->exists()){
-                        return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
-                    }
-                }else {
-
-                    $url = 'uploads/return_notes/' . $deliveries->image;
-
-                    if(file_exists($url)){
-                        $img = asset('uploads/return_notes/' . $deliveries->image);
-                        return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                    }else{
-                        $exists = Storage::disk('s3')->exists('return_note_images/'.$deliveries->image);
-                        if($exists){
-                            $img = Storage::disk('s3')->temporaryUrl('return_note_images/'.$deliveries->image, now()->addMinutes(5));
-                            return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                        }else{
-                            return "-";
-                        }
-                    }
-
-                }
-
+                return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
             })
             ->editColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
@@ -2639,6 +2615,14 @@ class ReturnController extends Controller
                     $return_note_image->image = $generated_image_name;
                     $return_note_image->save();
                     $flag = TRUE;
+                }
+                if($return_note->image !== NULL){
+                    $return_note_image = new ReturnNoteImage();
+                    $return_note_image->return_note_id = $return_note_id;
+                    $return_note_image->image = $return_note->image;
+                    $return_note_image->save();
+                    $return_note->image = NULL;
+                    $return_note->save();
                 }
                 if($flag){
                     $return_note->updated_by = Auth::id();
@@ -3074,6 +3058,8 @@ class ReturnController extends Controller
                         $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
                     }
                     return response()->json(['status' => 0, 'images' => $details]);
+                }else{
+                    return response()->json(['status' => 2]);
                 }
                 return response()->json(['status' => 1, 'error' => 'Return Note Images not found!']);
             }
@@ -3083,8 +3069,17 @@ class ReturnController extends Controller
     }
 
     public function history_delete_image(Request $request){
+        $return_note_id = $request->return_note_id;
         $return_note_image_id = $request->return_note_image_id;
-        if($return_note_image_id){
+        if($return_note_image_id == 0){
+            $return_note = ReturnNote::find($return_note_id);
+            if($return_note){
+                $return_note->image = NULL;
+                $return_note->save();
+                return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
+        }else{
             ReturnNoteImage::where('id', $return_note_image_id)->delete();
             return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
         }

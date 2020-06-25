@@ -467,15 +467,21 @@
                            '_token': '{{ csrf_token() }}'
                        }
                    }).done(function (data) {
-                        if(data.status == 0){
+                        if(data.status == 0) {
                             $('#image_return_note_id').val(return_note_id);
                             var image_html = '';
                             $.each(data.images, function (index, image) {
                                 index++;
-                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="'+ image.image +'" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-                                image_html += '<tr id="'+ image.id +'"><td>'+ index +'</td><td>'+ image.date +'</td><td>'+ img +'</td><td>'+ remove +'</td></tr>';
+                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
                             });
+                            $('#return_note_image_view_table tbody').append(image_html);
+                            $('#uploadReturnNote').modal('show');
+                        }else if(data.status == 2){
+                            $('#image_return_note_id').val(return_note_id);
+                            var image_html = '<tr><td colspan="4">No Images found!</td></tr>';
+
                             $('#return_note_image_view_table tbody').append(image_html);
                             $('#uploadReturnNote').modal('show');
                         }else{
@@ -546,6 +552,7 @@
 
             $('#return_note_image_view_table').on('click','a.remove_row', function () {
                var row_id = $(this).parents('tr').attr('id');
+               var return_id = $('#image_return_note_id').val();
                var current = $(this);
                if(row_id){
                    swal({
@@ -576,6 +583,7 @@
                                method: 'POST',
                                data: {
                                    'return_note_image_id': row_id,
+                                   'return_note_id':return_id,
                                    '_token': '{{ csrf_token() }}'
                                }
                            }).done(function (data) {
