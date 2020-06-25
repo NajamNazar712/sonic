@@ -12,6 +12,7 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\Blacklist\BlacklistSetting;
@@ -2526,27 +2527,7 @@ class ReturnController extends Controller
                 return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('image', function ($deliveries) {
-                $now = Carbon::now();
-                if($deliveries->image == null){
-                    return "-";
-                }else {
-                    $url = 'uploads/return_notes/' . $deliveries->image;
-
-                    if(file_exists($url)){
-                        $img = asset('uploads/return_notes/' . $deliveries->image);
-                        return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                    }else{
-                        $exists = Storage::disk('s3')->exists('return_note_images/'.$deliveries->image);
-                        if($exists){
-                            $img = Storage::disk('s3')->temporaryUrl('return_note_images/'.$deliveries->image, now()->addMinutes(5));
-                            return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                        }else{
-                            return "-";
-                        }
-                    }
-
-                }
-
+                return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
             })
             ->editColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
@@ -2608,46 +2589,48 @@ class ReturnController extends Controller
     }
 
     public function receive_return_note_image_upload(Request $request){
-
+        $flag = FALSE;
         $return_note_id = $request->image_return_note_id;
-        $return_note_image = $request->return_note_image;
-
-        $messages = [
-            'return_note_image.required' => 'No Image file selected!.',
-            'return_note_image.mimes' => 'Image file not supported!.',
-            'return_note_image.size' => 'Image file size exceded!.',
-        ];
-        $validation = [
-            'return_note_image' => 'required | mimes:jpeg,png,jpg | max:2048',
-        ];
-        $validate = Validator::make($request->all(), $validation, $messages);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 0, 'error' => $validate->errors()]);
+        $image_ids = explode(',', $request->selected_ids);
+        if(count($image_ids) == 0){
+            return redirect()->back()->with('error', 'No images selected!');
         }
+        $return_note = ReturnNote::find($return_note_id);
+        if($return_note){
+            if($return_note->status == 3 || $return_note->status == 1){
+                foreach ($image_ids as $id){
+                    $file_name = 'return_note_image_'.$id;
+                    $image = $request->file($file_name);
+                    $imageName = $image->getClientOriginalName();
 
-        if($return_note_id){
-            $return_note = ReturnNote::find($return_note_id);
-            if($return_note->status == 3){
-                $image = $request->file('return_note_image');
-                $imageName = $image->getClientOriginalName();
-
-                //$imageName = explode('.', $imageName);
-                $extension = $image->getClientOriginalExtension();
-                $random = rand(1000, 100000);
-                $now = Carbon::now();
-                $time = $now->year . '_' . $now->month;
-                $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-                $image->move(public_path('uploads/return_notes'), $generated_image_name);
-
-
-                $return_note->image = $generated_image_name;
-                $return_note->updated_by = Auth::id();
-                $return_note->status = 1;
-                $return_note->save();
-
-
+                    //$imageName = explode('.', $imageName);
+                    $extension = $image->getClientOriginalExtension();
+                    $random = rand(1000, 100000);
+                    $now = Carbon::now();
+                    $time = $now->year . '_' . $now->month;
+                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('uploads/return_notes'), $generated_image_name);
+                    $return_note_image = new ReturnNoteImage();
+                    $return_note_image->return_note_id = $return_note_id;
+                    $return_note_image->image = $generated_image_name;
+                    $return_note_image->save();
+                    $flag = TRUE;
+                }
+                if($return_note->image !== NULL){
+                    $return_note_image = new ReturnNoteImage();
+                    $return_note_image->return_note_id = $return_note_id;
+                    $return_note_image->image = $return_note->image;
+                    $return_note_image->save();
+                    $return_note->image = NULL;
+                    $return_note->save();
+                }
+                if($flag){
+                    $return_note->updated_by = Auth::id();
+                    $return_note->status = 1;
+                    $return_note->save();
+                }
                 return redirect()->back()->with(['status' => 1, 'success' => 'Return Note updated successfully']);
+
             }
             else{
                 return redirect()->back()->with(['status' => 0, 'error' => 'Return Note not updated yet!']);
@@ -3053,5 +3036,70 @@ class ReturnController extends Controller
         else{
             return response()->json(['status' => 1, 'error' => 'No Shipment found!']);
         }
+    }
+
+    public function history_get_images(Request $request){
+        $return_note_id = $request->return_note_id;
+        if($return_note_id){
+            $return = ReturnNote::find($return_note_id);
+            if($return){
+                if($return->image !== null){
+                    $details = array();
+                    $url = 'uploads/return_notes/' . $return->image;
+                    if(file_exists($url)){
+                        $img_url = asset('uploads/return_notes/' . $return->image);
+                    }else{
+                        $exists = Storage::disk('s3')->exists('return_note_images/'.$return->image);
+                        if($exists){
+                            $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return->image, now()->addMinutes(5));
+                        }
+                    }
+
+                    $details[] = array('id' => 0,'date' => Carbon::parse($return->updated_at)->toDateTimeString(),'image'=> $img_url);
+                    return response()->json(['status' => 0, 'images' => $details]);
+                }
+                $return_note_images = ReturnNoteImage::where('return_note_id', $return->id);
+                if($return_note_images->exists()){
+                    $return_note_images = $return_note_images->get();
+                    $details = array();
+                    foreach ($return_note_images as $return_note_image) {
+                        $url = 'uploads/return_notes/' . $return_note_image->image;
+                        if(file_exists($url)){
+                            $img_url = asset('uploads/return_notes/' . $return_note_image->image);
+                        }else{
+                            $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
+                            if($exists){
+                                $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
+                            }
+                        }
+                        $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
+                    }
+                    return response()->json(['status' => 0, 'images' => $details]);
+                }else{
+                    return response()->json(['status' => 2]);
+                }
+                return response()->json(['status' => 1, 'error' => 'Return Note Images not found!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Return Note ID not found!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Return Note ID not selected, please try again!']);
+    }
+
+    public function history_delete_image(Request $request){
+        $return_note_id = $request->return_note_id;
+        $return_note_image_id = $request->return_note_image_id;
+        if($return_note_image_id == 0){
+            $return_note = ReturnNote::find($return_note_id);
+            if($return_note){
+                $return_note->image = NULL;
+                $return_note->save();
+                return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
+        }else{
+            ReturnNoteImage::where('id', $return_note_image_id)->delete();
+            return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Image not found!']);
     }
 }
