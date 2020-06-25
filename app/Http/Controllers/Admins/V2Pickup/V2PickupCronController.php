@@ -61,16 +61,17 @@ class V2PickupCronController extends Controller
                 }
 
             }
-            if(!empty($pickup_request_ids)){
-                $pickup_note_ids = array();
-                foreach ($pickup_request_ids as $pickup_request_id) {
-                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->first();
-                    if(!in_array($pickup_note_request->pickup_note_id, $pickup_note_ids)){
-                        $pickup_note_ids[] = $pickup_note_request->pickup_note_id;
-                    }
-                }
-                V2PickupNote::whereIn('id', $pickup_note_ids)->update(['status' => 1]);
-            }
+            V2PickupNote::where('status', 0)->whereDate('created_at', '<=', $today)->whereTime('created_at', '<=', $arrival_time)->update(['status' => 1]);
+//            if(!empty($pickup_request_ids)){
+//                $pickup_note_ids = array();
+//                foreach ($pickup_request_ids as $pickup_request_id) {
+//                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->latest('id')->first();
+//                    if(!in_array($pickup_note_request->pickup_note_id, $pickup_note_ids)){
+//                        $pickup_note_ids[] = $pickup_note_request->pickup_note_id;
+//                    }
+//                }
+
+//            }
             self::remove_riders();
         }
     }
