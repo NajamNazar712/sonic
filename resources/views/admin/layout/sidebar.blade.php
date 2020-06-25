@@ -187,8 +187,17 @@
                                     @if (session('role_id') == 1 || in_array(27, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a></li>
                                     @endif
+
                                     @if (session('role_id') == 1 || in_array(124, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo.history.index') }}">History</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(31, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.cargo.receive.quick.index') }}">Quick Receive</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(124, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.cargo.receive.quick.list.index') }}">Quick Receive List</a></li>
                                     @endif
 
                                 </ul>
@@ -995,6 +1004,27 @@
                     </ul>
                 </li>
             @endif
+
+            <!-- Handover -->
+            @if (session('role_id') == 1 || count(array_intersect([339, 340,341,342], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-hand-o-right"></i>Shipment Handover</span></a>
+                    <ul class="menu-content">
+                            @if (session('role_id') == 1 || in_array(339, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.handover.create.index')}}">Create</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(341, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.handover.receive.index')}}">Receive</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(342, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.handover.list.index')}}">List</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(340, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.handover.responsibles.index')}}">Responsibles</a></li>
+                            @endif  
+                    </ul>
+                </li>
+            @endif
+
                 <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a>
         </ul>
     </div>

@@ -2763,7 +2763,7 @@ class AdminFinanceController extends Controller
                     ->where('consolidations.consolidation_id','=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
-            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable','consolidations.consolidation_id', 'oc.name as origin');
+            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable','consolidations.consolidation_id', 'oc.name as origin','u.account_type_id');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -2783,6 +2783,9 @@ class AdminFinanceController extends Controller
                 },
                 'type_id' => function($deliveries){
                     return $deliveries->type;
+                },
+                'account_type' => function($deliveries){
+                    return $deliveries->account_type_id;
                 }
             ])
             ->addColumn('deductable', function($pending_payment_shipments) {
@@ -4015,6 +4018,14 @@ class AdminFinanceController extends Controller
       $total_payable = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
+            $shipment_weight= $shipment->actual_weight;
+            if($done_payment_shipment->type == 0){
+                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+                if($change_shipment_weight_log->exists()){
+                    $change_shipment_weight_log = $change_shipment_weight_log->first();
+                    $shipment_weight = $change_shipment_weight_log->old_weight;
+                }
+            }
 
             if ($done_payment_shipment->type == 0) {
                 $type = 'Delivered';
@@ -4037,7 +4048,7 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->shipping_mode->mode . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
                               <td>' . $shipment->booking_type->booking_type . '</td>
-                              <td>' . $shipment->actual_weight . '</td>
+                              <td>' . $shipment_weight   . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>

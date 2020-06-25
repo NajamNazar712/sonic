@@ -450,7 +450,7 @@ class V2AdminPickupsController extends Controller
             $shipment = $shipment->first();
             $pickup_request_id = NULL;
             $rider = NULL;
-            $shipment_origin = $shipment->pickup_address->city_id;
+            $shipment_origin = $shipment->pickup_address->city->hub_id;
             if(session('role_id') != 1){
                 if(!in_array($shipment_origin, session('hubs'))){
                     return ['status' => 1, 'error' => 'You can not do arrival of this hub\'s shipment'];
@@ -844,7 +844,7 @@ class V2AdminPickupsController extends Controller
             $shipment = $shipment->first();
             $pickup_request_id = NULL;
             $rider = NULL;
-            $shipment_origin = $shipment->pickup_address->city_id;
+            $shipment_origin = $shipment->pickup_address->city->hub_id;
             if(session('role_id') != 1){
                 if(!in_array($shipment_origin, session('hubs'))){
                     return ['status' => 1, 'error' => 'You can not do arrival of this hub\'s shipment'];

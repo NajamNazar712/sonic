@@ -1135,14 +1135,18 @@
 				make_payments_table.rows().nodes().each(function(index) {
 					var row = make_payments_table.row(index);
 					if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
-						var type_id = parseInt($(row.node()).attr('type_id'));
-						var row_id = $(row.node()).attr('id');
-						if (type_id != 2) {
-							var amount = parseInt($(row.node()).find('td.deductable').text());
-							if(amount == 0){
-								zero_charges = true;
+						var account_type = parseInt($(row.node()).attr('account_type'));
+						if(account_type == 1){
+							var type_id = parseInt($(row.node()).attr('type_id'));
+							var row_id = $(row.node()).attr('id');
+							if (type_id != 2) {
+								var amount = parseInt($(row.node()).find('td.deductable').text());
+								if(amount == 0){
+									zero_charges = true;
+								}
 							}
 						}
+
 					}
 				});
 				if(zero_charges){

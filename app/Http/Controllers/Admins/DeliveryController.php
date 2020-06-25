@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -18,6 +19,8 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
@@ -614,6 +617,24 @@ class DeliveryController extends Controller
                     }
 
                     ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+
+                    $handover_shipments = HandoverShipments::where('shipment_id',$shipment)->whereIn('status',[1,3]);
+                    if($handover_shipments->exists()){
+                        $handover_shipments = $handover_shipments->first();
+                        $handover_shipments->status = 2;
+                        $handover_shipments ->save();
+                        $handover_count = HandoverShipments::where('status', 1)->where('handover_id', $handover_shipments->handover_id)->count();
+                        if($handover_count == 0){
+                            $handover = Handover::find($handover_shipments->handover_id);
+                            $handover->received_by = Auth::id();
+                            $handover->received_at = Carbon::now();
+                            $handover->received = $handover->received + 1;
+                            $handover->status_id = 4;
+                            $handover->save();
+                        }
+                        HandoverShipmentJourneyController::add( $shipment,$handover_shipments->handover_id,2);
+                    }
+
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
@@ -1636,7 +1657,6 @@ class DeliveryController extends Controller
 
                                 }
                             }
-
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
                     }else if($selected_status == 56){
@@ -1761,7 +1781,7 @@ class DeliveryController extends Controller
                         } else {
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                         }
-
+                        
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
 
@@ -3808,6 +3828,16 @@ class DeliveryController extends Controller
         $total_amount = 0;
         foreach($deposit_rows as $row){
             $total_amount += $request->amount[$row];
+        }
+        if( $sdn->sdn_amount>= $total_amount)
+        {
+            $sdn->sdn_deposit_amount = $total_amount;
+        }
+        else{
+            return redirect()->back()->with(['status' => 0, 'error' => 'Deposit Amount cannot be less than DNCC Amount!']);
+        }
+        foreach($deposit_rows as $row){
+           
             $file_name = 'deposit_slip_'.$row;
             $deposit_details = new StationDepositNoteSlip();
             $deposit_details->station_deposit_note_id = $sdn_id;
@@ -5354,22 +5384,35 @@ class DeliveryController extends Controller
         $sdn_id = $request->sdn_id;
         if($sdn_id){
             $sdn = StationDepositNote::find($sdn_id);
-            $sdn->adjustment_amount = $request->adjustment_amount;
-            $sdn->adjustment_date = $request->adjustment_date_formatted;
-            $sdn->adjustment_ref = $request->adjustment_ref;
-            $sdn->adjusted = 1;
-            // if($request->petty_cash_select != ''){
-            $sdn->petty_cash_statement_id = $request->petty_cash_select;
-            // }
-            $sdn->save();
+            $dncc_amount= $sdn->sdn_amount;
+            $deposit_amount= $sdn->sdn_deposit_amount;
+            $adjustment_amount =  $request->adjustment_amount;
 
-            $petty_details = PettyCashStatement::find($request->petty_cash_select);
-            if($petty_details) {
-                $petty_details->status = 5;
-                $petty_details->save();
+            $total =$deposit_amount + $adjustment_amount;
+            if($dncc_amount>= $total){
+                $sdn->adjustment_amount = $request->adjustment_amount;
+                $sdn->adjustment_date = $request->adjustment_date_formatted;
+                $sdn->adjustment_ref = $request->adjustment_ref;
+                $sdn->adjusted = 1;
+                $sdn->sdn_net_amount = $dncc_amount - $deposit_amount - $adjustment_amount;
+                // if($request->petty_cash_select != ''){
+                $sdn->petty_cash_statement_id = $request->petty_cash_select;
+                // }
+                $sdn->save();
+
+                $petty_details = PettyCashStatement::find($request->petty_cash_select);
+                if($petty_details) {
+                    $petty_details->status = 5;
+                    $petty_details->save();
+                }
+
+                return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
+
+            }
+            else{
+                return redirect()->back()->with(['error' => 'DNCC cannot be less than sum of adjustment amount & deposit amount']);
             }
 
-            return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
         }else{
             return redirect()->back()->with(['error' => 'Station Deposit Note ID not found!']);
         }

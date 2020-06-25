@@ -80,7 +80,12 @@
                                                 <button type="button" class="btn btn-outline-success mr-1 confirm">Confirm</button>
                                         </div>
                                         @endif
-                                   
+                                @elseif($document_status == 2)
+                                @if(session('role_id') == 1 || in_array(277, session('permissions')))
+                                        <div class="mr-1">
+                                            <button type="button" class="btn btn-outline-primary mr-1 edit">Edit</button>
+                                        </div>
+                                    @endif
                                 @elseif($document_status == 1)
                                     @if(session('role_id') == 1 || in_array(278, session('permissions')))
                                         <div class="mr-1">
@@ -127,33 +132,38 @@
                         <div class="col">
                             <div class="form-group">
                                 <label for="filled_and_signed_image">
-                                    Pdf of filled and signed document:
-                                </label>
-                                <input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf">
+                                    Pdf of filled and signed document: 
+                                </label><br>
+                                <span id="old_filled_and_signed_pdf"> </span><input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf">
                             </div>
                             <div class="form-group">
                                 <label for="signed_acknowledgement_image">
                                     Pdf of signed Acknowledgement form:
                                 </label>
-                                <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf" id="signed_acknowledgement_pdf">
+                                <br>
+                                <span id="old_signed_acknowledgement_pdf"> </span>
+                                <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf"  id="signed_acknowledgement_pdf">
                             </div>
                             <div class="form-group">
                                 <label for="cnic_front_image">
                                     Picture of CNIC (Front):
-                                </label>
-                                <input class="form-control form-control-sm" type="file" name="cnic_front_image" id="cnic_front_image">
+                                </label><br>
+                                <span id="old_cnic_front_image"> </span>
+                                <input class="form-control form-control-sm" type="file" name="cnic_front_image"  id="cnic_front_image">
                             </div>
                             <div class="form-group">
                                 <label for="cnic_back_image">
                                     Picture of CNIC (Back):
-                                </label>
-                                <input class="form-control form-control-sm" type="file" name="cnic_back_image" id="cnic_back_image">
+                                </label><br>
+                                <span id="old_cnic_back_image"> </span>
+                                <input class="form-control form-control-sm" type="file" name="cnic_back_image"  id="cnic_back_image">
                             </div>
                             <div class="form-group">
                                 <label for="blank_cheque_image">
                                     Picture of Blank cheque:
-                                </label>
-                                <input class="form-control form-control-sm" type="file" name="blank_cheque_image" id="blank_cheque_image">
+                                </label><br>
+                                <span id="old_blank_cheque_image"> </span>
+                                <input class="form-control form-control-sm" type="file" name="blank_cheque_image"  id="blank_cheque_image">
                             </div>
                         </div>
                     </div>
@@ -192,8 +202,39 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('.edit').on('click', function() {
-                $('#upload_modal').modal('show');
+                
+                var user_id = {!! $id !!};
+                console.log(user_id);
+                $.ajax({
+                    url: '{!! route('admin.accounts.documents.edit') !!}',
+                    method: 'POST',
+                    data: {
+                        'user_id': user_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        // console.log(data);
+                        // console.log(data.user_attachment.blank_cheque_image);
+                        $('#old_filled_and_signed_pdf').text(data.user_attachment.filled_and_signed_pdf);
+                        $('#old_signed_acknowledgement_pdf').text(data.user_attachment.signed_acknowledgement_pdf);
+                        $('#old_cnic_front_image').text(data.user_attachment.cnic_front_image);
+                        $('#old_cnic_back_image').text(data.user_attachment.cnic_back_image);
+                        $('#old_blank_cheque_image').text(data.user_attachment.blank_cheque_image);
+                        $('#upload_modal').modal('show');
+                    }
+                    else{
+                        $('#old_filled_and_signed_pdf').text("");
+                        $('#old_signed_acknowledgement_pdf').text("");
+                        $('#old_cnic_front_image').text("");
+                        $('#old_cnic_back_image').text("");
+                        $('#old_blank_cheque_image').text("");
+                        $('#upload_modal').modal('show');
+                    }
+                });     
+                
             });
+
             $('#upload_modal').on('hide.bs.modal', function (e) {
                 $('#upload_documents_form')[0].reset();
                 $('#filled_and_signed_pdf').val('');

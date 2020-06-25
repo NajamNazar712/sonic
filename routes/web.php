@@ -409,6 +409,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
         Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
         Route::post('/documents/confirm', 'Admins\AdminDashboardController@userDocumentsConfirm')->name('documents.confirm');
+        //my route
+        Route::post('/documents/edit', 'Admins\AdminDashboardController@userDocumentsEdit')->name('documents.edit');
 
         Route::prefix('sister_account')->name('sister_account.')->group(function(){
             Route::get('{id}/add/','Admins\AdminDashboardController@add_sister_account_view')->name('add.account');
@@ -910,6 +912,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_details', 'Admins\AdminCargoController@receive_shipment_details')->name('shipment_details');
             Route::post('short_received', 'Admins\AdminCargoController@receive_short_received')->name('short_received');
             Route::post('', 'Admins\AdminCargoController@receive_store')->name('store');
+
+            Route::prefix('quick')->name('quick.')->group(function () {
+                Route::get('', 'Admins\AdminCargoController@quick_receive_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminCargoController@quick_receive_shipment_details')->name('shipment_details');
+                Route::post('', 'Admins\AdminCargoController@quick_receive_store')->name('store');
+                Route::get('list', 'Admins\AdminCargoController@quick_receive_list_index')->name('list.index');
+                Route::get('list/ajax', 'Admins\AdminCargoController@quick_receive_list_ajax')->name('list.ajax');
+                Route::post('list/ajax', 'Admins\AdminCargoController@quick_receive_list_details')->name('list.details');
+            });
         });
         Route::post('piece_details', 'Admins\AdminCargoController@cargo_piece_details')->name('piece_details');
         Route::prefix('history')->name('history.')->group(function () {
@@ -980,6 +991,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
             Route::get('email', 'Admins\UserManagementController@user_email')->name('email');
             Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
+            Route::post('assign_hubs', 'Admins\UserManagementController@user_assign_hub')->name('assign_hubs');
 
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@user_add_index')->name('index');
@@ -1428,6 +1440,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('pickup_report')->name('pickup_report.')->group(function (){
             Route::get('', 'Admins\V2Pickup\V2AdminReportController@pickup_report_index')->name('index');
             Route::get('list', 'Admins\V2Pickup\V2AdminReportController@pickup_report_list')->name('list');
+            Route::post('/data', 'Admins\V2Pickup\V2AdminReportController@pickup_report_data')->name('data');
         });
     });
 
@@ -1797,6 +1810,36 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('search','Admins\CoordinatesController@address_search')->name('search.address');
         });
     });
+
+    Route::prefix('handover')->name('handover.')->group(function () {
+        Route::prefix('create')->name('create.')->group(function () {
+            Route::get('', 'AdminShipmentHandoverController@handover_create_index')->name('index');
+            Route::post('fetch', 'AdminShipmentHandoverController@handover_dropdown_val_fetch_from')->name('fetch');
+            Route::post('fetch1', 'AdminShipmentHandoverController@handover_dropdown_val_fetch_to')->name('fetch1');
+            Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details')->name('shipment_details');
+            Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit')->name('store');
+        });
+        Route::prefix('receive')->name('receive.')->group(function () {
+            Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
+            Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details_receive')->name('shipment_details');
+            Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit_receive')->name('store');
+        });
+        Route::prefix('list')->name('list.')->group(function () {
+            Route::get('', 'AdminShipmentHandoverController@handover_list_index')->name('index');
+            Route::get('list', 'AdminShipmentHandoverController@handover_list')->name('list');
+            Route::post('shipments','AdminShipmentHandoverController@handover_shipments_count')->name('shipments');
+            Route::put('delivered','AdminShipmentHandoverController@handover_shipments_delivered')->name('delivered');
+            Route::post('print','AdminShipmentHandoverController@handover_print')->name('print');
+        });
+        Route::prefix('responsibles')->name('responsibles.')->group(function () {
+            Route::get('', 'AdminShipmentHandoverController@responsibles_index')->name('index');
+            Route::get('list', 'AdminShipmentHandoverController@responsibles_list')->name('list');
+            Route::post('add', 'AdminShipmentHandoverController@responsibles_add')->name('add');
+            Route::post('status', 'AdminShipmentHandoverController@responsibles_status')->name('status');
+            Route::post('details','AdminShipmentHandoverController@responsibles_editview')->name('details');
+            Route::post('edit','AdminShipmentHandoverController@responsibles_edit')->name('edit');
+        });
+    });    
      
 });
 
