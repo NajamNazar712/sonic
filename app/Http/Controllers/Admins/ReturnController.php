@@ -3045,7 +3045,16 @@ class ReturnController extends Controller
             if($return){
                 if($return->image !== null){
                     $details = array();
-                    $img_url = asset('uploads/return_notes/' . $return->image);
+                    $url = 'uploads/return_notes/' . $return->image;
+                    if(file_exists($url)){
+                        $img_url = asset('uploads/return_notes/' . $return->image);
+                    }else{
+                        $exists = Storage::disk('s3')->exists('return_note_images/'.$return->image);
+                        if($exists){
+                            $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return->image, now()->addMinutes(5));
+                        }
+                    }
+
                     $details[] = array('id' => 0,'date' => Carbon::parse($return->updated_at)->toDateTimeString(),'image'=> $img_url);
                     return response()->json(['status' => 0, 'images' => $details]);
                 }
@@ -3054,7 +3063,15 @@ class ReturnController extends Controller
                     $return_note_images = $return_note_images->get();
                     $details = array();
                     foreach ($return_note_images as $return_note_image) {
-                        $img_url = asset('uploads/return_notes/' . $return_note_image->image);
+                        $url = 'uploads/return_notes/' . $return_note_image->image;
+                        if(file_exists($url)){
+                            $img_url = asset('uploads/return_notes/' . $return_note_image->image);
+                        }else{
+                            $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
+                            if($exists){
+                                $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
+                            }
+                        }
                         $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
                     }
                     return response()->json(['status' => 0, 'images' => $details]);
