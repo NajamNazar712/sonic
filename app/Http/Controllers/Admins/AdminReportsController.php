@@ -6440,5 +6440,53 @@ use Yajra\Datatables\Datatables;
             return $data;
         }
 
+        public function completed_aging_index(Request $request){
+            return view('admin.reports.completed_aging_report');
+        }
+
+        public function completed_aging_list(Request $request){
+            $today = Carbon::now()->startOfDay();
+            $aging_report = DB::connection('reports')->table('completed_aging_reports')
+            ->join('cities AS c', 'completed_aging_reports.hub_id', '=', 'c.id')
+            ->join('zones AS z', 'completed_aging_reports.main_hub_id', '=', 'z.id')
+            ->select(['completed_aging_reports.id as id','c.name as hubs','z.name as main_hubs','completed_aging_reports.days as days'])
+            ->whereDate('completed_aging_reports.created_at',$today);
+            $report = Datatables::of($aging_report);
+
+           
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $report->whereBetween('completed_aging_reports.created_at', [$from,$to]);
+            }
+
+           
+            return $report->make(true);
+        
+        }
+        public function pending_cash_collection_index(Request $request){
+            return view('admin.reports.pending_cash_collection_report');
+        }
+
+        public function pending_cash_collection_list(Request $request){
+            $today = Carbon::now()->startOfDay();
+            $aging_report = DB::connection('reports')->table('pending_cash_collection_aging_reports')
+            ->join('cities AS c', 'pending_cash_collection_aging_reports.hub_id', '=', 'c.id')
+            ->join('zones AS z', 'pending_cash_collection_aging_reports.main_hub_id', '=', 'z.id')
+            ->select(['pending_cash_collection_aging_reports.id as id','c.name as hubs','z.name as main_hubs','pending_cash_collection_aging_reports.days as days'])
+            ->whereDate('pending_cash_collection_aging_reports.created_at',$today);
+            $report = Datatables::of($aging_report);
+
+           
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $report->whereBetween('pending_cash_collection_aging_reports.created_at', [$from,$to]);
+            }
+
+           
+            return $report->make(true);
+        }
+
     }
 
