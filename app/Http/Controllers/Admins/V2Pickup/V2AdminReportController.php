@@ -57,7 +57,7 @@ class V2AdminReportController extends Controller
             $report->delete();
             V2PickupReportSummary::whereDate('date', $today)->delete();
         }
-        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday);
+        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday)->whereTime('ra.attempt_date', '<=',$arrival_time);
         
         if($pickup_requests->exists()){
            

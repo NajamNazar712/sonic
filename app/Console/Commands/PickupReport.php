@@ -39,6 +39,6 @@ class PickupReport extends Command
      */
     public function handle()
     {
-        dd(V2AdminReportController::insertReportData());
+        V2AdminReportController::insertReportData();
     }
 }
