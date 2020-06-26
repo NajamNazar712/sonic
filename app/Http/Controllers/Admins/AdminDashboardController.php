@@ -7497,7 +7497,7 @@ if(session('department_id') == 7){
                     $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
                 }
-                if($sale_check != null && $result->status != 2) {
+                if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
                     if($result->account_type_id == 1){
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
                             if($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || session('role_id') == 4 || session('role_id') == 2 || session('role_id') == 7)) {
