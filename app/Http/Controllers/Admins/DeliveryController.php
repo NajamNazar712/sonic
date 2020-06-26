@@ -2271,7 +2271,7 @@ class DeliveryController extends Controller
     }
 
 
-        public function receive_delivery_verify_status_submit(Request $request)
+    public function receive_delivery_verify_status_submit(Request $request)
     {
         $delivery_note_id = $request->delivery_note_id;
         $delivery_note = DeliveryNote::find($delivery_note_id);
@@ -2492,18 +2492,20 @@ class DeliveryController extends Controller
                                             if ($verification == 1) {
                                                 if (in_array($request->status_drop[$shipment], [14, 16, 30, 36, 37])) {
                                                     $parcel = Shipment::find($shipment);
-                                                    
-                                                    if ($parcel->booking_type_id == 2) {
-                                                        ShipmentChargesController::replacement($shipment);
-                                                    } else if ($parcel->booking_type_id == 3) {
-                                                        ShipmentChargesController::try_and_buy($shipment);
+                                                    if($parcel->user->account_type_id == 1){
+                                                        if ($parcel->booking_type_id == 2) {
+                                                            ShipmentChargesController::replacement($shipment);
+                                                        } else if ($parcel->booking_type_id == 3) {
+                                                            ShipmentChargesController::try_and_buy($shipment);
+                                                        }
+
+                                                        if ($parcel->booking_type_id != 4) {
+                                                            AdminFinanceController::add_payment($shipment, 0);
+                                                        } else {
+                                                            AdminFinanceController::done_payment($shipment, 0);
+                                                        }
                                                     }
 
-                                                    if ($parcel->booking_type_id != 4) {
-                                                        AdminFinanceController::add_payment($shipment, 0);
-                                                    } else {
-                                                        AdminFinanceController::done_payment($shipment, 0);
-                                                    }
                                                 }
                                             }
                                         } else {
@@ -2549,20 +2551,21 @@ class DeliveryController extends Controller
                                         if ($verification == 1) {
                                             if (in_array($shipper_status_details->shipper_status_id, [14, 16, 30, 36, 37])) {
                                                 $parcel = Shipment::find($shipment);
-
-                                                if ($parcel->booking_type_id == 2) {
-                                                    ShipmentChargesController::replacement($shipment);
-                                                } else if ($parcel->booking_type_id == 3) {
-                                                    ShipmentChargesController::try_and_buy($shipment);
-                                                }
-
-                                                if ($parcel->booking_type_id != 4) {
-                                                    if(($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != '') || $parcel->packaging_material_request == 0){
-                                                        AdminFinanceController::add_payment($shipment, 0);
+                                                if($parcel->user->account_type_id == 1){
+                                                    if ($parcel->booking_type_id == 2) {
+                                                        ShipmentChargesController::replacement($shipment);
+                                                    } else if ($parcel->booking_type_id == 3) {
+                                                        ShipmentChargesController::try_and_buy($shipment);
                                                     }
-                                                } else {
-                                                    if(($parcel->packaging_material_request == 1 && $parcel->amount != 0) || $parcel->packaging_material_request == 0){
-                                                        AdminFinanceController::done_payment($shipment, 0);
+
+                                                    if ($parcel->booking_type_id != 4) {
+                                                        if(($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != '') || $parcel->packaging_material_request == 0){
+                                                            AdminFinanceController::add_payment($shipment, 0);
+                                                        }
+                                                    } else {
+                                                        if(($parcel->packaging_material_request == 1 && $parcel->amount != 0) || $parcel->packaging_material_request == 0){
+                                                            AdminFinanceController::done_payment($shipment, 0);
+                                                        }
                                                     }
                                                 }
                                             }
