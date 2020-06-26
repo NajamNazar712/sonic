@@ -22,7 +22,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use Auth;
 
@@ -58,7 +57,7 @@ class V2AdminReportController extends Controller
             $report->delete();
             V2PickupReportSummary::whereDate('date', $today)->delete();
         }
-        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday);
+        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday)->groupBy('ra.pickup_request_id');
         
         if($pickup_requests->exists()){
            $pickup_requests = $pickup_requests->pluck('v2_pickup_requests.id')->toArray();
@@ -144,10 +143,9 @@ class V2AdminReportController extends Controller
                        $total_cut_off_time_after++;
                    }
 
-                   Log::info('Pickup'.$pickup_request_id);
-                   Log::info('Legendid'.$legend_id);
+
                    if($legend_id == null){
-                       $legend_id = 1;
+                       $legend_id = 6;
                    }
                    $pickup_report = new V2PickupReport();
                    $pickup_report->date = $today;
