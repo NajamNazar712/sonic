@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use Auth;
 
@@ -60,10 +61,11 @@ class V2AdminReportController extends Controller
         $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday);
         
         if($pickup_requests->exists()){
-           
-           $pickup_requests = $pickup_requests->get();
+           $pickup_requests = $pickup_requests->pluck('v2_pickup_requests.id')->toArray();
+
            if(!empty($pickup_requests)){
-               foreach ($pickup_requests as $pickup_request) {
+               foreach ($pickup_requests as $pickup_request_id) {
+                   $pickup_request = V2PickupRequest::find($pickup_request_id);
                    $department_id = NULL;
                    $category_id = NULL;
                    $legend_id = NULL;
@@ -142,6 +144,11 @@ class V2AdminReportController extends Controller
                        $total_cut_off_time_after++;
                    }
 
+                   Log::info('Pickup'.$pickup_request_id);
+                   Log::info('Legendid'.$legend_id);
+                   if($legend_id == null){
+                       $legend_id = 1;
+                   }
                    $pickup_report = new V2PickupReport();
                    $pickup_report->date = $today;
                    $pickup_report->pickup_request_id = $pickup_request_id;
@@ -225,10 +232,10 @@ class V2AdminReportController extends Controller
             'a.name as salesperson','v2_pickup_reports.expected_shipments as expected_shipments',
             'v2_pickup_reports.received_shipments as received_shipments','v2_pickup_reports.difference_shipments as difference_shipments',
             'ad.name as department','v.attempts as attempted_count','usi.poc AS contact_person', 'usi.vendor as vendor',
-            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id');
-        if (!$request->get('search_date_from')) {
-                $pickup_report->whereDate('v2_pickup_reports.date',$today);
-            }
+            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id')->whereDate('v2_pickup_reports.date',$today);
+//        if ($request->get('search_date_from') == null ||) {
+//            $pickup_report = $pickup_report->whereDate('v2_pickup_reports.date',$today);
+//            }
         $datatables = Datatables::of($pickup_report)
         ->setRowAttr([
             'class' => function ($pickup_report) {
