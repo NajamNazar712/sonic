@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use Auth;
 
@@ -57,106 +58,109 @@ class V2AdminReportController extends Controller
             $report->delete();
             V2PickupReportSummary::whereDate('date', $today)->delete();
         }
-        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday)->whereTime('ra.attempt_date', '<=',$arrival_time);
+        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday);
         
         if($pickup_requests->exists()){
-           
-           $pickup_requests = $pickup_requests->get();
-            $pickup_data=array();
+           $pickup_requests = $pickup_requests->pluck('v2_pickup_requests.id')->toArray();
+
            if(!empty($pickup_requests)){
-               foreach ($pickup_requests as $pickup_request) {
+               foreach ($pickup_requests as $pickup_request_id) {
+                   $pickup_request = V2PickupRequest::find($pickup_request_id);
+                   $department_id = NULL;
+                   $category_id = NULL;
+                   $legend_id = NULL;
+                   $booked = 0;
+                   $received = 0;
+                   $attempts = 0;
 
+                   $total_pickups++;
+                   $shipper_id = $pickup_request->shipper_id;
+                   $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0);
+                   if($sales_person->exists()){
+                       $sales_person = $sales_person->first();
+                       $admin_id = $sales_person->admin_id;
+                   }
+                   $reason_id = null;
 
-                       $department_id = NULL;
-                       $category_id = NULL;
-                       $legend_id = NULL;
-                       $booked = 0;
-                       $received = 0;
-                       $attempts = 0;
+                   $pickup_request_id = $pickup_request->id;
+                   $status_id = $pickup_request->status_id;
+                   $booked = $pickup_request->booked;
+                   if($pickup_request->received !== null){
+                       $received = $pickup_request->received;
+                   }
+                   if($booked > 0){
+                       $difference = ($booked - $received)/$booked;
+                       $difference_shipments = 100 - $difference;
 
-                       $total_pickups++;
-                       $shipper_id = $pickup_request->shipper_id;
-                       $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0);
-                       if($sales_person->exists()){
-                           $sales_person = $sales_person->first();
-                           $admin_id = $sales_person->admin_id;
-                       }
-                       $reason_id = null;
-
-                       $pickup_request_id = $pickup_request->id;
-                       $status_id = $pickup_request->status_id;
-                       $booked = $pickup_request->booked;
-                       if($pickup_request->received !== null){
-                           $received = $pickup_request->received;
-                       }
-                       if($booked > 0){
-                           $difference = ($booked - $received)/$booked;
-                           $difference_shipments = 100 - $difference;
-
-                       }else{
-                           $difference = 0;
-                           $difference_shipments = 0;
-                       }
-                       $attempts = $pickup_request->attempts;
-                       if(($status_id == 2) && ($attempts >= 1) && ($difference_shipments <= 10)){
-                           $legend_id = 1;
-                           $category_id = 1;
-                           $attempted_and_picked++;
-                       }
-                       if(($status_id == 2) && ($attempts >= 1) && ($difference_shipments > 10)){
-                           $legend_id = 2;
-                           $department_id = 7;
-                           $category_id = 1;
-                           $total_sales++;
-                           $attempted_and_picked++;
-                       }
-                       if(($status_id == 3) && ($attempts >= 1)){
-                           $department_id = 7;
-                           $legend_id = 3;
-                           $category_id = 2;
-                           $total_sales++;
-                           $attempted_and_not_picked++;
-                       }
-                       if($status_id == 4){
-                           $legend_id = 4;
-                           $department_id = 7;
-                           $category_id = 3;
-                           $attempted_failed++;
-                       }
-                       $pickup_attempts = $pickup_request->pickup_attempts;
-                       $pickup_attempt_flag = FALSE;
-                       $pickup_attempt_operation_status = array(7,8,9);
-                       if(count($pickup_attempts) > 0){
-                           foreach ($pickup_attempts as $pickup_attempt){
-                               if(in_array($pickup_attempt->reason_id, $pickup_attempt_operation_status)){
-                                   $pickup_attempt_flag = TRUE;
-                               }
+                   }else{
+                       $difference = 0;
+                       $difference_shipments = 0;
+                   }
+                   $attempts = $pickup_request->attempts;
+                   if(($status_id == 2) && ($attempts >= 1) && ($difference_shipments <= 10)){
+                       $legend_id = 1;
+                       $category_id = 1;
+                       $attempted_and_picked++;
+                   }
+                   if(($status_id == 2) && ($attempts >= 1) && ($difference_shipments > 10)){
+                       $legend_id = 2;
+                       $department_id = 7;
+                       $category_id = 1;
+                       $total_sales++;
+                       $attempted_and_picked++;
+                   }
+                   if(($status_id == 3) && ($attempts >= 1)){
+                       $department_id = 7;
+                       $legend_id = 3;
+                       $category_id = 2;
+                       $total_sales++;
+                       $attempted_and_not_picked++;
+                   }
+                   if($status_id == 4){
+                       $legend_id = 4;
+                       $department_id = 7;
+                       $category_id = 3;
+                       $attempted_failed++;
+                   }
+                   $pickup_attempts = $pickup_request->pickup_attempts;
+                   $pickup_attempt_flag = FALSE;
+                   $pickup_attempt_operation_status = array(7,8,9);
+                   if(count($pickup_attempts) > 0){
+                       foreach ($pickup_attempts as $pickup_attempt){
+                           if(in_array($pickup_attempt->reason_id, $pickup_attempt_operation_status)){
+                               $pickup_attempt_flag = TRUE;
                            }
                        }
-                       if($pickup_attempt_flag){
-                           $department_id = 6;
-                           $legend_id = 5;
-                           $total_operations++;
-                       }
-                       if($pickup_request->after_cut_off_time == null){
-                           $total_cut_off_time_before++;
-                       }
-                       else{
-                           $total_cut_off_time_after++;
-                       }
+                   }
+                   if($pickup_attempt_flag){
+                       $department_id = 6;
+                       $legend_id = 5;
+                       $total_operations++;
+                   }
+                   if($pickup_request->after_cut_off_time == null){
+                       $total_cut_off_time_before++;
+                   }
+                   else{
+                       $total_cut_off_time_after++;
+                   }
 
-                       $pickup_report = new V2PickupReport();
-                       $pickup_report->date = $today;
-                       $pickup_report->pickup_request_id = $pickup_request_id;
-                       $pickup_report->category_id = $category_id;
-                       $pickup_report->status_id = $status_id;
-                       $pickup_report->sale_person_id = $admin_id;
-                       $pickup_report->expected_shipments = $booked;
-                       $pickup_report->received_shipments = $received;
-                       $pickup_report->difference_shipments = $difference_shipments;
-                       $pickup_report->department_id = $department_id;
-                       $pickup_report->legend_id = $legend_id;
-                       $pickup_report->save();
+                   Log::info('Pickup'.$pickup_request_id);
+                   Log::info('Legendid'.$legend_id);
+                   if($legend_id == null){
+                       $legend_id = 1;
+                   }
+                   $pickup_report = new V2PickupReport();
+                   $pickup_report->date = $today;
+                   $pickup_report->pickup_request_id = $pickup_request_id;
+                   $pickup_report->category_id = $category_id;
+                   $pickup_report->status_id = $status_id;
+                   $pickup_report->sale_person_id = $admin_id;
+                   $pickup_report->expected_shipments = $booked;
+                   $pickup_report->received_shipments = $received;
+                   $pickup_report->difference_shipments = $difference_shipments;
+                   $pickup_report->department_id = $department_id;
+                   $pickup_report->legend_id = $legend_id;
+                   $pickup_report->save();
 
                }
                $pickup_report_summary = new V2PickupReportSummary();
@@ -183,15 +187,28 @@ class V2AdminReportController extends Controller
         $today = Carbon::today();  
         
 
-        $report_summary_data=V2PickupReportSummary::whereDate('created_at',$today)->first();
-        $stats['total']= $report_summary_data->total;
-        $stats['pending_operations']= $report_summary_data->pending_operations;
-        $stats['pending_sales']= $report_summary_data->pending_sales;
-        $stats['before_cut_off_time'] = $report_summary_data->before_cut_off_time;
-        $stats['after_cut_off_time'] = $report_summary_data->after_cut_off_time;
-        $stats['attempted_and_picked'] = $report_summary_data->attempted_and_picked;
-        $stats['attempted_and_not_picked'] = $report_summary_data->attempted_and_not_picked;
-        $stats['attempted_failed'] = $report_summary_data->attempted_failed;
+        $report_summary_data=V2PickupReportSummary::whereDate('created_at',$today);
+        if($report_summary_data->exists()){
+            $report_summary_data = $report_summary_data->first();
+            $stats['total']= $report_summary_data->total;
+            $stats['pending_operations']= $report_summary_data->pending_operations;
+            $stats['pending_sales']= $report_summary_data->pending_sales;
+            $stats['before_cut_off_time'] = $report_summary_data->before_cut_off_time;
+            $stats['after_cut_off_time'] = $report_summary_data->after_cut_off_time;
+            $stats['attempted_and_picked'] = $report_summary_data->attempted_and_picked;
+            $stats['attempted_and_not_picked'] = $report_summary_data->attempted_and_not_picked;
+            $stats['attempted_failed'] = $report_summary_data->attempted_failed;
+        }else{
+            $stats['total']= 0;
+            $stats['pending_operations']= 0;
+            $stats['pending_sales']= 0;
+            $stats['before_cut_off_time'] = 0;
+            $stats['after_cut_off_time'] = 0;
+            $stats['attempted_and_picked'] = 0;
+            $stats['attempted_and_not_picked'] = 0;
+            $stats['attempted_failed'] = 0;
+        }
+
 
         $legends = V2PickupReportLegend::all();
         $department = DB::connection('reports')->table('admin_departments')->whereIn('id',[6,7])->get();
@@ -215,9 +232,10 @@ class V2AdminReportController extends Controller
             'a.name as salesperson','v2_pickup_reports.expected_shipments as expected_shipments',
             'v2_pickup_reports.received_shipments as received_shipments','v2_pickup_reports.difference_shipments as difference_shipments',
             'ad.name as department','v.attempts as attempted_count','usi.poc AS contact_person', 'usi.vendor as vendor',
-            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id')
-            ->whereDate('v2_pickup_reports.created_at',$today)
-            ;
+            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id')->whereDate('v2_pickup_reports.date',$today);
+//        if ($request->get('search_date_from') == null ||) {
+//            $pickup_report = $pickup_report->whereDate('v2_pickup_reports.date',$today);
+//            }
         $datatables = Datatables::of($pickup_report)
         ->setRowAttr([
             'class' => function ($pickup_report) {
@@ -306,7 +324,7 @@ class V2AdminReportController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('v2_pickup_reports.created_at', [$from,$to]);
+            $datatables->whereBetween('v2_pickup_reports.date', [$from,$to]);
         }
 
         return $datatables->make(true);
