@@ -62,9 +62,8 @@ class V2AdminReportController extends Controller
         
         if($pickup_request_attempts->exists()){
             $pickup_request_attempts = $pickup_request_attempts->pluck('pickup_request_id')->toArray();
-            return $pickup_request_attempts;
-           if(!empty($pickup_requests)){
-               foreach ($pickup_requests as $pickup_request_id) {
+           if(!empty($pickup_request_attempts)){
+               foreach ($pickup_request_attempts as $pickup_request_id) {
                    $pickup_request = V2PickupRequest::find($pickup_request_id);
                    $department_id = NULL;
                    $category_id = NULL;
