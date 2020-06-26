@@ -57,11 +57,12 @@ class V2AdminReportController extends Controller
             $report->delete();
             V2PickupReportSummary::whereDate('date', $today)->delete();
         }
-        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday)->groupBy('ra.pickup_request_id');
+        $pickup_request_attempts = V2PickupRequestAttempt::whereBetween('attempt_date', [$yesterday,$today]);
+//        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday)->groupBy('ra.pickup_request_id');
         
-        if($pickup_requests->exists()){
-           $pickup_requests = $pickup_requests->pluck('v2_pickup_requests.id')->toArray();
-
+        if($pickup_request_attempts->exists()){
+            $pickup_request_attempts = $pickup_request_attempts->pluck('pickup_request_id')->toArray();
+            return $pickup_request_attempts;
            if(!empty($pickup_requests)){
                foreach ($pickup_requests as $pickup_request_id) {
                    $pickup_request = V2PickupRequest::find($pickup_request_id);
