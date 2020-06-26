@@ -1670,7 +1670,7 @@ class AdminDashboardController extends Controller
 
         $sales_commission = SalesCommission::where('shipper_id', $id)->first();
 if(session('department_id') == 7){
-            if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
+            if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
                 return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
             }
             else{
@@ -7500,7 +7500,7 @@ if(session('department_id') == 7){
                 if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
                     if($result->account_type_id == 1){
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                            if($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || session('role_id') == 4 || session('role_id') == 2 || session('role_id') == 7)) {
+                            if($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || session('role_id') == 4 || session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 44)) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         } else {
