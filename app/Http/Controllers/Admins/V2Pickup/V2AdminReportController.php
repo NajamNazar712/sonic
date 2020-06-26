@@ -57,16 +57,16 @@ class V2AdminReportController extends Controller
             $report->delete();
             V2PickupReportSummary::whereDate('date', $today)->delete();
         }
-        $pickup_requests = V2PickupRequest::whereDate('created_at', '<=', Carbon::today())->whereTime('created_at', '<=', $arrival_time);
+        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday)->whereTime('ra.attempt_date', '<=',$arrival_time);
         
         if($pickup_requests->exists()){
            
            $pickup_requests = $pickup_requests->get();
-     
+            $pickup_data=array();
            if(!empty($pickup_requests)){
                foreach ($pickup_requests as $pickup_request) {
-                   $pickup_request_attempts = $pickup_request->pickup_attempts()->whereBetween('attempt_date',[$yesterday,$today])->count();
-                   if($pickup_request_attempts > 0){
+
+
                        $department_id = NULL;
                        $category_id = NULL;
                        $legend_id = NULL;
@@ -157,7 +157,6 @@ class V2AdminReportController extends Controller
                        $pickup_report->department_id = $department_id;
                        $pickup_report->legend_id = $legend_id;
                        $pickup_report->save();
-                   }
 
                }
                $pickup_report_summary = new V2PickupReportSummary();
