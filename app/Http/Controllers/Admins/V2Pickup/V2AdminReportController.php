@@ -182,7 +182,7 @@ class V2AdminReportController extends Controller
 
         $report_summary_data=V2PickupReportSummary::whereDate('created_at',$today);
         if($report_summary_data->exists()){
-            $report_summary_data = $report_summary_data->get();
+            $report_summary_data = $report_summary_data->first();
             $stats['total']= $report_summary_data->total;
             $stats['pending_operations']= $report_summary_data->pending_operations;
             $stats['pending_sales']= $report_summary_data->pending_sales;
@@ -225,9 +225,10 @@ class V2AdminReportController extends Controller
             'a.name as salesperson','v2_pickup_reports.expected_shipments as expected_shipments',
             'v2_pickup_reports.received_shipments as received_shipments','v2_pickup_reports.difference_shipments as difference_shipments',
             'ad.name as department','v.attempts as attempted_count','usi.poc AS contact_person', 'usi.vendor as vendor',
-            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id')
-            ->whereDate('v2_pickup_reports.created_at',$today)
-            ;
+            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id');
+        if (!$request->get('search_date_from')) {
+                $pickup_report->whereDate('v2_pickup_reports.date',$today);
+            }
         $datatables = Datatables::of($pickup_report)
         ->setRowAttr([
             'class' => function ($pickup_report) {
