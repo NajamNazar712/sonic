@@ -316,7 +316,7 @@ class V2AdminReportController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('v2_pickup_reports.created_at', [$from,$to]);
+            $datatables->whereBetween('v2_pickup_reports.date', [$from,$to]);
         }
 
         return $datatables->make(true);
