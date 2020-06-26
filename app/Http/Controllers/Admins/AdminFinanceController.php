@@ -2575,9 +2575,12 @@ class AdminFinanceController extends Controller
                         $shipments++;
                     }
 
-                    $aging = round(($days / $shipments), 2) . 'd';
-
-                    return $aging;
+                    if ($shipments > 0) {
+                        return round(($days / $shipments), 2) . 'd';
+                    }
+                    else {
+                        return '-';
+                    }
                 }
                 else {
                     return '-';
