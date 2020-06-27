@@ -1684,6 +1684,16 @@ class AdminCargoController extends Controller
                 $cargo_consignment_shipment = $cargo_consignment_shipment->where('status', 0);
 
                 if ($cargo_consignment_shipment->exists()) {
+                    $cargo_consignment_shipment = $cargo_consignment_shipment->first();
+                    $cargo_consignment = $cargo_consignment_shipment->cargo;
+                    if(session('role_id') != 1){
+                        if (!in_array($cargo_consignment->destination_hub->hub_id, session('hubs'))) {
+                            return ['status' => 1, 'error' => 'Cargo Shipment doesn\'t belong to your assigned hub(s)!'];
+                        }
+                    }
+                    if (!in_array($cargo_consignment->status_id, [1, 2, 4, 6, 7, 9])) {
+                        return ['status' => 1, 'error' => 'Given Shipment\'s Cargo has already been modified!'];
+                    }
                     $consignee_city = $shipment->consignee_city;
 
                     if(!$request->has('pieces_confirm')){
