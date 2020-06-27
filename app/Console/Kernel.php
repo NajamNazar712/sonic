@@ -96,7 +96,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
 
         $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
-		$schedule->command('email:debriefingemail')->dailyAt('00:00')->runInBackground();
+		$schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
 
