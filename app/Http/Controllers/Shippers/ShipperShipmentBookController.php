@@ -1392,7 +1392,7 @@ class ShipperShipmentBookController extends Controller
                         ';
                         $shipment_details .= ' <tr>
                                 <td colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Try & Buy Fees</strong></td>
-                                <td colspan="6" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->try_and_buy_charges . '</td>
+                                <td colspan="6" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->try_and_buy_fees . '</td>
                               </tr>';
                         $shipment_details .= $table_end;
 
