@@ -2007,18 +2007,23 @@ class DeliveryController extends Controller
         $item_ids = explode(',', $request->trybuy_id_list);
 
         if (!empty($item_ids)) {
-            $cod = $request->trybuy_cod;
+//            $cod = $request->trybuy_cod;
             $checked = $request->item_checked;
             $unchecked = $request->item_unchecked;
-
+            $total_cod = 0;
             foreach ($item_ids as $item_id) {
-                ShipmentItem::where('id', $item_ids)->update(['bought' => 1]);
+                $shipment_item = ShipmentItem::find($item_ids);
+                $total_cod += $shipment_item->price;
+                $shipment_item->bought = 1;
+                $shipment_item->save();
             }
+            $shipment = Shipment::find($request->trybuy_shipment_id);
+            $total_cod += $shipment->try_and_buy_fees;
             if ($checked != $unchecked) {
-                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $cod, 'received_amount' => $cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
+                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                 ShipmentsJourneyController::add($request->trybuy_shipment_id, 37, 37, NULL, NULL, NULL, Auth::id(), $request->delivery_note_trybuy, NULL, 0);
             } elseif ($checked == $unchecked) {
-                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $cod, 'received_amount' => $cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
+                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
             }
             ShipmentChargesController::cash_handling($request->trybuy_shipment_id);
             DeliveryNoteShipment::where(['shipment_id' => $request->trybuy_shipment_id, 'delivery_note_id' => $request->delivery_note_trybuy])->update(['status' => 5]);

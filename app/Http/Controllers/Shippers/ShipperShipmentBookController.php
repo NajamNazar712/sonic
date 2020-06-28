@@ -127,7 +127,7 @@ class ShipperShipmentBookController extends Controller
         $shipment->shipper_status_id = 1;
         $shipment->consignee_status_id = 1;
 
-        $shipment->try_and_buy_charges = $try_and_buy_charges;
+        $shipment->try_and_buy_fees = $try_and_buy_charges;
         $shipment->booked_by = session('user_type');
         $shipment->pieces = $pieces;
         $shipment->save();
