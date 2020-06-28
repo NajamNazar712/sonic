@@ -50,7 +50,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\PickupRegenerate',
 		'\App\Console\Commands\PickupReport',
 		'\App\Console\Commands\CancelledPickupRequestEmail',
-		'\App\Console\Commands\RateRejectionEmail'
+		'\App\Console\Commands\RateRejectionEmail',
+		'\App\Console\Commands\CompletedAgingReport',
+		'\App\Console\Commands\PendingCashCollectionReport'
 
         ];
 
@@ -145,6 +147,15 @@ class Kernel extends ConsoleKernel
             $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
+        }
+        $settings = GlobalSettings::where('type', 'completed_aging_report_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $completed_aging_report_time = $settings->setting_value . ':00';
+            $schedule->command('completedAging:report')->dailyAt($completed_aging_report_time);
+            $schedule->command('pendingCashCollection:report')->dailyAt($completed_aging_report_time);
         }
     }
 	 /**

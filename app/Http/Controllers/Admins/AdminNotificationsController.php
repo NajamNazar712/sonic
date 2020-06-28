@@ -304,6 +304,7 @@ class AdminNotificationsController extends Controller
         else if ($id == 64){
             $details['fields'] = ['account_id', 'name'];
         }
+       
         return $details;
     }
 

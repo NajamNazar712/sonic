@@ -722,6 +722,12 @@
                         @if (session('role_id') == 1 || in_array(337, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.pickup_report.index') }}">Pickup Report</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(344, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.completed_aging.index') }}">Completed Aging Report</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(345, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.pending_cash_collection.index') }}">Pending Cash Collection Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -989,6 +995,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(311, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.overnight_overland_cargo_report.index')}}">Overnight Overland Cargo Report</a></li>
+                                    @endif
+                                     @if (session('role_id') == 1 || in_array(343, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.aging_report.index')}}">Completed Aging Report Settings</a></li>
                                     @endif
                                 </ul>
                             </li>

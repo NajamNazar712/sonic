@@ -28,6 +28,10 @@ use App\Http\Models\Blacklist\BlacklistSettingCondition;
 use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
+use App\Mail\Notifications;
+use App\Http\Models\Zone;
+use App\Http\Models\ZoneClassCity;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
@@ -36,6 +40,7 @@ use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\http\Models\DefaultWeight;
 use App\Http\Models\DeliveryCallVerificationRatio;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\MultipleSaleTagging;
@@ -51,6 +56,8 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
+use App\Http\Models\Admin\CompletedAgingReport;
+use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -2372,7 +2379,158 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function crm_default_agent_index(){
+    public function completed_aging_report_settings_index() {
+       
+        $settings = GlobalSettings::where('type', 'completed_aging_report_time')->first();
+
+        if ($settings) {
+            $completed_aging_report_time = $settings->setting_value;
+        }
+        else {
+            $completed_aging_report_time = 10;
+        }
+
+        return view('admin.settings.aging_report')->with(['completed_aging_report_time' => $completed_aging_report_time]);
+    }
+
+    public function completed_aging_report_settings_store(Request $request) {
+        $request_settings = GlobalSettings::where('type', 'completed_aging_report_time');
+
+        if ($request_settings->exists()) {
+            $request_settings = $request_settings->first();
+        }
+        else {
+            $request_settings = new GlobalSettings();
+
+            $request_settings->type = 'completed_aging_report_time';
+        }
+
+        $request_settings->setting_value = $request->completed_aging_report_time;
+
+        $request_settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public static function insertCompletedAgingData(){
+
+        $now = Carbon::now();
+        $subject = 'Completed Report';
+        $total=0;
+
+       $html='';
+        $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
+                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Trax Online Private Limited</h3>
+                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Recovery Control Sheet</h3>';
+                    $html .='<table style="width:100%;">'; 
+                    $html .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Main Hub</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th></tr></thead><tbody>';
+
+        $delviery_notes = DeliveryNote::where('cash_collection_status',1)->where('dncc_status',0)->get();
+        foreach($delviery_notes as $delviery_note)
+        {
+            $start = $delviery_note->updated_at;
+            $difference = $start->diff($now)->days;
+            if($difference >2)
+            {
+                $total = $difference + $total;
+                $zone_id = ZoneClassCity::where('city_id',$delviery_note->hub_id)->first();
+                $CompletedAgingReport = new CompletedAgingReport();
+                $city= City::where('id',$delviery_note->hub_id)->first();
+
+                $zone = Zone::where('id',$zone_id->zone_id)->first();
+
+
+                $CompletedAgingReport->hub_id=$delviery_note->hub_id;
+                $CompletedAgingReport->main_hub_id=$zone_id->zone_id;
+
+                $CompletedAgingReport->days=$difference;
+                $CompletedAgingReport->inserted_at= $delviery_note->updated_at;
+                $CompletedAgingReport->save();
+                
+                    $html .='<tr>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$difference.'</td>';
+                    $html .='</tr>';
+                   
+            }
+           
+        }
+        $html .='<tr>';
+        $html .='<td colspan="2" style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
+        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total.'</td>';
+        $html .='</tr>';
+           $html .= '</tbody></table>';
+        $body = $html;
+        $to = 'shaheryar.khan@trax.pk';
+        $mail = Mail::to($to);
+
+        $mail->send(new Notifications($subject, $body, null));
+
+    }
+    public static function insertPendingCashCollectionData(){
+
+        $now = Carbon::now();
+        $subject = 'Pending Cash Collection Report';
+        $total=0;
+
+       $html='';
+        $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
+                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Trax Online Private Limited</h3>
+                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Recovery Control Sheet</h3>';
+                    $html .='<table style="width:100%;">'; 
+                    $html .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Main Hub</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th></tr></thead><tbody>';
+
+        $delviery_notes = DeliveryNote::where('cash_collection_status',0)->where('dncc_status',0)->get();
+        foreach($delviery_notes as $delviery_note)
+        {
+            $start = $delviery_note->updated_at;
+            $difference = $start->diff($now)->days;
+            if($difference >2)
+            {
+                $total = $difference + $total;
+                $zone_id = ZoneClassCity::where('city_id',$delviery_note->hub_id)->first();
+                $PendingCashCollectionAgingReport = new PendingCashCollectionAgingReport();
+                $city= City::where('id',$delviery_note->hub_id)->first();
+
+                $zone = Zone::where('id',$zone_id->zone_id)->first();
+
+
+                $PendingCashCollectionAgingReport->hub_id=$delviery_note->hub_id;
+                $PendingCashCollectionAgingReport->main_hub_id=$zone_id->zone_id;
+
+                $PendingCashCollectionAgingReport->days=$difference;
+                $PendingCashCollectionAgingReport->inserted_at= $delviery_note->updated_at;
+                $PendingCashCollectionAgingReport->save();
+                
+                    $html .='<tr>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$difference.'</td>';
+                    $html .='</tr>';
+                   
+            }
+           
+        }
+        $html .='<tr>';
+        $html .='<td colspan="2" style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
+        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total.'</td>';
+        $html .='</tr>';
+           $html .= '</tbody></table>';
+        $body = $html;
+        $to = 'shaheryar.khan@trax.pk';
+        $mail = Mail::to($to);
+
+        $mail->send(new Notifications($subject, $body, null));
+
+    }
+ public function crm_default_agent_index(){
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)
             ->get();
@@ -2396,4 +2554,5 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
 }
