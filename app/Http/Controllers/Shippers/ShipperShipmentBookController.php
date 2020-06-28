@@ -46,7 +46,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\ShipmentPiece;
 
-use App\Jobs\ProcessShipmentBooking;
+use App\Jobs\ProcessShipmentBookingDB;
 
 use Auth;
 use Illuminate\Support\Facades\Storage;
@@ -2010,7 +2010,7 @@ class ShipperShipmentBookController extends Controller
                                 $row['nsas'] = $check;
                                 $row['nsa'] = $request->excel_nsa;
 
-                                dispatch(new ProcessShipmentBooking($row));
+                                dispatch(new ProcessShipmentBookingDB($row));
                             }
 
                             return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
@@ -3239,7 +3239,7 @@ class ShipperShipmentBookController extends Controller
                             $row['nsas'] = $check;
                             $row['nsa'] = $request->excel_nsa;
 
-                            dispatch(new ProcessShipmentBooking($row));
+                            dispatch(new ProcessShipmentBookingDB($row));
                         }
 
                         return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
