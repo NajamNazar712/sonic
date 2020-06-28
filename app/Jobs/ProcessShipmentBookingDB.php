@@ -28,7 +28,7 @@ class ProcessShipmentBookingDB implements ShouldQueue
      */
     public function __construct(array $booking)
     {
-        $this->messageGroupId = 'shipment_booking_db';
+        $this->queue = 'shipment_booking_db';
         $this->booking = $booking;
     }
 
