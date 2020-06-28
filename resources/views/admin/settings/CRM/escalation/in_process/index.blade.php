@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Crm Escalation Launched Setting')
+@section('title', 'Crm Escalation In-Process Setting')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Crm Escalation Launched Setting
+                    Crm Escalation In-Process Setting
                 </h1>
 
                 <div class="card">
@@ -84,7 +84,7 @@
                     text: '<i class="la la-cogs"></i> Add',
                     className: 'btn btn-primary add',
                     action: function (e, dt, node, config) {
-                        var url = '{!! route('admin.settings.escalation.launched.add.index') !!}';
+                        var url = '{!! route('admin.settings.escalation.in_process.add.index') !!}';
                         window.location = url;
                     }
                 },'reset'],
@@ -97,7 +97,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.settings.escalation.launched.list') }}',
+                ajax: '{{ route('admin.settings.escalation.in_process.list') }}',
                 rowId: 'id',
                 order: [[1, 'asc']],
                 columns: [
@@ -125,8 +125,8 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var mark_as_select = '<select name="mark_as_select" id="mark_as_select" class="select2 form-control">' +
-                        '<option value="0">Invalid</option>' +
-                        '<option value="1">Valid</option>' +
+                        '<option value="0">In-Process</option>' +
+                        '<option value="1">Resolved</option>' +
                         '</select>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '<option value="0">Disable</option>' +
@@ -205,7 +205,7 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if ($(this).hasClass('edit')) {
-                    var redirect = '{!! route('admin.settings.escalation.launched.edit.index', ':id') !!}';
+                    var redirect = '{!! route('admin.settings.escalation.in_process.edit.index', ':id') !!}';
                     var url = redirect.replace(':id', id);
                     window.location = url;
                 }

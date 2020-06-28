@@ -2372,4 +2372,28 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    public function crm_default_agent_index(){
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->where('admin_roles.department_id',3)
+            ->get();
+
+        $setting = GlobalSettings::where('type', 'crm_default_agent')->first();
+        return view('admin.settings.crm.default_agent')->with(['agents' => $agents, 'setting' => $setting]);
+    }
+
+    public function crm_default_agent_store(Request $request){
+        $setting = GlobalSettings::where('type', 'crm_default_agent');
+        if($setting->exists()){
+            $setting = $setting->first();
+            $setting->setting_value = $request->sale_person;
+            $setting->save();
+        }
+        else{
+            $setting = new GlobalSettings();
+            $setting->setting_value = $request->sale_person;
+            $setting->type = 'crm_default_agent';
+            $setting->save();
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

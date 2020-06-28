@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCrmEscalationsTable extends Migration
+class CreateCrmEscalationTaggingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,10 @@ class CreateCrmEscalationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('crm_escalations', function (Blueprint $table) {
+        Schema::create('crm_escalation_taggings', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('crm_request_status');
             $table->integer('case_nature');
             $table->integer('case_nature_type');
-            $table->integer('tat');
-            $table->integer('mark_as');
-            $table->string('comment')->nullable();
             $table->integer('updated_by');
             $table->integer('status');
             $table->timestamps();
@@ -34,6 +30,6 @@ class CreateCrmEscalationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('crm_escalations');
+        Schema::dropIfExists('crm_escalation_taggings');
     }
 }

@@ -4,7 +4,7 @@ namespace App\http\Models\CRM\Escalation;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CrmEscalationShipmentStatus extends Model
+class CrmEscalationTaggingShipmentStatus extends Model
 {
     public function status() {
         return $this->belongsTo('App\Http\Models\ShipmentStatus', 'shipment_status_id', 'id');

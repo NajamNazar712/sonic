@@ -2,13 +2,26 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\City;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\http\Models\CRM\Escalation\CrmEscalation;
+use App\http\Models\CRM\Escalation\CrmEscalationLevel;
+use App\http\Models\CRM\Escalation\CrmEscalationShipmentStatus;
+use App\http\Models\CRM\Escalation\CrmEscalationTagging;
+use App\http\Models\CRM\Escalation\CrmEscalationTaggingHub;
+use App\http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
+use App\http\Models\CRM\Escalation\CrmEscalationTaggingLevelEmail;
+use App\http\Models\CRM\Escalation\CrmEscalationTaggingShipmentStatus;
+use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
+use DB;
 
 class AdminCrmSettingsController extends Controller
 {
@@ -73,9 +86,678 @@ class AdminCrmSettingsController extends Controller
     }
 
     public function escalation_launched_list(){
-        $launched = CrmEscalation::leftjoin('crm_request_case_nature as crcn', 'crnc.id', '=', 'crm_escalations.case_nature')
-            ->leftjoin('crm_request_case_nature_types as crcnt', 'crnct.id', '=', 'crm_escalations.case_nature_type')
+        $launched = CrmEscalation::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_escalations.case_nature')
+            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_escalations.case_nature_type')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_escalations.updated_by')
-            ->select('crm_escalations.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalations.tat as tat', 'crm_escalations.mark_as as mark_as', 'crm_escalations.comment as comment', 'crm_escalations.updated_at as updated_at', 'a.name as updated_by');
-}
+            ->select('crm_escalations.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalations.tat as tat', 'crm_escalations.mark_as as mark_as', 'crm_escalations.comment as comment', 'crm_escalations.updated_at as updated_at', 'a.name as updated_by', 'crm_escalations.status as status')
+            ->where('crm_escalations.crm_request_status', 1);
+
+
+        $datatables = Datatables::of($launched)
+            ->editColumn('mark_as', function ($escalation) {
+                if($escalation->mark_as == 1){
+                    return 'Valid';
+                }
+                else{
+                    return 'Invalid';
+                }
+            })
+            ->editColumn('status', function ($escalation) {
+                if($escalation->status == 1){
+                    return 'Enabled';
+                }
+                else{
+                    return 'Disabled';
+                }
+            })
+            ->addColumn('view_statuses', function ($escalation) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">View</button>';
+            })
+            ->addColumn('action', function($escalation) {
+                if (session('role_id') == 1 || count(array_intersect([83, 84], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                    $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                    $dropdown .= $edit_button;
+
+                    if ($escalation->status == 1) {
+                        $dropdown .= $disable_button;
+                    }
+                    else {
+                        $dropdown .= $enable_button;
+                    }
+
+                    $dropdown .= '
+                      </div>
+                    </div>
+                ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+    }
+
+    public function escalation_launched_add_index(){
+        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        return view('admin.settings.CRM.escalation.launched.add')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
+    }
+
+    public function escalation_launched_add_store(Request $request){
+        $case_nature_id = $request->input('case_nature_select');
+        if($case_nature_id == 1){
+            $case_nature_type_id = $request->input('case_nature_complaint');
+        }
+        else if($case_nature_id == 2){
+            $case_nature_type_id = $request->input('case_nature_request');
+        }
+        else if($case_nature_id == 3){
+            $case_nature_type_id = $request->input('case_nature_claim');
+        }
+        $shipment_statuses = $request->shipment_statuses;
+        $tat = $request->input('tat');
+        $mark_as = $request->input('mark_as_select');
+        if($mark_as == 1){
+            $comment = $request->input('auto_comment');
+        }
+        else{
+            $comment = NULL;
+        }
+        $launched_escalation = new CrmEscalation();
+        $launched_escalation->crm_request_status = 1;
+        $launched_escalation->case_nature = $case_nature_id;
+        $launched_escalation->case_nature_type = $case_nature_type_id;
+        $launched_escalation->tat = $tat;
+        $launched_escalation->mark_as = $mark_as;
+        $launched_escalation->comment = $comment;
+        $launched_escalation->status = 1;
+        $launched_escalation->updated_by = Auth::id();
+        $launched_escalation->save();
+
+        foreach ($shipment_statuses as $shipment_status){
+            $launched_escalation_shipment_status = new CrmEscalationShipmentStatus();
+            $launched_escalation_shipment_status->escalation_id = $launched_escalation->id;
+            $launched_escalation_shipment_status->shipment_status_id = $shipment_status;
+            $launched_escalation_shipment_status->save();
+        }
+        return redirect()->route('admin.settings.escalation.launched.index')->with('success', 'Launched Escalation Added Successfully');
+    }
+
+    public function escalation_launched_edit_index($id){
+        $escalation = CrmEscalation::find($id);
+        $statuses = array();
+        foreach ($escalation->shipment_statuses as $shipment_status){
+            $statuses[] = $shipment_status->shipment_status_id;
+        }
+        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        return view('admin.settings.CRM.escalation.launched.edit')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'escalation' => $escalation, 'statuses' => $statuses]);
+    }
+
+    public function escalation_launched_edit_store(Request $request){
+        $launched_escalation = CrmEscalation::find($request->id);
+        $case_nature_id = $launched_escalation->case_nature;
+        if($case_nature_id == 1){
+            $case_nature_type_id = $request->input('case_nature_complaint');
+        }
+        else if($case_nature_id == 2){
+            $case_nature_type_id = $request->input('case_nature_request');
+        }
+        else if($case_nature_id == 3){
+            $case_nature_type_id = $request->input('case_nature_claim');
+        }
+        $shipment_statuses = $request->shipment_statuses;
+        $tat = $request->input('tat');
+        $mark_as = $request->input('mark_as_select');
+        if($mark_as == 1){
+            $comment = $request->input('auto_comment');
+        }
+        else{
+            $comment = NULL;
+        }
+        $launched_escalation->case_nature_type = $case_nature_type_id;
+        $launched_escalation->tat = $tat;
+        $launched_escalation->mark_as = $mark_as;
+        $launched_escalation->comment = $comment;
+        $launched_escalation->status = 1;
+        $launched_escalation->updated_by = Auth::id();
+        $launched_escalation->save();
+        CrmEscalationShipmentStatus::where('escalation_id', $launched_escalation->id)->delete();
+        foreach ($shipment_statuses as $shipment_status){
+            $launched_escalation_shipment_status = new CrmEscalationShipmentStatus();
+            $launched_escalation_shipment_status->escalation_id = $launched_escalation->id;
+            $launched_escalation_shipment_status->shipment_status_id = $shipment_status;
+            $launched_escalation_shipment_status->save();
+        }
+        return redirect()->route('admin.settings.escalation.launched.index')->with('success', 'Launched Escalation Added Successfully');
+    }
+
+    public function escalation_in_process_index(){
+        return view('admin.settings.CRM.escalation.in_process.index');
+    }
+
+    public function escalation_in_process_list(){
+        $in_process = CrmEscalation::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_escalations.case_nature')
+            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_escalations.case_nature_type')
+            ->leftjoin('admins as a', 'a.id', '=', 'crm_escalations.updated_by')
+            ->select('crm_escalations.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalations.tat as tat', 'crm_escalations.mark_as as mark_as', 'crm_escalations.comment as comment', 'crm_escalations.updated_at as updated_at', 'a.name as updated_by', 'crm_escalations.status as status')
+        ->where('crm_escalations.crm_request_status', 2);
+
+
+        $datatables = Datatables::of($in_process)
+            ->editColumn('mark_as', function ($escalation) {
+                if($escalation->mark_as == 1){
+                    return 'Resolved';
+                }
+                else{
+                    return 'In-Process';
+                }
+            })
+            ->editColumn('status', function ($escalation) {
+                if($escalation->status == 1){
+                    return 'Enabled';
+                }
+                else{
+                    return 'Disabled';
+                }
+            })
+            ->addColumn('view_statuses', function ($escalation) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">View</button>';
+            })
+            ->addColumn('action', function($escalation) {
+                if (session('role_id') == 1 || count(array_intersect([83, 84], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                    $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                    $dropdown .= $edit_button;
+
+                    if ($escalation->status == 1) {
+                        $dropdown .= $disable_button;
+                    }
+                    else {
+                        $dropdown .= $enable_button;
+                    }
+
+                    $dropdown .= '
+                      </div>
+                    </div>
+                ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+    }
+
+    public function escalation_in_process_add_index(){
+        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        return view('admin.settings.CRM.escalation.in_process.add')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
+    }
+
+    public function escalation_in_process_add_store(Request $request){
+        $case_nature_id = $request->input('case_nature_select');
+        if($case_nature_id == 1){
+            $case_nature_type_id = $request->input('case_nature_complaint');
+        }
+        else if($case_nature_id == 2){
+            $case_nature_type_id = $request->input('case_nature_request');
+        }
+        else if($case_nature_id == 3){
+            $case_nature_type_id = $request->input('case_nature_claim');
+        }
+        $shipment_statuses = $request->shipment_statuses;
+        $tat = $request->input('tat');
+        $mark_as = $request->input('mark_as_select');
+        $comment = $request->input('auto_comment');
+
+        $in_process_escalation = new CrmEscalation();
+        $in_process_escalation->crm_request_status = 2;
+        $in_process_escalation->case_nature = $case_nature_id;
+        $in_process_escalation->case_nature_type = $case_nature_type_id;
+        $in_process_escalation->tat = $tat;
+        $in_process_escalation->mark_as = $mark_as;
+        $in_process_escalation->comment = $comment;
+        $in_process_escalation->status = 1;
+        $in_process_escalation->updated_by = Auth::id();
+        $in_process_escalation->save();
+
+        foreach ($shipment_statuses as $shipment_status){
+            $in_process_escalation_shipment_status = new CrmEscalationShipmentStatus();
+            $in_process_escalation_shipment_status->escalation_id = $in_process_escalation->id;
+            $in_process_escalation_shipment_status->shipment_status_id = $shipment_status;
+            $in_process_escalation_shipment_status->save();
+        }
+        return redirect()->route('admin.settings.escalation.in_process.index')->with('success', 'In-Process Escalation Added Successfully');
+    }
+
+    public function escalation_in_process_edit_index($id){
+        $escalation = CrmEscalation::find($id);
+        $statuses = array();
+        foreach ($escalation->shipment_statuses as $shipment_status){
+            $statuses[] = $shipment_status->shipment_status_id;
+        }
+        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        return view('admin.settings.CRM.escalation.in_process.edit')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'escalation' => $escalation, 'statuses' => $statuses]);
+    }
+
+    public function escalation_in_process_edit_store(Request $request){
+        $in_process_escalation = CrmEscalation::find($request->id);
+        $case_nature_id = $in_process_escalation->case_nature;
+        if($case_nature_id == 1){
+            $case_nature_type_id = $request->input('case_nature_complaint');
+        }
+        else if($case_nature_id == 2){
+            $case_nature_type_id = $request->input('case_nature_request');
+        }
+        else if($case_nature_id == 3){
+            $case_nature_type_id = $request->input('case_nature_claim');
+        }
+        $shipment_statuses = $request->shipment_statuses;
+        $tat = $request->input('tat');
+        $mark_as = $request->input('mark_as_select');
+        if($mark_as == 1){
+            $comment = $request->input('auto_comment');
+        }
+        else{
+            $comment = NULL;
+        }
+        $in_process_escalation->case_nature_type = $case_nature_type_id;
+        $in_process_escalation->tat = $tat;
+        $in_process_escalation->mark_as = $mark_as;
+        $in_process_escalation->comment = $comment;
+        $in_process_escalation->status = 1;
+        $in_process_escalation->updated_by = Auth::id();
+        $in_process_escalation->save();
+        CrmEscalationShipmentStatus::where('escalation_id', $in_process_escalation->id)->delete();
+        foreach ($shipment_statuses as $shipment_status){
+            $in_process_escalation_shipment_status = new CrmEscalationShipmentStatus();
+            $in_process_escalation_shipment_status->escalation_id = $in_process_escalation->id;
+            $in_process_escalation_shipment_status->shipment_status_id = $shipment_status;
+            $in_process_escalation_shipment_status->save();
+        }
+        return redirect()->route('admin.settings.escalation.in_process.index')->with('success', 'In-Process Escalation Added Successfully');
+    }
+
+    public function escalation_status_update(Request $request){
+        $escalation = CrmEscalation::find($request->id);
+        $escalation->status = $request->status;
+        $escalation->save();
+        if($request->status == 1){
+            $status = 'enabled';
+        }
+        else{
+            $status = 'disabled';
+        }
+        return response()->json(['status' => 1, 'success' => 'Escalation ' . $status . ' successfully!']);
+    }
+
+    public function escalation_view_statuses(Request $request){
+        $escalation = CrmEscalation::find($request->id);
+        $statuses = array();
+        foreach ($escalation->shipment_statuses as $shipment_status){
+            $statuses[] = $shipment_status->status->name;
+        }
+        return response()->json(['status' => 1, 'statuses' => $statuses]);
+    }
+
+    public function escalation_level_index(){
+        $levels = CrmEscalationLevel::get();
+        return view('admin.settings.CRM.escalation.level')->with(['levels' => $levels]);
+    }
+
+    public function escalation_level_store(Request $request){
+        foreach ($request->level as $index => $level){
+            $index = $index +1;
+            $existing_escaltion_level = CrmEscalationLevel::where('id', $index);
+            if($existing_escaltion_level->exists()){
+                $existing_escaltion_level = $existing_escaltion_level->first();
+                $existing_escaltion_level->name = $level;
+                $existing_escaltion_level->save();
+            }
+            else{
+                $escalation_level = new CrmEscalationLevel();
+                $escalation_level->name = $level;
+                $escalation_level->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'Escalation Level(s) updated Successfully');
+    }
+
+
+    public function escalation_tagging_index(){
+        return view('admin.settings.CRM.escalation.tagging.index');
+    }
+
+    public function escalation_tagging_list(){
+        $tagging = CrmEscalationTagging::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_escalation_taggings.case_nature')
+            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_escalation_taggings.case_nature_type')
+            ->leftjoin('admins as a', 'a.id', '=', 'crm_escalation_taggings.updated_by')
+            ->select('crm_escalation_taggings.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalation_taggings.updated_at as updated_at', 'a.name as updated_by', 'crm_escalation_taggings.status as status');
+
+
+        $datatables = Datatables::of($tagging)
+            ->editColumn('view_hubs', function ($escalation) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">View</button>';
+            })
+            ->addColumn('view_statuses', function ($escalation) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">View</button>';
+            })
+            ->editColumn('view_levels', function ($escalation) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">View</button>';
+            })
+            ->editColumn('status', function ($escalation) {
+                if($escalation->status == 1){
+                    return 'Enabled';
+                }
+                else{
+                    return 'Disabled';
+                }
+            })
+            ->addColumn('action', function($escalation) {
+                if (session('role_id') == 1 || count(array_intersect([83, 84], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                    $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                    $dropdown .= $edit_button;
+
+                    if ($escalation->status == 1) {
+                        $dropdown .= $disable_button;
+                    }
+                    else {
+                        $dropdown .= $enable_button;
+                    }
+
+                    $dropdown .= '
+                      </div>
+                    </div>
+                ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+    }
+
+    public function escalation_tagging_add_index(){
+        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $hubs = City::where('hub',1)->select('id','name')->get();
+        $admin_roles = AdminRole::leftjoin('admin_departments as ad', 'ad.id', '=', 'admin_roles.department_id')
+            ->select('admin_roles.id as id', 'admin_roles.name as name', 'ad.name as department')
+            ->where('admin_roles.id', '!=', 1)
+            ->get();
+
+        $levels = CrmEscalationLevel::get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        return view('admin.settings.CRM.escalation.tagging.add')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'levels' => $levels, 'admin_roles' => $admin_roles]);
+    }
+
+
+    public function escalation_tagging_add_store(Request $request){
+        $case_nature_id = $request->input('case_nature_select');
+        if($case_nature_id == 1){
+            $case_nature_type_id = $request->input('case_nature_complaint');
+        }
+        else if($case_nature_id == 2){
+            $case_nature_type_id = $request->input('case_nature_request');
+        }
+        else if($case_nature_id == 3){
+            $case_nature_type_id = $request->input('case_nature_claim');
+        }
+        $shipment_statuses = $request->shipment_statuses;
+        $levels = $request->level;
+
+        $tagging_escalation = new CrmEscalationTagging();
+        $tagging_escalation->case_nature = $case_nature_id;
+        $tagging_escalation->case_nature_type = $case_nature_type_id;
+        $tagging_escalation->status = 1;
+        $tagging_escalation->updated_by = Auth::id();
+        $tagging_escalation->save();
+
+        if($request->has('hubs')){
+            $hubs = $request->hubs;
+            foreach ($hubs as $hub){
+                $tagging_escalation_hub = new CrmEscalationTaggingHub();
+                $tagging_escalation_hub->escalation_tagging_id = $tagging_escalation->id;
+                $tagging_escalation_hub->hub_id = $hub;
+                $tagging_escalation_hub->save();
+            }
+        }
+        foreach ($shipment_statuses as $shipment_status){
+            $tagging_escalation_shipment_status = new CrmEscalationTaggingShipmentStatus();
+            $tagging_escalation_shipment_status->escalation_tagging_id = $tagging_escalation->id;
+            $tagging_escalation_shipment_status->shipment_status_id = $shipment_status;
+            $tagging_escalation_shipment_status->save();
+        }
+
+        foreach($levels as $index => $level){
+            $addition_emails = explode(',', $request->additional_emails[$index]);
+            $admin_role = $request->admin_role_select[$index];
+            $tat = $request->tat[$index];
+            if($admin_role != NULL){
+                $level_tagging_escalation = new CrmEscalationTaggingLevel();
+                $level_tagging_escalation->escalation_tagging_id = $tagging_escalation->id;
+                $level_tagging_escalation->level_id = $level;
+                $level_tagging_escalation->tagged_id = $admin_role;
+                $level_tagging_escalation->tat = $tat;
+                $level_tagging_escalation->save();
+
+                foreach ($addition_emails as $addition_email){
+                    if($addition_email != null) {
+                        $level_tagging_escalation_email = new CrmEscalationTaggingLevelEmail();
+                        $level_tagging_escalation_email->escalation_tagging_id = $tagging_escalation->id;
+                        $level_tagging_escalation_email->tagging_level_id = $level_tagging_escalation->id;
+                        $level_tagging_escalation_email->email = $addition_email;
+                        $level_tagging_escalation_email->save();
+                    }
+                }
+            }
+        }
+        return redirect()->route('admin.settings.escalation.tagging.index')->with('success', 'Tagging Escalation Added Successfully');
+    }
+
+    public function escalation_tagging_edit_index($id){
+        $escalation_tagging = CrmEscalationTagging::find($id);
+        $statuses = array();
+        foreach ($escalation_tagging->shipment_statuses as $shipment_status){
+            $statuses[] = $shipment_status->shipment_status_id;
+        }
+        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $selected_hubs = array();
+        foreach ($escalation_tagging->hubs as $hub){
+            $selected_hubs[] = $hub->hub_id;
+        }
+        $hubs = City::where('hub',1)->select('id','name')->get();
+        $admin_roles = AdminRole::leftjoin('admin_departments as ad', 'ad.id', '=', 'admin_roles.department_id')
+            ->select('admin_roles.id as id', 'admin_roles.name as name', 'ad.name as department')
+            ->where('admin_roles.id', '!=', 1)
+            ->get();
+
+        $levels = CrmEscalationLevel::get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $selected_admin_roles = array();
+        $selected_tat = array();
+        $selected_emails = array();
+        foreach($escalation_tagging->levels as $level){
+            $selected_admin_roles[$level->level_id] = (int)$level->tagged_id;
+            $selected_tat[$level->level_id] = $level->tat;
+            $selected_emails[$level->level_id] = '';
+            foreach ($level->emails as $email){
+                $selected_emails[$level->level_id] .= $email->email . ',';
+            }
+        }
+        return view('admin.settings.CRM.escalation.tagging.edit')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'levels' => $levels, 'admin_roles' => $admin_roles, 'escalation_tagging' => $escalation_tagging, 'statuses' => $statuses, 'selected_hubs' => $selected_hubs, 'selected_admin_roles' => $selected_admin_roles, 'selected_tat' => $selected_tat, 'selected_emails' => $selected_emails]);
+    }
+
+
+    public function escalation_tagging_edit_store(Request $request){
+        $tagging_escalation = CrmEscalationTagging::find($request->id);
+        $case_nature_id = $tagging_escalation->case_nature;
+        if($case_nature_id == 1){
+            $case_nature_type_id = $request->input('case_nature_complaint');
+        }
+        else if($case_nature_id == 2){
+            $case_nature_type_id = $request->input('case_nature_request');
+        }
+        else if($case_nature_id == 3){
+            $case_nature_type_id = $request->input('case_nature_claim');
+        }
+        $shipment_statuses = $request->shipment_statuses;
+        $levels = $request->level;
+
+        $tagging_escalation->case_nature_type = $case_nature_type_id;
+        $tagging_escalation->status = 1;
+        $tagging_escalation->updated_by = Auth::id();
+        $tagging_escalation->save();
+
+        CrmEscalationTaggingHub::where('escalation_tagging_id', $tagging_escalation->id)->delete();
+        if($request->has('hubs')){
+            $hubs = $request->hubs;
+            foreach ($hubs as $hub){
+                $tagging_escalation_hub = new CrmEscalationTaggingHub();
+                $tagging_escalation_hub->escalation_tagging_id = $tagging_escalation->id;
+                $tagging_escalation_hub->hub_id = $hub;
+                $tagging_escalation_hub->save();
+            }
+        }
+        CrmEscalationTaggingShipmentStatus::where('escalation_tagging_id', $tagging_escalation->id)->delete();
+        foreach ($shipment_statuses as $shipment_status){
+            $tagging_escalation_shipment_status = new CrmEscalationTaggingShipmentStatus();
+            $tagging_escalation_shipment_status->escalation_tagging_id = $tagging_escalation->id;
+            $tagging_escalation_shipment_status->shipment_status_id = $shipment_status;
+            $tagging_escalation_shipment_status->save();
+        }
+
+        CrmEscalationTaggingLevel::where('escalation_tagging_id', $tagging_escalation->id)->delete();
+        CrmEscalationTaggingLevelEmail::where('escalation_tagging_id', $tagging_escalation->id)->delete();
+        foreach($levels as $index => $level){
+            $addition_emails = explode(',', $request->additional_emails[$index]);
+            $admin_role = $request->admin_role_select[$index];
+            $tat = $request->tat[$index];
+            if($admin_role != NULL){
+                $level_tagging_escalation = new CrmEscalationTaggingLevel();
+                $level_tagging_escalation->escalation_tagging_id = $tagging_escalation->id;
+                $level_tagging_escalation->level_id = $level;
+                $level_tagging_escalation->tagged_id = $admin_role;
+                $level_tagging_escalation->tat = $tat;
+                $level_tagging_escalation->save();
+
+                foreach ($addition_emails as $addition_email){
+                    if($addition_email != null){
+                        $level_tagging_escalation_email = new CrmEscalationTaggingLevelEmail();
+                        $level_tagging_escalation_email->escalation_tagging_id = $tagging_escalation->id;
+                        $level_tagging_escalation_email->tagging_level_id = $level_tagging_escalation->id;
+                        $level_tagging_escalation_email->email = $addition_email;
+                        $level_tagging_escalation_email->save();
+                    }
+                }
+            }
+        }
+        return redirect()->route('admin.settings.escalation.tagging.index')->with('success', 'Tagging Escalation updated Successfully');
+    }
+
+    public function escalation_tagging_status_update(Request $request){
+        $escalation = CrmEscalationTagging::find($request->id);
+        $escalation->status = $request->status;
+        $escalation->save();
+        if($request->status == 1){
+            $status = 'enabled';
+        }
+        else{
+            $status = 'disabled';
+        }
+        return response()->json(['status' => 1, 'success' => 'Escalation Tagging ' . $status . ' successfully!']);
+    }
+
+    public function escalation_tagging_view_statuses(Request $request){
+        $escalation_tagging = CrmEscalationTagging::find($request->id);
+        $statuses = array();
+        foreach ($escalation_tagging->shipment_statuses as $shipment_status){
+            $statuses[] = $shipment_status->status->name;
+        }
+        return response()->json(['status' => 1, 'statuses' => $statuses]);
+    }
+
+    public function escalation_tagging_view_hubs(Request $request){
+        $escalation_tagging = CrmEscalationTagging::find($request->id);
+        $hubs = array();
+        foreach ($escalation_tagging->hubs as $hub){
+            $hubs[] = $hub->hub->name;
+        }
+        return response()->json(['status' => 1, 'hubs' => $hubs]);
+    }
+
+    public function escalation_tagging_view_levels(Request $request){
+        $escalation_tagging = CrmEscalationTagging::find($request->id);
+        $selected_levels = array();
+        foreach($escalation_tagging->levels as $level){
+            $selected_levels['name'][] = $level->level->name;
+            $selected_levels['admin_roles'][] =  $level->role->name . ' | ' . $level->role->department->name;
+            $selected_levels['tat'][] = $level->tat;
+            $email_text = '';
+            $email_count = count($level->emails);
+            foreach ($level->emails as $index => $email){
+                if($email_count > ($index + 1)){
+                    $email_text .= $email->email . ', ';
+                }
+                else{
+                    $email_text .= $email->email;
+                }
+            }
+
+            $selected_levels['emails'][] = $email_text;
+        }
+        return response()->json(['status' => 1, 'selected_levels' => $selected_levels]);
+    }
 }

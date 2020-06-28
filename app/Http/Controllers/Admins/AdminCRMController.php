@@ -1624,23 +1624,6 @@ class AdminCRMController extends Controller
     }
 
     public function assign(Request $request){
-//        if($request->multiple == 0) {
-//            $crm_requests = CrmRequest::find($request->crm_request_id);
-//
-//            if ($request->crm_request_id == $crm_requests->id) {
-//                if ($crm_requests->agent_id != $request->admin_id) {
-//                    CrmRequestAgentHistory::create([
-//                        'crm_request_id' => $crm_requests->id,
-//                        'agent_id' => $request->admin_id
-//                    ]);
-//                    $crm_requests->agent_id = $request->admin_id;
-//                    $crm_requests->save();
-//                    return ['status' => 0, 'success' => 'Request has been Assigned'];
-//                }
-//                return ['status' => 1, 'error' => 'Request is already Assigned to Agent'];
-//            }
-//        }
-//        elseif ($request->multiple == 1) {
         if(!empty($request->crm_request_ids)){
             foreach ($request->crm_request_ids as $crm_request_id)
             {
@@ -1657,7 +1640,6 @@ class AdminCRMController extends Controller
             }
             return ['status' => 0, 'success' => 'Request(s) has been Assigned'];
         }
-//        }
     }
 
     public function valid(Request $request)
@@ -1753,7 +1735,7 @@ class AdminCRMController extends Controller
         }
     }
 
-    public function delay_in_delivery_shipment_add($request_id, $shipment_id){
+    static public function delay_in_delivery_shipment_add($request_id, $shipment_id){
 
         $delay_in_delivery = new DelayInDeliveryShipment();
         $delay_in_delivery->crm_request_id = $request_id;
@@ -1762,7 +1744,7 @@ class AdminCRMController extends Controller
 
     }
 
-    public function automation_payment_add($request_id, $shipment_id){
+    static public function automation_payment_add($request_id, $shipment_id){
 
         $payment = new CrmPaymentShipment();
         $payment->crm_request_id = $request_id;

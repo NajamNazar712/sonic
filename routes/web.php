@@ -1658,6 +1658,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@auto_crm_comment_store')->name('store');
         });
 
+        Route::prefix('default_agent')->name('default_agent.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@crm_default_agent_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@crm_default_agent_store')->name('store');
+        });
+
         Route::prefix('blacklist')->name('blacklist.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@blacklist_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@blacklist_list')->name('list');
@@ -1707,10 +1712,36 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('escalation')->name('escalation.')->group(function () {
             Route::prefix('launched')->name('launched.')->group(function () {
                 Route::get('', 'Admins\AdminCrmSettingsController@escalation_launched_index')->name('index');
-                Route::get('/list', 'Admins\AdminCrmSettingsController@escalation_launched_list')->name('index');
-//                Route::post('consignee', 'Admins\AdminCrmSettingsController@blacklist_search_consignee')->name('consignee');
-//                Route::post('update', 'Admins\AdminCrmSettingsController@blacklist_search_update')->name('update');
+                Route::get('/list', 'Admins\AdminCrmSettingsController@escalation_launched_list')->name('list');
+                Route::get('/add', 'Admins\AdminCrmSettingsController@escalation_launched_add_index')->name('add.index');
+                Route::post('/add/store', 'Admins\AdminCrmSettingsController@escalation_launched_add_store')->name('add.store');
+                Route::get('/edit/{id}', 'Admins\AdminCrmSettingsController@escalation_launched_edit_index')->name('edit.index');
+                Route::post('/edit/store', 'Admins\AdminCrmSettingsController@escalation_launched_edit_store')->name('edit.store');
             });
+            Route::prefix('in_process')->name('in_process.')->group(function () {
+                Route::get('', 'Admins\AdminCrmSettingsController@escalation_in_process_index')->name('index');
+                Route::get('/list', 'Admins\AdminCrmSettingsController@escalation_in_process_list')->name('list');
+                Route::get('/add', 'Admins\AdminCrmSettingsController@escalation_in_process_add_index')->name('add.index');
+                Route::post('/add/store', 'Admins\AdminCrmSettingsController@escalation_in_process_add_store')->name('add.store');
+                Route::get('/edit/{id}', 'Admins\AdminCrmSettingsController@escalation_in_process_edit_index')->name('edit.index');
+                Route::post('/edit/store', 'Admins\AdminCrmSettingsController@escalation_in_process_edit_store')->name('edit.store');
+            });
+            Route::prefix('tagging')->name('tagging.')->group(function () {
+                Route::get('', 'Admins\AdminCrmSettingsController@escalation_tagging_index')->name('index');
+                Route::get('/list', 'Admins\AdminCrmSettingsController@escalation_tagging_list')->name('list');
+                Route::get('/add', 'Admins\AdminCrmSettingsController@escalation_tagging_add_index')->name('add.index');
+                Route::post('/add/store', 'Admins\AdminCrmSettingsController@escalation_tagging_add_store')->name('add.store');
+                Route::get('/edit/{id}', 'Admins\AdminCrmSettingsController@escalation_tagging_edit_index')->name('edit.index');
+                Route::post('/edit/store', 'Admins\AdminCrmSettingsController@escalation_tagging_edit_store')->name('edit.store');
+                Route::post('/status', 'Admins\AdminCrmSettingsController@escalation_tagging_status_update')->name('status');
+                Route::post('/view_hubs', 'Admins\AdminCrmSettingsController@escalation_tagging_view_hubs')->name('view_hubs');
+                Route::post('/view_statuses', 'Admins\AdminCrmSettingsController@escalation_tagging_view_statuses')->name('view_statuses');
+                Route::post('/view_levels', 'Admins\AdminCrmSettingsController@escalation_tagging_view_levels')->name('view_levels');
+            });
+            Route::post('/status', 'Admins\AdminCrmSettingsController@escalation_status_update')->name('status');
+            Route::post('/view_statuses', 'Admins\AdminCrmSettingsController@escalation_view_statuses')->name('view_statuses');
+            Route::get('/levels', 'Admins\AdminCrmSettingsController@escalation_level_index')->name('levels.index');
+            Route::post('/levels/store', 'Admins\AdminCrmSettingsController@escalation_level_store')->name('levels.store');
         });
     });
 
