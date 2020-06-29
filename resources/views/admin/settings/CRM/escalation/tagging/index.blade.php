@@ -306,7 +306,7 @@
                 }
                 if ($(this).hasClass('enable')) {
                     $.ajax({
-                        url: '{!! route('admin.settings.escalation.status') !!}',
+                        url: '{!! route('admin.settings.escalation.tagging.status') !!}',
                         method: 'POST',
                         data: {
                             'id': id,
@@ -327,7 +327,7 @@
                 }
                 else if ($(this).hasClass('disable')) {
                     $.ajax({
-                        url: '{!! route('admin.settings.escalation.status') !!}',
+                        url: '{!! route('admin.settings.escalation.tagging.status') !!}',
                         method: 'POST',
                         data: {
                             'id': id,

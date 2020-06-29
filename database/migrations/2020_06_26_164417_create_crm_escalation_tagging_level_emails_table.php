@@ -17,7 +17,6 @@ class CreateCrmEscalationTaggingLevelEmailsTable extends Migration
             $table->increments('id');
             $table->integer('escalation_tagging_id');
             $table->integer('tagging_level_id');
-            $table->integer('tagging_level_id');
             $table->string('email');
             $table->timestamps();
         });

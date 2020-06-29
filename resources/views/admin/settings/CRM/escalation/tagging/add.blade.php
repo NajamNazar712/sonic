@@ -96,7 +96,7 @@
                                         <div class="col">
                                             @foreach($shipment_statuses as $shipment_status)
                                                 <fieldset class="d-inline-block m-1">
-                                                    <input type="checkbox" id="shipment_status_{{ $shipment_status->id }}" class="shipment_statuses" name="shipment_statuses[]" value="{{ $shipment_status->id }}">
+                                                    <input type="checkbox" id="shipment_status_{{ $shipment_status->id }}" class="shipment_statuses" name="shipment_statuses[]" value="{{ $shipment_status->id }}" >
                                                     <label for="shipment_status_{{ $shipment_status->id }}">{{ $shipment_status->name }}</label>
                                                 </fieldset>
                                             @endforeach
@@ -114,7 +114,7 @@
                                         @if($index == 0)
                                             <div class="row justify-content-center">
                                                 <fieldset class="col form-group">
-                                                    <select name="admin_role_select[{{$index}}]" id="admin_role_select_{{$index}}" class="form-control select2" data-rule-required="true" data-msg-required="User Role is required">
+                                                    <select name="admin_role_select[{{$index}}][]" id="admin_role_select_{{$index}}" class="form-control select2" data-rule-required="true" data-msg-required="User Role is required" multiple="multiple">
                                                         @foreach($admin_roles as $admin_role)
                                                             <option value="{{$admin_role->id}}">{{$admin_role->name}} | {{$admin_role->department}}</option>
                                                         @endforeach
@@ -141,7 +141,7 @@
                                         @else
                                             <div class="row justify-content-center">
                                                 <fieldset class="col form-group">
-                                                    <select name="admin_role_select[{{$index}}]" id="admin_role_select_{{$index}}" class="form-control select2">
+                                                    <select name="admin_role_select[{{$index}}]" id="admin_role_select_{{$index}}" class="form-control select2" multiple="multiple">
                                                         @foreach($admin_roles as $admin_role)
                                                             <option value="{{$admin_role->id}}">{{$admin_role->name}} | {{$admin_role->department}}</option>
                                                         @endforeach
@@ -187,6 +187,13 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <style type="text/css">
+        .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #64a0d2 !important;
+            border-color: #5587b4 !important;
+            color: #FFFFFF;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -289,14 +296,14 @@
 
             @foreach($levels as $index => $level)
                 @if($index == 0)
-                    $('#admin_role_select_{{$index}}').prepend('<option value="" selected="selected"></option>').select2({
+                    $('#admin_role_select_{{$index}}').select2({
                         width:'100%',
                         placeholder:"Select User Role",
                         allowClear:true,
                         dropdownParent:$('#settings_form')
                     });
                 @else
-                    $('#admin_role_select_{{$index}}').prepend('<option value="" selected="selected"></option>').select2({
+                    $('#admin_role_select_{{$index}}').select2({
                         width:'100%',
                         placeholder:"Select User Role",
                         allowClear:true,

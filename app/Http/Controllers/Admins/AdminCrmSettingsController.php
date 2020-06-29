@@ -15,6 +15,7 @@ use App\http\Models\CRM\Escalation\CrmEscalationTagging;
 use App\http\Models\CRM\Escalation\CrmEscalationTaggingHub;
 use App\http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
 use App\http\Models\CRM\Escalation\CrmEscalationTaggingLevelEmail;
+use App\Http\Models\CRM\Escalation\CrmEscalationTaggingLevelRole;
 use App\http\Models\CRM\Escalation\CrmEscalationTaggingShipmentStatus;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
@@ -580,16 +581,21 @@ class AdminCrmSettingsController extends Controller
 
         foreach($levels as $index => $level){
             $addition_emails = explode(',', $request->additional_emails[$index]);
-            $admin_role = $request->admin_role_select[$index];
-            $tat = $request->tat[$index];
-            if($admin_role != NULL){
+            if(isset($request->admin_role_select[$index])){
+                $admin_roles = $request->admin_role_select[$index];
+                $tat = $request->tat[$index];
                 $level_tagging_escalation = new CrmEscalationTaggingLevel();
                 $level_tagging_escalation->escalation_tagging_id = $tagging_escalation->id;
                 $level_tagging_escalation->level_id = $level;
-                $level_tagging_escalation->tagged_id = $admin_role;
                 $level_tagging_escalation->tat = $tat;
                 $level_tagging_escalation->save();
-
+                foreach ($admin_roles as $admin_role){
+                    $level_tagging_escalation_role = new CrmEscalationTaggingLevelRole();
+                    $level_tagging_escalation_role->escalation_tagging_id = $tagging_escalation->id;
+                    $level_tagging_escalation_role->tagging_level_id = $level_tagging_escalation->id;
+                    $level_tagging_escalation_role->role_id = $admin_role;
+                    $level_tagging_escalation_role->save();
+                }
                 foreach ($addition_emails as $addition_email){
                     if($addition_email != null) {
                         $level_tagging_escalation_email = new CrmEscalationTaggingLevelEmail();

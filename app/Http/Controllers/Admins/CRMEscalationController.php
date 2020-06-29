@@ -13,6 +13,8 @@ use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\CRM\DelayInDeliveryShipment;
 use App\http\Models\CRM\Escalation\CrmEscalation;
 use App\http\Models\CRM\Escalation\CrmEscalationShipmentStatus;
+use App\http\Models\CRM\Escalation\CrmEscalationTagging;
+use App\http\Models\CRM\Escalation\CrmEscalationTaggingShipmentStatus;
 use App\Http\Models\ShipmentsJourney;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -146,6 +148,36 @@ class CRMEscalationController extends Controller
                                 break;
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    static public function in_process_requests_tagging(){
+        $crm_requests = CrmRequest::where('status_id', 2)->where('case_nature_id', '!=', 3)->get();
+        $setting = GlobalSettings::where('type', 'crm_default_agent');
+        if($setting->exists()){
+            $setting = $setting->first();
+            $agent_id = $setting->setting_value;
+        }
+        else{
+            $agent_id = 306;
+        }
+
+        foreach ($crm_requests as $crm_request){
+            $case_nature = $crm_request->case_nature_id;
+            $case_nature_type = $crm_request->case_nature_type_id;
+            $shipper_status_id = $crm_request->shipment->shipper_status_id;
+            $crm_escalation_tagging = CrmEscalationTagging::where('case_nature', $case_nature)->where('case_nature_type', $case_nature_type)->where('status', 1);
+
+            if($crm_escalation_tagging->exists()) {
+                $crm_escalation_tagging = $crm_escalation_tagging->get();
+                foreach ($crm_escalation_tagging as $crm_escalation_tag){
+                    $crm_escalation_shipment_status = CrmEscalationTaggingShipmentStatus::where('escalation_tagging_id', $crm_escalation_tag->id)->where('shipment_status_id', $shipper_status_id);
+                    if($crm_escalation_shipment_status->exists()){
+                        $crm_escalation_shipment_status = $crm_escalation_shipment_status->get();
+                        dd($crm_escalation_shipment_status);
                     }
                 }
             }
