@@ -5394,7 +5394,7 @@ class DeliveryController extends Controller
             $adjustment_amount =  $request->adjustment_amount;
 
             $total =$deposit_amount + $adjustment_amount;
-            if($dncc_amount>= $total){
+            if($dncc_amount == $total){
                 $sdn->adjustment_amount = $request->adjustment_amount;
                 $sdn->adjustment_date = $request->adjustment_date_formatted;
                 $sdn->adjustment_ref = $request->adjustment_ref;
@@ -5415,7 +5415,7 @@ class DeliveryController extends Controller
 
             }
             else{
-                return redirect()->back()->with(['error' => 'DNCC cannot be less than sum of adjustment amount & deposit amount']);
+                return redirect()->back()->with(['error' => 'DNCC cannot be less/greater than sum of adjustment amount & deposit amount']);
             }
 
         }else{
