@@ -27,7 +27,7 @@
             margin: auto;
             padding: 0;
             /*width: 600px;*/
-            height: 720px;
+            height: 1080px;
             position: relative;
             overflow: hidden;
         }
