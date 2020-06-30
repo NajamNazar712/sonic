@@ -1855,9 +1855,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
     Route::prefix('power_bi')->name('power_bi.')->group(function () {
-
-        Route::get('', 'Admins\AdminPowerBIController@sales_dashboard_index')->name('sales');
-
+        Route::get('sales', 'Admins\AdminPowerBIController@sales_dashboard_index')->name('sales');
+        Route::get('operation', 'Admins\AdminPowerBIController@operation_dashboard_index')->name('operation');
     });
      
 });

@@ -1036,9 +1036,11 @@
 
                 <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a>
 
-            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Power BI</span></a>
+            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Power BI Dashboard</span></a>
                 <ul class="menu-content">
-                        <li class="menu-item"><a href="{{ route('admin.power_bi.sales') }}">Sales Dashboard</a>
+                        <li class="menu-item"><a href="{{ route('admin.power_bi.sales') }}">Sales</a>
+                        </li>
+                        <li class="menu-item"><a href="{{ route('admin.power_bi.operation') }}">Operation</a>
                         </li>
                 </ul>
             </li>
