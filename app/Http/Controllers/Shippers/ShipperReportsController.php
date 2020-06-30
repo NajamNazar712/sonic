@@ -383,10 +383,10 @@ class ShipperReportsController extends Controller
         $link = '';
 
         if (session('user_id') == 405) {
-            $link = 'https://app.powerbi.com/view?r=eyJrIjoiZDZiNDMzYTItMjk4Yy00NDEyLTgwYjctMGFiZDQ0YzdmNzU4IiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
+            $link = 'https://app.powerbi.com/view?r=eyJrIjoiZGZiMDgyMTktZjBmZC00NzcwLTkyMzEtYmI3ZGNjYWYxYmQxIiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
         }
         else if (in_array(session('user_id'), [167, 1159, 2035])) {
-            $link = 'https://app.powerbi.com/view?r=eyJrIjoiZDRmMTQzYTktOGVkNy00N2IxLWFmZmUtMWE0Njg2OTIyZGQ2IiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
+            $link = 'https://app.powerbi.com/view?r=eyJrIjoiNmFkZTFhYjUtMWUyNi00OWQwLWI3ZTktMTcxMzQzNGJiOWQ5IiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
         }
 
         return view('client.reports.delivery_and_return_report')->with(['link' => $link]);
