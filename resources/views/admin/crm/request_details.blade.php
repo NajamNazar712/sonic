@@ -161,7 +161,7 @@
                                             </tbody>
                                         </table>
                                         <div class="row justify-content-center">
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id())))
+                                            @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true))
                                                 <div class="text-center">
                                                     <form id="valid_form" method="post"
                                                           action="{{route('admin.crm.valid')}}">
@@ -179,7 +179,7 @@
                                                     </span>
                                                                 </button>
                                                             @elseif($crm_details['status_id'] == 2)
-                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id())))
+                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true))
                                                                     <button id="valid" type="submit"
                                                                             class="btn btn-success mr-1">
                                                         <span class="d-none d-lg-block">
@@ -398,7 +398,7 @@
                                                     <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>
                                                 </div>
                                             </div>
-                                            @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))) || ($sale_person && $sale_person->admin_id == Auth::id()))
+                                            @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)) || ($sale_person && $sale_person->admin_id == Auth::id()))
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
@@ -421,7 +421,7 @@
                                                                     <span class="">Internal</span>
                                                                 </button>
                                                             </fieldset>
-                                                            @if(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))))
+                                                            @if(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)))
                                                             <fieldset
                                                                     class="form-group position-relative has-icon-left m-0">
                                                                 <button id="chat_send" type="button"
@@ -562,6 +562,42 @@
                                                             @endif
                                                             <td>{{$tagging_history->created_at}}</td>
                                                             <td>{{$tagging_history->agent->name}}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(count($crm_escalation_tagging_history) > 0)
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h3>Escalation Taging</h3>
+                                            <div class="table-responsive">
+                                                <table class="table mb-0">
+                                                    <thead>
+                                                    <tr class="border-bottom-active border-custom-color">
+                                                        <th>S No.</th>
+                                                        <th>Role | Department</th>
+                                                        <th>Hub</th>
+                                                        <th>Tagged Date</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach($crm_escalation_tagging_history as $index => $escalation_tagging_history)
+                                                        @php $index++; @endphp
+                                                        <tr class="border-bottom-success border-custom-color">
+                                                            <td>{{$index}}</td>
+                                                            <td>{{$escalation_tagging_history->role->name}} | {{$escalation_tagging_history->role->department->name}}</td>
+                                                            @if($escalation_tagging_history->hub != NULL)
+                                                                <td>{{$escalation_tagging_history->hub->name}}</td>
+                                                            @else
+                                                                <td>-</td>
+                                                            @endif
+                                                            <td>{{$escalation_tagging_history->created_at}}</td>
                                                         </tr>
                                                     @endforeach
                                                     </tbody>

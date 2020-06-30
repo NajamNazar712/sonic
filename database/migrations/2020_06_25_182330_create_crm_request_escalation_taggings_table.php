@@ -17,7 +17,7 @@ class CreateCrmRequestEscalationTaggingsTable extends Migration
             $table->increments('id');
             $table->integer('crm_request_id');
             $table->integer('role_id');
-            $table->integer('hub_id');
+            $table->integer('hub_id')->nullable();
             $table->timestamps();
         });
     }

@@ -111,60 +111,73 @@
                                             </div>
                                         </div>
                                         <input type="hidden" name="level[{{$index}}]" value="{{$level->id}}">
-                                        @if($index == 0)
-                                            <div class="row justify-content-center">
-                                                <fieldset class="col form-group">
-                                                    <select name="admin_role_select[{{$index}}][]" id="admin_role_select_{{$index}}" class="form-control select2" data-rule-required="true" data-msg-required="User Role is required" multiple="multiple">
-                                                        @foreach($admin_roles as $admin_role)
-                                                            <option value="{{$admin_role->id}}">{{$admin_role->name}} | {{$admin_role->department}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </fieldset>
-                                                <div class="col-2 form-group">
-                                                    <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">TAT*</span>
-                                                        </div>
-                                                        <input type="text" name="tat[{{$index}}]" id="tat_{{$index}}" class="form-control tat" placeholder="" data-rule-required="true" data-msg-required="TAT is required" value="">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">day(s)</span>
+                                        <div class="col">
+                                            @if($index == 0)
+                                                <div class="row justify-content-center">
+                                                    <fieldset class="col-6 form-group">
+                                                        <select name="admin_role_select[{{$index}}][]" id="admin_role_select_{{$index}}" class="form-control select2" data-rule-required="true" data-msg-required="User Role is required" multiple="multiple">
+                                                            @foreach($admin_roles as $admin_role)
+                                                                <option value="{{$admin_role->id}}">{{$admin_role->name}} | {{$admin_role->department}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </fieldset>
+                                                    <div class="col-4 form-group">
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">TAT*</span>
+                                                            </div>
+                                                            <input type="text" name="tat[{{$index}}]" id="tat_{{$index}}" class="form-control tat" placeholder="" data-rule-required="true" data-msg-required="TAT is required" value="">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">day(s)</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-
+                                            @else
+                                                <div class="row justify-content-center">
+                                                    <fieldset class="col-6 form-group">
+                                                        <select name="admin_role_select[{{$index}}][]" id="admin_role_select_{{$index}}" class="form-control select2" multiple="multiple">
+                                                            @foreach($admin_roles as $admin_role)
+                                                                <option value="{{$admin_role->id}}">{{$admin_role->name}} | {{$admin_role->department}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </fieldset>
+                                                    <div class="col-4 form-group">
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">TAT*</span>
+                                                            </div>
+                                                            <input type="text" name="tat[{{$index}}]" id="tat_{{$index}}" class="form-control tat" placeholder="" value="">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">day(s)</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="col">
+                                            <div class="row justify-content-center">
                                                 <div class="col form-group">
                                                     <div class="input-group">
+                                                        <label for="additional_emails_{{$index}}"><strong>To:</strong></label>
                                                         <input type="text" name="additional_emails[{{$index}}]" id="additional_emails_{{$index}}" placeholder="abcd@gmail.com,bcda@gmai.com">
                                                     </div>
                                                 </div>
-                                            </div>
-                                        @else
-                                            <div class="row justify-content-center">
-                                                <fieldset class="col form-group">
-                                                    <select name="admin_role_select[{{$index}}]" id="admin_role_select_{{$index}}" class="form-control select2" multiple="multiple">
-                                                        @foreach($admin_roles as $admin_role)
-                                                            <option value="{{$admin_role->id}}">{{$admin_role->name}} | {{$admin_role->department}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </fieldset>
-                                                <div class="col-2 form-group">
+                                                <div class="col form-group">
                                                     <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">TAT*</span>
-                                                        </div>
-                                                        <input type="text" name="tat[{{$index}}]" id="tat_{{$index}}" class="form-control tat" placeholder="" value="">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">day(s)</span>
-                                                        </div>
+                                                        <label for="additional_emails_cc_{{$index}}"><strong>Cc:</strong></label>
+                                                        <input type="text" name="additional_emails_cc[{{$index}}]" id="additional_emails_cc_{{$index}}" placeholder="abcd@gmail.com,bcda@gmai.com">
                                                     </div>
                                                 </div>
                                                 <div class="col form-group">
                                                     <div class="input-group">
-                                                        <input type="text" name="additional_emails[{{$index}}]" id="additional_emails_{{$index}}" placeholder="abcd@gmail.com,bcda@gmai.com">
+                                                        <label for="additional_emails_bcc_{{$index}}"><strong>Bcc:</strong></label>
+                                                        <input type="text" name="additional_emails_bcc[{{$index}}]" id="additional_emails_bcc_{{$index}}" placeholder="abcd@gmail.com,bcda@gmai.com">
                                                     </div>
                                                 </div>
                                             </div>
-                                        @endif
+                                        </div>
                                     @endforeach
 
                                     <div class="row justify-content-center">
@@ -320,9 +333,51 @@
                         }
                     });
                 @endif
-
-
-            var select_{{$index}} = $('#additional_emails_{{$index}}').selectize({
+            $('#additional_emails_{{$index}}').selectize({
+                    placeholder: 'abcd@gmail.com,bcda@gmai.com',
+                    delimiter: ',',
+                    createOnBlur: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function (dropdown) {
+                        dropdown.remove();
+                    },
+                    create: function (input) {
+                        var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                        if (regex.test(input)) {
+                            return {
+                                value: input,
+                                text: input
+                            }
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                });
+            $('#additional_emails_cc_{{$index}}').selectize({
+                    placeholder: 'abcd@gmail.com,bcda@gmai.com',
+                    delimiter: ',',
+                    createOnBlur: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function (dropdown) {
+                        dropdown.remove();
+                    },
+                    create: function (input) {
+                        var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                        if (regex.test(input)) {
+                            return {
+                                value: input,
+                                text: input
+                            }
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                });
+            $('#additional_emails_bcc_{{$index}}').selectize({
                     placeholder: 'abcd@gmail.com,bcda@gmai.com',
                     delimiter: ',',
                     createOnBlur: true,

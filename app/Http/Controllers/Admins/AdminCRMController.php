@@ -16,6 +16,7 @@ use App\Http\Models\CRM\CrmPaymentShipment;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
+use App\http\Models\CRM\CrmRequestEscalationTagging;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
@@ -269,6 +270,19 @@ class AdminCRMController extends Controller
                     $tagged_name = Admin::find($tagged['tagged_id'])->name;
                 }
             }
+            $escalation_tagged = CrmRequestEscalationTagging::where('crm_request_id', $crm_request['id'])
+                ->where('role_id', session('role_id'))
+                ->where(function ($sub_sub_query) {
+                    $sub_sub_query->whereNull('hub_id')
+                        ->orWhereNotNull('hub_id')
+                        ->whereIn('hub_id', session('hubs'));
+                });
+            if($escalation_tagged->exists()){
+                $escalation_tagged_check = true;
+            }
+            else{
+                $escalation_tagged_check = false;
+            }
             $agent = Admin::where('id', $crm_request['agent_id'])->first();
             $agent_name = '';
             if($agent){
@@ -314,8 +328,8 @@ class AdminCRMController extends Controller
 
             $sale_person = SalePersonTag::where('user_id', $crm_request->shipper_id)->where('status', 0)->first();
 
-
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs]);
+            $crm_escalation_tagging_history = CrmRequestEscalationTagging::where('crm_request_id', $id)->get();
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -767,6 +781,7 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
+            ->leftjoin('crm_request_escalation_taggings as cret', 'cret.crm_request_id', '=', 'crm_requests.id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as destination_hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by')
             ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
@@ -793,6 +808,14 @@ class AdminCRMController extends Controller
                             $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
                                 ->orWhereIn('dc.hub_id', session('hubs'))
                                 ->orWhereIn('crt.hub_id', session('hubs'));
+                        });
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('cret.role_id', '=', session('role_id'))
+                        ->where(function ($sub_sub_query) {
+                            $sub_sub_query->whereNull('cret.hub_id')
+                                ->orWhereNotNull('cret.hub_id')
+                                ->whereIn('cret.hub_id', session('hubs'));
                         });
                 });
             });

@@ -4717,8 +4717,67 @@ class NotificationsController extends Controller
                 }
              
               }
+              else if($id == 65){
+                  $crm_request_id =  str_pad($reference_1_id, 6, '0', STR_PAD_LEFT);
+                  $to = $reference_2_id;
+                  $crm_request = CrmRequest::find($reference_1_id);
+                  $subject = $notification->subject;
+                  $body = $notification->body;
 
+                  if (strpos($subject, '[request_id]') !== FALSE) {
+                      $subject = str_replace('[request_id]', $crm_request_id, $subject);
+                  }
+                  if (strpos($subject, '[escalation]') !== FALSE) {
+                      $subject = str_replace('[escalation]', $escalation, $subject);
+                  }
+                  if (strpos($subject, '[case_nature]') !== FALSE) {
+                      $subject = str_replace('[case_nature]', $crm_request->nature->name, $subject);
+                  }
+                  if (strpos($subject, '[case_nature_type]') !== FALSE) {
+                      $subject = str_replace('[case_nature_type]', $crm_request->nature_type->type, $subject);
+                  }
 
+                  if (strpos($body, '[request_id]') !== FALSE) {
+                      $body = str_replace('[request_id]', $crm_request_id, $body);
+                  }
+                  if (strpos($body, '[escalation]') !== FALSE) {
+                      $body = str_replace('[escalation]', $escalation, $body);
+                  }
+                  if (strpos($body, '[case_nature]') !== FALSE) {
+                      $body = str_replace('[case_nature]', $crm_request->nature->name, $body);
+                  }
+                  if (strpos($body, '[case_nature_type]') !== FALSE) {
+                      $body = str_replace('[case_nature_type]', $crm_request->nature_type->type, $body);
+                  }
+
+                  self::email($subject, $body, $to);
+              }
+              else if($id == 66){
+                  $crm_request_id =  str_pad($reference_1_id, 6, '0', STR_PAD_LEFT);
+                  $to = $reference_2_id['to'];
+                  $cc = $reference_2_id['cc'];
+                  $bcc = $reference_2_id['bcc'];
+                  $escalation = $reference_2_id['level'];
+
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+
+                  if (strpos($subject, '[request_id]') !== FALSE) {
+                      $subject = str_replace('[request_id]', $crm_request_id, $subject);
+                  }
+                  if (strpos($subject, '[escalation]') !== FALSE) {
+                      $subject = str_replace('[escalation]', $escalation, $subject);
+                  }
+
+                  if (strpos($body, '[request_id]') !== FALSE) {
+                      $body = str_replace('[request_id]', $crm_request_id, $body);
+                  }
+                  if (strpos($body, '[escalation]') !== FALSE) {
+                      $body = str_replace('[escalation]', $escalation, $body);
+                  }
+
+                  self::email($subject, $body, $to, $cc, $bcc);
+              }
         }
       }
     }

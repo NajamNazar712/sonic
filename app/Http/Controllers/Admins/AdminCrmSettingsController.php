@@ -581,6 +581,8 @@ class AdminCrmSettingsController extends Controller
 
         foreach($levels as $index => $level){
             $addition_emails = explode(',', $request->additional_emails[$index]);
+            $addition_emails_cc = explode(',', $request->additional_emails_cc[$index]);
+            $addition_emails_bcc = explode(',', $request->additional_emails_bcc[$index]);
             if(isset($request->admin_role_select[$index])){
                 $admin_roles = $request->admin_role_select[$index];
                 $tat = $request->tat[$index];
@@ -601,6 +603,27 @@ class AdminCrmSettingsController extends Controller
                         $level_tagging_escalation_email = new CrmEscalationTaggingLevelEmail();
                         $level_tagging_escalation_email->escalation_tagging_id = $tagging_escalation->id;
                         $level_tagging_escalation_email->tagging_level_id = $level_tagging_escalation->id;
+                        $level_tagging_escalation_email->status = 1;
+                        $level_tagging_escalation_email->email = $addition_email;
+                        $level_tagging_escalation_email->save();
+                    }
+                }
+                foreach ($addition_emails_cc as $addition_email){
+                    if($addition_email != null) {
+                        $level_tagging_escalation_email = new CrmEscalationTaggingLevelEmail();
+                        $level_tagging_escalation_email->escalation_tagging_id = $tagging_escalation->id;
+                        $level_tagging_escalation_email->tagging_level_id = $level_tagging_escalation->id;
+                        $level_tagging_escalation_email->status = 2;
+                        $level_tagging_escalation_email->email = $addition_email;
+                        $level_tagging_escalation_email->save();
+                    }
+                }
+                foreach ($addition_emails_bcc as $addition_email){
+                    if($addition_email != null) {
+                        $level_tagging_escalation_email = new CrmEscalationTaggingLevelEmail();
+                        $level_tagging_escalation_email->escalation_tagging_id = $tagging_escalation->id;
+                        $level_tagging_escalation_email->tagging_level_id = $level_tagging_escalation->id;
+                        $level_tagging_escalation_email->status = 3;
                         $level_tagging_escalation_email->email = $addition_email;
                         $level_tagging_escalation_email->save();
                     }
@@ -634,16 +657,30 @@ class AdminCrmSettingsController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
         $selected_admin_roles = array();
         $selected_tat = array();
+        $selected_roles = array();
         $selected_emails = array();
         foreach($escalation_tagging->levels as $level){
             $selected_admin_roles[$level->level_id] = (int)$level->tagged_id;
             $selected_tat[$level->level_id] = $level->tat;
             $selected_emails[$level->level_id] = '';
+            $selected_emails_cc[$level->level_id] = '';
+            $selected_emails_bcc[$level->level_id] = '';
+            foreach ($level->roles as $role){
+                $selected_roles[$level->level_id][] = $role->role_id;
+            }
             foreach ($level->emails as $email){
-                $selected_emails[$level->level_id] .= $email->email . ',';
+                if($email->status == 1){
+                    $selected_emails[$level->level_id] .= $email->email . ',';
+                }
+                elseif ($email->status == 2){
+                    $selected_emails_cc[$level->level_id] .= $email->email . ',';
+                }
+                elseif ($email->status == 3){
+                    $selected_emails_bcc[$level->level_id] .= $email->email . ',';
+                }
             }
         }
-        return view('admin.settings.CRM.escalation.tagging.edit')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'levels' => $levels, 'admin_roles' => $admin_roles, 'escalation_tagging' => $escalation_tagging, 'statuses' => $statuses, 'selected_hubs' => $selected_hubs, 'selected_admin_roles' => $selected_admin_roles, 'selected_tat' => $selected_tat, 'selected_emails' => $selected_emails]);
+        return view('admin.settings.CRM.escalation.tagging.edit')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'levels' => $levels, 'admin_roles' => $admin_roles, 'escalation_tagging' => $escalation_tagging, 'statuses' => $statuses, 'selected_hubs' => $selected_hubs, 'selected_admin_roles' => $selected_admin_roles, 'selected_tat' => $selected_tat, 'selected_emails' => $selected_emails, 'selected_emails_cc' => $selected_emails_cc, 'selected_emails_bcc' => $selected_emails_bcc, 'selected_roles' => $selected_roles]);
     }
 
 
@@ -687,23 +724,52 @@ class AdminCrmSettingsController extends Controller
 
         CrmEscalationTaggingLevel::where('escalation_tagging_id', $tagging_escalation->id)->delete();
         CrmEscalationTaggingLevelEmail::where('escalation_tagging_id', $tagging_escalation->id)->delete();
+        CrmEscalationTaggingLevelRole::where('escalation_tagging_id', $tagging_escalation->id)->delete();
         foreach($levels as $index => $level){
             $addition_emails = explode(',', $request->additional_emails[$index]);
-            $admin_role = $request->admin_role_select[$index];
-            $tat = $request->tat[$index];
-            if($admin_role != NULL){
+            $addition_emails_cc = explode(',', $request->additional_emails_cc[$index]);
+            $addition_emails_bcc = explode(',', $request->additional_emails_bcc[$index]);
+            if(isset($request->admin_role_select[$index])){
+                $admin_roles = $request->admin_role_select[$index];
+                $tat = $request->tat[$index];
                 $level_tagging_escalation = new CrmEscalationTaggingLevel();
                 $level_tagging_escalation->escalation_tagging_id = $tagging_escalation->id;
                 $level_tagging_escalation->level_id = $level;
-                $level_tagging_escalation->tagged_id = $admin_role;
                 $level_tagging_escalation->tat = $tat;
                 $level_tagging_escalation->save();
-
+                foreach ($admin_roles as $admin_role){
+                    $level_tagging_escalation_role = new CrmEscalationTaggingLevelRole();
+                    $level_tagging_escalation_role->escalation_tagging_id = $tagging_escalation->id;
+                    $level_tagging_escalation_role->tagging_level_id = $level_tagging_escalation->id;
+                    $level_tagging_escalation_role->role_id = $admin_role;
+                    $level_tagging_escalation_role->save();
+                }
                 foreach ($addition_emails as $addition_email){
-                    if($addition_email != null){
+                    if($addition_email != null) {
                         $level_tagging_escalation_email = new CrmEscalationTaggingLevelEmail();
                         $level_tagging_escalation_email->escalation_tagging_id = $tagging_escalation->id;
                         $level_tagging_escalation_email->tagging_level_id = $level_tagging_escalation->id;
+                        $level_tagging_escalation_email->status = 1;
+                        $level_tagging_escalation_email->email = $addition_email;
+                        $level_tagging_escalation_email->save();
+                    }
+                }
+                foreach ($addition_emails_cc as $addition_email){
+                    if($addition_email != null) {
+                        $level_tagging_escalation_email = new CrmEscalationTaggingLevelEmail();
+                        $level_tagging_escalation_email->escalation_tagging_id = $tagging_escalation->id;
+                        $level_tagging_escalation_email->tagging_level_id = $level_tagging_escalation->id;
+                        $level_tagging_escalation_email->status = 2;
+                        $level_tagging_escalation_email->email = $addition_email;
+                        $level_tagging_escalation_email->save();
+                    }
+                }
+                foreach ($addition_emails_bcc as $addition_email){
+                    if($addition_email != null) {
+                        $level_tagging_escalation_email = new CrmEscalationTaggingLevelEmail();
+                        $level_tagging_escalation_email->escalation_tagging_id = $tagging_escalation->id;
+                        $level_tagging_escalation_email->tagging_level_id = $level_tagging_escalation->id;
+                        $level_tagging_escalation_email->status = 3;
                         $level_tagging_escalation_email->email = $addition_email;
                         $level_tagging_escalation_email->save();
                     }
@@ -749,20 +815,58 @@ class AdminCrmSettingsController extends Controller
         $selected_levels = array();
         foreach($escalation_tagging->levels as $level){
             $selected_levels['name'][] = $level->level->name;
-            $selected_levels['admin_roles'][] =  $level->role->name . ' | ' . $level->role->department->name;
-            $selected_levels['tat'][] = $level->tat;
-            $email_text = '';
-            $email_count = count($level->emails);
-            foreach ($level->emails as $index => $email){
-                if($email_count > ($index + 1)){
-                    $email_text .= $email->email . ', ';
+
+            $role_text = '';
+            $role_count = count($level->roles);
+            foreach ($level->roles as $index => $role){
+                if($role_count > ($index + 1)){
+                    $role_text .= $role->role->name . ' | ' . $role->role->department->name. ', ';
                 }
                 else{
-                    $email_text .= $email->email;
+                    $role_text .= $role->role->name . ' | ' . $role->role->department->name;
+                }
+            }
+            $selected_levels['admin_roles'][] =  $role_text;
+            $selected_levels['tat'][] = $level->tat;
+            $email_text = '';
+            $email_text_cc = '';
+            $email_text_bcc = '';
+            $email_count = 0;
+            $email_count_cc = 0;
+            $email_count_bcc = 0;
+            foreach ($level->emails as $index => $email){
+                if($email->status == 1){
+                    if($email_count == 0){
+                        $email_text .= $email->email;
+                    }
+                    else{
+                        $email_text .= ', ' . $email->email;
+                    }
+                    $email_count++;
+                }
+                elseif ($email->status == 2){
+                    if($email_count_cc == 0){
+                        $email_text_cc .= $email->email;
+                    }
+                    else{
+                        $email_text_cc .= ', ' . $email->email;
+                    }
+                    $email_count_cc++;
+                }
+                elseif($email->status == 3){
+                    if($email_count_bcc == 0){
+                        $email_text_bcc .= $email->email;
+                    }
+                    else{
+                        $email_text_bcc .= ', ' . $email->email;
+                    }
+                    $email_count_bcc++;
                 }
             }
 
             $selected_levels['emails'][] = $email_text;
+            $selected_levels['emails_cc'][] = $email_text_cc;
+            $selected_levels['emails_bcc'][] = $email_text_bcc;
         }
         return response()->json(['status' => 1, 'selected_levels' => $selected_levels]);
     }

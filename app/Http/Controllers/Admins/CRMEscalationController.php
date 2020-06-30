@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\CRM\CRMCommentController;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmPaymentShipment;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
+use App\http\Models\CRM\CrmRequestEscalationTagging;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\CRM\DelayInDeliveryShipment;
@@ -15,6 +19,7 @@ use App\http\Models\CRM\Escalation\CrmEscalation;
 use App\http\Models\CRM\Escalation\CrmEscalationShipmentStatus;
 use App\http\Models\CRM\Escalation\CrmEscalationTagging;
 use App\http\Models\CRM\Escalation\CrmEscalationTaggingShipmentStatus;
+use App\Http\Models\CRM\Escalation\CrmRequestEscalationLog;
 use App\Http\Models\ShipmentsJourney;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -176,8 +181,90 @@ class CRMEscalationController extends Controller
                 foreach ($crm_escalation_tagging as $crm_escalation_tag){
                     $crm_escalation_shipment_status = CrmEscalationTaggingShipmentStatus::where('escalation_tagging_id', $crm_escalation_tag->id)->where('shipment_status_id', $shipper_status_id);
                     if($crm_escalation_shipment_status->exists()){
-                        $crm_escalation_shipment_status = $crm_escalation_shipment_status->get();
-                        dd($crm_escalation_shipment_status);
+                        $hubs = $crm_escalation_tag->hubs;
+                        $crm_request_in_process = CrmRequestStatusHistory::where('crm_request_id', $crm_request->id)->where('status_id', 2)->latest()->first();
+                        $current_date = Carbon::today();
+                        foreach ($crm_escalation_tag->levels as $level){
+                            $log = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id)->where('escalation_tagging_id', $crm_escalation_tag->id)->where('level_id', $level->id);
+                            if(!$log->exists()){
+                                $crm_request_in_process_date_after_tat = Carbon::parse($crm_request_in_process->created_at)->addDays($level->tat);
+                                if($current_date > $crm_request_in_process_date_after_tat){
+                                    $tagging_to = array();
+                                    $to = array();
+                                    $cc = array();
+                                    $bcc = array();
+                                    $escalation_emails = array();
+                                    $escalation_emails['level'] = $level->level->name .'(' . $level->level->id . ')';
+                                    $roles = $level->roles;
+                                    foreach ($roles as $role)
+                                    {
+                                        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                                            ->where('admin_roles.id', $role->role_id)
+                                            ->where('a.status', 1)
+                                            ->select('a.id as id', 'a.email as email')
+                                            ->get();
+                                        if(count($hubs) > 0){
+                                            $total_hubs = array();
+                                            foreach ($hubs as $hub){
+                                                $crm_request_multiple_tagging = new CrmRequestEscalationTagging();
+                                                $crm_request_multiple_tagging->crm_request_id = $crm_request->id;
+                                                $crm_request_multiple_tagging->role_id = $role->role_id;
+                                                $crm_request_multiple_tagging->hub_id = $hub->hub_id;
+                                                $crm_request_multiple_tagging->save();
+
+                                                $total_hubs[] = $hub->hub_id;
+                                            }
+
+                                            foreach ($admins as $admin){
+                                                $admin_hubs = AdminHub::where('admin_id', $admin->id)->whereIn('hub_id', $total_hubs);
+                                                if($admin_hubs->exists()){
+                                                    $tagging_to[] = $admin->email;
+                                                }
+                                            }
+                                        }
+                                        else{
+                                            $crm_request_multiple_tagging = new CrmRequestEscalationTagging();
+                                            $crm_request_multiple_tagging->crm_request_id = $crm_request->id;
+                                            $crm_request_multiple_tagging->role_id = $role->role_id;
+                                            $crm_request_multiple_tagging->hub_id = NULL;
+                                            $crm_request_multiple_tagging->save();
+
+
+                                            foreach ($admins as $admin){
+                                                $tagging_to[] = $admin->email;
+                                            }
+                                        }
+                                    }
+                                    $emails = $level->emails;
+                                    foreach ($emails as $email){
+                                        if($email->status == 1){
+                                            $to[] = $email->email;
+                                        }
+                                        else if($email->status == 2){
+                                            $cc[] = $email->email;
+                                        }
+                                        else if($email->status == 3){
+                                            $bcc[] = $email->email;
+                                        }
+                                    }
+                                    $escalation_emails['to'] = $to;
+                                    $escalation_emails['cc'] = $cc;
+                                    $escalation_emails['bcc'] = $bcc;
+
+                                    $new_log = new CrmRequestEscalationLog();
+                                    $new_log->crm_request_id = $crm_request->id;
+                                    $new_log->escalation_tagging_id = $crm_escalation_tag->id;
+                                    $new_log->level_id = $level->id;
+                                    $new_log->save();
+                                    NotificationsController::send(65, $crm_request->id, $tagging_to);
+                                    NotificationsController::send(66, $crm_request->id, $escalation_emails);
+                                }
+                                else{
+                                    break;
+                                }
+                            }
+                        }
+                        break;
                     }
                 }
             }

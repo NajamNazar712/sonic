@@ -285,7 +285,7 @@
                                 html += '<td class="align-middle text-center">' + name + '</td>';
                                 html += '<td class="align-middle text-center">' + data.selected_levels.admin_roles[index] + '</td>';
                                 html += '<td class="align-middle text-center">' + data.selected_levels.tat[index] + '</td>';
-                                html += '<td class="align-middle text-center" width="35%">' + data.selected_levels.emails[index] + '</td>';
+                                html += '<td class="align-middle text-center" width="35%"><strong>To: </strong>' + data.selected_levels.emails[index] + '<br><strong>Cc: </strong>' + data.selected_levels.emails_cc[index] + '<br><strong>Bcc: </strong>' + data.selected_levels.emails_bcc[index] + '</td>';
                                 html += '</tr>';
                                 serial++;
                             });
