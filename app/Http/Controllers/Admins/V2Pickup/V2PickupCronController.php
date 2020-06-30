@@ -92,10 +92,12 @@ class V2PickupCronController extends Controller
         }
     }
     static public function pickup_re_generate(){
-        $pickup_requests = V2PickupRequest::where('status_id', 2);
+        $pickup_requests = V2PickupRequest::where('status_id', 2)->where('regenerate', 0);
         if($pickup_requests->exists()) {
             $pickup_requests = $pickup_requests->get();
             foreach ($pickup_requests as $pickup_request) {
+                $pickup_request->regenerate = 1;
+                $pickup_request->save();
                 $count = $pickup_request->pickup_request_shipments->where('status', 0)->count();
                 if($count > 0){
                     $pickup_request_shipments = $pickup_request->pickup_request_shipments->where('status', 0)->pluck('shipment_id')->toArray();
