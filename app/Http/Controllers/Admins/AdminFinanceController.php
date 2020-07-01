@@ -2259,6 +2259,26 @@ class AdminFinanceController extends Controller
         }
     }
 
+    static public function add_corporate_return_charges($shipment_id){
+        $shipment = Shipment::find($shipment_id);
+
+        $amount = $shipment->amount;
+        $charges = $shipment->return_charges - $shipment->cash_handling_charges;
+        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+        $charges = $charges - $amount;
+
+        $pending_invoice_shipment = new PendingInvoiceShipment();
+
+        $pending_invoice_shipment->shipment_id = $shipment_id;
+        $pending_invoice_shipment->type = 1;
+        $pending_invoice_shipment->charges = $charges;
+        $pending_invoice_shipment->gst = $gst;
+        $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+        $pending_invoice_shipment->save();
+
+    }
+
     static private function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type = NULL) {
         if ($payment_type == 0) {
             $payment_shipment = PendingPaymentShipment::where('pending_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
