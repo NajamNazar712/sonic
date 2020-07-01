@@ -2012,7 +2012,7 @@ class DeliveryController extends Controller
             $unchecked = $request->item_unchecked;
             $total_cod = 0;
             foreach ($item_ids as $item_id) {
-                $shipment_item = ShipmentItem::find($item_ids);
+                $shipment_item = ShipmentItem::find($item_id);
                 $total_cod += $shipment_item->price;
                 $shipment_item->bought = 1;
                 $shipment_item->save();
