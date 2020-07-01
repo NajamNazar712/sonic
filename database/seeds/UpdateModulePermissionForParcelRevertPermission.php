@@ -1,0 +1,18 @@
+<?php
+
+use Illuminate\Database\Seeder;
+
+class UpdateModulePermissionForParcelRevertPermission extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('module_permissions')->insert(array(
+            array('id' => 346, 'name' => 'Parcel Revert Permission', 'module_id' => 8)
+        ));
+    }
+}

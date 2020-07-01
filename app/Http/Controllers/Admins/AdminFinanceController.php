@@ -1313,130 +1313,139 @@ class AdminFinanceController extends Controller
                 $delivery_note_shipment = $delivery_note_shipment->first();
 
                 $shipment = Shipment::find($shipment_id);
+                
+                $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+                if($journey){
+                       $start = $journey->created_at;
+                       $difference = $start->diff($now)->days;
+                       if($difference <= 6 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
+                        $delivery_note_shipment->status = 8;
 
-                $delivery_note_shipment->status = 8;
-
-                $delivery_note_shipment->save();
-
-                $delivery_note = $delivery_note_shipment->delivery_note;
-
-                $delivery_note_amount = $delivery_note->received_cod_amount - $shipment->amount;
-
-                if ($delivery_note_amount < 0) {
-                    $delivery_note_amount = 0;
-                }
-
-                $delivery_note->delivered_shipments = $delivery_note->delivered_shipments - 1;
-                $delivery_note->received_cod_amount = $delivery_note_amount;
-
-                $delivery_note->save();
-
-                $delivery_note_station_deposit_note = $delivery_note->delivery_note_station_deposit_note;
-
-                if ($delivery_note_station_deposit_note) {
-                    $station_deposit_note = $delivery_note_station_deposit_note->station_deposit_note;
-
-                    $station_deposit_note_amount = $station_deposit_note->sdn_amount - $shipment->amount;
-
-                    if ($station_deposit_note_amount < 0) {
-                        $station_deposit_note_amount = 0;
-                    }
-
-                    $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
-                    $station_deposit_note->sdn_amount = $station_deposit_note_amount;
-                    $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
-
-                    $station_deposit_note->save();
-                }
-
-                $shipment->shipper_status_id = 13;
-                $shipment->consignee_status_id = 13;
-
-                $shipment->payment_status_id = 4;
-
-                $shipment->save();
-
-                $account_type_id = $shipment->user->account_type_id;
-
-                if ($account_type_id == 1) {
-                    $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
-
-                    if ($pending_payment_shipment->exists()) {
-                        $pending_payment_shipment = $pending_payment_shipment->latest()->first();
-
-                        $this->adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0, 2);
-                    }
-                    else {
-                        $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
-
-                        if ($done_payment_shipment->exists()) {
-                            $done_payment_shipment = $done_payment_shipment->latest()->first();
-
-                            $this->adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1,2);
+                        $delivery_note_shipment->save();
+        
+                        $delivery_note = $delivery_note_shipment->delivery_note;
+        
+                        $delivery_note_amount = $delivery_note->received_cod_amount - $shipment->amount;
+        
+                        if ($delivery_note_amount < 0) {
+                            $delivery_note_amount = 0;
                         }
-                    }
-                }
-                else {
-                    $payment_shipment_id = NULL;
-                    $payment_type = NULL;
-                    $invoice_shipment_id = NULL;
-                    $invoice_type = NULL;
-
-                    $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
-
-                    if ($pending_payment_shipment->exists()) {
-                        $pending_payment_shipment = $pending_payment_shipment->latest()->first();
-
-                        $payment_shipment_id = $pending_payment_shipment->id;
-                        $payment_type = 0;
-                    }
-                    else {
-                        $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
-
-                        if ($done_payment_shipment->exists()) {
-                            $done_payment_shipment = $done_payment_shipment->latest()->first();
-
-                            $payment_shipment_id = $done_payment_shipment->id;
-                            $payment_type = 1;
-                            $done_payment_id = $done_payment_shipment->done_payment_id;
+        
+                        $delivery_note->delivered_shipments = $delivery_note->delivered_shipments - 1;
+                        $delivery_note->received_cod_amount = $delivery_note_amount;
+        
+                        $delivery_note->save();
+        
+                        $delivery_note_station_deposit_note = $delivery_note->delivery_note_station_deposit_note;
+        
+                        if ($delivery_note_station_deposit_note) {
+                            $station_deposit_note = $delivery_note_station_deposit_note->station_deposit_note;
+        
+                            $station_deposit_note_amount = $station_deposit_note->sdn_amount - $shipment->amount;
+        
+                            if ($station_deposit_note_amount < 0) {
+                                $station_deposit_note_amount = 0;
+                            }
+        
+                            $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
+                            $station_deposit_note->sdn_amount = $station_deposit_note_amount;
+                            $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
+        
+                            $station_deposit_note->save();
                         }
-                    }
-
-                    $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id);
-
-                    if ($pending_invoice_shipment->exists()) {
-                        $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
-
-                        $invoice_shipment_id = $pending_invoice_shipment->id;
-                        $invoice_type = 0;
-                    }
-                    else {
-                        $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment_id);
-
-                        if ($done_invoice_shipment->exists()) {
-                            $done_invoice_shipment = $done_invoice_shipment->latest()->first();
-
-                            $invoice_shipment_id = $done_invoice_shipment->id;
-                            $invoice_type = 1;
+        
+                        $shipment->shipper_status_id = 13;
+                        $shipment->consignee_status_id = 13;
+        
+                        $shipment->payment_status_id = 4;
+        
+                        $shipment->save();
+        
+                        $account_type_id = $shipment->user->account_type_id;
+        
+                        if ($account_type_id == 1) {
+                            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+        
+                            if ($pending_payment_shipment->exists()) {
+                                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+        
+                                $this->adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0, 2);
+                            }
+                            else {
+                                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+        
+                                if ($done_payment_shipment->exists()) {
+                                    $done_payment_shipment = $done_payment_shipment->latest()->first();
+        
+                                    $this->adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1,2);
+                                }
+                            }
                         }
-                    }
+                        else {
+                            $payment_shipment_id = NULL;
+                            $payment_type = NULL;
+                            $invoice_shipment_id = NULL;
+                            $invoice_type = NULL;
+        
+                            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+        
+                            if ($pending_payment_shipment->exists()) {
+                                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+        
+                                $payment_shipment_id = $pending_payment_shipment->id;
+                                $payment_type = 0;
+                            }
+                            else {
+                                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+        
+                                if ($done_payment_shipment->exists()) {
+                                    $done_payment_shipment = $done_payment_shipment->latest()->first();
+        
+                                    $payment_shipment_id = $done_payment_shipment->id;
+                                    $payment_type = 1;
+                                    $done_payment_id = $done_payment_shipment->done_payment_id;
+                                }
+                            }
+        
+                            $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id);
+        
+                            if ($pending_invoice_shipment->exists()) {
+                                $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+        
+                                $invoice_shipment_id = $pending_invoice_shipment->id;
+                                $invoice_type = 0;
+                            }
+                            else {
+                                $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment_id);
+        
+                                if ($done_invoice_shipment->exists()) {
+                                    $done_invoice_shipment = $done_invoice_shipment->latest()->first();
+        
+                                    $invoice_shipment_id = $done_invoice_shipment->id;
+                                    $invoice_type = 1;
+                                }
+                            }
+        
+                            if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
+                                self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,2);
+                            }
+                        }
+        
+                        if(isset($payment_type) && $payment_type == 1) {
+                            ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), '', $done_payment_id);
+                        }
+                        else{
+                            ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id());
+                        }
+        
+                        ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+        
+                        NotificationsController::send(21, $shipment_id, Auth::id());
+                       }
+                   }
 
-                    if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                        self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,2);
-                    }
-                }
-
-                if(isset($payment_type) && $payment_type == 1) {
-                    ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), '', $done_payment_id);
-                }
-                else{
-                    ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id());
-                }
-
-                ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
-
-                NotificationsController::send(21, $shipment_id, Auth::id());
+                
 
             }
         }
@@ -1451,131 +1460,143 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($request->id);
 
+            $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+                 if($journey){
+                        $start = $journey->created_at;
+                        $difference = $start->diff($now)->days;
+                        if($difference <= 6 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
-            $delivery_note_shipment->status = 8;
+                            $delivery_note_shipment->status = 8;
 
-            $delivery_note_shipment->save();
+                            $delivery_note_shipment->save();
 
-            $delivery_note = $delivery_note_shipment->delivery_note;
+                            $delivery_note = $delivery_note_shipment->delivery_note;
 
-            $delivery_note_amount = $delivery_note->received_cod_amount - $shipment->amount;
+                            $delivery_note_amount = $delivery_note->received_cod_amount - $shipment->amount;
 
-            if ($delivery_note_amount < 0) {
-                $delivery_note_amount = 0;
-            }
+                            if ($delivery_note_amount < 0) {
+                                $delivery_note_amount = 0;
+                            }
 
-            $delivery_note->delivered_shipments = $delivery_note->delivered_shipments - 1;
-            $delivery_note->received_cod_amount = $delivery_note_amount;
+                            $delivery_note->delivered_shipments = $delivery_note->delivered_shipments - 1;
+                            $delivery_note->received_cod_amount = $delivery_note_amount;
 
-            $delivery_note->save();
+                            $delivery_note->save();
 
-            $delivery_note_station_deposit_note = $delivery_note->delivery_note_station_deposit_note;
+                            $delivery_note_station_deposit_note = $delivery_note->delivery_note_station_deposit_note;
 
-            if ($delivery_note_station_deposit_note) {
-                $station_deposit_note = $delivery_note_station_deposit_note->station_deposit_note;
+                            if ($delivery_note_station_deposit_note) {
+                                $station_deposit_note = $delivery_note_station_deposit_note->station_deposit_note;
 
-                $station_deposit_note_amount = $station_deposit_note->sdn_amount - $shipment->amount;
+                                $station_deposit_note_amount = $station_deposit_note->sdn_amount - $shipment->amount;
 
-                if ($station_deposit_note_amount < 0) {
-                    $station_deposit_note_amount = 0;
-                }
+                                if ($station_deposit_note_amount < 0) {
+                                    $station_deposit_note_amount = 0;
+                                }
 
-                $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
-                $station_deposit_note->sdn_amount = $station_deposit_note_amount;
-                $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
+                                $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
+                                $station_deposit_note->sdn_amount = $station_deposit_note_amount;
+                                $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
 
-                $station_deposit_note->save();
-            }
+                                $station_deposit_note->save();
+                            }
 
-            $shipment->shipper_status_id = 13;
-            $shipment->consignee_status_id = 13;
+                            $shipment->shipper_status_id = 13;
+                            $shipment->consignee_status_id = 13;
 
-            $shipment->payment_status_id = 4;
+                            $shipment->payment_status_id = 4;
 
-            $shipment->save();
+                            $shipment->save();
 
-            $account_type_id = $shipment->user->account_type_id;
+                            $account_type_id = $shipment->user->account_type_id;
 
-            if ($account_type_id == 1) {
-                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $request->id);
+                            if ($account_type_id == 1) {
+                                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $request->id);
 
-                if ($pending_payment_shipment->exists()) {
-                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+                                if ($pending_payment_shipment->exists()) {
+                                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
 
-                    $this->adjust_payment($pending_payment_shipment->pending_payment_id, $request->id, 0, 2);
-                }
-                else {
-                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $request->id);
+                                    $this->adjust_payment($pending_payment_shipment->pending_payment_id, $request->id, 0, 2);
+                                }
+                                else {
+                                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $request->id);
 
-                    if ($done_payment_shipment->exists()) {
-                        $done_payment_shipment = $done_payment_shipment->latest()->first();
+                                    if ($done_payment_shipment->exists()) {
+                                        $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                        $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id, 1,2);
+                                        $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id, 1,2);
+                                    }
+                                }
+                            }
+                            else {
+                                $payment_shipment_id = NULL;
+                                $payment_type = NULL;
+                                $invoice_shipment_id = NULL;
+                                $invoice_type = NULL;
+
+                                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+
+                                if ($pending_payment_shipment->exists()) {
+                                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                                    $payment_shipment_id = $pending_payment_shipment->id;
+                                    $payment_type = 0;
+                                }
+                                else {
+                                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
+
+                                    if ($done_payment_shipment->exists()) {
+                                        $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                                        $payment_shipment_id = $done_payment_shipment->id;
+                                        $payment_type = 1;
+                                        $done_payment_id = $done_payment_shipment->done_payment_id;
+                                    }
+                                }
+
+                                $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+
+                                if ($pending_invoice_shipment->exists()) {
+                                    $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+
+                                    $invoice_shipment_id = $pending_invoice_shipment->id;
+                                    $invoice_type = 0;
+                                }
+                                else {
+                                    $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment->id);
+
+                                    if ($done_invoice_shipment->exists()) {
+                                        $done_invoice_shipment = $done_invoice_shipment->latest()->first();
+
+                                        $invoice_shipment_id = $done_invoice_shipment->id;
+                                        $invoice_type = 1;
+                                    }
+                                }
+
+                                if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
+                                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,2);
+                                }
+                            }
+
+                            if(isset($payment_type) && $payment_type == 1) {
+                                ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id(), '', $done_payment_id);
+                            }
+                            else{
+                                ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id());
+                            }
+
+                            ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                            NotificationsController::send(21, $request->id, Auth::id());
+
+                            return ['status' => 0, 'success' => 'Shipment has been marked to be Adjusted in Payment'];
+            
+                        }
+                        else{
+                            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has not been modified because it reaches the 6 days'];
+                        }
                     }
-                }
-            }
-            else {
-                $payment_shipment_id = NULL;
-                $payment_type = NULL;
-                $invoice_shipment_id = NULL;
-                $invoice_type = NULL;
-
-                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
-
-                if ($pending_payment_shipment->exists()) {
-                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
-
-                    $payment_shipment_id = $pending_payment_shipment->id;
-                    $payment_type = 0;
-                }
-                else {
-                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
-
-                    if ($done_payment_shipment->exists()) {
-                        $done_payment_shipment = $done_payment_shipment->latest()->first();
-
-                        $payment_shipment_id = $done_payment_shipment->id;
-                        $payment_type = 1;
-                        $done_payment_id = $done_payment_shipment->done_payment_id;
-                    }
-                }
-
-                $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
-
-                if ($pending_invoice_shipment->exists()) {
-                    $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
-
-                    $invoice_shipment_id = $pending_invoice_shipment->id;
-                    $invoice_type = 0;
-                }
-                else {
-                    $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment->id);
-
-                    if ($done_invoice_shipment->exists()) {
-                        $done_invoice_shipment = $done_invoice_shipment->latest()->first();
-
-                        $invoice_shipment_id = $done_invoice_shipment->id;
-                        $invoice_type = 1;
-                    }
-                }
-
-                if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,2);
-                }
-            }
-
-            if(isset($payment_type) && $payment_type == 1) {
-                ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id(), '', $done_payment_id);
-            }
-            else{
-                ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id());
-            }
-
-            ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
-
-            NotificationsController::send(21, $request->id, Auth::id());
-
-            return ['status' => 0, 'success' => 'Shipment has been marked to be Adjusted in Payment'];
+            
         }
         else {
             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
