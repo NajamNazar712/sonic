@@ -2263,7 +2263,19 @@ class AdminFinanceController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         $amount = $shipment->amount;
-        $charges = $shipment->return_charges - $shipment->cash_handling_charges;
+        if($shipment->booking_type_id == 2){
+
+            $charges = $shipment->return_charges - $shipment->cash_handling_charges - $shipment->replacement_charges;
+
+        }else if($shipment->booking_type_id == 3){
+
+            $charges = $shipment->return_charges - $shipment->cash_handling_charges - $shipment->try_and_buy_charges;
+
+        }else{
+
+            $charges = $shipment->return_charges - $shipment->cash_handling_charges;
+
+        }
         $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
         $charges = $charges - $amount;
 
