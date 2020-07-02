@@ -86,6 +86,17 @@
                                             @endforeach
                                         </div>
                                     </div>
+                                    <div class="row justify-content-center">
+                                        <div class="col-4">
+                                            <fieldset class="form-group">
+                                                <select name="hub_status" id="hub_status" class="form-control select2">
+                                                    <option value="1">Origin</option>
+                                                    <option value="2">Destination</option>
+                                                    <option value="3">Both</option>
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                    </div>
                                     <hr>
                                     <div class="row justify-content-center">
                                         <div class="col">
@@ -268,6 +279,12 @@
                 allowClear:true,
                 dropdownParent:$('#settings_form')
             });
+            $('#hub_status').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Matching Location",
+                allowClear:true,
+                dropdownParent:$('#settings_form')
+            });
 
             $('.tat').inputmask({
                 'alias': 'integer',
@@ -402,6 +419,7 @@
             @endforeach
 
             var checked_statuses;
+            var checked_hubs;
             $('#settings_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -410,7 +428,23 @@
                 },
                 submitHandler: function(form) {
                     checked_statuses = $("input:checkbox.shipment_statuses:checked").length;
-                    if(checked_statuses > 0){
+                    checked_hubs = $("input:checkbox.hubs:checked").length;
+                    $flag = true;
+
+                    if(checked_statuses <= 0){
+                        error = "Please select at least one Shipment Status";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $flag = false;
+                    }
+                    if(checked_hubs > 0){
+                        var hub_status = $('#hub_status').val();
+                        if(hub_status == null || hub_status == ""){
+                            error = "Please select Matching location";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            $flag = false;
+                        }
+                    }
+                    if($flag == true){
                         swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes to add Tagging Escalation!',
@@ -445,10 +479,6 @@
                                 form.submit();
                             }
                         });
-                    }
-                    else{
-                        error = "Please select at least one Shipment Status";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
             });

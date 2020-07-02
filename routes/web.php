@@ -1827,7 +1827,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
             Route::post('edit', 'Admins\AdminCRMController@edit_comment')->name('edit');
         });
-
+        Route::post('escalation_status', 'Admins\AdminCRMController@escalation_status')->name('escalation_status');
+        Route::post('escalate', 'Admins\AdminCRMController@escalate')->name('escalate');
         Route::get('permissions', 'Admins\AdminCRMController@crm_index')->name('permissions');
         Route::get('list', 'Admins\AdminCRMController@crm_list')->name('list');
 

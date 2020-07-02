@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCrmRequestEscalationLogsTable extends Migration
+class CreateCrmRequestEscalationStatusesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateCrmRequestEscalationLogsTable extends Migration
      */
     public function up()
     {
-        Schema::create('crm_request_escalation_logs', function (Blueprint $table) {
+        Schema::create('crm_request_escalation_statuses', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('crm_request_id');
-            $table->integer('escalation_tagging_id');
-            $table->integer('tagging_level_id');
-            $table->integer('level_id');
+            $table->integer('status');
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ class CreateCrmRequestEscalationLogsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('crm_request_escalation_logs');
+        Schema::dropIfExists('crm_request_escalation_statuses');
     }
 }

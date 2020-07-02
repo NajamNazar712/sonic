@@ -71,7 +71,16 @@ class CRMController extends Controller
                 $comment = $settings->text;
                 $comment_by = 0;
                 $comment_type = 0;
-                CRMCommentController::add($id, 306,$comment_by,$comment_type, $comment);
+
+                $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
+                if($default_agent_setting->exists()){
+                    $default_agent_setting = $default_agent_setting->first();
+                    $default_agent_id = $default_agent_setting->setting_value;
+                }
+                else{
+                    $default_agent_id = 306;
+                }
+                CRMCommentController::add($id, $default_agent_id,$comment_by,$comment_type, $comment);
             }
         }
 

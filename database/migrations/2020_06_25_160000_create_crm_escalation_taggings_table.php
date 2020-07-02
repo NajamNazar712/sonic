@@ -17,6 +17,7 @@ class CreateCrmEscalationTaggingsTable extends Migration
             $table->increments('id');
             $table->integer('case_nature');
             $table->integer('case_nature_type');
+            $table->integer('hub_status')->nullable();
             $table->integer('updated_by');
             $table->integer('status');
             $table->timestamps();

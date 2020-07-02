@@ -7,6 +7,7 @@ use App\Http\Controllers\CRM\CRMController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\SalePersonTag;
@@ -25,6 +26,11 @@ use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CRM\DelayInDeliveryShipment;
+use App\http\Models\CRM\Escalation\CrmEscalationLevel;
+use App\http\Models\CRM\Escalation\CrmEscalationTagging;
+use App\http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
+use App\Http\Models\CRM\Escalation\CrmRequestEscalationLog;
+use App\Http\Models\CRM\Escalation\CrmRequestEscalationStatus;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\Shipment;
@@ -329,7 +335,30 @@ class AdminCRMController extends Controller
             $sale_person = SalePersonTag::where('user_id', $crm_request->shipper_id)->where('status', 0)->first();
 
             $crm_escalation_tagging_history = CrmRequestEscalationTagging::where('crm_request_id', $id)->get();
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history]);
+
+            $escalation_status_flag = true;
+            $escalation_log_flag = false;
+            $escalation_tagging_id = NULL;
+            $crm_escalation_levels = NULL;
+            $crm_request_escalation_status = CrmRequestEscalationStatus::where('crm_request_id', $crm_request->id);
+            if($crm_request_escalation_status->exists()){
+                $crm_request_escalation_status = $crm_request_escalation_status->first();
+                if($crm_request_escalation_status->status == 0){
+                    $escalation_status_flag = false;
+                }
+            }
+            $crm_request_escalation_log = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id);
+            if($crm_request_escalation_log->exists()){
+                $crm_request_escalation_log = $crm_request_escalation_log->latest()->first();
+                $previous_levels = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id)->where('escalation_tagging_id', $crm_request_escalation_log->escalation_tagging_id)->pluck('level_id')->toArray();
+                $crm_request_escalation_tagging = CrmEscalationTaggingLevel::where('escalation_tagging_id', $crm_request_escalation_log->escalation_tagging_id)->whereNotIn('level_id', $previous_levels)->pluck('level_id')->toArray();
+                    $crm_escalation_levels = CrmEscalationLevel::whereIn('id', $crm_request_escalation_tagging)->get();
+                    if(count($crm_escalation_levels) > 0){
+                        $escalation_log_flag = true;
+                        $escalation_tagging_id = $crm_request_escalation_log->escalation_tagging_id;
+                    }
+            }
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -2280,5 +2309,103 @@ class AdminCRMController extends Controller
 
         $edited_date = Carbon::parse($comment->comment_updated_at)->format('Y-m-d H:i:s');
         return ['status' => 0, 'success' => 'Comment has been marked as Internal', 'updated_at' => $edited_date, 'updated_by' => $comment->updated_by_admin->name];
+    }
+
+    public function escalation_status(Request $request){
+        $existing_escalation_status = CrmRequestEscalationStatus::where('crm_request_id', $request->crm_request_id);
+        if($existing_escalation_status->exists()){
+            $existing_escalation_status = $existing_escalation_status->first();
+            $existing_escalation_status->status = $request->status;
+            $existing_escalation_status->save();
+        }
+        else{
+            $new_escalation_status = new CrmRequestEscalationStatus();
+            $new_escalation_status->crm_request_id = $request->crm_request_id;
+            $new_escalation_status->status = $request->status;
+            $new_escalation_status->save();
+        }
+
+        return ['status' => 0, 'success' => 'Request(s) Escalation updated successfully!'];
+    }
+    public function escalate(Request $request){
+        $crm_request_id = $request->crm_request_id;
+        $escalation_tagging_id = $request->escalation_tagging_id;
+        $escalation_level_id = $request->selected_escalation;
+        $crm_escalation_level = CrmEscalationTaggingLevel::where('escalation_tagging_id', $escalation_tagging_id)->where('level_id', $escalation_level_id)->first();
+        if($crm_escalation_level){
+            $crm_escalation_tag = CrmEscalationTagging::find($escalation_tagging_id);
+            $hubs = $crm_escalation_tag->hubs;
+            $tagging_to = array();
+            $to = array();
+            $cc = array();
+            $bcc = array();
+            $escalation_emails = array();
+            $escalation_emails['level'] = $crm_escalation_level->level->name .'(' . $crm_escalation_level->level->id . ')';
+            $roles = $crm_escalation_level->roles;
+            foreach ($roles as $role)
+            {
+                $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                    ->where('admin_roles.id', $role->role_id)
+                    ->where('a.status', 1)
+                    ->select('a.id as id', 'a.email as email')
+                    ->get();
+                if(count($hubs) > 0){
+                    $total_hubs = array();
+                    foreach ($hubs as $hub){
+                        $crm_request_multiple_tagging = new CrmRequestEscalationTagging();
+                        $crm_request_multiple_tagging->crm_request_id = $crm_request_id;
+                        $crm_request_multiple_tagging->role_id = $role->role_id;
+                        $crm_request_multiple_tagging->hub_id = $hub->hub_id;
+                        $crm_request_multiple_tagging->save();
+
+                        $total_hubs[] = $hub->hub_id;
+                    }
+
+                    foreach ($admins as $admin){
+                        $admin_hubs = AdminHub::where('admin_id', $admin->id)->whereIn('hub_id', $total_hubs);
+                        if($admin_hubs->exists()){
+                            $tagging_to[] = $admin->email;
+                        }
+                    }
+                }
+                else{
+                    $crm_request_multiple_tagging = new CrmRequestEscalationTagging();
+                    $crm_request_multiple_tagging->crm_request_id = $crm_request_id;
+                    $crm_request_multiple_tagging->role_id = $role->role_id;
+                    $crm_request_multiple_tagging->hub_id = NULL;
+                    $crm_request_multiple_tagging->save();
+
+
+                    foreach ($admins as $admin){
+                        $tagging_to[] = $admin->email;
+                    }
+                }
+            }
+            $emails = $crm_escalation_level->emails;
+            foreach ($emails as $email){
+                if($email->status == 1){
+                    $to[] = $email->email;
+                }
+                else if($email->status == 2){
+                    $cc[] = $email->email;
+                }
+                else if($email->status == 3){
+                    $bcc[] = $email->email;
+                }
+            }
+            $escalation_emails['to'] = $to;
+            $escalation_emails['cc'] = $cc;
+            $escalation_emails['bcc'] = $bcc;
+
+            $new_log = new CrmRequestEscalationLog();
+            $new_log->crm_request_id = $crm_request_id;
+            $new_log->escalation_tagging_id = $escalation_tagging_id;
+            $new_log->tagging_level_id = $crm_escalation_level->id;
+            $new_log->level_id = $crm_escalation_level->level_id;
+            $new_log->save();
+            NotificationsController::send(65, $crm_request_id, $tagging_to);
+            NotificationsController::send(66, $crm_request_id, $escalation_emails);
+        }
+        return ['status' => 0, 'success' => 'Request(s) Escalated successfully!'];
     }
 }

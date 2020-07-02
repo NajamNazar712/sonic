@@ -1,7 +1,6 @@
 @extends('admin.layout.master')
 
 @section('title', 'Request Details')
-
 @section('content')
     <section>
         <div class="app-content content">
@@ -38,6 +37,19 @@
                                 <button type="button" class="btn btn-primary width-10-per" id="edit_request"><span
                                             class="d-none d-lg-block" style="color: white">Edit Request</span></button>
                             @endif
+                            @if(($crm_details['status_id'] == 2))
+                                @if((session('role_id') == 1 || in_array(352, session('permissions'))))
+                                    <button type="button" class="btn @if($escalation_status_flag == true) btn-danger @else btn-primary @endif width-10-per" id="halt_start_escalation" value="@if($escalation_status_flag == true) 0 @else 1 @endif"><span
+                                                class="d-none d-lg-block" style="color: white">@if($escalation_status_flag == true) Halt Escalation @else Start Escalation @endif</span></button>
+                                @endif
+                                @if((session('role_id') == 1 || in_array(353, session('permissions'))))
+                                    @if($escalation_log_flag == true)
+                                        <button type="button" class="btn btn-primary width-10-per" id="escalate"><span
+                                                    class="d-none d-lg-block" style="color: white">Escalate</span></button>
+                                    @endif
+                                @endif
+                            @endif
+
 
                         </div>
                     </h1>
@@ -801,6 +813,42 @@
                 </div>
             </div>
         </div>
+
+        @if($escalation_log_flag == true)
+            <div class="modal fade text-left" id="escalateModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="escalateModal" aria-hidden="true">
+                <div class="modal-dialog modal-md" role="document">
+                    <div class="modal-content ">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Escalate</h4>
+                        </div>
+                        <div class="modal-body text-center">
+                            <form id="escalate_submit_form" method="post">
+                                @method('POST')
+                                @csrf
+                                <div class="row justify-content-center">
+                                    <div class="col-11">
+                                        <fieldset class="form-group">
+                                            <input type="hidden" id="escalate_crm_request_id" value="{{$crm_details->id}}">
+                                            <input type="hidden" id="escalation_tagging_id" name="escalation_tagging_id"
+                                                   value="{{$escalation_tagging_id}}">
+                                            <select name="crm_escalation_level" id="crm_escalation_level" class="form-control select2">
+                                                @foreach($crm_escalation_levels as $crm_escalation_level)
+                                                    <option value="{{$crm_escalation_level->id}}"> {{$crm_escalation_level->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success width-25-per" id="escalateSubmit">Escalate</button>
+                            <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </section>
 @endsection
 @section('css')
@@ -1581,6 +1629,144 @@
                 $('#case_nature_claim').val('').trigger('change');
                 $('#claim_channel').val('').trigger('change');
                 $('#claim_product_cost').val('');
+            });
+
+            $("#crm_escalation_level").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Escalation",
+                width: '100%',
+                dropdownParent: $('#escalateModal')
+            });
+            $('#halt_start_escalation').on('click', function (e) {
+                e.preventDefault();
+                var request_id = @json($crm_details->id);
+                var status = $(this).val();
+                if(status == 0){
+                    var status_text = 'Halt';
+                }
+                else{
+                    var status_text = 'Start';
+                }
+                swal({
+                    text: 'Are you sure, you want to '+status_text+' Escalation of this Request?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.crm.escalation_status') !!}',
+                            method: 'POST',
+                            data: {
+                                'crm_request_id': request_id,
+                                'status': status,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function(data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                    setTimeout(function(){
+                                        window.location.reload(1);
+                                    }, 1500);
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                    }
+                });
+            });
+            $('#escalate').on('click', function (e) {
+                e.preventDefault();
+                $('#escalateModal').modal('show');
+            });
+            $('#escalateSubmit').on('click', function (e) {
+                e.preventDefault();
+                var crm_request_id = $('#escalate_crm_request_id').val();
+                var escalation_tagging_id = $('#escalation_tagging_id').val();
+                var selected_escalation = $('#crm_escalation_level').val();
+                var flag = true;
+                if(selected_escalation == null || selected_escalation == ''){
+                    var error = "Please select Escalation";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    flag = false
+                }
+                if(flag == true){
+                    swal({
+                        text: 'Are you sure, you want to Escalate this Request?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm){
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Escalation is in process!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            $.ajax({
+                                url: '{!! route('admin.crm.escalate') !!}',
+                                method: 'POST',
+                                data: {
+                                    'crm_request_id': crm_request_id,
+                                    'escalation_tagging_id': escalation_tagging_id,
+                                    'selected_escalation': selected_escalation,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function(data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                        setTimeout(function(){
+                                            window.location.reload(1);
+                                        }, 1500);
+                                    }
+                                    else {
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                });
+                        }
+                    });
+                }
             });
         });
 

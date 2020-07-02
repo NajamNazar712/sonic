@@ -95,6 +95,17 @@
                                             @endforeach
                                         </div>
                                     </div>
+                                    <div class="row justify-content-center">
+                                        <div class="col-4">
+                                            <fieldset class="form-group">
+                                                <select name="hub_status" id="hub_status" class="form-control select2">
+                                                    <option value="1" @if($escalation_tagging->hub_status == 1) selected @endif>Origin</option>
+                                                    <option value="2" @if($escalation_tagging->hub_status == 2) selected @endif>Destination</option>
+                                                    <option value="3" @if($escalation_tagging->hub_status == 3) selected @endif>Both</option>
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                    </div>
                                     <hr>
                                     <div class="row justify-content-center">
                                         <div class="col">
@@ -281,6 +292,21 @@
                 dropdownParent:$('#settings_form')
             });
             @endif
+            @if(count($selected_hubs) > 0)
+                $('#hub_status').select2({
+                    width:'100%',
+                    placeholder:"Select Matching Location",
+                    allowClear:true,
+                    dropdownParent:$('#settings_form')
+                });
+            @else
+                $('#hub_status').prepend('<option value="" selected="selected"></option>').select2({
+                    width:'100%',
+                    placeholder:"Select Matching Location",
+                    allowClear:true,
+                    dropdownParent:$('#settings_form')
+                });
+            @endif
             $('.tat').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -413,7 +439,8 @@
                 });
             @endforeach
 
-            var checked;
+            var checked_statuses;
+            var checked_hubs;
             $('#settings_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -421,9 +448,23 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
-                    checked = $("input[type=checkbox]:checked").length;
-                    if(checked > 0){
-
+                    checked_statuses = $("input:checkbox.shipment_statuses:checked").length;
+                    checked_hubs = $("input:checkbox.hubs:checked").length;
+                    $flag = true;
+                    if(checked_statuses <= 0){
+                        error = "Please select at least one Shipment Status";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $flag = false;
+                    }
+                    if(checked_hubs > 0){
+                        var hub_status = $('#hub_status').val();
+                        if(hub_status == null || hub_status == ""){
+                            error = "Please select Matching location";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            $flag = false;
+                        }
+                    }
+                    if($flag == true){
                         swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes to add Tagging Escalation!',
@@ -458,10 +499,6 @@
                                 form.submit();
                             }
                         });
-                    }
-                    else{
-                        error = "Please select at least one Shipment Status";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
             });

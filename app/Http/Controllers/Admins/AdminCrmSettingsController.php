@@ -559,6 +559,7 @@ class AdminCrmSettingsController extends Controller
         $tagging_escalation = new CrmEscalationTagging();
         $tagging_escalation->case_nature = $case_nature_id;
         $tagging_escalation->case_nature_type = $case_nature_type_id;
+        $tagging_escalation->hub_status = $request->hub_status;
         $tagging_escalation->status = 1;
         $tagging_escalation->updated_by = Auth::id();
         $tagging_escalation->save();
@@ -700,6 +701,7 @@ class AdminCrmSettingsController extends Controller
         $levels = $request->level;
 
         $tagging_escalation->case_nature_type = $case_nature_type_id;
+        $tagging_escalation->hub_status = $request->hub_status;
         $tagging_escalation->status = 1;
         $tagging_escalation->updated_by = Auth::id();
         $tagging_escalation->save();
