@@ -111,13 +111,13 @@ class V2PickupCronController extends Controller
             $pickup_requests = $pickup_requests->get();
 
             foreach ($pickup_requests as $pickup_request) {
-                $shipment_ids = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->pluck('shipment_id')->toArray();
-
-                if (count($shipment_ids) > 0) {
-                    $invalid_shipments = Shipment::whereIn('id', $shipment_ids)->where('shipper_status_id', '!=', 1)->pluck('id')->toArray();
-
-                    if (count($invalid_shipments) > 0) {
-                        V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->whereIn('shipment_id', $invalid_shipments)->delete();
+                $shipment_ids = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->distinct('shipment_id')->pluck('shipment_id')->toArray();
+                if(count($shipment_ids) > 0){
+                    foreach ($shipment_ids as $shipment_id) {
+                        $id = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->first()->id;
+                        if($id){
+                            V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->where('id', '!=', $id)->delete();
+                        }
                     }
                 }
             }
