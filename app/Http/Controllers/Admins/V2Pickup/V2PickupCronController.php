@@ -105,29 +105,10 @@ class V2PickupCronController extends Controller
 //        }
 
         $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->select('id')->get();
-        $current = Carbon::now()->day(2)->month(7)->startOfDay();
-        $past = Carbon::now()->day(18)->month(6)->startOfDay();
 
-        $shipments = array();
-        $shipments['dates'] = array();
-        while ($current->greaterThanOrEqualTo($past)) {
-            $shipments['dates'][] = $past->toDateString();
-            $past = $past->addDay(1);
-        }
-        $attempt_ids = array();
         foreach ($pickup_requests as $pickup_request) {
-            foreach ($shipments as $date){
-                $attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->latest('id')->first();
-                if($attempt){
-                    $to_delete_attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->where('id', '!=', $attempt->id)->pluck('id')->toArray();
-                    if(count($to_delete_attempts) > 0){
-                        array_merge($attempt_ids, $to_delete_attempts);
-                    }
-                }
-            }
-        }
-        if($attempt_ids){
-            V2PickupRequestAttempt::whereIn('id', $attempt_ids)->delete();
+            $pickup_request->attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->count();
+            $pickup_request->save();
         }
 
     }
