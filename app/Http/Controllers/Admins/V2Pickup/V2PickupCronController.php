@@ -9,6 +9,7 @@ use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use DB;
@@ -104,13 +105,23 @@ class V2PickupCronController extends Controller
 //            }
 //        }
 
-        $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->get();
+        $pickup_requests = V2PickupRequest::whereIn('status_id',[1,3]);
 
-        foreach ($pickup_requests as $pickup_request) {
-            $pickup_request->attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->count();
-            $pickup_request->save();
+        if ($pickup_requests->exists()) {
+            $pickup_requests = $pickup_requests->get();
+
+            foreach ($pickup_requests as $pickup_request) {
+                $shipment_ids = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->pluck('shipment_id')->toArray();
+
+                if (count($shipment_ids) > 0) {
+                    $invalid_shipments = Shipment::whereIn('id', $shipment_ids)->where('shipper_status_id', '!=', 1)->pluck('id')->toArray();
+
+                    if (count($invalid_shipments) > 0) {
+                        V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->whereIn('shipment_id', $invalid_shipments)->delete();
+                    }
+                }
+            }
         }
-
     }
     static public function pickup_re_generate(){
         $pickup_requests = V2PickupRequest::where('status_id', 2)->where('regenerate', 0);
