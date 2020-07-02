@@ -93,26 +93,15 @@ class V2PickupCronController extends Controller
         V2PickupRequest::whereIn('status_id', [1,3])->where('rider_status', 2)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
     }
     static public function cancel_if_not_valid(){
-//        $pickup_requests = V2PickupRequest::where('status_id', 1);
-//        if($pickup_requests->exists()) {
-//            $pickup_requests = $pickup_requests->get();
-//            foreach ($pickup_requests as $pickup_request) {
-//                $count = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereIn('reason_id', [1,2,3,4,5,6])->count();
-//                if($count >= 3){
-//                    $pickup_request->status_id = 4;
-//                    $pickup_request->save();
-//                }
-//            }
-//        }
-
-        $pickup_requests = V2PickupRequest::whereIn('status_id',[1,3]);
-
-        if ($pickup_requests->exists()) {
+        $pickup_requests = V2PickupRequest::where('status_id', 1);
+        if($pickup_requests->exists()) {
             $pickup_requests = $pickup_requests->get();
-
             foreach ($pickup_requests as $pickup_request) {
-                $pickup_request->booked = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->count();
-                $pickup_request->save();
+                $count = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereIn('reason_id', [1,2,3,4,5,6])->count();
+                if($count >= 3){
+                    $pickup_request->status_id = 4;
+                    $pickup_request->save();
+                }
             }
         }
     }
