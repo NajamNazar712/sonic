@@ -66,7 +66,7 @@ class V2PickupCronController extends Controller
                 }
 
             }
-            V2PickupNote::where('status', 0)->whereDate('created_at', '<=', $today)->update(['status' => 1]);
+            V2PickupNote::where('status', 0)->update(['status' => 1]);
 
             self::remove_riders();
         }
