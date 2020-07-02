@@ -47,8 +47,9 @@ class V2PickupCronController extends Controller
                 if($pickup_request->current_rider_id != null){
                     $pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', '>=' ,$yesterday)->whereTime('attempt_date', '>=', $arrival_time);
                     if($pickup_request_attempt->exists()){
-                        $pickup_request_attempt = $pickup_request_attempt->first();
+                        $pickup_request_attempt = $pickup_request_attempt->latest('id')->first();
                         $pickup_request_attempt->reason_id = 7;
+                        $pickup_request_attempt->trax_remarks = 'Pehly sy attempt lgi hue thi!';
                         $pickup_request_attempt->save();
                         $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request->id);
                         if($pickup_note_request->exists()){
@@ -61,6 +62,17 @@ class V2PickupCronController extends Controller
                         if(!in_array($pickup_request->id, $pickup_request_ids)){
                             $pickup_request_ids[] = $pickup_request->id;
                         }
+                    }else{
+                        $pickup_request->attempts = $pickup_request->attempts + 1;
+                        $pickup_request->save();
+                        $pickup_request_attempt = new V2PickupRequestAttempt();
+                        $pickup_request_attempt->pickup_request_id = $pickup_request->id;
+                        $pickup_request_attempt->rider_id = $rider_id;
+                        $pickup_request_attempt->reason_id = 7;
+                        $pickup_request_attempt->trax_remarks = 'Pehly sy attempt lgi hue thi pr mili nahi!';
+                        $pickup_request_attempt->attempt_date = $yesterday;
+                        $pickup_request_attempt->assigned_by = $global_admin_id;
+                        $pickup_request_attempt->save();
                     }
                 }else{
                     $pickup_request->attempts = $pickup_request->attempts + 1;
@@ -69,6 +81,7 @@ class V2PickupCronController extends Controller
                     $pickup_request_attempt->pickup_request_id = $pickup_request->id;
                     $pickup_request_attempt->rider_id = $rider_id;
                     $pickup_request_attempt->reason_id = 7;
+                    $pickup_request_attempt->trax_remarks = 'Pehly sy attempt lgi nahi hue thi!';
                     $pickup_request_attempt->attempt_date = $yesterday;
                     $pickup_request_attempt->assigned_by = $global_admin_id;
                     $pickup_request_attempt->save();
