@@ -63,6 +63,8 @@ class V2PickupCronController extends Controller
                         }
                     }
                 }else{
+                    $pickup_request->attempts = $pickup_request->attempts + 1;
+                    $pickup_request->save();
                     $pickup_request_attempt = new V2PickupRequestAttempt();
                     $pickup_request_attempt->pickup_request_id = $pickup_request->id;
                     $pickup_request_attempt->rider_id = $rider_id;
