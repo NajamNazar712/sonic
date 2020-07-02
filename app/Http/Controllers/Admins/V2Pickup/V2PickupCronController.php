@@ -118,7 +118,7 @@ class V2PickupCronController extends Controller
         foreach ($pickup_requests as $pickup_request) {
             foreach ($shipments as $date){
                 $attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->latest('id')->first();
-                $to_delete_attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->where('id', '!=', $attempt)->pluck('id')->toArray();
+                $to_delete_attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->where('id', '!=', $attempt->id)->pluck('id')->toArray();
                 if(count($to_delete_attempts) > 0){
                     array_merge($attempt_ids, $to_delete_attempts);
                 }
