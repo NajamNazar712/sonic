@@ -124,6 +124,7 @@ class V2PickupCronController extends Controller
                 }
             }
         }
+        return $attempt_ids;
         V2PickupRequestAttempt::whereIn('id', $attempt_ids)->delete();
 
     }
