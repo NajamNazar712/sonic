@@ -118,13 +118,17 @@ class V2PickupCronController extends Controller
         foreach ($pickup_requests as $pickup_request) {
             foreach ($shipments as $date){
                 $attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->latest('id')->first();
-                $to_delete_attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->where('id', '!=', $attempt->id)->pluck('id')->toArray();
-                if(count($to_delete_attempts) > 0){
-                    array_merge($attempt_ids, $to_delete_attempts);
+                if($attempt){
+                    $to_delete_attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->where('id', '!=', $attempt->id)->pluck('id')->toArray();
+                    if(count($to_delete_attempts) > 0){
+                        array_merge($attempt_ids, $to_delete_attempts);
+                    }
                 }
             }
         }
-        V2PickupRequestAttempt::whereIn('id', $attempt_ids)->delete();
+        if($attempt_ids){
+            V2PickupRequestAttempt::whereIn('id', $attempt_ids)->delete();
+        }
 
     }
     static public function pickup_re_generate(){
