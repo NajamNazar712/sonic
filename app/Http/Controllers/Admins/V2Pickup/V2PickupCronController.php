@@ -31,21 +31,28 @@ class V2PickupCronController extends Controller
         }
         $today = Carbon::today()->toDateString();
         $yesterday = Carbon::today()->toDateString();
-        $pickup_requests = V2PickupRequest::where('status_id', 1)->whereDate('created_at', '<=', $today)->whereTime('created_at', '<=', $arrival_time);
+        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->whereDate('created_at', '<=', $today)->whereTime('created_at', '<=', $arrival_time);
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
             $pickup_request_ids = array();
             foreach ($pickup_requests as $pickup_request) {
+                if($pickup_request->status_id == 3){
+                    $check_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', '>=' ,$yesterday)->whereTime('attempt_date', '>=', $arrival_time)->whereNotNull('reason_id');
+                    if($check_pickup_request_attempt->exists()){
+                        continue;
+                    }
+                }
                 $pickup_request->status_id = 3;
                 $pickup_request->save();
                 if($pickup_request->current_rider_id != null){
-                    $pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id);
+                    $pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', '>=' ,$yesterday)->whereTime('attempt_date', '>=', $arrival_time);
                     if($pickup_request_attempt->exists()){
-                        $pickup_request_attempt = $pickup_request_attempt->latest()->first();
+                        $pickup_request_attempt = $pickup_request_attempt->first();
                         $pickup_request_attempt->reason_id = 7;
                         $pickup_request_attempt->save();
-                        $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request->id)->latest('id')->first();
-                        if($pickup_note_request){
+                        $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request->id);
+                        if($pickup_note_request->exists()){
+                            $pickup_note_request = $pickup_note_request->latest('id')->first();
                             if($pickup_note_request->status == 0){
                                 $pickup_note_request->status = 1;
                                 $pickup_note_request->save();
