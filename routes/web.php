@@ -1893,7 +1893,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('details','AdminShipmentHandoverController@responsibles_editview')->name('details');
             Route::post('edit','AdminShipmentHandoverController@responsibles_edit')->name('edit');
         });
-    });    
+    });
+    Route::prefix('power_bi')->name('power_bi.')->group(function () {
+        Route::get('sales', 'Admins\AdminPowerBIController@sales_dashboard_index')->name('sales');
+        Route::get('operation', 'Admins\AdminPowerBIController@operation_dashboard_index')->name('operation');
+    });
      
 });
 

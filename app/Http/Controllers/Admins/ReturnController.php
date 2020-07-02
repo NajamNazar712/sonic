@@ -364,7 +364,11 @@ class ReturnController extends Controller
                         ShipmentChargesController::return($shipment);
 
                         if ($parcel->packaging_material_request != 1) {
-                            AdminFinanceController::add_payment($shipment, 1);
+                            if($parcel->user->account_type_id == 1){
+                                AdminFinanceController::add_payment($shipment, 1);
+                            }else{
+                                AdminFinanceController::add_corporate_return_charges($shipment);
+                            }
                         }
                     }
                     else {
