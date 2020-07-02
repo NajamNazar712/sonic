@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins\V2Pickup;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Shipment;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequest;
@@ -97,8 +98,11 @@ class V2PickupCronController extends Controller
                 $count = $pickup_request->pickup_request_shipments->where('status', 0)->count();
                 if($count > 0){
                     $pickup_request_shipments = $pickup_request->pickup_request_shipments->where('status', 0)->pluck('shipment_id')->toArray();
-                    foreach ($pickup_request_shipments as $shipment_id){
-                        AdminPickupsController::generate($shipment_id);
+                    $shipments = Shipment::where('shipper_status_id', 1)->whereIn('id', $pickup_request_shipments)->pluck('id')->toArray();
+                    if(count($shipments) > 0){
+                        foreach ($shipments as $shipment_id){
+                            AdminPickupsController::generate($shipment_id);
+                        }
                     }
                 }
             }
