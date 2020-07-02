@@ -111,8 +111,8 @@ class V2PickupCronController extends Controller
             $pickup_requests = $pickup_requests->get();
 
             foreach ($pickup_requests as $pickup_request) {
-                $pickup_requests->booked = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->count();
-                $pickup_requests->save();
+                $pickup_request->booked = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->count();
+                $pickup_request->save();
             }
         }
     }
