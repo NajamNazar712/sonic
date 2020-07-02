@@ -104,9 +104,9 @@ class V2PickupCronController extends Controller
 //            }
 //        }
 
-        $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,3])->select('id')->get();
-        $current = Carbon::now()->day(20)->month(6)->startOfDay();
-        $past = Carbon::now()->day(19)->month(6)->startOfDay();
+        $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->select('id')->get();
+        $current = Carbon::now()->day(2)->month(7)->startOfDay();
+        $past = Carbon::now()->day(18)->month(6)->startOfDay();
 
         $shipments = array();
         $shipments['dates'] = array();
