@@ -104,7 +104,7 @@ class V2PickupCronController extends Controller
 //            }
 //        }
 
-        $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->select('id')->get();
+        $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->get();
 
         foreach ($pickup_requests as $pickup_request) {
             $pickup_request->attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->count();
