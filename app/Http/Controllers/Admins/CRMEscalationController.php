@@ -234,7 +234,7 @@ class CRMEscalationController extends Controller
                                                 if(count($hubs) > 0){
                                                     $total_hubs = array();
                                                     foreach ($hubs as $hub){
-                                                        if(in_array($hub->id, $matching_hubs)){
+                                                        if(in_array($hub->hub_id, $matching_hubs)){
                                                             $crm_request_multiple_tagging = new CrmRequestEscalationTagging();
                                                             $crm_request_multiple_tagging->crm_request_id = $crm_request->id;
                                                             $crm_request_multiple_tagging->role_id = $role->role_id;
