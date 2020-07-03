@@ -1360,16 +1360,16 @@ class ShipperShipmentBookController extends Controller
 
                         $shipment_details .= '
                         <tr>
-                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Replacement Item</strong></td>
-                          <td class="color secondary border twice-top"><strong>Type</strong></td>
-                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
-                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                          <td>' . $item->quantity . '</td>
-                          <td colspan="2" class="border twice-top"></td>
+                          <td rowspan="2"  style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="align-middle  border twice-top twice-bottom"><strong>Replacement Item</strong></td>
+                          <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class=" border twice-top"><strong>Type</strong></td>
+                          <td colspan="2" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-top">' . $item->product->product_name . '</td>
+                          <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class=" border twice-top"><strong>Quantity</strong></td>
+                          <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important">' . $item->quantity . '</td>
+                          <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" colspan="2" class="border twice-top"></td>
                         </tr>
                         <tr>
-                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class=" border twice-bottom"><strong>Description</strong></td>
+                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . '</td>
                         </tr>
                     ';
 
