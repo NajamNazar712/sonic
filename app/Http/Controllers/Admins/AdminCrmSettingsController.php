@@ -227,12 +227,7 @@ class AdminCrmSettingsController extends Controller
         $shipment_statuses = $request->shipment_statuses;
         $tat = $request->input('tat');
         $mark_as = $request->input('mark_as_select');
-        if($mark_as == 1){
-            $comment = $request->input('auto_comment');
-        }
-        else{
-            $comment = NULL;
-        }
+        $comment = $request->input('auto_comment');
         $launched_escalation->case_nature_type = $case_nature_type_id;
         $launched_escalation->tat = $tat;
         $launched_escalation->mark_as = $mark_as;
@@ -391,12 +386,7 @@ class AdminCrmSettingsController extends Controller
         $shipment_statuses = $request->shipment_statuses;
         $tat = $request->input('tat');
         $mark_as = $request->input('mark_as_select');
-        if($mark_as == 1){
-            $comment = $request->input('auto_comment');
-        }
-        else{
-            $comment = NULL;
-        }
+        $comment = $request->input('auto_comment');
         $in_process_escalation->case_nature_type = $case_nature_type_id;
         $in_process_escalation->tat = $tat;
         $in_process_escalation->mark_as = $mark_as;
