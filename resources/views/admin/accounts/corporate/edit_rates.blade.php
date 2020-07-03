@@ -2035,7 +2035,7 @@
                                                 @endif
                                             @endforeach
                                                 @else
-                                                <div class="row detain_door_weight_row" id="detain_door_weight_row0">
+                                                <div class="row detain_door_weight_row" id="detain_door_weight_row1">
                                                     <input type="hidden" name="detain_door_weight_record[1]" value="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -2209,7 +2209,7 @@
                                                 @endif
                                             @endforeach
                                                 @else
-                                                <div class="row detain_hub_weight_row" id="detain_hub_weight_row0">
+                                                <div class="row detain_hub_weight_row" id="detain_hub_weight_row1">
                                                     <input type="hidden" name="detain_hub_weight_record[1]" value="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
