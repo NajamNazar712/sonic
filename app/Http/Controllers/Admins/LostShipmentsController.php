@@ -201,10 +201,9 @@ class LostShipmentsController extends Controller
                     $data = array();
                     $shipment = $shipment->first();
                     
-                    $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+                    $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                     if($journey)
                     {
-                        $verification = $journey->verification;
                         $verification = $journey->verification;
                         if($verification == 0)
                         {
