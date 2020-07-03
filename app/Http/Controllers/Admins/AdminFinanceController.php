@@ -1307,6 +1307,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_bulk_adjust_in_payment(Request $request) {
+        $now = Carbon::now();
         foreach ($request->shipment_ids as $index => $shipment_id){
             $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $request->dncc[$index]);
             if ($delivery_note_shipment->exists()) {
@@ -1453,6 +1454,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_adjust_in_payment(Request $request) {
+        $now = Carbon::now();
         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $request->dncc);
 
         if ($delivery_note_shipment->exists()) {
