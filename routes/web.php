@@ -1263,6 +1263,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@multiple_iban_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@multiple_iban_list')->name('list');
         });
+        Route::prefix('completed_aging')->name('completed_aging.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@completed_aging_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@completed_aging_list')->name('list');
+        });
+        Route::prefix('pending_cash_collection')->name('pending_cash_collection.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@pending_cash_collection_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@pending_cash_collection_list')->name('list');
+        });
         Route::prefix('lead_time')->name('lead_time.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@lead_time_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@lead_time_list')->name('list');
@@ -1622,6 +1630,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_history_list')->name('list');
             });
 
+
             Route::prefix('projection')->name('projection.')->group(function () {
                 Route::prefix('percentage')->name('percentage.')->group(function () {
                     Route::get('', 'Admins\GlobalSettingsController@projection_percentage_index')->name('index');
@@ -1642,6 +1651,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
         });
+
+
+        Route::prefix('aging_report')->name('aging_report.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@completed_aging_report_settings_index')->name('index');
+            Route::post('aging_settings_store', 'Admins\GlobalSettingsController@completed_aging_report_settings_store')->name('aging_settings_store');
+        });
+
         Route::prefix('overnight_overland_cargo_report')->name('overnight_overland_cargo_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_list')->name('list');
@@ -1658,6 +1674,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('crm_comment')->name('crm_comment.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_crm_comment_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@auto_crm_comment_store')->name('store');
+        });
+
+        Route::prefix('default_agent')->name('default_agent.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@crm_default_agent_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@crm_default_agent_store')->name('store');
         });
 
         Route::prefix('blacklist')->name('blacklist.')->group(function () {
@@ -1705,7 +1726,41 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('edit', 'Admins\GlobalSettingsController@return_reason_edit')->name('edit');
             });
         });
-   
+
+        Route::prefix('escalation')->name('escalation.')->group(function () {
+            Route::prefix('launched')->name('launched.')->group(function () {
+                Route::get('', 'Admins\AdminCrmSettingsController@escalation_launched_index')->name('index');
+                Route::get('/list', 'Admins\AdminCrmSettingsController@escalation_launched_list')->name('list');
+                Route::get('/add', 'Admins\AdminCrmSettingsController@escalation_launched_add_index')->name('add.index');
+                Route::post('/add/store', 'Admins\AdminCrmSettingsController@escalation_launched_add_store')->name('add.store');
+                Route::get('/edit/{id}', 'Admins\AdminCrmSettingsController@escalation_launched_edit_index')->name('edit.index');
+                Route::post('/edit/store', 'Admins\AdminCrmSettingsController@escalation_launched_edit_store')->name('edit.store');
+            });
+            Route::prefix('in_process')->name('in_process.')->group(function () {
+                Route::get('', 'Admins\AdminCrmSettingsController@escalation_in_process_index')->name('index');
+                Route::get('/list', 'Admins\AdminCrmSettingsController@escalation_in_process_list')->name('list');
+                Route::get('/add', 'Admins\AdminCrmSettingsController@escalation_in_process_add_index')->name('add.index');
+                Route::post('/add/store', 'Admins\AdminCrmSettingsController@escalation_in_process_add_store')->name('add.store');
+                Route::get('/edit/{id}', 'Admins\AdminCrmSettingsController@escalation_in_process_edit_index')->name('edit.index');
+                Route::post('/edit/store', 'Admins\AdminCrmSettingsController@escalation_in_process_edit_store')->name('edit.store');
+            });
+            Route::prefix('tagging')->name('tagging.')->group(function () {
+                Route::get('', 'Admins\AdminCrmSettingsController@escalation_tagging_index')->name('index');
+                Route::get('/list', 'Admins\AdminCrmSettingsController@escalation_tagging_list')->name('list');
+                Route::get('/add', 'Admins\AdminCrmSettingsController@escalation_tagging_add_index')->name('add.index');
+                Route::post('/add/store', 'Admins\AdminCrmSettingsController@escalation_tagging_add_store')->name('add.store');
+                Route::get('/edit/{id}', 'Admins\AdminCrmSettingsController@escalation_tagging_edit_index')->name('edit.index');
+                Route::post('/edit/store', 'Admins\AdminCrmSettingsController@escalation_tagging_edit_store')->name('edit.store');
+                Route::post('/status', 'Admins\AdminCrmSettingsController@escalation_tagging_status_update')->name('status');
+                Route::post('/view_hubs', 'Admins\AdminCrmSettingsController@escalation_tagging_view_hubs')->name('view_hubs');
+                Route::post('/view_statuses', 'Admins\AdminCrmSettingsController@escalation_tagging_view_statuses')->name('view_statuses');
+                Route::post('/view_levels', 'Admins\AdminCrmSettingsController@escalation_tagging_view_levels')->name('view_levels');
+            });
+            Route::post('/status', 'Admins\AdminCrmSettingsController@escalation_status_update')->name('status');
+            Route::post('/view_statuses', 'Admins\AdminCrmSettingsController@escalation_view_statuses')->name('view_statuses');
+            Route::get('/levels', 'Admins\AdminCrmSettingsController@escalation_level_index')->name('levels.index');
+            Route::post('/levels/store', 'Admins\AdminCrmSettingsController@escalation_level_store')->name('levels.store');
+        });
     });
 
 
@@ -1774,7 +1829,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
             Route::post('edit', 'Admins\AdminCRMController@edit_comment')->name('edit');
         });
-
+        Route::post('escalation_status', 'Admins\AdminCRMController@escalation_status')->name('escalation_status');
+        Route::post('escalate', 'Admins\AdminCRMController@escalate')->name('escalate');
         Route::get('permissions', 'Admins\AdminCRMController@crm_index')->name('permissions');
         Route::get('list', 'Admins\AdminCRMController@crm_list')->name('list');
 
@@ -1839,7 +1895,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('details','AdminShipmentHandoverController@responsibles_editview')->name('details');
             Route::post('edit','AdminShipmentHandoverController@responsibles_edit')->name('edit');
         });
-    });    
+    });
+    Route::prefix('power_bi')->name('power_bi.')->group(function () {
+        Route::get('sales', 'Admins\AdminPowerBIController@sales_dashboard_index')->name('sales');
+        Route::get('operation', 'Admins\AdminPowerBIController@operation_dashboard_index')->name('operation');
+    });
      
 });
 

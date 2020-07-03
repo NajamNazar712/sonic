@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\V2Pickup;
 
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\NotificationsController;
@@ -366,6 +367,7 @@ class V2AdminPickupsController extends Controller
         }else{
             return ['status' => 0, 'success' => 'Pickup Request(s) rider updated / assigned!'];
         }
+
         return ['status' => 1, 'error' => 'Pickup Request(s) already assigned'];
 
     }
@@ -748,6 +750,20 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->received = $pickup_request->received + 1;
 
                 $pickup_request->save();
+            }
+
+            if($shipment->user->account_type_id == 2){
+                if ($shipment->booking_type_id == 2) {
+                    ShipmentChargesController::replacement($shipment->id);
+                } else if ($shipment->booking_type_id == 3) {
+                    ShipmentChargesController::try_and_buy($shipment->id);
+                }
+
+                if ($shipment->booking_type_id != 4) {
+                    AdminFinanceController::add_payment($shipment->id, 0);
+                } else {
+                    AdminFinanceController::done_payment($shipment->id, 0);
+                }
             }
         }
         $pickup_note_ids = array();
@@ -1238,6 +1254,19 @@ class V2AdminPickupsController extends Controller
 
                 $pickup_request->save();
 
+            }
+            if($shipment->user->account_type_id == 2){
+                if ($shipment->booking_type_id == 2) {
+                    ShipmentChargesController::replacement($shipment->id);
+                } else if ($shipment->booking_type_id == 3) {
+                    ShipmentChargesController::try_and_buy($shipment->id);
+                }
+
+                if ($shipment->booking_type_id != 4) {
+                    AdminFinanceController::add_payment($shipment->id, 0);
+                } else {
+                    AdminFinanceController::done_payment($shipment->id, 0);
+                }
             }
         }
         $pickup_note_ids = array();

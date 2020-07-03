@@ -491,6 +491,8 @@ class Permission
             'crm.resolved.list' => 235,
             'crm.closed.index' => 236,
             'crm.closed.list' => 236,
+            'crm.escalation_status' => 352,
+            'crm.escalate' => 353,
 
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
@@ -578,6 +580,32 @@ class Permission
 
             'settings.commission.percentage.index' => 332,
             'settings.commission.percentage.store' => 332,
+
+            'settings.escalation.launched.index' => 347,
+            'settings.escalation.launched.list' => 347,
+            'settings.escalation.launched.add.index' => 347,
+            'settings.escalation.launched.add.store' => 347,
+            'settings.escalation.launched.edit.index' => 347,
+            'settings.escalation.launched.edit.store' => 347,
+
+            'settings.escalation.in_process.index' => 348,
+            'settings.escalation.in_process.list' => 348,
+            'settings.escalation.in_process.add.index' => 348,
+            'settings.escalation.in_process.add.store' => 348,
+            'settings.escalation.in_process.edit.index' => 348,
+            'settings.escalation.in_process.edit.store' => 348,
+
+            'settings.escalation.levels.index' => 349,
+            'settings.escalation.levels.store' => 349,
+
+            'settings.escalation.tagging.index' => 350,
+            'settings.escalation.tagging.list' => 350,
+            'settings.escalation.tagging.add.index' => 350,
+            'settings.escalation.tagging.add.store' => 350,
+            'settings.escalation.tagging.edit.index' => 350,
+            'settings.escalation.tagging.edit.store' => 350,
+
+            'settings.default_agent.index' => 351,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,

@@ -200,6 +200,23 @@ class LostShipmentsController extends Controller
                 if ($shipment->exists()) {
                     $data = array();
                     $shipment = $shipment->first();
+                    
+                    $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+                    if($journey)
+                    {
+                        $verification = $journey->verification;
+                        $verification = $journey->verification;
+                        if($verification == 0)
+                        {
+                            return response()->json(['status' => 0, 'error' => 'Shipment is unverified!']);
+                        }
+
+                    }
+                    if($shipment->shipper_status_id == 5)
+                    {
+                        return response()->json(['status' => 0, 'error' => 'Shipment is Out for Delivery !']);
+                    }
+
                     if($shipment->shipper_status_id != 18) {
 
                         $data['id'] = $shipment->id;

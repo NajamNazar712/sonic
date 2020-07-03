@@ -1127,6 +1127,7 @@
 
 			});
 
+			var shipments_array = [];
 			$('#make_payments #make_payments_form').bind('submit', function(e) {
 				e.preventDefault();
 
@@ -1135,6 +1136,15 @@
 				make_payments_table.rows().nodes().each(function(index) {
 					var row = make_payments_table.row(index);
 					if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+												
+						// var shipments = parseInt($(row.node()).find('td.shipment').text());
+						// var charges = parseInt($(row.node()).find('td.charges').text());
+						// if(charges == 0){
+						// 	console.log(shipments);
+						// }
+						
+						
+						var shipments = parseInt($(row.node()).find('td.shipment').text());
 						var account_type = parseInt($(row.node()).attr('account_type'));
 						if(account_type == 1){
 							var type_id = parseInt($(row.node()).attr('type_id'));
@@ -1143,6 +1153,7 @@
 								var amount = parseInt($(row.node()).find('td.deductable').text());
 								if(amount == 0){
 									zero_charges = true;
+									shipments_array.push(shipments);
 								}
 							}
 						}
@@ -1152,7 +1163,7 @@
 				if(zero_charges){
 					swal({
 						title: 'Are You Sure?',
-						text: 'Charges are zero for selected Shipment(s), select yes to pay!',
+						text: 'Charges are zero for these '+ shipments_array.toString() +' selected Shipment(s), select yes to pay!',
 						icon: 'warning',
 						buttons: {
 							cancel: {
@@ -1223,7 +1234,7 @@
 									}
 								},
 								closeOnClickOutside: false,
-								closeOnEsc: false,
+								closeOnEsc	: false,
 								dangerMode: true
 							}).then(function(confirm) {
 								if (confirm) {
