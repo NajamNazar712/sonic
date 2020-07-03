@@ -213,7 +213,7 @@ class CRMEscalationController extends Controller
                                 $crm_request_in_process = CrmRequestStatusHistory::where('crm_request_id', $crm_request->id)->where('status_id', 2)->latest()->first();
                                 $current_date = Carbon::today();
                                 foreach ($crm_escalation_tag->levels as $level){
-                                    $log = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id)->where('escalation_tagging_id', $crm_escalation_tag->id)->where('tagging_level_id', $level->id)->where('level_id', $level->level_id);
+                                    $log = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id)->where('escalation_tagging_id', $crm_escalation_tag->id)->where('level_id', $level->level_id);
                                     if(!$log->exists()){
                                         $crm_request_in_process_date_after_tat = Carbon::parse($crm_request_in_process->created_at)->addDays($level->tat);
                                         if($current_date > $crm_request_in_process_date_after_tat){
@@ -311,7 +311,7 @@ class CRMEscalationController extends Controller
                                     $crm_request_in_process = CrmRequestStatusHistory::where('crm_request_id', $crm_request->id)->where('status_id', 2)->latest()->first();
                                     $current_date = Carbon::today();
                                     foreach ($crm_escalation_tag->levels as $level){
-                                        $log = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id)->where('escalation_tagging_id', $crm_escalation_tag->id)->where('tagging_level_id', $level->id)->where('level_id', $level->level_id);
+                                        $log = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id)->where('escalation_tagging_id', $crm_escalation_tag->id)->where('level_id', $level->level_id);
                                         if(!$log->exists()){
                                             $crm_request_in_process_date_after_tat = Carbon::parse($crm_request_in_process->created_at)->addDays($level->tat);
                                             if($current_date > $crm_request_in_process_date_after_tat){
@@ -394,7 +394,7 @@ class CRMEscalationController extends Controller
                             $crm_request_in_process = CrmRequestStatusHistory::where('crm_request_id', $crm_request->id)->where('status_id', 2)->latest()->first();
                             $current_date = Carbon::today();
                             foreach ($crm_escalation_tag->levels as $level){
-                                $log = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id)->where('escalation_tagging_id', $crm_escalation_tag->id)->where('tagging_level_id', $level->id)->where('level_id', $level->level_id);
+                                $log = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id)->where('escalation_tagging_id', $crm_escalation_tag->id)->where('level_id', $level->level_id);
                                 if(!$log->exists()){
                                     $crm_request_in_process_date_after_tat = Carbon::parse($crm_request_in_process->created_at)->addDays($level->tat);
                                     if($current_date > $crm_request_in_process_date_after_tat){
