@@ -221,7 +221,7 @@ class V2AdminPickupsController extends Controller
         $pickup_request_ids = $request->input('pickup_request_ids');
 
         $rider_id = $request->input('rider_id');
-
+        array_unique($pickup_request_ids);
         $rider_cut_off_time = NULL;
         $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
         if($rider_settings->exists()){
