@@ -327,8 +327,6 @@
                     });
                 @else
                     @if(isset($selected_admin_roles[$level->id]))
-                        $('#tat_{{$index}}').data('rule-required', true);
-                        $('#tat_{{$index}}').data('msg-required', 'TAT is required');
                         $('#admin_role_select_{{$index}}').select2({
                             width:'100%',
                             placeholder:"Select User Role",
