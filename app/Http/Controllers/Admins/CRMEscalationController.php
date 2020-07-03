@@ -202,7 +202,9 @@ class CRMEscalationController extends Controller
                                 $origin_hub_id = $crm_request->shipment->pickup_address->city->hub_id;
                                 $matching_hubs[] = $origin_hub_id;
                                 $destination_hub_id = $crm_request->shipment->consignee_city->hub_id;
-                                $matching_hubs[] = $destination_hub_id;
+                                if($origin_hub_id != $destination_hub_id){
+                                    $matching_hubs[] = $destination_hub_id;
+                                }
                             }
 
                             $crm_escalation_hubs = CrmEscalationTaggingHub::where('escalation_tagging_id', $crm_escalation_tag->id)->whereIn('hub_id', $matching_hubs);
@@ -244,7 +246,7 @@ class CRMEscalationController extends Controller
                                                     }
 
                                                     foreach ($admins as $admin){
-                                                        $admin_hubs = AdminHub::where('admin_id', $admin->id)->whereIn('hub_id', $total_hubs);
+                                                        $admin_hubs = AdminHub::where('admin_id', $admin->id)->whereIn('hub_id', $matching_hubs);
                                                         if($admin_hubs->exists()){
                                                             $tagging_to[] = $admin->email;
                                                         }
