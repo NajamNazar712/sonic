@@ -846,6 +846,12 @@ class AdminCRMController extends Controller
                                 ->orWhereNotNull('cret.hub_id')
                                 ->whereIn('cret.hub_id', session('hubs'));
                         });
+                })
+                ->orWhere(function ($sub_query) {
+                    if(in_array(session('role_id'), [8, 9 ,10])){
+                        $sub_query->whereIn('oc.hub_id', session('hubs'))
+                            ->orWhereIn('dc.hub_id', session('hubs'));
+                    }
                 });
             });
         }
