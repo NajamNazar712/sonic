@@ -1448,6 +1448,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\V2Pickup\V2AdminReportController@pickup_report_list')->name('list');
             Route::post('/data', 'Admins\V2Pickup\V2AdminReportController@pickup_report_data')->name('data');
         });
+
+        Route::prefix('station_recovery')->name('station_recovery.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@station_recovery_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@station_recovery_list')->name('list');
+        });
     });
 
     //Reports end

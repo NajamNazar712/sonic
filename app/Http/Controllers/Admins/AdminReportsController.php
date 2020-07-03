@@ -6487,6 +6487,13 @@ use Yajra\Datatables\Datatables;
            
             return $report->make(true);
         }
+        public function station_recovery_index(Request $request){
+            return view('admin.reports.station_recovery');
+        }
+
+        public function station_recovery_list(Request $request){
+
+        }
 
     }
 
