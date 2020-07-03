@@ -193,28 +193,23 @@ class LostShipmentsController extends Controller
     }
     public function get_shipment_info(Request $request)
     {
-            $passing_status_array = array(1, 14, 17, 25, 30, 31, 60);
+            $passing_status_array = array(1, 5, 14, 17, 25, 30, 31, 60);
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $passing_status_array);
                 if ($shipment->exists()) {
                     $data = array();
                     $shipment = $shipment->first();
-                    
-                    $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+
+                    $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                     if($journey)
                     {
-                        $verification = $journey->verification;
                         $verification = $journey->verification;
                         if($verification == 0)
                         {
                             return response()->json(['status' => 0, 'error' => 'Shipment is unverified!']);
                         }
 
-                    }
-                    if($shipment->shipper_status_id == 5)
-                    {
-                        return response()->json(['status' => 0, 'error' => 'Shipment is Out for Delivery !']);
                     }
 
                     if($shipment->shipper_status_id != 18) {
