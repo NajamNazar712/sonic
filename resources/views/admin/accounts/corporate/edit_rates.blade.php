@@ -417,7 +417,7 @@
                                             @endforeach
                                                 @else
                                                 <div class="row on_hub_weight_row" id="on_hub_weight_row0">
-                                                    <input type="hidden" name="on_hub_weight_record[0]" value="">
+                                                    <input type="hidden" name="on_hub_weight_record[1]" value="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="0.01" name="on_hub_range_up[1]" disabled>
@@ -1138,7 +1138,7 @@
                                                     @endif
                                             @endforeach
                                                 @else
-                                                <div class="row ol_door_weight_row" id="ol_door_weight_row0">
+                                                <div class="row ol_door_weight_row" id="ol_door_weight_row1">
                                                     <input type="hidden" name="ol_door_weight_record[1]" value="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -1305,7 +1305,7 @@
                                                     @endif
                                             @endforeach
                                                 @else
-                                                <div class="row ol_hub_weight_row" id="ol_hub_weight_row0">
+                                                <div class="row ol_hub_weight_row" id="ol_hub_weight_row1">
                                                     <input type="hidden" name="ol_hub_weight_record[1]" value="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -2036,7 +2036,7 @@
                                             @endforeach
                                                 @else
                                                 <div class="row detain_door_weight_row" id="detain_door_weight_row0">
-                                                    <input type="hidden" name="detain_door_weight_record[0]" value="">
+                                                    <input type="hidden" name="detain_door_weight_record[1]" value="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="0.01" name="detain_door_range_up[1]"  disabled>
@@ -2920,34 +2920,34 @@
                                             @endforeach
                                                 @else
                                                 <div class="row sameday_door_weight_row" id="sameday_door_weight_row0">
-                                                    <input type="hidden" name="sameday_door_weight_record[0]" value="">
+                                                    <input type="hidden" name="sameday_door_weight_record[1]" value="">
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="0.01" name="sameday_door_range_up[0]" disabled>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="0.01" name="sameday_door_range_up[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_range_down[0]" disabled>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_range_down[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="SamedayDoorSwitch0" class="switchery weightAdditionDoorSameday" data-color="success" data-size="sm" name="sameday_door_wa_switch[0]"/>
+                                                            <input type="checkbox" id="SamedayDoorSwitch0" class="switchery weightAdditionDoorSameday" data-color="success" data-size="sm" name="sameday_door_wa_switch[1]"/>
                                                         </div>
                                                     </div>
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_local_charges[0]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_local_charges[1]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_class_0_charges[0]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_class_0_charges[1]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
