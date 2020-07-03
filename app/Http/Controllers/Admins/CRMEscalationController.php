@@ -246,7 +246,7 @@ class CRMEscalationController extends Controller
                                                     }
 
                                                     foreach ($admins as $admin){
-                                                        $admin_hubs = AdminHub::where('admin_id', $admin->id)->whereIn('hub_id', $matching_hubs);
+                                                        $admin_hubs = AdminHub::where('admin_id', $admin->id)->whereIn('hub_id', $total_hubs);
                                                         if($admin_hubs->exists()){
                                                             $tagging_to[] = $admin->email;
                                                         }
