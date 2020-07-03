@@ -145,11 +145,13 @@ class CRMEscalationController extends Controller
                                     }
 
                                     $comment = $crm_escalation->comment;
-                                    $crm_comment = CrmComments::where('crm_request_id', $crm_request->id)->where('comment', $comment);
-                                    if(!$crm_comment->exists()){
-                                        $comment_by = 0;
-                                        $comment_type = 0;
-                                        CRMCommentController::add($crm_request->id, $agent_id,$comment_by,$comment_type, $comment);
+                                    if($comment != null){
+                                        $crm_comment = CrmComments::where('crm_request_id', $crm_request->id)->where('comment', $comment);
+                                        if(!$crm_comment->exists()){
+                                            $comment_by = 0;
+                                            $comment_type = 0;
+                                            CRMCommentController::add($crm_request->id, $agent_id,$comment_by,$comment_type, $comment);
+                                        }
                                     }
                                 }
                                 break;
