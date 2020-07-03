@@ -334,7 +334,7 @@
                             dropdownParent:$('#settings_form')
                         }).bind('change', function () {
                             var id = $(this).val();
-                            if(id != '' || id != null || id.length != 0){
+                            if(id.length > 0){
                                 $('#tat_{{$index}}').data('rule-required', true);
                                 $('#tat_{{$index}}').data('msg-required', 'TAT is required');
                             }
@@ -351,7 +351,7 @@
                             dropdownParent:$('#settings_form')
                         }).bind('change', function () {
                             var id = $(this).val();
-                            if(id != '' || id != null || id.length != 0){
+                            if(id.length > 0){
                                 $('#tat_{{$index}}').data('rule-required', true);
                                 $('#tat_{{$index}}').data('msg-required', 'TAT is required');
                             }
