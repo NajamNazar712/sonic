@@ -139,6 +139,16 @@ class AdminMonthClosingController extends Controller
 
             if($shipment->exists()){
                 $shipment_details = $shipment->first();
+                $journey=  ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest('id')->first();
+                if($journey)
+                {
+                    $verification = $journey->verification;
+                    if($verification == 0)
+                    {
+                        continue;
+                    }
+
+                }
                 if($shipment_details->shipper_status_id != 51){
                     if(!in_array($shipment_details->shipper_status_id, $status_not_allowed)){
                         if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20, 30])) {
