@@ -129,7 +129,7 @@ class V2PickupCronController extends Controller
     static public function clean_data(){
         $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->select('id')->get();
         $current = Carbon::now()->day(5)->month(7)->startOfDay();
-        $past = Carbon::now()->day(3)->month(7)->startOfDay();
+        $past = Carbon::now()->day(18)->month(6)->startOfDay();
 
         $shipments = array();
         $shipments['dates'] = array();
@@ -140,7 +140,7 @@ class V2PickupCronController extends Controller
         $attempt_ids = array();
         if(count($pickup_requests) > 0){
             foreach ($pickup_requests as $pickup_request) {
-                foreach ($shipments as $date){
+                foreach ($shipments['dates'] as $date){
                     $attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->latest('id')->first();
                     if($attempt){
                         $to_delete_attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->where('id', '!=', $attempt->id)->pluck('id')->toArray();
