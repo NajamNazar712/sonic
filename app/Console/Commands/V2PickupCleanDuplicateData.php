@@ -38,7 +38,7 @@ class V2PickupCleanDuplicateData extends Command
      */
     public function handle()
     {
-        V2PickupCronController::clean_data();
+        dd(V2PickupCronController::clean_data());
 
     }
 }
