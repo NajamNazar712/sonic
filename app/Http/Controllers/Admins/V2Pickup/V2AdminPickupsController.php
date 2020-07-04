@@ -1557,6 +1557,10 @@ class V2AdminPickupsController extends Controller
     	->join('cities as c', 'usi.city_id', 'c.id')
     	->select('v2_rider_pickup_action_logs.id', 'v2_rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'v2_rider_pickup_action_logs.pickup_note_id', 'v2_rider_pickup_action_logs.pickup_request_id','pr.created_at','pra.assigned_by','pr.city_id as city_id','pr.current_rider_id');
 
+        if (session('role_id') != 1) {
+            $rider_pickup_action_logs = $rider_pickup_action_logs->whereIn('c.hub_id', session('hubs'));
+        }
+
         $datatables = Datatables::of($rider_pickup_action_logs)
         // ->editColumn('pickup_note_id', function ($rider_pickup_action_log) {
         //     return str_pad($rider_pickup_action_log->pickup_note_id, 6, '0', STR_PAD_LEFT);
