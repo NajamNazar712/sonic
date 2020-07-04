@@ -129,7 +129,7 @@ class V2PickupCronController extends Controller
     static public function clean_data(){
         $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->select('id')->get();
         $current = Carbon::now()->day(5)->month(7)->startOfDay();
-        $past = Carbon::now()->day(18)->month(6)->startOfDay();
+        $past = Carbon::now()->day(3)->month(7)->startOfDay();
 
         $shipments = array();
         $shipments['dates'] = array();
