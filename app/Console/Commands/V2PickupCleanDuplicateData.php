@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\V2Pickup\V2AdminReportController;
+use App\Http\Controllers\Admins\V2Pickup\V2PickupCronController;
 use Illuminate\Console\Command;
 
 class V2PickupCleanDuplicateData extends Command
@@ -38,7 +38,7 @@ class V2PickupCleanDuplicateData extends Command
      */
     public function handle()
     {
-        V2AdminReportController::clean_data();
+        V2PickupCronController::clean_data();
 
     }
 }
