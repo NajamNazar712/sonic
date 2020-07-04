@@ -145,17 +145,18 @@ class V2PickupCronController extends Controller
                     if($attempt){
                         $to_delete_attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->where('id', '!=', $attempt->id)->pluck('id')->toArray();
                         if(count($to_delete_attempts) > 0){
-                            array_merge($attempt_ids, $to_delete_attempts);
+                            foreach ($to_delete_attempts as $to_delete_attempt) {
+                                $attempt_ids[] = $to_delete_attempt;
+                            }
                         }
                     }
                 }
             }
         }
         if(count($attempt_ids) > 0){
-            return $attempt_ids;
-//            V2PickupRequestAttempt::whereIn('id', $attempt_ids)->delete();
+            V2PickupRequestAttempt::whereIn('id', $attempt_ids)->delete();
 
-//            self::reset_pickup_count();
+            self::reset_pickup_count();
         }
     }
     static public function reset_pickup_count(){
