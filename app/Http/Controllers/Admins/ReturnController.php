@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
@@ -467,7 +467,11 @@ class ReturnController extends Controller
                     ShipmentChargesController::return($request->shipment_id);
 
                     if ($parcel->packaging_material_request != 1) {
-                        AdminFinanceController::add_payment($request->shipment_id, 1);
+                        if($parcel->user->account_type_id == 1){
+                            AdminFinanceController::add_payment($request->shipment_id, 1);
+                        }else{
+                            AdminFinanceController::add_corporate_return_charges($request->shipment_id);
+                        }
                     }
                 }
                 else {
