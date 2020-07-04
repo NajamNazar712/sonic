@@ -49,7 +49,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\PickupCancel',
         '\App\Console\Commands\PickupRegenerate',
 		'\App\Console\Commands\PickupReport',
-		'\App\Console\Commands\CancelledPickupRequestEmail'
+		'\App\Console\Commands\CancelledPickupRequestEmail',
+		'\App\Console\Commands\V2PickupCleanDuplicateData'
+
 
         ];
 

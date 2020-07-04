@@ -125,4 +125,75 @@ class V2PickupCronController extends Controller
             }
         }
     }
+
+    static public function clean_data(){
+        $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->select('id')->get();
+        $current = Carbon::now()->day(5)->month(7)->startOfDay();
+        $past = Carbon::now()->day(18)->month(6)->startOfDay();
+
+        $shipments = array();
+        $shipments['dates'] = array();
+        while ($current->greaterThanOrEqualTo($past)) {
+            $shipments['dates'][] = $past->toDateString();
+            $past = $past->addDay(1);
+        }
+        $attempt_ids = array();
+        if(count($pickup_requests) > 0){
+            foreach ($pickup_requests as $pickup_request) {
+                foreach ($shipments as $date){
+                    $attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->latest('id')->first();
+                    if($attempt){
+                        $to_delete_attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', $date)->whereNull('reason_id')->where('id', '!=', $attempt->id)->pluck('id')->toArray();
+                        if(count($to_delete_attempts) > 0){
+                            array_merge($attempt_ids, $to_delete_attempts);
+                        }
+                    }
+                }
+            }
+        }
+        if($attempt_ids){
+            V2PickupRequestAttempt::whereIn('id', $attempt_ids)->delete();
+
+            self::reset_pickup_count();
+        }
+    }
+    static public function reset_pickup_count(){
+        $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->get();
+        foreach ($pickup_requests as $pickup_request){
+            $pickup_request->attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->count();
+            $pickup_request->save();
+        }
+        self::pickup_delete_duplicate_shipments();
+    }
+
+    static public function pickup_delete_duplicate_shipments(){
+        $pickup_requests = V2PickupRequest::whereIn('status_id',[1,3]);
+            if ($pickup_requests->exists()) {
+                $pickup_requests = $pickup_requests->get();
+
+                foreach ($pickup_requests as $pickup_request) {
+                    $shipment_ids = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->distinct('shipment_id')->pluck('shipment_id')->toArray();
+
+                    if (count($shipment_ids) > 0) {
+                        foreach ($shipment_ids as $shipment_id) {
+                            $id = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->first()->id;
+                            if($id){
+                                V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->where('id', '!=', $id)->delete();
+                            }
+                         }
+                    }
+               }
+           }
+        self::pickup_shipment_reset_count();
+    }
+    static public function pickup_shipment_reset_count(){
+        $pickup_requests = V2PickupRequest::whereIn('status_id',[1,3]);
+        if ($pickup_requests->exists()) {
+            $pickup_requests = $pickup_requests->get();
+            foreach ($pickup_requests as $pickup_request) {
+                $pickup_request->booked = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->count();
+                $pickup_request->save();
+            }
+        }
+    }
 }
