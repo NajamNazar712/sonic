@@ -2465,7 +2465,7 @@ class GlobalSettingsController extends Controller
         $html .='</tr>';
            $html .= '</tbody></table>';
         $body = $html;
-        $to = 'shaheryar.khan@trax.pk';
+        $to = array(12,49,216);
         $mail = Mail::to($to);
 
         $mail->send(new Notifications($subject, $body, null));
@@ -2524,13 +2524,13 @@ class GlobalSettingsController extends Controller
         $html .='</tr>';
            $html .= '</tbody></table>';
         $body = $html;
-        $to = 'shaheryar.khan@trax.pk';
+        $to = array(12,49,216);
         $mail = Mail::to($to);
 
         $mail->send(new Notifications($subject, $body, null));
 
     }
- public function crm_default_agent_index(){
+    public function crm_default_agent_index(){
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)
             ->get();
