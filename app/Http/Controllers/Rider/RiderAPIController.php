@@ -722,7 +722,7 @@ class RiderAPIController extends Controller {
 
     public function delivery_summary(Request $request){
         $rider_id = $request->rider_id;
-        $delivery_note_id = DeliveryNote::where('rider_id', $rider_id)->where('status', 0);
+        $delivery_note_id = DeliveryNote::where('rider_id', $rider_id)->where('pending_status', 0);
         if ($delivery_note_id->exists()) {
            //  $delivery_note = $delivery_note->latest('id')->first();
             $delivery_notes = $delivery_note_id->get();
@@ -1059,11 +1059,13 @@ class RiderAPIController extends Controller {
                 }
                 $rider_delivery->save();
 
-                $shipment->shipper_status_id = 14;
-                $shipment->consignee_status_id = 14;
-                $shipment->save();
+                if(DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()){
+                    $shipment->shipper_status_id = 14;
+                    $shipment->consignee_status_id = 14;
+                    $shipment->save();
 
-                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+                    ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+                }
             }
 
             return response()->json(['status' => 0, 'message' => 'Shipment marked as Delivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -1163,19 +1165,20 @@ class RiderAPIController extends Controller {
             Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
             $rider_delivery->picture_path = $picture_path;
             $rider_delivery->save();
+            if(DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
 
-            $shipment->shipper_status_id = $request->shipper_status_id;
-            $shipment->consignee_status_id = $request->status_reason_id;
-            $shipment->save();
+                $shipment->shipper_status_id = $request->shipper_status_id;
+                $shipment->consignee_status_id = $request->status_reason_id;
+                $shipment->save();
 
-            $remarks = NULL;
+                $remarks = NULL;
 
-            if($request->has('remarks')){
-                $remarks = $request->remarks;
+                if ($request->has('remarks')) {
+                    $remarks = $request->remarks;
+                }
+
+                ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
             }
-
-            ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
-
 
             return response()->json(['status' => 0, 'message' => 'Shipment is marked as Undelivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
         }
