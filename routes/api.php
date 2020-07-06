@@ -79,4 +79,35 @@ Route::name('api.')->group(function () {
 
 
 	});
+
+    Route::prefix('admin')->name('admin.')->group(function() {
+        Route::post('login', 'AdminAPIController@login')->name('login');
+
+        Route::middleware('RiderAPIToken')->group(function () {
+            Route::prefix('pickup')->name('pickup.')->group(function () {
+                Route::get('summary', 'Rider\RiderAPIController@pickup_summary')->name('pickup_summary');
+                Route::post('pick', 'Rider\RiderAPIController@pickup_pick')->name('pickup_pick');
+                Route::post('not_pick', 'Rider\RiderAPIController@pickup_not_pick')->name('pickup_not_pick');
+                Route::post('action_log', 'Rider\RiderAPIController@pickup_action_log')->name('pickup_action_log');
+                //pickup revamp module
+                Route::get('summary_v2', 'Rider\RiderAPIController@pickup_summary_v2')->name('pickup_summary_v2');
+                Route::post('pick_v2', 'Rider\RiderAPIController@pickup_pick_v2')->name('pickup_pick_v2');
+                Route::post('not_pick_v2', 'Rider\RiderAPIController@pickup_not_pick_v2')->name('pickup_not_pick_v2');
+                Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
+            });
+            Route::prefix('delivery')->name('delivery.')->group(function () {
+                Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
+                Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
+                Route::post('delivered', 'Rider\RiderAPIController@shipment_delivered')->name('delivered');
+                Route::post('undelivered', 'Rider\RiderAPIController@shipment_undelivered')->name('undelivered');
+            });
+            Route::prefix('comments')->name('comments.')->group(function () {
+                Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
+            });
+
+        });
+
+
+
+    });
 });

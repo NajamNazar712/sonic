@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistSetting;
@@ -17,6 +18,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
+use Illuminate\Support\Facades\Hash;
 use Validator;
 use Illuminate\Validation\Rule;
 
@@ -1658,48 +1660,4 @@ class APIController extends Controller
         }
     }
 
-    public function admin_login(Request $request) {
-        $rules = [
-            'email_address' => ['required', 'email'],
-            'password' => ['required', 'min:6']
-        ];
-
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-        else {
-            $user = User::where('email', $request->input('email_address'));
-
-            if ($user->exists()) {
-                $user = $user->first();
-
-                if ($user->blacklist == 1) {
-                    return response()->json(['status' => 1, 'message' => 'Your Account is Blacklisted.']);
-                }
-                else if ($user->status != 3) {
-                    return response()->json(['status' => 1, 'message' => 'Your Account is not Activated yet.']);
-                }
-                else if (Hash::check($request->input('password'), $user->password)) {
-                    $information = array();
-
-                    $information['id'] = $user->id;
-                    $information['name'] = $user->name;
-                    $information['account_type_id'] = $user->account_type_id;
-                    $information['api_key'] = $user->api_token;
-
-                    return response()->json(['status' => 0, 'message' => 'Logged In Succesfully', 'information' => $information]);
-                }
-                else {
-                    return response()->json(['status' => 1, 'message' => 'Invalid Password']);
-                }
-            }
-            else {
-                return response()->json(['status' => 1, 'message' => 'No User with given Email Address']);
-            }
-        }
-    }
 }
