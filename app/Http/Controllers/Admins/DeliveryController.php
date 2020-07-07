@@ -2510,21 +2510,19 @@ class DeliveryController extends Controller
                                             if ($verification == 1) {
                                                 if (in_array($request->status_drop[$shipment], [14, 16, 30, 36, 37])) {
                                                     $parcel = Shipment::find($shipment);
-                                                    if($parcel->user->account_type_id == 1){
-                                                        if ($parcel->booking_type_id == 2) {
-                                                            ShipmentChargesController::replacement($shipment);
-                                                        } else if ($parcel->booking_type_id == 3) {
-                                                            ShipmentChargesController::try_and_buy($shipment);
-                                                        }
 
-                                                        if ($parcel->booking_type_id != 4) {
-                                                            AdminFinanceController::add_payment($shipment, 0);
-                                                        } else {
-                                                            AdminFinanceController::done_payment($shipment, 0);
-                                                        }
-                                                    }else{
-                                                        AdminFinanceController::add_corporate_delivered_cod($shipment);
+                                                    if ($parcel->booking_type_id == 2) {
+                                                        ShipmentChargesController::replacement($shipment);
+                                                    } else if ($parcel->booking_type_id == 3) {
+                                                        ShipmentChargesController::try_and_buy($shipment);
                                                     }
+
+                                                    if ($parcel->booking_type_id != 4) {
+                                                        AdminFinanceController::add_payment($shipment, 0);
+                                                    } else {
+                                                        AdminFinanceController::done_payment($shipment, 0);
+                                                    }
+
 
                                                 }
                                             }
@@ -2571,23 +2569,23 @@ class DeliveryController extends Controller
                                         if ($verification == 1) {
                                             if (in_array($shipper_status_details->shipper_status_id, [14, 16, 30, 36, 37])) {
                                                 $parcel = Shipment::find($shipment);
-                                                if($parcel->user->account_type_id == 1){
-                                                    if ($parcel->booking_type_id == 2) {
-                                                        ShipmentChargesController::replacement($shipment);
-                                                    } else if ($parcel->booking_type_id == 3) {
-                                                        ShipmentChargesController::try_and_buy($shipment);
-                                                    }
 
-                                                    if ($parcel->booking_type_id != 4) {
-                                                        if(($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != '') || $parcel->packaging_material_request == 0){
-                                                            AdminFinanceController::add_payment($shipment, 0);
-                                                        }
-                                                    } else {
-                                                        if(($parcel->packaging_material_request == 1 && $parcel->amount != 0) || $parcel->packaging_material_request == 0){
-                                                            AdminFinanceController::done_payment($shipment, 0);
-                                                        }
+                                                if ($parcel->booking_type_id == 2) {
+                                                    ShipmentChargesController::replacement($shipment);
+                                                } else if ($parcel->booking_type_id == 3) {
+                                                    ShipmentChargesController::try_and_buy($shipment);
+                                                }
+
+                                                if ($parcel->booking_type_id != 4) {
+                                                    if(($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != '') || $parcel->packaging_material_request == 0){
+                                                        AdminFinanceController::add_payment($shipment, 0);
+                                                    }
+                                                } else {
+                                                    if(($parcel->packaging_material_request == 1 && $parcel->amount != 0) || $parcel->packaging_material_request == 0){
+                                                        AdminFinanceController::done_payment($shipment, 0);
                                                     }
                                                 }
+
                                             }
 
                                             ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);

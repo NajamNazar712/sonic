@@ -751,20 +751,6 @@ class V2AdminPickupsController extends Controller
 
                 $pickup_request->save();
             }
-
-            if($shipment->user->account_type_id == 2){
-                if ($shipment->booking_type_id == 2) {
-                    ShipmentChargesController::replacement($shipment->id);
-                } else if ($shipment->booking_type_id == 3) {
-                    ShipmentChargesController::try_and_buy($shipment->id);
-                }
-
-                if ($shipment->booking_type_id != 4) {
-                    AdminFinanceController::add_payment($shipment->id, 0);
-                } else {
-                    AdminFinanceController::done_payment($shipment->id, 0);
-                }
-            }
         }
         $pickup_note_ids = array();
         foreach ($pickup_request_ids as $pickup_request_id) {
@@ -1254,19 +1240,6 @@ class V2AdminPickupsController extends Controller
 
                 $pickup_request->save();
 
-            }
-            if($shipment->user->account_type_id == 2){
-                if ($shipment->booking_type_id == 2) {
-                    ShipmentChargesController::replacement($shipment->id);
-                } else if ($shipment->booking_type_id == 3) {
-                    ShipmentChargesController::try_and_buy($shipment->id);
-                }
-
-                if ($shipment->booking_type_id != 4) {
-                    AdminFinanceController::add_payment($shipment->id, 0);
-                } else {
-                    AdminFinanceController::done_payment($shipment->id, 0);
-                }
             }
         }
         $pickup_note_ids = array();
