@@ -1764,6 +1764,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/levels', 'Admins\AdminCrmSettingsController@escalation_level_index')->name('levels.index');
             Route::post('/levels/store', 'Admins\AdminCrmSettingsController@escalation_level_store')->name('levels.store');
         });
+
+        Route::prefix('station_recovery_cron')->name('station_recovery_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@station_recovery_cron_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@station_recovery_cron_store')->name('store');
+        });
     });
 
 

@@ -2555,4 +2555,28 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    public function station_recovery_cron_index(){
+        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+        if($settings->exists()){
+            $settings = $settings->first();
+        }else{
+            $settings = '';
+        }
+
+        return view('admin.settings.station_recovery_cron_time')->with('settings', $settings);
+    }
+    public function station_recovery_cron_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+        if($settings->exists()){
+            $settings = $settings->first();
+        }else{
+            $settings = new GlobalSettings();
+            $settings->type = 'station_recovery_cron_time';
+        }
+        $settings->setting_value = $request->station_recovery_cron_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }
