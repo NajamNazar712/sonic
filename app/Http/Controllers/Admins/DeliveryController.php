@@ -2522,6 +2522,8 @@ class DeliveryController extends Controller
                                                         } else {
                                                             AdminFinanceController::done_payment($shipment, 0);
                                                         }
+                                                    }else{
+                                                        AdminFinanceController::add_corporate_delivered_cod($shipment);
                                                     }
 
                                                 }

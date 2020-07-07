@@ -2141,7 +2141,7 @@ class AdminFinanceController extends Controller
         }
 
         if ($valid) {
-            if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request && $amount != 0)) {
+            if ($account_type_id == 1) {
                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
                 if ($pending_payment->exists()) {
@@ -2259,6 +2259,53 @@ class AdminFinanceController extends Controller
                 }
             }
         }
+    }
+
+    static public function add_corporate_delivered_cod($shipment_id){
+        $type = 0;
+        $shipment = Shipment::find($shipment_id);
+
+        $amount = $shipment->amount;
+
+        if(!$shipment->packaging_material_request && $amount != 0){
+            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+            if ($pending_payment->exists()) {
+                $pending_payment = $pending_payment->first();
+
+                $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+
+                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
+
+                $pending_payment->save();
+            }
+            else{
+                $pending_payment = new PendingPayment();
+
+                $pending_payment->user_id = $shipment->user_id;
+                $pending_payment->total_shipments = 1;
+
+                $pending_payment->delivered_shipments = 1;
+                $pending_payment->returned_shipments = 0;
+                $pending_payment->adjusted_shipments = 0;
+
+                $pending_payment->save();
+            }
+
+            $pending_payment_shipment = new PendingPaymentShipment();
+            if ($amount != 0) {
+                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                $pending_payment_shipment->shipment_id = $shipment_id;
+                $pending_payment_shipment->type = $type;
+                $pending_payment_shipment->amount = $amount;
+                $pending_payment_shipment->charges = 0;
+                $pending_payment_shipment->gst = 0;
+                $pending_payment_shipment->payable = $amount;
+
+                $pending_payment_shipment->save();
+            }
+
+        }
+
     }
 
     static public function add_corporate_return_charges($shipment_id){
