@@ -2557,13 +2557,13 @@ class GlobalSettingsController extends Controller
 
     public function station_recovery_cron_index(){
         $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+        $time = '';
         if($settings->exists()){
             $settings = $settings->first();
-        }else{
-            $settings = '';
+            $time = $settings->setting_value;
         }
 
-        return view('admin.settings.station_recovery_cron_time')->with('settings', $settings);
+        return view('admin.settings.station_recovery.station_recovery_cron_time')->with('time', $time);
     }
     public function station_recovery_cron_store(Request $request) {
         $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
