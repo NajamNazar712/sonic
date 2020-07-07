@@ -85,7 +85,6 @@ Route::name('api.')->group(function () {
 
         Route::middleware('AdminAPIToken')->group(function () {
             Route::get('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
-
         });
 
     });
