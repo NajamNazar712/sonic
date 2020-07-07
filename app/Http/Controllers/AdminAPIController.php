@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\ReturnNoteImage;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AdminAPIController extends Controller
 {
@@ -68,11 +71,60 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function return_note_summary(){
-        $return_note = ReturnNote::where('status', 0);
-        if($return_note->exists()){
-            $return_note = $return_note->get();
+    public function return_note_details(Request $request){
+        $admin_id = $request->admin_id;
+        $return_note_id = $request->return_note_id;
+        if($return_note_id){
+            $return_note = ReturnNote::find($return_note_id);
+            if($return_note){
+                if($return_note->status == 1 || $return_note->status == 3){
+                    if($return_note->image !== null){
+                        $details = array();
+                        $img_url = '';
+                        $url = 'uploads/return_notes/' . $return_note->image;
+                        if(file_exists($url)){
+                            $img_url = asset('uploads/return_notes/' . $return_note->image);
+                        }else{
+                            $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note->image);
+                            if($exists){
+                                $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note->image, now()->addMinutes(5));
+                            }
+                        }
+                        $details['return_note_id'] = $return_note_id;
+                        $details['images'] = array('id' => 0,'image'=> $img_url);
+                        return response()->json(['status' => 0, 'message' => 'Images found', 'information' => $details]);
+                    }else{
+                        $return_note_images = ReturnNoteImage::where('return_note_id', $return_note_id);
+                        if($return_note_images->exists()){
+                            $return_note_images = $return_note_images->get();
+                            $details = array();
+                            foreach ($return_note_images as $return_note_image) {
+                                $img_url = '';
+                                $url = 'uploads/return_notes/' . $return_note_image->image;
+                                if(file_exists($url)){
+                                    $img_url = asset('uploads/return_notes/' . $return_note_image->image);
+                                }else{
+                                    $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
+                                    if($exists){
+                                        $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
+                                    }
+                                }
+                                $details['images'] = array('id' => $return_note_image->id,'image'=> $img_url);
+                            }
+                            return response()->json(['status' => 0, 'message' => 'Images found', 'information' => $details]);
+                        }else{
+                            return response()->json(['status' => 0, 'message' => 'No images found!', 'information' => '']);
+                        }
+                    }
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Return Note not ready for image upload!']);
+                }
 
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Return Note not found!']);
+            }
+        }else {
+            return response()->json(['status' => 1, 'message' => 'No return note scanned!']);
         }
     }
 }
