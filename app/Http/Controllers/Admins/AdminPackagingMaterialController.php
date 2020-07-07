@@ -606,7 +606,7 @@ class AdminPackagingMaterialController extends Controller
             return response()->json(['status'=>0,'error'=>"Warehouse does\'nt exists for requested hub!"]);
         }
         else {
-            $fulfilment_hub = $fulfilment_hub->first();
+            $fulfilment_hub = $fulfilment_hub->latest('id')->first();
         }
 
         $check = false;
