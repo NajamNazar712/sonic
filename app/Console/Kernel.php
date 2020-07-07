@@ -50,7 +50,6 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\PickupRegenerate',
 		'\App\Console\Commands\PickupReport',
 		'\App\Console\Commands\CancelledPickupRequestEmail',
-		'\App\Console\Commands\RateRejectionEmail',
 		'\App\Console\Commands\CompletedAgingReport',
 		'\App\Console\Commands\PendingCashCollectionReport',
 		'\App\Console\Commands\V2PickupCleanDuplicateData'
