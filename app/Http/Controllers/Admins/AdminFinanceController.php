@@ -1315,7 +1315,7 @@ class AdminFinanceController extends Controller
 
                 $shipment = Shipment::find($shipment_id);
                 
-                $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+                $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                 if($journey){
                        $start = $journey->created_at;
                        $difference = $start->diff($now)->days;
@@ -1462,7 +1462,7 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($request->id);
 
-            $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+            $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                  if($journey){
                         $start = $journey->created_at;
                         $difference = $start->diff($now)->days;
