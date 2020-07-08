@@ -52,7 +52,8 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\CancelledPickupRequestEmail',
 		'\App\Console\Commands\RateRejectionEmail',
 		'\App\Console\Commands\CompletedAgingReport',
-		'\App\Console\Commands\PendingCashCollectionReport'
+		'\App\Console\Commands\PendingCashCollectionReport',
+		'\App\Console\Commands\ZeroChargesReport',
 
         ];
 
@@ -156,6 +157,15 @@ class Kernel extends ConsoleKernel
             $completed_aging_report_time = $settings->setting_value . ':00';
             $schedule->command('completedAging:report')->dailyAt($completed_aging_report_time);
             $schedule->command('pendingCashCollection:report')->dailyAt($completed_aging_report_time);
+        }
+
+        $settings = GlobalSettings::where('type', 'zero_charges_report_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $zero_charges_report_time = $settings->setting_value . ':00';
+            $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time);
         }
     }
 	 /**

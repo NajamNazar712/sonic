@@ -1658,6 +1658,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('aging_settings_store', 'Admins\GlobalSettingsController@completed_aging_report_settings_store')->name('aging_settings_store');
         });
 
+        Route::prefix('zero_charges')->name('zero_charges.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@zero_charges_report_settings_index')->name('index');
+            Route::post('zero_charges_store', 'Admins\GlobalSettingsController@zero_charges_report_settings_store')->name('zero_charges_store');
+        });
+
         Route::prefix('overnight_overland_cargo_report')->name('overnight_overland_cargo_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@overnight_overland_cargo_report_list')->name('list');
