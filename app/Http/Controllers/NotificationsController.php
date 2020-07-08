@@ -4787,8 +4787,8 @@ class NotificationsController extends Controller
                   ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
                   ->join('users AS u', 'shipments.user_id', '=', 'u.id')
                   ->select('shipments.tracking_number as tracking_number','u.name as shipper', 'oc.name as origin','dc.name as destination','shipments.amount as cod','shipments.actual_weight as actual_weight')
-                  ->where('shipments.booking_type_id','!=', 2)
-                  ->where('shipments.amount','=', 0)
+                  ->where('u.account_type_id','!=', 2)
+                  // ->where('shipments.amount','!=', 0)
                   // ->groupBy('shipments.id')
                   ->get();
 
@@ -4808,6 +4808,8 @@ class NotificationsController extends Controller
                                         $zero_report .= '<tbody>';
 
                   foreach($users as $user){
+
+                    $charges = $user->weight_charges + $user->cash_handling_charges + $user->insurance_charges + $user->return_charges + $user->fuel_surcharge + $user->replacement_charges + $user->try_and_buy_charges + $user->packaging_material_charges + $user->intercept_charges + $user->nsa_osa_charges;
          
                       $zero_report .= '<tr>';
                       $zero_report .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $user->tracking_number . '</td>';
@@ -4816,17 +4818,18 @@ class NotificationsController extends Controller
                       $zero_report .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $user->destination . '</td>';
                       $zero_report .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $user->cod . '</td>';
                       $zero_report .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $user->actual_weight . '</td>';
+                      $zero_report .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $charges . '</td>';
                       $zero_report .= '</tr>';
+                      $charges=0;
 
                   }
                   $zero_report .= '</tbody></table>';
                   if (strpos($body, '[zero_report]') !== FALSE) {
                     $body = str_replace('[zero_report]', $zero_report, $body);
                       }
-                      $too="shaheryar.khan@trax.pk";
-                      $id = Admin::whereIn('id', [12, 49, 60])->first();
-                      if ($id->exists()) {
-                        $to = array_merge($to, $id->pluck('email')->toArray());
+                      $admins =Admin::whereIn('id', [12, 49, 60])->where('status', 1);
+                     if ($admins->exists()) {
+                         $to = $admins->distinct('id')->pluck('email')->toArray();
                       }
                       self::email($subject, $body, $to);                  
                 }
