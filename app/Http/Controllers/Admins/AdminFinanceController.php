@@ -1318,7 +1318,7 @@ class AdminFinanceController extends Controller
                 $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                 if($journey){
                        $start = $journey->created_at;
-                       $difference = $start->diff($now)->days;
+                        $difference = $start->diffInDays($now);
                        if($difference <= 6 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
                         $delivery_note_shipment->status = 8;
