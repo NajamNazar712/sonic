@@ -4781,13 +4781,16 @@ class NotificationsController extends Controller
               else if($id == 67){
 
                 $to = array();
+                $date =\Carbon\Carbon::yesterday()->format('Y-m-d');
                 $zero_report="";
                 $users = Shipment::join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                ->join('shipments_journey AS sj', 'shipments.id', '=', 'sj.shipment_id')
                 ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
                   ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
                   ->join('users AS u', 'shipments.user_id', '=', 'u.id')
                   ->select('shipments.tracking_number as tracking_number','u.name as shipper', 'oc.name as origin','dc.name as destination','shipments.amount as cod','shipments.actual_weight as actual_weight')
-                  ->where('u.account_type_id','!=', 2)
+                  ->where('sj.shipper_status_id', 2)
+                  ->where('sj.created_at','>=',$date)
                   // ->where('shipments.amount','!=', 0)
                   // ->groupBy('shipments.id')
                   ->get();
@@ -4810,7 +4813,9 @@ class NotificationsController extends Controller
                   foreach($users as $user){
 
                     $charges = $user->weight_charges + $user->cash_handling_charges + $user->insurance_charges + $user->return_charges + $user->fuel_surcharge + $user->replacement_charges + $user->try_and_buy_charges + $user->packaging_material_charges + $user->intercept_charges + $user->nsa_osa_charges;
-         
+
+                    if($charges == 0)
+                    {
                       $zero_report .= '<tr>';
                       $zero_report .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $user->tracking_number . '</td>';
                       $zero_report .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $user->shipper . '</td>';
@@ -4820,7 +4825,9 @@ class NotificationsController extends Controller
                       $zero_report .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $user->actual_weight . '</td>';
                       $zero_report .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $charges . '</td>';
                       $zero_report .= '</tr>';
-                      $charges=0;
+                    }
+                    // $charges=0;
+                      
 
                   }
                   $zero_report .= '</tbody></table>';
