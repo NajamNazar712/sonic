@@ -4676,7 +4676,7 @@ class NotificationsController extends Controller
 
                 if($user){
 
-                  array_push($to,$user->email);
+//                  array_push($to,$user->email);
                     $subject = $notification->subject;
                     $body = $notification->body;
                     // $user_bank_info = UserBankInfo::where('user_id', $user->id)->first();
