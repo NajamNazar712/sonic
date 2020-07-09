@@ -2466,7 +2466,8 @@ class GlobalSettingsController extends Controller
            $html .= '</tbody></table>';
         $body = $html;
         $to = array(12,49,216);
-        $mail = Mail::to($to);
+        $admins = Admin::whereIn('id', $to)->pluck('email')->toArray();
+        $mail = Mail::to($admins);
 
         $mail->send(new Notifications($subject, $body, null));
 
@@ -2525,7 +2526,8 @@ class GlobalSettingsController extends Controller
            $html .= '</tbody></table>';
         $body = $html;
         $to = array(12,49,216);
-        $mail = Mail::to($to);
+        $admins = Admin::whereIn('id', $to)->pluck('email')->toArray();
+        $mail = Mail::to($admins);
 
         $mail->send(new Notifications($subject, $body, null));
 
