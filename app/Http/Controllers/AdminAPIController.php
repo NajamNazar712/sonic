@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class AdminAPIController extends Controller
 {
@@ -41,7 +42,7 @@ class AdminAPIController extends Controller
             $user = Admin::where('email', $request->input('email_address'));
             if ($user->exists()) {
                 $user = $user->first();
-                if(Hash::check($request->input('password')) == $user->password){
+                if(Hash::check($request->input('password'), $user->password)){
                     $information = array();
 
                     $information['id'] = $user->id;
