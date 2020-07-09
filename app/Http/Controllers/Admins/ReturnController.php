@@ -1405,7 +1405,11 @@ class ReturnController extends Controller
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
-            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status'])
+            ->join('return_note_shipments', function ($join) {
+                $join->on('return_note_shipments.return_note_id', '=', 'return_notes.id')
+                    ->where('return_note_shipments.status',0);
+            })
+            ->select(['return_notes.id as return_note',DB::raw('count(return_note_shipments.shipment_id) as shipments_unverified_count'),'return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status'])
             ->whereIn('return_notes.status',[0,3]);
 
         if (session('role_id') != 1) {
@@ -1422,6 +1426,14 @@ class ReturnController extends Controller
             ->editColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('shipments_unverified_link', function($deliveries) {
+                if ($deliveries->shipments_unverified_count != 0) {
+                    return  $deliveries->shipments_unverified_count ;
                 }
                 else {
                     return 0;

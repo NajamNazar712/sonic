@@ -669,9 +669,15 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->join('delivery_note_shipments', function ($join) {
+                $join->on('delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where('delivery_note_shipments.status',0);
+            })
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone'])
+            ->select(['delivery_notes.id as delivery_note', DB::raw('count(delivery_note_shipments.shipment_id) as shipments_unverified_count'), 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone'])
             ->where('delivery_notes.status', 0);
+
+
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -693,6 +699,14 @@ class DeliveryController extends Controller
             ->editColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('shipments_unverified_link', function($deliveries) {
+                if ($deliveries->shipments_unverified_count != 0) {
+                    return  $deliveries->shipments_unverified_count ;
                 }
                 else {
                     return 0;
