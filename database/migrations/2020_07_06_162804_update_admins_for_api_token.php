@@ -14,7 +14,7 @@ class UpdateAdminsForApiToken extends Migration
     public function up()
     {
         Schema::table('admins', function (Blueprint $table) {
-            //
+            $table->string('api_token', 100)->nullable()->default(NULL);
         });
     }
 
@@ -26,7 +26,7 @@ class UpdateAdminsForApiToken extends Migration
     public function down()
     {
         Schema::table('admins', function (Blueprint $table) {
-            //
+            $table->dropColumn('api_token');
         });
     }
 }
