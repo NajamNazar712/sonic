@@ -57,14 +57,14 @@ class V2AdminReportController extends Controller
             $report->delete();
             V2PickupReportSummary::whereDate('date', $today)->delete();
         }
-        $pickup_requests = V2PickupRequest::whereDate('created_at', '<=', Carbon::today())->whereTime('created_at', '<=', $arrival_time);;
+        $pickup_request_attempts = V2PickupRequestAttempt::whereBetween('attempt_date', [$yesterday,$today]);
+//        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday)->groupBy('ra.pickup_request_id');
         
-        if($pickup_requests->exists()){
-           
-           $pickup_requests = $pickup_requests->get();
-     
-           if(!empty($pickup_requests)){
-               foreach ($pickup_requests as $pickup_request) {
+        if($pickup_request_attempts->exists()){
+            $pickup_request_attempts = $pickup_request_attempts->pluck('pickup_request_id')->toArray();
+           if(!empty($pickup_request_attempts)){
+               foreach ($pickup_request_attempts as $pickup_request_id) {
+                   $pickup_request = V2PickupRequest::find($pickup_request_id);
                    $department_id = NULL;
                    $category_id = NULL;
                    $legend_id = NULL;
@@ -72,7 +72,7 @@ class V2AdminReportController extends Controller
                    $received = 0;
                    $attempts = 0;
 
-   $total_pickups++;
+                   $total_pickups++;
                    $shipper_id = $pickup_request->shipper_id;
                    $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0);
                    if($sales_person->exists()){
@@ -81,7 +81,7 @@ class V2AdminReportController extends Controller
                    }
                    $reason_id = null;
 
-					$pickup_request_id = $pickup_request->id;
+                   $pickup_request_id = $pickup_request->id;
                    $status_id = $pickup_request->status_id;
                    $booked = $pickup_request->booked;
                    if($pickup_request->received !== null){
@@ -126,9 +126,9 @@ class V2AdminReportController extends Controller
                    $pickup_attempt_operation_status = array(7,8,9);
                    if(count($pickup_attempts) > 0){
                        foreach ($pickup_attempts as $pickup_attempt){
-                            if(in_array($pickup_attempt->reason_id, $pickup_attempt_operation_status)){
-                                $pickup_attempt_flag = TRUE;
-                            }
+                           if(in_array($pickup_attempt->reason_id, $pickup_attempt_operation_status)){
+                               $pickup_attempt_flag = TRUE;
+                           }
                        }
                    }
                    if($pickup_attempt_flag){
@@ -143,6 +143,10 @@ class V2AdminReportController extends Controller
                        $total_cut_off_time_after++;
                    }
 
+
+                   if($legend_id == null){
+                       $legend_id = 6;
+                   }
                    $pickup_report = new V2PickupReport();
                    $pickup_report->date = $today;
                    $pickup_report->pickup_request_id = $pickup_request_id;
@@ -181,15 +185,28 @@ class V2AdminReportController extends Controller
         $today = Carbon::today();  
         
 
-        $report_summary_data=V2PickupReportSummary::whereDate('created_at',$today)->first();
-        $stats['total']= $report_summary_data->total;
-        $stats['pending_operations']= $report_summary_data->pending_operations;
-        $stats['pending_sales']= $report_summary_data->pending_sales;
-        $stats['before_cut_off_time'] = $report_summary_data->before_cut_off_time;
-        $stats['after_cut_off_time'] = $report_summary_data->after_cut_off_time;
-        $stats['attempted_and_picked'] = $report_summary_data->attempted_and_picked;
-        $stats['attempted_and_not_picked'] = $report_summary_data->attempted_and_not_picked;
-        $stats['attempted_failed'] = $report_summary_data->attempted_failed;
+        $report_summary_data=V2PickupReportSummary::whereDate('created_at',$today);
+        if($report_summary_data->exists()){
+            $report_summary_data = $report_summary_data->first();
+            $stats['total']= $report_summary_data->total;
+            $stats['pending_operations']= $report_summary_data->pending_operations;
+            $stats['pending_sales']= $report_summary_data->pending_sales;
+            $stats['before_cut_off_time'] = $report_summary_data->before_cut_off_time;
+            $stats['after_cut_off_time'] = $report_summary_data->after_cut_off_time;
+            $stats['attempted_and_picked'] = $report_summary_data->attempted_and_picked;
+            $stats['attempted_and_not_picked'] = $report_summary_data->attempted_and_not_picked;
+            $stats['attempted_failed'] = $report_summary_data->attempted_failed;
+        }else{
+            $stats['total']= 0;
+            $stats['pending_operations']= 0;
+            $stats['pending_sales']= 0;
+            $stats['before_cut_off_time'] = 0;
+            $stats['after_cut_off_time'] = 0;
+            $stats['attempted_and_picked'] = 0;
+            $stats['attempted_and_not_picked'] = 0;
+            $stats['attempted_failed'] = 0;
+        }
+
 
         $legends = V2PickupReportLegend::all();
         $department = DB::connection('reports')->table('admin_departments')->whereIn('id',[6,7])->get();
@@ -213,9 +230,10 @@ class V2AdminReportController extends Controller
             'a.name as salesperson','v2_pickup_reports.expected_shipments as expected_shipments',
             'v2_pickup_reports.received_shipments as received_shipments','v2_pickup_reports.difference_shipments as difference_shipments',
             'ad.name as department','v.attempts as attempted_count','usi.poc AS contact_person', 'usi.vendor as vendor',
-            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id')
-            ->whereDate('v2_pickup_reports.created_at',$today)
-            ;
+            'usi.phone AS contact_number','usi.pickup_address AS address', 'ci.name AS city','v2_pickup_reports.category_id as category_id','v2_pickup_reports.legend_id as legend_id');
+        if ($request->get('search_date_from') == null) {
+            $pickup_report = $pickup_report->whereDate('v2_pickup_reports.date',$today);
+            }
         $datatables = Datatables::of($pickup_report)
         ->setRowAttr([
             'class' => function ($pickup_report) {
@@ -304,7 +322,7 @@ class V2AdminReportController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('v2_pickup_reports.created_at', [$from,$to]);
+            $datatables->whereBetween('v2_pickup_reports.date', [$from,$to]);
         }
 
         return $datatables->make(true);

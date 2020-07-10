@@ -70,6 +70,7 @@
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         {{--<th class="border-primary border-darken-1">Consignee Contact</th>--}}
                         <th class="border-primary border-darken-1">Consignee Address</th>
@@ -831,7 +832,8 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle vendor'},
+                    {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     // {data: 'phone', name: 'phone', class: 'align-middle phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},

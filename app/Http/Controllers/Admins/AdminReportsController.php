@@ -4030,15 +4030,9 @@ use Yajra\Datatables\Datatables;
                                                     ->orWhereNull('zcc.class')
                                                     ->orWhereIn('zcc.class', [0, 1]);
                                                 })
-                                                ->where(function ($sub_sub_sub_sub_sub_sub_query) {
-                                                    $sub_sub_sub_sub_sub_sub_query->where(function ($sub_sub_sub_sub_sub_sub_sub_query) {
-                                                        $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::connection('reports')->raw('usi.city_id'))
-                                                        ->where('sj.shipper_status_id', '=', 2);
-                                                    })
-                                                    ->orWhere(function ($sub_sub_sub_sub_sub_sub_sub_query) {
-                                                        $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
-                                                        ->where('sj.shipper_status_id', '=', 4);
-                                                    });
+                                                ->where(function ($sub_sub_sub_sub_sub_sub_sub_query) {
+                                                    $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::connection('reports')->raw('usi.city_id'))
+                                                    ->where('sj.shipper_status_id', '=', 2);
                                                 });
                                             });
                                         })

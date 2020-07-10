@@ -810,6 +810,7 @@ class RiderAPIController extends Controller {
 
 
                     $deliveries = array();
+                    $deliveries['delivery_note_id'] = $delivery_note->id;
                     $deliveries['shipment_id'] = $shipment_id;
                     $deliveries['tracking_number'] = $tracking_number;
                     $deliveries['consignee_name'] = $consignee_name;

@@ -1161,9 +1161,21 @@
 					}
 				});
 				if(zero_charges){
+					var html = '';
+
+					html += 'Charges are zero for the following Shipments<br/>';
+					$.each(shipments_array, function(index, tracking_number) {
+						html += tracking_number + '<br/>';
+					});
+
+					html += '<br/>Select yes to pay!';
+
+					content = document.createElement('div');
+					content.innerHTML = html;
+
 					swal({
 						title: 'Are You Sure?',
-						text: 'Charges are zero for these '+ shipments_array.toString() +' selected Shipment(s), select yes to pay!',
+						content: content,
 						icon: 'warning',
 						buttons: {
 							cancel: {

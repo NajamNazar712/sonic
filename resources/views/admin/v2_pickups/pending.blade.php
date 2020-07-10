@@ -66,7 +66,7 @@
                                     <th class="border-primary border-darken-1">Pickup Note ID</th>
                                     <th class="border-primary border-darken-1">Shipment(s) Booked</th>
                                     <th class="border-primary border-darken-1">Shipment(s) Rider Picked</th>
-                                    <th class="border-primary border-darken-1">Shipment(s) Received</th>
+{{--                                    <th class="border-primary border-darken-1">Shipment(s) Received</th>--}}
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Contact Person</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
@@ -261,7 +261,7 @@
                         head.push('Pickup Note ID');
                         head.push('Shipment(s) Booked');
                         head.push('Shipment(s) Rider Picked');
-                        head.push('Shipment(s) Received');
+                        // head.push('Shipment(s) Received');
                         head.push('Shipper');
                         head.push('Contact Person');
                         head.push('Vendor');
@@ -288,7 +288,7 @@
                             row.push(values.pickup_note_id);
                             row.push(values.booked);
                             row.push(values.shipments_rider_picked);
-                            row.push(values.received);
+                            // row.push(values.received);
                             row.push(values.shipper);
                             row.push(values.contact_person);
                             row.push(values.vendor_name);
@@ -448,8 +448,8 @@
                 {data: 'last_rider', name: 'lr.name', class: 'align-middle last_rider'},
                 {data: 'pickup_note_no', name: 'vpn.pickup_note_id', class: 'align-middle pickup_note_no'},
                 {data: 'bookings_link', name: 'v2_pickup_requests.booked', class: 'align-middle text-center bookings_link'},
-                {data: 'shipments_rider_picked', name: 'shipments_rider_picked', class: 'align-middle shipments_rider_picked', orderable: false, searchable: false},
-                {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
+                {data: 'shipments_rider_picked', name: 'vpr.shipments', class: 'align-middle shipments_rider_picked'},
+                // {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                 {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
@@ -486,7 +486,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments_rider_picked') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action')) {
+                    if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.pickup_status')){
                         $(drop_select).appendTo($(search))
@@ -691,31 +691,31 @@
                     }
                 });
             });
-            $('#datatable tbody').on('click','tr td.received_link button',function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                $('#pending_bookings_modal .modal-body').html('');
-                $('#pending_bookings_modal').modal('show');
+            {{--$('#datatable tbody').on('click','tr td.received_link button',function () {--}}
+            {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
+            {{--    $('#pending_bookings_modal .modal-body').html('');--}}
+            {{--    $('#pending_bookings_modal').modal('show');--}}
 
-                $.ajax({
-                    url: '{!! route('admin.v2_pickups.pending.bookings.received') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'pickup_request_id': id
-                    }
-                })
-                .done(function(data) {
-                    if (data) {
-                        var shipments = '';
-                        if (data.booked) {
-                            $.each(data.booked, function(index, tracking_numbers) {
-                                shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
-                            });
-                        }
-                        $('#pending_bookings_modal .modal-body').html(shipments);
-                    }
-                });
-            });
+            {{--    $.ajax({--}}
+            {{--        url: '{!! route('admin.v2_pickups.pending.bookings.received') !!}',--}}
+            {{--        method: 'POST',--}}
+            {{--        data: {--}}
+            {{--            '_token': '{{ csrf_token() }}',--}}
+            {{--            'pickup_request_id': id--}}
+            {{--        }--}}
+            {{--    })--}}
+            {{--    .done(function(data) {--}}
+            {{--        if (data) {--}}
+            {{--            var shipments = '';--}}
+            {{--            if (data.booked) {--}}
+            {{--                $.each(data.booked, function(index, tracking_numbers) {--}}
+            {{--                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';--}}
+            {{--                });--}}
+            {{--            }--}}
+            {{--            $('#pending_bookings_modal .modal-body').html(shipments);--}}
+            {{--        }--}}
+            {{--    });--}}
+            {{--});--}}
             $('#datatable tbody').on('click', 'tr td.pickup_note_no button.print', function() {
                 var pickup_note_id = parseInt($(this).attr('rel'));
 

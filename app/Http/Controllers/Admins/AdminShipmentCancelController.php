@@ -65,22 +65,25 @@ class AdminShipmentCancelController extends Controller
                         V2AdminPickupsController::cancel($shipment->id);
 
                         $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
-                        $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id);
-                        if($pickup_requests->exists()){
-                            $pickup_requests = $pickup_requests->get();
-                            $flag = true;
-                            foreach ($pickup_requests as $pickup_request){
-                                $is_shipment = Shipment::find($pickup_request->shipment_id);
-                                if($is_shipment->shipper_status_id != 17){
-                                    $flag = false;
+                        if($pickup_request_shipment){
+                            $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id);
+                            if($pickup_requests->exists()){
+                                $pickup_requests = $pickup_requests->get();
+                                $flag = true;
+                                foreach ($pickup_requests as $pickup_request){
+                                    $is_shipment = Shipment::find($pickup_request->shipment_id);
+                                    if($is_shipment->shipper_status_id != 17){
+                                        $flag = false;
+                                    }
+                                }
+                                if($flag == true){
+                                    $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
+                                    $pickup_request->status_id = 4;
+                                    $pickup_request->save();
                                 }
                             }
-                            if($flag == true){
-                                $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
-                                $pickup_request->status_id = 4;
-                                $pickup_request->save();
-                            }
                         }
+                        
                         ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
                     }
                 }

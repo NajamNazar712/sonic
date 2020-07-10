@@ -79,4 +79,13 @@ Route::name('api.')->group(function () {
 
 
 	});
+
+    Route::prefix('admin')->name('admin.')->group(function() {
+        Route::post('login', 'AdminAPIController@login')->name('login');
+
+        Route::middleware('AdminAPIToken')->group(function () {
+            Route::get('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
+        });
+
+    });
 });

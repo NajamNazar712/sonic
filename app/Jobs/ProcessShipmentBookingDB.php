@@ -1,0 +1,342 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Http\Models\Shipment;
+use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Controllers\NotificationsController;
+
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\City;
+
+class ProcessShipmentBookingDB implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $booking;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct(array $booking)
+    {
+        $this->queue = 'shipment_booking_db';
+        $this->booking = $booking;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        $user_id = $this->booking['user_id'];
+        $service_type_id = $this->booking['service_type_id'];
+        $pickup_address_id = $this->booking['pickup_address_id'];
+        $pickup_city_id = UserShippingInfo::find($this->booking['pickup_address_id'])->city_id;
+
+        if (strtolower($this->booking['information_display']) == 'yes') {
+            $information_display = TRUE;
+        } else {
+            $information_display = FALSE;
+        }
+
+        $consignee_city_id = City::where('name', $this->booking['consignee_city_name'])->first()->id;
+        $consignee_name = $this->booking['consignee_name'];
+        $consignee_address = $this->booking['consignee_address'];
+        $consignee_phone_number_1 = substr_replace($this->booking['consignee_phone_number_1'], '-', 4, 0);
+
+        if (!empty(trim($this->booking['consignee_phone_number_2']))) {
+            $consignee_phone_number_2 = substr_replace($this->booking['consignee_phone_number_2'], '-', 4, 0);
+        } else {
+            $consignee_phone_number_2 = NULL;
+        }
+
+        if (!empty(trim($this->booking['consignee_email_address']))) {
+            $consignee_email_address = $this->booking['consignee_email_address'];
+        } else {
+            $consignee_email_address = NULL;
+        }
+
+        if (!empty(trim($this->booking['order_id']))) {
+            $order_id = $this->booking['order_id'];
+        } else {
+            $order_id = NULL;
+        }
+
+        if (!empty(trim($this->booking['special_instructions']))) {
+            $special_instructions = $this->booking['special_instructions'];
+        } else {
+            $special_instructions = NULL;
+        }
+
+        $estimated_weight = $this->booking['estimated_weight'];
+        $shipping_mode_id = $this->booking['shipping_mode_id'];
+
+        if ($shipping_mode_id == 4) {
+            $same_day_timing_id = $this->booking['same_day_timing_id'];
+        } else {
+            $same_day_timing_id = NULL;
+        }
+
+        $amount = $this->booking['amount'];
+
+        $payment_mode_id = $this->booking['payment_mode_id'];
+
+        $charges_mode_id = $this->booking['charges_mode_id'];
+
+        $package_type = TRUE;
+
+        if ($service_type_id == 3) {
+            $try_and_buy_charges = $this->booking['try_and_buy_charges'];
+            $amount = 0;
+        }
+        else {
+            $try_and_buy_charges = NULL;
+        }
+        $pieces_quantity = 1;
+
+        if($service_type_id == 1){
+            if (isset($this->booking['pieces_quantity'])) {
+                $pieces_quantity = $this->booking['pieces_quantity'];
+            }
+        }
+        if ($this->booking['account_type_id'] == 1) {
+            $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges,$pieces_quantity);
+        }
+        else {
+            $delivery_type_id = $this->booking['delivery_type_id'];
+
+            if ($delivery_type_id == 2) {
+                $consignee_address = 'TRAX Office ' . $this->booking['consignee_city_name'];
+            }
+
+            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity);
+        }
+
+        $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+        if ($service_type_id == 1 || $service_type_id == 5) {
+            $item_product_type_id = $this->booking['item_product_type_id'];
+
+            if (!empty(trim($this->booking['item_description']))) {
+                $item_description = $this->booking['item_description'];
+            } else {
+                $item_description = NULL;
+            }
+
+            $item_quantity = $this->booking['item_quantity'];
+
+            if (strtolower($this->booking['item_insurance']) == 'yes') {
+                $item_price = str_replace(',', '', $this->booking['item_price']);
+                $item_insurance = TRUE;
+            } else {
+                $item_price = NULL;
+                $item_insurance = FALSE;
+            }
+
+            $item_type = 0;
+
+            ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            if($service_type_id == 1 && $pieces_quantity > 1){
+                ShipperShipmentBookController::create_shipment_pieces($shipment_id, $pieces_quantity);
+            }
+        }
+        else if ($service_type_id == 2) {
+            $item_product_type_id = $this->booking['item_product_type_id'];
+
+            if (!empty(trim($this->booking['item_description']))) {
+                $item_description = $this->booking['item_description'];
+            } else {
+                $item_description = NULL;
+            }
+
+            $item_quantity = $this->booking['item_quantity'];
+
+            if (strtolower($this->booking['item_insurance']) == 'yes') {
+                $item_price = str_replace(',', '', $this->booking['item_price']);
+                $item_insurance = TRUE;
+            } else {
+                $item_price = NULL;
+                $item_insurance = FALSE;
+            }
+
+            $item_type = 0;
+
+            ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+
+            $replacement_item_product_type_id = $this->booking['replacement_item_product_type_id'];
+
+            if (!empty(trim($this->booking['replacement_item_description']))) {
+                $replacement_item_description = $this->booking['replacement_item_description'];
+            } else {
+                $replacement_item_description = NULL;
+            }
+
+            $replacement_item_quantity = $this->booking['replacement_item_quantity'];
+
+            $replacement_item_price = NULL;
+            $replacement_item_insurance = NULL;
+            $replacement_item_type = 1;
+
+            ShipperShipmentBookController::add_item($shipment_id, $replacement_item_product_type_id, $replacement_item_description, $replacement_item_quantity, $replacement_item_price, $replacement_item_insurance, $replacement_item_type);
+        }
+        else if ($service_type_id == 3) {
+            $try_and_buy_cod_amount = intval($try_and_buy_charges);
+            $item_product_type_id = $this->booking['item_product_type_id_1'];
+
+            if (!empty(trim($this->booking['item_description_1']))) {
+                $item_description = $this->booking['item_description_1'];
+            } else {
+                $item_description = NULL;
+            }
+
+            $item_quantity = $this->booking['item_quantity_1'];
+
+            if (strtolower($this->booking['item_insurance_1']) == 'yes') {
+                $item_insurance = TRUE;
+            } else {
+                $item_insurance = FALSE;
+            }
+            $item_price = str_replace(',', '', $this->booking['item_price_1']);
+
+            $item_type = 2;
+            $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
+            ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+
+            if($this->booking['item_product_type_id_2'] != null){
+                $item_product_type_id = $this->booking['item_product_type_id_2'];
+
+                if (!empty(trim($this->booking['item_description_2']))) {
+                    $item_description = $this->booking['item_description_2'];
+                } else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $this->booking['item_quantity_2'];
+
+
+                if (strtolower($this->booking['item_insurance_2']) == 'yes') {
+                    $item_insurance = TRUE;
+                } else {
+                    $item_insurance = FALSE;
+                }
+                $item_price = str_replace(',', '', $this->booking['item_price_2']);
+
+                $item_type = 2;
+
+                $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
+                ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            }
+
+            if($this->booking['item_product_type_id_3'] != null){
+                $item_product_type_id = $this->booking['item_product_type_id_3'];
+
+                if (!empty(trim($this->booking['item_description_3']))) {
+                    $item_description = $this->booking['item_description_3'];
+                } else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $this->booking['item_quantity_3'];
+
+                if (strtolower($this->booking['item_insurance_3']) == 'yes') {
+                    $item_insurance = TRUE;
+                } else {
+                    $item_insurance = FALSE;
+                }
+                $item_price = str_replace(',', '', $this->booking['item_price_3']);
+
+                $item_type = 2;
+
+                $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
+                ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            }
+
+            if($this->booking['item_product_type_id_4'] != null){
+                $item_product_type_id = $this->booking['item_product_type_id_4'];
+
+                if (!empty(trim($this->booking['item_description_4']))) {
+                    $item_description = $this->booking['item_description_4'];
+                } else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $this->booking['item_quantity_4'];
+
+                if (strtolower($this->booking['item_insurance_4']) == 'yes') {
+                    $item_insurance = TRUE;
+                } else {
+                    $item_insurance = FALSE;
+                }
+                $item_price = str_replace(',', '', $this->booking['item_price_4']);
+
+                $item_type = 2;
+
+                $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
+                ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            }
+
+            if($this->booking['item_product_type_id_5'] != null){
+                $item_product_type_id = $this->booking['item_product_type_id_5'];
+
+                if (!empty(trim($this->booking['item_description_5']))) {
+                    $item_description = $this->booking['item_description_5'];
+                } else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $this->booking['item_quantity_5'];
+
+                if (strtolower($this->booking['item_insurance_5']) == 'yes') {
+                    $item_insurance = TRUE;
+                } else {
+                    $item_insurance = FALSE;
+                }
+                $item_price = str_replace(',', '', $this->booking['item_price_5']);
+
+                $item_type = 2;
+
+                $try_and_buy_cod_amount = $try_and_buy_cod_amount + intval($item_price);
+
+                ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+            }
+            $shipment_try_and_buy = Shipment::find($shipment_id);
+            $shipment_try_and_buy->amount = $try_and_buy_cod_amount;
+            $shipment_try_and_buy->save();
+        }
+
+        if(!empty($this->booking['nsas']) && $this->booking['nsa']) {
+            $present = '';
+            $address_array = preg_split("/[ ,]+/", $this->booking['consignee_address']);
+
+            foreach ($this->booking['nsas'] as $nsa) {
+                foreach ($address_array as $address_value) {
+                    if (strtolower($nsa) == strtolower($address_value)) {
+                        if ($present != '') {
+                            $present .= ', ' . $address_value;
+                        }
+                        else {
+                            $present = $address_value;
+                        }
+                    }
+                }
+            }
+
+            if ($present != '') {
+                NotificationsController::send(32, $shipment_id, $present);
+            }
+        }
+
+        NotificationsController::send(2, $shipment_id);
+    }
+}

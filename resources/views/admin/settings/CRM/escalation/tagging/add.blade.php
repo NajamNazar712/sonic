@@ -340,7 +340,7 @@
                         dropdownParent:$('#settings_form')
                     }).bind('change', function () {
                         var id = $(this).val();
-                        if(id != ''){
+                        if(id.length > 0){
                             $('#tat_{{$index}}').data('rule-required', true);
                             $('#tat_{{$index}}').data('msg-required', 'TAT is required');
                         }

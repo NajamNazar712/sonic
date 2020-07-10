@@ -2555,7 +2555,40 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function station_recovery_cron_index(){
+    public function zero_charges_report_settings_index() {
+       
+        $settings = GlobalSettings::where('type', 'zero_charges_report_time')->first();
+
+        if ($settings) {
+            $zero_charges_report_time = $settings->setting_value;
+        }
+        else {
+            $zero_charges_report_time = 10;
+        }
+
+        return view('admin.settings.zero_charges_report_settings')->with(['zero_charges_report_time' => $zero_charges_report_time]);
+    }
+
+    public function zero_charges_report_settings_store(Request $request) {
+        $request_settings = GlobalSettings::where('type', 'zero_charges_report_time');
+
+        if ($request_settings->exists()) {
+            $request_settings = $request_settings->first();
+        }
+        else {
+            $request_settings = new GlobalSettings();
+
+            $request_settings->type = 'zero_charges_report_time';
+        }
+
+        $request_settings->setting_value = $request->zero_charges_report_time;
+
+        $request_settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+	public function station_recovery_cron_index(){
         $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
         $time = '';
         if($settings->exists()){

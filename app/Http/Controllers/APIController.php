@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistSetting;
@@ -17,6 +18,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
+use Illuminate\Support\Facades\Hash;
 use Validator;
 use Illuminate\Validation\Rule;
 
@@ -319,7 +321,7 @@ class APIController extends Controller
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
-			'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'numeric', 'min:0'],
+			'try_and_buy_fees' => ['required_if:service_type_id,3', 'nullable', 'numeric', 'min:0'],
             'items' => ['required_if:service_type_id,3', 'array', 'min:1', 'max:5'],
             'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,1000'],
@@ -536,7 +538,7 @@ class APIController extends Controller
         $amount = $request->input('amount');
         $payment_mode_id = $request->input('payment_mode_id');
 		if ($service_type_id == 3) {
-              $try_and_buy_charges = $request->input('try_and_buy_charges');
+              $try_and_buy_charges = $request->input('try_and_buy_fees');
               $amount = 0;
           }
           else {
@@ -1657,4 +1659,5 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
         }
     }
+
 }

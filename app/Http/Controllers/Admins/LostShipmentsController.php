@@ -193,18 +193,17 @@ class LostShipmentsController extends Controller
     }
     public function get_shipment_info(Request $request)
     {
-            $passing_status_array = array(1, 14, 17, 25, 30, 31, 60);
+            $passing_status_array = array(1, 5, 14, 17, 25, 30, 31, 60);
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $passing_status_array);
                 if ($shipment->exists()) {
                     $data = array();
                     $shipment = $shipment->first();
-                    
-                    $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+
+                    $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                     if($journey)
                     {
-                        $verification = $journey->verification;
                         $verification = $journey->verification;
                         if($verification == 0)
                         {
@@ -245,7 +244,7 @@ class LostShipmentsController extends Controller
             }
     }
     public function add_lost_shipments(Request $request){
-        $passing_status_array = array(1, 14, 17, 18, 25, 30, 31, 60);
+        $passing_status_array = array(1, 5, 14, 17, 18, 25, 30, 31, 60);
         $intransit_status_array = array(3, 21, 26, 32);
         $shipments = explode(',', $request->shipment_ids);
         $remarks = $request->remarks;
@@ -254,6 +253,18 @@ class LostShipmentsController extends Controller
                 $shipment_details = Shipment::where('id', $shipment)->whereNotIn('shipper_status_id', $passing_status_array);
                 if ($shipment_details->exists()) {
                     $shipment_details = $shipment_details->first();
+
+                    $journey=  ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest('id')->first();
+                    if($journey)
+                    {
+                        $verification = $journey->verification;
+                        if($verification == 0)
+                        {
+                            return response()->json(['status' => 0, 'error' => 'Shipment is unverified!']);
+                        }
+
+                    }
+
                     if (in_array($shipment_details->shipper_status_id, $intransit_status_array)) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
                         if ($cargo_consignment_shipment->exists()) {

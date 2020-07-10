@@ -48,7 +48,10 @@ class AdminShipmentHandoverController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-
+            $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
+            if($handover_shipment->exists()){
+                return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
+            }
             $details = array();
 
             $details['id'] = $shipment->id;
@@ -70,7 +73,7 @@ class AdminShipmentHandoverController extends Controller
 
       if ($shipment->exists()) {
           $shipment = $shipment->first();
-          $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id)->where('status', 1);
+          $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id)->whereIn('status', [1,3]);
           if($handover_shipments->exists()){
             $details = array();
             $details['id'] = $shipment->id;
@@ -83,7 +86,7 @@ class AdminShipmentHandoverController extends Controller
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
           }
           else {
-            return ['status' => 1, 'error' => 'Shipment not in Handover/ not ready to update!'];
+            return ['status' => 1, 'error' => 'Shipment not in Handover / not ready to update!'];
           }
          }
          else {
@@ -130,7 +133,7 @@ class AdminShipmentHandoverController extends Controller
         $shipment_ids = explode(',', $request->shipment_ids);
         $handover_ids = array();
         foreach ($shipment_ids as $shipment_id) {
-            $handover_shipments = HandoverShipments::where('shipment_id', $shipment_id)->where('status',1);
+            $handover_shipments = HandoverShipments::where('shipment_id', $shipment_id)->whereIn('status',[1,3]);
             if($handover_shipments->exists()){
                 $handover_shipments = $handover_shipments->latest()->first();
                 $handover_id = $handover_shipments->handover_id;
@@ -237,6 +240,14 @@ class AdminShipmentHandoverController extends Controller
           if($handover_request) {
             $handover_request->status_id = 2;
             $handover_request->save();
+            $handover_shipments = $handover_request->handover_note_shipments;
+            if(count($handover_shipments)){
+                foreach ($handover_shipments as $shipment){
+                    $shipment->status = 3;
+                    $shipment->save();
+                    HandoverShipmentJourneyController::add($shipment->shipment_id,$handover_request->id,3);
+                }
+            }
           }
           else{
             return ['status' => 1, 'error' => 'Handover note already updated!'];

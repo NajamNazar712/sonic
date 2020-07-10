@@ -55,186 +55,106 @@ class AdminPickupsController extends Controller
 
     static public function generate($shipment_id) {
               $shipment = Shipment::find($shipment_id);
+              if(in_array($shipment->shipper_status_id, [1, 17])){
 
-              if($shipment->shipper_status_id == 17){
-                  $shipment->shipper_status_id == 1;
-                  $shipment->consignee_status_id == 1;
-//                  ShipmentsJourneyController::add($shipment_id,1,1,NULL,'Pickup generated',NULL,6);
-              }
-              $shipment->pickup_date = Carbon::now();
-              $shipment->save();
-              $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->whereIn('status_id', [1,3]);
+                  if($shipment->shipper_status_id == 17){
+                      $shipment->shipper_status_id == 1;
+                      $shipment->consignee_status_id == 1;
+                  }
+                  $shipment->pickup_date = Carbon::now();
+                  $shipment->save();
+                  $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->whereIn('status_id', [1,3]);
 
-              $shipments_count = 0;
-              $shipments = array();
-              $try_and_buy = FALSE;
-              $vendor = FALSE;
-              if ($pickup_request->exists()) {
-                $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
+                  $shipments_count = 0;
+                  $shipments = array();
+                  $try_and_buy = FALSE;
+                  $vendor = FALSE;
+                  $allow = FALSE;
+                  if ($pickup_request->exists()) {
+                      $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
+                      if(!V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->exists()){
+                          $bookings = $pickup_request->booked + 1;
 
-                $bookings = $pickup_request->booked + 1;
+                          $pickup_request->booked = $bookings;
 
-                $pickup_request->booked = $bookings;
+                          $pickup_request->save();
 
-                $pickup_request->save();
-              }
-              else {
-                $existing_pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->orderBy('id', 'DESC')->first();
-                if($existing_pickup_request){
-                    if($existing_pickup_request->status_id == 4 && $existing_pickup_request->renew == 0){
-                        $existing_pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $existing_pickup_request->id)->get();
-                        if($existing_pickup_request_shipments){
-                            foreach ($existing_pickup_request_shipments as $pickup_request_shipment){
-                                $existing_shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
-                                if($existing_shipment->shipper_status_id == 1){
-                                    $shipments[] = $existing_shipment->id;
-                                    $shipments_count++;
-                                    if($existing_shipment->booking_type_id == 3){
-                                        $try_and_buy = TRUE;
-                                    }
-                                    if(($vendor == FALSE) && ($existing_shipment->pickup_address->vendor != NULL)){
-                                        $vendor = TRUE;
-                                    }
-                                }
-                            }
-                        }
-                        $existing_pickup_request->renew = 1;
-                        $existing_pickup_request->save();
-                    }
-                }
+                          $allow = TRUE;
+                      }
+                  }
+                  else {
+                      $existing_pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->orderBy('id', 'DESC')->first();
+                      if($existing_pickup_request){
+                          if($existing_pickup_request->status_id == 4 && $existing_pickup_request->renew == 0){
+                              $existing_pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $existing_pickup_request->id)->get();
+                              if($existing_pickup_request_shipments){
+                                  foreach ($existing_pickup_request_shipments as $pickup_request_shipment){
+                                      $existing_shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
+                                      if($existing_shipment->shipper_status_id == 1){
+                                          $shipments[] = $existing_shipment->id;
+                                          $shipments_count++;
+                                          if($existing_shipment->booking_type_id == 3){
+                                              $try_and_buy = TRUE;
+                                          }
+                                          if(($vendor == FALSE) && ($existing_shipment->pickup_address->vendor != NULL)){
+                                              $vendor = TRUE;
+                                          }
+                                      }
+                                  }
+                              }
+                              $existing_pickup_request->renew = 1;
+                              $existing_pickup_request->save();
+                          }
+                      }
 
-                $pickup_request = new V2PickupRequest();
+                      $pickup_request = new V2PickupRequest();
 
-                $pickup_request->shipper_id = $shipment->user_id;
-                $pickup_request->pickup_address_id = $shipment->pickup_address_id;
-                $pickup_request->city_id = $shipment->pickup_address->city_id;
-                $pickup_request->booked = $shipments_count + 1;
-                if(($vendor == FALSE) && ($shipment->pickup_address->vendor != NULL)){
-                    $vendor = TRUE;
-                }
-                if($shipment->booking_type_id == 3){
-                    $try_and_buy = TRUE;
-                }
-                if($try_and_buy){
-                    $pickup_request->try_and_buy = 1;
-                }
-                if($vendor){
-                    $pickup_request->vendor = 1;
-                }
-                $pickup_request->save();
-              }
+                      $pickup_request->shipper_id = $shipment->user_id;
+                      $pickup_request->pickup_address_id = $shipment->pickup_address_id;
+                      $pickup_request->city_id = $shipment->pickup_address->city_id;
+                      $pickup_request->booked = $shipments_count + 1;
+                      if(($vendor == FALSE) && ($shipment->pickup_address->vendor != NULL)){
+                          $vendor = TRUE;
+                      }
+                      if($shipment->booking_type_id == 3){
+                          $try_and_buy = TRUE;
+                      }
+                      if($try_and_buy){
+                          $pickup_request->try_and_buy = 1;
+                      }
+                      if($vendor){
+                          $pickup_request->vendor = 1;
+                      }
+                      $pickup_request->save();
 
-              ShipmentsPickupJourneyController::add($shipment_id, 1, NULL, $pickup_request->id);
+                      $allow = TRUE;
+                  }
 
-        //      $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $shipment_id);
-        //
-        //      if (!$pickup_request_assigned_shipment->exists()) {
-                $pickup_request_assigned_shipment = new V2PickupRequestShipment();
+                  if ($allow) {
+                      ShipmentsPickupJourneyController::add($shipment_id, 1, NULL, $pickup_request->id);
 
-                $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
-                $pickup_request_assigned_shipment->shipment_id = $shipment_id;
-                $pickup_request_assigned_shipment->status = 0;
+                      $pickup_request_assigned_shipment = new V2PickupRequestShipment();
 
-                $pickup_request_assigned_shipment->save();
-        //      }
-        //      else {
-        //        $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
-        //
-        //        $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
-        //        $pickup_request_assigned_shipment->status = 0;
-        //
-        //        $pickup_request_assigned_shipment->save();
-        //      }
+                      $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
+                      $pickup_request_assigned_shipment->shipment_id = $shipment_id;
+                      $pickup_request_assigned_shipment->status = 0;
 
-              if(count($shipments) > 0){
-                  foreach ($shipments as $is_shipment){
+                      $pickup_request_assigned_shipment->save();
 
-                      ShipmentsPickupJourneyController::add($is_shipment, 1, NULL, $pickup_request->id);
+                      if (count($shipments) > 0) {
+                          foreach ($shipments as $is_shipment) {
+                              ShipmentsPickupJourneyController::add($is_shipment, 1, NULL, $pickup_request->id);
+                              $pickup_request_assigned_shipment = new V2PickupRequestShipment();
 
-        //              $pickup_request_assigned_shipment = V2PickupRequestShipment::where('shipment_id', $is_shipment);
-        //
-        //              if (!$pickup_request_assigned_shipment->exists()) {
-                          $pickup_request_assigned_shipment = new V2PickupRequestShipment();
+                              $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
+                              $pickup_request_assigned_shipment->shipment_id = $is_shipment;
+                              $pickup_request_assigned_shipment->status = 0;
 
-                          $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
-                          $pickup_request_assigned_shipment->shipment_id = $is_shipment;
-                          $pickup_request_assigned_shipment->status = 0;
-
-                          $pickup_request_assigned_shipment->save();
-
-        //              }
-        //              else {
-        //                  $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
-        //
-        //                  $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
-        //                  $pickup_request_assigned_shipment->status = 0;
-        //
-        //                  $pickup_request_assigned_shipment->save();
-        //              }
+                              $pickup_request_assigned_shipment->save();
+                          }
+                      }
                   }
               }
-
-        //        if ($pickup_request->exists()) {
-        //            $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
-        //
-        //            $bookings = $pickup_request->bookings + 1;
-        //            $total_estimated_weight = $pickup_request->total_estimated_weight + $shipment->estimated_weight;
-        //
-        //            if ($total_estimated_weight < $defined_pickup_weight) {
-        //                $pickup_type = 0;
-        //            }
-        //            else {
-        //                $pickup_type = 1;
-        //            }
-        //
-        //            $pickup_request->bookings = $bookings;
-        //            $pickup_request->total_estimated_weight = $total_estimated_weight;
-        //            $pickup_request->pickup_type = $pickup_type;
-        //
-        //            $pickup_request->save();
-        //        }
-        //        else {
-        //            $pickup_request = new PickupRequest();
-        //
-        //            $pickup_request->shipper_id = $shipment->user_id;
-        //            $pickup_request->pickup_address_id = $shipment->pickup_address_id;
-        //            $pickup_request->bookings = 1;
-        //            $pickup_request->total_estimated_weight = $shipment->estimated_weight;
-        //
-        //            if ($shipment->estimated_weight < $defined_pickup_weight) {
-        //                $pickup_request->pickup_type = 0;
-        //            }
-        //            else {
-        //                $pickup_request->pickup_type = 1;
-        //            }
-        //
-        //            $pickup_request->pickup_date = $shipment->pickup_date;
-        //            $pickup_request->status = 0;
-        //
-        //            $pickup_request->save();
-        //        }
-        //
-        //        ShipmentsPickupJourneyController::add($shipment_id, 1, NULL, $pickup_request->id);
-        //
-        //        $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id);
-        //
-        //        if (!$pickup_request_assigned_shipment->exists()) {
-        //            $pickup_request_assigned_shipment = new PickupRequestAssignedShipment();
-        //
-        //            $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
-        //            $pickup_request_assigned_shipment->shipment_id = $shipment_id;
-        //            $pickup_request_assigned_shipment->status = 0;
-        //
-        //            $pickup_request_assigned_shipment->save();
-        //        }
-        //        else {
-        //            $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
-        //
-        //            $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
-        //            $pickup_request_assigned_shipment->status = 0;
-        //
-        //            $pickup_request_assigned_shipment->save();
-        //        }
         }
 
     static public function cancel($shipment_id) {
@@ -2218,7 +2138,7 @@ class AdminPickupsController extends Controller
         if ($received_shipments) {
           foreach ($received_shipments as $received_shipment) {
             $shipment = $received_shipment->shipment;
-            ShipmentsPickupJourneyController::add($shipment->id, 5, Auth::id(), $pickup_note->id);
+//            ShipmentsPickupJourneyController::add($shipment->id, 5, Auth::id(), $pickup_note->id);
           }
         }
         $vendor = $pickup_request->pickup_address->vendor;

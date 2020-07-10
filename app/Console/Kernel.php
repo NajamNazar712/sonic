@@ -52,7 +52,8 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\CancelledPickupRequestEmail',
 		'\App\Console\Commands\RateRejectionEmail',
 		'\App\Console\Commands\CompletedAgingReport',
-		'\App\Console\Commands\PendingCashCollectionReport'
+		'\App\Console\Commands\PendingCashCollectionReport',
+		'\App\Console\Commands\ZeroChargesReport',
 
         ];
 
@@ -99,7 +100,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
 
         $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
-		$schedule->command('email:debriefingemail')->dailyAt('00:00')->runInBackground();
+		$schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
 
@@ -111,8 +112,8 @@ class Kernel extends ConsoleKernel
             $schedule->command('email:returndeliveredtoshipper')->dailyAt($rdts_time)->runInBackground();
         }
 
-        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
-        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
+//        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
+//        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
         $schedule->command('saleperson:numbers')->dailyAt('08:00')->runInBackground();
         $schedule->command('month:average')->dailyAt('08:00')->runInBackground();
         $schedule->command('hubwise:split')->dailyAt('08:00')->runInBackground();
@@ -156,6 +157,15 @@ class Kernel extends ConsoleKernel
             $completed_aging_report_time = $settings->setting_value . ':00';
             $schedule->command('completedAging:report')->dailyAt($completed_aging_report_time);
             $schedule->command('pendingCashCollection:report')->dailyAt($completed_aging_report_time);
+        }
+
+        $settings = GlobalSettings::where('type', 'zero_charges_report_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $zero_charges_report_time = $settings->setting_value . ':00';
+            $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time);
         }
     }
 	 /**

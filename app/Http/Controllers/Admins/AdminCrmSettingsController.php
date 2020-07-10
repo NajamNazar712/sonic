@@ -150,7 +150,7 @@ class AdminCrmSettingsController extends Controller
     }
 
     public function escalation_launched_add_index(){
-        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
@@ -204,7 +204,7 @@ class AdminCrmSettingsController extends Controller
         foreach ($escalation->shipment_statuses as $shipment_status){
             $statuses[] = $shipment_status->shipment_status_id;
         }
-        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
@@ -227,12 +227,7 @@ class AdminCrmSettingsController extends Controller
         $shipment_statuses = $request->shipment_statuses;
         $tat = $request->input('tat');
         $mark_as = $request->input('mark_as_select');
-        if($mark_as == 1){
-            $comment = $request->input('auto_comment');
-        }
-        else{
-            $comment = NULL;
-        }
+        $comment = $request->input('auto_comment');
         $launched_escalation->case_nature_type = $case_nature_type_id;
         $launched_escalation->tat = $tat;
         $launched_escalation->mark_as = $mark_as;
@@ -318,7 +313,7 @@ class AdminCrmSettingsController extends Controller
     }
 
     public function escalation_in_process_add_index(){
-        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
@@ -368,7 +363,7 @@ class AdminCrmSettingsController extends Controller
         foreach ($escalation->shipment_statuses as $shipment_status){
             $statuses[] = $shipment_status->shipment_status_id;
         }
-        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
@@ -391,12 +386,7 @@ class AdminCrmSettingsController extends Controller
         $shipment_statuses = $request->shipment_statuses;
         $tat = $request->input('tat');
         $mark_as = $request->input('mark_as_select');
-        if($mark_as == 1){
-            $comment = $request->input('auto_comment');
-        }
-        else{
-            $comment = NULL;
-        }
+        $comment = $request->input('auto_comment');
         $in_process_escalation->case_nature_type = $case_nature_type_id;
         $in_process_escalation->tat = $tat;
         $in_process_escalation->mark_as = $mark_as;
@@ -526,7 +516,7 @@ class AdminCrmSettingsController extends Controller
     }
 
     public function escalation_tagging_add_index(){
-        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $hubs = City::where('hub',1)->select('id','name')->get();
         $admin_roles = AdminRole::leftjoin('admin_departments as ad', 'ad.id', '=', 'admin_roles.department_id')
             ->select('admin_roles.id as id', 'admin_roles.name as name', 'ad.name as department')
@@ -640,7 +630,7 @@ class AdminCrmSettingsController extends Controller
         foreach ($escalation_tagging->shipment_statuses as $shipment_status){
             $statuses[] = $shipment_status->shipment_status_id;
         }
-        $shipment_statuses = ShipmentStatus::select('id','name')->get();
+        $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $selected_hubs = array();
         foreach ($escalation_tagging->hubs as $hub){
             $selected_hubs[] = $hub->hub_id;

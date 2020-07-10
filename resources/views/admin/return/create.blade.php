@@ -328,6 +328,7 @@
                             }
                             else if(data.status == 2){
                                 $('#scan_piece_tracking_number').prop('disabled', true);
+                                $('#scan_piece_tracking_number').val(tracking);
                                 $('#piece_confirm').prop('disabled', true);
                                 if(data.details.scanned_shipment_piece){
                                     var piece_index = $.inArray(parseInt(data.details.scanned_shipment_piece), all_shipment_piece_ids);
@@ -410,6 +411,7 @@
                                 }
                                 else if(data.status == 2){
                                     $('#scan_piece_tracking_number').prop('disabled', true);
+                                    $('#scan_piece_tracking_number').val(tracking);
                                     $('#piece_confirm').prop('disabled', true);
                                     if(data.details.scanned_shipment_piece){
                                         var piece_index = $.inArray(parseInt(data.details.scanned_shipment_piece), all_shipment_piece_ids);
@@ -713,7 +715,7 @@
                             url:'{{route('admin.return.create.shipment_details')}}',
                             type:'POST',
                             data: {
-                                'tracking':tracking,
+                                'tracking':tracking_number,
                                 'hub_id':hub_id,
                                 'pieces_confirm':1,
                                 '_token':'{!! csrf_token() !!}'
@@ -745,6 +747,7 @@
                             });
                     }
                     $('#ShipmentPiecesModal').modal('hide');
+                    return false;
                 }
             });
 

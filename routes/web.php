@@ -866,6 +866,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\ReturnController@history_index')->name('index');
             Route::get('list', 'Admins\ReturnController@history_list')->name('list');
             Route::post('shipments', 'Admins\ReturnController@history_shipments')->name('shipments');
+            Route::post('get_images', 'Admins\ReturnController@history_get_images')->name('get_images');
+            Route::post('delete_image', 'Admins\ReturnController@history_delete_image')->name('delete_image');
 
         });
         Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
@@ -915,7 +917,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminCargoController@quick_receive_index')->name('index');
                 Route::post('shipment_details', 'Admins\AdminCargoController@quick_receive_shipment_details')->name('shipment_details');
                 Route::post('', 'Admins\AdminCargoController@quick_receive_store')->name('store');
-                Route::get('list/index', 'Admins\AdminCargoController@quick_receive_list_index')->name('list.index');
+                Route::get('list', 'Admins\AdminCargoController@quick_receive_list_index')->name('list.index');
                 Route::get('list/ajax', 'Admins\AdminCargoController@quick_receive_list_ajax')->name('list.ajax');
                 Route::post('list/ajax', 'Admins\AdminCargoController@quick_receive_list_details')->name('list.details');
             });
@@ -1659,6 +1661,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('aging_report')->name('aging_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@completed_aging_report_settings_index')->name('index');
             Route::post('aging_settings_store', 'Admins\GlobalSettingsController@completed_aging_report_settings_store')->name('aging_settings_store');
+        });
+
+        Route::prefix('zero_charges')->name('zero_charges.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@zero_charges_report_settings_index')->name('index');
+            Route::post('zero_charges_store', 'Admins\GlobalSettingsController@zero_charges_report_settings_store')->name('zero_charges_store');
         });
 
         Route::prefix('overnight_overland_cargo_report')->name('overnight_overland_cargo_report.')->group(function () {

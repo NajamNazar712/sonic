@@ -100,15 +100,13 @@ class ProcessSMS implements ShouldQueue
         $telenor = Telenor::latest()->first();
 
         if ($telenor) {
-            if ($telenor->status == 1) {
-                $now = Carbon::now();
-                $last = Carbon::parse($telenor->created_at);
+            $now = Carbon::now();
+            $last = Carbon::parse($telenor->created_at);
 
-                $difference = $last->diffInMinutes($now);
+            $difference = $last->diffInMinutes($now);
 
-                if ($difference >= 25) {
-                    $generate_session_id = TRUE;
-                }
+            if ($difference >= 25) {
+                $generate_session_id = TRUE;
             }
         }
         else {

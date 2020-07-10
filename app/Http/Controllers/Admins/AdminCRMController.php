@@ -2335,11 +2335,29 @@ class AdminCRMController extends Controller
     }
     public function escalate(Request $request){
         $crm_request_id = $request->crm_request_id;
+        $crm_request = CrmRequest::find($crm_request_id);
         $escalation_tagging_id = $request->escalation_tagging_id;
         $escalation_level_id = $request->selected_escalation;
         $crm_escalation_level = CrmEscalationTaggingLevel::where('escalation_tagging_id', $escalation_tagging_id)->where('level_id', $escalation_level_id)->first();
         if($crm_escalation_level){
             $crm_escalation_tag = CrmEscalationTagging::find($escalation_tagging_id);
+            if($crm_escalation_tag->hub_status == 1){
+                $origin_hub_id = $crm_request->shipment->pickup_address->city->hub_id;
+                $matching_hubs[] = $origin_hub_id;
+            }
+            elseif($crm_escalation_tag->hub_status == 2){
+                $destination_hub_id = $crm_request->shipment->consignee_city->hub_id;
+                $matching_hubs[] = $destination_hub_id;
+
+            }
+            elseif($crm_escalation_tag->hub_status == 3){
+                $origin_hub_id = $crm_request->shipment->pickup_address->city->hub_id;
+                $matching_hubs[] = $origin_hub_id;
+                $destination_hub_id = $crm_request->shipment->consignee_city->hub_id;
+                if($origin_hub_id != $destination_hub_id){
+                    $matching_hubs[] = $destination_hub_id;
+                }
+            }
             $hubs = $crm_escalation_tag->hubs;
             $tagging_to = array();
             $to = array();
@@ -2358,13 +2376,15 @@ class AdminCRMController extends Controller
                 if(count($hubs) > 0){
                     $total_hubs = array();
                     foreach ($hubs as $hub){
-                        $crm_request_multiple_tagging = new CrmRequestEscalationTagging();
-                        $crm_request_multiple_tagging->crm_request_id = $crm_request_id;
-                        $crm_request_multiple_tagging->role_id = $role->role_id;
-                        $crm_request_multiple_tagging->hub_id = $hub->hub_id;
-                        $crm_request_multiple_tagging->save();
+                        if(in_array($hub->hub_id, $matching_hubs)) {
+                            $crm_request_multiple_tagging = new CrmRequestEscalationTagging();
+                            $crm_request_multiple_tagging->crm_request_id = $crm_request_id;
+                            $crm_request_multiple_tagging->role_id = $role->role_id;
+                            $crm_request_multiple_tagging->hub_id = $hub->hub_id;
+                            $crm_request_multiple_tagging->save();
 
-                        $total_hubs[] = $hub->hub_id;
+                            $total_hubs[] = $hub->hub_id;
+                        }
                     }
 
                     foreach ($admins as $admin){

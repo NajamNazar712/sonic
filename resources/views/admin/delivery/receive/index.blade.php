@@ -47,6 +47,7 @@
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
+                        <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Total Collection</th>
@@ -272,6 +273,7 @@
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data:'shipments_unverified_link' ,name: 'delivery_notes.shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},

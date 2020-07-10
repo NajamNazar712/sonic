@@ -46,6 +46,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
+                        <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -90,10 +91,18 @@
                     <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>
-                        <fieldset class="form-group">
-                            <input type="file" class="form-control-file" id="return_note_image" name="return_note_image" accept="image/*" data-rule-required="true" data-msg-required="Image File is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2048000" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
-                        </fieldset>
+                        <input type="hidden" name="selected_ids" id="selected_ids"/>
+                        <table class="table table-bordered datatable" id="return_upload_table" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
 
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Image</th>
+                                <th class="border-primary border-darken-1"></th>
+
+                            </tr>
+                            </thead>
+                        </table>
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
@@ -252,6 +261,8 @@
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    // { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data:'shipments_unverified_link' ,name: 'return_notes.shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
                     { data:'return_note_status' ,name: 'return_notes.status', class: 'align-middle return_note_status'},
@@ -406,6 +417,7 @@
                 if(id){
                     $('#image_return_note_id').val(id);
                     $('#uploadReturnNote').modal('show');
+                    add_row();
                 }
             });
 
@@ -413,7 +425,6 @@
             $.validator.addMethod('maxsize', function(value, element, params) {
                 if ($(element).attr('type') === 'file') {
                     if (element.files && element.files.length) {
-                        console.log(element.files);
                         for (var c = 0; c < element.files.length; c++) {
                             if (element.files[c].size > params) {
                                 return false;
@@ -424,6 +435,70 @@
 
                 return true;
             }, $.validator.format("File Size must not exceed {0} bytes."));
+
+            var selected_rows = [];
+            var rows_count = 0;
+            var return_image_table = $('#return_upload_table').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons:[{
+                    title: 'Add Row',
+                    className: 'btn btn-primary mb-1',
+                    text: '<i class="la la-plus"></i> Add Row',
+                    action:function (e) {
+                        add_row();
+                    }
+                }],
+                ordering:false,
+                paging:false,
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {name: 'image', class: 'align-middle image form-group'},
+                    {name: 'action', class: 'align-middle action'},
+                ],
+
+                rowCallback: function(row, data, index) {
+                    var info = return_image_table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+
+                    // this.api().table().columns.adjust();
+                }
+            });
+
+            function add_row() {
+                rows_count++;
+
+                var return_image = '<input class="form-control form-control-sm" type="file" name="return_note_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                if(rows_count == 1){
+                    var remove = '';
+                }else{
+                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                }
+                return_image_table.row.add([0, return_image,remove]).node().id = rows_count;
+                return_image_table.draw(true);
+                $('#ReturnNoteImageSubmitButton').attr('disabled', false);
+                selected_rows.push(rows_count);
+            }
+
+            $('#uploadReturnNote').on('hidden.bs.modal', function () {
+                $('#image_return_note_id').val('');
+                return_image_table.clear();
+                selected_rows = [];
+            });
+
+            $('body').on('click', 'a.remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, selected_rows);
+
+                if (index !== -1) {
+                    selected_rows.splice(index, 1);
+                }
+                return_image_table.row( $(this).parents('tr') ).remove().draw();
+            });
 
             $('#return_note_upload_form').validate({
 
@@ -437,7 +512,7 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
+                    $('#selected_ids').val(selected_rows);
                     swal({
                         title: 'Please Wait!',
                         text: 'Image is being uploaded!',

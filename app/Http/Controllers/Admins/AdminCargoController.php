@@ -36,6 +36,7 @@ use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use Auth;
 use DB;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -1683,6 +1684,16 @@ class AdminCargoController extends Controller
                 $cargo_consignment_shipment = $cargo_consignment_shipment->where('status', 0);
 
                 if ($cargo_consignment_shipment->exists()) {
+                    $cargo_consignment_shipment = $cargo_consignment_shipment->first();
+                    $cargo_consignment = $cargo_consignment_shipment->cargo;
+                    if(session('role_id') != 1){
+                        if (!in_array($cargo_consignment->destination_hub->hub_id, session('hubs'))) {
+                            return ['status' => 1, 'error' => 'Cargo Shipment doesn\'t belong to your assigned hub(s)!'];
+                        }
+                    }
+                    if (!in_array($cargo_consignment->status_id, [1, 2, 4, 6, 7, 9])) {
+                        return ['status' => 1, 'error' => 'Given Shipment\'s Cargo has already been modified!'];
+                    }
                     $consignee_city = $shipment->consignee_city;
 
                     if(!$request->has('pieces_confirm')){
@@ -1736,127 +1747,130 @@ class AdminCargoController extends Controller
         $cargo_consignment_excel->save();
 
         $cargo_consignment_ids = array();
-        $cargo_consignment_excel_array = array();
-        $cargo_consignment_excel_array['header'] = ['S. No.','Cargo Consignment ID', 'Tracking Number'];
-        $cargo_consignment_excel_array[] = ['serial' => '', 'Cargo Consignment ID' => '', 'Tracking Number' => ''];
-        $serial = 0;
         foreach ($shipment_ids as $shipment_id) {
-            $serial++;
-            $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_id)->where('status', 0)->first();
-            $cargo_consignment_shipment->status = 1;
+            $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_id)->where('status', 0);
 
-            $cargo_consignment_shipment->save();
-//
-            $shipment = Shipment::find($shipment_id);
-//
-            $shipper_status_id = NULL;
-            $consignee_status_id = NULL;
-            $cargo_consignment = $cargo_consignment_shipment->cargo;
-            if ($cargo_consignment->type == 1) {
-                if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
-                    ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
-                    $shipper_status_id = 15;
-                    $consignee_status_id = 15;
-                }
-                else {
-                    $shipper_status_id = 4;
-                    $consignee_status_id = 4;
-                }
-            }
-            else {
-                if ($shipment->booking_type_id == 1) {
-                    $shipper_status_id = 22;
-                    $consignee_status_id = 22;
-                }
-                else if ($shipment->booking_type_id == 2) {
-                    $shipper_status_id = 27;
-                    $consignee_status_id = 27;
-                }
-                else if ($shipment->booking_type_id == 3) {
-                    $shipper_status_id = 33;
-                    $consignee_status_id = 33;
-                }
-                else if ($shipment->booking_type_id == 4) {
-                    $shipper_status_id = 22;
-                    $consignee_status_id = 22;
-                }
-                else {
-                    $shipper_status_id = 22;
-                    $consignee_status_id = 22;
-                }
-            }
+            if ($cargo_consignment_shipment->exists()) {
+                $cargo_consignment_shipment = $cargo_consignment_shipment->first();
 
-            $shipment->shipper_status_id = $shipper_status_id;
-            $shipment->consignee_status_id = $consignee_status_id;
+                $cargo_consignment_shipment->status = 1;
 
-
-            if(in_array($shipment_id, $open_box_ids)){
-                $shipment->open_box = 1;
-                ShipmentOpenBoxJourneyController::add($shipment_id,2,Auth::id());
-            }
-
-            $shipment->save();
-
-            ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
-//            Consolidated Shipments
-
-            if ($cargo_consignment->type == 1) {
-                $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
-                if ($consolidated_shipment) {
-                    $check_all_consolidation_shipments = true;
-
-                    $shipment->shipper_status_id = 58;
-                    $shipment->consignee_status_id = 58;
-                    $shipment->save();
-
-                    ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
-
-                    $consolidation_id = $consolidated_shipment->consolidation_id;
-                    $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
-
-                    foreach ($remaining_consolidated_shipments as $remaining_consolidated_shipment) {
-                        $check_remaining_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
-                        if ($check_remaining_consolidated_shipment->shipper_status_id != 58) {
-                            $check_all_consolidation_shipments = false;
-                        }
+                $cargo_consignment_shipment->save();
+    //
+                $shipment = Shipment::find($shipment_id);
+    //
+                $shipper_status_id = NULL;
+                $consignee_status_id = NULL;
+                $cargo_consignment = $cargo_consignment_shipment->cargo;
+                if ($cargo_consignment->type == 1) {
+                    if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
+                        ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
+                        $shipper_status_id = 15;
+                        $consignee_status_id = 15;
                     }
-
-                    if ($check_all_consolidation_shipments == true) {
-                        foreach ($remaining_consolidated_shipments as $update_remaining_consolidated_shipment) {
-                            $update_all_consolidated_shipment = Shipment::find($update_remaining_consolidated_shipment->shipment_id);
-
-                            $update_all_consolidated_shipment->shipper_status_id = 59;
-                            $update_all_consolidated_shipment->consignee_status_id = 59;
-
-                            $update_all_consolidated_shipment->save();
-
-                            ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
-                        }
+                    else {
+                        $shipper_status_id = 4;
+                        $consignee_status_id = 4;
                     }
                 }
+                else {
+                    if ($shipment->booking_type_id == 1) {
+                        $shipper_status_id = 22;
+                        $consignee_status_id = 22;
+                    }
+                    else if ($shipment->booking_type_id == 2) {
+                        $shipper_status_id = 27;
+                        $consignee_status_id = 27;
+                    }
+                    else if ($shipment->booking_type_id == 3) {
+                        $shipper_status_id = 33;
+                        $consignee_status_id = 33;
+                    }
+                    else if ($shipment->booking_type_id == 4) {
+                        $shipper_status_id = 22;
+                        $consignee_status_id = 22;
+                    }
+                    else {
+                        $shipper_status_id = 22;
+                        $consignee_status_id = 22;
+                    }
+                }
+
+                $shipment->shipper_status_id = $shipper_status_id;
+                $shipment->consignee_status_id = $consignee_status_id;
+
+
+                if(in_array($shipment_id, $open_box_ids)){
+                    $shipment->open_box = 1;
+                    ShipmentOpenBoxJourneyController::add($shipment_id,2,Auth::id());
+                }
+
+                $shipment->save();
+
+                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
+    //            Consolidated Shipments
+
+                if ($cargo_consignment->type == 1) {
+                    $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
+                    if ($consolidated_shipment) {
+                        $check_all_consolidation_shipments = true;
+
+                        $shipment->shipper_status_id = 58;
+                        $shipment->consignee_status_id = 58;
+                        $shipment->save();
+
+                        ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
+
+                        $consolidation_id = $consolidated_shipment->consolidation_id;
+                        $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+
+                        foreach ($remaining_consolidated_shipments as $remaining_consolidated_shipment) {
+                            $check_remaining_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
+                            if ($check_remaining_consolidated_shipment->shipper_status_id != 58) {
+                                $check_all_consolidation_shipments = false;
+                            }
+                        }
+
+                        if ($check_all_consolidation_shipments == true) {
+                            foreach ($remaining_consolidated_shipments as $update_remaining_consolidated_shipment) {
+                                $update_all_consolidated_shipment = Shipment::find($update_remaining_consolidated_shipment->shipment_id);
+
+                                $update_all_consolidated_shipment->shipper_status_id = 59;
+                                $update_all_consolidated_shipment->consignee_status_id = 59;
+
+                                $update_all_consolidated_shipment->save();
+
+                                ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
+                            }
+                        }
+                    }
+                }
+                //Consolidated Shipments
+
+                if(!in_array($cargo_consignment->id, $cargo_consignment_ids)){
+                    $cargo_consignment_ids[] = $cargo_consignment->id;
+                }
+
+                $cargo_consignment_shipment_excel = new CargoConsignmentShipmentExcel();
+                $cargo_consignment_shipment_excel->cargo_consignment_excel_id = $cargo_consignment_excel->id;
+                $cargo_consignment_shipment_excel->cargo_consignment_id = $cargo_consignment->id;
+                $cargo_consignment_shipment_excel->shipment_id = $shipment_id;
+                $cargo_consignment_shipment_excel->save();
+
+
+                NotificationsController::send(7, $cargo_consignment->id, $shipment_id);
+
+                NotificationsController::send(8, $cargo_consignment->id, $shipment_id);
             }
-            //Consolidated Shipments
-
-            if(!in_array($cargo_consignment->id, $cargo_consignment_ids)){
-                $cargo_consignment_ids[] = $cargo_consignment->id;
-            }
-
-            $cargo_consignment_shipment_excel = new CargoConsignmentShipmentExcel();
-            $cargo_consignment_shipment_excel->cargo_consignment_excel_id = $cargo_consignment_excel->id;
-            $cargo_consignment_shipment_excel->cargo_consignment_id = $cargo_consignment->id;
-            $cargo_consignment_shipment_excel->shipment_id = $shipment_id;
-            $cargo_consignment_shipment_excel->save();
-
-            $cargo_consignment_excel_array[] = ['serial' => $serial, 'Cargo Consignment ID' => strval(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT)), 'Tracking Number' => strval($shipment->tracking_number)];
-
-
-            NotificationsController::send(7, $cargo_consignment->id, $shipment_id);
-
-            NotificationsController::send(8, $cargo_consignment->id, $shipment_id);
-
         }
 
         $all_cargo_consignment_ids = '';
+
+        $cargo_consignment_excel_array = array();
+        $cargo_consignment_excel_array['header'] = ['S. No.','Cargo Consignment ID', 'Tracking Number', 'Origin Hub', 'Destination Hub', 'Status'];
+        $cargo_consignment_excel_array[] = ['serial' => '', 'Cargo Consignment ID' => '', 'Tracking Number' => '', 'Origin Hub' => '', 'Destination Hub' => '', 'Status' => ''];
+        $serial = 0;
+        $total_shipments = 0;
         foreach ($cargo_consignment_ids as $cargo_consignment_id){
             $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
             $cargo_consignment->received_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 1)->count();
@@ -1908,7 +1922,21 @@ class AdminCargoController extends Controller
             else{
                 $all_cargo_consignment_ids .= ', ' . $cargo_consignment_id;
             }
+
+            foreach ($cargo_consignment->cargo_consignment_shipments as $cargo_shipment){
+                $serial++;
+                if($cargo_shipment->status == 0){
+                    $status = 'Short Received';
+                }else{
+                    $status = 'Received';
+                }
+                $cargo_consignment_excel_array[] = ['serial' => $serial, 'Cargo Consignment ID' => strval(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT)), 'Tracking Number' => strval($cargo_shipment->shipment->tracking_number), 'Origin Hub' => $cargo_consignment->origin_hub->name, 'Destination Hub' => $cargo_consignment->destination_hub->name, 'Status' => $status];
+            }
+            $total_shipments = $total_shipments + count($cargo_consignment->cargo_consignment_shipments);
         }
+
+        $cargo_consignment_excel->shipments = $total_shipments;
+        $cargo_consignment_excel->save();
         $cell_st = [
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -1919,22 +1947,21 @@ class AdminCargoController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($cargo_consignment_excel_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
         $sheet->getStyle("C2:C50000")->getNumberFormat()
             ->setFormatCode(
                 \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
             );
+        $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
         $sheet->setTitle('Quick Cargo Received');
         $writer = new Xlsx($spreadsheet);
 
 
-        $file_name_without_path = "reports/cargo_consignment_excel_" . $cargo_consignment_excel->id . ".xlsx";
+        $file_name_without_path = "/reports/cargo_consignment_excel_" . $cargo_consignment_excel->id . ".xlsx";
         $file_name = public_path() . "/reports/cargo_consignment_excel_" . $cargo_consignment_excel->id . ".xlsx";
         $writer->save($file_name);
+            Storage::disk('s3')->put( 'cargo_consignment_excels/'.'cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx', file_get_contents($file_name));
+            Storage::disk('public')->delete('reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
 
-        $file = Storage::disk('public')->url('/reports/cargo_consignment_excel_'. $cargo_consignment_excel->id .'.xlsx');
-        Storage::disk('s3')->put( 'cargo_consignment_excels/'.'cargo_consignment_excel_'. 1 .'.xlsx', $file);
-        Storage::disk('public')->delete('reports/cargo_consignment_excel_'. 1 .'.xlsx');
 
         $cargo_consignment_excel->cargoes = count($cargo_consignment_ids);
         $cargo_consignment_excel->excel = 'cargo_consignment_excel_' . $cargo_consignment_excel->id  . '.xlsx';
@@ -1978,15 +2005,16 @@ class AdminCargoController extends Controller
         $cargo_excel_id = $request->input('cargo_excel_id');
         $status = $request->input('shipments');
         $details = array();
-        $cargo_shipment_excels = CargoConsignmentShipmentExcel::where('cargo_consignment_excel_id', $cargo_excel_id);
+        $cargo_shipment_excels = CargoConsignmentShipmentExcel::where('cargo_consignment_excel_id', $cargo_excel_id)->groupBy('cargo_consignment_id')->get();
         if($status == 1){
-            $cargo_shipment_excels = $cargo_shipment_excels->get();
             foreach ($cargo_shipment_excels as $cargo_shipment_excel){
-                $details[] = $cargo_shipment_excel->shipment->tracking_number;
+                $cargo_consignment = CargoConsignment::find($cargo_shipment_excel->cargo_consignment_id);
+                foreach ($cargo_consignment->cargo_consignment_shipments as $cargo_shipment) {
+                    $details[] = $cargo_shipment->shipment->tracking_number;
+                }
             }
         }
         else{
-            $cargo_shipment_excels = $cargo_shipment_excels->groupBy('cargo_consignment_id')->get();
             foreach ($cargo_shipment_excels as $cargo_shipment_excel){
                 $details[] = str_pad($cargo_shipment_excel->cargo_consignment_id, 6, '0', STR_PAD_LEFT);
             }

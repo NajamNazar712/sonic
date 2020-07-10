@@ -19,6 +19,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
 use App\Http\Models\Blacklist\BlacklistSetting;
@@ -616,6 +617,24 @@ class DeliveryController extends Controller
                     }
 
                     ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+
+                    $handover_shipments = HandoverShipments::where('shipment_id',$shipment)->whereIn('status',[1,3]);
+                    if($handover_shipments->exists()){
+                        $handover_shipments = $handover_shipments->first();
+                        $handover_shipments->status = 2;
+                        $handover_shipments ->save();
+                        $handover_count = HandoverShipments::where('status', 1)->where('handover_id', $handover_shipments->handover_id)->count();
+                        if($handover_count == 0){
+                            $handover = Handover::find($handover_shipments->handover_id);
+                            $handover->received_by = Auth::id();
+                            $handover->received_at = Carbon::now();
+                            $handover->received = $handover->received + 1;
+                            $handover->status_id = 4;
+                            $handover->save();
+                        }
+                        HandoverShipmentJourneyController::add( $shipment,$handover_shipments->handover_id,2);
+                    }
+
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
@@ -650,9 +669,15 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->join('delivery_note_shipments', function ($join) {
+                $join->on('delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where('delivery_note_shipments.status',0);
+            })
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone'])
+            ->select(['delivery_notes.id as delivery_note', DB::raw('count(delivery_note_shipments.shipment_id) as shipments_unverified_count'), 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone'])
             ->where('delivery_notes.status', 0);
+
+
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -674,6 +699,14 @@ class DeliveryController extends Controller
             ->editColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('shipments_unverified_link', function($deliveries) {
+                if ($deliveries->shipments_unverified_count != 0) {
+                    return  $deliveries->shipments_unverified_count ;
                 }
                 else {
                     return 0;
@@ -1763,12 +1796,6 @@ class DeliveryController extends Controller
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                         }
                         
-                        $handover_shipments = HandoverShipments::where('shipment_id',$shipment)->where('status','!=',3)->first();
-                        $handover_shipments->status = 3;
-                        $handover_shipments ->save();
-
-                        HandoverShipmentJourneyController::add( $shipment,$handover_shipments->handover_id,3);
-                        
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
 
@@ -1994,18 +2021,23 @@ class DeliveryController extends Controller
         $item_ids = explode(',', $request->trybuy_id_list);
 
         if (!empty($item_ids)) {
-            $cod = $request->trybuy_cod;
+//            $cod = $request->trybuy_cod;
             $checked = $request->item_checked;
             $unchecked = $request->item_unchecked;
-
+            $total_cod = 0;
             foreach ($item_ids as $item_id) {
-                ShipmentItem::where('id', $item_ids)->update(['bought' => 1]);
+                $shipment_item = ShipmentItem::find($item_id);
+                $total_cod += $shipment_item->price;
+                $shipment_item->bought = 1;
+                $shipment_item->save();
             }
+            $shipment = Shipment::find($request->trybuy_shipment_id);
+            $total_cod += $shipment->try_and_buy_fees;
             if ($checked != $unchecked) {
-                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $cod, 'received_amount' => $cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
+                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                 ShipmentsJourneyController::add($request->trybuy_shipment_id, 37, 37, NULL, NULL, NULL, Auth::id(), $request->delivery_note_trybuy, NULL, 0);
             } elseif ($checked == $unchecked) {
-                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $cod, 'received_amount' => $cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
+                Shipment::where('id', $request->trybuy_shipment_id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
             }
             ShipmentChargesController::cash_handling($request->trybuy_shipment_id);
             DeliveryNoteShipment::where(['shipment_id' => $request->trybuy_shipment_id, 'delivery_note_id' => $request->delivery_note_trybuy])->update(['status' => 5]);
@@ -5379,7 +5411,7 @@ class DeliveryController extends Controller
             $adjustment_amount =  $request->adjustment_amount;
 
             $total =$deposit_amount + $adjustment_amount;
-            if($dncc_amount>= $total){
+            if($dncc_amount == $total){
                 $sdn->adjustment_amount = $request->adjustment_amount;
                 $sdn->adjustment_date = $request->adjustment_date_formatted;
                 $sdn->adjustment_ref = $request->adjustment_ref;
@@ -5400,7 +5432,7 @@ class DeliveryController extends Controller
 
             }
             else{
-                return redirect()->back()->with(['error' => 'DNCC cannot be less than sum of adjustment amount & deposit amount']);
+                return redirect()->back()->with(['error' => 'DNCC cannot be less/greater than sum of adjustment amount & deposit amount']);
             }
 
         }else{

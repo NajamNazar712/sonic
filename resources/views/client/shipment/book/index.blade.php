@@ -173,11 +173,7 @@
 											</div>
 
 											<div class="form-group input-group">
-												<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
-											</div>
-
-											<div id="pieces_quantity" class="form-group input-group d-none">
-												<input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" >
+												<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of items inside the flyer/box.">
 											</div>
 
 											<div class="form-group text-center p-1 border border-light rounded">
@@ -194,12 +190,12 @@
 											</div>
 										</div>
 
-										<div id="replacement" class="mb-1 d-none" style="color:#000000; background-color: #000000">
+										<div id="replacement" class="mb-1 d-none">
 											<h4 class="text-center m-0 p-1 bg-dark white border border-dark rounded-top">Replacement</h4>
 
 											<div class="pt-1 pl-1 pr-1 border border-light rounded-bottom">
-												<div class="form-group" style="color:#000000; background-color: #000000">
-													<select style="color:#000000; background-color: #000000" name="replacement_product_type" class="select2" id="replacement_product_type" data-rule-required="true" data-msg-required="Product Type is required">
+												<div class="form-group">
+													<select name="replacement_product_type" class="select2" id="replacement_product_type" data-rule-required="true" data-msg-required="Product Type is required">
 														@foreach($products as $product)
 															@if($user['product_id'] == $product->id)
 																<option value="{{ $product->id }}" selected="selected">{{ $product->product_name }}</option>
@@ -211,12 +207,11 @@
 												</div>
 
 												<div class="form-group">
-													<textarea style="color:#000000; background-color: #000000" name="replacement_item_description" class="form-control" placeholder="Please enter another flyer  with the airway bill*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" data-toggle="tooltip" data-placement="top" title="" data-original-title="Please describe in a way that rider can understand what to collect from the consignee"></textarea>
+													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" data-toggle="tooltip" data-placement="top" title="" data-original-title="Please enter another flyer with the airway bill"></textarea>													
 												</div>
 
 												<div class="form-group input-group">
-													<input style="color:#000000; background-color: #000000" type="text" name="replacement_item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
-												</div>
+													<input type="text" name="replacement_item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">												</div>
 											</div>
 										</div>
 
@@ -247,7 +242,7 @@
 															</div>
 
 															<div class="form-group input-group">
-																<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quanity is required">
+																<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quanity is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of items inside the flyer/box.">
 															</div>
 
 															<div class="form-group input-group">
@@ -304,6 +299,10 @@
 										</div>
 
 										<h6 class="form-text mb-1 text-justify text-muted text-italic">*Charges will be subjected to the Final Weight measured at the time of Shipment Arrival.</h6>
+
+										<div id="pieces_quantity" class="form-group input-group d-none">
+											<input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
+										</div>
 
 										<div class="form-group">
 											<select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Mode of Shipping is required">
@@ -556,6 +555,8 @@
 						buttondown_txt: '<i class="ft-minus"></i>',
 						buttonup_txt: '<i class="ft-plus"></i>'
 					}).bind('input change', function() {
+						$(this).tooltip('show');
+
 						if ($(this).hasClass('danger')) {
 							$(this).valid();
 						}
@@ -1126,6 +1127,8 @@
 						buttondown_txt: '<i class="ft-minus"></i>',
 						buttonup_txt: '<i class="ft-plus"></i>'
 					}).bind('input change', function() {
+						$(this).tooltip('show');
+
 						if ($(this).hasClass('danger')) {
 							$(this).valid();
 						}
@@ -1509,7 +1512,7 @@
 				'clearIncomplete': true
 			});
 
-			$('.quantity').TouchSpin({
+			$(this).find('.quantity').TouchSpin({
 				min: 1,
 				max: 10000,
 				buttondown_class: 'btn btn-primary rounded-left',
@@ -1517,6 +1520,8 @@
 				buttondown_txt: '<i class="ft-minus"></i>',
 				buttonup_txt: '<i class="ft-plus"></i>'
 			}).bind('input change', function() {
+				$(this).tooltip('show');
+
 				if ($(this).hasClass('danger')) {
 					$(this).valid();
 				}
