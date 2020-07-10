@@ -79,6 +79,28 @@
 
 
                 </div>
+                <div class="row">
+                        <!-- <input type="hidden" id="cards_filter_input"> -->
+                        <div class="col-4">
+                            <div class="card pull-up">
+                                <div class="card-content border rounded" id="totals">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body text-left">
+                                                <span>Total</span>
+                                            </div>
+                                            <div class="media-body text-right">
+                                            
+                                                
+                                                <h3 id="total"></h3>
+                                             
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
                 </form>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -179,6 +201,23 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var total_amount=0;
+            	
+            // $("#datatable").on('change', '.txtCal', function () {
+            //     var calculated_total_sum = 0;
+                
+            //     $("#datatable tr.amount").each(function () {
+            //         var get_textbox_value = $(this).val();
+            //         if ($.isNumeric(get_textbox_value)) {
+            //             calculated_total_sum += parseFloat(get_textbox_value);
+            //             }                  
+            //             });
+            //             $("#total").html(calculated_total_sum);
+            // var table = $('#datatable').DataTable();
+            //             // console.log('Column sum is: '+ table.column( 3, {page:'current'} ).data().sum());
+            //             console.log('Column sum is: '+ table.column( 3 ).data().sum());
+            //     });
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipping Mode',
                 width:'100%',
@@ -312,6 +351,7 @@
 
             var index_column = 0;
             var table = $('#datatable').DataTable({
+                
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
@@ -366,17 +406,45 @@
 
                 ],
                 rowCallback: function(row, data, index) {
+                    total_amount=0;
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                   
+                    // table.columns( '.amount' ).every( function () {
+                    // var sum = this
+                    //     .data()
+                    //     .reduce( function (a,b) {
+                    //         return parseInt(a) + parseInt(b);
+                    //     } );
+                
+                    // $('#total').html(sum );
+                    // } );
                 },
+                drawCallback: function (settings) {
+				var api = new $.fn.dataTable.Api( settings );
+				var data = api.rows( {page:'current'} ).data();
+                    if(data.length > 0){
+                        for(var i=0;i<data.length; i++)
+                        {
+                            // console.log(data[i].sum_amount);
+                            total_amount+= parseFloat(data[i].sum_amount);
+                        }
+                        
+                    }
+                    $('#total').text(total_amount);
+                    
+			      },
+                
                 initComplete: function() {
 
                     this.api().table().columns.adjust();
-                }
+                },
             });
 
             $('#search_filter_btn').on('click',function () {
+               
                 table.draw();
+               
             });
 
             function printDNCC(id) {
