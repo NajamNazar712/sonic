@@ -2426,10 +2426,11 @@ class GlobalSettingsController extends Controller
                     $html .= '<thead><tr>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Id</th></tr></thead><tbody>';
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed > 2days</th>
+                                           </tr></thead><tbody>';
         $hubs = City::where('hub', 1)->where('status', 1)->pluck('id')->toArray();
         if(count($hubs) > 0){
+            DB::table('completed_aging_reports')->truncate();
             foreach ($hubs as $hub_id){
                 $city = City::find($hub_id);
                 $total_count = 0;
@@ -2481,7 +2482,7 @@ class GlobalSettingsController extends Controller
 
         $now = Carbon::now();
         $subject = 'Pending Cash Collection Report';
-        $total=0;
+        $total = 0;
 
        $html='';
         $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
@@ -2491,42 +2492,45 @@ class GlobalSettingsController extends Controller
                     $html .= '<thead><tr>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Id</th></tr></thead><tbody>';
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed > 2days</th></tr></thead><tbody>';
 
-        $delviery_notes = DeliveryNote::where('cash_collection_status',0)->where('dncc_status',0)->get();
-        foreach($delviery_notes as $delviery_note)
-        {
-            $start = $delviery_note->updated_at;
-            $difference = $start->diff($now)->days;
-            if($difference >2)
-            {
-                $total = $difference + $total;
-                $zone_id = ZoneClassCity::where('city_id',$delviery_note->hub_id)->first();
-                $PendingCashCollectionAgingReport = new PendingCashCollectionAgingReport();
-                $city= City::where('id',$delviery_note->hub_id)->first();
-
+        $hubs = City::where('hub', 1)->where('status', 1)->pluck('id')->toArray();
+        if(count($hubs) > 0){
+            DB::table('pending_cash_collection_aging_reports')->truncate();
+            foreach ($hubs as $hub_id){
+                $city = City::find($hub_id);
+                $total_count = 0;
+                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
                 $zone = Zone::where('id',$zone_id->zone_id)->first();
+                $PendingCashCollectionAgingReport = new PendingCashCollectionAgingReport();
 
+                $PendingCashCollectionAgingReport->hub_id = $hub_id;
+                $PendingCashCollectionAgingReport->zone_id = $zone_id->zone_id;
 
-                $PendingCashCollectionAgingReport->hub_id=$delviery_note->hub_id;
-                $PendingCashCollectionAgingReport->zone=$zone_id->zone_id;
+                $PendingCashCollectionAgingReport->date = $now;
 
-                $PendingCashCollectionAgingReport->days=$difference;
-                $PendingCashCollectionAgingReport->date= $delviery_note->updated_at;
-                $PendingCashCollectionAgingReport->delivery_note_id= $delviery_note->id;
+                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('cash_collection_status',0)->where('dncc_status',0)->get();
+                foreach($delviery_notes as $delviery_note)
+                {
+                    $start = $delviery_note->updated_at;
+                    $difference = $start->diffInDays($now);
+                    if($difference > 2)
+                    {
+                        $total_count++;
+                    }
+                }
+                $total += $total_count;
+                $PendingCashCollectionAgingReport->count = $total_count;
                 $PendingCashCollectionAgingReport->save();
-                
-                    $html .='<tr>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$difference.'</td>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delviery_note->id.'</td>';
-                    $html .='</tr>';
-                   
+
+                $html .='<tr>';
+                $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
+                $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
+                $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total_count.'</td>';
+                $html .='</tr>';
             }
-           
         }
+
         $html .='<tr>';
         $html .='<td colspan="2" style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total.'</td>';

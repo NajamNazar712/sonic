@@ -11,33 +11,6 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div id="search_form" class="row mb-2 justify-content-center">
-
-                  
-                    <div class="col-3 ">
-                        <div class="form-group input-group ">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
-                        </div>
-                    </div>
-                    <div class="col-3 ">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
-                        </div>
-                    </div>
-                    <div class="col-2">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                    </div>
-                </div>
 
 
                 <table class="table table-bordered datatable" id="datatable" style="width:100%;z-index: 3;">
@@ -47,7 +20,7 @@
                         <th class="border-primary border-darken-1">S.No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
-                        <th class="border-primary border-darken-1">Completed >2days</th>
+                        <th class="border-primary border-darken-1">Completed > 2days</th>
                     </tr>
                     </thead>
                 </table>
@@ -55,24 +28,6 @@
         </div>
     </div>
 
-    <!-- <div class="modal fade" id="shipments" role="dialog" aria-labelledby="shipments_title" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="shipments_title">Shipment(s)</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div> -->
 
 @endsection
 
@@ -142,32 +97,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#search_form #search_date_from').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
-                    }
-                }
-            });
-            $('#search_form #search_date_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
-                    }
-                }
-            });
+
              jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                  if ( this.context.length ) {
                      blockPagePermanently();
@@ -184,7 +114,7 @@
                             head.push('S. No');
                             head.push('Hubs');
                             head.push('Zone');
-                            head.push('Completed >2days');
+                            head.push('Completed > 2days');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -204,7 +134,6 @@
                     return {body: body, header: head};
                 }
             } );
-            var index_column = 0;
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -231,7 +160,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[1, 'desc']],
+                order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'hubs', name: 'c.name', class: 'align-middle text_center hubs'},

@@ -6447,7 +6447,6 @@ use Yajra\Datatables\Datatables;
             ->whereDate('completed_aging_reports.date',$today);
             $report = Datatables::of($aging_report);
 
-           
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
@@ -6466,11 +6465,10 @@ use Yajra\Datatables\Datatables;
             $today = Carbon::now()->startOfDay();
             $aging_report = DB::connection('reports')->table('pending_cash_collection_aging_reports')
             ->join('cities AS c', 'pending_cash_collection_aging_reports.hub_id', '=', 'c.id')
-            ->join('zones AS z', 'pending_cash_collection_aging_reports.zone', '=', 'z.id')
-            ->select(['pending_cash_collection_aging_reports.id as id','c.name as hubs','z.name as main_hubs','pending_cash_collection_aging_reports.days as days','pending_cash_collection_aging_reports.delivery_note_id as delivery_note_id'])
-            ->whereDate('pending_cash_collection_aging_reports.created_at',$today);
+            ->join('zones AS z', 'pending_cash_collection_aging_reports.zone_id', '=', 'z.id')
+            ->select(['pending_cash_collection_aging_reports.id as id','c.name as hubs','z.name as zone','pending_cash_collection_aging_reports.count'])
+            ->whereDate('pending_cash_collection_aging_reports.date',$today);
             $report = Datatables::of($aging_report);
-
            
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
