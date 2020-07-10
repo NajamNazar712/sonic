@@ -47,7 +47,6 @@
                         <th class="border-primary border-darken-1">S.No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
-                        <th class="border-primary border-darken-1">Delivery Note Id</th>
                         <th class="border-primary border-darken-1">Completed >2days</th>
                     </tr>
                     </thead>
@@ -142,45 +141,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            // function print(id) {
-            //     $.ajax({
-            //         url: '{!! route('admin.cargo.in_transit.print') !!}',
-            //         method: 'POST',
-            //         data: {
-            //             'id': id,
-            //             '_token': '{{ csrf_token() }}'
-            //         }
-            //     })
-            //         .done(function(data) {
-            //             var tab = window.open('', '_blank');
 
-            //             if(!tab) {
-            //                 swal({
-            //                     title: 'Popup Blocker Enabled!',
-            //                     text: 'Please add this site to your exception list.',
-            //                     icon: 'error',
-            //                     closeOnClickOutside: false,
-            //                     closeOnEsc: false
-            //                 });
-            //             }
-            //             else {
-            //                 tab.document.write(data);
-            //                 tab.document.close();
-            //                 tab.focus();
-            //             }
-            //         });
-            // }
-            
-            // $('#search_iban_no').inputmask({
-            //     'alias': 'integer',
-            //     'allowMinus': false,
-            //     'allowPlus': false
-            // });
-            // $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-            //     placeholder:'Search Shipper',
-            //     width:'100%',
-            //     allowClear:true
-            // });        
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -223,31 +184,15 @@
                             head.push('S. No');
                             head.push('Hubs');
                             head.push('Zone');
-                            head.push('Delivery Note ID');
                             head.push('Completed >2days');
-                           
-                            // head.push('Branch Name');
-                            // head.push('City');
-                            // head.push('Account Title');
-                            // head.push('Account No.');
-                            // head.push('IBAN No.');
-                            // head.push('Default');
-                            // head.push('Bank Added at');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
                                 row.push(values.hubs);
-                                row.push(values.main_hubs);
-                                row.push(values.delivery_note_id);
-                                row.push(values.days);
-                                // row.push(values.bank_branch);
-                                // row.push(values.city);
-                                // row.push(values.account_title);
-                                // row.push(values.account_no);
-                                // row.push(values.iban);
-                                // row.push(values.default);
-                                // row.push(values.bank_added_at);
+                                row.push(values.zone);
+                                row.push(values.count);
 
                                 body.push(row);
                             });
@@ -290,10 +235,8 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'hubs', name: 'c.name', class: 'align-middle text_center hubs'},
-                    {data: 'main_hubs', name: 'z.name', class: 'align-middle text_center main_hubs'},
-                    {data: 'days', name: 'completed_aging_reports.days', class: 'text_center align-middle days'},
-                    {data: 'delivery_note_id', name: 'completed_aging_reports.delivery_note_id', class: 'text_center align-middle delivery_note_id'},
-                    // {data: 'days', name: 'completed_aging_reports.days', class: 'align-middle bankname'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle text_center zone'},
+                    {data: 'count', name: 'completed_aging_reports.count', class: 'text_center align-middle count'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

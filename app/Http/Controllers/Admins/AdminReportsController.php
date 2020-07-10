@@ -6442,16 +6442,16 @@ use Yajra\Datatables\Datatables;
             $today = Carbon::now()->startOfDay();
             $aging_report = DB::connection('reports')->table('completed_aging_reports')
             ->join('cities AS c', 'completed_aging_reports.hub_id', '=', 'c.id')
-            ->join('zones AS z', 'completed_aging_reports.zone', '=', 'z.id')
-            ->select(['completed_aging_reports.id as id','c.name as hubs','z.name as main_hubs','completed_aging_reports.days as days','completed_aging_reports.delivery_note_id as delivery_note_id'])
-            ->whereDate('completed_aging_reports.created_at',$today);
+            ->join('zones AS z', 'completed_aging_reports.zone_id', '=', 'z.id')
+            ->select(['completed_aging_reports.id as id','c.name as hubs','z.name as zone','completed_aging_reports.count'])
+            ->whereDate('completed_aging_reports.date',$today);
             $report = Datatables::of($aging_report);
 
            
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
-                $report->whereBetween('completed_aging_reports.created_at', [$from,$to]);
+                $report->whereBetween('completed_aging_reports.date', [$from,$to]);
             }
 
            
