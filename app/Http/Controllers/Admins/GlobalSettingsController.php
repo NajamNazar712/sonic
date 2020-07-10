@@ -2425,8 +2425,9 @@ class GlobalSettingsController extends Controller
                     $html .='<table style="width:100%;">'; 
                     $html .= '<thead><tr>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Main Hub</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th></tr></thead><tbody>';
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Id</th></tr></thead><tbody>';
 
         $delviery_notes = DeliveryNote::where('cash_collection_status',1)->where('dncc_status',0)->get();
         foreach($delviery_notes as $delviery_note)
@@ -2444,16 +2445,18 @@ class GlobalSettingsController extends Controller
 
 
                 $CompletedAgingReport->hub_id=$delviery_note->hub_id;
-                $CompletedAgingReport->main_hub_id=$zone_id->zone_id;
+                $CompletedAgingReport->zone=$zone_id->zone_id;
 
                 $CompletedAgingReport->days=$difference;
-                $CompletedAgingReport->inserted_at= $delviery_note->updated_at;
+                $CompletedAgingReport->date= $delviery_note->updated_at;
+                $CompletedAgingReport->delivery_note_id= $delviery_note->id;
                 $CompletedAgingReport->save();
                 
                     $html .='<tr>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$difference.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delviery_note->id.'</td>';
                     $html .='</tr>';
                    
             }
@@ -2485,8 +2488,9 @@ class GlobalSettingsController extends Controller
                     $html .='<table style="width:100%;">'; 
                     $html .= '<thead><tr>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Main Hub</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th></tr></thead><tbody>';
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Id</th></tr></thead><tbody>';
 
         $delviery_notes = DeliveryNote::where('cash_collection_status',0)->where('dncc_status',0)->get();
         foreach($delviery_notes as $delviery_note)
@@ -2504,16 +2508,18 @@ class GlobalSettingsController extends Controller
 
 
                 $PendingCashCollectionAgingReport->hub_id=$delviery_note->hub_id;
-                $PendingCashCollectionAgingReport->main_hub_id=$zone_id->zone_id;
+                $PendingCashCollectionAgingReport->zone=$zone_id->zone_id;
 
                 $PendingCashCollectionAgingReport->days=$difference;
-                $PendingCashCollectionAgingReport->inserted_at= $delviery_note->updated_at;
+                $PendingCashCollectionAgingReport->date= $delviery_note->updated_at;
+                $PendingCashCollectionAgingReport->delivery_note_id= $delviery_note->id;
                 $PendingCashCollectionAgingReport->save();
                 
                     $html .='<tr>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$difference.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delviery_note->id.'</td>';
                     $html .='</tr>';
                    
             }
