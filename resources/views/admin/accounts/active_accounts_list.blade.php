@@ -86,6 +86,29 @@
             </div>
         </div>
     </section>
+    <div class="modal fade text-left" id="SalesTagModal1" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Sales Person</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="shipper_id1">
+                    <select name="Sale_person" id="saletag1" class="form-control select2">
+                        @foreach($sale_name as $sn)
+                            <option value="{{ $sn->id }}" > {{ $sn->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="salesTagSubmit1">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -264,92 +287,246 @@
            dom: '<"d-inline-block"l><"pull-right"B>tipr',
            scrollX: true, scrollY: '500px',
            buttons: [
-                    {{--{--}}
-                    {{--    text: 'Set Commission',--}}
-                    {{--    className: 'btn btn-primary set_commission',--}}
-                    {{--    enabled:false,--}}
-                    {{--    action: function (e, dt, node, config) {--}}
-                    {{--        if(selected_rows != ''){--}}
-                    {{--            swal({--}}
-                    {{--                title: 'Are You Sure?',--}}
-                    {{--                text: 'Select Yes to Set Commission!',--}}
-                    {{--                icon: 'warning',--}}
-                    {{--                buttons: {--}}
-                    {{--                    cancel: {--}}
-                    {{--                        text: 'No',--}}
-                    {{--                        value: null,--}}
-                    {{--                        visible: true,--}}
-                    {{--                        closeModal: true,--}}
-                    {{--                    },--}}
-                    {{--                    confirm: {--}}
-                    {{--                        text: 'Yes',--}}
-                    {{--                        value: true,--}}
-                    {{--                        visible: true,--}}
-                    {{--                        closeModal: true--}}
-                    {{--                    }--}}
-                    {{--                },--}}
-                    {{--                closeOnClickOutside: false,--}}
-                    {{--                closeOnEsc: false,--}}
-                    {{--                dangerMode: true--}}
-                    {{--            }).then(function (confirm) {--}}
-                    {{--                if (confirm) {--}}
-                    {{--                    var link = '{{ route('admin.settings.commission.set_commission', ["ids" => 0]) }}';--}}
-                    {{--                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;--}}
-                    {{--                }--}}
-                    {{--            });--}}
+                    // {{--{--}}
+                    // {{--    text: 'Set Commission',--}}
+                    // {{--    className: 'btn btn-primary set_commission',--}}
+                    // {{--    enabled:false,--}}
+                    // {{--    action: function (e, dt, node, config) {--}}
+                    // {{--        if(selected_rows != ''){--}}
+                    // {{--            swal({--}}
+                    // {{--                title: 'Are You Sure?',--}}
+                    // {{--                text: 'Select Yes to Set Commission!',--}}
+                    // {{--                icon: 'warning',--}}
+                    // {{--                buttons: {--}}
+                    // {{--                    cancel: {--}}
+                    // {{--                        text: 'No',--}}
+                    // {{--                        value: null,--}}
+                    // {{--                        visible: true,--}}
+                    // {{--                        closeModal: true,--}}
+                    // {{--                    },--}}
+                    // {{--                    confirm: {--}}
+                    // {{--                        text: 'Yes',--}}
+                    // {{--                        value: true,--}}
+                    // {{--                        visible: true,--}}
+                    // {{--                        closeModal: true--}}
+                    // {{--                    }--}}
+                    // {{--                },--}}
+                    // {{--                closeOnClickOutside: false,--}}
+                    // {{--                closeOnEsc: false,--}}
+                    // {{--                dangerMode: true--}}
+                    // {{--            }).then(function (confirm) {--}}
+                    // {{--                if (confirm) {--}}
+                    // {{--                    var link = '{{ route('admin.settings.commission.set_commission', ["ids" => 0]) }}';--}}
+                    // {{--                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;--}}
+                    // {{--                }--}}
+                    // {{--            });--}}
 
 
-                    {{--        }--}}
-                    {{--        else{--}}
-                    {{--            var error = "Something went wrong please refresh page and try again!";--}}
-                    {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    // {{--        }--}}
+                    // {{--        else{--}}
+                    // {{--            var error = "Something went wrong please refresh page and try again!";--}}
+                    // {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                    {{--        }--}}
-                    {{--    }--}}
-                    {{--},--}}
-                    {{--{--}}
-                    {{--    text: 'Approve Commission',--}}
-                    {{--    className: 'btn btn-primary approve_commission',--}}
-                    {{--    enabled:false,--}}
-                    {{--    action: function (e, dt, node, config) {--}}
-                    {{--        if(selected_rows != ''){--}}
-                    {{--            swal({--}}
-                    {{--                title: 'Are You Sure?',--}}
-                    {{--                text: 'Select Yes to Approve Commission!',--}}
-                    {{--                icon: 'warning',--}}
-                    {{--                buttons: {--}}
-                    {{--                    cancel: {--}}
-                    {{--                        text: 'No',--}}
-                    {{--                        value: null,--}}
-                    {{--                        visible: true,--}}
-                    {{--                        closeModal: true,--}}
-                    {{--                    },--}}
-                    {{--                    confirm: {--}}
-                    {{--                        text: 'Yes',--}}
-                    {{--                        value: true,--}}
-                    {{--                        visible: true,--}}
-                    {{--                        closeModal: true--}}
-                    {{--                    }--}}
-                    {{--                },--}}
-                    {{--                closeOnClickOutside: false,--}}
-                    {{--                closeOnEsc: false,--}}
-                    {{--                dangerMode: true--}}
-                    {{--            }).then(function (confirm) {--}}
-                    {{--                if (confirm) {--}}
-                    {{--                    var link = '{{ route('admin.settings.commission.approve_commission', ["ids" => 0]) }}';--}}
-                    {{--                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;--}}
-                    {{--                }--}}
-                    {{--            });--}}
+                    // {{--        }--}}
+                    // {{--    }--}}
+                    // {{--},--}}
+                    // {{--{--}}
+                    // {{--    text: 'Approve Commission',--}}
+                    // {{--    className: 'btn btn-primary approve_commission',--}}
+                    // {{--    enabled:false,--}}
+                    // {{--    action: function (e, dt, node, config) {--}}
+                    // {{--        if(selected_rows != ''){--}}
+                    // {{--            swal({--}}
+                    // {{--                title: 'Are You Sure?',--}}
+                    // {{--                text: 'Select Yes to Approve Commission!',--}}
+                    // {{--                icon: 'warning',--}}
+                    // {{--                buttons: {--}}
+                    // {{--                    cancel: {--}}
+                    // {{--                        text: 'No',--}}
+                    // {{--                        value: null,--}}
+                    // {{--                        visible: true,--}}
+                    // {{--                        closeModal: true,--}}
+                    // {{--                    },--}}
+                    // {{--                    confirm: {--}}
+                    // {{--                        text: 'Yes',--}}
+                    // {{--                        value: true,--}}
+                    // {{--                        visible: true,--}}
+                    // {{--                        closeModal: true--}}
+                    // {{--                    }--}}
+                    // {{--                },--}}
+                    // {{--                closeOnClickOutside: false,--}}
+                    // {{--                closeOnEsc: false,--}}
+                    // {{--                dangerMode: true--}}
+                    // {{--            }).then(function (confirm) {--}}
+                    // {{--                if (confirm) {--}}
+                    // {{--                    var link = '{{ route('admin.settings.commission.approve_commission', ["ids" => 0]) }}';--}}
+                    // {{--                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;--}}
+                    // {{--                }--}}
+                    // {{--            });--}}
 
 
-                    {{--        }--}}
-                    {{--        else{--}}
-                    {{--            var error = "Something went wrong please refresh page and try again!";--}}
-                    {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    // {{--        }--}}
+                    // {{--        else{--}}
+                    // {{--            var error = "Something went wrong please refresh page and try again!";--}}
+                    // {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                    {{--        }--}}
-                    {{--    }--}}
-                    {{--},--}}
+                    // {{--        }--}}
+                    // {{--    }--}}
+                    // {{--},--}}
+                    @if (session('role_id') == 1 || in_array(361, session('permissions')))
+                    {
+                            text: 'Assign Rider',
+                            className: 'btn btn-primary assign_rider',
+                            enabled:false,
+                            action: function (e, dt, node, config) {
+                           if(selected_rows != ''){
+                              
+                                $('#SalesTagModal1').modal('show');
+                                $('#salesTagSubmit1').on('click',function () {
+                                    var assign = parseInt($('#saletag1').val());
+                                    swal({
+                                        text: 'Are you sure, you want to Assign?',
+                                        icon: 'info',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function(confirm) {
+                                        if (confirm) {
+                                            if (assign) {
+                                                $.ajax({
+                                                    url: '{!! route('admin.accounts.tag.submit.bulk') !!}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        'admin_id': assign,
+                                                        'shipper_ids[]': selected_rows,
+                                                        '_token': '{{ csrf_token() }}'
+                                                    }
+                                                })
+                                                    .done(function (data) {
+                                                        if (data.status == 1) {
+                                                            $('#SalesTagModal1').modal('hide');
+                                                            toastr.success(data.success, 'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
+                                                        } else {
+                                                            toastr.error(data.error, 'Error!', {
+                                                                positionClass: 'toast-top-center',
+                                                                containerId: 'toast-top-center'
+                                                            });
+                                                        }
+                                                        selected_rows = [];
+
+                                                        table.rows().deselect();
+                                                        $('#SalesTagModal1').modal('hide');
+                                                        table.draw(true);
+                                                        table.button('.assign_rider').disable();
+                                                        
+
+                                                    });
+                                            } else {
+                                                var error = "Rider Not Selected!";
+                                                toastr.error(error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+                                        }
+                                    });
+                                });
+
+                            }else{
+                                var error = "Not selected any Rider!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
+                    },
+                    @endif
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                    id = parseInt(row.id());
+
+                                    hub_id = $(row.node()).data('id');
+
+                                    var allow = false;
+
+                                    if(hub_ids.length == 0) {
+                                        hub_ids.push(hub_id);
+
+                                        allow = true;
+                                    }
+                                    else if(hub_ids[0] == hub_id) {
+                                        allow = true;
+                                    }
+
+                                    if (allow) {
+                                        row.select();
+
+                                        var index = $.inArray(id, selected_rows);
+
+                                        if (index === -1) {
+                                            selected_rows.push(id);
+                                        }
+
+                                        table.button('.assign_rider').enable();
+                                        
+                                    }
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.assign_rider').disable();
+
+                                        hub_ids.splice(index, 1);
+                                    }
+                                }
+                            });
+                        }
+                    },
                     {
                         extend: 'excel',
                         title: 'Active Accounts',
@@ -505,6 +682,8 @@
                 this.api().table().columns.adjust();
             }
         });
+
+        var hub_ids = [];
 
         $('#search_filter_btn').on('click',function () {
             table.draw();
@@ -865,12 +1044,11 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button('.set_commission').enable();
-                    table.button('.approve_commission').enable();
+                    table.button('.assign_rider').enable();
+
                 }
                 else {
-                    table.button('.set_commission').disable();
-                    table.button('.approve_commission').disable();
+                    table.button('.assign_rider').disable();
                 }
         });
     });
