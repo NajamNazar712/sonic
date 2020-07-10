@@ -2444,10 +2444,11 @@ class GlobalSettingsController extends Controller
 
 
                 $CompletedAgingReport->hub_id=$delviery_note->hub_id;
-                $CompletedAgingReport->main_hub_id=$zone_id->zone_id;
+                $CompletedAgingReport->zone=$zone_id->zone_id;
 
                 $CompletedAgingReport->days=$difference;
-                $CompletedAgingReport->inserted_at= $delviery_note->updated_at;
+                $CompletedAgingReport->date= $delviery_note->updated_at;
+                $CompletedAgingReport->delivery_note_id= $delviery_note->id;
                 $CompletedAgingReport->save();
                 
                     $html .='<tr>';
@@ -2504,10 +2505,11 @@ class GlobalSettingsController extends Controller
 
 
                 $PendingCashCollectionAgingReport->hub_id=$delviery_note->hub_id;
-                $PendingCashCollectionAgingReport->main_hub_id=$zone_id->zone_id;
+                $PendingCashCollectionAgingReport->zone=$zone_id->zone_id;
 
                 $PendingCashCollectionAgingReport->days=$difference;
-                $PendingCashCollectionAgingReport->inserted_at= $delviery_note->updated_at;
+                $PendingCashCollectionAgingReport->date= $delviery_note->updated_at;
+                $PendingCashCollectionAgingReport->delivery_note_id= $delviery_note->id;
                 $PendingCashCollectionAgingReport->save();
                 
                     $html .='<tr>';
