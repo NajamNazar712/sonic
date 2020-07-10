@@ -46,7 +46,8 @@
 
                         <th class="border-primary border-darken-1">S.No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Main Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
+                        <th class="border-primary border-darken-1">Delivery Note Id</th>
                         <th class="border-primary border-darken-1">Completed >2days</th>
                     </tr>
                     </thead>
@@ -221,7 +222,8 @@
 
                             head.push('S. No');
                             head.push('Hubs');
-                            head.push('Main Hubs');
+                            head.push('Zone');
+                            head.push('Delivery Note Id');
                             head.push('Completed >2days');
                             // head.push('Branch Name');
                             // head.push('City');
@@ -236,6 +238,7 @@
                                 row.push(index + 1);
                                 row.push(values.hubs);
                                 row.push(values.main_hubs);
+                                row.push(values.delivery_note_id);
                                 row.push(values.days);
                                 // row.push(values.bank_branch);
                                 // row.push(values.city);
@@ -288,6 +291,7 @@
                     {data: 'hubs', name: 'c.name', class: 'align-middle text_center hubs'},
                     {data: 'main_hubs', name: 'z.name', class: 'align-middle text_center main_hubs'},
                     {data: 'days', name: 'pending_cash_collection_aging_reports.days', class: 'text_center align-middle days'},
+                    {data: 'delivery_note_id', name: 'pending_cash_collection_aging_reports.delivery_note_id', class: 'text_center align-middle delivery_note_id'},
                     // {data: 'days', name: 'completed_aging_reports.days', class: 'align-middle bankname'},
                 ],
                 rowCallback: function(row, data, index) {
