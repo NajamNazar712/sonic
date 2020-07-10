@@ -382,6 +382,7 @@
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
+                                console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
