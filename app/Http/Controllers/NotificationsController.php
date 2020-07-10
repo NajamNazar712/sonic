@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
@@ -4777,6 +4779,88 @@ class NotificationsController extends Controller
                   }
 
                   self::email($subject, $body, $to, $cc, $bcc);
+              }
+              else if($id == 71){
+                  $completed_agings = CompletedAgingReport::get();
+
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+                  $date = Carbon::now()->toDateString();
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+                  $html = '<table style="width:100%;">';
+                  $html .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed > 2days</th>
+                                           </tr></thead><tbody>';
+                  $total_count = 0;
+                  foreach ($completed_agings as $completed_aging){
+                      $html .='<tr>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$completed_aging->city->name.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$completed_aging->zone->name.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$completed_aging->count.'</td>';
+                      $html .='</tr>';
+                      $total_count = $total_count + $completed_aging->count;
+                  }
+                  $html .='<tr>';
+                  $html .='<td colspan="2" style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
+                  $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total_count.'</td>';
+                  $html .='</tr>';
+                  $html .= '</tbody></table>';
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                  $admins = Admin::whereIn('id', [12,49,216]);
+
+                  if ($admins->exists()) {
+                      $to = $admins->pluck('email')->toArray();
+                  }
+
+                  self::email($subject, $body, $to);
+              }
+              else if($id == 72){
+                  $pending_cash_collection_agings = PendingCashCollectionAgingReport::get();
+
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+                  $date = Carbon::now()->toDateString();
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+                  $html = '<table style="width:100%;">';
+                  $html .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed > 2days</th>
+                                           </tr></thead><tbody>';
+                  $total_count = 0;
+                  foreach ($pending_cash_collection_agings as $pending_cash_collection_aging){
+                      $html .='<tr>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pending_cash_collection_aging->city->name.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pending_cash_collection_aging->zone->name.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pending_cash_collection_aging->count.'</td>';
+                      $html .='</tr>';
+                      $total_count = $total_count + $pending_cash_collection_aging->count;
+                  }
+                  $html .='<tr>';
+                  $html .='<td colspan="2" style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
+                  $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total_count.'</td>';
+                  $html .='</tr>';
+                  $html .= '</tbody></table>';
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                  $admins = Admin::whereIn('id', [12,49,216]);
+
+                  if ($admins->exists()) {
+                      $to = $admins->pluck('email')->toArray();
+                  }
+
+                  self::email($subject, $body, $to);
               }
         }
       }
