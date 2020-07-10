@@ -431,6 +431,9 @@
                         }
                         
                     }
+                    else{
+                        total_amount=0;
+                    }
                     $('#total').text(total_amount);
                     
 			      },
