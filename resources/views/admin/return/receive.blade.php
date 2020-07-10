@@ -201,6 +201,7 @@
                             head.push('Hub');
                             head.push('Rider');
                             head.push('No. Of Shipments');
+                            head.push('No. Of Pending Shipments');
                             head.push('Assigned By');
                             head.push('Assigned Date');
 
@@ -213,6 +214,7 @@
                                 row.push(values.hub);
                                 row.push(values.rider);
                                 row.push(values.shipments_count);
+                                row.push(values.shipments_unverified_count);
                                 row.push(values.assignee);
                                 row.push(values.created_at);
                                 row.push(values.return_note_status);
