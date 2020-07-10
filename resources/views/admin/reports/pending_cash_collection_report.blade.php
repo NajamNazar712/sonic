@@ -265,7 +265,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'User IBAN Number Report',
+                        title: 'Pending Cash Collection Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],

@@ -2426,8 +2426,8 @@ class GlobalSettingsController extends Controller
                     $html .= '<thead><tr>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Id</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th></tr></thead><tbody>';
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Id</th></tr></thead><tbody>';
 
         $delviery_notes = DeliveryNote::where('cash_collection_status',1)->where('dncc_status',0)->get();
         foreach($delviery_notes as $delviery_note)
@@ -2455,8 +2455,8 @@ class GlobalSettingsController extends Controller
                     $html .='<tr>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delviery_note->id.'</td>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$difference.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delviery_note->id.'</td>';
                     $html .='</tr>';
                    
             }
@@ -2489,8 +2489,8 @@ class GlobalSettingsController extends Controller
                     $html .= '<thead><tr>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Id</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th></tr></thead><tbody>';
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Id</th></tr></thead><tbody>';
 
         $delviery_notes = DeliveryNote::where('cash_collection_status',0)->where('dncc_status',0)->get();
         foreach($delviery_notes as $delviery_note)
@@ -2518,8 +2518,8 @@ class GlobalSettingsController extends Controller
                     $html .='<tr>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delviery_note->id.'</td>';
                         $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$difference.'</td>';
+                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delviery_note->id.'</td>';
                     $html .='</tr>';
                    
             }
