@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Completed Aging Report Setting
+                    Pending Cash Collection & Completed Aging Reports Setting
                 </h1>
 
                 <div class="card">
@@ -26,7 +26,7 @@
 
                                             <div class="input-group">
                                                 <div class="input-group-prepend">
-                                                    <span class="input-group-text">Completed Aging Report Time</span>
+                                                    <span class="input-group-text">Pending Cash Collection & Completed Aging Reports Time</span>
                                                 </div>
                                                 <input type="text" name="completed_aging_report_time" class="form-control completed_aging_report_time" placeholder="Aging Report Time*" data-rule-required="true" data-msg-required="Aging report Time is required" value="{{ $completed_aging_report_time }}" data-rule-min="0" data-msg-min="Aging Report Time can not be less than 0" data-rule-max="23" data-msg-min="Aging Report Time can not be more than 23">
                                                 <div class="input-group-append">

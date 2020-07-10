@@ -997,7 +997,7 @@
                                         <li><a class="menu-item" href="{{route('admin.settings.overnight_overland_cargo_report.index')}}">Overnight Overland Cargo Report</a></li>
                                     @endif
                                      @if (session('role_id') == 1 || in_array(343, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.settings.aging_report.index')}}">Completed Aging Report Settings</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.settings.aging_report.index')}}">Pending Cash Collection & Completed Aging Reports</a></li>
                                     @endif
                                 </ul>
                             </li>
