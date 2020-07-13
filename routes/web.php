@@ -614,7 +614,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
-            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@v2_pickups_index')->name('index');
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@P')->name('index');
             Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_list_v2')->name('list');
             Route::get('shipments', 'Admins\V2Pickup\V2AdminPickupsController@pickups_shipments')->name('shipments');
         });
@@ -1451,6 +1451,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\V2Pickup\V2AdminReportController@pickup_report_list')->name('list');
             Route::post('/data', 'Admins\V2Pickup\V2AdminReportController@pickup_report_data')->name('data');
         });
+
+        Route::prefix('not_attempted_aging')->name('not_attempted_aging.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@not_attempted_aging_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@not_attempted_aging_list')->name('list');
+        });
     });
 
     //Reports end
@@ -1650,7 +1655,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 });
 
             });
-
         });
 
 
@@ -1766,6 +1770,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/view_statuses', 'Admins\AdminCrmSettingsController@escalation_view_statuses')->name('view_statuses');
             Route::get('/levels', 'Admins\AdminCrmSettingsController@escalation_level_index')->name('levels.index');
             Route::post('/levels/store', 'Admins\AdminCrmSettingsController@escalation_level_store')->name('levels.store');
+        });
+
+
+        Route::prefix('holidays')->name('holidays.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@holidays_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@holidays_update')->name('update');
+            Route::post('list', 'Admins\GlobalSettingsController@holidays_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@holidays_add')->name('add');
+        });
+
+        Route::prefix('not_attempted_cron')->name('not_attempted_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@not_attempted_cron_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@not_attempted_cron_store')->name('store');
         });
     });
 

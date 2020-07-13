@@ -201,6 +201,7 @@
                             head.push('Hub');
                             head.push('Rider');
                             head.push('No. Of Shipments');
+                            head.push('No. Of Pending Shipments');
                             head.push('Assigned By');
                             head.push('Assigned Date');
 
@@ -213,6 +214,7 @@
                                 row.push(values.hub);
                                 row.push(values.rider);
                                 row.push(values.shipments_count);
+                                row.push(values.shipments_unverified_count);
                                 row.push(values.assignee);
                                 row.push(values.created_at);
                                 row.push(values.return_note_status);
@@ -262,7 +264,7 @@
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     // { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data:'shipments_unverified_link' ,name: 'return_notes.shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center'},
+                    { data:'shipments_unverified_link' ,name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center',orderable: false, searchable: false},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
                     { data:'return_note_status' ,name: 'return_notes.status', class: 'align-middle return_note_status'},
@@ -299,7 +301,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.shipments_unverified_link')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.action')){
                             $(td).appendTo($(search));

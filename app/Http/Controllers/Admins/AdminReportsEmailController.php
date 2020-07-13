@@ -16,10 +16,13 @@ use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
+use App\Http\Models\Excel_reports\NotAttemptedShipmentAging;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
+use App\Http\Models\Holiday;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -858,5 +861,141 @@ class AdminReportsEmailController extends Controller
         $writer->save($file_name);
 
         return url('/') . '/' . $file_name_without_path;
+    }
+
+    static public function not_attempted_aging($date){
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time')->first();
+        $cut_off_time = $settings->setting_value;
+        $time = $settings->setting_value . ':00';
+        $formatted_date = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00");
+        $from = Carbon::today()->addHour($cut_off_time)->toDateTimeString();
+        $formatted_date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00")->subDays(30)->toDateTimeString();
+        $formatted_date_to = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00")->toDateTimeString();
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $from_id = ShipmentsJourney::select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $formatted_date_from)->first()->id;
+        $to_id = ShipmentsJourney::select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $formatted_date_to)->first()->id;
+        $hub_shipments = array();
+        $zone_hub_shipments = array();
+        NotAttemptedShipmentAging::where('created_at', '<', $formatted_date_from)->delete();
+        foreach ($hubs as $hub){
+            $hub_shipments[$hub->name]['id'] = $hub->id;
+            $hub_shipments[$hub->name]['name'] = $hub->name;
+            $hub_shipments[$hub->name]['zone_id'] = $hub->zone_id;
+            $hub_shipments[$hub->name]['zone'] = $hub->zone->name;
+            $hub_shipments[$hub->name]['zero'] = 0;
+            $hub_shipments[$hub->name]['one'] = 0;
+            $hub_shipments[$hub->name]['two'] = 0;
+            $hub_shipments[$hub->name]['three'] = 0;
+            $hub_shipments[$hub->name]['four'] = 0;
+            $hub_shipments[$hub->name]['five'] = 0;
+            $hub_shipments[$hub->name]['six_plus'] = 0;
+            $cities_shipments = City::join('shipments as s', function($join) {
+                                $join->where(function($query) {
+                                    $query->where('cities.id', '=','s.consignee_city_id')
+                                    ->orWhere(function ($sub_query) {
+                                        $sub_query->on('cities.id', '=', DB::raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
+                                    });
+                                });
+                            })
+                            ->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+                            ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
+                            ->leftjoin('cities as sch', 's.consignee_city_id', '=', 'sch.id')
+                            ->leftjoin('zone_class_cities as zcc', function($join) {
+                                $join->on('pc.zone_id', '=', 'zcc.zone_id')
+                                    ->on('s.consignee_city_id', '=', 'zcc.city_id');
+                            })
+                            ->join('shipments_journey as sj', function($join) use ($from_id, $to_id) {
+                                $join->on('s.id', '=', 'sj.shipment_id')
+                                    ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id < "' . $to_id . '")'));
+                            })
+                            ->join('shipments_journey as sja', function($join){
+                                $join->on('s.id', '=', 'sja.shipment_id')
+                                    ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+                            })
+                            ->select('sja.created_at as arrival_date')
+                            ->where(function ($query) use ($cut_off_time, $from){
+                                $query->where(function($sub_query){
+                                    $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
+                                        ->where('sj.shipper_status_id', '=', 7);
+                                })
+                                    ->orWhere(function ($sub_query) use ($cut_off_time, $from) {
+                                        $sub_query->where(function ($sub_sub_query) use ($cut_off_time, $from) {
+                                            $sub_sub_query->where(function ($sub_sub_sub_query){
+                                                $sub_sub_sub_query->where(function ($sub_sub_sub_sub_query){
+                                                    $sub_sub_sub_sub_query->where(function ($sub_sub_sub_sub_sub_query) {
+                                                        $sub_sub_sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
+                                                            ->orWhereNull('zcc.class')
+                                                            ->orWhereIn('zcc.class', [0, 1]);
+                                                    })
+                                                        ->where(function ($sub_sub_sub_sub_sub_sub_sub_query) {
+                                                            $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::raw('usi.city_id'))
+                                                                ->where('sj.shipper_status_id', '=', 2);
+                                                        });
+                                                });
+                                            })
+                                                ->where(function ($sub_sub_sub_query) use ($cut_off_time, $from) {
+                                                    $sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) < date(?)', [$from])
+                                                        ->orWhere(function ($sub_sub_sub_sub_query) use ($cut_off_time, $from) {
+                                                            $sub_sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) = date(?)', [$from])
+                                                                ->whereRaw('hour(`sj`.`created_at`) < ?', [$cut_off_time]);
+                                                        });
+                                                });
+                                        });
+                                    });
+                            })
+                            ->where('cities.hub_id', $hub->id);
+
+            if($cities_shipments->exists()){
+                $cities_shipments = $cities_shipments->groupBy('s.id')->get();
+            }
+            foreach ($cities_shipments as $cities_shipment){
+                $arrival_date = Carbon::parse($cities_shipment->arrival_date);
+                $holidays = Holiday::whereBetween('holiday', [$arrival_date, $formatted_date])->count();
+                $count_without_holidays = $arrival_date->diffInDays($formatted_date);
+                $count_with_holidays = $count_without_holidays - $holidays;
+                if($count_with_holidays == 0){
+                    $hub_shipments[$hub->name]['zero']++;
+                }
+                elseif ($count_with_holidays == 1){
+                    $hub_shipments[$hub->name]['one']++;
+                }
+                elseif ($count_with_holidays == 2){
+                    $hub_shipments[$hub->name]['two']++;
+                }
+                elseif ($count_with_holidays == 3){
+                    $hub_shipments[$hub->name]['three']++;
+                }
+                elseif ($count_with_holidays == 4){
+                    $hub_shipments[$hub->name]['four']++;
+                }
+                elseif ($count_with_holidays == 5){
+                    $hub_shipments[$hub->name]['five']++;
+                }
+                elseif ($count_with_holidays >= 6){
+                    $hub_shipments[$hub->name]['six_plus']++;
+                }
+            }
+        }
+        foreach($hub_shipments as $hub_shipment){
+            $not_attempted_shipment_aging = new NotAttemptedShipmentAging();
+            $not_attempted_shipment_aging->hub_id = $hub_shipment['id'];
+            $not_attempted_shipment_aging->zone_id = $hub_shipment['zone_id'];
+            $not_attempted_shipment_aging->zero = $hub_shipment['zero'];
+            $not_attempted_shipment_aging->one = $hub_shipment['one'];
+            $not_attempted_shipment_aging->two = $hub_shipment['two'];
+            $not_attempted_shipment_aging->three = $hub_shipment['three'];
+            $not_attempted_shipment_aging->four = $hub_shipment['four'];
+            $not_attempted_shipment_aging->five = $hub_shipment['five'];
+            $not_attempted_shipment_aging->six_plus = $hub_shipment['six_plus'];
+            $not_attempted_shipment_aging->save();
+
+            NotificationsController::send(68, $date, $hub_shipment);
+
+            $zone_hub_shipments[$hub_shipment['zone_id']][$hub_shipment['name']] = $hub_shipment;
+        }
+        foreach ($zone_hub_shipments as $zone_hub_shipment){
+            NotificationsController::send(69, $date, $zone_hub_shipment);
+        }
+        NotificationsController::send(70, $date, $hub_shipments);
     }
 }
