@@ -796,7 +796,7 @@
 
                         if (index === -1) {
                             selected_rows.push(id);
-                        }
+                     }
                         else {
                             selected_rows.splice(index, 1);
                         }
