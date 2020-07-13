@@ -28,6 +28,7 @@ use App\Http\Models\Blacklist\BlacklistSettingCondition;
 use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
+use App\Http\Models\Holiday;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
@@ -2588,4 +2589,45 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    public function not_attempted_cron_index(){
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time')->first();
+
+        return view('admin.settings.not_attempted_report_cron_time')->with('settings', $settings);
+    }
+    public function not_attempted_cron_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time')->first();
+
+        $settings->setting_value = $request->not_attempted_cron_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function holidays_index(){
+        return view('admin.settings.holidays');
+    }
+    public function holidays_list(){
+        $holidays = Holiday::leftjoin('admins as a', 'a.id', '=', 'holidays.created_by')
+            ->select('holidays.reason as reason', 'holidays.holiday as holiday', 'holidays.created_at as created_at', 'a.name as created_by');
+
+        return Datatables::of($holidays)
+            ->make(true);
+    }
+    public function holidays_add(Request $request){
+        $holiday_date = $request->holiday_date;
+        $holiday_reason = $request->holiday_reason;
+        $existing_holiday = CrmTatHolidays::where('holiday', $holiday_date);
+        if ($existing_holiday->exists()){
+            return ['status' => 0, 'error' => 'Holiday is already marked on the selected date!'];
+        }
+        else{
+            $new_holiday = new Holiday();
+            $new_holiday->holiday = $holiday_date;
+            $new_holiday->reason = $holiday_reason;
+            $new_holiday->created_by = Auth::id();
+            $new_holiday->save();
+            return ['status' => 1, 'success' => 'Holiday added successfully!'];
+        }
+    }
 }

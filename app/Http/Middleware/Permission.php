@@ -401,6 +401,8 @@ class Permission
             'reports.pickup_report.index' => 337,
             'reports.pickup_report.list' => 337,
             'reports.pickup_report.data' => 337,
+            'reports.not_attempted_aging.index' => 360,
+            'reports.not_attempted_aging.list' => 360,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -606,6 +608,13 @@ class Permission
             'settings.escalation.tagging.edit.store' => 350,
 
             'settings.default_agent.index' => 351,
+
+            'settings.holidays.index' => 358,
+            'settings.holidays.list' => 358,
+            'settings.holidays.add' => 358,
+
+            'settings.not_attempted_cron.index' => 359,
+            'settings.not_attempted_cron.store' => 359,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,

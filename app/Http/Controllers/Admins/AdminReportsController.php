@@ -6482,6 +6482,24 @@ use Yajra\Datatables\Datatables;
            
             return $report->make(true);
         }
+        public function not_attempted_aging_index(Request $request){
+            return view('admin.reports.not_attempted_aging_report');
+        }
+
+        public function not_attempted_aging_list(Request $request){
+            if ($request->has('date')) {
+                $date = $request->get('date');
+                $date_from = Carbon::parse($date)->startOfDay()->toDateTimeString();
+                $date_to = Carbon::parse($date)->endOfDay()->toDateTimeString();
+            }
+            $not_attempting_aging_report = DB::connection('reports')->table('not_attempted_shipment_agings')
+            ->join('cities as h', 'not_attempted_shipment_agings.hub_id', '=', 'h.id')
+            ->join('zones as z', 'not_attempted_shipment_agings.zone_id', '=', 'z.id')
+            ->select(['h.name as hub', 'not_attempted_shipment_agings.zero as zero', 'not_attempted_shipment_agings.one as one', 'not_attempted_shipment_agings.two as two', 'not_attempted_shipment_agings.three as three', 'not_attempted_shipment_agings.four as four', 'not_attempted_shipment_agings.five as five', 'not_attempted_shipment_agings.six_plus as six_plus'])
+            ->whereBetween('not_attempted_shipment_agings.created_at',[$date_from, $date_to]);
+            $report = Datatables::of($not_attempting_aging_report);
+            return $report->make(true);
+        }
 
     }
 

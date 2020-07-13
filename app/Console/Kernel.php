@@ -93,6 +93,15 @@ class Kernel extends ConsoleKernel
             $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
         }
 
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $time = $settings->setting_value . ':00';
+
+            $schedule->command('email:notattemptedagingreport')->dailyAt($time)->runInBackground();
+        }
         // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
 
         $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
