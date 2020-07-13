@@ -776,7 +776,7 @@
                                     shipment += '</thead>';
                                     shipment += '<tbody>';
 
-                                    $.each(details.pickup_history, function (index, history) {
+                                    $.each(details.old_pickup_history, function (index, history) {
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.date_time + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
