@@ -734,7 +734,7 @@
 
                                 if ('pickup_history' in details) {
                                     shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Pickup History</u></h4>';
+                                    shipment += '<h4><u>Pickup History (V2)</u></h4>';
                                     shipment += '<div class="border table-responsive">';
 
                                     shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
@@ -763,7 +763,7 @@
                                 }
                                 if ('old_pickup_history' in details) {
                                     shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Old Pickup History</u></h4>';
+                                    shipment += '<h4><u>Pickup History (V1)</u></h4>';
                                     shipment += '<div class="border table-responsive">';
 
                                     shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
