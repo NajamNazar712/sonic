@@ -761,6 +761,35 @@
                                     shipment += '</div>';
                                     shipment += '</div>';
                                 }
+                                if ('old_pickup_history' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Old Pickup History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.pickup_history, function (index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
                                 if ('handover_history' in details) {
                                     shipment += '<div class="col-12 mt-2">';
                                     shipment += '<h4><u>Handover Shipment History</u></h4>';
