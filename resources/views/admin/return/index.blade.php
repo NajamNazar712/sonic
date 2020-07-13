@@ -1552,11 +1552,12 @@
 
         $('body').on('click', 'button.remarks_label', function () {
             var shipment_id = $(this).parents('tr').attr('id');
-            var shipment_id1 = $(this).parents('tr').attr('id');
+            // var shipper_phone = $(this).parents('tr').attr('shipper_phone'); 
+            
                 // var id = parseInt($(this).parent('tr').attr('id'));
                 // var hub_id = $(this).parents('tr').data('hub');
                 // var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
-                // console.log(shipment_id);
+                console.log("before: "+shipment_id);
                 if(shipment_id){
                     $.ajax({
                         url: '{!! route('admin.return.remarks_info') !!}',
@@ -1569,8 +1570,8 @@
                         .done(function(data) {
                             if (data.status == 0) {
                                 details = data.details;
-                                $('#consignee_information_id1').val(details.remarks_data.id);
-                                console.log(details.remarks_data.id);
+                                $('#consignee_information_id1').val(shipment_id);
+                                console.log("0 wala console "+shipment_id);
                                 $('#remarks_textarea').val(details.remarks_data.remarks);
                                
                                 $('#ConsigneeInformationModal1').modal('show');
@@ -1578,9 +1579,9 @@
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             }
                             if (data.status == 1) {
-                                // details = data.details;
-                                $('#consignee_information_id1').val(details.remarks_data.id);
-                                console.log(details.remarks_data.id);
+                                 details = data.details;
+                                 $('#consignee_information_id1').val(shipment_id);
+                                console.log("1 wala console "+shipment_id);
                                 $('#remarks_textarea').val(details.remarks_data.remarks);
                                
                                 $('#ConsigneeInformationModal1').modal('show');
@@ -1607,7 +1608,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Remars is being added!',
+                        text: 'Remarks are being added!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

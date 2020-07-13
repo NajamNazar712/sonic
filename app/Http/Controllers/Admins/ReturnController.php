@@ -353,22 +353,21 @@ public function remarks_info(Request $request){
     $remarks_information = ShipmentsJourney::where('shipment_id', $shipment_id)->first();
     if($remarks_information){
 
-        $data['remarks']['id'] = $remarks_information->shipment_id;
-        $data['remarks']['remarks'] = $remarks_information->remarks;
+        $data['remarks_data']['id'] = $remarks_information->shipment_id;
+        $data['remarks_data']['remarks'] = $remarks_information->remarks;
        
         return response()->json(['status' => 0, 'success' => 'Remarks information found!', 'details' => $data]);
        
     }
     else{
-        $data['remarks']['id'] = $request->shipment_id;
-        $data['remarks']['remarks'] = '';
+        $data['remarks_data']['id'] = $request->shipment_id;
+        $data['remarks_data']['remarks'] = '';
         return response()->json(['status' => 1,'success' => 'Remarks information found!','details' => $data]);
     }
     
 }
 
 public function remarks_update(Request $request){
-    // $action = $request->action;
     $remarks = $request->remarks_textarea;
     $shipment_id = $request->consignee_information_id1;
 
@@ -379,7 +378,7 @@ public function remarks_update(Request $request){
             $ShipmentsJourney->save();
         }else{
             $ShipmentsJourney = new ShipmentsJourney();
-            $ShipmentsJourney->shipment_id = 12;
+            $ShipmentsJourney->shipment_id = $shipment_id;
             $ShipmentsJourney->remarks = $remarks;
             $ShipmentsJourney->save();
         }

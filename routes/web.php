@@ -161,6 +161,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('reattempt/status/single','Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
             Route::post('marked/self_collection','Shippers\ShipperReturnController@change_status_to_self_collection')->name('marked.self_collection');
             Route::post('consignee', 'Shippers\ShipperReturnController@blacklist_search_consignee')->name('consignee');
+            Route::post('remarks_info','Shippers\ShipperReturnController@remarks_info')->name('remarks_info');
+            Route::post('remarks_update', 'Shippers\ShipperReturnController@remarks_update')->name('remarks_update');
         });
         Route::prefix('reattempt_history')->name('reattempt_history.')->group(function (){
             Route::get('','Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');

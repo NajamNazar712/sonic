@@ -103,8 +103,14 @@ class ShipperReturnController extends Controller
                 }
             })
             ->addColumn('shipment_remarks',function ($shipments){
-                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
-                return $remark;
+                if($shipments->remarks){
+                    $remark = '<button class="btn btn-sm btn-outline-info align-middle remarks_label">'.$shipments->remarks.'</button>';
+                    return $remark;
+                }
+                else{
+                    $remarks= '<button class="btn btn-sm btn-outline-info align-middle remarks_label">Enter Remarks</button>';
+                    return $remarks;
+                }
             })
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
             ->editColumn('arrival',function($shipments){
@@ -518,4 +524,48 @@ class ShipperReturnController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Consignee not found']);
     }
+    // my work
+
+    public function remarks_info(Request $request){
+        $shipment_id = $request->shipment_id;
+        $data = array();
+        $data['remarks_data'] = array();
+        $remarks_information = ShipmentsJourney::where('shipment_id', $shipment_id)->first();
+        if($remarks_information){
+
+            $data['remarks_data']['id'] = $remarks_information->shipment_id;
+            $data['remarks_data']['remarks'] = $remarks_information->remarks;
+        
+            return response()->json(['status' => 0, 'success' => 'Remarks information found!', 'details' => $data]);
+        
+        }
+        else{
+            $data['remarks_data']['id'] = $request->shipment_id;
+            $data['remarks_data']['remarks'] = '';
+            return response()->json(['status' => 1,'success' => 'Remarks information found!','details' => $data]);
+        }
+        
+    }
+
+    public function remarks_update(Request $request){
+        $remarks = $request->remarks_textarea;
+        $shipment_id = $request->consignee_information_id1;
+
+            $ShipmentsJourney = ShipmentsJourney::where('shipment_id', $shipment_id);
+            if($ShipmentsJourney->exists()){
+                $ShipmentsJourney = $ShipmentsJourney->first();
+                $ShipmentsJourney->remarks = $remarks;
+                $ShipmentsJourney->save();
+            }else{
+                $ShipmentsJourney = new ShipmentsJourney();
+                $ShipmentsJourney->shipment_id = $shipment_id;
+                $ShipmentsJourney->remarks = $remarks;
+                $ShipmentsJourney->save();
+            }
+
+        
+        return redirect()->back()->with('success', 'Successfully updated!');
+    }
+
+    //
 }
