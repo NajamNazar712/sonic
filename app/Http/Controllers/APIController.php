@@ -1659,4 +1659,41 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
         }
     }
+
+    public function pickup_check_tracking_number(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+          return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+          $shipment = $shipment->first();
+
+          if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+            return response()->json(['status' => 0, 'message' => 'Shipment Found', 'tracking_number' => $request->tracking_number]);
+          }
+          else {
+            return response()->json(['status' => 1, 'message' => 'Shipment has already been picked!']);
+          }
+        }
+        else {
+          $request_id = CRMController::add($request->case_nature_id, $request->case_nature_type_id, 1, 1, $user_id, 1, $shipment->id, $user_id, NULL, $request->description);
+
+          return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
+        }
+      }
+    }
 }
