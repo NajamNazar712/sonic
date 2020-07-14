@@ -2972,9 +2972,6 @@ class ShipperShipmentBookController extends Controller
         ];
 
         $rules = [
-            'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
-                $query->whereNotIn('id', [3, 4, 5]);
-            })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
             })],
@@ -3023,26 +3020,33 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-
-            $header = ['Service Type ID', 'Pickup Address ID', 'Delivery Type ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID', 'Pieces'];
         }
+
         if (isset($spreadsheet)) {
-            $header_correct = TRUE;
+            if(count($spreadsheet[0]) == 26){
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'special_instructions', 19 => 'estimated_weight', 20 => 'shipping_mode_id', 21 => 'same_day_timing_id', 22 => 'amount', 23 => 'payment_mode_id', 24 => 'charges_mode_id', 25 => 'pieces_quantity'];
 
-            foreach ($spreadsheet[0] as $index => $header_value) {
-                if ($index == 25) {}
-                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
-                    $header_correct = FALSE;
-                    break;
-                }
+                $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
+                    $query->whereNotIn('id', [4, 5]);
+                })];
+                $service_type_check_id = null;
             }
-
-            if (!$header_correct) {
+            elseif (count($spreadsheet[0]) == 23){
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'special_instructions', 16 => 'estimated_weight', 17 => 'shipping_mode_id', 18 => 'same_day_timing_id', 19 => 'amount', 20 => 'payment_mode_id', 21 => 'charges_mode_id', 22 => 'pieces_quantity'];
+                $service_type_check_id = 1;
+            }
+            elseif (count($spreadsheet[0]) == 25){
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'special_instructions', 19 => 'estimated_weight', 20 => 'shipping_mode_id', 21 => 'same_day_timing_id', 22 => 'amount', 23 => 'payment_mode_id', 24 => 'charges_mode_id'];
+                $service_type_check_id = 2;
+            }
+            elseif (count($spreadsheet[0]) == 23){
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'special_instructions', 16 => 'estimated_weight', 17 => 'shipping_mode_id', 18 => 'same_day_timing_id', 19 => 'amount', 20 => 'payment_mode_id', 21 => 'charges_mode_id'];
+                $service_type_check_id = 5;
+            }
+            else{
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
-            else {
-                unset($spreadsheet[0]);
-            }
+            unset($spreadsheet[0]);
         }
 
         if (!isset($spreadsheet) || !empty($spreadsheet)) {
@@ -3073,6 +3077,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $rows[] = $row;
                 }
+                $service_type_check_id = $request->service_type_check_id;
             }
 
             $errors = array();
@@ -3087,6 +3092,10 @@ class ShipperShipmentBookController extends Controller
 
                 if (!isset($row['charges_mode_id'])) {
                   $rows[$key]['charges_mode_id'] = 3;
+                }
+                if($service_type_check_id != null){
+                    $rows[$key]['service_type_id'] = $service_type_check_id;
+                    $row['service_type_id'] = $service_type_check_id;
                 }
                 if($row['service_type_id'] == 1 && isset($row['pieces_quantity'])){
                     if($row['pieces_quantity'] != null){
@@ -3163,7 +3172,7 @@ class ShipperShipmentBookController extends Controller
                         $errors[$row_id]['consignee_city_name'] = 'Same Day Delivery is not available for Different City Shipment';
                     }
 
-                    if ($user_shipping_info->city->id != $consignee_city->id) {
+                    if ($user_shipping_info->city->id != $consignee_city->id && ($service_type_check_id == 1 || $service_type_check_id == 2)) {
                         $city_zone = City::where('id', $consignee_city->id)->first();
                         $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
                         $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
@@ -3281,12 +3290,12 @@ class ShipperShipmentBookController extends Controller
                         return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
                     }
                     else{
-                        return view('client.shipment.book.corporate.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories]);
+                        return view('client.shipment.book.corporate.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories, 'service_type_check_id' => $service_type_check_id]);
                     }
 
             }
                 else{
-                    return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error]);
+                    return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id]);
                 }
             }
             else {
@@ -3316,7 +3325,7 @@ class ShipperShipmentBookController extends Controller
                     $city_name[$city->name]=$city->name;
                 }
 
-                return view('client.shipment.book.corporate.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes]);
+                return view('client.shipment.book.corporate.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id]);
             }
         }
         else {
