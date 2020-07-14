@@ -46,6 +46,9 @@
 										<div class="form-group text-right">
 											<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Try And Buy Template</a>
 										</div>
+										<div class="form-group text-right">
+											<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Reverse Pickup Template</a>
+										</div>
 									</div>
 								</div>
 							</form>

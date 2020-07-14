@@ -101,11 +101,15 @@ class ProcessShipmentBooking implements ShouldQueue
             $try_and_buy_charges = $this->booking['try_and_buy_charges'];
             $amount = 0;
         }
+        elseif ($service_type_id == 5){
+            $try_and_buy_charges = NULL;
+            $amount = 0;
+        }
         else {
             $try_and_buy_charges = NULL;
             $amount = $this->booking['amount'];
         }
-        
+
         $pieces_quantity = 1;
 
         if($service_type_id == 1){

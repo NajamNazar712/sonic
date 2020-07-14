@@ -1574,7 +1574,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_index() {
-        $booking_types = BookingType::whereNotIn('id',[ 4, 5])->get();
+        $booking_types = BookingType::whereNotIn('id',[4, 5])->get();
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
@@ -1743,7 +1743,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required_if:service_type_id,1,2,5', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
@@ -1779,6 +1779,10 @@ class ShipperShipmentBookController extends Controller
             elseif (count($spreadsheet[0]) == 41){
                 $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'order_id', 9 => 'item_product_type_id_1', 10 => 'item_description_1', 11 => 'item_quantity_1', 12 => 'item_insurance_1', 13 => 'item_price_1', 14 => 'item_product_type_id_2', 15 => 'item_description_2', 16 => 'item_quantity_2', 17 => 'item_insurance_2', 18 => 'item_price_2', 19 => 'item_product_type_id_3', 20 => 'item_description_3', 21 => 'item_quantity_3', 22 => 'item_insurance_3', 23 => 'item_price_3', 24 => 'item_product_type_id_4', 25 => 'item_description_4', 26 => 'item_quantity_4', 27 => 'item_insurance_4', 28 => 'item_price_4', 29 => 'item_product_type_id_5', 30 => 'item_description_5', 31 => 'item_quantity_5', 32 => 'item_insurance_5', 33 => 'item_price_5', 34 => 'special_instructions', 35 => 'estimated_weight', 36 => 'shipping_mode_id', 37 => 'same_day_timing_id', 38 => 'try_and_buy_charges', 39 => 'payment_mode_id', 40 => 'charges_mode_id'];
                 $service_type_check_id = 3;
+            }
+            elseif (count($spreadsheet[0]) == 20){
+                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'order_id', 9 => 'item_product_type_id', 10 => 'item_description', 11 => 'item_quantity', 12 => 'item_insurance', 13 => 'item_price', 14 => 'special_instructions', 15 => 'estimated_weight', 16 => 'shipping_mode_id', 17 => 'same_day_timing_id', 18 => 'payment_mode_id', 19 => 'charges_mode_id'];
+                $service_type_check_id = 5;
             }
             else{
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
@@ -1907,7 +1911,7 @@ class ShipperShipmentBookController extends Controller
                         $errors[$row_id]['consignee_city_name'] = 'Same Day Delivery is not available for Different City Shipment';
                     }
 
-                    if ($user_shipping_info->city->id != $consignee_city->id) {
+                    if (($user_shipping_info->city->id != $consignee_city->id) && ($service_type_check_id == 1 || $service_type_check_id == 2)) {
                         $city_zone = City::where('id', $consignee_city->id)->first();
                         $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
                         $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();

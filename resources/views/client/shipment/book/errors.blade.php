@@ -77,7 +77,9 @@
                                 @if($service_type_check_id == 3 || $service_type_check_id == null)
                                     <th>Try and Buy Charges</th>
                                 @endif
-                                <th>Amount</th>
+                                @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
+                                    <th>Amount</th>
+                                @endif
                                 <th>Mode of Payment ID</th>
                                 <th>Charges Mode ID</th>
                                 <th>Pieces</th>
@@ -354,7 +356,7 @@
                                         <td>{!! Form::text('form[' . $no . '][try_and_buy_charges]', $ro['try_and_buy_charges'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                     @endif
                                 @endif
-                                @if($service_type_check_id != 3 || $service_type_check_id == null)
+                                @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
                                     @if(isset($errors[$no]['amount']))
                                         <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['amount']}}</font></td>
                                     @else
