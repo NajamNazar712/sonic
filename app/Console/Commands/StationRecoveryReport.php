@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Reports\StationRecoveryController;
 use Illuminate\Console\Command;
 
 class StationRecoveryReport extends Command
@@ -37,6 +38,6 @@ class StationRecoveryReport extends Command
      */
     public function handle()
     {
-
+        StationRecoveryController::station_recovery_data();
     }
 }
