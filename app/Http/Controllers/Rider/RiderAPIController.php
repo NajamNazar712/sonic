@@ -1464,7 +1464,7 @@ class RiderAPIController extends Controller {
 
     public function pickup_check_tracking_number(Request $request) {
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', 'exists:shipments,tracking_number']
+        'tracking_number' => ['required', 'digits_between:12,20', 'exists:shipments,tracking_number']
       ];
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
