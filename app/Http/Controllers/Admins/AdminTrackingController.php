@@ -810,6 +810,47 @@ class AdminTrackingController extends Controller
                         }
                     }
 
+                    $old_shipment_pickup_journey = $shipment->shipment_pickup_journey;
+
+                    if ($old_shipment_pickup_journey) {
+                        foreach ($old_shipment_pickup_journey as $journey) {
+                            $journey_details = array();
+
+                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                            $journey_details['status'] = $journey->status->name;
+
+                            if ($journey->reference_1_id) {
+                                $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+
+                                if ($journey->reference_2_id) {
+                                    if ($journey->status_id == 2) {
+                                        $rider = Rider::find($journey->reference_2_id);
+                                        if($rider){
+                                            $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                                        }
+
+                                    }
+                                    else {
+                                        $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                    }
+                                }
+
+                                $journey_details['status'] .= ')';
+                            }
+
+                            $admin = $journey->admin;
+
+                            if ($admin) {
+                                $journey_details['user'] = $admin->name;
+                            }
+                            else {
+                                $journey_details['user'] = '';
+                            }
+
+                            $details['old_pickup_history'][] = $journey_details;
+                        }
+                    }
+
                     $handover_shipment_journey = $shipment->handover_shipments_journeys;
 
                     if ($handover_shipment_journey) {

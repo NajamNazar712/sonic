@@ -50,7 +50,6 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\PickupRegenerate',
 		'\App\Console\Commands\PickupReport',
 		'\App\Console\Commands\CancelledPickupRequestEmail',
-		'\App\Console\Commands\RateRejectionEmail',
 		'\App\Console\Commands\CompletedAgingReport',
 		'\App\Console\Commands\PendingCashCollectionReport',
 		'\App\Console\Commands\V2PickupCleanDuplicateData'
@@ -155,8 +154,8 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
 
             $completed_aging_report_time = $settings->setting_value . ':00';
-            $schedule->command('completedAging:report')->dailyAt($completed_aging_report_time);
-            $schedule->command('pendingCashCollection:report')->dailyAt($completed_aging_report_time);
+            $schedule->command('completedAging:report')->dailyAt($completed_aging_report_time)->runInBackground();
+            $schedule->command('pendingCashCollection:report')->dailyAt($completed_aging_report_time)->runInBackground();
         }
     }
 	 /**

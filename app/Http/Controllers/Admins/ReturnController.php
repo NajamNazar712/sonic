@@ -608,121 +608,135 @@ class ReturnController extends Controller
             'remarks' => ['nullable', 'between:0,190']
         ];
         $fields = [0 => 'tracking_number', 1 => 'shipper_status_id', 2 => 'remarks'];
-        $file = $request->file('shipments');
 
-        $spreadsheet = IOFactory::createReaderForFile($file);
-        $spreadsheet->setReadDataOnly(true);
-        $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-        $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt)', 'Remarks'];
-        if ($spreadsheet[0] == $header) {
-            unset($spreadsheet[0]);
+        if($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            if (!empty($spreadsheet)) {
-                $rows = array();
-                foreach ($spreadsheet as $spreadsheet_row) {
-                    $row = array();
+            $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt)', 'Remarks'];
+        }
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
 
-                    foreach ($spreadsheet_row as $key => $value) {
-                        $row[$fields[$key]] = $value;
-                    }
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if($index == 2){
+                }
+                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
 
-                    $rows[] = $row;
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            else {
+                unset($spreadsheet[0]);
+            }
+        }
+        if (!empty($spreadsheet) || !isset($spreadsheet)) {
+            $rows = array();
+            foreach ($spreadsheet as $spreadsheet_row) {
+                $row = array();
+
+                foreach ($spreadsheet_row as $key => $value) {
+                    $row[$fields[$key]] = $value;
                 }
 
-                unset($spreadsheet);
-                $errors = array();
-                $tracking_ids = array();
-                $tracking_id_row = array();
-                foreach ($rows as $key => $row) {
-                    $row_id = $key + 2;
+                $rows[] = $row;
+            }
 
-                    $validate = Validator::make($row, $rules, $messages);
+            unset($spreadsheet);
+            $errors = array();
+            $tracking_ids = array();
+            $tracking_id_row = array();
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
 
-                    $validate->setAttributeNames($names);
+                $validate = Validator::make($row, $rules, $messages);
 
-                    if ($validate->fails()) {
-                        $errors['Row #' . $row_id] = $validate->errors()->all();
-                    }
-                    if (empty($errors['Row #' . $row_id])) {
-                        if (!empty(trim($row['tracking_number']))) {
-                            if (empty($tracking_ids)) {
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+                if (empty($errors['Row #' . $row_id])) {
+                    if (!empty(trim($row['tracking_number']))) {
+                        if (empty($tracking_ids)) {
+                            $tracking_ids[] = $row['tracking_number'];
+                            $tracking_id_row[$row['tracking_number']] = $row_id;
+                        }
+                        else {
+                            if (in_array($row['tracking_number'], $tracking_ids)) {
+                                $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                            }
+                            else {
                                 $tracking_ids[] = $row['tracking_number'];
                                 $tracking_id_row[$row['tracking_number']] = $row_id;
                             }
-                            else {
-                                if (in_array($row['tracking_number'], $tracking_ids)) {
-                                    $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
-                                }
-                                else {
-                                    $tracking_ids[] = $row['tracking_number'];
-                                    $tracking_id_row[$row['tracking_number']] = $row_id;
-                                }
-                            }
-                        }
-                        if (!Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 12)->exists()) {
-                            $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
                         }
                     }
-
-
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 12)->exists()) {
+                        $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
+                    }
                 }
-                if(empty($errors)){
-                    $tracking_numbers = array();
-                    foreach ($rows as $key => $row) {
-                        $row_id = $key + 2;
-                        $tracking = trim($row['tracking_number']);
-                        $status = trim($row['shipper_status_id']);
-                        $remarks = trim($row['remarks']);
 
-                        if (!empty($row['remarks'])) {
-                            $remarks = trim($row['remarks']);
-                        }
-                        else {
-                            $remarks = NULL;
-                        }
-                        $shipment_details = Shipment::where('tracking_number',$tracking)->first();
-                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
-                        if($status == 0){
-                            $shipment_details->shipper_status_id = 20; //Confirmation Pending
-                            ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
-                            NotificationsController::send(15, 0, $shipment_details->id);
-                            NotificationsController::send(16, 0, $shipment_details->id);
+
+            }
+            if(empty($errors)){
+                $tracking_numbers = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+                    $tracking = trim($row['tracking_number']);
+                    $status = trim($row['shipper_status_id']);
+                    $remarks = trim($row['remarks']);
+
+                    if (!empty($row['remarks'])) {
+                        $remarks = trim($row['remarks']);
+                    }
+                    else {
+                        $remarks = NULL;
+                    }
+                    $shipment_details = Shipment::where('tracking_number',$tracking)->first();
+                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
+                    if($status == 0){
+                        $shipment_details->shipper_status_id = 20; //Confirmation Pending
+                        ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+                        NotificationsController::send(15, 0, $shipment_details->id);
+                        NotificationsController::send(16, 0, $shipment_details->id);
 
 //                            ShipmentChargesController::return($shipment_details->id);
 //
 //                            AdminFinanceController::add_payment($shipment_details->id, 1);
-                        }
-                        if($status == 1){
-                            $shipment_details->shipper_status_id = 13; //Re-Attempt
-                            ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+                    }
+                    if($status == 1){
+                        $shipment_details->shipper_status_id = 13; //Re-Attempt
+                        ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 //                            NotificationsController::send(15, 0, $shipment_details->id);
 //                            NotificationsController::send(16, 0, $shipment_details->id);
-                        }
-                        $shipment_details->save();
-                        $tracking_numbers['Row #' . $row_id] = $tracking;
-
                     }
-                    $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                        return $row . ': ' . $tracking_number;
-                    }, array_keys($tracking_numbers), $tracking_numbers));
+                    $shipment_details->save();
+                    $tracking_numbers['Row #' . $row_id] = $tracking;
 
-                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
                 }
-                else{
-                    $errors = array_map(function ($row, $errors) {
-                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
-                    }, array_keys($errors), $errors);
+                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                    return $row . ': ' . $tracking_number;
+                }, array_keys($tracking_numbers), $tracking_numbers));
 
-                    return redirect()->back()->withErrors($errors);
-                }
+                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+            }
+            else{
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
 
+                return redirect()->back()->withErrors($errors);
             }
-            else {
-                return redirect()->back()->with('error', 'No Shipments in File');
-            }
+
         }
         else {
-            return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            return redirect()->back()->with('error', 'No Shipments in File');
         }
     }
 

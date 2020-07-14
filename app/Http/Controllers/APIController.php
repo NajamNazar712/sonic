@@ -856,6 +856,8 @@ class APIController extends Controller
 
         $details['tracking_number'] = $tracking_number;
 
+        $details['order_id'] = $shipment->order_id;
+
         $shipper = $shipment->user;
 
         $details['shipper']['name'] = $shipper->name;
