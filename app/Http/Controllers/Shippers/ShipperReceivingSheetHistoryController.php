@@ -67,6 +67,11 @@ class ShipperReceivingSheetHistoryController extends Controller
       ->where('usi.user_id', session('user_id'))
       ->where('receiving_sheets.received', '!=', 0);
 
+        if(session('user_type') == 2){
+            if(session('restriction') == 1){
+                $receiving_sheet = $receiving_sheet->join('substitute_user_receiving_sheets as surs', 'surs.receiving_sheet_id', '=', 'receiving_sheets.id');
+            }
+        }
       $datatable = Datatables::of($receiving_sheet)
       ->addColumn('id_padded', function($receiving_sheet) {
         return str_pad($receiving_sheet->id, 6, '0', STR_PAD_LEFT);

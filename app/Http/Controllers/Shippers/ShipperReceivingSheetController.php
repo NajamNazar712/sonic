@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\BookingType;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\http\Models\SubstituteUserReceivingSheet;
 use App\http\Models\SubstituteUserShipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -67,6 +68,13 @@ class ShipperReceivingSheetController extends Controller
         $receiving_sheet->status = 0;
 
         $receiving_sheet->save();
+
+        if(session('user_type') == 2){
+            $substitute_user_receiving_sheet = new SubstituteUserReceivingSheet();
+            $substitute_user_receiving_sheet->substitute_user_id = Auth::id();
+            $substitute_user_receiving_sheet->receiving_sheet_id = $receiving_sheet->id;
+            $substitute_user_receiving_sheet->save();
+        }
 
         $receiving_sheet_id = $receiving_sheet->id;
 
