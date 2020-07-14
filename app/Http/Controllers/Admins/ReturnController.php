@@ -1305,6 +1305,7 @@ class ReturnController extends Controller
             return ['status' => 1, 'error' => 'No Shipment Item with given Item ID is present'];
         }
     }
+
     public function return_note_create(Request $request)
     {
         $trackings = explode(',', $request->shipment_ids);
