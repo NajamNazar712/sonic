@@ -90,7 +90,6 @@ class ProcessShipmentBooking implements ShouldQueue
             $same_day_timing_id = NULL;
         }
 
-        $amount = $this->booking['amount'];
 
         $payment_mode_id = $this->booking['payment_mode_id'];
 
@@ -104,6 +103,7 @@ class ProcessShipmentBooking implements ShouldQueue
         }
         else {
             $try_and_buy_charges = NULL;
+            $amount = $this->booking['amount'];
         }
         $pieces_quantity = 1;
 
