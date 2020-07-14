@@ -1093,7 +1093,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Your shipment(s) are being booked!',
+                        text: 'Your shipment(s) are being updated!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

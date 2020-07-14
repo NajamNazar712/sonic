@@ -3821,7 +3821,6 @@ class AdminFinanceController extends Controller
             $header = ['Payment ID', 'Status'];
         }
 
-
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
 
