@@ -33,6 +33,8 @@ use App\Http\Models\PickupRequestAssignedShipment;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Models\RiderPickup;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\RiderPickupActionLog;
@@ -1464,7 +1466,7 @@ class RiderAPIController extends Controller {
 
     public function pickup_check_tracking_number(Request $request) {
       $rules = [
-        'tracking_number' => ['required', 'digits_between:12,20', 'exists:shipments,tracking_number']
+        'tracking_number' => ['required']
       ];
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -1472,23 +1474,57 @@ class RiderAPIController extends Controller {
       $validate->setAttributeNames($this->names);
 
       if ($validate->fails()) {
-          return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+          return response()->json(['status' => 1, 'message' => 'Tracking Number Required']);
       }
       else {
+        $tracking_number = NULL;
+        $items = NULL;
+        $pieces = NULL;
+
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
-          $shipment = $shipment->first();
+            $shipment = $shipment->first();
 
-          if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
-            return response()->json(['status' => 0, 'message' => 'Shipment Found', 'tracking_number' => $request->tracking_number]);
-          }
-          else {
-            return response()->json(['status' => 1, 'message' => 'Shipment has already been picked!']);
-          }
+            $tracking_number = $shipment->tracking_number;
         }
         else {
-          return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
+            $shipment_item = ShipmentItem::find($request->tracking_number);
+
+            if ($shipment_item->exists()) {
+                $shipment_item = $shipment_item->first();
+
+                $shipment = Shipment::find('tracking_number', $shipment_item->shipment_id);
+
+                $tracking_number = $shipment->tracking_number;
+
+                $items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+            }
+            else {
+                $shipment_piece = ShipmentPiece::where('tracking_number', $request->tracking_number);
+
+                if ($shipment_piece->exists()) {
+                    $shipment_piece = $shipment_piece->first();
+
+                    $shipment = Shipment::find('tracking_number', $shipment_piece->shipment_id);
+
+                    $tracking_number = $shipment->tracking_number;
+
+                    $pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+                }
+            }
+        }
+
+        if ($tracking_number) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+                return response()->json(['status' => 0, 'message' => 'Shipment Found', 'tracking_number' => $tracking_number, 'items' => $items, 'pieces' => $pieces]);
+            }
+            else {
+                return response()->json(['status' => 1, 'message' => 'Shipment is already Picked!']);
+            }
+        }
+        else {
+            return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number!']);
         }
       }
     }
