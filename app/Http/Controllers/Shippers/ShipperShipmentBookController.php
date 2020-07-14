@@ -19,6 +19,7 @@ use App\Http\Models\DeliveryType;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -476,6 +477,12 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity);
+                    if(session('user_type') == 2){
+                        $substitute_user_shipment = new SubstituteUserShipment();
+                        $substitute_user_shipment->substitute_user_id = Auth::id();
+                        $substitute_user_shipment->shipment_id = $shipment_id;
+                        $substitute_user_shipment->save();
+                    }
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
@@ -2017,6 +2024,12 @@ class ShipperShipmentBookController extends Controller
                                 $row['account_type_id'] = 1;
                                 $row['nsas'] = $check;
                                 $row['nsa'] = $request->excel_nsa;
+                                if(session('user_type') == 2){
+                                    $row['substitute_user_id'] = Auth::id();
+                                }
+                                else{
+                                    $row['substitute_user_id'] = null;
+                                }
 
                                 if ($user_id != 3324) {
                                     dispatch(new ProcessShipmentBookingDB($row));
@@ -2302,7 +2315,12 @@ class ShipperShipmentBookController extends Controller
                     $pieces_quantity = $request->pieces_quantity;
                 }
                 $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity);
-
+                if(session('user_type') == 2){
+                    $substitute_user_shipment = new SubstituteUserShipment();
+                    $substitute_user_shipment->substitute_user_id = Auth::id();
+                    $substitute_user_shipment->shipment_id = $shipment_id;
+                    $substitute_user_shipment->save();
+                }
                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
                 $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                 if ($service_type_id == 1 || $service_type_id == 5) {

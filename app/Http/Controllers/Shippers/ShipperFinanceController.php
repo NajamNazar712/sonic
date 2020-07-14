@@ -817,6 +817,11 @@ class ShipperFinanceController extends Controller
       ->leftJoin('done_payment_shipments as dps', 's.id', 'dps.shipment_id')
       ->select('s.id', 's.tracking_number', 's.order_id', 'bt.booking_type as service_type', 's.consignee_name', 's.consignee_phone_number_1', 's.consignee_phone_number_2', 's.created_at', 'c.name as destination', 's.actual_weight', 'ss.name as shipment_status', 'sps.name as shipment_payment_status', DB::raw('IF(s.tracking_number IS NULL, NULL, IFNULL(GROUP_CONCAT(dps.done_payment_id SEPARATOR ", "), NULL)) AS payment_ids'));
 
+        if(session('user_type') == 2){
+            if(session('restriction') == 1){
+                $shipments = $shipments->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 's.id');
+            }
+        }
       $shipments = $shipments->where(function ($query) {
         $query->where('rs.user_id', session('user_id'))
           ->orwhereIn('rs.user_id', session('sister_users'));

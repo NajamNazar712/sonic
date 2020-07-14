@@ -63,6 +63,12 @@ class ShipperReportsController extends Controller
                 })
                 ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
+
+                if(session('user_type') == 2){
+                    if(session('restriction') == 1){
+                        $sales = $sales->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+                    }
+                }
 //                ->where('u.id', session('user_id'))
 //                ->orwhereIn('shipments.user_id', session('sister_users'));
             $sales = $sales->where(function ($query) {
@@ -140,14 +146,28 @@ class ShipperReportsController extends Controller
         }
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
-        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
-        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
-        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
-        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
-        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
-        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
-        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
-
+        $restriction = false;
+        if(session('user_type') == 2){
+            if(session('restriction') == 1){
+                $restriction = true;
+            }
+        }
+        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
+        if($restriction == true){
+            $stats['total'] = $stats['total']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['booked'] = $stats['booked']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['canceled'] = $stats['canceled']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['received'] = $stats['received']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['delivered'] = $stats['delivered']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['return'] = $stats['return']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['in_process'] = $stats['in_process']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+        }
         if ($origin) {
             $stats['total'] = $stats['total']->whereExists(function($query) use ($origin) {
                 $query->from('user_shipping_infos')
@@ -237,13 +257,28 @@ class ShipperReportsController extends Controller
         $stats = array();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
-        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $restriction = false;
+        if(session('user_type') == 2){
+            if(session('restriction') == 1){
+                $restriction = true;
+            }
+        }
+        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        if($restriction == true){
+            $stats['total'] = $stats['total']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['booked'] = $stats['booked']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['canceled'] = $stats['canceled']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['received'] = $stats['received']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['delivered'] = $stats['delivered']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['return'] = $stats['return']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            $stats['in_process'] = $stats['in_process']->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+        }
         $stats['total'] = number_format($stats['total']->count());
         $stats['booked'] = number_format($stats['booked']->count());
         $stats['canceled'] = number_format($stats['canceled']->count());
@@ -276,6 +311,12 @@ class ShipperReportsController extends Controller
             })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
             ->select(['u.name as user_name', 'shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.consignee_name as consignee_name','shipments.consignee_phone_number_1 as consignee_phone']);
+
+            if(session('user_type') == 2){
+                if(session('restriction') == 1){
+                    $shipments = $shipments->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+                }
+            }
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
@@ -348,6 +389,12 @@ class ShipperReportsController extends Controller
             ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 'adjustment_logs.created_at as created_at', 'u.name as shipper_name', 'dps.done_payment_id as done_payment_id')
             ->whereIn('adjustment_logs.type', [1,2])
             ->where('s.user_id', session('user_id'));
+
+        if(session('user_type') == 2){
+            if(session('restriction') == 1){
+                $adjustments = $adjustments->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 's.id');
+            }
+        }
         $datatable = Datatables::of($adjustments)
             ->addColumn('adjustment_id_padded', function ($adjustment) {
                 $padded_id = str_pad($adjustment->adjustment_id, 6, '0', STR_PAD_LEFT);
