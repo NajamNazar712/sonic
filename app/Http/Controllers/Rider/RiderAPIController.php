@@ -1487,6 +1487,13 @@ class RiderAPIController extends Controller {
             $shipment = $shipment->first();
 
             $tracking_number = $shipment->tracking_number;
+
+            if ($shipment->booking_type_id == 3) {
+                $items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+            }
+            else if ($shipment->pieces > 1) {
+                $pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+            }
         }
         else {
             $shipment_item = ShipmentItem::find($request->tracking_number);
