@@ -134,7 +134,7 @@ class LoginController extends Controller
                 return back()->with('info', 'Your Account is Disabled');
             }
             else {
-                $permissions = SubstituteUserPermissiosn::where('substitute_user_id', $user->id)->pluck('permission_id')->toArray();
+                $permissions = SubstituteUserPermission::where('substitute_user_id', $user->id)->pluck('permission_id')->toArray();
                 $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
                 session(['sister_users' => $sister_users]);
                 session(['permissions' => $permissions]);
