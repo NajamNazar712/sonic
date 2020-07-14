@@ -1461,4 +1461,35 @@ class RiderAPIController extends Controller {
             return response()->json(['status' => 0, 'message' => 'Pickup Action Log(s) Successfully']);
         }
     }
+
+    public function pickup_check_tracking_number(Request $request) {
+      $rules = [
+        'tracking_number' => ['required', 'integer', 'digits_between:12,20', 'exists:shipments,tracking_number']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+          return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+          $shipment = $shipment->first();
+
+          if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+            return response()->json(['status' => 0, 'message' => 'Shipment Found', 'tracking_number' => $request->tracking_number]);
+          }
+          else {
+            return response()->json(['status' => 1, 'message' => 'Shipment has already been picked!']);
+          }
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
+        }
+      }
+    }
 }
