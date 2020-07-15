@@ -149,9 +149,10 @@
                 buttons: [
                     {
                         title: 'Update',
-                        className: 'btn btn-primary',
+                        className: 'btn btn-primary update',
                         text: '<i class="la la-edit"></i> Update',
                         action:function (e) {
+                            $('button btn.update').addClass('d-none');
                             edit_table();
                             $(this).addClass('d-none');
                         }
@@ -247,7 +248,6 @@
                     dropdownCssClass: 'form-control-sm p-0'
                 });
 
-                table.api().table().columns.adjust();
             }
         });
     </script>
