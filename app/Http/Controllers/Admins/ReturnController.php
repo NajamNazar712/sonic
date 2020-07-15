@@ -227,16 +227,12 @@ class ReturnController extends Controller
                 }
             })
             ->orderColumn('shipper_phone', 'u.phone $1, u.phone2 $1')
+
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+
             ->addColumn('shipment_remarks',function ($shipments){
-                if($shipments->remarks){
-                    $remark = '<button class="btn btn-sm btn-outline-info align-middle remarks_label">'.$shipments->remarks.'</button>';
-                    return $remark;
-                }
-                else{
-                    $remarks= '<button class="btn btn-sm btn-outline-info align-middle remarks_label">Enter Remarks</button>';
-                    return $remarks;
-                }
+                $remark = '<textarea style="width:200px;" class="form-control form-control-sm" rows="4" cols="100" placeholder="Remarks here.." value="'.$shipments->remarks.'"></textarea>';
+                return $remark;
                 
             })
             ->editColumn('status_date',function ($shipments){
@@ -344,50 +340,50 @@ class ReturnController extends Controller
         }
         return $datatable->make(true);
     }
-// my work
+// // my work
 
-public function remarks_info(Request $request){
-    $shipment_id = $request->shipment_id;
-    $data = array();
-    $data['remarks_data'] = array();
-    $remarks_information = ShipmentsJourney::where('shipment_id', $shipment_id)->first();
-    if($remarks_information){
+// public function remarks_info(Request $request){
+//     $shipment_id = $request->shipment_id;
+//     $data = array();
+//     $data['remarks_data'] = array();
+//     $remarks_information = ShipmentsJourney::where('shipment_id', $shipment_id)->first();
+//     if($remarks_information){
 
-        $data['remarks_data']['id'] = $remarks_information->shipment_id;
-        $data['remarks_data']['remarks'] = $remarks_information->remarks;
+//         $data['remarks_data']['id'] = $remarks_information->shipment_id;
+//         $data['remarks_data']['remarks'] = $remarks_information->remarks;
        
-        return response()->json(['status' => 0, 'success' => 'Remarks information found!', 'details' => $data]);
+//         return response()->json(['status' => 0, 'success' => 'Remarks information found!', 'details' => $data]);
        
-    }
-    else{
-        $data['remarks_data']['id'] = $request->shipment_id;
-        $data['remarks_data']['remarks'] = '';
-        return response()->json(['status' => 1,'success' => 'Remarks information found!','details' => $data]);
-    }
+//     }
+//     else{
+//         $data['remarks_data']['id'] = $request->shipment_id;
+//         $data['remarks_data']['remarks'] = '';
+//         return response()->json(['status' => 1,'success' => 'Remarks information found!','details' => $data]);
+//     }
     
-}
+// }
 
-public function remarks_update(Request $request){
-    $remarks = $request->remarks_textarea;
-    $shipment_id = $request->consignee_information_id1;
+// public function remarks_update(Request $request){
+//     $remarks = $request->remarks_textarea;
+//     $shipment_id = $request->consignee_information_id1;
 
-        $ShipmentsJourney = ShipmentsJourney::where('shipment_id', $shipment_id);
-        if($ShipmentsJourney->exists()){
-            $ShipmentsJourney = $ShipmentsJourney->first();
-            $ShipmentsJourney->remarks = $remarks;
-            $ShipmentsJourney->save();
-        }else{
-            $ShipmentsJourney = new ShipmentsJourney();
-            $ShipmentsJourney->shipment_id = $shipment_id;
-            $ShipmentsJourney->remarks = $remarks;
-            $ShipmentsJourney->save();
-        }
+//         $ShipmentsJourney = ShipmentsJourney::where('shipment_id', $shipment_id);
+//         if($ShipmentsJourney->exists()){
+//             $ShipmentsJourney = $ShipmentsJourney->first();
+//             $ShipmentsJourney->remarks = $remarks;
+//             $ShipmentsJourney->save();
+//         }else{
+//             $ShipmentsJourney = new ShipmentsJourney();
+//             $ShipmentsJourney->shipment_id = $shipment_id;
+//             $ShipmentsJourney->remarks = $remarks;
+//             $ShipmentsJourney->save();
+//         }
 
     
-    return redirect()->back()->with('success', 'Successfully updated!');
-}
+//     return redirect()->back()->with('success', 'Successfully updated!');
+// }
 
-//
+// //
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
 
 

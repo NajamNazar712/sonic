@@ -281,44 +281,6 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="ConsigneeInformationModal1" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConsigneeInformationModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Remarks</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div id="consignee_info_div1">
-
-                    
-                    </div>
-                    <form id="label_update_form1" class="mb-1 mt-2" method="POST" action="{{ route('admin.return.remarks_update') }}" novalidate="novalidate">
-                        {{ csrf_field() }}
-
-                        <input type="hidden" id="consignee_information_id1" name="consignee_information_id1">
-                        <div class="col-8 text-center">
-                                        <fieldset class="form-group">
-                                            <textarea class="form-control" name="remarks_textarea" id="remarks_textarea" rows="5" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
-                                        </fieldset>
-                                    </div>
-                  
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <button type="submit" name="action" class="btn btn-primary btn-block" id="label_btn1" value="label">Update Remarks</button>
-                                </div>
-                            </div>
-
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
 @endsection
 
@@ -331,7 +293,7 @@
         table.dataTable {
             font-size: 12px;
         }
-
+        
         table.dataTable thead tr th {
             padding-left: 0.5em;
             white-space: normal;
@@ -1550,76 +1512,7 @@
             });
        
 
-        $('body').on('click', 'button.remarks_label', function () {
-            var shipment_id = $(this).parents('tr').attr('id');
-            // var shipper_phone = $(this).parents('tr').attr('shipper_phone'); 
-            
-                // var id = parseInt($(this).parent('tr').attr('id'));
-                // var hub_id = $(this).parents('tr').data('hub');
-                // var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
-                console.log("before: "+shipment_id);
-                if(shipment_id){
-                    $.ajax({
-                        url: '{!! route('admin.return.remarks_info') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'shipment_id': shipment_id
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status == 0) {
-                                details = data.details;
-                                $('#consignee_information_id1').val(shipment_id);
-                                console.log("0 wala console "+shipment_id);
-                                $('#remarks_textarea').val(details.remarks_data.remarks);
-                               
-                                $('#ConsigneeInformationModal1').modal('show');
-
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            if (data.status == 1) {
-                                 details = data.details;
-                                 $('#consignee_information_id1').val(shipment_id);
-                                console.log("1 wala console "+shipment_id);
-                                $('#remarks_textarea').val(details.remarks_data.remarks);
-                               
-                                $('#ConsigneeInformationModal1').modal('show');
-
-                                // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                // $(form).find('button.search').prop('disabled', false);
-
-                                // toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        });
-                }
-            });
-
-            $('#label_update_form1').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Remarks are being added!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
-
-
+      
         });
     </script>
 @endsection

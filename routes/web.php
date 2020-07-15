@@ -161,8 +161,6 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('reattempt/status/single','Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
             Route::post('marked/self_collection','Shippers\ShipperReturnController@change_status_to_self_collection')->name('marked.self_collection');
             Route::post('consignee', 'Shippers\ShipperReturnController@blacklist_search_consignee')->name('consignee');
-            Route::post('remarks_info','Shippers\ShipperReturnController@remarks_info')->name('remarks_info');
-            Route::post('remarks_update', 'Shippers\ShipperReturnController@remarks_update')->name('remarks_update');
         });
         Route::prefix('reattempt_history')->name('reattempt_history.')->group(function (){
             Route::get('','Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');
@@ -832,8 +830,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
         Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
         Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');
-        Route::post('remarks_info','Admins\ReturnController@remarks_info')->name('remarks_info');
-        Route::post('remarks_update', 'Admins\ReturnController@remarks_update')->name('remarks_update');
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
