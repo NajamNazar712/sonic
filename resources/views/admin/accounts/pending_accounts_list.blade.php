@@ -362,6 +362,7 @@
                                                         selected_rows = [];
 
                                                         table.rows().deselect();
+                                                        $('#saletag1').val('').trigger('change');
                                                         $('#SalesTagModal1').modal('hide');
                                                         table.draw(true);
                                                         table.button('.assign_rider').disable();
@@ -724,6 +725,11 @@
 
         var hub_ids = [];
         $("#saletag").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Sales Person",
+            width:'100%',
+            dropdownParent:$('#SalesTagModal')
+        });
+        $("#saletag1").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Person",
             width:'100%',
             dropdownParent:$('#SalesTagModal')
