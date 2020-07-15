@@ -24,7 +24,6 @@
                         <th class="border-primary border-darken-1">Bank Name</th>
                         <th class="border-primary border-darken-1">ADJ/Correction</th>
                         <th class="border-primary border-darken-1">Difference</th>
-                        <th class="border-primary border-darken-1">Voucher In Hand</th>
                         <th class="border-primary border-darken-1">Percentage</th>
                         <th class="border-primary border-darken-1">Reason</th>
                     </tr>
@@ -126,7 +125,6 @@
                             head.push('Bank Name');
                             head.push('ADJ/Correction');
                             head.push('Difference');
-                            head.push('Voucher In Hand');
                             head.push('Percentage');
                             head.push('Reason');
 
@@ -177,6 +175,7 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

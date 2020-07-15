@@ -17,7 +17,6 @@ class CreateStationRecoveryReportDepositsTable extends Migration
             $table->increments('id');
             $table->integer('station_recovery_report_id');
             $table->integer('bank_id');
-            $table->decimal('amount');
             $table->integer('admin_id');
             $table->timestamps();
         });

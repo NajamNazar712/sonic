@@ -22,11 +22,11 @@ class CreateStationRecoveryReportsTable extends Migration
             $table->decimal('last_day_balance');
             $table->decimal('amount');
             $table->decimal('total_amount');
-            $table->decimal('deposit_amount');
-            $table->decimal('adjustment_amount');
-            $table->decimal('difference_amount');
+            $table->decimal('deposit_amount')->nullable();
+            $table->decimal('adjustment_amount')->nullable();
+            $table->decimal('difference_amount')->nullable();
             $table->decimal('percentage');
-            $table->string('reason');
+            $table->string('reason')->nullable();
             $table->timestamps();
         });
     }

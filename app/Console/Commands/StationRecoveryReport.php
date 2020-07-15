@@ -19,7 +19,7 @@ class StationRecoveryReport extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Station Recovery Report Data add cron';
 
     /**
      * Create a new command instance.
