@@ -231,7 +231,7 @@ class ReturnController extends Controller
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
 
             ->addColumn('shipment_remarks',function ($shipments){
-                $remark = '<textarea style="width:200px;" placeholder="Enter Remarks" class="form-control form-control-sm" rows="4" cols="100" value="'.$shipments->remarks.'" ></textarea>';
+                $remark = '<textarea style="width:200px;" placeholder="Enter Remarks" class="form-control form-control-sm" rows="4" cols="100">'.$shipments->remarks.'</textarea>';
                 return $remark;
             })
             ->editColumn('status_date',function ($shipments){
