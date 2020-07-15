@@ -25,6 +25,7 @@
 										<th class="border-primary border-darken-1">Phone Number</th>
 										<th class="border-primary border-darken-1">Email</th>
 										<th class="border-primary border-darken-1">CNIC</th>
+										<th class="border-primary border-darken-1">Restriction</th>
 										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Status</th>
@@ -131,6 +132,7 @@
 					{data: 'phone_number', name: 'substitute_users.phone_number', class: 'align-middle phone_number'},
 					{data: 'email', name: 'substitute_users.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'substitute_users.cnic', class: 'align-middle cnic'},
+					{data: 'restriction', name: 'substitute_users.restriction', class: 'align-middle restriction'},
 					{data: 'created_at', name: 'substitute_users.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'substitute_users.updated_at', class: 'align-middle updated_at'},
 					{data: 'status', name: 'status', class: 'align-middle status'},

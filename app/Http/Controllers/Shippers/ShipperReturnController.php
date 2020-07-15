@@ -66,6 +66,12 @@ class ShipperReturnController extends Controller
             ->where('shipments.user_id', session('user_id'))
             ->groupBy('shipments.id');
 
+            if(session('user_type') == 2){
+                if(session('restriction') == 1){
+                    $shipments = $shipments->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+                }
+            }
+
 
         return Datatables::of($shipments)
             ->setRowAttr([
@@ -441,6 +447,12 @@ class ShipperReturnController extends Controller
             ->select('s.tracking_number as tracking_number','s.tracking_number as tracking','u.name as shipper','oc.name as origin','dc.name as destination','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as current_status','sj.created_at as current_status_date','shipments_journey.created_at as reattempt_status_date','sj.remarks as current_remarks')
             ->where('shipments_journey.shipper_status_id', 52)
             ->where('s.user_id', session('user_id'));
+
+            if(session('user_type') == 2){
+                if(session('restriction') == 1){
+                    $shipments_journey = $shipments_journey->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 's.id');
+                }
+            }
         return Datatables::of($shipments_journey)
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('cod.tracking.index');

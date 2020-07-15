@@ -77,7 +77,9 @@
                                 @if($service_type_check_id == 3 || $service_type_check_id == null)
                                     <th>Try and Buy Charges</th>
                                 @endif
-                                <th>Amount</th>
+                                @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
+                                    <th>Amount</th>
+                                @endif
                                 <th>Mode of Payment ID</th>
                                 <th>Charges Mode ID</th>
                                 <th>Pieces</th>
@@ -354,10 +356,12 @@
                                         <td>{!! Form::text('form[' . $no . '][try_and_buy_charges]', $ro['try_and_buy_charges'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                     @endif
                                 @endif
-                                @if(isset($errors[$no]['amount']))
-                                    <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['amount']}}</font></td>
-                                @else
-                                    <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
+                                    @if(isset($errors[$no]['amount']))
+                                        <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['amount']}}</font></td>
+                                    @else
+                                        <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                    @endif
                                 @endif
                                 @if(isset($errors[$no]['payment_mode_id']))
                                     <td>{!! Form::select('form[' . $no . '][payment_mode_id]', $payment_modes,null,['class' => 'form-control is-invalid payment_mode_id select2','id'=>'payment_mode_id', 'style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['payment_mode_id']}}</font></td>

@@ -44,7 +44,9 @@
                                             @endif
                                             <th>Special Instructions</th>
                                             <th>Estimated Weight (kg)</th>
-                                            <th>Amount</th>
+                                            @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
+                                                <th>Amount</th>
+                                            @endif
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -110,7 +112,9 @@
                                                     <td><input type="text" name="form[{{$no}}][estimated_weight]" class="form-control number" value="{{$ro['estimated_weight']}}" readonly="readonly"></td>
                                                     <input type="hidden" name="form[{{$no}}][shipping_mode_id]" value="{{$ro['shipping_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][same_day_timing_id]" value="{{$ro['same_day_timing_id']}}">
-                                                    <td><input type="text" name="form[{{$no}}][amount]" class="form-control text" value="{{$ro['amount']}}" readonly="readonly"></td>
+                                                    @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
+                                                        <td><input type="text" name="form[{{$no}}][amount]" class="form-control text" value="{{$ro['amount']}}" readonly="readonly"></td>
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
                                                     @if($service_type_check_id == 3 || $service_type_check_id == null)
@@ -169,7 +173,9 @@
                                                     <input type="hidden" name="form[{{$no}}][estimated_weight]" value="{{$ro['estimated_weight']}}">
                                                     <input type="hidden" name="form[{{$no}}][shipping_mode_id]" value="{{$ro['shipping_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][same_day_timing_id]" value="{{$ro['same_day_timing_id']}}">
-                                                    <input type="hidden" name="form[{{$no}}][amount]" value="{{$ro['amount']}}">
+                                                    @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][amount]" value="{{$ro['amount']}}">
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
                                                     @if($service_type_check_id == 3 || $service_type_check_id == null)
