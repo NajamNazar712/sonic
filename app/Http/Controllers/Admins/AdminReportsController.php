@@ -1,11 +1,13 @@
 <?php
 namespace App\Http\Controllers\Admins;
 
+use App\Console\Commands\StationRecoveryReport;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\BanksList;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\Excel_reports\Debriefing;
@@ -6482,12 +6484,18 @@ use Yajra\Datatables\Datatables;
             return $report->make(true);
         }
         public function station_recovery_index(Request $request){
-            return view('admin.reports.station_recovery');
+            $banks_list = BanksList::where('status', 1)->select('id', 'name')->get();
+            return view('admin.reports.station_recovery')->with('banks_lists', $banks_list);
         }
 
         public function station_recovery_list(Request $request){
-
-
+            $station_recovery = DB::connection('reports')->table('station_recovery_reports')->join('cities as h', 'h.id', '=', 'station_recovery_reports.city_id')
+                ->join('zones', 'zones.id', '=', 'station_recovery_reports.zone_id')
+                ->leftjoin('station_recovery_report_deposits as srd', 'srd.station_recovery_report_id', '=', 'station_recovery_reports.id')
+                ->leftjoin('banks_lists as bl', 'bl.id', '=', 'srd.bank_id')
+                ->select('station_recovery_reports.id as recovery_id', 'h.name as hub', 'zones.name as zone', 'station_recovery_reports.delivered_shipments', 'station_recovery_reports.last_day_balance', 'station_recovery_reports.amount','station_recovery_reports.total_amount', 'station_recovery_reports.deposit_amount', 'station_recovery_reports.adjustment_amount', 'station_recovery_reports.difference_amount', 'station_recovery_reports.percentage', 'station_recovery_reports.reason','bl.name as bank_name');
+            $datatable = Datatables::of($station_recovery);
+            return $datatable->make(true);
 
         }
 

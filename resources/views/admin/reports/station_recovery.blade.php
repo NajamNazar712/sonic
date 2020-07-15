@@ -15,7 +15,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Station</th>
-                        <th class="border-primary border-darken-1">Contact Person</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">No of Delivered Parcels</th>
                         <th class="border-primary border-darken-1">Last Day Balance</th>
                         <th class="border-primary border-darken-1">Amount</th>
@@ -148,6 +148,15 @@
                 scrollX: true, scrollY: '500px',
                 buttons: [
                     {
+                        title: 'Update',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-edit"></i> Update',
+                        action:function (e) {
+                            edit_table();
+                            $(this).addClass('d-none');
+                        }
+                    },
+                    {
                         extend: 'excel',
                         title: 'Station Recovery Notes',
                         className:'btn btn-primary',
@@ -162,19 +171,23 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: {
-                    url: '{{ route('admin.reports.station_recovery.list') }}',
-                    data: function (d) {
-                        d.search_hub = $('#search_hub').val();
-                        d.search_sdn_no = $('#search_sdn_no').val();
-                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                    }
-                },
-                rowId: 'sdn_id',
+                ajax: '{{ route('admin.reports.station_recovery.list') }}',
+                rowId: 'recovery_id',
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'hub' ,name: 'h.name', class: 'align-middle text-center hub'},
+                    { data:'zone' ,name: 'zones.name', class: 'align-middle text-center zone'},
+                    { data:'delivered_shipments' ,name: 'station_recovery_reports.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
+                    { data:'last_day_balance' ,name: 'station_recovery_reports.last_day_balance', class: 'align-middle text-center last_day_balance'},
+                    { data:'amount' ,name: 'station_recovery_reports.amount', class: 'align-middle text-center amount'},
+                    { data:'total_amount' ,name: 'station_recovery_reports.total_amount', class: 'align-middle text-center total_amount'},
+                    { data:'deposit_amount' ,name: 'station_recovery_reports.deposit_amount', class: 'align-middle text-center deposit_amount'},
+                    { data:'bank_name' ,name: 'bl.id', class: 'align-middle text-center bank_name'},
+                    { data:'adjustment_amount' ,name: 'station_recovery_reports.adjustment_amount', class: 'align-middle text-center adjustment_amount'},
+                    { data:'difference_amount' ,name: 'station_recovery_reports.difference_amount', class: 'align-middle text-center difference_amount'},
+                    { data:'percentage' ,name: 'station_recovery_reports.percentage', class: 'align-middle text-center percentage'},
+                    { data:'reason' ,name: 'station_recovery_reports.reason', class: 'align-middle text-center reason'}
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -186,6 +199,56 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            function edit_table() {
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    var id = parseInt(row.id());
+                    var deposit_amount = $(row.node()).find('td.deposit_amount').text();
+                    var deposit_amount_input = '<input class="form-control form-control-sm deposit_amount" name="deposit_amount['+ id +']" placeholder="Deposited Amount" value="'+ deposit_amount +'">';
+                    $(row.node()).find('td.deposit_amount').html(deposit_amount_input);
+                    var bank_select = '<select name="bank_select['+ id +']" class="select2 bank_select form-control"></select>';
+                    $(row.node()).find('td.bank_name').html(bank_select);
+                    var adjustment_amount = $(row.node()).find('td.adjustment_amount').text();
+                    var adjustment_amount_input = '<input class="form-control form-control-sm adjustment_amount" name="adjustment_amount['+ id +']" placeholder="Adjustment Amount" value="'+ adjustment_amount +'">';
+                    $(row.node()).find('td.adjustment_amount').html(adjustment_amount_input);
+                    var reason = $(row.node()).find('td.reason').text();
+                    var reason_input = '<input class="form-control form-control-sm reason" name="reason['+ id +']" placeholder="Reason" value="'+ reason +'">';
+                    $(row.node()).find('td.reason').html(reason_input);
+
+                });
+                $('input.deposit_amount').inputmask({
+                    'alias': 'decimal',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                    'digits': 2,
+                    'min': 0.00,
+                });
+                $('input.adjustment_amount').inputmask({
+                    'alias': 'decimal',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                    'digits': 2,
+                    'min': 0.00,
+                });
+                var bank = $.map({!! $banks_lists !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+
+                    return obj;
+                });
+                $(".select2.bank_select").prepend('<option value="" selected></option>').select2({
+                    data:bank,
+                    placeholder: "Select Bank",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+
+                table.api().table().columns.adjust();
+            }
         });
     </script>
 @endsection
