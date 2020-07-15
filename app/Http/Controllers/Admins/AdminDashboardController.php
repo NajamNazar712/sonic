@@ -1431,6 +1431,13 @@ class AdminDashboardController extends Controller
                         $sale_person_tag->user_id=$shipper_id;
                         $sale_person_tag->save();
                     }
+                    else{
+                        $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->first();
+                        $shipper_data->admin_id=$tag_id;
+                        $sale_person_tag->user_id=$shipper_id;
+                        $sale_person_tag->save();
+                        
+                    }
 
             // return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
                  }
