@@ -293,7 +293,7 @@
         table.dataTable {
             font-size: 12px;
         }
-
+        
         table.dataTable thead tr th {
             padding-left: 0.5em;
             white-space: normal;
@@ -1510,6 +1510,9 @@
                     form.submit();
                 }
             });
+       
+
+      
         });
     </script>
 @endsection

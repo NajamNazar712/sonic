@@ -108,6 +108,11 @@ class ShipperDashboardController extends Controller
             $query->where('shipments.user_id', session('user_id'))
                 ->orwhereIn('shipments.user_id', session('sister_users'));
         });
+        if(session('user_type') == 2){
+            if(session('restriction') == 1){
+                $shipments = $shipments->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+            }
+        }
 
 
         $datatable = Datatables::of($shipments)

@@ -227,9 +227,11 @@ class ReturnController extends Controller
                 }
             })
             ->orderColumn('shipper_phone', 'u.phone $1, u.phone2 $1')
+
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+
             ->addColumn('shipment_remarks',function ($shipments){
-                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
+                $remark = '<textarea style="width:200px;" placeholder="Enter Remarks" class="form-control form-control-sm" rows="4" cols="100" value="'.$shipments->remarks.'" ></textarea>';
                 return $remark;
             })
             ->editColumn('status_date',function ($shipments){
@@ -343,6 +345,8 @@ class ReturnController extends Controller
 
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
+        // $remarks = $request->remark;
+        
         if($request->action == 'confirm'){
 
             foreach ($shipment_ids as $shipment){

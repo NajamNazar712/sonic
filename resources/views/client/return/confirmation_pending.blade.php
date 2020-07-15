@@ -81,6 +81,8 @@
         </div>
     </div>
 
+    
+
 
 @endsection
 
@@ -143,7 +145,8 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
@@ -796,7 +799,7 @@
 
                         if (index === -1) {
                             selected_rows.push(id);
-                        }
+                     }
                         else {
                             selected_rows.splice(index, 1);
                         }
@@ -1143,6 +1146,7 @@
                         });
                 }
             });
+
 
         });
     </script>

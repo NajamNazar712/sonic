@@ -50,6 +50,17 @@
 											<input type="password" name="password" class="form-control" placeholder="Password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 characters">
 										</div>
 									</div>
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<select name="restriction" class="select2" id="restriction" data-rule-required="true" data-msg-required="Restriction is required">
+											@if($substitute_user->restriction == 1)
+												<option value="1" selected>Enable</option>
+												<option value="0">Disable</option>
+											@else
+												<option value="1">Enable</option>
+												<option value="0" selected>Disable</option>
+											@endif
+										</select>
+									</div>
 
 									<div class="col-12">
 										<h4 class="form-section mb-2">Permissions</h4>
@@ -82,11 +93,13 @@
 @endsection
 
 @section('css')
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
 @endsection
 
 @section('js')
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -94,6 +107,10 @@
 
 	<script>
 		$(document).ready(function() {
+			$('#restriction').select2({
+				width: '100%',
+				placeholder: 'Restriction*'
+			});
 			$('#substitute_account_form #phone_number').inputmask({
 				'mask': '9999-9999999',
 				'clearIncomplete': true
