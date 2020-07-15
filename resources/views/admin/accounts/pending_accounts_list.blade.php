@@ -732,7 +732,7 @@
         $("#saletag1").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Person",
             width:'100%',
-            dropdownParent:$('#SalesTagModal')
+            dropdownParent:$('#SalesTagModal1')
         });
         
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
