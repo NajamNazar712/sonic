@@ -433,6 +433,7 @@
                                                         selected_rows = [];
 
                                                         table.rows().deselect();
+                                                        $('#saletag1').val('').trigger('change');
                                                         $('#SalesTagModal1').modal('hide');
                                                         table.draw(true);
                                                         table.button('.assign_rider').disable();
@@ -450,7 +451,7 @@
                                     });
                                 });
 
-                            }else{r
+                            }else{
                                 var error = "Not selected any Rider!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
@@ -770,6 +771,11 @@
             placeholder: "Select Sales Person",
             width:'100%',
             dropdownParent:$('#SalesTagModal')
+        });
+        $("#saletag1").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Sales Person",
+            width:'100%',
+            dropdownParent:$('#SalesTagModal1')
         });
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
             var $invoker = $(e.relatedTarget);
