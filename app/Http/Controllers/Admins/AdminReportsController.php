@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Admins;
 
-use App\Console\Commands\StationRecoveryReport;
+
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
@@ -12,6 +12,8 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\StationRecoveryReport;
+use App\Http\Models\StationRecoveryReportDeposit;
 use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
@@ -6494,10 +6496,34 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('station_recovery_report_deposits as srd', 'srd.station_recovery_report_id', '=', 'station_recovery_reports.id')
                 ->leftjoin('banks_lists as bl', 'bl.id', '=', 'srd.bank_id')
                 ->select('station_recovery_reports.id as recovery_id', 'h.name as hub', 'zones.name as zone', 'station_recovery_reports.delivered_shipments', 'station_recovery_reports.last_day_balance', 'station_recovery_reports.amount','station_recovery_reports.total_amount', 'station_recovery_reports.deposit_amount', 'station_recovery_reports.adjustment_amount', 'station_recovery_reports.difference_amount', 'station_recovery_reports.percentage', 'station_recovery_reports.reason','bl.name as bank_name');
-            $datatable = Datatables::of($station_recovery);
+            $datatable = Datatables::of($station_recovery)
+                ;
+
             return $datatable->make(true);
 
         }
-
+        public function station_recovery_update(Request $request){
+            if($request->form_save == 1){
+                foreach ($request->deposit_amount as $key => $value){
+                    $station_recovery = StationRecoveryReport::find($key);
+                    $station_recovery->deposit_amount = $value;
+                    $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
+                    $station_recovery->reason = $request->reason[$key];
+                    $station_recovery->save();
+                    $bank_row = 'bank_select'. $key;
+                    if($request->has($bank_row)){
+                        StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
+                        foreach ($request->bank_select[$key] as $row => $bank){
+                            $deposit = new StationRecoveryReportDeposit();
+                            $deposit->station_recovery_report_id = $key;
+                            $deposit->bank_id = $bank;
+                            $deposit->admin_id = Auth::id();
+                            $deposit->save();
+                        }
+                    }
+                }
+                return redirect()->back()->with('success', 'Report updated successfully!');
+            }
+        }
     }
 

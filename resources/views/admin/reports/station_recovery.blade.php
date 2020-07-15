@@ -10,6 +10,9 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <form id="recovery_form" action="{{ route('admin.reports.station_recovery.update') }}" method="post">
+                    @csrf
+                    <input type="hidden" name="form_save" id="form_save">
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -29,6 +32,7 @@
                     </tr>
                     </thead>
                 </table>
+                </form>
             </div>
         </div>
     </div>
@@ -148,13 +152,48 @@
                 scrollX: true, scrollY: '500px',
                 buttons: [
                     {
+                        title: 'Save',
+                        className: 'btn btn-success save d-none',
+                        text: '<i class="la la-save"></i> Save',
+                        action:function (e) {
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to update!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if(confirm){
+                                    $('#form_save').val(1);
+                                    $('#recovery_form').submit();
+                                }
+                            });
+
+                        }
+                    },
+                    {
                         title: 'Update',
                         className: 'btn btn-primary update',
                         text: '<i class="la la-edit"></i> Update',
                         action:function (e) {
-                            $('button btn.update').addClass('d-none');
+                            table.button('.save').node().removeClass('d-none');
+                            table.button('.update').node().addClass('d-none');
                             edit_table();
-                            $(this).addClass('d-none');
                         }
                     },
                     {
@@ -208,13 +247,13 @@
                     var deposit_amount = $(row.node()).find('td.deposit_amount').text();
                     var deposit_amount_input = '<input class="form-control form-control-sm deposit_amount" name="deposit_amount['+ id +']" placeholder="Deposited Amount" value="'+ deposit_amount +'">';
                     $(row.node()).find('td.deposit_amount').html(deposit_amount_input);
-                    var bank_select = '<select name="bank_select['+ id +']" class="select2 bank_select form-control"></select>';
+                    var bank_select = '<select name="bank_select['+ id +'][]" multiple="multiple" class="select2 bank_select form-control"></select>';
                     $(row.node()).find('td.bank_name').html(bank_select);
                     var adjustment_amount = $(row.node()).find('td.adjustment_amount').text();
                     var adjustment_amount_input = '<input class="form-control form-control-sm adjustment_amount" name="adjustment_amount['+ id +']" placeholder="Adjustment Amount" value="'+ adjustment_amount +'">';
                     $(row.node()).find('td.adjustment_amount').html(adjustment_amount_input);
                     var reason = $(row.node()).find('td.reason').text();
-                    var reason_input = '<input class="form-control form-control-sm reason" name="reason['+ id +']" placeholder="Reason" value="'+ reason +'">';
+                    var reason_input = '<textarea class="form-control form-control-sm reason" name="reason['+ id +']" placeholder="Reason">'+ reason +'</textarea>';
                     $(row.node()).find('td.reason').html(reason_input);
 
                 });
@@ -240,15 +279,16 @@
 
                     return obj;
                 });
-                $(".select2.bank_select").prepend('<option value="" selected></option>').select2({
+                $(".select2.bank_select").select2({
                     data:bank,
                     placeholder: "Select Bank",
                     width:'100%',
-                    containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
 
             }
+
+
         });
     </script>
 @endsection
