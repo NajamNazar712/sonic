@@ -33,7 +33,7 @@ class AdminPowerBIController extends Controller
         else if($user_id == 157){
             $link = 'https://app.powerbi.com/view?r=eyJrIjoiNTVjMTRmYTEtNzg0Ny00ZGI4LTljYjEtZjFlZTJiMDY1YjcwIiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
         }
-        else if($user_id == 13){
+        else if($user_id == 128){
             $link = 'https://app.powerbi.com/view?r=eyJrIjoiODM3YmVjYjYtOGFiMC00ZWQwLThlZGQtNDE2NTQzNzk3MDg5IiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
         }
         else if($user_id == 151){
