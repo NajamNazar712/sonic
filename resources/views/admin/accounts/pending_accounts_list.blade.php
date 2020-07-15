@@ -304,7 +304,7 @@
                     // {{--},--}}
                     @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
-                            text: 'Assign Rider',
+                            text: 'Bulk Tagging',
                             className: 'btn btn-primary assign_rider',
                             enabled:false,
                             action: function (e, dt, node, config) {
@@ -315,7 +315,7 @@
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
-                                        text: 'Are you sure, you want to Assign?',
+                                        text: 'Are you sure, you want to Tag?',
                                         icon: 'info',
                                         buttons: {
                                             cancel: {
