@@ -1847,16 +1847,13 @@ class ShipperShipmentBookController extends Controller
                     $rows[$key]['service_type_id'] = $service_type_check_id;
                     $row['service_type_id'] = $service_type_check_id;
                 }
-//                dd($row);
-                if($row['service_type_id'] == 1 && isset($row['pieces_quantity'])){
-                    if($row['pieces_quantity'] != null){
-                        $rows[$key]['pieces_quantity'] = $row['pieces_quantity'];
-                    }else{
-                        $rows[$key]['pieces_quantity'] = 1;
-                    }
-                }else{
-                    $rows[$key]['pieces_quantity'] = 1;
+
+                if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
+                    $row['pieces_quantity'] = 1;
                 }
+
+                $rows[$key]['pieces_quantity'] = $row['pieces_quantity'];
+
                 $validate = Validator::make($row, $rules, $messages);
 
                 $validate->setAttributeNames($names);
@@ -3097,15 +3094,13 @@ class ShipperShipmentBookController extends Controller
                     $rows[$key]['service_type_id'] = $service_type_check_id;
                     $row['service_type_id'] = $service_type_check_id;
                 }
-                if($row['service_type_id'] == 1 && isset($row['pieces_quantity'])){
-                    if($row['pieces_quantity'] != null){
-                        $row[$key]['pieces_quantity'] = $row['pieces_quantity'];
-                    }else{
-                        $row[$key]['pieces_quantity'] = 1;
-                    }
-                }else{
-                    $row[$key]['pieces_quantity'] = 1;
+
+
+                if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
+                    $row['pieces_quantity'] = 1;
                 }
+
+                $rows[$key]['pieces_quantity'] = $row['pieces_quantity'];
 
                 $validate = Validator::make($row, $rules, $messages);
 
