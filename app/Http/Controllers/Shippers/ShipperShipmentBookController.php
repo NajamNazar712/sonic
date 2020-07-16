@@ -3278,7 +3278,12 @@ class ShipperShipmentBookController extends Controller
                             $row['account_type_id'] = 2;
                             $row['nsas'] = $check;
                             $row['nsa'] = $request->excel_nsa;
-
+                            if(session('user_type') == 2){
+                                $row['substitute_user_id'] = Auth::id();
+                            }
+                            else{
+                                $row['substitute_user_id'] = null;
+                            }
                             if ($user_id != 3324) {
                                 dispatch(new ProcessShipmentBookingDB($row));
                             }
