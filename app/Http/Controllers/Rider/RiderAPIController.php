@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\ConsigneeLocation;
@@ -1327,6 +1328,22 @@ class RiderAPIController extends Controller {
                 $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('status', 0)->count();
                 if($pickup_note_requests_count == 0){
                     V2PickupNote::where('id', $request->pickup_note_id)->update(['status' => 1]);
+                }
+
+                if($request->has('tracking_numbers')){
+                    foreach ($request->tracking_numbers as $tracking_number) {
+                        if($shipment = Shipment::where('tracking_number', $tracking_number)->exists()){
+                            $shipment = $shipment->first();
+                            if($shipment->shipper_status_id == 17){
+                                AdminPickupsController::generate($shipment->id);
+                            }
+                            $shipment->shipper_status_id = 53;
+                            $shipment->consignee_status_id = 53;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment->id,53,53,NULL,NULL,NULL,NULL,$request->pickup_request_id,$request->pickup_note_id,1,NULL,$rider_id);
+                        }
+                    }
+                    NotificationsController::send(73,$request->tracking_numbers, $request->pickup_request_id);
                 }
             }
 
