@@ -293,7 +293,7 @@
         table.dataTable {
             font-size: 12px;
         }
-
+        
         table.dataTable thead tr th {
             padding-left: 0.5em;
             white-space: normal;
@@ -604,7 +604,7 @@
 
                                             if ($(row.node()).hasClass('selected')) {
                                                 var id = parseInt(row.id());
-                                                var remark = $(row.node()).find('td.shipment_remarks input').val();
+                                                var remark = $(row.node()).find('td.shipment_remarks textarea').val();
                                                 shipment_remarks[id] = remark;
                                             }
                                         });
@@ -991,7 +991,7 @@
             $('body').on('click','.returnMarkStatus',function () {
                 var action = $(this).data('action');
                 var row_id = $(this).parents('tr').attr('id');
-                var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
+                var remark = $(this).parents('tr').find('td.shipment_remarks textarea').val();
                 if(action === 'confirm'){
                     atext = 'Select Yes to change shipment status to Return-Confirm!';
                     $('#ReturnConfirmReasonSingleModal').modal('show');
@@ -1141,7 +1141,7 @@
                                 var row = table.row(index);
                                 if ($(row.node()).hasClass('selected')) {
                                     var id = parseInt(row.id());
-                                    var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                                    var remarks = $(row.node()).find('td.shipment_remarks textarea').val();
                                     shipment_remarks[id] = remarks;
                                 }
                             });
@@ -1287,7 +1287,7 @@
 
             $('#datatable').on('click', '.selfCollection', function () {
                 var row_id = $(this).parents('tr').attr('id');
-                var remark = $.trim($('tr#' + row_id).find('td.shipment_remarks input').val());
+                var remark = $.trim($('tr#' + row_id).find('td.shipment_remarks textarea').val());
                 if(row_id){
                     swal({
                         text: 'Are you sure you want to mark shipment for Self-Collection?',
@@ -1510,6 +1510,9 @@
                     form.submit();
                 }
             });
+       
+
+      
         });
     </script>
 @endsection

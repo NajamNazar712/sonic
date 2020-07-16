@@ -391,6 +391,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('status/change','Admins\AdminDashboardController@UserStatusChange')->name('status.change');
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
         Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
+        Route::post('tag/submit/bulk','Admins\AdminDashboardController@tagSubmitBulk')->name('tag.submit.bulk');
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
 
@@ -613,7 +614,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
-            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@v2_pickups_index')->name('index');
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@P')->name('index');
             Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_list_v2')->name('list');
             Route::get('shipments', 'Admins\V2Pickup\V2AdminPickupsController@pickups_shipments')->name('shipments');
         });
@@ -828,7 +829,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
         Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
-        Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');
+        Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');   
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
@@ -1451,7 +1452,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/data', 'Admins\V2Pickup\V2AdminReportController@pickup_report_data')->name('data');
         });
 
-        Route::prefix('station_recovery')->name('station_recovery.')->group(function (){
+        Route::prefix('not_attempted_aging')->name('not_attempted_aging.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@not_attempted_aging_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@not_attempted_aging_list')->name('list');
+        });
+		Route::prefix('station_recovery')->name('station_recovery.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@station_recovery_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@station_recovery_list')->name('list');
             Route::post('update', 'Admins\AdminReportsController@station_recovery_update')->name('update');
@@ -1655,7 +1660,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 });
 
             });
-
         });
 
 
@@ -1773,7 +1777,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/levels/store', 'Admins\AdminCrmSettingsController@escalation_level_store')->name('levels.store');
         });
 
-        Route::prefix('station_recovery_cron')->name('station_recovery_cron.')->group(function () {
+
+        Route::prefix('holidays')->name('holidays.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@holidays_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@holidays_update')->name('update');
+            Route::post('list', 'Admins\GlobalSettingsController@holidays_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@holidays_add')->name('add');
+        });
+
+        Route::prefix('not_attempted_cron')->name('not_attempted_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@not_attempted_cron_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@not_attempted_cron_store')->name('store');
+        });
+		Route::prefix('station_recovery_cron')->name('station_recovery_cron.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@station_recovery_cron_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@station_recovery_cron_store')->name('store');
         });

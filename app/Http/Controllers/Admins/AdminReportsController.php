@@ -14,6 +14,7 @@ use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\StationRecoveryReportDeposit;
+use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
@@ -1064,7 +1065,7 @@ use Yajra\Datatables\Datatables;
                 })
                 ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
                 ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-                ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sod.created_at as operation_status_date','svd.created_at as verification_status_date', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status','rider.name as rider_name', 's.booking_type_id', 'usi.poc','u.id as account_no')
+                ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount','s.amount as sum_amount', 'ss.name as current_status', 'sod.created_at as operation_status_date','svd.created_at as verification_status_date', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status','rider.name as rider_name', 's.booking_type_id', 'usi.poc','u.id as account_no')
                 ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,11]);
             if (session('role_id') != 1) {
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -5172,10 +5173,15 @@ use Yajra\Datatables\Datatables;
                             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 2)'));
                 })
                 ->leftjoin('crm_request_taggings as crt' ,'crt.crm_request_id', '=' , 'crm_requests.id')
+                ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
+                    $join->on('crth.crm_request_id', '=', 'crm_requests.id')
+                        ->where('crth.id','=',
+                            DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
+                })
                 ->leftjoin('admins as crta', 'crta.id', '=', 'crt.tagged_id')
                 ->leftjoin('admin_departments as crtad', 'crtad.id', '=', 'crt.tagged_id')
                 ->leftjoin('cities as crtadh', 'crtadh.id', '=', 'crt.hub_id')
-                ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crt.created_at as tagged_at')
+                ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at')
             ->groupBy('crm_requests.id');
             $datatable = Datatables::of($crm)
                 ->editColumn('tagged_to', function ($crm_request){
@@ -6485,7 +6491,26 @@ use Yajra\Datatables\Datatables;
            
             return $report->make(true);
         }
-        public function station_recovery_index(Request $request){
+        public function not_attempted_aging_index(Request $request){
+            return view('admin.reports.not_attempted_aging_report');
+        }
+
+        public function not_attempted_aging_list(Request $request){
+            if ($request->has('date')) {
+                $date = $request->get('date');
+                $date_from = Carbon::parse($date)->startOfDay()->toDateTimeString();
+                $date_to = Carbon::parse($date)->endOfDay()->toDateTimeString();
+            }
+            $not_attempting_aging_report = DB::connection('reports')->table('not_attempted_shipment_agings')
+            ->join('cities as h', 'not_attempted_shipment_agings.hub_id', '=', 'h.id')
+            ->join('zones as z', 'not_attempted_shipment_agings.zone_id', '=', 'z.id')
+            ->select(['h.name as hub', 'not_attempted_shipment_agings.zero as zero', 'not_attempted_shipment_agings.one as one', 'not_attempted_shipment_agings.two as two', 'not_attempted_shipment_agings.three as three', 'not_attempted_shipment_agings.four as four', 'not_attempted_shipment_agings.five as five', 'not_attempted_shipment_agings.six_plus as six_plus'])
+            ->whereBetween('not_attempted_shipment_agings.created_at',[$date_from, $date_to]);
+            $report = Datatables::of($not_attempting_aging_report);
+            return $report->make(true);
+        }
+		
+		public function station_recovery_index(Request $request){
             $banks_list = BanksList::where('status', 1)->select('id', 'name')->get();
             return view('admin.reports.station_recovery')->with('banks_lists', $banks_list);
         }
@@ -6557,5 +6582,6 @@ use Yajra\Datatables\Datatables;
                 return redirect()->back()->with('success', 'Report updated successfully!');
             }
         }
+
     }
 

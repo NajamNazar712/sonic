@@ -43,7 +43,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -227,9 +227,11 @@ class ReturnController extends Controller
                 }
             })
             ->orderColumn('shipper_phone', 'u.phone $1, u.phone2 $1')
+
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+
             ->addColumn('shipment_remarks',function ($shipments){
-                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
+                $remark = '<textarea style="width:200px;" placeholder="Enter Remarks" class="form-control form-control-sm" rows="4" cols="100">'.$shipments->remarks.'</textarea>';
                 return $remark;
             })
             ->editColumn('status_date',function ($shipments){
@@ -343,6 +345,8 @@ class ReturnController extends Controller
 
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
+        // $remarks = $request->remark;
+        
         if($request->action == 'confirm'){
 
             foreach ($shipment_ids as $shipment){
@@ -1406,11 +1410,7 @@ class ReturnController extends Controller
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
-            ->join('return_note_shipments', function ($join) {
-                $join->on('return_note_shipments.return_note_id', '=', 'return_notes.id')
-                    ->where('return_note_shipments.status',0);
-            })
-            ->select(['return_notes.id as return_note',DB::raw('count(return_note_shipments.shipment_id) as shipments_unverified_count'),'return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status'])
+            ->select(['return_notes.id as return_note', 'return_notes.id','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status',DB::raw('(SELECT COUNT(r.id) FROM return_notes AS r INNER JOIN return_note_shipments AS rns ON r.id = rns.return_note_id WHERE rns.return_note_id = return_notes.id AND rns.status = 0) AS shipments_unverified_count')])
             ->whereIn('return_notes.status',[0,3]);
 
         if (session('role_id') != 1) {

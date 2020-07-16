@@ -27,12 +27,15 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function list() {
-      $substitute_users = SubstituteUser::select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status')
+      $substitute_users = SubstituteUser::select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status', 'substitute_users.restriction')
       ->where('substitute_users.user_id', session('user_id'));
 
       $datatables = Datatables::of($substitute_users)
       ->editColumn('status', function ($substitute_user) {
         return (($substitute_user->status) ? 'Enabled' : 'Disabled');
+      })
+      ->editColumn('restriction', function ($substitute_user) {
+        return (($substitute_user->restriction) ? 'Enabled' : 'Disabled');
       })
       ->addColumn('action', function($substitute_user) {
         $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
@@ -130,6 +133,7 @@ class ShipperSubstituteAccountManagementController extends Controller
       $substitute_user->phone_number = $request->input('phone_number');
       $substitute_user->cnic = $request->input('cnic');
       $substitute_user->password = bcrypt($request->input('password'));
+      $substitute_user->restriction = $request->input('restriction');
 
       $substitute_user->save();
 
@@ -169,6 +173,7 @@ class ShipperSubstituteAccountManagementController extends Controller
       $substitute_user->email = $request->input('email');
       $substitute_user->phone_number = $request->input('phone_number');
       $substitute_user->cnic = $request->input('cnic');
+      $substitute_user->restriction = $request->input('restriction');
 
       if ($request->filled('password')) {
         $substitute_user->password = bcrypt($request->input('password'));

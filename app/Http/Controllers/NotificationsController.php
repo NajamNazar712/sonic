@@ -4842,6 +4842,166 @@ class NotificationsController extends Controller
                 }
 
               }
+              else if($id == 68){
+                  $date = $reference_1_id;
+                  $hub_shipment = $reference_2_id;
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+
+                  if (strpos($subject, '[hub]') !== FALSE) {
+                      $subject = str_replace('[hub]', $hub_shipment['name'], $subject);
+                  }
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+                  $html = '<table style="width:100%;">';
+                  $html .= '<thead><tr>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zero</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">One</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Two</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Three</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Four</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Five</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Six Plus</th>';
+                  $html .= '</tr></thead><tbody>';
+
+                  $html .= '<tr>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['name'] . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['zero'] . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['one'] . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['two'] . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['three'] . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['four'] . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['five'] . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['six_plus'] . '</td>';
+                  $html .= '</tr>';
+                  $html .= '</tbody></table>';
+
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                  $operation_admins = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $hub_shipment['id']);
+                  if ($operation_admins->exists()) {
+                      $to = $operation_admins->pluck('admins.email')->toArray();
+                  }
+                  $cc = array();
+
+                  $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $hub_shipment['id']);
+
+                  if ($general_managers->exists()) {
+                      $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
+                  }
+
+                  self::email($subject, $body, $to, $cc);
+              }
+              else if($id == 69){
+                  $date = $reference_1_id;
+                  $zone_hub_shipments = $reference_2_id;
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+                  $html = '<table style="width:100%;">';
+                  $html .= '<thead><tr>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zero</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">One</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Two</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Three</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Four</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Five</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Six Plus</th>';
+                  $html .= '</tr></thead><tbody>';
+                foreach($zone_hub_shipments as $zone_hub_shipment){
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $zone_hub_shipment['name'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $zone_hub_shipment['zero'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $zone_hub_shipment['one'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $zone_hub_shipment['two'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $zone_hub_shipment['three'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $zone_hub_shipment['four'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $zone_hub_shipment['five'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $zone_hub_shipment['six_plus'] . '</td>';
+                    $html .= '</tr>';
+                    $zone = $zone_hub_shipment['zone'];
+                    $zone_id = $zone_hub_shipment['zone_id'];
+                }
+                  $html .= '</tbody></table>';
+
+                  if (strpos($subject, '[zone]') !== FALSE) {
+                      $subject = str_replace('[zone]', $zone, $subject);
+                  }
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                  $to = array();
+
+                  $operation_admins =  Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->join('cities','cities.id','=','admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)->where('cities.zone_id','=', $zone_id);
+                   $cc = array();
+
+                  $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $zone_id);
+                  if ($operation_admins->exists()) {
+                      $to = array_merge($to, $operation_admins->pluck('email')->toArray());
+                  }
+
+                   if ($general_managers->exists()) {
+                       $cc = $general_managers->pluck('admins.email')->toArray();
+                   }
+
+                  self::email($subject, $body, $to, $cc);
+              }
+              else if($id == 70){
+                  $date = $reference_1_id;
+                  $hub_shipments = $reference_2_id;
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+                  $html = '<table style="width:100%;">';
+                  $html .= '<thead><tr>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zero</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">One</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Two</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Three</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Four</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Five</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Six Plus</th>';
+                  $html .= '</tr></thead><tbody>';
+                foreach($hub_shipments as $hub_shipment){
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['name'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['zero'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['one'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['two'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['three'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['four'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['five'] . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_shipment['six_plus'] . '</td>';
+                    $html .= '</tr>';
+                }
+                  $html .= '</tbody></table>';
+
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                   $to = 'hassan@trax.pk';
+                   $cc = array();
+
+                   $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 18, 19, 22, 34, 36])->where('status', 1);
+
+                   if ($department_heads->exists()) {
+                     $cc = array_merge($cc, $department_heads->pluck('email')->toArray());
+                   }
+
+                   self::email($subject, $body, $to, $cc);
+              }
         }
       }
     }

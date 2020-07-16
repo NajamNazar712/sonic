@@ -731,6 +731,9 @@
                         @if (session('role_id') == 1 || in_array(356, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.station_recovery.index') }}">Station Recovery</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(345, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.not_attempted_aging.index') }}">Not Attempted Aging Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -948,10 +951,10 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279, 358], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Support</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279], session('permissions'))) !== 0)
+                                    @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279, 358], session('permissions'))) !== 0)
                                         @if (session('role_id') == 1 || in_array(152, session('permissions')))
                                             <li><a class="menu-item" href="{{route('admin.settings.ticker.index')}}">Ticker</a></li>
                                         @endif
@@ -982,6 +985,10 @@
                                             <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><span class="menu-title">Notifications</span></a>
                                             </li>
                                         @endif
+                                        @if (session('role_id') == 1 || in_array(358, session('permissions')))
+                                            <li class=" nav-item"><a href="{{ route('admin.settings.holidays.index') }}"><span class="menu-title">Holidays</span></a>
+                                            </li>
+                                        @endif
                                     @endif
                                 </ul>
                             </li>
@@ -1007,6 +1014,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(357, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.zero_charges.index')}}">Zero Charges Report Settings</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(359, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.not_attempted_cron.index')}}">Not Attempted Report Cron Time</a></li>
                                     @endif
                                 </ul>
                             </li>

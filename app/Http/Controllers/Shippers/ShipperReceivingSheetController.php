@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\BookingType;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\http\Models\SubstituteUserReceivingSheet;
+use App\http\Models\SubstituteUserShipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
@@ -67,6 +69,13 @@ class ShipperReceivingSheetController extends Controller
 
         $receiving_sheet->save();
 
+        if(session('user_type') == 2){
+            $substitute_user_receiving_sheet = new SubstituteUserReceivingSheet();
+            $substitute_user_receiving_sheet->substitute_user_id = Auth::id();
+            $substitute_user_receiving_sheet->receiving_sheet_id = $receiving_sheet->id;
+            $substitute_user_receiving_sheet->save();
+        }
+
         $receiving_sheet_id = $receiving_sheet->id;
 
         foreach ($shipment_ids as $shipment_id) {
@@ -108,6 +117,12 @@ class ShipperReceivingSheetController extends Controller
                 $query->where('shipments.user_id', session('user_id'))
                 ->orwhereIn('shipments.user_id', session('sister_users'));
             });
+
+            if(session('user_type') == 2){
+                if(session('restriction') == 1){
+                    $shipments = $shipments->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+                }
+            }
 
         return Datatables::of($shipments)
             ->editColumn('receiving_sheet', function($shipment) {
@@ -690,7 +705,15 @@ class ShipperReceivingSheetController extends Controller
             if($shipment->exists()){
                 $shipment = $shipment->first();
                 $pickup_id = $shipment->pickup_address_id;
-                
+
+                if(session('user_type') == 2){
+                    if(session('restriction') == 1){
+                        $sub_check = SubstituteUserShipment::where('substitute_user_id', Auth::id())->where('shipment_id', $shipment->id);
+                        if(!$sub_check->exists()){
+                            return ['status' => 1, 'error' => $shipment->tracking_number . ' is restricted'];
+                        }
+                    }
+                }
                 if ($shipment->shipper_status_id != 1) {
                     return ['status' => 1, 'error' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
                 }
