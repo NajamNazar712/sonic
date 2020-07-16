@@ -223,7 +223,7 @@
                     { data:'amount' ,name: 'station_recovery_reports.amount', class: 'align-middle text-center amount'},
                     { data:'total_amount' ,name: 'station_recovery_reports.total_amount', class: 'align-middle text-center total_amount'},
                     { data:'deposit_amount' ,name: 'station_recovery_reports.deposit_amount', class: 'align-middle text-center deposit_amount'},
-                    { data:'bank_name' ,name: 'bl.id', class: 'align-middle text-center bank_name'},
+                    { data:'banks_list' ,name: 'banks_list', class: 'align-middle text-center banks_list', orderable: false, searchable: false},
                     { data:'adjustment_amount' ,name: 'station_recovery_reports.adjustment_amount', class: 'align-middle text-center adjustment_amount'},
                     { data:'difference_amount' ,name: 'station_recovery_reports.difference_amount', class: 'align-middle text-center difference_amount'},
                     { data:'percentage' ,name: 'station_recovery_reports.percentage', class: 'align-middle text-center percentage'},
@@ -242,13 +242,16 @@
 
             function edit_table() {
                 table.rows().nodes().each(function(index) {
+                    var bank_ids = '';
                     var row = table.row(index);
                     var id = parseInt(row.id());
                     var deposit_amount = $(row.node()).find('td.deposit_amount').text();
                     var deposit_amount_input = '<input class="form-control form-control-sm deposit_amount" name="deposit_amount['+ id +']" placeholder="Deposited Amount" value="'+ deposit_amount +'">';
                     $(row.node()).find('td.deposit_amount').html(deposit_amount_input);
                     var bank_select = '<select name="bank_select['+ id +'][]" multiple="multiple" class="select2 bank_select form-control"></select>';
-                    $(row.node()).find('td.bank_name').html(bank_select);
+                    $(row.node()).find('td.banks_list').html(bank_select);
+                    $(row.node()).find('td.banks_list input').val();
+
                     var adjustment_amount = $(row.node()).find('td.adjustment_amount').text();
                     var adjustment_amount_input = '<input class="form-control form-control-sm adjustment_amount" name="adjustment_amount['+ id +']" placeholder="Adjustment Amount" value="'+ adjustment_amount +'">';
                     $(row.node()).find('td.adjustment_amount').html(adjustment_amount_input);

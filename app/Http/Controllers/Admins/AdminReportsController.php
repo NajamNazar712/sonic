@@ -6493,9 +6493,8 @@ use Yajra\Datatables\Datatables;
         public function station_recovery_list(Request $request){
             $station_recovery = DB::connection('reports')->table('station_recovery_reports')->join('cities as h', 'h.id', '=', 'station_recovery_reports.city_id')
                 ->join('zones', 'zones.id', '=', 'station_recovery_reports.zone_id')
-                ->leftjoin('station_recovery_report_deposits as srd', 'srd.station_recovery_report_id', '=', 'station_recovery_reports.id')
-                ->leftjoin('banks_lists as bl', 'bl.id', '=', 'srd.bank_id')
-                ->select('station_recovery_reports.id as recovery_id', 'h.name as hub', 'zones.name as zone', 'station_recovery_reports.delivered_shipments', 'station_recovery_reports.last_day_balance', 'station_recovery_reports.amount','station_recovery_reports.total_amount', 'station_recovery_reports.deposit_amount', 'station_recovery_reports.adjustment_amount', 'station_recovery_reports.difference_amount', 'station_recovery_reports.percentage', 'station_recovery_reports.reason','bl.name as bank_name');
+
+                ->select('station_recovery_reports.id as recovery_id', 'h.name as hub', 'zones.name as zone', 'station_recovery_reports.delivered_shipments', 'station_recovery_reports.last_day_balance', 'station_recovery_reports.amount','station_recovery_reports.total_amount', 'station_recovery_reports.deposit_amount', 'station_recovery_reports.adjustment_amount', 'station_recovery_reports.difference_amount', 'station_recovery_reports.percentage', 'station_recovery_reports.reason');
             $datatable = Datatables::of($station_recovery)
                 ->editColumn('last_day_balance', function ($recovery){
                     return number_format($recovery->last_day_balance);
@@ -6508,12 +6507,17 @@ use Yajra\Datatables\Datatables;
                 })
                 ->addColumn('banks_list', function ($recovery){
                     $banks_list = '';
-                    if($banks = StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
-                        $banks = $banks->get();
+                    if(StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
+                        $banks = StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->get();
+                        $bank_ids = '';
                         foreach ($banks as $bank) {
-                            $banks_list .= BanksList::find($bank->bank_id)->name;
+                            $banklist = BanksList::find($bank->bank_id);
+                            $banks_list .= $banklist->name;
                             $banks_list .= ',';
+                            $bank_ids .= $banklist->id.',';
                         }
+                        $html = '<input type="hidden" name="bank_ids" value="'. $bank_ids .'">';
+                        $banks_list = $banks_list. $html;
                         return $banks_list;
                     }
                     return $banks_list;
