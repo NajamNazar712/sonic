@@ -6497,7 +6497,27 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('banks_lists as bl', 'bl.id', '=', 'srd.bank_id')
                 ->select('station_recovery_reports.id as recovery_id', 'h.name as hub', 'zones.name as zone', 'station_recovery_reports.delivered_shipments', 'station_recovery_reports.last_day_balance', 'station_recovery_reports.amount','station_recovery_reports.total_amount', 'station_recovery_reports.deposit_amount', 'station_recovery_reports.adjustment_amount', 'station_recovery_reports.difference_amount', 'station_recovery_reports.percentage', 'station_recovery_reports.reason','bl.name as bank_name');
             $datatable = Datatables::of($station_recovery)
-                ;
+                ->editColumn('last_day_balance', function ($recovery){
+                    return number_format($recovery->last_day_balance);
+                })
+                ->editColumn('amount', function ($recovery){
+                    return number_format($recovery->amount);
+                })
+                ->editColumn('total_amount', function ($recovery){
+                    return number_format($recovery->total_amount);
+                })
+                ->addColumn('banks_list', function ($recovery){
+                    $banks_list = '';
+                    if($banks = StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
+                        $banks = $banks->get();
+                        foreach ($banks as $bank) {
+                            $banks_list .= BanksList::find($bank->bank_id)->name;
+                            $banks_list .= ',';
+                        }
+                        return $banks_list;
+                    }
+                    return $banks_list;
+                });
 
             return $datatable->make(true);
 
