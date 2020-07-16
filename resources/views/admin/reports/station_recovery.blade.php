@@ -10,6 +10,24 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div id="search_form" class="row mb-2 justify-content-center">
+
+                    <div class="col-4">
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date" placeholder="Date" data-value="{{Carbon\Carbon::today()}}">
+                        </div>
+                    </div>
+
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
+                </div>
                 <form id="recovery_form" action="{{ route('admin.reports.station_recovery.update') }}" method="post">
                     @csrf
                     <input type="hidden" name="form_save" id="form_save">
@@ -107,6 +125,14 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var date = $('#search_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -212,6 +238,12 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.reports.station_recovery.list') }}',
+                ajax: {
+                    url: '{{ route('admin.reports.station_recovery.list') }}',
+                    data: function (d) {
+                        d.search_date = $('input[name="search_date_formatted"]').val();
+                    }
+                },
                 rowId: 'recovery_id',
                 order: [[1, 'desc']],
                 columns: [
@@ -241,6 +273,7 @@
             });
 
             function edit_table() {
+                var bank_ids_array = [];
                 table.rows().nodes().each(function(index) {
                     var bank_ids = '';
                     var row = table.row(index);
@@ -249,9 +282,13 @@
                     var deposit_amount_input = '<input class="form-control form-control-sm deposit_amount" name="deposit_amount['+ id +']" placeholder="Deposited Amount" value="'+ deposit_amount +'">';
                     $(row.node()).find('td.deposit_amount').html(deposit_amount_input);
                     var bank_select = '<select name="bank_select['+ id +'][]" multiple="multiple" class="select2 bank_select form-control"></select>';
+                    bank_ids = $(row.node()).find('td.banks_list input').val();
                     $(row.node()).find('td.banks_list').html(bank_select);
-                    $(row.node()).find('td.banks_list input').val();
 
+                    if(typeof bank_ids !== 'undefined'){
+                        bank_ids_array[id] = bank_ids.split(',');
+
+                    }
                     var adjustment_amount = $(row.node()).find('td.adjustment_amount').text();
                     var adjustment_amount_input = '<input class="form-control form-control-sm adjustment_amount" name="adjustment_amount['+ id +']" placeholder="Adjustment Amount" value="'+ adjustment_amount +'">';
                     $(row.node()).find('td.adjustment_amount').html(adjustment_amount_input);
@@ -288,9 +325,18 @@
                     width:'100%',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
+                if(bank_ids_array.length > 0){
+                    $.each(bank_ids_array, function (index, val) {
+                        if(typeof val !== 'undefined'){
+                            $("select[name='bank_select["+ index +"][]']").val(val).trigger('change');
+                        }
+                    });
+                }
 
             }
-
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
 
         });
     </script>

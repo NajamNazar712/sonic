@@ -6494,7 +6494,7 @@ use Yajra\Datatables\Datatables;
             $station_recovery = DB::connection('reports')->table('station_recovery_reports')->join('cities as h', 'h.id', '=', 'station_recovery_reports.city_id')
                 ->join('zones', 'zones.id', '=', 'station_recovery_reports.zone_id')
 
-                ->select('station_recovery_reports.id as recovery_id', 'h.name as hub', 'zones.name as zone', 'station_recovery_reports.delivered_shipments', 'station_recovery_reports.last_day_balance', 'station_recovery_reports.amount','station_recovery_reports.total_amount', 'station_recovery_reports.deposit_amount', 'station_recovery_reports.adjustment_amount', 'station_recovery_reports.difference_amount', 'station_recovery_reports.percentage', 'station_recovery_reports.reason');
+                ->select('station_recovery_reports.id as recovery_id', 'h.name as hub', 'zones.name as zone', 'station_recovery_reports.delivered_shipments', 'station_recovery_reports.last_day_balance', 'station_recovery_reports.amount','station_recovery_reports.total_amount', 'station_recovery_reports.deposit_amount', 'station_recovery_reports.adjustment_amount', 'station_recovery_reports.difference_amount', 'station_recovery_reports.percentage', 'station_recovery_reports.reason','station_recovery_reports.date');
             $datatable = Datatables::of($station_recovery)
                 ->editColumn('last_day_balance', function ($recovery){
                     return number_format($recovery->last_day_balance);
@@ -6510,11 +6510,15 @@ use Yajra\Datatables\Datatables;
                     if(StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
                         $banks = StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->get();
                         $bank_ids = '';
-                        foreach ($banks as $bank) {
+                        foreach ($banks as $index => $bank) {
+                            $index++;
                             $banklist = BanksList::find($bank->bank_id);
                             $banks_list .= $banklist->name;
-                            $banks_list .= ',';
-                            $bank_ids .= $banklist->id.',';
+                            $bank_ids .= $banklist->id;
+                            if($index != count($banks)){
+                                $banks_list .= ',';
+                                $bank_ids .= ',';
+                            }
                         }
                         $html = '<input type="hidden" name="bank_ids" value="'. $bank_ids .'">';
                         $banks_list = $banks_list. $html;
@@ -6522,11 +6526,15 @@ use Yajra\Datatables\Datatables;
                     }
                     return $banks_list;
                 });
-
+            if ($request->get('search_date')) {
+                $date = $request->get('search_date');
+                $datatable = $datatable->whereDate('station_recovery_reports.date', $date);
+            }
             return $datatable->make(true);
 
         }
         public function station_recovery_update(Request $request){
+
             if($request->form_save == 1){
                 foreach ($request->deposit_amount as $key => $value){
                     $station_recovery = StationRecoveryReport::find($key);
@@ -6534,7 +6542,7 @@ use Yajra\Datatables\Datatables;
                     $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
                     $station_recovery->reason = $request->reason[$key];
                     $station_recovery->save();
-                    $bank_row = 'bank_select'. $key;
+                    $bank_row = "bank_select.$key";
                     if($request->has($bank_row)){
                         StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
                         foreach ($request->bank_select[$key] as $row => $bank){
