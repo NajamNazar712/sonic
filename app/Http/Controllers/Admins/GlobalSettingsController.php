@@ -2672,7 +2672,7 @@ class GlobalSettingsController extends Controller
 
 
     public function over_payment_limit_store(Request $request) {
-        $settings = GlobalSettings::where('type', 'over_payment_limit')->first();
+        $settings = GlobalSettings::where('type', 'over_payment_limit');
 
         if ($settings->exists()) {
             $settings = $settings->first();
