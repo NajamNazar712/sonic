@@ -1515,9 +1515,7 @@ class RiderAPIController extends Controller {
         else {
             $shipment_item = ShipmentItem::find($request->tracking_number);
 
-            if ($shipment_item->exists()) {
-                $shipment_item = $shipment_item->first();
-
+            if ($shipment_item) {
                 $shipment = Shipment::find('tracking_number', $shipment_item->shipment_id);
 
                 $tracking_number = $shipment->tracking_number;
