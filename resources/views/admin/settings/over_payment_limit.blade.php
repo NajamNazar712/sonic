@@ -23,7 +23,7 @@
 										{{ csrf_field() }}
 
 										<div class="form-group">
-											<input type="text" name="over_payment_limit" class="form-control over_payment_limit" placeholder="Over Payment Limit*" data-rule-required="true" data-msg-required="Over Payment Limit is required" value="{{ $settings->setting_value }}" data-rule-min="1" data-msg-min="Over Payment Limit can not be less than 1">
+											<input type="text" name="over_payment_limit" class="form-control over_payment_limit" placeholder="Over Payment Limit*" data-rule-required="true" data-msg-required="Over Payment Limit is required" value="{{ $over_payment_limit }}" data-rule-min="1" data-msg-min="Over Payment Limit can not be less than 1">
 										</div>
 
 										<button type="submit" class="btn btn-primary">Update</button>
