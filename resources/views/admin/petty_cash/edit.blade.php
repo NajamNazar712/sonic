@@ -695,6 +695,20 @@
                 }
             });
 
+            $.validator.addMethod('maxsize', function(value, element, params) {
+                if ($(element).attr('type') === 'file') {
+                    if (element.files && element.files.length) {
+                        for (var c = 0; c < element.files.length; c++) {
+                            if (element.files[c].size > params) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }, $.validator.format("File Size must not exceed {0} bytes."));
+            
             $('#statement_reject').on('click',  function (e) {
                 e.preventDefault();
                 var id = '{{$petty_statement->id}}';

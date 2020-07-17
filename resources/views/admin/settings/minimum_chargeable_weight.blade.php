@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Multiple Sale Person Tagging')
+@section('title', 'Minimum Chargeable Weight')
 
 @section('content')
     <div class="app-content content">

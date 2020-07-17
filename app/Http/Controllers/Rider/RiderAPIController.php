@@ -286,7 +286,7 @@ class RiderAPIController extends Controller {
     private function verify_pickup_address_location($pickup_address_id) {
         $number_of_entries = 5;
 
-        $pickup_requests = PickupRequest::where('pickup_address_id', $pickup_address_id)->where('status', 2);
+        $pickup_requests = PickupRequest::where('pickup_address_id', $pickup_address_id)->where('status_id', 2);
 
         if ($pickup_requests->exists() && $pickup_requests->count() >= $number_of_entries) {
             $pickup_request_ids = $pickup_requests->latest('id')->take($number_of_entries)->pluck('id')->toArray();
@@ -341,7 +341,7 @@ class RiderAPIController extends Controller {
     private function verify_pickup_address_location_v2($pickup_address_id) {
         $number_of_entries = 5;
 
-        $pickup_requests = V2PickupRequest::where('pickup_address_id', $pickup_address_id)->where('status', 2);
+        $pickup_requests = V2PickupRequest::where('pickup_address_id', $pickup_address_id)->where('status_id', 2);
 
         if ($pickup_requests->exists() && $pickup_requests->count() >= $number_of_entries) {
             $pickup_request_ids = $pickup_requests->latest('id')->take($number_of_entries)->pluck('id')->toArray();
