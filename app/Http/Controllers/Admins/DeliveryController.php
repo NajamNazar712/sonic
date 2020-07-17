@@ -2785,7 +2785,7 @@ class DeliveryController extends Controller
             $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->orderBy('id')->get();
             //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
             $shipment_details = '
-                      <table class="table table-sm table-bordered border">
+                      <table class="table table-bordered border" style="margin-bottom: 10rem !important;">
                         <tbody>
                           <tr>
                             <td class="color primary"><strong>S. No.</strong></td>
@@ -2905,7 +2905,6 @@ class DeliveryController extends Controller
                       </table>
         ';
             $html .= $main_details;
-            $html .= $shipment_details;
             $html .= '
                       <div class="mt-2 manual_form">
                       <div class="row  mt-1">
@@ -2917,8 +2916,8 @@ class DeliveryController extends Controller
                           </div>
                         </div>
                         <hr>';
-                        $html .= '<div class="row justify-content-end mt-2">
-                                    <div class="col-3">
+            $html .= '<div class="row justify-content-end mt-2">
+                                    <div class="col-3 ">
                                     <table class="table table-sm table-bordered border">
                                         <thead>
                                           <tr>
@@ -2942,7 +2941,9 @@ class DeliveryController extends Controller
                                     </table>
                                     </div>
                                   </div>';
-                        
+
+            $html .= $shipment_details;
+
                       $html .= '<div class="row justify-content-center align-items-end mt-5">
                           <div class="col justify-content-center ">
                             <div class="text-center">
