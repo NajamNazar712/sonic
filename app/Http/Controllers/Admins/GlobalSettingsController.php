@@ -2595,10 +2595,16 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.not_attempted_report_cron_time')->with('settings', $settings);
     }
     public function not_attempted_cron_store(Request $request) {
-        $settings = GlobalSettings::where('type', 'not_attempted_cron_time')->first();
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
+        if($settings->exists()){
+            $settings = $settings->first();
+        }
+        else{
+            $settings = new GlobalSettings();
+            $settings->type = 'not_attempted_cron_time';
+        }
 
         $settings->setting_value = $request->not_attempted_cron_time;
-
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
