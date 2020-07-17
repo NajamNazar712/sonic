@@ -63,6 +63,8 @@ Route::name('api.')->group(function () {
                 Route::post('pick_v2', 'Rider\RiderAPIController@pickup_pick_v2')->name('pickup_pick_v2');
                 Route::post('not_pick_v2', 'Rider\RiderAPIController@pickup_not_pick_v2')->name('pickup_not_pick_v2');
                 Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
+
+                Route::post('check_tracking_number', 'Rider\RiderAPIController@pickup_check_tracking_number')->name('check_tracking_number');
 	        });
             Route::prefix('delivery')->name('delivery.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
