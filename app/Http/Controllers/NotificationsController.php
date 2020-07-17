@@ -4844,7 +4844,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[pickup_city]', $pickup_city, $body);
                     }
 
-                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number(s)</strong></th></tr></thead><tbody>';
+                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th></tr></thead><tbody>';
                     foreach ($tracking_numbers as $row => $tracking){
                         $row++;
                         $html .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $row .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $tracking .'</td></tr>';
@@ -4860,7 +4860,7 @@ class NotificationsController extends Controller
 
                     $to[] = $pickup_request->shipper->email;
 
-                    $sales_person = SalePersonTag::where('user_id', $pickup_request->user->id)->where('status', 0)->first();
+                    $sales_person = SalePersonTag::where('user_id', $pickup_request->shipper_id)->where('status', 0)->first();
 
                     if($sales_person){
                         $bcc[] = Admin::find($sales_person->admin_id)->email;
@@ -4869,7 +4869,7 @@ class NotificationsController extends Controller
                     $city_id = $pickup_request->pickup_city->hub_id;
 
                     $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($city_id) {
-                        $query->whereIn('hub_id', $city_id);
+                        $query->where('hub_id', $city_id);
                     });
 
                     if ($related_admins->exists()) {

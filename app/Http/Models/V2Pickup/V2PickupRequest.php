@@ -16,7 +16,7 @@ class V2PickupRequest extends Model
         return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo');
     }
     public function pickup_city() {
-        return $this->belongsTo('App\Http\Models\City');
+        return $this->belongsTo('App\Http\Models\City', 'city_id');
     }
     public function pickup_request_shipments() {
         return $this->hasMany('App\Http\Models\V2Pickup\V2PickupRequestShipment', 'pickup_request_id');
