@@ -2656,14 +2656,32 @@ class GlobalSettingsController extends Controller
     }
 
     public function over_payment_limit_index() {
-        $settings = GlobalSettings::where('type', 'over_payment_limit')->first();
+        $settings = GlobalSettings::where('type', 'over_payment_limit');
 
-        return view('admin.settings.over_payment_limit')->with('settings', $settings);
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $over_payment_limit = $settings->setting_value;
+        }
+        else {
+            $over_payment_limit = 6000000;
+        }
+
+        return view('admin.settings.over_payment_limit')->with('over_payment_limit', $over_payment_limit);
     }
 
 
     public function over_payment_limit_store(Request $request) {
         $settings = GlobalSettings::where('type', 'over_payment_limit')->first();
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'over_payment_limit';
+        }
 
         $settings->setting_value = $request->over_payment_limit;
 
