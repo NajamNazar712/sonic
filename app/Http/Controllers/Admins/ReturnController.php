@@ -1764,8 +1764,10 @@ class ReturnController extends Controller
         $return_note_id = $request->return_note_id;
         $array_returned = array(25,31,38);
         $array_returned_status = array(24,29,35,47,48, 60);
+        $actual_date = $request->actual_date_formatted;
         if($return_note_id != '') {
             $return_note_details = ReturnNote::find($return_note_id);
+
             foreach ($shipments as $shipment) {
                 $reasonId = "reason_drop.$shipment";
                 $parcel = Shipment::where('id', $shipment)->first();
@@ -1802,6 +1804,7 @@ class ReturnController extends Controller
                     $return_note_details->status = 3;
                     $return_note_details->updated_by = Auth::id();
                 }
+                $return_note_details->actual_date = $actual_date;
                 $return_note_details->save();
             }
 
@@ -1929,10 +1932,10 @@ class ReturnController extends Controller
     }
 
     public function receive_return_status_submit_all(Request $request){
-
         if(!empty($request->shipment_ids)){
             $shipment_ids = $request->shipment_ids;
             $shipment_status = $request->shipment_status;
+            $actual_date = $request->actual_date;
             $open_box_ids = array();
             if($request->has('open_box_ids')){
                 $open_box_ids = $request->open_box_ids;
@@ -2013,12 +2016,13 @@ class ReturnController extends Controller
                         $return_note_details->save();
                     }
                 }
-                $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
+                $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status' => 0])->count();
                 if($shipment_status_count == 0){
                     $return_note_details->updated_by = Auth::id();
                     $return_note_details->status = 3;
-                    $return_note_details->save();
                 }
+                $return_note_details->actual_date = $actual_date;
+                $return_note_details->save();
 
                 NotificationsController::send(15, $request->return_note_id);
                 NotificationsController::send(16, $request->return_note_id);
@@ -2053,6 +2057,7 @@ class ReturnController extends Controller
                         $return_note_details->status = 3;
                         $return_note_details->updated_by = Auth::id();
                     }
+                    $return_note_details->actual_date = $actual_date;
                     $return_note_details->save();
 
                 }

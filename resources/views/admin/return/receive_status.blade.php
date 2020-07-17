@@ -18,6 +18,18 @@
                     <input type="hidden" name="open_box_ids" id="open_box_ids">
 
                     <div class="row justify-content-center">
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o"></span>
+                                    </span>
+                                </div>
+                                <input type="text" name="actual_date" class="form-control bg-primary border-primary white rounded-right" id="actual_date" placeholder="Actual Date" data-rule-required="true" data-msg-required="Actual Date is required" data-value="{{\Illuminate\Support\Carbon::now()}}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
                         <div class="col-4">
                             <fieldset class="form-group">
                                 <select name="select_all_status" id="select_all_status" class="form-control select2">
@@ -56,6 +68,7 @@
                         </tr>
                         </thead>
                     </table>
+
                     <div class="row justify-content-center">
                         @if($return_note_status == 0)
                         <div class="col-2">
@@ -80,6 +93,8 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
     <style>
         table.dataTable {
@@ -144,9 +159,28 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var date = $('#actual_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                max: '{{Carbon\Carbon::now()}}',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    // $('#actual_date_root').css('top', '-326px');
+                },
+                onSet: function(context) {
+                }
+            });
             $('.decimal').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -583,7 +617,7 @@
                 var select_all_status = $('#select_all_status').val();
                 var return_note = $('#return_note').val();
                 var errros = 'Something went wrong, Refresh page and try again';
-
+                var actual_date = $('input[name="actual_date_formatted"]').val();
                 if(selected_rows.length > 0){
                     if(select_all_status != ''){
                         swal({
@@ -674,6 +708,7 @@
                                                         'shipment_status':select_all_status,
                                                         'remarks': shipment_remarks_obj,
                                                         'received_or_refused_by': shipment_received_refused_obj,
+                                                        'actual_date' : actual_date,
                                                         '_token': '{{ csrf_token() }}'
                                                     }
                                                 }).done(function (data) {
@@ -700,6 +735,7 @@
                                                 'shipment_status':select_all_status,
                                                 'remarks': shipment_remarks_obj,
                                                 'received_or_refused_by': shipment_received_refused_obj,
+                                                'actual_date' : actual_date,
                                                 '_token': '{{ csrf_token() }}'
                                             }
                                         }).done(function (data) {
@@ -757,6 +793,7 @@
                                                     'shipment_status':select_all_status,
                                                     'remarks': shipment_remarks,
                                                     'received_or_refused_by': null,
+                                                    'actual_date' : actual_date,
                                                     '_token': '{{ csrf_token() }}'
                                                 }
                                             }).done(function (data) {

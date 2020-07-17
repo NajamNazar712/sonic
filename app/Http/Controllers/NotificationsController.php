@@ -2968,7 +2968,7 @@ class NotificationsController extends Controller
 
                 $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name'];
 
-                $field_names = ['tracking_number' => 'Tracking Number', 'status_updated_at' => 'Status Updated At', 'receiver_name' => 'Received By'];
+                $field_names = ['tracking_number' => 'Tracking Number', 'status_updated_at' => 'Status Updated At', 'receiver_name' => 'Received By', 'returned_at' => 'Returned At'];
 
                 $present_fields = array();
 
@@ -2997,7 +2997,7 @@ class NotificationsController extends Controller
                 }
 
                 $user_wise_shipments = array();
-                $shipment_details = ShipmentsJourney::join('shipments', 'shipments.id', '=', 'shipments_journey.shipment_id')->where('shipments.shipper_status_id', 25)->where('shipments_journey.shipper_status_id', 25)->whereBetween('shipments_journey.created_at', [$yesterday, $today])->select('shipments.user_id','shipments.tracking_number','shipments_journey.created_at','shipments_journey.received_or_refused_by');
+                $shipment_details = ShipmentsJourney::join('shipments', 'shipments.id', '=', 'shipments_journey.shipment_id')->where('shipments.shipper_status_id', 25)->where('shipments_journey.shipper_status_id', 25)->whereBetween('shipments_journey.created_at', [$yesterday, $today])->select('shipments.user_id','shipments.tracking_number','shipments_journey.created_at','shipments_journey.received_or_refused_by','shipments_journey.reference_1_id');
 
                 if ($shipment_details->exists()) {
                 
@@ -3010,6 +3010,12 @@ class NotificationsController extends Controller
                     $details['tracking_number'] = $data->tracking_number;
                     $details['status_updated_at'] = $data->created_at;
                     $details['receiver_name'] = $data->received_or_refused_by;
+                    $return_note = ReturnNote::find($data->reference_1_id);
+                    $returned_at = '';
+                    if($return_note && $return_note->actual_date != null){
+                        $returned_at = Carbon::parse($return_note->actual_date)->toDateString();
+                    }
+                    $details['returned_at'] = $returned_at;
 
                     $user_wise_shipments[$data->user_id][] = $details;
                    
