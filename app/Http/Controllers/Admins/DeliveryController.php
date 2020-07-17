@@ -2273,6 +2273,7 @@ class DeliveryController extends Controller
                 $location = '<div class="text-center">';
                 if($deliveries->actual_location_latitude != null && $deliveries->actual_location_longitude != null){
                     $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $deliveries->actual_location_latitude . ',' . $deliveries->actual_location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    $location .= '</div>';
                     return $location;
                 }
                 else{
@@ -2289,6 +2290,7 @@ class DeliveryController extends Controller
                 $location = '<div class="text-center">';
                 if($lat != null && $long != null){
                     $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $lat . ',' . $long . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    $location .= '</div>';
                     return $location;
                 }
                 else{
