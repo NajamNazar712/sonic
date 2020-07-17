@@ -6530,6 +6530,13 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('total_amount', function ($recovery){
                     return number_format($recovery->total_amount);
                 })
+                ->editColumn('percentage', function ($recovery){
+                    if($recovery->percentage == 0){
+                        return '0%';
+                    }else{
+                        return $recovery->percentage .'%';
+                    }
+                })
                 ->addColumn('banks_list', function ($recovery){
                     $banks_list = '';
                     if(StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
@@ -6567,6 +6574,15 @@ use Yajra\Datatables\Datatables;
                     $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
                     $station_recovery->reason = $request->reason[$key];
                     $station_recovery->save();
+                    $station_recovery->fresh();
+                    $difference = $station_recovery->total_amount - $station_recovery->deposit_amount - $station_recovery->adjustment_amount;
+                    $station_recovery->difference_amount = $difference;
+                    if($station_recovery->total_amount > 0){
+                        $percentage = (($station_recovery->deposit_amount + $station_recovery->adjustment_amount) / $station_recovery->total_amount) * 100;
+                        $station_recovery->percentage = $percentage;
+                    }
+                    $station_recovery->save();
+
                     $bank_row = "bank_select.$key";
                     if($request->has($bank_row)){
                         StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
