@@ -5111,6 +5111,7 @@ use Yajra\Datatables\Datatables;
         }
 
         public function crm_index(){
+
             $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id','name')->get();
             $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
@@ -5333,6 +5334,9 @@ use Yajra\Datatables\Datatables;
                 });
             if($tracking = $request->get('search_tracking_no')){
                 $datatable->where('s.tracking_number', '=', $tracking);
+            }
+            if($rnumber = $request->get('search_request_number')){
+                $datatable->where('crm_requests.id', '=', $rnumber);
             }
             if($shipper = $request->get('search_shipper')){
                 $datatable->where('u.id', '=', $shipper);

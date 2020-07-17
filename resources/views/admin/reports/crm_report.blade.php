@@ -18,6 +18,11 @@
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_request_number" id="search_request_number" placeholder="Search Request Number">
+                        </fieldset>
+                    </div>
 
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -88,6 +93,7 @@
                             </select>
                         </fieldset>
                     </div>
+
 
                     <div class="col-4">
                         <div class="form-group input-group">
@@ -220,6 +226,11 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#search_tracking_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+            $('#search_request_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
@@ -391,6 +402,7 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
+
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
@@ -402,6 +414,8 @@
                         d.search_status = $('#search_status').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.search_request_number = $('#search_request_number').val();
+
                     }
                 },
                 // rowId: 'shipment_id',
