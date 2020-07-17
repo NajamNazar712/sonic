@@ -1332,7 +1332,8 @@ class RiderAPIController extends Controller {
 
                 if($request->has('tracking_numbers')){
                     foreach ($request->tracking_numbers as $tracking_number) {
-                        if($shipment = Shipment::where('tracking_number', $tracking_number)->exists()){
+                        $shipment = Shipment::where('tracking_number', $tracking_number);
+                        if($shipment->exists()){
                             $shipment = $shipment->first();
                             if($shipment->shipper_status_id == 17){
                                 AdminPickupsController::generate($shipment->id);
