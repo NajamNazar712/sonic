@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
@@ -1064,6 +1065,12 @@ class RiderAPIController extends Controller {
                 $shipment->save();
 
                 ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+
+                $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+                if($updated_shipments_count == 0){
+                    DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+
+                }
             }
 
             return response()->json(['status' => 0, 'message' => 'Shipment marked as Delivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -1176,11 +1183,15 @@ class RiderAPIController extends Controller {
 
             ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
 
+            $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+            if($updated_shipments_count == 0){
+                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+            }
 
             return response()->json(['status' => 0, 'message' => 'Shipment is marked as Undelivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
         }
     }
-    //updated pickup module revamp
+
     public function pickup_summary_v2(Request $request) {
         $rider_id = $request->rider_id;
 
