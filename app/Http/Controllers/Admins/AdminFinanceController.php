@@ -2969,6 +2969,15 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_verify(Request $request) {
+        $settings = DB::connection('reports')->table('global_settings')->where('type', 'over_payment_limit')->first();
+
+        if ($settings) {
+            $over_payment_limit = $settings->setting_value;
+        }
+        else {
+            $over_payment_limit = 6000000;
+        }
+
         $pending_payment_shipment_ids = explode(',', $request->pending_payment_shipment_ids);
 
         $pending_payment_payables = array();
@@ -2976,7 +2985,7 @@ class AdminFinanceController extends Controller
         $shipment_ids = array();
         $duplicate_shipment_ids = array();
         $duplicate_shipments = array();
-        
+
         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
@@ -3021,6 +3030,8 @@ class AdminFinanceController extends Controller
 
         $negative_payments = array();
 
+        $over_payments = array();
+
         foreach ($pending_payment_payables as $pending_payment_id => $payable) {
             $pending_payment_shipper = PendingPayment::find($pending_payment_id)->shipper;
 
@@ -3029,6 +3040,18 @@ class AdminFinanceController extends Controller
             if ($payable < 0) {
                 $negative_payments[] = $pending_payment_shipper->name;
             }
+            else if ($payable > $over_payment_limit) {
+                $over_payment = array();
+
+                $over_payment['shipper'] = $pending_payment_shipper->name;
+                $over_payment['payable'] = number_format($payable);
+
+                $over_payments[] = $over_payment;
+            }
+        }
+
+        if (empty($over_payments)) {
+            $over_payments = false;
         }
 
         if (empty($negative_payments)) {
@@ -3065,10 +3088,10 @@ class AdminFinanceController extends Controller
                     }
                 }
 
-                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => false];
+                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => false, 'over_payments' => $over_payments];
             }
             else {
-                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => $duplicate_shipments];
+                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => $duplicate_shipments, 'over_payments' => $over_payments];
             }
         }
         else {
