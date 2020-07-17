@@ -161,6 +161,19 @@
                             $.each(result.data, function(index, values) {
                                 row = [];
 
+                                row.push(index + 1);
+                                row.push(values.hub);
+                                row.push(values.zone);
+                                row.push(values.delivered_shipments);
+                                row.push(values.last_day_balance);
+                                row.push(values.amount);
+                                row.push(values.total_amount);
+                                row.push(values.deposit_amount);
+                                row.push(values.banks_list);
+                                row.push(values.adjustment_amount);
+                                row.push(values.difference_amount);
+                                row.push(values.percentage);
+                                row.push(values.reason);
 
                                 row.push(index + 1);
 
@@ -237,7 +250,6 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.reports.station_recovery.list') }}',
                 ajax: {
                     url: '{{ route('admin.reports.station_recovery.list') }}',
                     data: function (d) {
