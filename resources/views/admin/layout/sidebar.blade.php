@@ -536,7 +536,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328,337], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328,337,356], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
 
                     <ul class="menu-content">
@@ -723,10 +723,13 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.pickup_report.index') }}">Pickup Report</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(344, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.reports.completed_aging.index') }}">Completed Aging Report</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.completed_aging.index') }}">Completed Aging</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(345, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.reports.pending_cash_collection.index') }}">Pending Cash Collection Report</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.pending_cash_collection.index') }}">Pending Cash Collection</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(356, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.station_recovery.index') }}">Station Recovery</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(345, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.not_attempted_aging.index') }}">Not Attempted Aging Report</a></li>
@@ -862,6 +865,9 @@
 
                                     @if (session('role_id') == 1 || in_array(335, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.return.reason.index') }}">Return Reasons</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(355, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.station_recovery_cron.index') }}">Station Recovery Cron</a></li>
                                     @endif
                                 </ul>
                             </li>

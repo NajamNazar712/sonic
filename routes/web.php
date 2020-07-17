@@ -1456,6 +1456,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@not_attempted_aging_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@not_attempted_aging_list')->name('list');
         });
+		Route::prefix('station_recovery')->name('station_recovery.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@station_recovery_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@station_recovery_list')->name('list');
+            Route::post('update', 'Admins\AdminReportsController@station_recovery_update')->name('update');
+        });
     });
 
     //Reports end
@@ -1783,6 +1788,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('not_attempted_cron')->name('not_attempted_cron.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@not_attempted_cron_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@not_attempted_cron_store')->name('store');
+        });
+		Route::prefix('station_recovery_cron')->name('station_recovery_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@station_recovery_cron_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@station_recovery_cron_store')->name('store');
         });
     });
 

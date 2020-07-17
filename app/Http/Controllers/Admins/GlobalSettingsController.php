@@ -2630,4 +2630,28 @@ class GlobalSettingsController extends Controller
             return ['status' => 1, 'success' => 'Holiday added successfully!'];
         }
     }
+	public function station_recovery_cron_index(){
+        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+        $time = '';
+        if($settings->exists()){
+            $settings = $settings->first();
+            $time = $settings->setting_value;
+        }
+
+        return view('admin.settings.station_recovery.station_recovery_cron_time')->with('time', $time);
+    }
+    public function station_recovery_cron_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+        if($settings->exists()){
+            $settings = $settings->first();
+        }else{
+            $settings = new GlobalSettings();
+            $settings->type = 'station_recovery_cron_time';
+        }
+        $settings->setting_value = $request->station_recovery_cron_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

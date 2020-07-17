@@ -1,15 +1,19 @@
 <?php
 namespace App\Http\Controllers\Admins;
 
+
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\BanksList;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\StationRecoveryReport;
+use App\Http\Models\StationRecoveryReportDeposit;
 use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use function foo\func;
@@ -6504,6 +6508,79 @@ use Yajra\Datatables\Datatables;
             ->whereBetween('not_attempted_shipment_agings.created_at',[$date_from, $date_to]);
             $report = Datatables::of($not_attempting_aging_report);
             return $report->make(true);
+        }
+		
+		public function station_recovery_index(Request $request){
+            $banks_list = BanksList::where('status', 1)->select('id', 'name')->get();
+            return view('admin.reports.station_recovery')->with('banks_lists', $banks_list);
+        }
+
+        public function station_recovery_list(Request $request){
+            $station_recovery = DB::connection('reports')->table('station_recovery_reports')->join('cities as h', 'h.id', '=', 'station_recovery_reports.city_id')
+                ->join('zones', 'zones.id', '=', 'station_recovery_reports.zone_id')
+
+                ->select('station_recovery_reports.id as recovery_id', 'h.name as hub', 'zones.name as zone', 'station_recovery_reports.delivered_shipments', 'station_recovery_reports.last_day_balance', 'station_recovery_reports.amount','station_recovery_reports.total_amount', 'station_recovery_reports.deposit_amount', 'station_recovery_reports.adjustment_amount', 'station_recovery_reports.difference_amount', 'station_recovery_reports.percentage', 'station_recovery_reports.reason','station_recovery_reports.date');
+            $datatable = Datatables::of($station_recovery)
+                ->editColumn('last_day_balance', function ($recovery){
+                    return number_format($recovery->last_day_balance);
+                })
+                ->editColumn('amount', function ($recovery){
+                    return number_format($recovery->amount);
+                })
+                ->editColumn('total_amount', function ($recovery){
+                    return number_format($recovery->total_amount);
+                })
+                ->addColumn('banks_list', function ($recovery){
+                    $banks_list = '';
+                    if(StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
+                        $banks = StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->get();
+                        $bank_ids = '';
+                        foreach ($banks as $index => $bank) {
+                            $index++;
+                            $banklist = BanksList::find($bank->bank_id);
+                            $banks_list .= $banklist->name;
+                            $bank_ids .= $banklist->id;
+                            if($index != count($banks)){
+                                $banks_list .= ',';
+                                $bank_ids .= ',';
+                            }
+                        }
+                        $html = '<input type="hidden" name="bank_ids" value="'. $bank_ids .'">';
+                        $banks_list = $banks_list. $html;
+                        return $banks_list;
+                    }
+                    return $banks_list;
+                });
+            if ($request->get('search_date')) {
+                $date = $request->get('search_date');
+                $datatable = $datatable->whereDate('station_recovery_reports.date', $date);
+            }
+            return $datatable->make(true);
+
+        }
+        public function station_recovery_update(Request $request){
+
+            if($request->form_save == 1){
+                foreach ($request->deposit_amount as $key => $value){
+                    $station_recovery = StationRecoveryReport::find($key);
+                    $station_recovery->deposit_amount = $value;
+                    $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
+                    $station_recovery->reason = $request->reason[$key];
+                    $station_recovery->save();
+                    $bank_row = "bank_select.$key";
+                    if($request->has($bank_row)){
+                        StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
+                        foreach ($request->bank_select[$key] as $row => $bank){
+                            $deposit = new StationRecoveryReportDeposit();
+                            $deposit->station_recovery_report_id = $key;
+                            $deposit->bank_id = $bank;
+                            $deposit->admin_id = Auth::id();
+                            $deposit->save();
+                        }
+                    }
+                }
+                return redirect()->back()->with('success', 'Report updated successfully!');
+            }
         }
 
     }
