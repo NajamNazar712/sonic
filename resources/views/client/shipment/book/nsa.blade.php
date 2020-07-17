@@ -106,7 +106,7 @@
                                                             <input type="hidden" name="form[{{$no}}][item_insurance_5]" value="{{$ro['item_insurance_5']}}">
                                                             <input type="hidden" name="form[{{$no}}][item_price_5]" value="{{$ro['item_price_5']}}">
                                                         @endif
-                                                        <td><textarea type="text" name="form[{{$no}}][special_instructions]" class="form-control text" value="{{$ro['special_instructions']}}"></textarea></td>
+                                                        <td><textarea type="text" name="form[{{$no}}][special_instructions]" class="form-control text">{{$ro['special_instructions']}}</textarea></td>
                                                         <td><input type="text" name="form[{{$no}}][estimated_weight]" class="form-control number" value="{{$ro['estimated_weight']}}" readonly="readonly"></td>
                                                         <input type="hidden" name="form[{{$no}}][shipping_mode_id]" value="{{$ro['shipping_mode_id']}}">
                                                         <input type="hidden" name="form[{{$no}}][same_day_timing_id]" value="{{$ro['same_day_timing_id']}}">
