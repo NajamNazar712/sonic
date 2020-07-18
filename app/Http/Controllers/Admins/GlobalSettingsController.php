@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\BusinessProjectionReason;
@@ -2416,122 +2417,74 @@ class GlobalSettingsController extends Controller
     public static function insertCompletedAgingData(){
 
         $now = Carbon::now();
-        $subject = 'Completed Report';
-        $total=0;
+        $total = 0;
+        $hubs = City::where('hub', 1)->where('status', 1)->pluck('id')->toArray();
+        if(count($hubs) > 0){
+            DB::table('completed_aging_reports')->truncate();
+            foreach ($hubs as $hub_id){
+                $total_count = 0;
+                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
+                $completed_aging_report = new CompletedAgingReport();
+                $completed_aging_report->hub_id = $hub_id;
+                $completed_aging_report->zone_id = $zone_id->zone_id;
 
-       $html='';
-        $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
-                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Trax Online Private Limited</h3>
-                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Recovery Control Sheet</h3>';
-                    $html .='<table style="width:100%;">'; 
-                    $html .= '<thead><tr>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Main Hub</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th></tr></thead><tbody>';
+                $completed_aging_report->date = $now;
 
-        $delviery_notes = DeliveryNote::where('cash_collection_status',1)->where('dncc_status',0)->get();
-        foreach($delviery_notes as $delviery_note)
-        {
-            $start = $delviery_note->updated_at;
-            $difference = $start->diff($now)->days;
-            if($difference >2)
-            {
-                $total = $difference + $total;
-                $zone_id = ZoneClassCity::where('city_id',$delviery_note->hub_id)->first();
-                $CompletedAgingReport = new CompletedAgingReport();
-                $city= City::where('id',$delviery_note->hub_id)->first();
-
-                $zone = Zone::where('id',$zone_id->zone_id)->first();
-
-
-                $CompletedAgingReport->hub_id=$delviery_note->hub_id;
-                $CompletedAgingReport->main_hub_id=$zone_id->zone_id;
-
-                $CompletedAgingReport->days=$difference;
-                $CompletedAgingReport->inserted_at= $delviery_note->updated_at;
-                $CompletedAgingReport->save();
-                
-                    $html .='<tr>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$difference.'</td>';
-                    $html .='</tr>';
-                   
+                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('cash_collection_status',1)->where('dncc_status',0)->get();
+                foreach($delviery_notes as $delviery_note)
+                {
+                    $start = $delviery_note->updated_at;
+                    $difference = $start->diffInDays($now);
+                    if($difference > 2)
+                    {
+                        $total_count++;
+                    }
+                }
+                $total += $total_count;
+                $completed_aging_report->count = $total_count;
+                $completed_aging_report->save();
             }
-           
+
+            NotificationsController::send(71, $now);
         }
-        $html .='<tr>';
-        $html .='<td colspan="2" style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
-        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total.'</td>';
-        $html .='</tr>';
-           $html .= '</tbody></table>';
-        $body = $html;
-        $to = 'shaheryar.khan@trax.pk';
-        $mail = Mail::to($to);
-
-        $mail->send(new Notifications($subject, $body, null));
-
     }
     public static function insertPendingCashCollectionData(){
 
         $now = Carbon::now();
-        $subject = 'Pending Cash Collection Report';
-        $total=0;
+        $total = 0;
 
-       $html='';
-        $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
-                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Trax Online Private Limited</h3>
-                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Recovery Control Sheet</h3>';
-                    $html .='<table style="width:100%;">'; 
-                    $html .= '<thead><tr>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Main Hub</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed >2days</th></tr></thead><tbody>';
+        $hubs = City::where('hub', 1)->where('status', 1)->pluck('id')->toArray();
+        if(count($hubs) > 0){
+            DB::table('pending_cash_collection_aging_reports')->truncate();
+            foreach ($hubs as $hub_id){
+                $total_count = 0;
+                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
+                $pending_cash_collection_aging_report = new PendingCashCollectionAgingReport();
 
-        $delviery_notes = DeliveryNote::where('cash_collection_status',0)->where('dncc_status',0)->get();
-        foreach($delviery_notes as $delviery_note)
-        {
-            $start = $delviery_note->updated_at;
-            $difference = $start->diff($now)->days;
-            if($difference >2)
-            {
-                $total = $difference + $total;
-                $zone_id = ZoneClassCity::where('city_id',$delviery_note->hub_id)->first();
-                $PendingCashCollectionAgingReport = new PendingCashCollectionAgingReport();
-                $city= City::where('id',$delviery_note->hub_id)->first();
+                $pending_cash_collection_aging_report->hub_id = $hub_id;
+                $pending_cash_collection_aging_report->zone_id = $zone_id->zone_id;
 
-                $zone = Zone::where('id',$zone_id->zone_id)->first();
+                $pending_cash_collection_aging_report->date = $now;
 
-
-                $PendingCashCollectionAgingReport->hub_id=$delviery_note->hub_id;
-                $PendingCashCollectionAgingReport->main_hub_id=$zone_id->zone_id;
-
-                $PendingCashCollectionAgingReport->days=$difference;
-                $PendingCashCollectionAgingReport->inserted_at= $delviery_note->updated_at;
-                $PendingCashCollectionAgingReport->save();
-                
-                    $html .='<tr>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$city->name.'</td>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$zone->name.'</td>';
-                        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$difference.'</td>';
-                    $html .='</tr>';
-                   
+                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('cash_collection_status',0)->where('dncc_status',0)->get();
+                foreach($delviery_notes as $delviery_note)
+                {
+                    $start = $delviery_note->updated_at;
+                    $difference = $start->diffInDays($now);
+                    if($difference > 2)
+                    {
+                        $total_count++;
+                    }
+                }
+                $total += $total_count;
+                $pending_cash_collection_aging_report->count = $total_count;
+                $pending_cash_collection_aging_report->save();
             }
-           
         }
-        $html .='<tr>';
-        $html .='<td colspan="2" style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
-        $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total.'</td>';
-        $html .='</tr>';
-           $html .= '</tbody></table>';
-        $body = $html;
-        $to = 'shaheryar.khan@trax.pk';
-        $mail = Mail::to($to);
-
-        $mail->send(new Notifications($subject, $body, null));
+        NotificationsController::send(72, $now);
 
     }
- public function crm_default_agent_index(){
+    public function crm_default_agent_index(){
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)
             ->get();

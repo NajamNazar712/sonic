@@ -56,7 +56,7 @@
 			                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
 			                    </div>
 			                </div>
-			                <div class="row justify-content-center">
+			                <div class="row justify-content-center d-none">
 			                	<div class="col-4">
 			                		<table class="table table-bordered text-center">
 				                		<thead>

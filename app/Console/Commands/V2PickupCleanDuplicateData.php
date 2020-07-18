@@ -2,23 +2,24 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\V2Pickup\V2PickupCronController;
 use Illuminate\Console\Command;
 
-class RateRejectionEmail extends Command
+class V2PickupCleanDuplicateData extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'ratesEmail:rejection';
+    protected $signature = 'pickup:cleandata';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Rates Rejection Email';
+    protected $description = 'Command description';
 
     /**
      * Create a new command instance.
@@ -37,6 +38,7 @@ class RateRejectionEmail extends Command
      */
     public function handle()
     {
-        NotificationsController::send(64,0, 0);
+        V2PickupCronController::clean_data();
+
     }
 }

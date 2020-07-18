@@ -466,7 +466,7 @@ class AdminPackagingMaterialController extends Controller
             if (!$fulfilment_hub->exists()) {
                 return response()->json(['status' => 0, 'error'=>'Warehouse does\'nt exists for requested hub!']);
             } else {
-                $fulfilment_hub = $fulfilment_hub->first();
+                $fulfilment_hub = $fulfilment_hub->latest('id')->first();
             }
 
             $warehouse_id = $fulfilment_hub->warehouse_id;
@@ -485,7 +485,7 @@ class AdminPackagingMaterialController extends Controller
             $user_shipping_info = UserShippingInfo::where(['user_id' => $user_id, 'city_id' => $warehouse_hub_id]);
 
             if($user_shipping_info->exists()){
-                $trax_address = $user_shipping_info->latest()->first();
+                $trax_address = $user_shipping_info->latest('id')->first();
             }
             else{
                 $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address_office, $pickup_address_poc, $pickup_address_phone, $pickup_address_email, $warehouse_hub_id, 0);
@@ -606,7 +606,7 @@ class AdminPackagingMaterialController extends Controller
             return response()->json(['status'=>0,'error'=>"Warehouse does\'nt exists for requested hub!"]);
         }
         else {
-            $fulfilment_hub = $fulfilment_hub->first();
+            $fulfilment_hub = $fulfilment_hub->latest('id')->first();
         }
 
         $check = false;

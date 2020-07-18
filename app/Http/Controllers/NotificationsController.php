@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
@@ -659,7 +661,7 @@ class NotificationsController extends Controller
 
             $to = array();
 
-            $general_admins = Admin::whereIn('role_id', [3, 4, 6])->where('status', 1);
+            $general_admins = Admin::whereIn('role_id', [3, 4])->where('status', 1);
 
             if ($general_admins->exists()) {
               $to = array_merge($to, $general_admins->pluck('email')->toArray());
@@ -1383,7 +1385,7 @@ class NotificationsController extends Controller
 
             $to = [$launched_by->email];
 
-            $general_admins = Admin::whereIn('role_id', [4, 3, 2, 5, 6])->where('status', 1);
+            $general_admins = Admin::whereIn('role_id', [4, 3, 2, 5])->where('status', 1);
 
             if ($general_admins->exists()) {
               $to = array_merge($to, $general_admins->pluck('email')->toArray());
@@ -1838,7 +1840,7 @@ class NotificationsController extends Controller
               }else{
                   $to = [$shipper->email];
               }
-            $general_admins = Admin::whereIn('role_id', [4, 6])->where('status', 1);
+            $general_admins = Admin::whereIn('role_id', [4])->where('status', 1);
 
             if ($general_admins->exists()) {
               $to = array_merge($to, $general_admins->pluck('email')->toArray());
@@ -2226,7 +2228,7 @@ class NotificationsController extends Controller
 
                   $to = array();
 
-                  $general_admins = Admin::whereIn('role_id', [6, 3, 15])->where('status', 1);
+                  $general_admins = Admin::whereIn('role_id', [3])->where('status', 1);
 
                   if ($general_admins->exists()) {
                     $to = array_merge($to, $general_admins->pluck('email')->toArray());
@@ -2384,7 +2386,7 @@ class NotificationsController extends Controller
 
                   $to = array();
 
-                  $general_admins = Admin::whereIn('role_id', [6, 3, 15])->where('status', 1);
+                  $general_admins = Admin::whereIn('role_id', [3])->where('status', 1);
 
                   if ($general_admins->exists()) {
                     $to = array_merge($to, $general_admins->pluck('email')->toArray());
@@ -2811,7 +2813,7 @@ class NotificationsController extends Controller
 
                 $cc = array();
 
-                $general_admins = Admin::whereIn('role_id', [15, 3, 7, 14])->where('status', 1);
+                $general_admins = Admin::whereIn('role_id', [3, 7, 14])->where('status', 1);
 
                 if ($general_admins->exists()) {
                   $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
@@ -3300,7 +3302,7 @@ class NotificationsController extends Controller
                     }
                   $cc = array();
 
-                  $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $hub->id);
+                  $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 8, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $hub->id);
 
                   if ($general_managers->exists()) {
                     $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
@@ -3696,7 +3698,8 @@ class NotificationsController extends Controller
 
                $to = array();
                $cc = array();
-               $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+               
+               $admins = Admin::whereIn('role_id', [2, 3, 4, 20])->where('status', 1);
 
                if ($admins->exists()) {
                    $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -3794,6 +3797,7 @@ class NotificationsController extends Controller
                 $cc = array();
 
                     $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20])->where('status', 1);
 
                     if ($admins->exists()) {
                         $cc = $admins->pluck('email')->toArray();
@@ -3896,7 +3900,7 @@ class NotificationsController extends Controller
 
                $to = array();
 
-               $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+               $admins = Admin::whereIn('role_id', [2, 3, 4, 20])->where('status', 1);
 
                if ($admins->exists()) {
                    $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -4273,7 +4277,7 @@ class NotificationsController extends Controller
                 $to = array();
                 $cc = array();
 
-                $admins =Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->leftjoin('cities as c', 'c.id', '=', 'ah.hub_id')->whereIn('role_id', [2, 3, 4, 6])->where('admins.status', 1);
+                $admins =Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->leftjoin('cities as c', 'c.id', '=', 'ah.hub_id')->whereIn('role_id', [2, 3, 4])->where('admins.status', 1);
 
 
             $cc_admins = Admin::whereIn('id', [8, 3]);
@@ -4682,7 +4686,7 @@ class NotificationsController extends Controller
 
                 if($user){
 
-                  array_push($to,$user->email);
+                  //array_push($to,$user->email);
                     $subject = $notification->subject;
                     $body = $notification->body;
                     // $user_bank_info = UserBankInfo::where('user_id', $user->id)->first();
@@ -5007,6 +5011,88 @@ class NotificationsController extends Controller
                    }
 
                    self::email($subject, $body, $to, $cc);
+              }
+			else if($id == 71){
+                  $completed_agings = CompletedAgingReport::get();
+
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+                  $date = Carbon::now()->toDateString();
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+                  $html = '<table style="width:100%;">';
+                  $html .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed > 2days</th>
+                                           </tr></thead><tbody>';
+                  $total_count = 0;
+                  foreach ($completed_agings as $completed_aging){
+                      $html .='<tr>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$completed_aging->city->name.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$completed_aging->zone->name.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$completed_aging->count.'</td>';
+                      $html .='</tr>';
+                      $total_count = $total_count + $completed_aging->count;
+                  }
+                  $html .='<tr>';
+                  $html .='<td colspan="2" style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
+                  $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total_count.'</td>';
+                  $html .='</tr>';
+                  $html .= '</tbody></table>';
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                  $admins = Admin::whereIn('id', [12,49,216]);
+
+                  if ($admins->exists()) {
+                      $to = $admins->pluck('email')->toArray();
+                  }
+
+                  self::email($subject, $body, $to);
+              }
+              else if($id == 72){
+                  $pending_cash_collection_agings = PendingCashCollectionAgingReport::get();
+
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+                  $date = Carbon::now()->toDateString();
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+                  $html = '<table style="width:100%;">';
+                  $html .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Zone</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Completed > 2days</th>
+                                           </tr></thead><tbody>';
+                  $total_count = 0;
+                  foreach ($pending_cash_collection_agings as $pending_cash_collection_aging){
+                      $html .='<tr>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pending_cash_collection_aging->city->name.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pending_cash_collection_aging->zone->name.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pending_cash_collection_aging->count.'</td>';
+                      $html .='</tr>';
+                      $total_count = $total_count + $pending_cash_collection_aging->count;
+                  }
+                  $html .='<tr>';
+                  $html .='<td colspan="2" style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
+                  $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$total_count.'</td>';
+                  $html .='</tr>';
+                  $html .= '</tbody></table>';
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                  $admins = Admin::whereIn('id', [12,49,216]);
+
+                  if ($admins->exists()) {
+                      $to = $admins->pluck('email')->toArray();
+                  }
+
+                  self::email($subject, $body, $to);
               }
         }
       }
