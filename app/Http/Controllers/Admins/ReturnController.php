@@ -1836,6 +1836,7 @@ class ReturnController extends Controller
     public function return_status_delivered(Request $request){
         if(!empty($request->shipment_ids)){
             $open_box_ids = array();
+            $actual_date = $request->actual_date;
             if($request->has('open_box_ids')){
                 $open_box_ids = $request->open_box_ids;
             }
@@ -1857,9 +1858,6 @@ class ReturnController extends Controller
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-
-
-
 
                         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
                         if ($packaging_material_shipment != null) {
@@ -1926,8 +1924,9 @@ class ReturnController extends Controller
             if($shipment_status == 0){
                 $return_note_details->status = 3;
                 $return_note_details->updated_by = Auth::id();
-                $return_note_details->save();
             }
+            $return_note_details->actual_date = $actual_date;
+            $return_note_details->save();
 
             NotificationsController::send(15, $request->return_note_id);
             NotificationsController::send(16, $request->return_note_id);

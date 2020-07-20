@@ -173,7 +173,7 @@
                 max: '{{Carbon\Carbon::now()}}',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     // $('#actual_date_root').css('top', '-326px');
@@ -236,7 +236,7 @@
                                         var submit_all_status_flag = true;
                                         var not_updated_shipments = [];
                                         var not_updated_shipment_ids = [];
-
+                                        var actual_date = $('input[name="actual_date_formatted"]').val();
                                         table.rows().nodes().each(function(index) {
                                             var row = table.row(index);
                                             if ($(row.node()).hasClass('selected')) {
@@ -294,6 +294,7 @@
                                                             'return_note_id': note_id,
                                                             'remarks': shipment_remarks_obj,
                                                             'received_or_refused_by': shipment_received_refused_obj,
+                                                            'actual_date' : actual_date,
                                                             '_token': '{{ csrf_token() }}'
                                                         }
                                                     }).done(function (data) {

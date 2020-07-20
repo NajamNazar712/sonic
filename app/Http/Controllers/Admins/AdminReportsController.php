@@ -6566,34 +6566,38 @@ use Yajra\Datatables\Datatables;
         public function station_recovery_update(Request $request){
 
             if($request->form_save == 1){
-                foreach ($request->deposit_amount as $key => $value){
-                    $station_recovery = StationRecoveryReport::find($key);
-                    $station_recovery->deposit_amount = $value;
-                    $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
-                    $station_recovery->reason = $request->reason[$key];
-                    $station_recovery->save();
-                    $station_recovery->fresh();
-                    $difference = $station_recovery->total_amount - $station_recovery->deposit_amount - $station_recovery->adjustment_amount;
-                    $station_recovery->difference_amount = $difference;
-                    if($station_recovery->total_amount > 0){
-                        $percentage = (($station_recovery->deposit_amount + $station_recovery->adjustment_amount) / $station_recovery->total_amount) * 100;
-                        $station_recovery->percentage = $percentage;
-                    }
-                    $station_recovery->save();
+                if($request->has('deposit_amount') && count($request->deposit_amount) > 0){
+                    foreach ($request->deposit_amount as $key => $value){
+                        $station_recovery = StationRecoveryReport::find($key);
+                        $station_recovery->deposit_amount = $value;
+                        $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
+                        $station_recovery->reason = $request->reason[$key];
+                        $station_recovery->save();
+                        $station_recovery->fresh();
+                        $difference = $station_recovery->total_amount - $station_recovery->deposit_amount - $station_recovery->adjustment_amount;
+                        $station_recovery->difference_amount = $difference;
+                        if($station_recovery->total_amount > 0){
+                            $percentage = (($station_recovery->deposit_amount + $station_recovery->adjustment_amount) / $station_recovery->total_amount) * 100;
+                            $station_recovery->percentage = $percentage;
+                        }
+                        $station_recovery->save();
 
-                    $bank_row = "bank_select.$key";
-                    if($request->has($bank_row)){
-                        StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
-                        foreach ($request->bank_select[$key] as $row => $bank){
-                            $deposit = new StationRecoveryReportDeposit();
-                            $deposit->station_recovery_report_id = $key;
-                            $deposit->bank_id = $bank;
-                            $deposit->admin_id = Auth::id();
-                            $deposit->save();
+                        $bank_row = "bank_select.$key";
+                        if($request->has($bank_row)){
+                            StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
+                            foreach ($request->bank_select[$key] as $row => $bank){
+                                $deposit = new StationRecoveryReportDeposit();
+                                $deposit->station_recovery_report_id = $key;
+                                $deposit->bank_id = $bank;
+                                $deposit->admin_id = Auth::id();
+                                $deposit->save();
+                            }
                         }
                     }
+                    return redirect()->back()->with('success', 'Report updated successfully!');
                 }
-                return redirect()->back()->with('success', 'Report updated successfully!');
+                return redirect()->back()->with('error', 'Please refresh page and update properly!');
+
             }
         }
 
