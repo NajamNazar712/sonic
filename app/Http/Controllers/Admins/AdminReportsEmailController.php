@@ -876,9 +876,11 @@ class AdminReportsEmailController extends Controller
             $from = Carbon::today()->addHour($cut_off_time)->toDateTimeString();
             $formatted_date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00")->subDays(30)->toDateTimeString();
             $formatted_date_to = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00")->toDateTimeString();
+            $from = Carbon::parse($date)->addHour($cut_off_time)->toDateTimeString();
+            $to = Carbon::parse($date)->addDay()->addHour($cut_off_time)->subSecond()->toDateTimeString();
             $hubs = City::where('hub', 1)->where('status', 1)->get();
-            $from_id = ShipmentsJourney::select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $formatted_date_from)->first()->id;
-            $to_id = ShipmentsJourney::select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $formatted_date_to)->first()->id;
+            $from_id = ShipmentsJourney::select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from)->first()->id;
+            $to_id = ShipmentsJourney::select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to)->first()->id;
             $hub_shipments = array();
             $zone_hub_shipments = array();
             NotAttemptedShipmentAging::where('created_at', '<', $formatted_date_from)->delete();
@@ -916,7 +918,7 @@ class AdminReportsEmailController extends Controller
                     })
                     ->join('shipments_journey as sja', function($join){
                         $join->on('s.id', '=', 'sja.shipment_id')
-                            ->where('sja.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+                            ->where('sja.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey as shipments_journeya where shipments_journeya.shipment_id = s.id and shipments_journeya.shipper_status_id = 2)'));
                     })
                     ->select('s.id as shipment_id', 'sja.created_at as arrival_date')
                     ->where(function ($query) use ($cut_off_time, $from){
