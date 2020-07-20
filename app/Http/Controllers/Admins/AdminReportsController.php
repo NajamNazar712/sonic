@@ -6555,6 +6555,25 @@ use Yajra\Datatables\Datatables;
                         return $banks_list;
                     }
                     return $banks_list;
+                })
+                ->addColumn('banks_list_excel', function ($recovery){
+                    $banks_list = '';
+                    if(StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
+                        $banks = StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->get();
+                        $bank_ids = '';
+                        foreach ($banks as $index => $bank) {
+                            $index++;
+                            $banklist = BanksList::find($bank->bank_id);
+                            $banks_list .= $banklist->name;
+                            $bank_ids .= $banklist->id;
+                            if($index != count($banks)){
+                                $banks_list .= ',';
+                                $bank_ids .= ',';
+                            }
+                        }
+                        return $banks_list;
+                    }
+                    return $banks_list;
                 });
             if ($request->get('search_date')) {
                 $date = $request->get('search_date');
