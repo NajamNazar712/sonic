@@ -865,20 +865,25 @@ class AdminReportsEmailController extends Controller
 
     static public function not_attempted_aging($date){
         $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
+        Carbon::setWeekendDays([
+            Carbon::SUNDAY,
+        ]);
         if($settings->exists()){
             $settings = $settings->first();
             $cut_off_time = $settings->setting_value;
             $time = $settings->setting_value . ':00';
             $formatted_date = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00");
             $from = Carbon::today()->addHour($cut_off_time)->toDateTimeString();
-            $formatted_date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00")->subDays(30)->toDateTimeString();
-            $formatted_date_to = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00")->toDateTimeString();
+            $formatted_date_from = Carbon::parse($date)->subDays(30)->addHour($cut_off_time)->toDateTimeString();
+            $del_formatted_date_from = Carbon::parse($date)->subDays(30)->toDateTimeString();
+            $to_cut = Carbon::tomorrow()->addHour($cut_off_time)->subSecond()->toDateTimeString();
             $hubs = City::where('hub', 1)->where('status', 1)->get();
             $from_id = ShipmentsJourney::select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $formatted_date_from)->first()->id;
-            $to_id = ShipmentsJourney::select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $formatted_date_to)->first()->id;
+            $to_id = ShipmentsJourney::select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to_cut)->first()->id;
             $hub_shipments = array();
             $zone_hub_shipments = array();
-            NotAttemptedShipmentAging::where('created_at', '<', $formatted_date_from)->delete();
+            NotAttemptedShipmentAging::where('created_at', '<', $del_formatted_date_from)->delete();
+            $shipments = array();
             foreach ($hubs as $hub){
                 $hub_shipments[$hub->name]['id'] = $hub->id;
                 $hub_shipments[$hub->name]['name'] = $hub->name;
@@ -908,13 +913,13 @@ class AdminReportsEmailController extends Controller
                     })
                     ->join('shipments_journey as sj', function($join) use ($from_id, $to_id) {
                         $join->on('s.id', '=', 'sj.shipment_id')
-                            ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id < "' . $to_id . '")'));
+                            ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
                     })
                     ->join('shipments_journey as sja', function($join){
                         $join->on('s.id', '=', 'sja.shipment_id')
-                            ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+                            ->where('sja.id', '=', DB::raw('(select max(shipments_journeya.id) from shipments_journey as shipments_journeya where shipments_journeya.shipment_id = s.id and shipments_journeya.shipper_status_id = 2)'));
                     })
-                    ->select('sja.created_at as arrival_date')
+                    ->select('s.id as shipment_id', 'sja.created_at as arrival_date')
                     ->where(function ($query) use ($cut_off_time, $from){
                         $query->where(function($sub_query){
                             $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
@@ -953,28 +958,35 @@ class AdminReportsEmailController extends Controller
                 foreach ($cities_shipments as $cities_shipment){
                     $arrival_date = Carbon::parse($cities_shipment->arrival_date);
                     $holidays = Holiday::whereBetween('holiday', [$arrival_date, $formatted_date])->count();
-                    $count_without_holidays = $arrival_date->diffInDays($formatted_date);
+                    $count_without_holidays = $arrival_date->diffInWeekdays($formatted_date);
                     $count_with_holidays = $count_without_holidays - $holidays;
                     if($count_with_holidays == 0){
                         $hub_shipments[$hub->name]['zero']++;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 0;
                     }
                     elseif ($count_with_holidays == 1){
                         $hub_shipments[$hub->name]['one']++;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 1;
                     }
                     elseif ($count_with_holidays == 2){
                         $hub_shipments[$hub->name]['two']++;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 2;
                     }
                     elseif ($count_with_holidays == 3){
                         $hub_shipments[$hub->name]['three']++;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 3;
                     }
                     elseif ($count_with_holidays == 4){
                         $hub_shipments[$hub->name]['four']++;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 4;
                     }
                     elseif ($count_with_holidays == 5){
                         $hub_shipments[$hub->name]['five']++;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 5;
                     }
                     elseif ($count_with_holidays >= 6){
                         $hub_shipments[$hub->name]['six_plus']++;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 6;
                     }
                 }
             }

@@ -176,13 +176,11 @@
                                 row.push(values.amount);
                                 row.push(values.total_amount);
                                 row.push(values.deposit_amount);
-                                row.push(values.banks_list);
+                                row.push(values.banks_list_excel);
                                 row.push(values.adjustment_amount);
                                 row.push(values.difference_amount);
                                 row.push(values.percentage);
                                 row.push(values.reason);
-
-                                row.push(index + 1);
 
                                 body.push(row);
                             });
