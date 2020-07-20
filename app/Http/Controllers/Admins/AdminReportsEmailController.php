@@ -876,7 +876,7 @@ class AdminReportsEmailController extends Controller
             $from = Carbon::today()->addHour($cut_off_time)->toDateTimeString();
             $formatted_date_from = Carbon::parse($date)->subDays(30)->addHour($cut_off_time)->toDateTimeString();
             $del_formatted_date_from = Carbon::parse($date)->subDays(30)->toDateTimeString();
-            $to_cut = Carbon::parse($date)->addDay()->addHour($cut_off_time)->subSecond()->toDateTimeString();
+            $to_cut = Carbon::tomorrow()->addHour($cut_off_time)->subSecond()->toDateTimeString();
             $hubs = City::where('hub', 1)->where('status', 1)->get();
             $from_id = ShipmentsJourney::select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $formatted_date_from)->first()->id;
             $to_id = ShipmentsJourney::select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to_cut)->first()->id;
