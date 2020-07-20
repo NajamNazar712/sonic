@@ -960,9 +960,10 @@ class AdminReportsEmailController extends Controller
                 if($cities_shipments->exists()) {
                     $cities_shipments = $cities_shipments->groupBy('s.id')->get();
                     foreach ($cities_shipments as $cities_shipment) {
-                        $arrival_date = Carbon::parse($cities_shipment->arrival_date)->format("Y-m-d");
+                        $arrival_date = Carbon::parse($cities_shipment->arrival_date);
+                        $check_arrival_date = Carbon::parse($cities_shipment->arrival_date)->format("Y-m-d");
                         $now_date = Carbon::today()->format("Y-m-d");
-                        $holidays = Holiday::whereBetween('holiday', [$arrival_date, $now_date])->count();
+                        $holidays = Holiday::whereBetween('holiday', [$check_arrival_date, $now_date])->count();
                         $count_without_holidays = $arrival_date->diffInWeekdays($formatted_date);
                         $count_with_holidays = $count_without_holidays - $holidays;
                         if ($count_with_holidays == 0) {
