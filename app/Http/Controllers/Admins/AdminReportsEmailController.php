@@ -961,6 +961,7 @@ class AdminReportsEmailController extends Controller
                     $count_with_holidays = $count_without_holidays - $holidays;
                     if($count_with_holidays == 0){
                         $hub_shipments[$hub->name]['zero']++;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 0;
                     }
                     elseif ($count_with_holidays == 1){
                         $hub_shipments[$hub->name]['one']++;
@@ -976,7 +977,7 @@ class AdminReportsEmailController extends Controller
                     }
                     elseif ($count_with_holidays == 4){
                         $hub_shipments[$hub->name]['four']++;
-                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] =42;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 4;
                     }
                     elseif ($count_with_holidays == 5){
                         $hub_shipments[$hub->name]['five']++;
