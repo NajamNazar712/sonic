@@ -865,6 +865,9 @@ class AdminReportsEmailController extends Controller
 
     static public function not_attempted_aging($date){
         $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
+        Carbon::setWeekendDays([
+            Carbon::SUNDAY,
+        ]);
         if($settings->exists()){
             $settings = $settings->first();
             $cut_off_time = $settings->setting_value;
@@ -879,6 +882,7 @@ class AdminReportsEmailController extends Controller
             $hub_shipments = array();
             $zone_hub_shipments = array();
             NotAttemptedShipmentAging::where('created_at', '<', $formatted_date_from)->delete();
+            $shipments = array();
             foreach ($hubs as $hub){
                 $hub_shipments[$hub->name]['id'] = $hub->id;
                 $hub_shipments[$hub->name]['name'] = $hub->name;
@@ -918,7 +922,7 @@ class AdminReportsEmailController extends Controller
                     ->where(function ($query) use ($cut_off_time, $from){
                         $query->where(function($sub_query){
                             $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
-                                ->where('sj.shipper_status_id', '=', 7);
+                                ->where('s.id as shipment_id', 'sj.shipper_status_id', '=', 7);
                         })
                             ->orWhere(function ($sub_query) use ($cut_off_time, $from) {
                                 $sub_query->where(function ($sub_sub_query) use ($cut_off_time, $from) {
@@ -953,7 +957,7 @@ class AdminReportsEmailController extends Controller
                 foreach ($cities_shipments as $cities_shipment){
                     $arrival_date = Carbon::parse($cities_shipment->arrival_date);
                     $holidays = Holiday::whereBetween('holiday', [$arrival_date, $formatted_date])->count();
-                    $count_without_holidays = $arrival_date->diffInDays($formatted_date);
+                    $count_without_holidays = $arrival_date->diffInWeekdays($formatted_date);
                     $count_with_holidays = $count_without_holidays - $holidays;
                     if($count_with_holidays == 0){
                         $hub_shipments[$hub->name]['zero']++;
@@ -976,8 +980,10 @@ class AdminReportsEmailController extends Controller
                     elseif ($count_with_holidays >= 6){
                         $hub_shipments[$hub->name]['six_plus']++;
                     }
+                    $shipments[$hub->name][] = $cities_shipment->shipment_id;
                 }
             }
+            dd($shipments);
             foreach($hub_shipments as $hub_shipment){
                 $not_attempted_shipment_aging = new NotAttemptedShipmentAging();
                 $not_attempted_shipment_aging->hub_id = $hub_shipment['id'];
