@@ -18,7 +18,6 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
-use Illuminate\Support\Facades\Hash;
 use Validator;
 use Illuminate\Validation\Rule;
 
