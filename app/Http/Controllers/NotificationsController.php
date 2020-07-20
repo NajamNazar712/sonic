@@ -4892,9 +4892,10 @@ class NotificationsController extends Controller
                       $body = str_replace('[preview]', $html, $body);
                   }
 
+                  $to = array();
                   $operation_admins = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $hub_shipment['id']);
                   if ($operation_admins->exists()) {
-                      $to = $operation_admins->pluck('admins.email')->toArray();
+                      $to = array_merge($to, $operation_admins->pluck('admins.email')->toArray());
                   }
                   $cc = array();
 
@@ -4958,9 +4959,9 @@ class NotificationsController extends Controller
                       $to = array_merge($to, $operation_admins->pluck('email')->toArray());
                   }
 
-                   if ($general_managers->exists()) {
-                       $cc = $general_managers->pluck('admins.email')->toArray();
-                   }
+                  if ($general_managers->exists()) {
+                      $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
+                  }
 
                   self::email($subject, $body, $to, $cc);
               }
