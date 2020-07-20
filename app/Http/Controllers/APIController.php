@@ -544,9 +544,9 @@ class APIController extends Controller
               $try_and_buy_charges = NULL;
           }
           $pieces_quantity = 1;
-          if($service_type_id == 1 && $request->has('pieces')){
-              if($request->input('pieces') != null){
-                  $pieces_quantity = $request->input('pieces');
+          if($service_type_id == 1 && $request->has('pieces_quantity')){
+              if($request->input('pieces_quantity') != null){
+                  $pieces_quantity = $request->input('pieces_quantity');
               }else{
                   $pieces_quantity = 1;
               }
