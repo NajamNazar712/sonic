@@ -913,7 +913,7 @@ class AdminReportsEmailController extends Controller
                     })
                     ->join('shipments_journey as sj', function($join) use ($from_id, $to_id) {
                         $join->on('s.id', '=', 'sj.shipment_id')
-                            ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id < "' . $to_id . '")'));
+                            ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
                     })
                     ->join('shipments_journey as sja', function($join){
                         $join->on('s.id', '=', 'sja.shipment_id')
