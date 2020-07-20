@@ -4007,7 +4007,6 @@ use Yajra\Datatables\Datatables;
                                 ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
                             });
                         }
-
                         if ($type == 'delivered') {
                             $rows = $rows->whereIn('sj.shipper_status_id', [14, 30, 36, 37]);
                         }
