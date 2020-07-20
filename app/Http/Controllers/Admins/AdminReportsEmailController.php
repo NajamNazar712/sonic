@@ -878,8 +878,8 @@ class AdminReportsEmailController extends Controller
             $del_formatted_date_from = Carbon::parse($date)->subDays(30)->toDateTimeString();
             $to_cut = Carbon::tomorrow()->addHour($cut_off_time)->subSecond()->toDateTimeString();
             $hubs = City::where('hub', 1)->where('status', 1)->get();
-            $from_id = ShipmentsJourney::select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $formatted_date_from)->first()->id;
-            $to_id = ShipmentsJourney::select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to_cut)->first()->id;
+            $from_id = DB::connection('reports')->table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $formatted_date_from)->first()->id;
+            $to_id = DB::connection('reports')->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to_cut)->first()->id;
             $hub_shipments = array();
             $zone_hub_shipments = array();
             NotAttemptedShipmentAging::where('created_at', '<', $del_formatted_date_from)->delete();
@@ -957,45 +957,38 @@ class AdminReportsEmailController extends Controller
                     })
                     ->where('cities.hub_id', $hub->id);
 
-                if($cities_shipments->exists()){
+                if($cities_shipments->exists()) {
                     $cities_shipments = $cities_shipments->groupBy('s.id')->get();
-                }
-                foreach ($cities_shipments as $cities_shipment){
-                    $arrival_date = Carbon::parse($cities_shipment->arrival_date);
-                    $holidays = Holiday::whereBetween('holiday', [$arrival_date, $formatted_date])->count();
-                    $count_without_holidays = $arrival_date->diffInWeekdays($formatted_date);
-                    $count_with_holidays = $count_without_holidays - $holidays;
-                    if($count_with_holidays == 0){
-                        $hub_shipments[$hub->name]['zero']++;
-                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 0;
-                    }
-                    elseif ($count_with_holidays == 1){
-                        $hub_shipments[$hub->name]['one']++;
-                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 1;
-                    }
-                    elseif ($count_with_holidays == 2){
-                        $hub_shipments[$hub->name]['two']++;
-                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 2;
-                    }
-                    elseif ($count_with_holidays == 3){
-                        $hub_shipments[$hub->name]['three']++;
-                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 3;
-                    }
-                    elseif ($count_with_holidays == 4){
-                        $hub_shipments[$hub->name]['four']++;
-                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 4;
-                    }
-                    elseif ($count_with_holidays == 5){
-                        $hub_shipments[$hub->name]['five']++;
-                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 5;
-                    }
-                    elseif ($count_with_holidays >= 6){
-                        $hub_shipments[$hub->name]['six_plus']++;
-                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 6;
+                    foreach ($cities_shipments as $cities_shipment) {
+                        $arrival_date = Carbon::parse($cities_shipment->arrival_date);
+                        $holidays = Holiday::whereBetween('holiday', [$arrival_date, $formatted_date])->count();
+                        $count_without_holidays = $arrival_date->diffInWeekdays($formatted_date);
+                        $count_with_holidays = $count_without_holidays - $holidays;
+                        if ($count_with_holidays == 0) {
+                            $hub_shipments[$hub->name]['zero']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 0;
+                        } elseif ($count_with_holidays == 1) {
+                            $hub_shipments[$hub->name]['one']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 1;
+                        } elseif ($count_with_holidays == 2) {
+                            $hub_shipments[$hub->name]['two']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 2;
+                        } elseif ($count_with_holidays == 3) {
+                            $hub_shipments[$hub->name]['three']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 3;
+                        } elseif ($count_with_holidays == 4) {
+                            $hub_shipments[$hub->name]['four']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 4;
+                        } elseif ($count_with_holidays == 5) {
+                            $hub_shipments[$hub->name]['five']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 5;
+                        } elseif ($count_with_holidays >= 6) {
+                            $hub_shipments[$hub->name]['six_plus']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 6;
+                        }
                     }
                 }
             }
-            dd($shipments);
             foreach($hub_shipments as $hub_shipment){
                 $not_attempted_shipment_aging = new NotAttemptedShipmentAging();
                 $not_attempted_shipment_aging->hub_id = $hub_shipment['id'];
