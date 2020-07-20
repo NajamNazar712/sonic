@@ -905,8 +905,6 @@ class AdminReportsEmailController extends Controller
                     });
                 })
                     ->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
-                    ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
-                    ->leftjoin('cities as sch', 's.consignee_city_id', '=', 'sch.id')
                     ->leftjoin('zone_class_cities as zcc', function($join) {
                         $join->on('pc.zone_id', '=', 'zcc.zone_id')
                             ->on('s.consignee_city_id', '=', 'zcc.city_id');
@@ -950,7 +948,7 @@ class AdminReportsEmailController extends Controller
                                 });
                             })
                             ->orWhere(function ($sub_query) use ($cut_off_time, $from) {
-                                $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                $sub_query->where('cities.id', '=', 's.consignee_city_id')
                                     ->whereIn('sj.shipper_status_id', [8, 13])
                                     ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
                             });
