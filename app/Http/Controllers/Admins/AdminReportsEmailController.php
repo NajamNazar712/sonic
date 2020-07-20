@@ -875,13 +875,14 @@ class AdminReportsEmailController extends Controller
             $formatted_date = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00");
             $from = Carbon::today()->addHour($cut_off_time)->toDateTimeString();
             $formatted_date_from = Carbon::parse($date)->subDays(30)->addHour($cut_off_time)->toDateTimeString();
+            $del_formatted_date_from = Carbon::parse($date)->subDays(30)->toDateTimeString();
             $to_cut = Carbon::parse($date)->addDay()->addHour($cut_off_time)->subSecond()->toDateTimeString();
             $hubs = City::where('hub', 1)->where('status', 1)->get();
             $from_id = ShipmentsJourney::select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $formatted_date_from)->first()->id;
             $to_id = ShipmentsJourney::select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to_cut)->first()->id;
             $hub_shipments = array();
             $zone_hub_shipments = array();
-            NotAttemptedShipmentAging::where('created_at', '<', $formatted_date_from)->delete();
+            NotAttemptedShipmentAging::where('created_at', '<', $del_formatted_date_from)->delete();
             $shipments = array();
             foreach ($hubs as $hub){
                 $hub_shipments[$hub->name]['id'] = $hub->id;
