@@ -896,11 +896,11 @@ class AdminReportsEmailController extends Controller
                 $hub_shipments[$hub->name]['four'] = 0;
                 $hub_shipments[$hub->name]['five'] = 0;
                 $hub_shipments[$hub->name]['six_plus'] = 0;
-                $cities_shipments = City::join('shipments as s', function($join) {
+                $cities_shipments = DB::connection('reports')->table('cities')->join('shipments as s', function($join) {
                     $join->where(function($query) {
-                        $query->where('cities.id', '=',DB::raw('s.consignee_city_id'))
+                        $query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                             ->orWhere(function ($sub_query) {
-                                $sub_query->on('cities.id', '=', DB::raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
+                                $sub_query->on('cities.id', '=', DB::connection('reports')->raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
                             });
                     });
                 })
@@ -913,16 +913,16 @@ class AdminReportsEmailController extends Controller
                     })
                     ->join('shipments_journey as sj', function($join) use ($from_id, $to_id) {
                         $join->on('s.id', '=', 'sj.shipment_id')
-                            ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
+                            ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
                     })
                     ->join('shipments_journey as sja', function($join){
                         $join->on('s.id', '=', 'sja.shipment_id')
-                            ->where('sja.id', '=', DB::raw('(select max(shipments_journeya.id) from shipments_journey as shipments_journeya where shipments_journeya.shipment_id = s.id and shipments_journeya.shipper_status_id = 2)'));
+                            ->where('sja.id', '=',DB::connection('reports')->raw('(select max(shipments_journeya.id) from shipments_journey as shipments_journeya where shipments_journeya.shipment_id = s.id and shipments_journeya.shipper_status_id = 2)'));
                     })
                     ->select('s.id as shipment_id', 'sja.created_at as arrival_date')
                     ->where(function ($query) use ($cut_off_time, $from){
                         $query->where(function($sub_query){
-                            $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
+                            $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                 ->where('sj.shipper_status_id', '=', 7);
                         })
                             ->orWhere(function ($sub_query) use ($cut_off_time, $from) {
@@ -930,12 +930,12 @@ class AdminReportsEmailController extends Controller
                                     $sub_sub_query->where(function ($sub_sub_sub_query){
                                         $sub_sub_sub_query->where(function ($sub_sub_sub_sub_query){
                                             $sub_sub_sub_sub_query->where(function ($sub_sub_sub_sub_sub_query) {
-                                                $sub_sub_sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
+                                                $sub_sub_sub_sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                                     ->orWhereNull('zcc.class')
                                                     ->orWhereIn('zcc.class', [0, 1]);
                                             })
                                                 ->where(function ($sub_sub_sub_sub_sub_sub_sub_query) {
-                                                    $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::raw('usi.city_id'))
+                                                    $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::connection('reports')->raw('usi.city_id'))
                                                         ->where('sj.shipper_status_id', '=', 2);
                                                 });
                                         });
@@ -950,7 +950,7 @@ class AdminReportsEmailController extends Controller
                                 });
                             })
                             ->orWhere(function ($sub_query) use ($cut_off_time, $from) {
-                                $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
+                                $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->whereIn('sj.shipper_status_id', [8, 13])
                                     ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
                             });

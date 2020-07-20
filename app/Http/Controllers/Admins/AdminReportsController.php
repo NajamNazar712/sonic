@@ -3965,7 +3965,7 @@ use Yajra\Datatables\Datatables;
                         if ($type == 'status_not_attempted' || $type == 'delivery_tomorrow') {
                             $rows = $rows->join('shipments as s', function($join) {
                                 $join->where(function($query) {
-                                    $query->where('cities.id', '=',  DB::connection('reports')->raw('s.consignee_city_id'))
+                                    $query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->orWhere(function ($sub_query) {
                                         $sub_query->on('cities.id', '=', DB::connection('reports')->raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
                                     });
