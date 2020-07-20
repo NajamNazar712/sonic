@@ -948,6 +948,11 @@ class AdminReportsEmailController extends Controller
                                                 });
                                         });
                                 });
+                            })
+                            ->orWhere(function ($sub_query) use ($cut_off_time, $from) {
+                                $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    ->whereIn('sj.shipper_status_id', [8, 13])
+                                    ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
                             });
                     })
                     ->where('cities.hub_id', $hub->id);
