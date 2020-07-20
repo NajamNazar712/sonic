@@ -922,7 +922,7 @@ class AdminReportsEmailController extends Controller
                     ->select('s.id as shipment_id', 'sja.created_at as arrival_date')
                     ->where(function ($query) use ($cut_off_time, $from){
                         $query->where(function($sub_query){
-                            $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
+                            $sub_query->where('sch.id', '=', DB::raw('s.consignee_city_id'))
                                 ->where('sj.shipper_status_id', '=', 7);
                         })
                             ->orWhere(function ($sub_query) use ($cut_off_time, $from) {
