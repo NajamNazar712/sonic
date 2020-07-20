@@ -50,6 +50,9 @@
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('cod.return.reattempt_history.index') }}">Re-Attempt Request</a></li>
                     </ul>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{route('cod.return.confirmed.index')}}">Confirmed</a></li>
+                    </ul>
                 </li>
             @endif
 

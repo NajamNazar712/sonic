@@ -166,6 +166,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('','Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');
             Route::get('list','Shippers\ShipperReturnController@return_reattempt_history_list')->name('list');
         });
+        Route::prefix('confirmed')->name('confirmed.')->group(function (){
+            Route::get('','Shippers\ShipperReturnController@return_confirmed_index')->name('index');
+            Route::get('list','Shippers\ShipperReturnController@return_list')->name('list');
+
+        });
     });
 
     Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function() {
