@@ -990,7 +990,6 @@ class AdminReportsEmailController extends Controller
                     }
                 }
             }
-            dd($shipments);
             foreach($hub_shipments as $hub_shipment){
                 $not_attempted_shipment_aging = new NotAttemptedShipmentAging();
                 $not_attempted_shipment_aging->hub_id = $hub_shipment['id'];
