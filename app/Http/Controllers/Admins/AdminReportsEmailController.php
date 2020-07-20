@@ -905,6 +905,8 @@ class AdminReportsEmailController extends Controller
                     });
                 })
                     ->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+                    ->leftjoin('cities as pc', 'usi.city_id', '=', 'pc.id')
+                    ->leftjoin('cities as sch', 's.consignee_city_id', '=', 'sch.id')
                     ->leftjoin('zone_class_cities as zcc', function($join) {
                         $join->on('pc.zone_id', '=', 'zcc.zone_id')
                             ->on('s.consignee_city_id', '=', 'zcc.city_id');
@@ -993,6 +995,7 @@ class AdminReportsEmailController extends Controller
                     }
                 }
             }
+            dd($shipments);
             foreach($hub_shipments as $hub_shipment){
                 $not_attempted_shipment_aging = new NotAttemptedShipmentAging();
                 $not_attempted_shipment_aging->hub_id = $hub_shipment['id'];
