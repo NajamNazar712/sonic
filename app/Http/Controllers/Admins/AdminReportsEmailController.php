@@ -964,33 +964,27 @@ class AdminReportsEmailController extends Controller
                     }
                     elseif ($count_with_holidays == 1){
                         $hub_shipments[$hub->name]['one']++;
-                        $shipments[$hub->name]['id'][] = $cities_shipment->shipment_id;
-                        $shipments[$hub->name]['id']['day'] = 1;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 1;
                     }
                     elseif ($count_with_holidays == 2){
                         $hub_shipments[$hub->name]['two']++;
-                        $shipments[$hub->name]['id'][] = $cities_shipment->shipment_id;
-                        $shipments[$hub->name]['id']['day'] = 2;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 2;
                     }
                     elseif ($count_with_holidays == 3){
                         $hub_shipments[$hub->name]['three']++;
-                        $shipments[$hub->name]['id'][] = $cities_shipment->shipment_id;
-                        $shipments[$hub->name]['id']['day'] = 3;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 3;
                     }
                     elseif ($count_with_holidays == 4){
                         $hub_shipments[$hub->name]['four']++;
-                        $shipments[$hub->name]['id'][] = $cities_shipment->shipment_id;
-                        $shipments[$hub->name]['id']['day'] = 4;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] =42;
                     }
                     elseif ($count_with_holidays == 5){
                         $hub_shipments[$hub->name]['five']++;
-                        $shipments[$hub->name]['id'][] = $cities_shipment->shipment_id;
-                        $shipments[$hub->name]['id']['day'] = 5;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 5;
                     }
                     elseif ($count_with_holidays >= 6){
                         $hub_shipments[$hub->name]['six_plus']++;
-                        $shipments[$hub->name]['id'][] = $cities_shipment->shipment_id;
-                        $shipments[$hub->name]['id']['day'] = 6;
+                        $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 6;
                     }
                 }
             }
