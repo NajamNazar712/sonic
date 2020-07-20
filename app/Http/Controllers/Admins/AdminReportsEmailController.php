@@ -874,12 +874,10 @@ class AdminReportsEmailController extends Controller
             $time = $settings->setting_value . ':00';
             $formatted_date = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00");
             $from = Carbon::today()->addHour($cut_off_time)->toDateTimeString();
-            $formatted_date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00")->subDays(30)->toDateTimeString();
-            $formatted_date_to = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00")->toDateTimeString();
-            $from_cut = Carbon::parse($date)->addHour($cut_off_time)->toDateTimeString();
+            $formatted_date_from = Carbon::parse($date)->subDays(30)->addHour($cut_off_time)->toDateTimeString();
             $to_cut = Carbon::parse($date)->addDay()->addHour($cut_off_time)->subSecond()->toDateTimeString();
             $hubs = City::where('hub', 1)->where('status', 1)->get();
-            $from_id = ShipmentsJourney::select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from_cut)->first()->id;
+            $from_id = ShipmentsJourney::select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $formatted_date_from)->first()->id;
             $to_id = ShipmentsJourney::select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to_cut)->first()->id;
             $hub_shipments = array();
             $zone_hub_shipments = array();
