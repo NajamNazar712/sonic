@@ -3934,12 +3934,12 @@ use Yajra\Datatables\Datatables;
                 $hubs = $hubs->get();
 
                 if ($date) {
-                    $from_month = Carbon::parse($date)->subDays(60)->addHour($day_cut_off_time)->toDateTimeString();
+                    $from_month = Carbon::parse($date)->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                     $from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
                     $to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
                 }
                 else {
-                    $from_month = Carbon::today()->subDays(60)->addHour($day_cut_off_time)->toDateTimeString();
+                    $from_month = Carbon::today()->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                     $from = Carbon::today()->addHour($day_cut_off_time)->toDateTimeString();
                     $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
                 }
@@ -3965,7 +3965,7 @@ use Yajra\Datatables\Datatables;
                         if ($type == 'status_not_attempted' || $type == 'delivery_tomorrow') {
                             $rows = $rows->join('shipments as s', function($join) {
                                 $join->where(function($query) {
-                                    $query->where('cities.id', '=',  DB::connection('reports')->raw('s.consignee_city_id'))
+                                    $query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->orWhere(function ($sub_query) {
                                         $sub_query->on('cities.id', '=', DB::connection('reports')->raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
                                     });
@@ -4004,10 +4004,9 @@ use Yajra\Datatables\Datatables;
                         else {
                             $rows = $rows->join('shipments_journey as sj', function($join) use ($from_id, $to_id) {
                                 $join->on('s.id', '=', 'sj.shipment_id')
-                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id < "' . $to_id . '")'));
+                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
                             });
                         }
-
                         if ($type == 'delivered') {
                             $rows = $rows->whereIn('sj.shipper_status_id', [14, 30, 36, 37]);
                         }
@@ -6456,16 +6455,15 @@ use Yajra\Datatables\Datatables;
             $today = Carbon::now()->startOfDay();
             $aging_report = DB::connection('reports')->table('completed_aging_reports')
             ->join('cities AS c', 'completed_aging_reports.hub_id', '=', 'c.id')
-            ->join('zones AS z', 'completed_aging_reports.main_hub_id', '=', 'z.id')
-            ->select(['completed_aging_reports.id as id','c.name as hubs','z.name as main_hubs','completed_aging_reports.days as days'])
-            ->whereDate('completed_aging_reports.created_at',$today);
+            ->join('zones AS z', 'completed_aging_reports.zone_id', '=', 'z.id')
+            ->select(['completed_aging_reports.id as id','c.name as hubs','z.name as zone','completed_aging_reports.count'])
+            ->whereDate('completed_aging_reports.date',$today);
             $report = Datatables::of($aging_report);
 
-           
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
-                $report->whereBetween('completed_aging_reports.created_at', [$from,$to]);
+                $report->whereBetween('completed_aging_reports.date', [$from,$to]);
             }
 
            
@@ -6480,11 +6478,10 @@ use Yajra\Datatables\Datatables;
             $today = Carbon::now()->startOfDay();
             $aging_report = DB::connection('reports')->table('pending_cash_collection_aging_reports')
             ->join('cities AS c', 'pending_cash_collection_aging_reports.hub_id', '=', 'c.id')
-            ->join('zones AS z', 'pending_cash_collection_aging_reports.main_hub_id', '=', 'z.id')
-            ->select(['pending_cash_collection_aging_reports.id as id','c.name as hubs','z.name as main_hubs','pending_cash_collection_aging_reports.days as days'])
-            ->whereDate('pending_cash_collection_aging_reports.created_at',$today);
+            ->join('zones AS z', 'pending_cash_collection_aging_reports.zone_id', '=', 'z.id')
+            ->select(['pending_cash_collection_aging_reports.id as id','c.name as hubs','z.name as zone','pending_cash_collection_aging_reports.count'])
+            ->whereDate('pending_cash_collection_aging_reports.date',$today);
             $report = Datatables::of($aging_report);
-
            
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
@@ -6534,6 +6531,13 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('total_amount', function ($recovery){
                     return number_format($recovery->total_amount);
                 })
+                ->editColumn('percentage', function ($recovery){
+                    if($recovery->percentage == 0){
+                        return '0%';
+                    }else{
+                        return $recovery->percentage .'%';
+                    }
+                })
                 ->addColumn('banks_list', function ($recovery){
                     $banks_list = '';
                     if(StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
@@ -6554,6 +6558,25 @@ use Yajra\Datatables\Datatables;
                         return $banks_list;
                     }
                     return $banks_list;
+                })
+                ->addColumn('banks_list_excel', function ($recovery){
+                    $banks_list = '';
+                    if(StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
+                        $banks = StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->get();
+                        $bank_ids = '';
+                        foreach ($banks as $index => $bank) {
+                            $index++;
+                            $banklist = BanksList::find($bank->bank_id);
+                            $banks_list .= $banklist->name;
+                            $bank_ids .= $banklist->id;
+                            if($index != count($banks)){
+                                $banks_list .= ',';
+                                $bank_ids .= ',';
+                            }
+                        }
+                        return $banks_list;
+                    }
+                    return $banks_list;
                 });
             if ($request->get('search_date')) {
                 $date = $request->get('search_date');
@@ -6565,25 +6588,38 @@ use Yajra\Datatables\Datatables;
         public function station_recovery_update(Request $request){
 
             if($request->form_save == 1){
-                foreach ($request->deposit_amount as $key => $value){
-                    $station_recovery = StationRecoveryReport::find($key);
-                    $station_recovery->deposit_amount = $value;
-                    $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
-                    $station_recovery->reason = $request->reason[$key];
-                    $station_recovery->save();
-                    $bank_row = "bank_select.$key";
-                    if($request->has($bank_row)){
-                        StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
-                        foreach ($request->bank_select[$key] as $row => $bank){
-                            $deposit = new StationRecoveryReportDeposit();
-                            $deposit->station_recovery_report_id = $key;
-                            $deposit->bank_id = $bank;
-                            $deposit->admin_id = Auth::id();
-                            $deposit->save();
+                if($request->has('deposit_amount') && count($request->deposit_amount) > 0){
+                    foreach ($request->deposit_amount as $key => $value){
+                        $station_recovery = StationRecoveryReport::find($key);
+                        $station_recovery->deposit_amount = $value;
+                        $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
+                        $station_recovery->reason = $request->reason[$key];
+                        $station_recovery->save();
+                        $station_recovery->fresh();
+                        $difference = $station_recovery->total_amount - $station_recovery->deposit_amount - $station_recovery->adjustment_amount;
+                        $station_recovery->difference_amount = $difference;
+                        if($station_recovery->total_amount > 0){
+                            $percentage = (($station_recovery->deposit_amount + $station_recovery->adjustment_amount) / $station_recovery->total_amount) * 100;
+                            $station_recovery->percentage = $percentage;
+                        }
+                        $station_recovery->save();
+
+                        $bank_row = "bank_select.$key";
+                        if($request->has($bank_row)){
+                            StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
+                            foreach ($request->bank_select[$key] as $row => $bank){
+                                $deposit = new StationRecoveryReportDeposit();
+                                $deposit->station_recovery_report_id = $key;
+                                $deposit->bank_id = $bank;
+                                $deposit->admin_id = Auth::id();
+                                $deposit->save();
+                            }
                         }
                     }
+                    return redirect()->back()->with('success', 'Report updated successfully!');
                 }
-                return redirect()->back()->with('success', 'Report updated successfully!');
+                return redirect()->back()->with('error', 'Please refresh page and update properly!');
+
             }
         }
 

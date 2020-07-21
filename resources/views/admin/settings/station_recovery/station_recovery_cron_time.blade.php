@@ -24,7 +24,7 @@
 
                                         <div class="form-group">
                                             <div class="input-group">
-                                            <input type="text" name="station_recovery_cron_time" class="form-control daily_pickup_sales_cron_time" placeholder="Daily Pickup Sales Cron Time*" data-rule-required="true" data-msg-required="Station Recovery Cron Time is required" value="{{ $time }}" data-rule-min="0" data-msg-min="Station Recovery Cron Time can not be less than 0" data-rule-max="23" data-msg-min="Station Recovery Cron Time can not be more than 23">
+                                            <input type="text" name="station_recovery_cron_time" class="form-control daily_pickup_sales_cron_time" placeholder="Station Recovery Cron Time*" data-rule-required="true" data-msg-required="Station Recovery Cron Time is required" value="{{ $time }}" data-rule-min="0" data-msg-min="Station Recovery Cron Time can not be less than 0" data-rule-max="23" data-msg-min="Station Recovery Cron Time can not be more than 23">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">hrs</span>
                                             </div>

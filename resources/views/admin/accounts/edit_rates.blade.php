@@ -194,12 +194,12 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->local_or_6hr != $onweight->local_or_6hr) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->local_or_6hr != $onweight->local_or_6hr) {{$e_weight[1][$index]->local_or_6hr}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local_or_6hr}}" name="on_wa_local_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->local_or_6hr != $onweight->local_or_6hr) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->local_or_6hr != $onweight->local_or_6hr) {{$e_weight[1][$index]->local_or_6hr}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local_or_6hr}}" name="on_wa_local_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->national_charges_class_0 != $onweight->national_charges_class_0) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->national_charges_class_0 != $onweight->national_charges_class_0) {{$e_weight[1][$index]->national_charges_class_0}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_0}}" name="on_class_0_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->national_charges_class_0 != $onweight->national_charges_class_0) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->national_charges_class_0 != $onweight->national_charges_class_0) {{$e_weight[1][$index]->national_charges_class_0}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_0}}" name="on_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -255,12 +255,12 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges[0]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="on_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="on_class_0_charges[0]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -949,12 +949,12 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->local_or_6hr != $olweight->local_or_6hr) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->local_or_6hr != $olweight->local_or_6hr) {{$e_weight[2][$index]->local_or_6hr}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_wa_local_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->local_or_6hr != $olweight->local_or_6hr) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->local_or_6hr != $olweight->local_or_6hr) {{$e_weight[2][$index]->local_or_6hr}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_wa_local_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->national_charges_class_0 != $olweight->national_charges_class_0) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->national_charges_class_0 != $olweight->national_charges_class_0) {{$e_weight[2][$index]->national_charges_class_0}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_class_0_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->national_charges_class_0 != $olweight->national_charges_class_0) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->national_charges_class_0 != $olweight->national_charges_class_0) {{$e_weight[2][$index]->national_charges_class_0}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -1010,12 +1010,12 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_local_charges[0]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_class_0_charges[0]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -1702,12 +1702,12 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->local_or_6hr != $detweight->local_or_6hr) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->local_or_6hr != $detweight->local_or_6hr) {{$e_weight[3][$index]->local_or_6hr}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local_or_6hr}}" name="detain_wa_local_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->local_or_6hr != $detweight->local_or_6hr) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->local_or_6hr != $detweight->local_or_6hr) {{$e_weight[3][$index]->local_or_6hr}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local_or_6hr}}" name="detain_wa_local_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->national_charges_class_0 != $detweight->national_charges_class_0) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->national_charges_class_0 != $detweight->national_charges_class_0) {{$e_weight[3][$index]->national_charges_class_0}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_0}}" name="detain_class_0_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->national_charges_class_0 != $detweight->national_charges_class_0) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->national_charges_class_0 != $detweight->national_charges_class_0) {{$e_weight[3][$index]->national_charges_class_0}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_0}}" name="detain_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -1764,12 +1764,12 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_local_charges[0]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_class_0_charges[0]">
                                                         </fieldset>
                                                     </div>
                                                         <div class="col">
@@ -2456,12 +2456,12 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->local_or_6hr != $sameweight->local_or_6hr) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->local_or_6hr != $sameweight->local_or_6hr) {{$e_weight[4][$index]->local_or_6hr}} @endif"  data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_wa_local_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->local_or_6hr != $sameweight->local_or_6hr) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->local_or_6hr != $sameweight->local_or_6hr) {{$e_weight[4][$index]->local_or_6hr}} @endif"  data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_wa_local_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->national_charges_class_0 != $sameweight->national_charges_class_0) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->national_charges_class_0 != $sameweight->national_charges_class_0) {{$e_weight[4][$index]->national_charges_class_0}} @endif"  data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_class_0_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->national_charges_class_0 != $sameweight->national_charges_class_0) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif decimal" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->national_charges_class_0 != $sameweight->national_charges_class_0) {{$e_weight[4][$index]->national_charges_class_0}} @endif"  data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     
@@ -2504,12 +2504,12 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges[0]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_class_0_charges[0]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1"></div>
@@ -4117,7 +4117,7 @@
             'allowMinus': false,
             'allowPlus': false,
             'rightAlign': false,
-            'digits': 3,
+            'digits': 2,
             'min': 0.00,
             'max': 10000
         });

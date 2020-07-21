@@ -35,11 +35,12 @@ class StationRecoveryController extends Controller
         $hubs = City::where('hub', 1)->where('status', 1)->pluck('id')->toArray();
         if(count($hubs) > 0){
             foreach ($hubs as $hub_id){
+                $city_ids = City::where('hub_id', $hub_id)->pluck('id')->toArray();
                 $zone = ZoneClassCity::where('city_id',$hub_id)->first();
                 $zone_id = $zone->zone_id;
-                $delivered_shipments_ids = ShipmentsJourney::whereIn('shipper_status_id', [14, 30, 36, 37])->where('verification', 1)->whereBetween(DB::raw('DATE(created_at)'), array($from_date, $to_date))->pluck('shipment_id')->toArray();
+                $delivered_shipments_ids = ShipmentsJourney::whereIn('shipper_status_id', [14, 30, 36, 37])->whereIn('city_id', $city_ids)->where('verification', 1)->whereBetween(DB::raw('DATE(created_at)'), array($from_date, $to_date))->pluck('shipment_id')->toArray();
                 $no_of_delivered_shipments = count($delivered_shipments_ids);
-                $last_day_shipments = ShipmentsJourney::whereIn('shipper_status_id', [14, 30, 36, 37])->where('verification', 1)->whereDate('created_at', '<=', $yesterday)->whereTime('created_at', '<=', $cut_off_time)->pluck('shipment_id')->toArray();
+                $last_day_shipments = ShipmentsJourney::whereIn('shipper_status_id', [14, 30, 36, 37])->whereIn('city_id', $city_ids)->where('verification', 1)->whereDate('created_at', '<=', $yesterday)->whereTime('created_at', '<=', $cut_off_time)->pluck('shipment_id')->toArray();
                 $last_day_balance = Shipment::whereIn('id', $last_day_shipments)->sum('amount');
                 $amount = Shipment::whereIn('id', $delivered_shipments_ids)->sum('amount');
                 $total_amount = $last_day_balance + $amount;

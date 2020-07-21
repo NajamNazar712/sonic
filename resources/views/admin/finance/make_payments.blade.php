@@ -1216,11 +1216,97 @@
 				})
 				.done(function(data) {
 					if (data.status == 0) {
-						if (data.duplicate_shipments) {
+						if (data.duplicate_shipments && data.over_payments) {
 							var html = 'The following Shipment(s) have Duplicate Same Type Payments:<br/>';
 
 							$.each(data.duplicate_shipments, function(index, duplicate_shipment) {
 								html += duplicate_shipment + '<br/>';
+							});
+
+							html += 'The following Shipment(s) have Payments above the Limit:<br/>';
+
+							$.each(data.over_payments, function(index, over_payment) {
+								html += over_payment.shipper + ' ' + '<b>' + over_payment.payable + '</b>' + '<br/>';
+							});
+
+							html += '<br/>Are you sure, you want to make the Payments?';
+
+							content = document.createElement('div');
+							content.innerHTML = html;
+
+							swal({
+								content: content,
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc	: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									$('#make_payments #make_payments_form button').remove();
+
+									form.submit();
+								}
+							});
+						}
+						else if (data.duplicate_shipments) {
+							var html = 'The following Shipment(s) have Duplicate Same Type Payments:<br/>';
+
+							$.each(data.duplicate_shipments, function(index, duplicate_shipment) {
+								html += duplicate_shipment + '<br/>';
+							});
+
+							html += '<br/>Are you sure, you want to make the Payments?';
+
+							content = document.createElement('div');
+							content.innerHTML = html;
+
+							swal({
+								content: content,
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc	: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									$('#make_payments #make_payments_form button').remove();
+
+									form.submit();
+								}
+							});
+						}
+						else if (data.over_payments) {
+							var html = 'The following Shipment(s) have Payments above the Limit:<br/>';
+
+							$.each(data.over_payments, function(index, over_payment) {
+								html += over_payment.shipper + ': ' + '<b>' + over_payment.payable + '</b>' + '<br/>';
 							});
 
 							html += '<br/>Are you sure, you want to make the Payments?';

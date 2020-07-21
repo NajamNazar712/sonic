@@ -98,7 +98,7 @@
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">City</th>
-										<th class="border-primary border-darken-1">Type</th>
+										<th class="border-primary border-darken-1">Action Type</th>
 										<th class="border-primary border-darken-1">Pickup Note ID</th>
 										<th class="border-primary border-darken-1">Pickup Request ID</th>
 									</tr>

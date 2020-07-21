@@ -1315,10 +1315,10 @@ class AdminFinanceController extends Controller
 
                 $shipment = Shipment::find($shipment_id);
                 
-                $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+                $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                 if($journey){
                        $start = $journey->created_at;
-                       $difference = $start->diff($now)->days;
+                        $difference = $start->diffInDays($now);
                        if($difference <= 6 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
                         $delivery_note_shipment->status = 8;
@@ -1462,10 +1462,10 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($request->id);
 
-            $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->first();
+            $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                  if($journey){
                         $start = $journey->created_at;
-                        $difference = $start->diff($now)->days;
+                        $difference = $start->diffInDays($now);
                         if($difference <= 6 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
                             $delivery_note_shipment->status = 8;
@@ -2261,6 +2261,53 @@ class AdminFinanceController extends Controller
         }
     }
 
+    static public function add_corporate_delivered_cod($shipment_id){
+        $type = 0;
+        $shipment = Shipment::find($shipment_id);
+
+        $amount = $shipment->amount;
+
+        if(!$shipment->packaging_material_request && $amount != 0){
+            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+            if ($pending_payment->exists()) {
+                $pending_payment = $pending_payment->first();
+
+                $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+
+                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
+
+                $pending_payment->save();
+            }
+            else{
+                $pending_payment = new PendingPayment();
+
+                $pending_payment->user_id = $shipment->user_id;
+                $pending_payment->total_shipments = 1;
+
+                $pending_payment->delivered_shipments = 1;
+                $pending_payment->returned_shipments = 0;
+                $pending_payment->adjusted_shipments = 0;
+
+                $pending_payment->save();
+            }
+
+            $pending_payment_shipment = new PendingPaymentShipment();
+            if ($amount != 0) {
+                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                $pending_payment_shipment->shipment_id = $shipment_id;
+                $pending_payment_shipment->type = $type;
+                $pending_payment_shipment->amount = $amount;
+                $pending_payment_shipment->charges = 0;
+                $pending_payment_shipment->gst = 0;
+                $pending_payment_shipment->payable = $amount;
+
+                $pending_payment_shipment->save();
+            }
+
+        }
+
+    }
+
     static public function add_corporate_return_charges($shipment_id){
         $shipment = Shipment::find($shipment_id);
 
@@ -2969,6 +3016,15 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_verify(Request $request) {
+        $settings = DB::connection('reports')->table('global_settings')->where('type', 'over_payment_limit')->first();
+
+        if ($settings) {
+            $over_payment_limit = $settings->setting_value;
+        }
+        else {
+            $over_payment_limit = 6000000;
+        }
+
         $pending_payment_shipment_ids = explode(',', $request->pending_payment_shipment_ids);
 
         $pending_payment_payables = array();
@@ -2976,7 +3032,7 @@ class AdminFinanceController extends Controller
         $shipment_ids = array();
         $duplicate_shipment_ids = array();
         $duplicate_shipments = array();
-        
+
         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
@@ -3021,6 +3077,8 @@ class AdminFinanceController extends Controller
 
         $negative_payments = array();
 
+        $over_payments = array();
+
         foreach ($pending_payment_payables as $pending_payment_id => $payable) {
             $pending_payment_shipper = PendingPayment::find($pending_payment_id)->shipper;
 
@@ -3029,6 +3087,18 @@ class AdminFinanceController extends Controller
             if ($payable < 0) {
                 $negative_payments[] = $pending_payment_shipper->name;
             }
+            else if ($payable > $over_payment_limit) {
+                $over_payment = array();
+
+                $over_payment['shipper'] = $pending_payment_shipper->name;
+                $over_payment['payable'] = number_format($payable);
+
+                $over_payments[] = $over_payment;
+            }
+        }
+
+        if (empty($over_payments)) {
+            $over_payments = false;
         }
 
         if (empty($negative_payments)) {
@@ -3065,10 +3135,10 @@ class AdminFinanceController extends Controller
                     }
                 }
 
-                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => false];
+                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => false, 'over_payments' => $over_payments];
             }
             else {
-                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => $duplicate_shipments];
+                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => $duplicate_shipments, 'over_payments' => $over_payments];
             }
         }
         else {
@@ -3433,25 +3503,25 @@ class AdminFinanceController extends Controller
     public function done_payments_list(Request $request) {
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
+            ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftJoin('user_bank_infos as ubi', function ($join) {
                 $join->on('ubi.id', '=', 'done_payments.user_bank_info_id');
             })
             ->leftJoin('user_bank_infos as ubi_default', function ($join) {
                 $join->on('ubi_default.user_id', '=', 'u.id')
-                    ->where('ubi_default.default_bank',DB::raw(1));
+                    ->where('ubi_default.default_bank', DB::raw(1));
             })
             ->leftJoin('banks_lists as ub', function ($join) {
                 $join->where(function($sub_query) {
                     $sub_query->whereNotNull('done_payments.user_bank_info_id')
-                    ->where('ubi.bank_name', '=', 'ub.id');
+                    ->where('ubi.bank_name', '=', DB::raw('`ub`.`id`'));
                 })->orWhere(function($sub_query) {
                     $sub_query->whereNull('done_payments.user_bank_info_id')
-                    ->where('ubi_default.bank_name', '=', 'ub.id');
+                    ->where('ubi_default.bank_name', '=', DB::raw('`ub`.`id`'));
                 });
             })
-            ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
-            ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
-            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
             ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 's.booking_type_id', 'usi.poc', 'done_payments.ibft_charges', 's.packaging_charges')
             ->groupBy('done_payments.id');
@@ -3773,7 +3843,6 @@ class AdminFinanceController extends Controller
 
             $header = ['Payment ID', 'Status'];
         }
-
 
         if (isset($spreadsheet)) {
             $header_correct = TRUE;

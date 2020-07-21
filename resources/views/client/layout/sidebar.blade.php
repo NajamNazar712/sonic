@@ -21,16 +21,15 @@
                             @endif
                         </ul>
                         </li>
-                        <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Receiving Sheet</span></a>
-                            <ul class="menu-content">
                         @if (session('user_type') == 1 || in_array(3, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
-                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
-                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
+                            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Receiving Sheet</span></a>
+                                <ul class="menu-content">
+                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
+                                </ul>
+                            </li>
                         @endif
-                            </ul>
-                        </li>
-
                         @if (Session::has('air_waybill_type') && session('air_waybill_type') == 3)
                             <li class=" nav-item"><a href="{{ route('cod.shipment.list.index') }}"><span class="menu-title" data-i18n="nav.dash.main">List</span></a></li>
                             <li class=" nav-item"><a href="{{ route('cod.shipment.verify.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Verify</span></a></li>

@@ -369,11 +369,9 @@ class ReturnController extends Controller
                         ShipmentChargesController::return($shipment);
 
                         if ($parcel->packaging_material_request != 1) {
-                            if($parcel->user->account_type_id == 1){
-                                AdminFinanceController::add_payment($shipment, 1);
-                            }else{
-                                AdminFinanceController::add_corporate_return_charges($shipment);
-                            }
+
+                            AdminFinanceController::add_payment($shipment, 1);
+
                         }
                     }
                     else {
@@ -471,11 +469,7 @@ class ReturnController extends Controller
                     ShipmentChargesController::return($request->shipment_id);
 
                     if ($parcel->packaging_material_request != 1) {
-                        if($parcel->user->account_type_id == 1){
-                            AdminFinanceController::add_payment($request->shipment_id, 1);
-                        }else{
-                            AdminFinanceController::add_corporate_return_charges($request->shipment_id);
-                        }
+                        AdminFinanceController::add_payment($request->shipment_id, 1);
                     }
                 }
                 else {
@@ -618,121 +612,135 @@ class ReturnController extends Controller
             'remarks' => ['nullable', 'between:0,190']
         ];
         $fields = [0 => 'tracking_number', 1 => 'shipper_status_id', 2 => 'remarks'];
-        $file = $request->file('shipments');
 
-        $spreadsheet = IOFactory::createReaderForFile($file);
-        $spreadsheet->setReadDataOnly(true);
-        $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-        $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt)', 'Remarks'];
-        if ($spreadsheet[0] == $header) {
-            unset($spreadsheet[0]);
+        if($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            if (!empty($spreadsheet)) {
-                $rows = array();
-                foreach ($spreadsheet as $spreadsheet_row) {
-                    $row = array();
+            $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt)', 'Remarks'];
+        }
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
 
-                    foreach ($spreadsheet_row as $key => $value) {
-                        $row[$fields[$key]] = $value;
-                    }
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if($index == 2){
+                }
+                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
 
-                    $rows[] = $row;
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            else {
+                unset($spreadsheet[0]);
+            }
+        }
+        if (!empty($spreadsheet) || !isset($spreadsheet)) {
+            $rows = array();
+            foreach ($spreadsheet as $spreadsheet_row) {
+                $row = array();
+
+                foreach ($spreadsheet_row as $key => $value) {
+                    $row[$fields[$key]] = $value;
                 }
 
-                unset($spreadsheet);
-                $errors = array();
-                $tracking_ids = array();
-                $tracking_id_row = array();
-                foreach ($rows as $key => $row) {
-                    $row_id = $key + 2;
+                $rows[] = $row;
+            }
 
-                    $validate = Validator::make($row, $rules, $messages);
+            unset($spreadsheet);
+            $errors = array();
+            $tracking_ids = array();
+            $tracking_id_row = array();
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
 
-                    $validate->setAttributeNames($names);
+                $validate = Validator::make($row, $rules, $messages);
 
-                    if ($validate->fails()) {
-                        $errors['Row #' . $row_id] = $validate->errors()->all();
-                    }
-                    if (empty($errors['Row #' . $row_id])) {
-                        if (!empty(trim($row['tracking_number']))) {
-                            if (empty($tracking_ids)) {
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+                if (empty($errors['Row #' . $row_id])) {
+                    if (!empty(trim($row['tracking_number']))) {
+                        if (empty($tracking_ids)) {
+                            $tracking_ids[] = $row['tracking_number'];
+                            $tracking_id_row[$row['tracking_number']] = $row_id;
+                        }
+                        else {
+                            if (in_array($row['tracking_number'], $tracking_ids)) {
+                                $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                            }
+                            else {
                                 $tracking_ids[] = $row['tracking_number'];
                                 $tracking_id_row[$row['tracking_number']] = $row_id;
                             }
-                            else {
-                                if (in_array($row['tracking_number'], $tracking_ids)) {
-                                    $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
-                                }
-                                else {
-                                    $tracking_ids[] = $row['tracking_number'];
-                                    $tracking_id_row[$row['tracking_number']] = $row_id;
-                                }
-                            }
-                        }
-                        if (!Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 12)->exists()) {
-                            $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
                         }
                     }
-
-
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 12)->exists()) {
+                        $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
+                    }
                 }
-                if(empty($errors)){
-                    $tracking_numbers = array();
-                    foreach ($rows as $key => $row) {
-                        $row_id = $key + 2;
-                        $tracking = trim($row['tracking_number']);
-                        $status = trim($row['shipper_status_id']);
-                        $remarks = trim($row['remarks']);
 
-                        if (!empty($row['remarks'])) {
-                            $remarks = trim($row['remarks']);
-                        }
-                        else {
-                            $remarks = NULL;
-                        }
-                        $shipment_details = Shipment::where('tracking_number',$tracking)->first();
-                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
-                        if($status == 0){
-                            $shipment_details->shipper_status_id = 20; //Confirmation Pending
-                            ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
-                            NotificationsController::send(15, 0, $shipment_details->id);
-                            NotificationsController::send(16, 0, $shipment_details->id);
+
+            }
+            if(empty($errors)){
+                $tracking_numbers = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+                    $tracking = trim($row['tracking_number']);
+                    $status = trim($row['shipper_status_id']);
+                    $remarks = trim($row['remarks']);
+
+                    if (!empty($row['remarks'])) {
+                        $remarks = trim($row['remarks']);
+                    }
+                    else {
+                        $remarks = NULL;
+                    }
+                    $shipment_details = Shipment::where('tracking_number',$tracking)->first();
+                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
+                    if($status == 0){
+                        $shipment_details->shipper_status_id = 20; //Confirmation Pending
+                        ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+                        NotificationsController::send(15, 0, $shipment_details->id);
+                        NotificationsController::send(16, 0, $shipment_details->id);
 
 //                            ShipmentChargesController::return($shipment_details->id);
 //
 //                            AdminFinanceController::add_payment($shipment_details->id, 1);
-                        }
-                        if($status == 1){
-                            $shipment_details->shipper_status_id = 13; //Re-Attempt
-                            ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+                    }
+                    if($status == 1){
+                        $shipment_details->shipper_status_id = 13; //Re-Attempt
+                        ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 //                            NotificationsController::send(15, 0, $shipment_details->id);
 //                            NotificationsController::send(16, 0, $shipment_details->id);
-                        }
-                        $shipment_details->save();
-                        $tracking_numbers['Row #' . $row_id] = $tracking;
-
                     }
-                    $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                        return $row . ': ' . $tracking_number;
-                    }, array_keys($tracking_numbers), $tracking_numbers));
+                    $shipment_details->save();
+                    $tracking_numbers['Row #' . $row_id] = $tracking;
 
-                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
                 }
-                else{
-                    $errors = array_map(function ($row, $errors) {
-                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
-                    }, array_keys($errors), $errors);
+                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                    return $row . ': ' . $tracking_number;
+                }, array_keys($tracking_numbers), $tracking_numbers));
 
-                    return redirect()->back()->withErrors($errors);
-                }
+                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+            }
+            else{
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
 
+                return redirect()->back()->withErrors($errors);
             }
-            else {
-                return redirect()->back()->with('error', 'No Shipments in File');
-            }
+
         }
         else {
-            return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            return redirect()->back()->with('error', 'No Shipments in File');
         }
     }
 
@@ -1764,8 +1772,10 @@ class ReturnController extends Controller
         $return_note_id = $request->return_note_id;
         $array_returned = array(25,31,38);
         $array_returned_status = array(24,29,35,47,48, 60);
+        $actual_date = $request->actual_date_formatted;
         if($return_note_id != '') {
             $return_note_details = ReturnNote::find($return_note_id);
+
             foreach ($shipments as $shipment) {
                 $reasonId = "reason_drop.$shipment";
                 $parcel = Shipment::where('id', $shipment)->first();
@@ -1802,6 +1812,7 @@ class ReturnController extends Controller
                     $return_note_details->status = 3;
                     $return_note_details->updated_by = Auth::id();
                 }
+                $return_note_details->actual_date = $actual_date;
                 $return_note_details->save();
             }
 
@@ -1825,6 +1836,7 @@ class ReturnController extends Controller
     public function return_status_delivered(Request $request){
         if(!empty($request->shipment_ids)){
             $open_box_ids = array();
+            $actual_date = $request->actual_date;
             if($request->has('open_box_ids')){
                 $open_box_ids = $request->open_box_ids;
             }
@@ -1846,9 +1858,6 @@ class ReturnController extends Controller
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-
-
-
 
                         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
                         if ($packaging_material_shipment != null) {
@@ -1915,8 +1924,9 @@ class ReturnController extends Controller
             if($shipment_status == 0){
                 $return_note_details->status = 3;
                 $return_note_details->updated_by = Auth::id();
-                $return_note_details->save();
             }
+            $return_note_details->actual_date = $actual_date;
+            $return_note_details->save();
 
             NotificationsController::send(15, $request->return_note_id);
             NotificationsController::send(16, $request->return_note_id);
@@ -1929,10 +1939,10 @@ class ReturnController extends Controller
     }
 
     public function receive_return_status_submit_all(Request $request){
-
         if(!empty($request->shipment_ids)){
             $shipment_ids = $request->shipment_ids;
             $shipment_status = $request->shipment_status;
+            $actual_date = $request->actual_date;
             $open_box_ids = array();
             if($request->has('open_box_ids')){
                 $open_box_ids = $request->open_box_ids;
@@ -2013,12 +2023,13 @@ class ReturnController extends Controller
                         $return_note_details->save();
                     }
                 }
-                $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
+                $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status' => 0])->count();
                 if($shipment_status_count == 0){
                     $return_note_details->updated_by = Auth::id();
                     $return_note_details->status = 3;
-                    $return_note_details->save();
                 }
+                $return_note_details->actual_date = $actual_date;
+                $return_note_details->save();
 
                 NotificationsController::send(15, $request->return_note_id);
                 NotificationsController::send(16, $request->return_note_id);
@@ -2053,6 +2064,7 @@ class ReturnController extends Controller
                         $return_note_details->status = 3;
                         $return_note_details->updated_by = Auth::id();
                     }
+                    $return_note_details->actual_date = $actual_date;
                     $return_note_details->save();
 
                 }

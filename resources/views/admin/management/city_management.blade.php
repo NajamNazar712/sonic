@@ -30,6 +30,7 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
+                                    <th class="border-primary border-darken-1">Location</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -179,6 +180,7 @@
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'ch.created_at', class: 'align-middle updated_at'},
+                    {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {
@@ -205,7 +207,7 @@
                        var column = this;
                        var header = column.header();
 
-                       if ($(header).is('.serial_number') || $(header).is('.action')) {
+                       if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')) {
                            $(td).appendTo($(search));
                        }else if($(header).is('.status')){
                            $(status_select).appendTo($(search))
