@@ -107,6 +107,13 @@
             width: auto !important;
             text-align: left;
         }
+        table.dataTable tbody tr td.banks_list {
+              width:230px;
+          }
+        table.dataTable tbody tr td.reason {
+            width:200px;
+        }
+
     </style>
 @endsection
 
@@ -161,8 +168,19 @@
                             $.each(result.data, function(index, values) {
                                 row = [];
 
-
                                 row.push(index + 1);
+                                row.push(values.hub);
+                                row.push(values.zone);
+                                row.push(values.delivered_shipments);
+                                row.push(values.last_day_balance);
+                                row.push(values.amount);
+                                row.push(values.total_amount);
+                                row.push(values.deposit_amount);
+                                row.push(values.banks_list_excel);
+                                row.push(values.adjustment_amount);
+                                row.push(values.difference_amount);
+                                row.push(values.percentage);
+                                row.push(values.reason);
 
                                 body.push(row);
                             });
@@ -237,7 +255,6 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.reports.station_recovery.list') }}',
                 ajax: {
                     url: '{{ route('admin.reports.station_recovery.list') }}',
                     data: function (d) {
@@ -279,9 +296,9 @@
                     var row = table.row(index);
                     var id = parseInt(row.id());
                     var deposit_amount = $(row.node()).find('td.deposit_amount').text();
-                    var deposit_amount_input = '<input class="form-control form-control-sm deposit_amount" name="deposit_amount['+ id +']" placeholder="Deposited Amount" value="'+ deposit_amount +'">';
+                    var deposit_amount_input = '<input class="form-control form-control-sm deposit_amount" name="deposit_amount['+ id +']" placeholder="Deposit" value="'+ deposit_amount +'">';
                     $(row.node()).find('td.deposit_amount').html(deposit_amount_input);
-                    var bank_select = '<select name="bank_select['+ id +'][]" multiple="multiple" class="select2 bank_select form-control"></select>';
+                    var bank_select = '<select style="width:230px;" name="bank_select['+ id +'][]" multiple="multiple" class="select2 bank_select form-control"></select>';
                     bank_ids = $(row.node()).find('td.banks_list input').val();
                     $(row.node()).find('td.banks_list').html(bank_select);
 
@@ -290,10 +307,10 @@
 
                     }
                     var adjustment_amount = $(row.node()).find('td.adjustment_amount').text();
-                    var adjustment_amount_input = '<input class="form-control form-control-sm adjustment_amount" name="adjustment_amount['+ id +']" placeholder="Adjustment Amount" value="'+ adjustment_amount +'">';
+                    var adjustment_amount_input = '<input class="form-control form-control-sm adjustment_amount" name="adjustment_amount['+ id +']" placeholder="ADJ Amount" value="'+ adjustment_amount +'">';
                     $(row.node()).find('td.adjustment_amount').html(adjustment_amount_input);
                     var reason = $(row.node()).find('td.reason').text();
-                    var reason_input = '<textarea class="form-control form-control-sm reason" name="reason['+ id +']" placeholder="Reason">'+ reason +'</textarea>';
+                    var reason_input = '<textarea style="width:200px;" class="form-control form-control-sm reason" name="reason['+ id +']" placeholder="Reason">'+ reason +'</textarea>';
                     $(row.node()).find('td.reason').html(reason_input);
 
                 });

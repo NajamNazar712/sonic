@@ -1798,6 +1798,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@station_recovery_cron_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@station_recovery_cron_store')->name('store');
         });
+
+        Route::prefix('over_payment_limit')->name('over_payment_limit.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@over_payment_limit_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@over_payment_limit_store')->name('store');
+        });
     });
 
 

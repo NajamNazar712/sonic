@@ -101,4 +101,5 @@ class Shipment extends Model
 	public function handover_shipments_journeys(){
 	    return $this->hasMany('App\Http\Models\Handover\HandoverShipmentsJourney')->orderBy('id', 'DESC');
     }
+
 }

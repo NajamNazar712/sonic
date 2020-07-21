@@ -222,7 +222,7 @@ class V2AdminPickupsController extends Controller
         $pickup_request_ids = $request->input('pickup_request_ids');
 
         $rider_id = $request->input('rider_id');
-
+        array_unique($pickup_request_ids);
         $rider_cut_off_time = NULL;
         $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
         if($rider_settings->exists()){
@@ -751,20 +751,6 @@ class V2AdminPickupsController extends Controller
 
                 $pickup_request->save();
             }
-
-            if($shipment->user->account_type_id == 2){
-                if ($shipment->booking_type_id == 2) {
-                    ShipmentChargesController::replacement($shipment->id);
-                } else if ($shipment->booking_type_id == 3) {
-                    ShipmentChargesController::try_and_buy($shipment->id);
-                }
-
-                if ($shipment->booking_type_id != 4) {
-                    AdminFinanceController::add_payment($shipment->id, 0);
-                } else {
-                    AdminFinanceController::done_payment($shipment->id, 0);
-                }
-            }
         }
         $pickup_note_ids = array();
         foreach ($pickup_request_ids as $pickup_request_id) {
@@ -1255,19 +1241,6 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->save();
 
             }
-            if($shipment->user->account_type_id == 2){
-                if ($shipment->booking_type_id == 2) {
-                    ShipmentChargesController::replacement($shipment->id);
-                } else if ($shipment->booking_type_id == 3) {
-                    ShipmentChargesController::try_and_buy($shipment->id);
-                }
-
-                if ($shipment->booking_type_id != 4) {
-                    AdminFinanceController::add_payment($shipment->id, 0);
-                } else {
-                    AdminFinanceController::done_payment($shipment->id, 0);
-                }
-            }
         }
         $pickup_note_ids = array();
         foreach ($pickup_request_ids as $pickup_request_id) {
@@ -1511,6 +1484,9 @@ class V2AdminPickupsController extends Controller
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
             ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked);
+            if (session('role_id') != 1) {
+                $rider_pickups = $rider_pickups->whereIn('c.hub_id', session('hubs'));
+            }
 
         $datatables = Datatables::of($rider_pickups)
             ->editColumn('pickup_note_id', function ($rider_pickup) {
@@ -1582,6 +1558,10 @@ class V2AdminPickupsController extends Controller
     	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
     	->join('cities as c', 'usi.city_id', 'c.id')
     	->select('v2_rider_pickup_action_logs.id', 'v2_rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'v2_rider_pickup_action_logs.pickup_note_id', 'v2_rider_pickup_action_logs.pickup_request_id','pr.created_at','pra.assigned_by','pr.city_id as city_id','pr.current_rider_id');
+
+        if (session('role_id') != 1) {
+            $rider_pickup_action_logs = $rider_pickup_action_logs->whereIn('c.hub_id', session('hubs'));
+        }
 
         $datatables = Datatables::of($rider_pickup_action_logs)
         // ->editColumn('pickup_note_id', function ($rider_pickup_action_log) {

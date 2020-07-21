@@ -7845,7 +7845,7 @@ if(session('department_id') == 7){
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7867,6 +7867,16 @@ if(session('department_id') == 7){
 //                $query->whereRaw('false');
 //            }
 //        })
+            ->addColumn('location', function ($result){
+                $location = '<div class="text-center">';
+                if($result->location_latitude != null && $result->location_longitude != null) {
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->location_latitude . ',' . $result->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    $location .= '</div>';
+                    return $location;
+                }else{
+                    return '-';
+                }
+            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -7910,7 +7920,6 @@ if(session('department_id') == 7){
         return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking]);
     }
     public function getEditCityForm($id){
-//        return $id;
         $city = City::find($id);
         if($city->hub == 1){
             $cityhub = '';
@@ -7921,7 +7930,6 @@ if(session('department_id') == 7){
 
         }
         $delivery_array = CityDelivery::where('city_id',$city->id)->select(['booking_type_id','shipping_mode_id'])->get();
-//        $delivery_row_id = CityDelivery::where('city_id',$city->id)->select('id')->get();
         $delivery = array();
         foreach ($delivery_array as $delivery_details) {
             $delivery[$delivery_details['booking_type_id']][] = $delivery_details['shipping_mode_id'];
@@ -7942,7 +7950,6 @@ if(session('department_id') == 7){
     }
 
     public function updateCity(Request $request,$id){
-
         $city_id = City::where('id',$id)->first();
         if($request->postType == 'city'){
             City::where('id',$id)->update([
@@ -7952,7 +7959,9 @@ if(session('department_id') == 7){
                 'zone_id'=>City::find($request->hubs)->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat
+                'attempt_tat'=>$request->attempt_tat,
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -7963,7 +7972,9 @@ if(session('department_id') == 7){
                 'status' => $city_id->status,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -7998,6 +8009,8 @@ if(session('department_id') == 7){
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -8008,7 +8021,9 @@ if(session('department_id') == 7){
                 'status' => $city_id->status,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -8049,7 +8064,9 @@ if(session('department_id') == 7){
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'status'=>1
+                'status'=>1,
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude
             ]);
 
             CityHistory::create([
@@ -8061,7 +8078,9 @@ if(session('department_id') == 7){
                 'status'=>1,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude
             ]);
 
             if(!empty($request->walk_in_delivery)) {
@@ -8093,7 +8112,9 @@ if(session('department_id') == 7){
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'status'=>1
+                'status'=>1,
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude
             ]);
 
             CityHistory::create([
@@ -8104,7 +8125,9 @@ if(session('department_id') == 7){
                 'status'=>1,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude
             ]);
 
             if(!empty($request->walk_in_delivery)) {

@@ -56,6 +56,16 @@
 
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_case_nature" id="search_case_nature" class="form-control select2">
                                 @foreach($case_natures as $case_nature)
                                     <option value="{{$case_nature->id}}">{{$case_nature->name}}</option>
@@ -136,6 +146,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Channel</th>
                         <th class="border-primary border-darken-1">Agent</th>
@@ -250,6 +261,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Zone',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_agent').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Agent',
                 width:'100%',
@@ -323,6 +339,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Arrival Date');
                             head.push('Channel');
                             head.push('Agent');
@@ -353,6 +370,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.zone);
                                 row.push(values.arrival_date);
                                 row.push(values.channel);
                                 row.push(values.agent);
@@ -407,6 +425,7 @@
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();
+                        d.search_zone = $('#search_zone').val();
                         d.search_agent = $('#search_agent').val();
                         d.search_case_nature = $('#search_case_nature').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
@@ -432,6 +451,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'agent', name: 'a.name', class: 'align-middle agent'},

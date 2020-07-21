@@ -66,7 +66,8 @@
                             <th class="border-primary border-darken-1">Attempts Count</th>
                             <th class="border-primary border-darken-1">Open Box</th>
 							<th class="border-primary border-darken-1">Consolidation</th>
-                            <th class="border-primary border-darken-1">Consolidated IDs</th>                            <th class="border-primary border-darken-1">Clear</th>
+                            <th class="border-primary border-darken-1">Consolidated IDs</th>
+                            <th class="border-primary border-darken-1">Clear</th>
                         </tr>
                         </thead>
                     </table>
@@ -1497,8 +1498,6 @@
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
                 e.preventDefault();
-
-                // this.submit();
             });
             $( "#replacement_form" ).validate({
                 errorClass:"danger",

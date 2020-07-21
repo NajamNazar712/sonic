@@ -578,36 +578,62 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    var rider_id = parseInt($(form).find('select.rider').val());
 
-                    $.ajax({
-                        url: '{!! route('admin.v2_pickups.pending.assign') !!}',
-                        method: 'PUT',
-                        data: {
-                            'pickup_request_ids': selected_rows,
-                            'rider_id': rider_id,
-                            '_token': '{{ csrf_token() }}'
+                    swal({
+                        text: 'Are you sure, you want to assign rider to the following pickup(s)?',
+                        icon: 'info',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if(confirm){
+                            var rider_id = parseInt($(form).find('select.rider').val());
+
+                            $.ajax({
+                                url: '{!! route('admin.v2_pickups.pending.assign') !!}',
+                                method: 'PUT',
+                                data: {
+                                    'pickup_request_ids': selected_rows,
+                                    'rider_id': rider_id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function(data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else {
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+
+                                    table.rows().deselect();
+
+                                    selected_rows = [];
+
+                                    table.button('.assign').disable();
+                                    table.button('.update').disable();
+
+                                    table.draw('false');
+
+                                    $('#assign_to_rider').modal('hide');
+                                });
                         }
-                    })
-                    .done(function(data) {
-                        if (data.status == 0) {
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-                        else {
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-
-                        table.rows().deselect();
-
-                        selected_rows = [];
-
-                        table.button('.assign').disable();
-                        table.button('.update').disable();
-
-                        table.draw('false');
-
-                        $('#assign_to_rider').modal('hide');
                     });
+
                 }
             });
 
@@ -630,39 +656,63 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    var reason_id = parseInt($(form).find('select.reason').val());
-                    var remarks = $('#trax_remarks').val();
-                    $.ajax({
-                        url: '{!! route('admin.v2_pickups.pending.update') !!}',
-                        method: 'PUT',
-                        data: {
-                            'pickup_request_ids': selected_rows,
-                            'reason_id': reason_id,
-                            'trax_remarks': remarks,
-                            '_token': '{{ csrf_token() }}'
+                    swal({
+                        text: 'Are you sure, you want to update the following pickup(s)?',
+                        icon: 'info',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if(confirm){
+                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                            var reason_id = parseInt($(form).find('select.reason').val());
+                            var remarks = $('#trax_remarks').val();
+                            $.ajax({
+                                url: '{!! route('admin.v2_pickups.pending.update') !!}',
+                                method: 'PUT',
+                                data: {
+                                    'pickup_request_ids': selected_rows,
+                                    'reason_id': reason_id,
+                                    'trax_remarks': remarks,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function(data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else {
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+
+                                    table.rows().deselect();
+
+                                    selected_rows = [];
+
+                                    table.button('.assign').disable();
+                                    table.button('.update').disable();
+
+                                    table.draw('false');
+
+                                    $('#update_pickup_modal').modal('hide');
+                                });
+                            $('#update_pickup_request_btn_submit').attr('disabled', false);
                         }
-                    })
-                        .done(function(data) {
-                            if (data.status == 0) {
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-
-                            table.rows().deselect();
-
-                            selected_rows = [];
-
-                            table.button('.assign').disable();
-                            table.button('.update').disable();
-
-                            table.draw('false');
-
-                            $('#update_pickup_modal').modal('hide');
-                        });
-                    $('#update_pickup_request_btn_submit').attr('disabled', false);
+                    });
                 }
             });
             var route = '{!! route('admin.tracking.index') !!}';

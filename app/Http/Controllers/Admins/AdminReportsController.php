@@ -3934,12 +3934,12 @@ use Yajra\Datatables\Datatables;
                 $hubs = $hubs->get();
 
                 if ($date) {
-                    $from_month = Carbon::parse($date)->subDays(60)->addHour($day_cut_off_time)->toDateTimeString();
+                    $from_month = Carbon::parse($date)->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                     $from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
                     $to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
                 }
                 else {
-                    $from_month = Carbon::today()->subDays(60)->addHour($day_cut_off_time)->toDateTimeString();
+                    $from_month = Carbon::today()->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                     $from = Carbon::today()->addHour($day_cut_off_time)->toDateTimeString();
                     $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
                 }
@@ -3965,7 +3965,7 @@ use Yajra\Datatables\Datatables;
                         if ($type == 'status_not_attempted' || $type == 'delivery_tomorrow') {
                             $rows = $rows->join('shipments as s', function($join) {
                                 $join->where(function($query) {
-                                    $query->where('cities.id', '=',  DB::connection('reports')->raw('s.consignee_city_id'))
+                                    $query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->orWhere(function ($sub_query) {
                                         $sub_query->on('cities.id', '=', DB::connection('reports')->raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
                                     });
@@ -4004,10 +4004,9 @@ use Yajra\Datatables\Datatables;
                         else {
                             $rows = $rows->join('shipments_journey as sj', function($join) use ($from_id, $to_id) {
                                 $join->on('s.id', '=', 'sj.shipment_id')
-                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id < "' . $to_id . '")'));
+                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
                             });
                         }
-
                         if ($type == 'delivered') {
                             $rows = $rows->whereIn('sj.shipper_status_id', [14, 30, 36, 37]);
                         }
@@ -5115,12 +5114,13 @@ use Yajra\Datatables\Datatables;
             $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id','name')->get();
             $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
+            $zones = DB::connection('reports')->table('zones')->get();
             $agents = DB::connection('reports')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
                 ->where('admin_roles.department_id',3)->get();
             $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
             $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6,7])->get();
             $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-            return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'statuses'=>$statuses, 'shipping_modes' => $shipping_modes]);
+            return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'statuses'=>$statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
         }
 
         public function crm_list(Request $request){
@@ -5134,6 +5134,7 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
                 ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
                 ->leftjoin('cities as h' ,'h.id', '=' , 'dc.hub_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
                 ->leftjoin('crm_request_channels as crc' ,'crc.id', '=' , 'crm_requests.channel_id')
                 ->leftjoin('admins as a' ,'a.id', '=' , 'crm_requests.agent_id')
                 ->leftJoin('admins as al', function ($join) {
@@ -5182,7 +5183,7 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('admins as crta', 'crta.id', '=', 'crt.tagged_id')
                 ->leftjoin('admin_departments as crtad', 'crtad.id', '=', 'crt.tagged_id')
                 ->leftjoin('cities as crtadh', 'crtadh.id', '=', 'crt.hub_id')
-                ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at')
+                ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone')
             ->groupBy('crm_requests.id');
             $datatable = Datatables::of($crm)
                 ->editColumn('tagged_to', function ($crm_request){
@@ -5349,6 +5350,9 @@ use Yajra\Datatables\Datatables;
             }
             if($hub = $request->get('search_hub')){
                 $datatable->where('h.id', '=', $hub);
+            }
+            if($zone = $request->get('search_zone')){
+                $datatable->where('z.id', '=', $zone);
             }
             if($case_nature = $request->get('search_case_nature')){
                 $datatable->where('crcn.id', '=', $case_nature);
@@ -6456,16 +6460,15 @@ use Yajra\Datatables\Datatables;
             $today = Carbon::now()->startOfDay();
             $aging_report = DB::connection('reports')->table('completed_aging_reports')
             ->join('cities AS c', 'completed_aging_reports.hub_id', '=', 'c.id')
-            ->join('zones AS z', 'completed_aging_reports.main_hub_id', '=', 'z.id')
-            ->select(['completed_aging_reports.id as id','c.name as hubs','z.name as main_hubs','completed_aging_reports.days as days'])
-            ->whereDate('completed_aging_reports.created_at',$today);
+            ->join('zones AS z', 'completed_aging_reports.zone_id', '=', 'z.id')
+            ->select(['completed_aging_reports.id as id','c.name as hubs','z.name as zone','completed_aging_reports.count'])
+            ->whereDate('completed_aging_reports.date',$today);
             $report = Datatables::of($aging_report);
 
-           
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
-                $report->whereBetween('completed_aging_reports.created_at', [$from,$to]);
+                $report->whereBetween('completed_aging_reports.date', [$from,$to]);
             }
 
            
@@ -6480,11 +6483,10 @@ use Yajra\Datatables\Datatables;
             $today = Carbon::now()->startOfDay();
             $aging_report = DB::connection('reports')->table('pending_cash_collection_aging_reports')
             ->join('cities AS c', 'pending_cash_collection_aging_reports.hub_id', '=', 'c.id')
-            ->join('zones AS z', 'pending_cash_collection_aging_reports.main_hub_id', '=', 'z.id')
-            ->select(['pending_cash_collection_aging_reports.id as id','c.name as hubs','z.name as main_hubs','pending_cash_collection_aging_reports.days as days'])
-            ->whereDate('pending_cash_collection_aging_reports.created_at',$today);
+            ->join('zones AS z', 'pending_cash_collection_aging_reports.zone_id', '=', 'z.id')
+            ->select(['pending_cash_collection_aging_reports.id as id','c.name as hubs','z.name as zone','pending_cash_collection_aging_reports.count'])
+            ->whereDate('pending_cash_collection_aging_reports.date',$today);
             $report = Datatables::of($aging_report);
-
            
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
@@ -6534,6 +6536,13 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('total_amount', function ($recovery){
                     return number_format($recovery->total_amount);
                 })
+                ->editColumn('percentage', function ($recovery){
+                    if($recovery->percentage == 0){
+                        return '0%';
+                    }else{
+                        return $recovery->percentage .'%';
+                    }
+                })
                 ->addColumn('banks_list', function ($recovery){
                     $banks_list = '';
                     if(StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
@@ -6554,6 +6563,25 @@ use Yajra\Datatables\Datatables;
                         return $banks_list;
                     }
                     return $banks_list;
+                })
+                ->addColumn('banks_list_excel', function ($recovery){
+                    $banks_list = '';
+                    if(StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->exists()){
+                        $banks = StationRecoveryReportDeposit::where('station_recovery_report_id', $recovery->recovery_id)->get();
+                        $bank_ids = '';
+                        foreach ($banks as $index => $bank) {
+                            $index++;
+                            $banklist = BanksList::find($bank->bank_id);
+                            $banks_list .= $banklist->name;
+                            $bank_ids .= $banklist->id;
+                            if($index != count($banks)){
+                                $banks_list .= ',';
+                                $bank_ids .= ',';
+                            }
+                        }
+                        return $banks_list;
+                    }
+                    return $banks_list;
                 });
             if ($request->get('search_date')) {
                 $date = $request->get('search_date');
@@ -6565,25 +6593,38 @@ use Yajra\Datatables\Datatables;
         public function station_recovery_update(Request $request){
 
             if($request->form_save == 1){
-                foreach ($request->deposit_amount as $key => $value){
-                    $station_recovery = StationRecoveryReport::find($key);
-                    $station_recovery->deposit_amount = $value;
-                    $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
-                    $station_recovery->reason = $request->reason[$key];
-                    $station_recovery->save();
-                    $bank_row = "bank_select.$key";
-                    if($request->has($bank_row)){
-                        StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
-                        foreach ($request->bank_select[$key] as $row => $bank){
-                            $deposit = new StationRecoveryReportDeposit();
-                            $deposit->station_recovery_report_id = $key;
-                            $deposit->bank_id = $bank;
-                            $deposit->admin_id = Auth::id();
-                            $deposit->save();
+                if($request->has('deposit_amount') && count($request->deposit_amount) > 0){
+                    foreach ($request->deposit_amount as $key => $value){
+                        $station_recovery = StationRecoveryReport::find($key);
+                        $station_recovery->deposit_amount = $value;
+                        $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
+                        $station_recovery->reason = $request->reason[$key];
+                        $station_recovery->save();
+                        $station_recovery->fresh();
+                        $difference = $station_recovery->total_amount - $station_recovery->deposit_amount - $station_recovery->adjustment_amount;
+                        $station_recovery->difference_amount = $difference;
+                        if($station_recovery->total_amount > 0){
+                            $percentage = (($station_recovery->deposit_amount + $station_recovery->adjustment_amount) / $station_recovery->total_amount) * 100;
+                            $station_recovery->percentage = $percentage;
+                        }
+                        $station_recovery->save();
+
+                        $bank_row = "bank_select.$key";
+                        if($request->has($bank_row)){
+                            StationRecoveryReportDeposit::where('station_recovery_report_id', $key)->delete();
+                            foreach ($request->bank_select[$key] as $row => $bank){
+                                $deposit = new StationRecoveryReportDeposit();
+                                $deposit->station_recovery_report_id = $key;
+                                $deposit->bank_id = $bank;
+                                $deposit->admin_id = Auth::id();
+                                $deposit->save();
+                            }
                         }
                     }
+                    return redirect()->back()->with('success', 'Report updated successfully!');
                 }
-                return redirect()->back()->with('success', 'Report updated successfully!');
+                return redirect()->back()->with('error', 'Please refresh page and update properly!');
+
             }
         }
 

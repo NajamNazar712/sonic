@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -162,7 +163,22 @@ class ShipperTrackingController extends Controller
                                 }
                             }
 
+                            if($journey->shipper_status_id == 25 && $journey->reference_1_id){
+                                $return_note = ReturnNote::find($journey->reference_1_id);
+                                if($return_note && $return_note->actual_date != null){
+                                    $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
+                                }
+                            }
+
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+                            if(in_array($journey->shipper_status_id, [20,52,54])){
+                                $journey_details['status_remarks'] = ($journey->remarks) ? $journey->remarks : '';
+                            }else{
+                                $journey_details['status_remarks'] = '';
+                            }
+
+
                             $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
 //                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
 
