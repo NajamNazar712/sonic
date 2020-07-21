@@ -1061,11 +1061,11 @@ class RiderAPIController extends Controller {
                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1]);
                 }
 
-                $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
-                if($updated_shipments_count == 0){
-                    DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
-
-                }
+//                $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+//                if($updated_shipments_count == 0){
+//                    DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+//
+//                }
             }
 
             return response()->json(['status' => 0, 'message' => 'Shipment marked as Delivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -1182,10 +1182,10 @@ class RiderAPIController extends Controller {
             }
             
 
-            $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
-            if($updated_shipments_count == 0){
-                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
-            }
+//            $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+//            if($updated_shipments_count == 0){
+//                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+//            }
 
             return response()->json(['status' => 0, 'message' => 'Shipment is marked as Undelivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
         }
