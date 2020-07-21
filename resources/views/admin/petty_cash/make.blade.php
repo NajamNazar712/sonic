@@ -455,6 +455,20 @@
             }
             add_row();
 
+            $.validator.addMethod('maxsize', function(value, element, params) {
+                if ($(element).attr('type') === 'file') {
+                    if (element.files && element.files.length) {
+                        for (var c = 0; c < element.files.length; c++) {
+                            if (element.files[c].size > params) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }, $.validator.format("File Size must not exceed {0} bytes."));
+
             $('body').on('select2:select','.account_head .head_select',function () {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var selected_head = $(this).find(':selected');

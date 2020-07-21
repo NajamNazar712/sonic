@@ -239,6 +239,20 @@
                 }
             });
 
+            $.validator.addMethod('maxsize', function(value, element, params) {
+                if ($(element).attr('type') === 'file') {
+                    if (element.files && element.files.length) {
+                        for (var c = 0; c < element.files.length; c++) {
+                            if (element.files[c].size > params) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }, $.validator.format("File Size must not exceed {0} bytes."));
+
             var min_date = '{{$petty_statement_draft->from}}';
             var max_date = '{{$petty_statement_draft->to}}';
             rows_count = 0;

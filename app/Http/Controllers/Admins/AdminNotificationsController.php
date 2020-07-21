@@ -238,7 +238,7 @@ class AdminNotificationsController extends Controller
         else if ($id == 36 || $id == 37) {
              $details['fields'] = ['account_id', 'company_name_b', 'company_name_a', 'trax_logo'];
         }
-		else if($id == 38){
+		else if ($id == 38){
             $details['fields'] = ['shipper_name','button','trax_logo'];
         }
         else if ($id == 39) {
@@ -310,11 +310,13 @@ class AdminNotificationsController extends Controller
         else if ($id == 66){
             $details['fields'] = ['request_id', '[escalation].'];
         }
-        else if ($id == 67){
+		else if ($id == 67){
             $details['fields'] = ['zero_report'];
         }
-       
-        return $details;
+		else if ($id == 73){
+            $details['fields'] = ['pickup_request_id', 'tracking_numbers', 'company_name', 'pickup_city'];
+        }
+		return $details;
     }
 
     public function edit(Request $request) {

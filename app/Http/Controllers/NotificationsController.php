@@ -1747,8 +1747,7 @@ class NotificationsController extends Controller
 
             $bcc = array();
 
-            $general_admins = Admin::whereIn('role_id', [4, 3, 6])->where('status', 1);
-
+            $general_admins = Admin::whereIn('role_id', [4, 3])->where('status', 1);
             if ($general_admins->exists()) {
               $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
             }
@@ -2084,7 +2083,7 @@ class NotificationsController extends Controller
 
                   $cc = array();
 
-                  $general_admins = Admin::whereIn('role_id', [6, 15, 21])->where('status', 1);
+                  $general_admins = Admin::whereIn('role_id', [15, 21])->where('status', 1);
 
                   if ($general_admins->exists()) {
                     $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
@@ -2429,7 +2428,7 @@ class NotificationsController extends Controller
 
               $to = array();
 
-              $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20, 22])->where('status', 1);
+              $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22])->where('status', 1);
 
               if ($admins->exists()) {
                   $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -2601,7 +2600,7 @@ class NotificationsController extends Controller
 
             self::email($subject, $body, $to, $cc);
           }
-			else if($id == 31){
+		  else if($id == 31){
 	              $possible_fields = ['tracking_number', 'shipper_name', 'email', 'phone', 'destination', 'channel', 'case_nature', 'case_nature_type', 'details'];
 
 	            $crm_request = CrmRequest::find($reference_1_id);
@@ -2747,7 +2746,7 @@ class NotificationsController extends Controller
 	                    }
 	            }
 	          }
-            else if ($id == 32) {
+          else if ($id == 32) {
                   $nsa_shipment = Shipment::find($reference_1_id);
 
                   if (strpos($subject, '[nsa]') !== FALSE) {
@@ -2829,7 +2828,7 @@ class NotificationsController extends Controller
 
                 self::email($subject, $body, $to);
             }
-            else if($id == 34){
+          else if($id == 34){
                 $user_id = str_pad($reference_1_id, 6, '0', STR_PAD_LEFT);
                 $updated_at = Carbon::now();
                 $sale_person = Admin::where('id', $reference_2_id)->first();
@@ -2860,7 +2859,7 @@ class NotificationsController extends Controller
 
                 self::email($subject, $body, $to);
             }
-            else if($id == 35){
+          else if($id == 35){
                 $shipment = Shipment::find($reference_1_id);
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('verification', 1)->latest('id')->first();
                 if (strpos($body, '[tracking_number]') !== FALSE) {
@@ -2886,7 +2885,7 @@ class NotificationsController extends Controller
                 $to = $shipment->consignee_phone_number_1;
                 self::sms($body, $to);
             }
-            else if($id == 36 || $id == 37){
+          else if($id == 36 || $id == 37){
                 $account_a = User::where('id', $reference_1_id)->first();
                 $account_b = User::where('id', $reference_2_id)->first();
 //                $account_id_a = str_pad($account_a->id, 6, '0', STR_PAD_LEFT);
@@ -2915,7 +2914,7 @@ class NotificationsController extends Controller
 
                 self::email($subject, $body, $to);
             }
-			else if($id == 38){
+          else if($id == 38){
                 $shipper = User::find($reference_1_id);
                 if($shipper){
                     $terms = CRFTermsConditions::where('user_id', $shipper->id)->first();
@@ -2946,7 +2945,7 @@ class NotificationsController extends Controller
                     }
                 }
             }
-			else if($id == 39){
+          else if($id == 39){
 
                 $subject = $notification->subject;
                 $body = $notification->body;
@@ -3002,11 +3001,11 @@ class NotificationsController extends Controller
                 $shipment_details = ShipmentsJourney::join('shipments', 'shipments.id', '=', 'shipments_journey.shipment_id')->where('shipments.shipper_status_id', 25)->where('shipments_journey.shipper_status_id', 25)->whereBetween('shipments_journey.created_at', [$yesterday, $today])->select('shipments.user_id','shipments.tracking_number','shipments_journey.created_at','shipments_journey.received_or_refused_by','shipments_journey.reference_1_id');
 
                 if ($shipment_details->exists()) {
-                
+
                   $shipment_details = $shipment_details->get();
 
                   foreach ($shipment_details as $data) {
-                    
+
                     $details = array();
 
                     $details['tracking_number'] = $data->tracking_number;
@@ -3020,9 +3019,9 @@ class NotificationsController extends Controller
                     $details['returned_at'] = $returned_at;
 
                     $user_wise_shipments[$data->user_id][] = $details;
-                   
+
                   }
-                  
+
                   if(!empty($user_wise_shipments)){
                     $original_subject = $subject;
                     $original_body = $body;
@@ -3037,9 +3036,9 @@ class NotificationsController extends Controller
                           if (strpos($body, '[company_name]') !== FALSE) {
                             $body = str_replace('[company_name]', $shipper->name, $body);
                           }
-                          
+
                          if (ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
-                        
+
                           $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
                           }
                           else {
@@ -3087,7 +3086,7 @@ class NotificationsController extends Controller
                           }
 
                           $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
-                      
+
                           self::email($subject, $body, $to);
 
                           $subject = $original_subject;
@@ -3097,7 +3096,7 @@ class NotificationsController extends Controller
                   }
                 }
             }
-			else if($id == 40){
+          else if($id == 40){
                 $delivery_note = DeliveryNote::find($reference_1_id);
                 if($delivery_note){
                     $rider = Rider::find($delivery_note->rider_id);
@@ -3118,7 +3117,7 @@ class NotificationsController extends Controller
                     self::sms($body, $to);
                 }
             }
-			else if($id == 41){
+		  else if($id == 41){
                 $crm_request = CrmRequest::find($reference_1_id);
                 if($crm_request){
                     $user = User::find($crm_request->shipper_id);
@@ -3133,7 +3132,7 @@ class NotificationsController extends Controller
                     }
                 }
             }
-			else if($id == 42){
+		  else if($id == 42){
                 $rider = Rider::find($reference_1_id);
                 $user = User::find($reference_2_id);
                 if($user){
@@ -3151,50 +3150,7 @@ class NotificationsController extends Controller
                     }
                 }
             }
-            //updated revamp
-			// else if($id == 43){
-			//     $pickup_request = PickupRequest::find($reference_1_id);
-			//     if($pickup_request){
-      //               $vendor = $pickup_request->pickup_address->vendor;
-      //               if($vendor != null){
-      //                   $shipper_name = $pickup_request->shipper->name;
-
-      //                   if (strpos($subject, '[shipper_name]') !== FALSE) {
-      //                       $subject = str_replace('[shipper_name]', $shipper_name, $subject);
-      //                   }
-      //                   if (strpos($body, '[shipper_name]') !== FALSE) {
-      //                       $body = str_replace('[shipper_name]', $shipper_name, $body);
-      //                   }
-      //                   if (strpos($body, '[vendor]') !== FALSE) {
-      //                       $body = str_replace('[vendor]', $vendor, $body);
-      //                   }
-
-      //                   $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
-      //                   $shipment_details = '<table style="width:100%;">';
-      //                   $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
-      //                   $shipment_details .= '<tbody>';
-      //                   foreach ($assigned_shipments as $assigned_shipment){
-      //                       $shipment = $assigned_shipment->shipment;
-      //                       $items = ShipmentItem::where('shipment_id', $shipment->id)->first();
-      //                       $shipment_details .= '<tr>';
-      //                       $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
-      //                       $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->description . '</td>';
-      //                       $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
-      //                       $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
-      //                       $shipment_details .= '</tr>';
-      //                   }
-      //                   $shipment_details .= '</tbody></table>';
-
-      //                   if (strpos($body, '[shipments_detail]') !== FALSE) {
-      //                       $body = str_replace('[shipments_detail]', $shipment_details, $body);
-      //                   }
-
-      //                   $to = $pickup_request->pickup_address->email;
-      //                   self::email($subject, $body, $to);
-      //               }
-      //           }
-      //       }
-      else if($id == 43){
+          else if($id == 43){
         $pickup_request = V2PickupRequest::find($reference_1_id);
         if($pickup_request){
                   $vendor = $pickup_request->pickup_address->vendor;
@@ -3795,8 +3751,6 @@ class NotificationsController extends Controller
                 $to = array();
 
                 $cc = array();
-
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
                     $admins = Admin::whereIn('role_id', [2, 3, 4, 20])->where('status', 1);
 
                     if ($admins->exists()) {
@@ -3933,7 +3887,6 @@ class NotificationsController extends Controller
 //
 //                 self::email($subject, $body, $to);
             }
-            //updated revamp status
             else if($id == 50){
               $done = "Done";
               $not_done = "Not Done";
@@ -4005,7 +3958,6 @@ class NotificationsController extends Controller
                   self::email($subject, $body, $to);
               }
           }
-            //updated revamp
             else if($id == 51){
               $done = "Done";
               $not_done = "Not Done";
@@ -4049,7 +4001,6 @@ class NotificationsController extends Controller
                   self::sms($body, $to);
               }
           }
-
             else if ($id == 53) {
                 $date = Carbon::yesterday()->format('Y-m-d');
                 if (strpos($subject, '[date]') !== FALSE) {
@@ -4129,7 +4080,6 @@ class NotificationsController extends Controller
 
                 self::email($subject, $body, $to, $cc);
             }
-
             else if ($id == 54) {
                 $date = Carbon::yesterday()->format('Y-m-d');
                 if (strpos($subject, '[date]') !== FALSE) {
@@ -4215,7 +4165,6 @@ class NotificationsController extends Controller
 
                 self::email($subject, $body, $to, $cc);
             }
-
             else if ($id == 55) {
 
                 $date = Carbon::yesterday()->format('Y-m-d');
@@ -4585,7 +4534,6 @@ class NotificationsController extends Controller
                     self::sms($body, $to);
                 }
             }
-
             else if($id == 62){
             
              $users = User::where('status', 3)->get();
@@ -4643,7 +4591,6 @@ class NotificationsController extends Controller
              }
   
             }
-
             else if($id == 63){
                 $date =\Carbon\Carbon::yesterday()->format('Y-m-d');
                 $pickup_requests = V2PickupRequest::where('status_id', '=',4)->where('updated_at','>=',$date)->get();
@@ -4677,8 +4624,7 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 }    
               }
-
-              else if($id == 64){
+            else if($id == 64){
 
                 $to = array();
                 $cc = array();
@@ -4727,7 +4673,7 @@ class NotificationsController extends Controller
                 }
              
               }
-              else if($id == 65){
+            else if($id == 65){
                   $crm_request_id =  str_pad($reference_1_id, 6, '0', STR_PAD_LEFT);
                   $to = $reference_2_id;
                   $crm_request = CrmRequest::find($reference_1_id);
@@ -4762,7 +4708,7 @@ class NotificationsController extends Controller
 
                   self::email($subject, $body, $to);
               }
-              else if($id == 66){
+            else if($id == 66){
                   $crm_request_id =  str_pad($reference_1_id, 6, '0', STR_PAD_LEFT);
                   $to = $reference_2_id['to'];
                   $cc = $reference_2_id['cc'];
@@ -4788,7 +4734,7 @@ class NotificationsController extends Controller
 
                   self::email($subject, $body, $to, $cc, $bcc);
               }
-              else if($id == 67){
+			else if($id == 67){
 
                 $to = array();
                 $date =\Carbon\Carbon::yesterday()->format('Y-m-d');
@@ -5013,8 +4959,7 @@ class NotificationsController extends Controller
 
                    self::email($subject, $body, $to, $cc);
               }
-			else if($id == 71){
-                  $completed_agings = CompletedAgingReport::get();
+              else if($id == 71){                  $completed_agings = CompletedAgingReport::get();
 
                   $subject = $notification->subject;
                   $body = $notification->body;
@@ -5054,7 +4999,7 @@ class NotificationsController extends Controller
 
                   self::email($subject, $body, $to);
               }
-              else if($id == 72){
+            else if($id == 72){
                   $pending_cash_collection_agings = PendingCashCollectionAgingReport::get();
 
                   $subject = $notification->subject;
@@ -5095,6 +5040,77 @@ class NotificationsController extends Controller
 
                   self::email($subject, $body, $to);
               }
+            else if($id == 73){
+
+                $tracking_numbers = $reference_1_id;
+                $pickup_request_id = $reference_2_id;
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                if($pickup_request){
+                    if (strpos($subject, '[pickup_request_id]') !== FALSE) {
+                        $subject = str_replace('[pickup_request_id]', $pickup_request_id, $subject);
+                    }
+
+                    if (strpos($body, '[pickup_request_id]') !== FALSE) {
+                        $body = str_replace('[pickup_request_id]', $pickup_request_id, $body);
+                    }
+
+                    $company_name = $pickup_request->shipper->name;
+
+                    if (strpos($subject, '[company_name]') !== FALSE) {
+                        $subject = str_replace('[company_name]', $company_name, $subject);
+                    }
+
+                    if (strpos($body, '[company_name]') !== FALSE) {
+                        $body = str_replace('[company_name]', $company_name, $body);
+                    }
+
+                    $pickup_city = $pickup_request->pickup_city->name;
+                    if (strpos($subject, '[pickup_city]') !== FALSE) {
+                        $subject = str_replace('[pickup_city]', $pickup_city, $subject);
+                    }
+
+                    if (strpos($body, '[pickup_city]') !== FALSE) {
+                        $body = str_replace('[pickup_city]', $pickup_city, $body);
+                    }
+
+                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th></tr></thead><tbody>';
+                    foreach ($tracking_numbers as $row => $tracking){
+                        $row++;
+                        $html .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $row .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $tracking .'</td></tr>';
+                    }
+
+                    $html .= '</tbody></table>';
+                    if (strpos($body, '[tracking_numbers]') !== FALSE) {
+                        $body = str_replace('[tracking_numbers]', $html, $body);
+                    }
+
+                    $to = array();
+                    $bcc = array();
+
+                    $to[] = $pickup_request->shipper->email;
+
+                    $sales_person = SalePersonTag::where('user_id', $pickup_request->shipper_id)->where('status', 0)->first();
+
+                    if($sales_person){
+                        $bcc[] = Admin::find($sales_person->admin_id)->email;
+                    }
+
+                    $city_id = $pickup_request->pickup_city->hub_id;
+
+                    $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($city_id) {
+                        $query->where('hub_id', $city_id);
+                    });
+
+                    if ($related_admins->exists()) {
+                        $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
+                    }
+                    if (empty($bcc)) {
+                        $bcc = NULL;
+                    }
+
+                    self::email($subject, $body, $to, NULL, $bcc);
+                }
+            }
         }
       }
     }
