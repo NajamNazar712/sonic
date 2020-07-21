@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\City;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\ShipmentScanningScreenLocation;
@@ -37,25 +38,34 @@ class AdminShipmentScanningHistoryController extends Controller
                             if($scanning_history->user_type == 1){
                                 $account_type = 'Admin';
                                 $admin = Admin::find($scanning_history->admin_id);
+                                $c = City::find($admin->default_hub_id);
+                                ($c)?$city=$c['name']:$city='-';
+                              /* dd($city);*/
                                 $scanned_by = $admin->name;
                             }
                             elseif($scanning_history->user_type == 2){
                                 $account_type = 'Shipper';
                                 $user = User::find($scanning_history->user_id);
                                 $scanned_by = $user->name;
+                                $city='-';
+
+
                             }
                             elseif($scanning_history->user_type == 3){
                                 $account_type = 'Substitute Shipper';
                                 $sub_user = SubstituteUser::find($scanning_history->substitute_user_id);
                                 $scanned_by = $sub_user->name;
+                                $city='-';
                             }
                             else{
                                 $account_type = '-';
                                 $scanned_by = '-';
+                                $city='-';
                             }
                             $details[$index]['screen_location'] = $screen_location->name;
                             $details[$index]['account_type'] = $account_type;
                             $details[$index]['scanned_by'] = $scanned_by;
+                            $details[$index]['city'] = $city;
                             $details[$index]['scanned_at'] = Carbon::parse($scanning_history->created_at)->format('Y-m-d H:i:s');
                         }
                         $data['tracking_number'] = $shipment->tracking_number;
