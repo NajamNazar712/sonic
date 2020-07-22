@@ -8369,11 +8369,14 @@ if(session('department_id') == 7){
         return view('admin.management.rider_management')->with(['categories'=>$category]);
     }
     public function riderListAjax(){
+
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
             ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
-            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
+            ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
+            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic',                'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as                           status','riders.created_at','cb.name as created_by', 'ub.name as updated_by']);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -8478,7 +8481,8 @@ if(session('department_id') == 7){
             'rider_category_id'=>$request->rider_category,
             'status'=>1,
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
-            'pin'=> bcrypt($request->pin)
+            'pin'=> bcrypt($request->pin),
+            'created_by' => Auth::id()
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -8539,7 +8543,7 @@ if(session('department_id') == 7){
 
             NotificationsController::send(61, $rider->id, $request->pin);
         }
-
+        $rider->updated_by = Auth::id();
         $rider->save();
 
         if($rider){
