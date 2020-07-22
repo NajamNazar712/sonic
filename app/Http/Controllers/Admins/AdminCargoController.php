@@ -497,7 +497,7 @@ class AdminCargoController extends Controller
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             }
             else{
-                return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
+                return ['status' => 1, 'error' => 'Given Item aID does not belong here'];
             }
 
         }
