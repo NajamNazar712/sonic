@@ -2083,11 +2083,11 @@ class NotificationsController extends Controller
 
                   $cc = array();
 
-                  $general_admins = Admin::whereIn('role_id', [15, 21])->where('status', 1);
-
-                  if ($general_admins->exists()) {
-                    $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
-                  }
+//                  $general_admins = Admin::whereIn('role_id', [15, 21])->where('status', 1);
+//
+//                  if ($general_admins->exists()) {
+//                    $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
+//                  }
 
                   self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
 
