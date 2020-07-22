@@ -47,6 +47,7 @@
                                     <th class="border-primary border-darken-1"> S. No.</th>
                                     <th class="border-primary border-darken-1"> Created At</th>
                                     <th class="border-primary border-darken-1"> Created By</th>
+                                    <th class="border-primary border-darken-1"> City </th>
                                     <th class="border-primary border-darken-1"> Cargoes</th>
                                     <th class="border-primary border-darken-1"> Shipments</th>
                                     <th class="border-primary border-darken-1"> Excel</th>
@@ -285,6 +286,7 @@
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'created_at', name: 'cargo_consignment_excels.created_at', class: 'align-middle text-center created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle text-center created_by'},
+                    {data: 'city', name: 'c.name', class: 'align-middle text-center city'},
                     {data: 'cargoes_button', name: 'cargo_consignment_excels.cargoes', class: 'align-middle text-center cargoes'},
                     {data: 'shipments_button', name: 'cargo_consignment_excels.shipments', class: 'align-middle text-center shipments'},
                     {data: 'excel_button', name: 'cargo_consignment_excels.excel', class: 'align-middle text-center excel'},

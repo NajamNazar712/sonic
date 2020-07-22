@@ -40,7 +40,6 @@ class AdminShipmentScanningHistoryController extends Controller
                                 $admin = Admin::find($scanning_history->admin_id);
                                 $c = City::find($admin->default_hub_id);
                                 ($c)?$city=$c['name']:$city='-';
-                              /* dd($city);*/
                                 $scanned_by = $admin->name;
                             }
                             elseif($scanning_history->user_type == 2){
