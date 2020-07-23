@@ -655,14 +655,15 @@
                         dangerMode: true
                     }).then(function(confirm) {
                         if(confirm){
-                            $('#update_pickup_request_btn_submit').attr('disabled', 'disabled');
+                            $('#update_pickup_request_btn_submit').prop('disabled', true);
 
                             $('#update_pickup_request_ids').val(selected_rows);
                             form.submit();
 
                         }
-                        $('#update_pickup_request_btn_submit').attr('disabled', false);
+
                     });
+                    $('#update_pickup_request_btn_submit').prop('disabled', false);
                 }
             });
             var route = '{!! route('admin.tracking.index') !!}';
