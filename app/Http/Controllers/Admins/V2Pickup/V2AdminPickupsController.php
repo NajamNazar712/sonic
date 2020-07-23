@@ -220,11 +220,12 @@ class V2AdminPickupsController extends Controller
     public function pending_assign(Request $request) {
         $pickup_request_ids = $request->input('pickup_request_ids');
         $pickup_request_ids = explode(',' , $pickup_request_ids);
+        $rider_id = $request->input('rider');
 
-        $rider_id = $request->input('rider_id');
-        if(count($pickup_request_ids) == 0 || $pickup_request_ids == null){
+        if(count($pickup_request_ids) == 0){
             return redirect()->back()->with('error', 'No Pickups selected!');
         }
+
         array_unique($pickup_request_ids);
         $rider_cut_off_time = NULL;
         $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
@@ -377,7 +378,7 @@ class V2AdminPickupsController extends Controller
         $pickup_request_ids = $request->pickup_request_ids;
         $pickup_request_ids = explode(',' , $pickup_request_ids);
 
-        $reason_id = $request->reason_id;
+        $reason_id = $request->reason;
         $trax_remarks = $request->trax_remarks;
         if(count($pickup_request_ids) > 0){
             foreach ($pickup_request_ids as $pickup_request_id) {
