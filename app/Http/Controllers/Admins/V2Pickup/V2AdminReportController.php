@@ -143,6 +143,7 @@ class V2AdminReportController extends Controller
                        $legend_id = 4;
                        $department_id = 7;
                        $category_id = 3;
+                       $total_sales++;
                        $attempted_failed++;
                    }
 
