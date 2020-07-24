@@ -113,10 +113,30 @@ class V2AdminReportController extends Controller
                        $attempted_and_picked++;
                    }
                    if(($status_id == 3) && ($attempts >= 1)){
-                       $department_id = 7;
-                       $legend_id = 3;
+                       $pickup_attempts = $pickup_request->pickup_attempts;
+                       $pickup_attempt_flag = FALSE;
+                       $pickup_attempt_operation_status = array(7,8,9);
+
+                       if(count($pickup_attempts) > 0){
+                           foreach ($pickup_attempts as $pickup_attempt){
+                               if(in_array($pickup_attempt->reason_id, $pickup_attempt_operation_status)){
+                                   $pickup_attempt_flag = TRUE;
+                               }
+                           }
+                       }
+
+                       if ($pickup_attempt_flag) {
+                           $department_id = 6;
+                           $legend_id = 5;
+                           $total_operations++;
+                       }
+                       else {
+                           $department_id = 7;
+                           $legend_id = 3;
+                           $total_sales++;
+                       }
+
                        $category_id = 2;
-                       $total_sales++;
                        $attempted_and_not_picked++;
                    }
                    if($status_id == 4){
@@ -125,21 +145,7 @@ class V2AdminReportController extends Controller
                        $category_id = 3;
                        $attempted_failed++;
                    }
-                   $pickup_attempts = $pickup_request->pickup_attempts;
-                   $pickup_attempt_flag = FALSE;
-                   $pickup_attempt_operation_status = array(7,8,9);
-                   if(count($pickup_attempts) > 0){
-                       foreach ($pickup_attempts as $pickup_attempt){
-                           if(in_array($pickup_attempt->reason_id, $pickup_attempt_operation_status)){
-                               $pickup_attempt_flag = TRUE;
-                           }
-                       }
-                   }
-                   if($pickup_attempt_flag){
-                       $department_id = 6;
-                       $legend_id = 5;
-                       $total_operations++;
-                   }
+
                    if($pickup_request->after_cut_off_time == null){
                        $total_cut_off_time_before++;
                    }
