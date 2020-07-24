@@ -93,7 +93,7 @@ class V2AdminReportController extends Controller
                    }
                    if($booked > 0){
                        $difference = ($booked - $received)/$booked;
-                       $difference_shipments = 100 - $difference;
+                       $difference_shipments = (1 - ($difference)) * 100;
 
                    }else{
                        $difference = 0;
