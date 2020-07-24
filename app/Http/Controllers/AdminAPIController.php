@@ -25,6 +25,10 @@ class AdminAPIController extends Controller
         'image' => ':attribute must be an Image.'
     ];
 
+    public function verify(Request $request) {
+        return response()->json(['status' => 0, 'message' => 'API Key is Valid']);
+    }
+
     public function login(Request $request) {
         $rules = [
             'email_address' => ['required', 'email'],

@@ -86,7 +86,8 @@ Route::name('api.')->group(function () {
         Route::post('login', 'AdminAPIController@login')->name('login');
 
         Route::middleware('AdminAPIToken')->group(function () {
-            Route::get('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
+            Route::post('verify', 'AdminAPIController@verify')->name('verify');
+            Route::post('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
         });
 
     });
