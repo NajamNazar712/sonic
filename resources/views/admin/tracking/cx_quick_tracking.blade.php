@@ -384,7 +384,7 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
-            
+
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Shipper',
                 width: '100%',
