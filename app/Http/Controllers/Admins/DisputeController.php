@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
@@ -392,7 +393,28 @@ class DisputeController extends Controller
             }
 
             return response()->json(['success'=>1,'cities'=>$cities,'dispute_types'=>$dispute_types,'cargo_shipments'=>$tracking]);
-        }else{
+        }
+        elseif ($request->has('master_cargo')){
+            $disputes = array(3,7,9,10);
+            $cities = City::where('status',1)->select('id','name')->get();
+            $dispute_types = DisputeType::whereIn('id',$disputes)->get();
+            $master_cargo = MasterCargo::find($request->master_cargo_id);
+            $master_cargo_bags = $master_cargo->master_bags;
+            $master_cargo_bags_shipment_ids = array();
+            $tracking = array();
+            foreach ($master_cargo_bags as $master_cargo_bag){
+                $master_cargo_bag_shipments = $master_cargo_bag->bag->shipment;
+                foreach ($master_cargo_bag_shipments as $master_cargo_bag_shipment) {
+                    $master_cargo_bags_shipment_ids[] = $master_cargo_bag_shipment->shipment_id;
+                }
+            }
+            $trackings = Shipment::whereIn('id',$master_cargo_bags_shipment_ids)->select('tracking_number')->get();
+            foreach ($trackings as $number){
+                $tracking[]  =$number->tracking_number;
+            }
+            return response()->json(['success'=>1,'cities'=>$cities,'dispute_types'=>$dispute_types,'cargo_shipments'=>$tracking]);
+        }
+        else{
             $shipment_id = $request->shipment_id;
             $tracking = Shipment::where('id',$shipment_id)->select('tracking_number')->first();
             $disputes = array(3,4,5,8,9);
@@ -455,9 +477,14 @@ class DisputeController extends Controller
 
         }
     }
-    public static function add_junction_dispute($cargo_id,$junction_id){
+    public static function add_junction_dispute($cargo_id,$junction_id, $master = NULL){
             $junction = City::find($junction_id);
-            $description = "This Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT) . " is not updated at $junction->name";
+            if($master != NULL){
+                $description = "This Master Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT) . " is not updated at $junction->name";
+            }
+            else{
+                $description = "This Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT) . " is not updated at $junction->name";
+            }
             $admin = Auth::id();
             $city_id = $junction_id;
 
@@ -472,28 +499,54 @@ class DisputeController extends Controller
 
             NotificationsController::send(19, $dispute->id);
     }
-    public static function add_cargo_short_received($cargo_id,$shipments){
-        $description = "Short received shipments dispute for Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
-        $admin = Auth::id();
-        $city_id = Shipment::find($shipments[0]->shipment_id)->pickup_address->city->hub_id;
-        $count = count($shipments);
-        $dispute = Dispute::create([
-            'description'=>$description,
-            'raised_by'=>$admin,
-            'raised_by_status'=>0,
-            'city_id'=>$city_id,
-            'dispute_type_id'=>7,
-            'shipments_count'=>$count
-        ]);
-        if($dispute){
-            foreach ($shipments as $shipment){
-                DisputeShipment::create([
-                    'dispute_id'=>$dispute->id,
-                    'shipment_id'=>$shipment->shipment_id
-                ]);
-            }
+    public static function add_cargo_short_received($cargo_id,$shipments, $master = NULL){
+        if($master != NULL){
+            $description = "Short received shipments dispute for Master Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
+            $admin = Auth::id();
+            $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
+            $count = count($shipments);
+            $dispute = Dispute::create([
+                'description'=>$description,
+                'raised_by'=>$admin,
+                'raised_by_status'=>0,
+                'city_id'=>$city_id,
+                'dispute_type_id'=>7,
+                'shipments_count'=>$count
+            ]);
+            if($dispute){
+                foreach ($shipments as $shipment_id){
+                    DisputeShipment::create([
+                        'dispute_id'=>$dispute->id,
+                        'shipment_id'=>$shipment_id
+                    ]);
+                }
 
-            NotificationsController::send(19, $dispute->id);
+                NotificationsController::send(19, $dispute->id);
+            }
+        }
+        else{
+            $description = "Short received shipments dispute for Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
+            $admin = Auth::id();
+            $city_id = Shipment::find($shipments[0]->shipment_id)->pickup_address->city->hub_id;
+            $count = count($shipments);
+            $dispute = Dispute::create([
+                'description'=>$description,
+                'raised_by'=>$admin,
+                'raised_by_status'=>0,
+                'city_id'=>$city_id,
+                'dispute_type_id'=>7,
+                'shipments_count'=>$count
+            ]);
+            if($dispute){
+                foreach ($shipments as $shipment){
+                    DisputeShipment::create([
+                        'dispute_id'=>$dispute->id,
+                        'shipment_id'=>$shipment->shipment_id
+                    ]);
+                }
+
+                NotificationsController::send(19, $dispute->id);
+            }
         }
     }
     public static function add_delivery_wrong_status_dispute($delivery_note,$shipments){
