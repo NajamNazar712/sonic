@@ -6276,7 +6276,7 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('cities as dc', 'dc.id', '=', 'cargo_consignments.destination_hub_id')
                 ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'cargo_consignments.shipping_mode_id')
                 ->leftjoin('shipments as s', 's.id', '=', 'css.shipment_id')
-                ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'cargo_consignments.type as cargo_type', 'cargo_consignments.created_at as transited_at')
+                ->select('s.tracking_number as tracking_number','cargo_consignments.id as cargo','oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'cargo_consignments.type as cargo_type', 'cargo_consignments.created_at as transited_at')
                 ->where('cargo_consignments.status_id', 4)
                 ->whereIn('s.shipper_status_id', [3, 21])->get();
 

@@ -3820,6 +3820,7 @@ class AdminFinanceController extends Controller
     public function done_payments_excel_store(Request $request){
         $names = [
             'payment_id' => 'Payment ID',
+            'company_bank_id' => 'Company Bank ID',
             'status' => 'Status',
         ];
 
@@ -3830,10 +3831,13 @@ class AdminFinanceController extends Controller
 
         $rules = [
             'payment_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('done_payments', 'id')],
+            'company_bank_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('banks_lists', 'id')->where(function($query) {
+                $query->where('affiliate', DB::raw(1));
+            })],
             'status' => ['required', 'string', 'in:paid,Paid,Reverted,reverted,PAID,REVERTED'],
         ];
 
-        $fields = [0 => 'payment_id', 1 => 'status'];
+        $fields = [0 => 'payment_id', 1 => 'company_bank_id', 2 => 'status'];
 
         if($file = $request->file('payments')) {
 
@@ -3841,7 +3845,7 @@ class AdminFinanceController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Payment ID', 'Status'];
+            $header = ['Payment ID', 'Company Bank ID', 'Status'];
         }
 
         if (isset($spreadsheet)) {
@@ -3894,7 +3898,6 @@ class AdminFinanceController extends Controller
                 $errors = array_map(function ($row, $errors) {
                     return $row . ':' . PHP_EOL . implode(' | ', $errors);
                 }, array_keys($errors), $errors);
-//                dd($errors);
                 return redirect()->back()->withErrors($errors);
             }
             else{
@@ -3904,6 +3907,7 @@ class AdminFinanceController extends Controller
                     $status = strtolower($row['status']);
                     if($status == "paid"){
                         if ($done_payment->status != 1) {
+                            $done_payment->company_bank_id = (int)$row['company_bank_id'];
                             $done_payment->status = 1;
 
                             $done_payment->save();
@@ -3930,6 +3934,7 @@ class AdminFinanceController extends Controller
                     }
                     elseif($status == "reverted"){
                         if ($done_payment->status != 2 && $done_payment->status != 1) {
+                            $done_payment->company_bank_id = (int)$row['company_bank_id'];
                             $done_payment->status = 2;
 
                             $done_payment->save();
