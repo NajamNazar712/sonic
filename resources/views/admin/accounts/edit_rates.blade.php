@@ -3653,26 +3653,6 @@
                                     </table>
                                 </div>
                             </div>
-                            @if(!in_array(8, session('permissions')) && !in_array(140, session('permissions')))
-                            <div class="col mt-2">
-                                <hr>
-                                <h3 class="text-center">Documents Attachment</h3>
-                                <div class="row justify-content-center">
-                                    <div class=" col form-group">
-                                        <label for="filled_and_signed_image">
-                                            Pdf of filled and signed document:
-                                        </label>
-                                        <input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf" data-rule-required="true" data-msg-required="This field is required" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
-                                    </div>
-                                    <div class=" col form-group">
-                                        <label for="signed_acknowledgement_image">
-                                            Pdf of signed Acknowledgement form:
-                                        </label>
-                                        <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf" id="signed_acknowledgement_pdf" data-rule-required="true" data-msg-required="This field is required" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
 
                             <div class="row mt-2 justify-content-center">
                                 <div class="col-5 form-group">
@@ -3722,6 +3702,39 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn" data-dismiss="modal">No</button>
                     <button type="button" class="btn btn-danger" id="RejectRatesSubmit">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="UserDocumentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UserDocumentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Document Attachment</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="user_document_form" novalidate="novalidate" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="user_id" id="user_document_user_id" value="{{$shipper->id}}">
+                        <input type="hidden" name="doc_upload" id="doc_upload" value="0">
+                        <div class="col form-group">
+                            <label for="filled_and_signed_image">
+                                Pdf of filled and signed document:
+                            </label>
+                            <input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
+                        </div>
+                        <div class="col form-group">
+                            <label for="signed_acknowledgement_image">
+                                Pdf of signed Acknowledgement form:
+                            </label>
+                            <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf" id="signed_acknowledgement_pdf" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="UserDocumentSubmit">Upload</button>
                 </div>
             </div>
         </div>
@@ -5525,25 +5538,30 @@
             },
             submitHandler: function(form) {
                 if (overnightSwitch.checked == true || overlandSwitch.checked == true || detainSwitch.checked == true || samedaySwitch.checked == true) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    var msg = "";
-                    if($('#authorize').val() == 1){
-                        msg = "Rates are being authorized!"
-                    }else{
-                        msg = 'Rates are being added!';
+                    if($('#authorize').val() != 1 && $('#approve').val() != 1 && $('#doc_upload').val() == 0){
+                        $('#UserDocumentModal').modal('show');
                     }
+                    else{
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                        var msg = "";
+                        if($('#authorize').val() == 1){
+                            msg = "Rates are being authorized!"
+                        }else{
+                            msg = 'Rates are being added!';
+                        }
 
 
-                    swal({
-                        title: 'Please Wait!',
-                        text: msg,
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
+                        swal({
+                            title: 'Please Wait!',
+                            text: msg,
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
 
-                    form.submit();
+                        form.submit();
+                    }
                 }
                 else {
                     swal({
@@ -5552,6 +5570,37 @@
                         icon: 'warning'
                     });
 
+                }
+            }
+        });
+
+        $('#UserDocumentSubmit').on('click',function () {
+            var pdf_of_filled_and_signed_document= $('#filled_and_signed_pdf').val();
+            var pdf_of_signed_acknowledgment = $('#signed_acknowledgement_pdf').val();
+            if(pdf_of_filled_and_signed_document && pdf_of_signed_acknowledgment){
+                var formData = new FormData($('#user_document_form')[0]);
+                $.ajax({
+                    url: '{!! route('admin.edit.user_documents') !!}',
+                    method: 'POST',
+                    enctype: 'multipart/form-data',
+                    data: formData,
+                    dataType: 'json',
+                    processData: false,
+                    contentType: false,
+                })
+                    .done(function(data) {
+                        $('#UserDocumentModal').modal('hide');
+                        $('#doc_upload').val(1);
+                        $('#ratesAdditionForm').submit();
+                    });
+            }else{
+                if(!pdf_of_filled_and_signed_document){
+                    var error = "Please attach Pdf of filled and signed documents!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(!pdf_of_signed_acknowledgment){
+                    var error = "Please attach Pdf of signed Acknowledment!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             }
         });
