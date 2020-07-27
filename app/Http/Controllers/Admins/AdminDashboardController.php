@@ -3582,6 +3582,44 @@ if(session('department_id') == 7){
                     SalesCommission::where('shipper_id', $id)->delete();
                 }
             }
+            $user_attachment = UserDocumentAttachment::where('user_id', $id)->first();
+            if($user_attachment){
+                if ($request->hasFile('filled_and_signed_pdf')) {
+                    $filename = 'filled_and_signed_pdf_' . $id . '.pdf';
+                    $file = $request->file('filled_and_signed_pdf');
+                    Storage::disk('public')->putFileAs('users_attached_documents/'. $id .'', $file, $filename);
+                    $user_attachment->filled_and_signed_pdf = $filename;
+                }
+                if ($request->hasFile('signed_acknowledgement_pdf')) {
+                    $filename = 'signed_acknowledgement_pdf_' . $id . '.pdf';
+                    $file = $request->file('signed_acknowledgement_pdf');
+                    Storage::disk('public')->putFileAs('users_attached_documents/'. $id .'', $file, $filename);
+                    $user_attachment->signed_acknowledgement_pdf = $filename;
+                }
+                $user_attachment->save();
+            }
+            else{
+                $new_user_attachment = new UserDocumentAttachment();
+                if ($request->hasFile('filled_and_signed_pdf')) {
+                    $filename = 'filled_and_signed_pdf_' . $id . '.pdf';
+                    $file = $request->file('filled_and_signed_pdf');
+                    Storage::disk('public')->putFileAs('users_attached_documents/'. $id .'', $file, $filename);
+                    $new_user_attachment->filled_and_signed_pdf = $filename;
+                }
+
+                if ($request->hasFile('signed_acknowledgement_pdf')) {
+                    $filename = 'signed_acknowledgement_pdf_' . $id . '.pdf';
+                    $file = $request->file('signed_acknowledgement_pdf');
+                    Storage::disk('public')->putFileAs('users_attached_documents/'. $id .'', $file, $filename);
+                    $new_user_attachment->signed_acknowledgement_pdf = $filename;
+                }
+                $new_user_attachment->user_id = $id;
+                $new_user_attachment->save();
+            }
+            $user = User::find($id);
+            $user->documents_status = 0;
+            $user->documents_status_reason = null;
+            $user->save();
             if($request->authorize == 1){
                 User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id()]);
                 return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
@@ -5876,6 +5914,45 @@ if(session('department_id') == 7){
                     SalesCommission::where('shipper_id', $id)->delete();
                 }
             }
+
+            $user_attachment = UserDocumentAttachment::where('user_id', $id)->first();
+            if($user_attachment){
+                if ($request->hasFile('filled_and_signed_pdf')) {
+                    $filename = 'filled_and_signed_pdf_' . $id . '.pdf';
+                    $file = $request->file('filled_and_signed_pdf');
+                    Storage::disk('public')->putFileAs('users_attached_documents/'. $id .'', $file, $filename);
+                    $user_attachment->filled_and_signed_pdf = $filename;
+                }
+                if ($request->hasFile('signed_acknowledgement_pdf')) {
+                    $filename = 'signed_acknowledgement_pdf_' . $id . '.pdf';
+                    $file = $request->file('signed_acknowledgement_pdf');
+                    Storage::disk('public')->putFileAs('users_attached_documents/'. $id .'', $file, $filename);
+                    $user_attachment->signed_acknowledgement_pdf = $filename;
+                }
+                $user_attachment->save();
+            }
+            else{
+                $new_user_attachment = new UserDocumentAttachment();
+                if ($request->hasFile('filled_and_signed_pdf')) {
+                    $filename = 'filled_and_signed_pdf_' . $id . '.pdf';
+                    $file = $request->file('filled_and_signed_pdf');
+                    Storage::disk('public')->putFileAs('users_attached_documents/'. $id .'', $file, $filename);
+                    $new_user_attachment->filled_and_signed_pdf = $filename;
+                }
+
+                if ($request->hasFile('signed_acknowledgement_pdf')) {
+                    $filename = 'signed_acknowledgement_pdf_' . $id . '.pdf';
+                    $file = $request->file('signed_acknowledgement_pdf');
+                    Storage::disk('public')->putFileAs('users_attached_documents/'. $id .'', $file, $filename);
+                    $new_user_attachment->signed_acknowledgement_pdf = $filename;
+                }
+                $new_user_attachment->user_id = $id;
+                $new_user_attachment->save();
+            }
+            $user = User::find($id);
+            $user->documents_status = 0;
+            $user->documents_status_reason = null;
+            $user->save();
 
             NotificationsController::send(34, $id, Auth::id());
 
@@ -9034,7 +9111,7 @@ if(session('department_id') == 7){
             $new_user_attachment->user_id = $request->user_id;
             $new_user_attachment->save();
 
-            
+
         }
         $user = User::find($request->user_id);
         $user->documents_status = 0;

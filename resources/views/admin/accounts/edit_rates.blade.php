@@ -22,7 +22,7 @@
                     <input type="hidden" id="shipper_id" value="{{$shipper->id}}">
 
                     <div class="card-content">
-                        <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.edit.rates.submit',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
+                        <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.edit.rates.submit',['id'=>$shipper->id])}}" method="post" novalidate="novalidate" enctype="multipart/form-data">
                             @csrf
 
                             <div class="card">
@@ -3653,6 +3653,26 @@
                                     </table>
                                 </div>
                             </div>
+                            @if(!in_array(8, session('permissions')) && !in_array(140, session('permissions')))
+                            <div class="col mt-2">
+                                <hr>
+                                <h3 class="text-center">Documents Attachment</h3>
+                                <div class="row justify-content-center">
+                                    <div class=" col form-group">
+                                        <label for="filled_and_signed_image">
+                                            Pdf of filled and signed document:
+                                        </label>
+                                        <input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf" data-rule-required="true" data-msg-required="This field is required" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
+                                    </div>
+                                    <div class=" col form-group">
+                                        <label for="signed_acknowledgement_image">
+                                            Pdf of signed Acknowledgement form:
+                                        </label>
+                                        <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf" id="signed_acknowledgement_pdf" data-rule-required="true" data-msg-required="This field is required" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
 
                             <div class="row mt-2 justify-content-center">
                                 <div class="col-5 form-group">
