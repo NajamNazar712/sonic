@@ -232,6 +232,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
     });
 
+    Route::prefix('rates')->name('rates.')->group(function (){
+        Route::prefix('view')->name('view.')->group(function (){
+            Route::get('','Shippers\ShipperDashboardController@view_rates_index')->name('index');
+        });
+    });
+
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
