@@ -14,6 +14,7 @@ use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
+use App\http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
@@ -5088,6 +5089,58 @@ class NotificationsController extends Controller
                   }
 
                   $admins = Admin::whereIn('id', [12,49,216]);
+
+                  if ($admins->exists()) {
+                      $to = $admins->pluck('email')->toArray();
+                  }
+
+                  self::email($subject, $body, $to);
+              }
+              else if($id == 74){
+                  $qa_report_petty_cash = QaReportPettyCash::get();
+
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $reference_1_id, $subject);
+                  }
+
+                  if (strpos($body, '[date]') !== FALSE) {
+                      $body = str_replace('[date]', $reference_1_id, $body);
+                  }
+//                $file = storage_path($reference_2_id);
+
+                  $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                  if (strpos($subject, '[link]') !== FALSE) {
+                      $subject = str_replace('[link]', $link, $subject);
+                  }
+
+                  if (strpos($body, '[link]') !== FALSE) {
+                      $body = str_replace('[link]', $link, $body);
+                  }
+                  $html = '<table style="width:100%;">';
+                  $html .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Station Approval</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Operation Approval</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Finance Approval</th>
+                                           </tr></thead><tbody>';
+                  $total_count = 0;
+                  foreach ($qa_report_petty_cash as $report_petty_cash){
+                      $html .='<tr>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$report_petty_cash->hub->name.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$report_petty_cash->station_approval.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$report_petty_cash->operation_approval.'</td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$report_petty_cash->finance_approval.'</td>';
+                      $html .='</tr>';
+                  }
+                  $html .= '</tbody></table>';
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                  $admins = Admin::whereIn('id', [174,60,12]);
 
                   if ($admins->exists()) {
                       $to = $admins->pluck('email')->toArray();

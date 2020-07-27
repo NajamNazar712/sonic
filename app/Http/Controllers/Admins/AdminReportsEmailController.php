@@ -7,6 +7,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\CargoConsignment;
@@ -17,6 +18,7 @@ use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\NotAttemptedShipmentAging;
+use App\http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\Holiday;
 use App\Http\Models\OvernightOverlandReportData;
@@ -1013,5 +1015,64 @@ class AdminReportsEmailController extends Controller
             }
             NotificationsController::send(70, $date, $hub_shipments);
         }
+    }
+
+    static public function qa_petty_cash_report(){
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $qa_report_petty_cash_array['header'] = ['S. No.', 'Hub Name', 'Station Approval', 'Operation Approval', 'Finance Approval'];
+        $qa_report_petty_cash_array[] = ['S. No.' => '', 'Hub Name' => '', 'Station Approval' => '', 'Operation Approval' => '', 'Finance Approval' => ''];
+        foreach ($hubs as $hub){
+            $hub_approvals[$hub->id]['name'] = $hub->name;
+            $hub_approvals[$hub->id]['station_approval'] = 0;
+            $hub_approvals[$hub->id]['operation_approval'] = 0;
+            $hub_approvals[$hub->id]['finance_approval'] = 0;
+            $petty_cash_statements = PettyCashStatement::where('hub_id', $hub->id)->get();
+            foreach ($petty_cash_statements as $petty_cash_statement){
+                if($petty_cash_statement->station_approved_by == null){
+                    $hub_approvals[$hub->id]['station_approval']++;
+                }
+                if($petty_cash_statement->operation_approved_by == null){
+                    $hub_approvals[$hub->id]['operation_approval']++;
+                }
+                if($petty_cash_statement->finance_approved_by == null){
+                    $hub_approvals[$hub->id]['finance_approval']++;
+                }
+            }
+        }
+        QaReportPettyCash::truncate();
+
+        foreach ($hub_approvals as $index => $hub_approval){
+            $qa_report_petty_cash = new QaReportPettyCash();
+            $qa_report_petty_cash->hub_id = $index;
+            $qa_report_petty_cash->hub_name = $hub_approval['name'];
+            $qa_report_petty_cash->station_approval = $hub_approval['station_approval'];
+            $qa_report_petty_cash->operation_approval = $hub_approval['operation_approval'];
+            $qa_report_petty_cash->finance_approval = $hub_approval['finance_approval'];
+            $qa_report_petty_cash->save();
+            $qa_report_petty_cash_array[] = ['S. No.' => '', 'Hub Name' => $hub_approval['name'], 'Station Approval' => $hub_approval['station_approval'], 'Operation Approval' => $hub_approval['operation_approval'], 'Finance Approval' => $hub_approval['finance_approval']];
+        }
+
+        $cell_st = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getDefaultColumnDimension()->setWidth(20);
+        $sheet->fromArray($qa_report_petty_cash_array, NULL, 'A2', true);
+        $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
+        $sheet->setTitle('QA Report Petty Cash');
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="qa_report_petty_cash.xlsx"');
+        header('Cache-Control: max-age=0');
+        $date_file_name = Carbon::today()->format('Y_m_d');
+        $file_name_without_path = "reports/qa_report_petty_cash_" . $date_file_name . ".xlsx";
+        $file_name = public_path() . "/reports/qa_report_petty_cash_" . $date_file_name . ".xlsx";
+        $writer->save($file_name);
+
+        return url('/') . '/' . $file_name_without_path;
     }
 }
