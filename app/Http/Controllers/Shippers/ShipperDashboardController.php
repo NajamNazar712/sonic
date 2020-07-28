@@ -836,7 +836,7 @@ class ShipperDashboardController extends Controller
     }
 
     public function view_rates_index(){
-        $id = Auth::id();
+        $id = session('user_id');
         $user = User::find($id);
         if(session('account_type') == 1){
             $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
