@@ -16,6 +16,7 @@ use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
@@ -96,7 +97,7 @@ class ShipperShipmentBookController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection) {
 
 
         $shipment = new Shipment();
@@ -135,6 +136,12 @@ class ShipperShipmentBookController extends Controller
         $shipment->save();
 
         $shipment_id = $shipment->id;
+
+        if($self_collection == TRUE){
+            $shipment_self_collection = new SelfCollectionShipment();
+            $shipment_self_collection->shipment_id = $shipment_id;
+            $shipment_self_collection->save();
+        }
 
         AdminPickupsController::generate($shipment_id);
 
@@ -381,6 +388,17 @@ class ShipperShipmentBookController extends Controller
                         $information_display = TRUE;
                     }
 
+                    if ($service_type_id == 1) {
+                        if ($request->filled('self_collection')) {
+                            $self_collection = TRUE;
+                        } else {
+                            $self_collection = FALSE;
+                        }
+                    }
+                    else{
+                        $self_collection = FALSE;
+                    }
+
                     if ($service_type_id != 5) {
                         $consignee_city_id = $request->input('consignee_city');
                         $consignee_name = $request->input('consignee_name');
@@ -476,7 +494,7 @@ class ShipperShipmentBookController extends Controller
                         $pieces_quantity = $request->pieces_quantity;
                     }
 
-                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity);
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection);
                     if(session('user_type') == 2){
                         $substitute_user_shipment = new SubstituteUserShipment();
                         $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -2078,7 +2096,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces) {
+    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection) {
 
 
         $shipment = new Shipment();
@@ -2116,6 +2134,12 @@ class ShipperShipmentBookController extends Controller
         $shipment->save();
 
         $shipment_id = $shipment->id;
+
+        if($self_collection == TRUE){
+            $shipment_self_collection = new SelfCollectionShipment();
+            $shipment_self_collection->shipment_id = $shipment_id;
+            $shipment_self_collection->save();
+        }
 
         AdminPickupsController::generate($shipment_id);
 
@@ -2229,6 +2253,17 @@ class ShipperShipmentBookController extends Controller
                     $information_display = TRUE;
                 }
 
+                if ($service_type_id == 1) {
+                    if ($request->filled('self_collection')) {
+                        $self_collection = TRUE;
+                    } else {
+                        $self_collection = FALSE;
+                    }
+                }
+                else{
+                    $self_collection = FALSE;
+                }
+
                 if ($service_type_id != 5) {
                     $consignee_city_id = $request->input('consignee_city');
                     $consignee_name = $request->input('consignee_name');
@@ -2312,7 +2347,7 @@ class ShipperShipmentBookController extends Controller
                 if($service_type_id == 1){
                     $pieces_quantity = $request->pieces_quantity;
                 }
-                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity);
+                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection);
                 if(session('user_type') == 2){
                     $substitute_user_shipment = new SubstituteUserShipment();
                     $substitute_user_shipment->substitute_user_id = Auth::id();

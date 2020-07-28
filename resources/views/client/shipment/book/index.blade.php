@@ -146,6 +146,11 @@
 										<div class="form-group">
 											<input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
 										</div>
+
+										<div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
+											<label class="d-block">Self Collection</label>
+											<input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
+										</div>
 									</div>
 
 									<div id="order_information_header_div" class="col col_custom_middle">
@@ -824,6 +829,7 @@
 						$('#consignee_header_info').html('Consignee Information');
 						$('#amount').prop('disabled', false);
 						$('#pieces_quantity').removeClass('d-none');
+						$('#self_collection_div').removeClass('d-none');
 					}
 					else if (service_type == 2) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -843,6 +849,7 @@
 						$('#amount').prop('disabled', false);
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
+						$('#self_collection_div').addClass('d-none');
 					}
 					else if (service_type == 3) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -862,6 +869,7 @@
 						$('#amount').prop('disabled', true);
 						$('#try_and_buy_charges_div').removeClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
+						$('#self_collection_div').addClass('d-none');
 					}
 					else if (service_type == 5) {
 						$('#shipping_header_div').removeClass('col col_custom');
@@ -882,6 +890,7 @@
 						$('#amount').prop('disabled', false);
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
+						$('#self_collection_div').addClass('d-none');
 					}
 					$('#booking_form #selected_service_type').val(service_type);
 
@@ -1038,6 +1047,7 @@
 			});
 
 			$('#information_display').checkboxpicker();
+			$('#self_collection').checkboxpicker();
 
 
 			$('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
@@ -1137,9 +1147,6 @@
 							try_and_buy_total_quantity();
 						}
 					});
-
-					
-					
 
 					$('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
 
