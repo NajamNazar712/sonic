@@ -65,6 +65,7 @@
                                                     <td><font color="red">{{$blacklist_errors[$key+2]['msg']}}</font><input type="text" name="form[{{$no}}][consignee_phone_number_1]" class="form-control phone" value="{{$ro['consignee_phone_number_1']}}" readonly="readonly"><span class="danger">High Return Ratio for Consignee</span></td>
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_2]" value="{{$ro['consignee_phone_number_2']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
+                                                    <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
                                                     <td><input type="text" name="form[{{$no}}][order_id]" class="form-control text" value="{{$ro['order_id']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][item_product_type_id]" class="form-control number" value="{{$ro['item_product_type_id']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][item_description]" class="form-control text" value="{{$ro['item_description']}}" readonly="readonly"></td>
@@ -97,6 +98,7 @@
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_1]" value="{{$ro['consignee_phone_number_1']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_2]" value="{{$ro['consignee_phone_number_2']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
+                                                    <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
                                                     <input type="hidden" name="form[{{$no}}][order_id]" value="{{$ro['order_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][item_product_type_id]" value="{{$ro['item_product_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][item_description]" value="{{$ro['item_description']}}">

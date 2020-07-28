@@ -1637,6 +1637,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => 'Consignee Phone Number 1',
             'consignee_phone_number_2' => 'Consignee Phone Number 2',
             'consignee_email_address' => 'Consignee Email Address',
+            'self_collection' => 'Self Collection',
             'order_id' => 'Order ID',
 
 
@@ -1720,6 +1721,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
+            'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -1785,16 +1787,16 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
         }
         if (isset($spreadsheet)) {
-            if(count($spreadsheet[0]) == 52){
-                $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'item_product_type_id_1', 19 => 'item_description_1', 20 => 'item_quantity_1', 21 => 'item_insurance_1', 22 => 'item_price_1', 23 => 'item_product_type_id_2', 24 => 'item_description_2', 25 => 'item_quantity_2', 26 => 'item_insurance_2', 27 => 'item_price_2', 28 => 'item_product_type_id_3', 29 => 'item_description_3', 30 => 'item_quantity_3', 31 => 'item_insurance_3', 32 => 'item_price_3', 33 => 'item_product_type_id_4', 34 => 'item_description_4', 35 => 'item_quantity_4', 36 => 'item_insurance_4', 37 => 'item_price_4', 38 => 'item_product_type_id_5', 39 => 'item_description_5', 40 => 'item_quantity_5', 41 => 'item_insurance_5', 42 => 'item_price_5', 43 => 'special_instructions', 44 => 'estimated_weight', 45 => 'shipping_mode_id', 46 => 'same_day_timing_id', 47 => 'try_and_buy_charges', 48 => 'amount', 49 => 'payment_mode_id', 50 => 'charges_mode_id', 51 => 'pieces_quantity'];
+            if(count($spreadsheet[0]) == 53){
+                $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'replacement_item_product_type_id', 17 => 'replacement_item_description', 18 => 'replacement_item_quantity', 19 => 'item_product_type_id_1', 20 => 'item_description_1', 21 => 'item_quantity_1', 22 => 'item_insurance_1', 23 => 'item_price_1', 24 => 'item_product_type_id_2', 25 => 'item_description_2', 26 => 'item_quantity_2', 27 => 'item_insurance_2', 28 => 'item_price_2', 29 => 'item_product_type_id_3', 30 => 'item_description_3', 31 => 'item_quantity_3', 32 => 'item_insurance_3', 33 => 'item_price_3', 34 => 'item_product_type_id_4', 35 => 'item_description_4', 36 => 'item_quantity_4', 37 => 'item_insurance_4', 38 => 'item_price_4', 39 => 'item_product_type_id_5', 40 => 'item_description_5', 41 => 'item_quantity_5', 42 => 'item_insurance_5', 43 => 'item_price_5', 44 => 'special_instructions', 45 => 'estimated_weight', 46 => 'shipping_mode_id', 47 => 'same_day_timing_id', 48 => 'try_and_buy_charges', 49 => 'amount', 50 => 'payment_mode_id', 51 => 'charges_mode_id', 52 => 'pieces_quantity'];
 
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
                     $query->whereNotIn('id', [4, 5]);
                 })];
                 $service_type_check_id = null;
             }
-            elseif (count($spreadsheet[0]) == 22){
-                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'order_id', 9 => 'item_product_type_id', 10 => 'item_description', 11 => 'item_quantity', 12 => 'item_insurance', 13 => 'item_price', 14 => 'special_instructions', 15 => 'estimated_weight', 16 => 'shipping_mode_id', 17 => 'same_day_timing_id', 18 => 'amount', 19 => 'payment_mode_id', 20 => 'charges_mode_id', 21 => 'pieces_quantity'];
+            elseif (count($spreadsheet[0]) == 23){
+                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'self_collection', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'special_instructions', 16 => 'estimated_weight', 17 => 'shipping_mode_id', 18 => 'same_day_timing_id', 19 => 'amount', 20 => 'payment_mode_id', 21 => 'charges_mode_id', 22 => 'pieces_quantity'];
                 $service_type_check_id = 1;
             }
             elseif (count($spreadsheet[0]) == 24){
@@ -1871,6 +1873,12 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 $rows[$key]['pieces_quantity'] = $row['pieces_quantity'];
+
+                if(!isset($row['self_collection']) || $row['self_collection'] == null){
+                    $row['self_collection'] = 'no';
+                }
+
+                $rows[$key]['self_collection'] = $row['self_collection'];
 
                 $validate = Validator::make($row, $rules, $messages);
 
@@ -2959,6 +2967,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => 'Consignee Phone Number 1',
             'consignee_phone_number_2' => 'Consignee Phone Number 2',
             'consignee_email_address' => 'Consignee Email Address',
+            'self_collection' => 'Self Collection',
             'order_id' => 'Order ID',
 
             'item_product_type_id' => 'Item Product Type ID',
@@ -3019,6 +3028,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
+            'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -3044,8 +3054,6 @@ class ShipperShipmentBookController extends Controller
                 $query->whereNotIn('id', [2, 3]);
             })]
         ];
-
-        $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'delivery_type_id', 3 => 'information_display', 4 => 'consignee_city_name', 5 => 'consignee_name', 6 => 'consignee_address', 7 => 'consignee_phone_number_1', 8 => 'consignee_phone_number_2', 9 => 'consignee_email_address', 10 => 'order_id', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'replacement_item_product_type_id', 17 => 'replacement_item_description', 18 => 'replacement_item_quantity', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id', 26 => 'pieces_quantity'];
 //        $form= $request->shipments;
 //        dd($form);
         if($file = $request->file('shipments')) {
@@ -3056,16 +3064,16 @@ class ShipperShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-            if(count($spreadsheet[0]) == 26){
-                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'special_instructions', 19 => 'estimated_weight', 20 => 'shipping_mode_id', 21 => 'same_day_timing_id', 22 => 'amount', 23 => 'payment_mode_id', 24 => 'charges_mode_id', 25 => 'pieces_quantity'];
+            if(count($spreadsheet[0]) == 27){
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'replacement_item_product_type_id', 17 => 'replacement_item_description', 18 => 'replacement_item_quantity', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id', 26 => 'pieces_quantity'];
 
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
                     $query->whereNotIn('id', [4, 5]);
                 })];
                 $service_type_check_id = null;
             }
-            elseif (count($spreadsheet[0]) == 23){
-                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'special_instructions', 16 => 'estimated_weight', 17 => 'shipping_mode_id', 18 => 'same_day_timing_id', 19 => 'amount', 20 => 'payment_mode_id', 21 => 'charges_mode_id', 22 => 'pieces_quantity'];
+            elseif (count($spreadsheet[0]) == 24){
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'shipping_mode_id', 19 => 'same_day_timing_id', 20 => 'amount', 21 => 'payment_mode_id', 22 => 'charges_mode_id', 23 => 'pieces_quantity'];
                 $service_type_check_id = 1;
             }
             elseif (count($spreadsheet[0]) == 25){
@@ -3131,12 +3139,17 @@ class ShipperShipmentBookController extends Controller
                     $row['service_type_id'] = $service_type_check_id;
                 }
 
-
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
                     $row['pieces_quantity'] = 1;
                 }
 
                 $rows[$key]['pieces_quantity'] = $row['pieces_quantity'];
+
+                if(!isset($row['self_collection']) || $row['self_collection'] == null){
+                    $row['self_collection'] = 'no';
+                }
+
+                $rows[$key]['self_collection'] = $row['self_collection'];
 
                 $validate = Validator::make($row, $rules, $messages);
 
