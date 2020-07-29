@@ -1345,7 +1345,7 @@ class AdminMasterCargoController extends Controller
                 foreach ($master_cargo_bags->get() as $master_cargo_bag) {
                     $bag = $master_cargo_bag->bag;
                     if($bag->status_id == 2){
-                        $bag_shipments = BagShipment::where('bag_id', $bag->id)->where('status', 0);
+                        $bag_shipments = BagShipment::where('bag_id', $bag->id);
                         if ($bag_shipments->exists()) {
                             foreach ($bag_shipments->get() as $bag_shipment){
                                 $shipment = Shipment::find($bag_shipment->shipment_id);
