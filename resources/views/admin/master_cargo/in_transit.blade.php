@@ -63,6 +63,7 @@
                                     <th class="border-primary border-darken-1">Master Cargo No.</th>
                                     <th class="border-primary border-darken-1">Master Cargo Type</th>
                                     <th class="border-primary border-darken-1">Bag Quantity</th>
+                                    <th class="border-primary border-darken-1">Short Received Bags</th>
                                     <th class="border-primary border-darken-1">No. of Shipments</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
@@ -182,6 +183,7 @@
                             head.push('Master Cargo No.');
                             head.push('Master Cargo Type');
                             head.push('Bag Quantity');
+                            head.push('Short Received Bags');
                             head.push('No. of Shipments');
                             head.push('Origin');
                             head.push('Destination');
@@ -208,6 +210,7 @@
                                 row.push(values.id_padded);
                                 row.push(values.cargo_type);
                                 row.push(values.bags_count);
+                                row.push(values.short_received_bags_count);
                                 row.push(values.shipments_count);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -268,6 +271,7 @@
                     {data: 'id_padded_link', name: 'master_cargoes.id', class: 'align-middle master_cargo_number'},
                     {data: 'cargo_type', name: 'master_cargoes.type', class: 'align-middle cargo_type'},
                     {data: 'bags', name: 'master_cargoes.bags', class: 'align-middle bags'},
+                    {data: 'short_received_bags', name: 'master_cargoes.bags', class: 'align-middle short_received_bags'},
                     {data: 'shipments', name: 'master_cargoes.shipments', class: 'align-middle text-center shipments'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
@@ -432,6 +436,40 @@
                             var bag_numbers = '';
 
                             head = '<h4 class="modal-title" id="info_modal_title">Bag(s)</h4>' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">×</span>\n' +
+                                '</button>';
+
+                            $.each(data, function(index, bag_number) {
+                                bag_numbers += bag_number + '<br>';
+                            });
+
+                            $('#info_modal .modal-header').html(head);
+                            $('#info_modal .modal-body').html(bag_numbers);
+
+                            $('#info_modal').modal('show');
+                        }
+                    });
+            });
+            $('#datatable tbody').on('click', 'tr td.short_received_bags button', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                $('#info_modal .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('admin.master_cargo.in_transit.short_received_bags') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var head = '';
+                            var bag_numbers = '';
+
+                            head = '<h4 class="modal-title" id="info_modal_title">Short Received Bag(s)</h4>' +
                                 '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
                                 '<span aria-hidden="true">×</span>\n' +
                                 '</button>';

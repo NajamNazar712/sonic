@@ -1166,7 +1166,7 @@ class AdminMasterCargoController extends Controller
             ->leftjoin('cities as jh2', 'master_cargoes.junction_hub_2_id', '=', 'jh2.id')
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.builty_number', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'master_cargoes.type as master_cargo_type')
+            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.builty_number', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'master_cargoes.type as master_cargo_type')
             ->whereIn('master_cargoes.status_id', [1, 2, 4, 6, 7, 9]);
 
         if (session('role_id') != 1) {
@@ -1197,6 +1197,9 @@ class AdminMasterCargoController extends Controller
             ->addColumn('shipments_count', function ($master_cargo) {
                 return $master_cargo->shipments;
             })
+            ->addColumn('short_received_bags_count', function ($master_cargo) {
+                return $master_cargo->short_received_bags;
+            })
             ->editColumn('cargo_type',function ($cargo_received){
                 if($cargo_received->master_cargo_type == 1){
                     return 'Normal';
@@ -1209,6 +1212,14 @@ class AdminMasterCargoController extends Controller
             })
             ->addColumn('shipments', function ($master_cargo) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->shipments . '</button>';
+            })
+            ->addColumn('short_received_bags', function ($master_cargo) {
+                if($master_cargo->short_received_bags > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->short_received_bags . '</button>';
+                }
+                else{
+                    return '-';
+                }
             })
             ->filterColumn('master_cargoes.id', function ($query, $keyword) {
                 return $query->where('master_cargoes.id', '=', $keyword);
@@ -1305,6 +1316,19 @@ class AdminMasterCargoController extends Controller
         foreach ($master_cargo_bags as $master_cargo_bag){
             $seal_number = $master_cargo_bag->bag->seal_number;
             $bag_numbers[]  = $seal_number;
+        }
+
+        return $bag_numbers;
+    }
+    public function master_cargo_in_transit_short_received_bags(Request $request) {
+        $bag_numbers = array();
+        $master_cargo = MasterCargo::find($request->id);
+        $master_cargo_bags = $master_cargo->master_bags;
+        foreach ($master_cargo_bags as $master_cargo_bag){
+            if($master_cargo_bag->status == 0){
+                $seal_number = $master_cargo_bag->bag->seal_number;
+                $bag_numbers[]  = $seal_number;
+            }
         }
 
         return $bag_numbers;
@@ -2234,7 +2258,7 @@ class AdminMasterCargoController extends Controller
             ->leftjoin('cities as jh2', 'master_cargoes.junction_hub_2_id', '=', 'jh2.id')
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.builty_number', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'master_cargoes.type as master_cargo_type');
+            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.builty_number', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'master_cargoes.type as master_cargo_type');
 
         if (session('role_id') != 1) {
             $receive_cargo = $receive_cargo->where(function ($query) {
@@ -2255,6 +2279,9 @@ class AdminMasterCargoController extends Controller
             ->addColumn('shipments_count', function ($master_cargo) {
                 return $master_cargo->shipments;
             })
+            ->addColumn('short_received_bags_count', function ($master_cargo) {
+                return $master_cargo->short_received_bags;
+            })
             ->editColumn('cargo_type',function ($cargo_received){
                 if($cargo_received->master_cargo_type == 1){
                     return 'Normal';
@@ -2264,6 +2291,14 @@ class AdminMasterCargoController extends Controller
             })
             ->addColumn('bags', function ($master_cargo) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->bags . '</button>';
+            })
+            ->addColumn('short_received_bags', function ($master_cargo) {
+                if($master_cargo->short_received_bags > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->short_received_bags . '</button>';
+                }
+                else{
+                    return '-';
+                }
             })
             ->addColumn('shipments', function ($master_cargo) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->shipments . '</button>';
