@@ -89,6 +89,7 @@ class AdminAPIController extends Controller
                         $url = 'uploads/return_notes/' . $return_note->image;
                         if(file_exists($url)){
                             $img_url = asset('uploads/return_notes/' . $return_note->image);
+
                         }else{
                             $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note->image);
                             if($exists){
@@ -114,7 +115,7 @@ class AdminAPIController extends Controller
                                         $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
                                     }
                                 }
-                                $details['images'] = array('id' => $return_note_image->id,'image'=> $img_url);
+                                $details['images'][] = array('id' => $return_note_image->id,'image'=> $img_url);
                             }
                             return response()->json(['status' => 0, 'message' => 'Images found', 'information' => $details]);
                         }else{
@@ -126,10 +127,28 @@ class AdminAPIController extends Controller
                 }
 
             }else{
-                return response()->json(['status' => 1, 'message' => 'Return Note not found!']);
+                return response()->json(['status' => 1, 'message' => 'Return Note Image not found!']);
             }
         }else {
             return response()->json(['status' => 1, 'message' => 'No return note scanned!']);
         }
+
+    }
+    public function history_update_image(Request $request){
+        $return_note_id = $request->return_note_id;
+        $image = $request->image;
+        if($image == 0){
+            $return_note = ReturnNote::find($return_note_id);
+            if($return_note){
+                $return_note->image = NULL;
+                $return_note->save();
+                return response()->json(['status' => 0, 'success' => 'Image Insert successfully!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
+        }else{
+            ReturnNoteImage::insert(['return_note_id' => 'return_note_id','image' =>'$image']);
+            return response()->json(['status' => 0, 'success' => 'Image insert successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Image not found!']);
     }
 }
