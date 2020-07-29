@@ -258,7 +258,7 @@
                             row.push(values.shipper_phone);
                             row.push(values.address);
                             row.push(values.email);
-                            row.push(values.product_name);
+                            row.push(values.product_type);
                             row.push(values.status);
                             row.push(values.admin_tag_id);
                             row.push(values.created_at);
