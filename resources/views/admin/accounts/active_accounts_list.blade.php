@@ -215,9 +215,9 @@
             allowClear:true,
         });
         $('#search_shipper').select2({
-+            width:'100%',
-+            placeholder:"Select Shipper",
-+            allowClear:true,
+            width:'100%',
+            placeholder:"Select Shipper",
+            allowClear:true,
          });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
