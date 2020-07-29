@@ -681,14 +681,14 @@
             var picker = null;
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var cargo__id = parseInt($(this).parents('tr').attr('id'));
+                var cargo_id = parseInt($(this).parents('tr').attr('id'));
 
                 if ($(this).hasClass('print')) {
-                    print(cargo__id);
+                    print(cargo_id);
                 }
                 @if (session('role_id') == 1 || in_array(31, session('permissions')))
                     else if ($(this).hasClass('receive')) {
-                        $('#receive_form .master_cargo_number').val(cargo__id);
+                        $('#receive_form .master_cargo_number').val(cargo_id);
 
                         $('#receive_form').submit();
                     }
@@ -699,7 +699,7 @@
                     blockPagePermanently();
 
                     swal({
-                        text: 'Are you sure you want to update Cargo as Lost?',
+                        text: 'Are you sure you want to update Master Cargo as Lost?',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -725,13 +725,11 @@
                                 method:'POST',
                                 data:{
                                     '_token': '{{ csrf_token() }}',
-                                    'cargo__id': cargo__id
+                                    'cargo_id': cargo_id
                                 }
                             }).done(function (data) {
                                 selected_rows = [];
                                 table.rows().deselect();
-                                table.button('.confirm').disable();
-                                table.button('.re-attempt').disable();
                                 table.draw('false');
 
                                 if (data.status == 0) {

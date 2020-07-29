@@ -1329,7 +1329,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_in_transit_lost(Request $request) {
-        $master_cargo_id = $request->input('cargo__id');
+        $master_cargo_id = $request->input('cargo_id');
 
         $master_cargo = MasterCargo::find($master_cargo_id);
 
@@ -1361,10 +1361,10 @@ class AdminMasterCargoController extends Controller
                 }
             }
 
-            return ['status' => 0, 'success' => 'Cargo Number #' . $request->input('cargo_consignment_id') . ' has been Updated as Lost'];
+            return ['status' => 0, 'success' => 'Master Cargo Number #' . $master_cargo_id . ' has been Updated as Lost'];
         }
         else {
-            return ['status' => 1, 'error' => 'Cargo Number #' . $request->input('cargo_consignment_id') . ' could not be Updated as Lost'];
+            return ['status' => 1, 'error' => 'Master Cargo Number #' . $master_cargo_id . ' could not be Updated as Lost'];
         }
     }
 
