@@ -7845,7 +7845,7 @@ if(session('department_id') == 7){
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7961,7 +7961,8 @@ if(session('department_id') == 7){
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -7974,7 +7975,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -8010,7 +8012,8 @@ if(session('department_id') == 7){
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -8023,7 +8026,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -8066,7 +8070,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'status'=>1,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             CityHistory::create([
@@ -8080,7 +8085,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             if(!empty($request->walk_in_delivery)) {
@@ -8114,7 +8120,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'status'=>1,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             CityHistory::create([
@@ -8127,7 +8134,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             if(!empty($request->walk_in_delivery)) {

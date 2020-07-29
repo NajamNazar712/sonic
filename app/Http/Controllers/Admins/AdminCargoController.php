@@ -13,6 +13,7 @@ use App\Http\Models\DraftCargo;
 use App\Http\Models\DraftCargoShipment;
 use App\Http\Models\JunctionMapping;
 use App\Http\Models\PackagingMaterialRequest;
+use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\WarehouseStockRequest;
@@ -1581,6 +1582,14 @@ class AdminCargoController extends Controller
 				//Consolidated Shipments
 
                 if ($cargo_consignment->type == 1) {
+                    $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
+                    if($self_collection_shipment) {
+                        $shipment->shipper_status_id = 15;
+                        $shipment->consignee_status_id = 15;
+
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                    }
                     $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
                     if ($consolidated_shipment) {
                         $check_all_consolidation_shipments = true;

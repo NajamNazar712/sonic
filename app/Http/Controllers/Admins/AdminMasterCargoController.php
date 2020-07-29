@@ -21,6 +21,7 @@ use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\JunctionMapping;
 use App\Http\Models\PackagingMaterialRequest;
+use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentStatus;
@@ -1604,19 +1605,19 @@ class AdminMasterCargoController extends Controller
                         return redirect()->route('admin.master_cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
                     }
                     else {
-                        return back()->withErrors('Given Cargo Number has already been modified!');
+                        return back()->withErrors('Given Master Cargo Number has already been modified!');
                     }
                 }
                 else {
-                    return back()->withErrors('Cargo doesn\'t belong to your assigned hub(s)!');
+                    return back()->withErrors('Master Cargo doesn\'t belong to your assigned hub(s)!');
                 }
             }
             else {
-                return back()->withErrors('Invalid Cargo Number!');
+                return back()->withErrors('Invalid Master Cargo Number!');
             }
         }
         else {
-            return back()->withErrors('Missing Cargo Number!');
+            return back()->withErrors('Missing Master Cargo Number!');
         }
     }
     public function master_cargo_receive_index() {
@@ -1630,7 +1631,7 @@ class AdminMasterCargoController extends Controller
         }
     }
 
-    public function master_cargo_receive_bagt_details(Request $request) {
+    public function master_cargo_receive_bag_details(Request $request) {
         $bag = Bag::where('seal_number', $request->bag_number);
 
         if ($bag->exists()) {
@@ -1765,6 +1766,15 @@ class AdminMasterCargoController extends Controller
                     //Consolidated Shipments
 
                     if ($cargo_consignment->type == 1) {
+
+                        $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
+                        if($self_collection_shipment){
+                            $shipment->shipper_status_id = 15;
+                            $shipment->consignee_status_id = 15;
+
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                        }
                         $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
                         if ($consolidated_shipment) {
                             $check_all_consolidation_shipments = true;

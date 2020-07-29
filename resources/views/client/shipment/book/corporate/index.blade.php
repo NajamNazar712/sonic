@@ -888,6 +888,7 @@
             });
 
             $('#information_display').checkboxpicker();
+            $('#self_collection').checkboxpicker();
 
             $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',

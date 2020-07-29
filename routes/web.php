@@ -389,6 +389,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
         Route::post('telenor_shipments_arrival','Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
+
+        Route::prefix('self_collection')->name('self_collection.')->group(function () {
+            Route::get('', 'Admins\OrderManagementController@self_collection_index')->name('index');
+            Route::get('list', 'Admins\OrderManagementController@self_collection_list')->name('list');
+        });
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
@@ -1013,7 +1018,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'Admins\AdminMasterCargoController@master_cargo_receive_index')->name('index');
-            Route::post('bag_details', 'Admins\AdminMasterCargoController@master_cargo_receive_bagt_details')->name('bag_details');
+            Route::post('bag_details', 'Admins\AdminMasterCargoController@master_cargo_receive_bag_details')->name('bag_details');
             Route::post('short_received', 'Admins\AdminMasterCargoController@master_cargo_receive_short_received')->name('short_received');
             Route::post('', 'Admins\AdminMasterCargoController@master_cargo_receive_store')->name('store');
 

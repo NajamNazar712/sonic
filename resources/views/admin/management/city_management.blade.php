@@ -31,6 +31,7 @@
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1">Location</th>
+                                    <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -96,6 +97,7 @@
                             head.push('Status');
                             head.push('Updated By');
                             head.push('Updated At');
+                            head.push('Address');
 
 
                             $.each(result.data, function(index, values) {
@@ -112,6 +114,7 @@
                                 row.push(values.status);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
+                                row.push(values.address);
 
                                 body.push(row);
                             });
@@ -181,6 +184,7 @@
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'ch.created_at', class: 'align-middle updated_at'},
                     {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
+                    {data: 'address', name: 'cities.address', class: 'align-middle address'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {
