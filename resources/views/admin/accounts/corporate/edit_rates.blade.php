@@ -3810,7 +3810,7 @@
 
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <input name="packing_charges[{{$pkey}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{$packing->charges}}" {{ ($wms_user_info->packing_charges)? '':'disabled'}}>
+                                                                        <input name="packing_charges[{{$pkey}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control amount" placeholder="Charges" value="{{$packing->charges}}" {{ ($wms_user_info->packing_charges)? '':'disabled'}}>
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
@@ -3842,7 +3842,7 @@
                                                                     </div>
                                                                     <div class="col-md-2">
                                                                         <fieldset class="form-group">
-                                                                            <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
+                                                                            <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control amount" placeholder="Charges" disabled="disabled">
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-md-2">
@@ -3872,7 +3872,7 @@
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
-                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ ($wms_labelling_charges)? $wms_labelling_charges->charges:0 }}" {{ ($wms_user_info->labelling_charges)? '':'disabled'}}>
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control amount" placeholder="Charges" value="{{ ($wms_labelling_charges)? $wms_labelling_charges->charges:0 }}" {{ ($wms_user_info->labelling_charges)? '':'disabled'}}>
                                                             </fieldset>
                                                         </div>
                                                     </div>
@@ -5997,12 +5997,13 @@
 
             });
             $('input[name="packing_charges['+packing_type_rows+']"]').inputmask({
-                'alias': 'integer',
+                'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
-                'min': 0,
-                'max': 1000000
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
             });
 
             packing_type_rows++;
