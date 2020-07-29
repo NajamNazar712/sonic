@@ -1594,7 +1594,7 @@ class AdminMasterCargoController extends Controller
                               <td>' . $serial_number . '</td>
                               <td>' . $bag->seal_number . '</td>
                               <td>' . $bag->shipments . '</td>
-                              <td>' . $bag->origin_hub->name . '</td>
+                              <td>' . $bag->destination_hub->name . '</td>
                               <td>' . $bag->actual_weight . '</td>
                             </tr>
         ';
