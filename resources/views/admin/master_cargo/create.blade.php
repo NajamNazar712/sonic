@@ -198,7 +198,7 @@
         $(document).ready(function() {
             @if (session('print'))
             $.ajax({
-                url: '{!! route('admin.cargo.in_transit.print') !!}',
+                url: '{!! route('admin.master_cargo.in_transit.print') !!}',
                 method: 'POST',
                 data: {
                     'id': '{{ session('print') }}',

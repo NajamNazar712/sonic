@@ -7858,7 +7858,7 @@ if(session('department_id') == 7){
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7974,7 +7974,8 @@ if(session('department_id') == 7){
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -7987,7 +7988,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -8023,7 +8025,8 @@ if(session('department_id') == 7){
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -8036,7 +8039,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -8079,7 +8083,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'status'=>1,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             CityHistory::create([
@@ -8093,7 +8098,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             if(!empty($request->walk_in_delivery)) {
@@ -8127,7 +8133,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'status'=>1,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             CityHistory::create([
@@ -8140,7 +8147,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             if(!empty($request->walk_in_delivery)) {
@@ -9047,7 +9055,7 @@ if(session('department_id') == 7){
             $new_user_attachment->user_id = $request->user_id;
             $new_user_attachment->save();
 
-            
+
         }
         $user = User::find($request->user_id);
         $user->documents_status = 0;
@@ -9069,6 +9077,47 @@ if(session('department_id') == 7){
             return response()->json(['status' => 1,'success' => 'Files confirmed successfully']);
         }
         return response()->json(['error' => 'User not found!']);
+    }
+    public function edit_rates_user_documents(Request $request){
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if($user_attachment){
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->filled_and_signed_pdf = $filename;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            $user_attachment->save();
+        }
+        else{
+            $new_user_attachment = new UserDocumentAttachment();
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->filled_and_signed_pdf = $filename;
+            }
+
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            $new_user_attachment->user_id = $request->user_id;
+            $new_user_attachment->save();
+        }
+        $user = User::find($request->user_id);
+        $user->documents_status = 0;
+        $user->documents_status_reason = null;
+        $user->save();
+        return ['success' => 'User Document Uploaded!'];
     }
 }
 

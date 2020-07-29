@@ -144,7 +144,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.seal_numer);
+                                row.push(values.seal_number);
                                 row.push(values.bag_type);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -175,7 +175,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Bag In-transit',
+                        title: 'Pending for Master Cargo',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],

@@ -1922,7 +1922,7 @@
 
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                        <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control amount" placeholder="Charges">
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
@@ -1951,7 +1951,7 @@
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
-                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control amount" placeholder="Charges">
                                                             </fieldset>
                                                         </div>
                                                     </div>
@@ -3675,12 +3675,13 @@
                 $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
             });
             $('input[name="packing_charges['+packing_type_rows+']"]').inputmask({
-                'alias': 'integer',
+                'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
-                'min': 0,
-                'max': 1000000
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
             });
 
             packing_type_rows++;

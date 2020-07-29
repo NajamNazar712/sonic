@@ -232,6 +232,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
     });
 
+    Route::prefix('rates')->name('rates.')->group(function (){
+        Route::prefix('view')->name('view.')->group(function (){
+            Route::get('','Shippers\ShipperDashboardController@view_rates_index')->name('index');
+        });
+    });
+
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
@@ -383,6 +389,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
         Route::post('telenor_shipments_arrival','Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
+
+        Route::prefix('self_collection')->name('self_collection.')->group(function () {
+            Route::get('', 'Admins\OrderManagementController@self_collection_index')->name('index');
+            Route::get('list', 'Admins\OrderManagementController@self_collection_list')->name('list');
+        });
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
@@ -456,6 +467,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('add.rates.submit');
     //edit rates
     Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('edit.rates');
+    Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
     Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
     Route::get('accounts/{id}/view_crf_agreement', 'ShipperAgreementController@view_crf_agreement')->name('accounts.view_crf_agreement');
     //
@@ -467,6 +479,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
         Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_submit')->name('add.rates');
         Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_index')->name('edit.rates');
+        Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
         Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_submit')->name('edit.rates');
         Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
 
@@ -998,6 +1011,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_in_transit_list')->name('list');
             Route::post('lost', 'Admins\AdminMasterCargoController@master_cargo_in_transit_lost')->name('lost');
             Route::post('bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bags')->name('bags');
+            Route::post('short_received_bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_short_received_bags')->name('short_received_bags');
             Route::post('shipments', 'Admins\AdminMasterCargoController@master_cargo_in_transit_shipments')->name('shipments');
             Route::post('print', 'Admins\AdminMasterCargoController@master_cargo_in_transit_print')->name('print');
             Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive')->name('receive');
@@ -1005,7 +1019,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'Admins\AdminMasterCargoController@master_cargo_receive_index')->name('index');
-            Route::post('bag_details', 'Admins\AdminMasterCargoController@master_cargo_receive_bagt_details')->name('bag_details');
+            Route::post('bag_details', 'Admins\AdminMasterCargoController@master_cargo_receive_bag_details')->name('bag_details');
             Route::post('short_received', 'Admins\AdminMasterCargoController@master_cargo_receive_short_received')->name('short_received');
             Route::post('', 'Admins\AdminMasterCargoController@master_cargo_receive_store')->name('store');
 

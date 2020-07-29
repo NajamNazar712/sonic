@@ -56,6 +56,14 @@
             </fieldset>
         </div>
     </div>
+
+    <div class="row mb-2">
+        <div class="col">
+            <fieldset class="form-group">
+                <textarea type="text" name="address" id="address" class="form-control address" placeholder="Office Address">{{$city->address}}</textarea>
+            </fieldset>
+        </div>
+    </div>
     <div class="row">
         <div class="col-2">
             <h4 class="card-title font-weight-bold">Location</h4>

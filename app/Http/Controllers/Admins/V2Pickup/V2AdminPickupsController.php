@@ -14,6 +14,7 @@ use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
+use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\PickupAction;
@@ -660,6 +661,16 @@ class V2AdminPickupsController extends Controller
                 $reference_2_id = NULL;
                 ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
+                $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
+                if($self_collection_shipment){
+                    if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
+                        $shipment->shipper_status_id = 15;
+                        $shipment->consignee_status_id = 15;
+
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                    }
+                }
 
                 //Consolidated Shipments
                 $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
@@ -1149,6 +1160,17 @@ class V2AdminPickupsController extends Controller
                 $reference_2_id = NULL;
                 ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
+
+                $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
+                if($self_collection_shipment){
+                    if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
+                        $shipment->shipper_status_id = 15;
+                        $shipment->consignee_status_id = 15;
+
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                    }
+                }
 
                 //Consolidated Shipments
                 $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
