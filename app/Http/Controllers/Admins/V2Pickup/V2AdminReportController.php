@@ -92,8 +92,13 @@ class V2AdminReportController extends Controller
                        $received = $pickup_request->received;
                    }
                    if($booked > 0){
-                       $difference = ($booked - $received)/$booked;
-                       $difference_shipments = (1 - ($difference)) * 100;
+                       $difference = ($booked - $received) / $booked;
+
+                       if ($difference < 0) {
+                        $difference = 0;
+                       }
+                       
+                       $difference_shipments = $difference * 100;
 
                    }else{
                        $difference = 0;
