@@ -597,7 +597,7 @@
                                 row.push(values.destination);
                                 row.push(values.vendor);
                                 row.push(values.consignee_name);
-                                row.push(values.phone);
+                                row.push(values.phone.replace('<br>', ' '));
                                 row.push(values.consignee_address);
                                 row.push(values.amount);
                                 row.push(values.booking_date);
