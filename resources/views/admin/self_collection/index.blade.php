@@ -17,30 +17,6 @@
                             <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
                                    placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
                         </div>
-                        <div class="col-3">
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
-                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o small-calender-icon"></span>
-                                      </span>
-                                </div>
-                                <input type="text" name="booking_from_date"
-                                       class="form-control bg-primary border-primary white rounded-right"
-                                       id="booking_from_date" placeholder="Booking Date From">
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o small-calender-icon"></span>
-                                        </span>
-                                </div>
-                                <input type="text" name="booking_to_date"
-                                       class="form-control bg-primary border-primary white rounded-right"
-                                       id="booking_to_date" placeholder="Booking Date To">
-                            </div>
-                        </div>
 
                         <div class="form-group col-md-5 mt-2 justify-content-center">
                             <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width" disabled><i
@@ -349,46 +325,6 @@
                 'digits': 2,
                 'min': 0.00,
                 'max': 1000000.00
-            });
-            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
-
-
-            var booking_from_date = $('#booking_from_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#booking_from_date_root').css('top','40px');
-                },
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #booking_to_date').pickadate('picker').set('min', $('#track_form #booking_from_date').pickadate('picker').get('select'));
-                    }
-                }
-            });
-
-            var booking_to_date = $('#booking_to_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#booking_to_date_root').css('top','40px');
-                },
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
-                    }
-                }
             });
 
             $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
@@ -953,14 +889,10 @@
                 e.preventDefault();
 
                 var tracking_numbers = $('#track_form .tracking_numbers').val();
-                var booking_from_date = $('#track_form #booking_from_date').val();
-                var booking_to_date = $('#track_form #booking_to_date').val();
-                if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '')) {
+                if (tracking_numbers != '') {
                     table.draw();
                 }
-
             });
-
 
             var max_char = 245;
             $('#feedback_description').on('keypress copy paste',function (e) {
