@@ -144,6 +144,7 @@ class AdminDashboardController extends Controller
     public function index(){
         $stats = array();
         $graph = array();
+        $sales=array();
         $graph_dates = array();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
@@ -165,6 +166,11 @@ class AdminDashboardController extends Controller
         $stats['complaints_in_process'] = CrmRequestStatusHistory::where('status_id', 2)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['complaints_closed'] = CrmRequestStatusHistory::where('status_id', 4)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['complaints_rejected'] = CrmRequestStatusHistory::where('status_id', 7)->whereBetween('created_at',[$thirtyDays,$today]);
+        $sales['total_accounts']=DB::table('users')->select('name')->get();
+        $sales['active_accounts']=User::where('status',3);
+        $sales['inactive_accounts']=User::where('status',4)->where('blacklist',0);
+        $sales['pending_accounts']=User::whereIn('status',[0,1,2]);
+        $sales['blocked_accounts']=User::where('blacklist',1);
 
         if (session('role_id') != 1) {
             $stats['total'] = $stats['total']->where(function($query) {
@@ -265,6 +271,8 @@ class AdminDashboardController extends Controller
             });
         }
 
+
+
         $stats['total'] = number_format($stats['total']->count());
         $stats['booked'] = number_format($stats['booked']->count());
         $stats['canceled'] = number_format($stats['canceled']->count());
@@ -282,6 +290,11 @@ class AdminDashboardController extends Controller
         $stats['complaints_in_process'] =  number_format($stats['complaints_in_process']->count());
         $stats['complaints_closed'] =  number_format($stats['complaints_closed']->count());
         $stats['complaints_rejected'] =  number_format($stats['complaints_rejected']->count());
+        $sales['total_accounts']=number_format($sales['total_accounts']->count());
+        $sales['active_accounts']=number_format($sales['active_accounts']->count());
+        $sales['inactive_accounts']=number_format($sales['inactive_accounts']->count());
+        $sales['pending_accounts']=number_format($sales['pending_accounts']->count());
+        $sales['blocked_accounts']=number_format( $sales['blocked_accounts']->count());
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
@@ -425,7 +438,7 @@ class AdminDashboardController extends Controller
 //        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
 
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
     }
     public function statistics_search(Request $request){
 //        return $request;
