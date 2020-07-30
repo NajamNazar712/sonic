@@ -54,7 +54,8 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\PendingCashCollectionReport',
 		'\App\Console\Commands\ZeroChargesReport',
 		'\App\Console\Commands\StationRecoveryReport',
-		'\App\Console\Commands\V2PickupCleanDuplicateData'
+		'\App\Console\Commands\V2PickupCleanDuplicateData',
+		'\App\Console\Commands\SelfCollection'
 
         ];
 
@@ -111,6 +112,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
 		$schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
+		$schedule->command('shipments:self_collection')->dailyAt('09:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
 

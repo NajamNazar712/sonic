@@ -58,7 +58,7 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Status</th>
+{{--                        <th class="border-primary border-darken-1">Status</th>--}}
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -557,6 +557,60 @@
             {{--            }--}}
             {{--        });--}}
             {{--}--}}
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.master_cargo.pending.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Tracking Number.');
+                            head.push('Order ID');
+                            head.push('Shipper');
+                            head.push('Service Type');
+                            head.push('Payment Status');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Vendor');
+                            head.push('Consignee Name');
+                            head.push('Consignee Contact');
+                            head.push('Consignee Address');
+                            head.push('Collection Amount');
+                            head.push('Booking Date');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.order_id);
+                                row.push(values.shipper);
+                                row.push(values.service_type);
+                                row.push(values.payment_status);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.vendor);
+                                row.push(values.consignee_name);
+                                row.push(values.phone);
+                                row.push(values.consignee_address);
+                                row.push(values.amount);
+                                row.push(values.booking_date);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 
             var selected_rows = [];
             var table = $('#datatable').DataTable({
@@ -659,6 +713,12 @@
                     //         });
                     //     }
                     // },
+                    {
+                        extend: 'excel',
+                        title: 'Self Collection Shipments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
                     'reset'
                 ],
                 // select: {
@@ -692,7 +752,7 @@
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    // {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle vendor'},
@@ -727,12 +787,14 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.select')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
-                            $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.service_type')){
+                        }
+                        // else if($(header).is('.status')){
+                        //     $(drop_select).appendTo($(search))
+                        //         .on( 'change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         } ).wrap(td);
+                        // }
+                        else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
@@ -758,19 +820,19 @@
 
                         return obj;
                     });
-                    var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.text = obj.name; // replace name with the property used for the text
+                    {{--var data = $.map({!! $shipment_status !!}, function (obj) {--}}
+                    {{--    obj.text = obj.name; // replace name with the property used for the text--}}
 
-                        return obj;
-                    });
+                    {{--    return obj;--}}
+                    {{--});--}}
 
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        data:data,
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    {{--$("#status_select").prepend('<option value="" selected></option>').select2({--}}
+                    {{--    data:data,--}}
+                    {{--    placeholder: "Select Status",--}}
+                    {{--    width:'100%',--}}
+                    {{--    containerCssClass: 'select-xs',--}}
+                    {{--    dropdownCssClass: 'form-control-sm p-0'--}}
+                    {{--});--}}
                     var data2 = $.map({!! $service_type !!}, function (obj) {
                         obj.id = obj.id;
                         obj.text = obj.booking_type;
