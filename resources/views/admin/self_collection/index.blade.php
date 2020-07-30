@@ -57,17 +57,19 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Shipper Contact</th>
                         <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Shipping mode</th>
 {{--                        <th class="border-primary border-darken-1">Status</th>--}}
-                        <th class="border-primary border-darken-1">Payment Status</th>
+                        <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Contact</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Booking Date</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -572,16 +574,18 @@
                             head.push('Tracking Number.');
                             head.push('Order ID');
                             head.push('Shipper');
+                            head.push('Shipper Contact');
                             head.push('Service Type');
-                            head.push('Payment Status');
+                            head.push('Shipping Mode');
+                            head.push('Hub');
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Vendor');
                             head.push('Consignee Name');
                             head.push('Consignee Contact');
                             head.push('Consignee Address');
                             head.push('Collection Amount');
                             head.push('Booking Date');
+                            head.push('Arrival Date');
 
 
                             $.each(result.data, function(index, values) {
@@ -591,16 +595,18 @@
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
+                                row.push(values.shipper_phone);
                                 row.push(values.service_type);
-                                row.push(values.payment_status);
+                                row.push(values.shipping_mode);
+                                row.push(values.hub);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.vendor);
                                 row.push(values.consignee_name);
                                 row.push(values.phone.replace('<br>', ' '));
                                 row.push(values.consignee_address);
                                 row.push(values.amount);
                                 row.push(values.booking_date);
+                                row.push(values.arrival_date);
 
                                 body.push(row);
                             });
@@ -744,24 +750,26 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[13, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'shipper_phone', name: 'u.phone', class: 'align-middle shipper_phone'},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
+                    {data: 'shipping_mode', name: 'sm.id', class: 'align-middle shipping_mode'},
                     // {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
+                    {data: 'hub', name: 'h.name', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle vendor'},
-                    {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'phone', name: 'phone', class: 'align-middle phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
+                    {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
                     // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -778,7 +786,7 @@
                     var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '</select>';
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
-                    var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
+                    var shipping_select = '<select name="shipping_select" id="shipping_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -799,8 +807,8 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
-                        }else if($(header).is('.payment_status')){
-                            $(payment_select).appendTo($(search))
+                        }else if($(header).is('.shipping_mode')){
+                            $(shipping_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -846,15 +854,15 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    var data4 = $.map({!! $payment_status !!}, function (obj) {
+                    var data4 = $.map({!! $shipping_mode !!}, function (obj) {
                         obj.id = obj.id;
-                        obj.text = obj.name;
+                        obj.text = obj.mode;
                         return obj;
                     });
 
-                    $("#payment_select").prepend('<option value="" selected></option>').select2({
+                    $("#shipping_select").prepend('<option value="" selected></option>').select2({
                         data:data4,
-                        placeholder: "Select Payment",
+                        placeholder: "Select Shipping Mode",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

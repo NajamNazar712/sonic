@@ -22,6 +22,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
@@ -423,6 +424,7 @@ class OrderManagementController extends Controller
 
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
+        $shipping_mode = ShippingMode::all();
         $products = Product::select('id','product_name')->get();
         $payment_status = ShipmentPaymentStatus::all();
         $case_nature = CrmRequestCaseNature::get();
@@ -430,7 +432,7 @@ class OrderManagementController extends Controller
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
-        return view('admin.self_collection.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
+        return view('admin.self_collection.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
     public function self_Collection_list(Request $request)
     {
@@ -447,9 +449,14 @@ class OrderManagementController extends Controller
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id'])
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id', 'sj.created_at as arrival_date', 'u.phone as shipper_phone','u.phone2 as shipper_phone2', 'sm.mode as shipping_mode', 'h.name as hub'])
         ->where('shipments.shipper_status_id', '=', 15);
 
         if(session('department_id') == 7){
@@ -477,6 +484,13 @@ class OrderManagementController extends Controller
                 else {
                     return $shipment->shipper;
                 }
+            })
+            ->editColumn('shipper_phone',function ($shipper){
+                $phone = "$shipper->shipper_phone";
+                if($shipper->shipper_phone2 != null){
+                    $phone .= " | $shipper->shipper_phone2";
+                }
+                return $phone;
             })
             ->filterColumn('u.name', function ($query, $keyword) {
                 $query->where(function ($sub_query) use ($keyword) {
