@@ -55,6 +55,7 @@ use App\Http\Models\Rates\RateHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\Sister_account\MergedSisterAccount;
@@ -7358,6 +7359,9 @@ if(session('department_id') == 7){
                 if (session('role_id') == 1 || in_array(149, session('permissions'))){
                     $dropdown .= '<button type="button" class="dropdown-item shipment_days_button"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Auto Shipment Cancel Days</div></button>';
                 }
+                if($sale_check){
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -7609,6 +7613,9 @@ if(session('department_id') == 7){
                 }
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
 
+                if($sale_check){
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -9118,6 +9125,34 @@ if(session('department_id') == 7){
         $user->documents_status_reason = null;
         $user->save();
         return ['success' => 'User Document Uploaded!'];
+    }
+
+    public function add_contacts($id){
+        $shipper = User::find($id);
+        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
+        $admin = Admin::find($sale_person->admin_id);
+        $contacts = ShipperContact::where('shipper_id', $id);
+        if($contacts->exists()){
+            $contacts = $contacts->get();
+        }else{
+            $contacts = null;
+        }
+        return view('admin.accounts.multiple_poc')->with(['sale_person' => $admin, 'contacts' => $contacts, 'shipper' => $shipper]);
+    }
+
+    public function add_contacts_store(Request $request){
+        ShipperContact::where('shipper_id', $request->shipper_id)->delete();
+        if($request->has('poc')){
+            foreach($request->poc as $index => $poc){
+                $shipper_contact = new ShipperContact();
+                $shipper_contact->shipper_id = $request->shipper_id;
+                $shipper_contact->poc = $poc;
+                $shipper_contact->designation = $request->designation[$index];
+                $shipper_contact->phone_number = $request->phone[$index];
+                $shipper_contact->save();
+            }
+        }
+        return redirect()->back()->with(['success' => 'Contacts updated successfully']);
     }
 }
 

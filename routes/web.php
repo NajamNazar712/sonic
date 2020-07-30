@@ -261,6 +261,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
+    Route::get('contacts','Shippers\ShipperDashboardController@contacts')->name('contacts');
 
     Route::prefix('resources')->name('resources.')->group(function (){
         Route::get('','Shippers\ShipperResourcesController@index')->name('index');
@@ -472,6 +473,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('accounts/{id}/view_crf_agreement', 'ShipperAgreementController@view_crf_agreement')->name('accounts.view_crf_agreement');
     //
     Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
+    Route::get('/accounts/{id}/add_contacts','Admins\AdminDashboardController@add_contacts')->name('accounts.add_contacts');
+    Route::post('/accounts/add_contacts.store','Admins\AdminDashboardController@add_contacts_store')->name('accounts.add_contacts.store');
 
 
 

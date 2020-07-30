@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BookingType;
@@ -37,6 +38,7 @@ use App\Http\Models\Reference;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
+use App\http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\V2Pickup\V2PickupRequest;
@@ -940,4 +942,16 @@ class ShipperDashboardController extends Controller
 //        return response()->json(['status'=>1,'graph'=>$graph]);
 //    }
 
+
+    public function contacts(){
+        $sale_person = SalePersonTag::where('user_id', session('user_id'))->where('status', 0)->first();
+        $admin = Admin::find($sale_person->admin_id);
+        $contacts = ShipperContact::where('shipper_id', session('user_id'));
+        if($contacts->exists()){
+            $contacts = $contacts->get();
+        }else{
+            $contacts = null;
+        }
+        return view('client.profile.contacts')->with(['sale_person' => $admin, 'contacts' => $contacts]);
+    }
 }
