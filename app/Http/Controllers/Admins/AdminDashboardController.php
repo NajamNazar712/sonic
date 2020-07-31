@@ -1353,9 +1353,10 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
     }
     public function activeAccountsList(){
+        $shippers = User::where('status', 3)->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers]);
 
     }
     public function blockAccountsList(){
@@ -7149,7 +7150,7 @@ if(session('department_id') == 7){
             $users = $users->where('users.cnic', $search_cnic);
         }
         if($search_shipper = $request->get('search_shipper')){
-            $users = $users->where('users.name', 'like', '%' . $search_shipper . '%');
+            $users = $users->whereIn('users.id', $search_shipper);
         }
 
         if($search_iban = $request->get('search_iban')){

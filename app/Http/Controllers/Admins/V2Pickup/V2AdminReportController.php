@@ -46,22 +46,26 @@ class V2AdminReportController extends Controller
         $attempted_failed = 0;
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
-        $arrival_cut_off_time = '08:00';
+        $arrival_cut_off_time = '8';
         if ($settings->exists()) {
             $settings = $settings->first();
-            $arrival_cut_off_time = $settings->setting_value . ':00';
+            $arrival_cut_off_time = $settings->setting_value;
         }
-        $arrival_time = Carbon::parse($arrival_cut_off_time)->toTimeString();
+//        $arrival_time = Carbon::parse($arrival_cut_off_time)->toTimeString();
         $report = V2PickupReport::whereDate('date', $today);
         if($report->exists()){
             $report->delete();
             V2PickupReportSummary::whereDate('date', $today)->delete();
         }
+        $yesterday->setTime($arrival_cut_off_time,0,1);
+        $today->setTime($arrival_cut_off_time,0,0);
+
         $pickup_request_attempts = V2PickupRequestAttempt::whereBetween('attempt_date', [$yesterday,$today]);
+
 //        $pickup_requests = V2PickupRequest::leftjoin('v2_pickup_request_attempts as ra', 'ra.pickup_request_id','=','v2_pickup_requests.id')->whereDate('v2_pickup_requests.created_at', '<=', Carbon::today())->whereDate('ra.attempt_date', '>=', $yesterday)->groupBy('ra.pickup_request_id');
         
         if($pickup_request_attempts->exists()){
-            $pickup_request_attempts = $pickup_request_attempts->pluck('pickup_request_id')->toArray();
+            $pickup_request_attempts = $pickup_request_attempts->groupBy('pickup_request_id')->pluck('pickup_request_id')->toArray();
            if(!empty($pickup_request_attempts)){
                foreach ($pickup_request_attempts as $pickup_request_id) {
                    $pickup_request = V2PickupRequest::find($pickup_request_id);
@@ -88,8 +92,13 @@ class V2AdminReportController extends Controller
                        $received = $pickup_request->received;
                    }
                    if($booked > 0){
-                       $difference = ($booked - $received)/$booked;
-                       $difference_shipments = 100 - $difference;
+                       $difference = ($booked - $received) / $booked;
+
+                       if ($difference < 0) {
+                        $difference = 0;
+                       }
+                       
+                       $difference_shipments = $difference * 100;
 
                    }else{
                        $difference = 0;
@@ -109,33 +118,40 @@ class V2AdminReportController extends Controller
                        $attempted_and_picked++;
                    }
                    if(($status_id == 3) && ($attempts >= 1)){
-                       $department_id = 7;
-                       $legend_id = 3;
+                       $pickup_attempts = $pickup_request->pickup_attempts;
+                       $pickup_attempt_flag = FALSE;
+                       $pickup_attempt_operation_status = array(7,8,9);
+
+                       if(count($pickup_attempts) > 0){
+                           foreach ($pickup_attempts as $pickup_attempt){
+                               if(in_array($pickup_attempt->reason_id, $pickup_attempt_operation_status)){
+                                   $pickup_attempt_flag = TRUE;
+                               }
+                           }
+                       }
+
+                       if ($pickup_attempt_flag) {
+                           $department_id = 6;
+                           $legend_id = 5;
+                           $total_operations++;
+                       }
+                       else {
+                           $department_id = 7;
+                           $legend_id = 3;
+                           $total_sales++;
+                       }
+
                        $category_id = 2;
-                       $total_sales++;
                        $attempted_and_not_picked++;
                    }
                    if($status_id == 4){
                        $legend_id = 4;
                        $department_id = 7;
                        $category_id = 3;
+                       $total_sales++;
                        $attempted_failed++;
                    }
-                   $pickup_attempts = $pickup_request->pickup_attempts;
-                   $pickup_attempt_flag = FALSE;
-                   $pickup_attempt_operation_status = array(7,8,9);
-                   if(count($pickup_attempts) > 0){
-                       foreach ($pickup_attempts as $pickup_attempt){
-                           if(in_array($pickup_attempt->reason_id, $pickup_attempt_operation_status)){
-                               $pickup_attempt_flag = TRUE;
-                           }
-                       }
-                   }
-                   if($pickup_attempt_flag){
-                       $department_id = 6;
-                       $legend_id = 5;
-                       $total_operations++;
-                   }
+
                    if($pickup_request->after_cut_off_time == null){
                        $total_cut_off_time_before++;
                    }

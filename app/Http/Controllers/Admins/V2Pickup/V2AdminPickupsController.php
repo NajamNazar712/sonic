@@ -218,10 +218,14 @@ class V2AdminPickupsController extends Controller
 
 
     public function pending_assign(Request $request) {
-
         $pickup_request_ids = $request->input('pickup_request_ids');
+        $pickup_request_ids = explode(',' , $pickup_request_ids);
+        $rider_id = $request->input('rider');
 
-        $rider_id = $request->input('rider_id');
+        if(count($pickup_request_ids) == 0){
+            return redirect()->back()->with('error', 'No Pickups selected!');
+        }
+
         array_unique($pickup_request_ids);
         $rider_cut_off_time = NULL;
         $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
@@ -233,17 +237,17 @@ class V2AdminPickupsController extends Controller
         }
         if($rider_cut_off_time != null){
             if(Carbon::now() > $rider_cut_off_time){
-                return ['status' => 1, 'error' => 'Rider can not be assigned after cut off time!'];
+                return redirect()->back()->with('error', 'Rider can not be assigned after cut off time!');
             }
         }
 
 
         if (empty($pickup_request_ids)) {
-            return ['status' => 1, 'error' => 'No Pickup Request Selected'];
+            return redirect()->back()->with('error', 'No Pickup Request Selected!');
         }
 
         if (empty($rider_id)) {
-            return ['status' => 1, 'error' => 'No Rider Selected'];
+            return redirect()->back()->with('error', 'No Rider Selected!');
         }
 
 //        foreach ($pickup_request_ids as $pickup_request_id) {
@@ -362,19 +366,19 @@ class V2AdminPickupsController extends Controller
                 }
 
             }
-
-            return ['status' => 0, 'success' => 'Pickup Request(s) has been Assigned to the Rider'];
+            return redirect()->back()->with('success', 'Pickup Request(s) has been Assigned to the Rider!');
         }else{
-            return ['status' => 0, 'success' => 'Pickup Request(s) rider updated / assigned!'];
+            return redirect()->back()->with('success', 'Pickup Request(s) rider updated / assigned!');
         }
-
-        return ['status' => 1, 'error' => 'Pickup Request(s) already assigned'];
+        return redirect()->back()->with('error', 'Pickup Request(s) already assigned!');
 
     }
 
     public function pending_update(Request $request){
         $pickup_request_ids = $request->pickup_request_ids;
-        $reason_id = $request->reason_id;
+        $pickup_request_ids = explode(',' , $pickup_request_ids);
+
+        $reason_id = $request->reason;
         $trax_remarks = $request->trax_remarks;
         if(count($pickup_request_ids) > 0){
             foreach ($pickup_request_ids as $pickup_request_id) {
@@ -404,9 +408,9 @@ class V2AdminPickupsController extends Controller
 
                 }
             }
-            return ['status' => 0, 'success' => 'Pickup(s) updated successfully!'];
+            return redirect()->back()->with('success', 'Pickup(s) updated successfully!');
         }
-        return ['status' => 1, 'error' => 'Pickup(s) not selected!'];
+        return redirect()->back()->with('error', 'Pickup(s) not selected!');
 
     }
     public function pending_all_bookings(Request $request){

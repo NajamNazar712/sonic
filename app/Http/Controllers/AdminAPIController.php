@@ -25,6 +25,10 @@ class AdminAPIController extends Controller
         'image' => ':attribute must be an Image.'
     ];
 
+    public function verify(Request $request) {
+        return response()->json(['status' => 0, 'message' => 'API Key is Valid']);
+    }
+
     public function login(Request $request) {
         $rules = [
             'email_address' => ['required', 'email'],
@@ -110,7 +114,7 @@ class AdminAPIController extends Controller
                                         $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
                                     }
                                 }
-                                $details['images'] = array('id' => $return_note_image->id,'image'=> $img_url);
+                                $details['images'][] = array('id' => $return_note_image->id,'image'=> $img_url);
                             }
                             return response()->json(['status' => 0, 'message' => 'Images found', 'information' => $details]);
                         }else{

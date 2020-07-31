@@ -17,12 +17,12 @@ class V2PickupCronController extends Controller
 {
     static public function arrival_not_picked(){
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
-        $arrival_cut_off_time = '08:00';
+        $arrival_cut_off_time = '8';
         if ($settings->exists()) {
             $settings = $settings->first();
-            $arrival_cut_off_time = $settings->setting_value . ':00';
+            $arrival_cut_off_time = $settings->setting_value;
         }
-        $arrival_time = Carbon::parse($arrival_cut_off_time)->toTimeString();
+        // $arrival_time = Carbon::parse($arrival_cut_off_time)->toTimeString();
         $rider_id = 1837;
         $global_admin_id = 346;
         $setting = GlobalSettings::where('type', 'global_rider_id');
@@ -30,27 +30,27 @@ class V2PickupCronController extends Controller
             $setting = $setting->first();
             $rider_id = $setting->setting_value;
         }
-        $today = Carbon::today()->toDateString();
-        $yesterday = Carbon::yesterday()->toDateString();
-        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->whereDate('created_at', '<=', $today)->whereTime('created_at', '<=', $arrival_time);
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+        $today->setTime($arrival_cut_off_time,0,0);
+        $yesterday->setTime($arrival_cut_off_time,0,1);
+        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->whereBetween('created_at', [$yesterday,$today]);
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
             foreach ($pickup_requests as $pickup_request) {
                 $now = Carbon::now();
-                if($pickup_request->status_id == 3){
-                    $check_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', '>=' ,$yesterday)->whereTime('attempt_date', '>=', $arrival_time)->whereNotNull('reason_id');
-                    if($check_pickup_request_attempt->exists()){
-                        continue;
-                    }
+                if($pickup_request->status_id != 3){
+                    $pickup_request->status_id = 3;
+                    $pickup_request->save();
                 }
-                $pickup_request->status_id = 3;
-                $pickup_request->save();
                 if($pickup_request->current_rider_id != null){
-                    $pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', '>=' ,$yesterday)->whereTime('attempt_date', '>=', $arrival_time);
+                    $pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereBetween('attempt_date', [$yesterday,$today]);
                     if($pickup_request_attempt->exists()){
                         $pickup_request_attempt = $pickup_request_attempt->latest('id')->first();
-                        $pickup_request_attempt->reason_id = 7;
-                        $pickup_request_attempt->save();
+                        if($pickup_request_attempt->reason_id == null){
+                            $pickup_request_attempt->reason_id = 7;
+                            $pickup_request_attempt->save();
+                        }
                         $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request->id);
                         if($pickup_note_request->exists()){
                             $pickup_note_request = $pickup_note_request->latest('id')->first();
@@ -89,6 +89,7 @@ class V2PickupCronController extends Controller
             self::remove_riders();
         }
     }
+    
     static public function remove_riders(){
         V2PickupRequest::whereIn('status_id', [1,3])->where('rider_status', 2)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
     }
@@ -196,6 +197,83 @@ class V2PickupCronController extends Controller
                 $pickup_request->booked = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->count();
                 $pickup_request->save();
             }
+        }
+    }
+    
+    static public function arrival_not_picked_old(){
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+        $arrival_cut_off_time = '8';
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $arrival_cut_off_time = $settings->setting_value;
+        }
+        $arrival_time = Carbon::parse($arrival_cut_off_time)->toTimeString();
+        $rider_id = 1837;
+        $global_admin_id = 346;
+        $setting = GlobalSettings::where('type', 'global_rider_id');
+        if($setting->exists()){
+            $setting = $setting->first();
+            $rider_id = $setting->setting_value;
+        }
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+        $today->setTime($arrival_cut_off_time,0,0);
+        $yesterday->setTime($arrival_cut_off_time,0,1);
+        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->whereBetween('created_at', [$yesterday,$today]);
+        if($pickup_requests->exists()){
+            $pickup_requests = $pickup_requests->get();
+            foreach ($pickup_requests as $pickup_request) {
+                $now = Carbon::now();
+                if($pickup_request->status_id == 3){
+                    $check_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereBetween('attempt_date', [$yesterday,$today])->whereNotNull('reason_id');
+                    if($check_pickup_request_attempt->exists()){
+                        continue;
+                    }
+                }
+                $pickup_request->status_id = 3;
+                $pickup_request->save();
+                if($pickup_request->current_rider_id != null){
+                    $pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereDate('attempt_date', '>=' ,$yesterday)->whereTime('attempt_date', '>=', $arrival_time);
+                    if($pickup_request_attempt->exists()){
+                        $pickup_request_attempt = $pickup_request_attempt->latest('id')->first();
+                        $pickup_request_attempt->reason_id = 7;
+                        $pickup_request_attempt->save();
+                        $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request->id);
+                        if($pickup_note_request->exists()){
+                            $pickup_note_request = $pickup_note_request->latest('id')->first();
+                            if($pickup_note_request->status == 0){
+                                $pickup_note_request->status = 1;
+                                $pickup_note_request->save();
+                            }
+                        }
+                    }else{
+                        $pickup_request->attempts = $pickup_request->attempts + 1;
+                        $pickup_request->save();
+                        $pickup_request_attempt = new V2PickupRequestAttempt();
+                        $pickup_request_attempt->pickup_request_id = $pickup_request->id;
+                        $pickup_request_attempt->rider_id = $rider_id;
+                        $pickup_request_attempt->reason_id = 7;
+                        $pickup_request_attempt->attempt_date = $now;
+                        $pickup_request_attempt->assigned_by = $global_admin_id;
+                        $pickup_request_attempt->save();
+                    }
+                }else{
+                    $pickup_request->attempts = $pickup_request->attempts + 1;
+                    $pickup_request->save();
+                    $pickup_request_attempt = new V2PickupRequestAttempt();
+                    $pickup_request_attempt->pickup_request_id = $pickup_request->id;
+                    $pickup_request_attempt->rider_id = $rider_id;
+                    $pickup_request_attempt->reason_id = 7;
+                    $pickup_request_attempt->attempt_date = $now;
+                    $pickup_request_attempt->assigned_by = $global_admin_id;
+                    $pickup_request_attempt->save();
+
+                }
+
+            }
+            V2PickupNote::where('status', 0)->update(['status' => 1]);
+
+            self::remove_riders();
         }
     }
 }
