@@ -55,6 +55,7 @@ use App\Http\Models\Rates\RateHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\Sister_account\MergedSisterAccount;
@@ -144,6 +145,7 @@ class AdminDashboardController extends Controller
     public function index(){
         $stats = array();
         $graph = array();
+        $sales=array();
         $graph_dates = array();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
@@ -165,6 +167,11 @@ class AdminDashboardController extends Controller
         $stats['complaints_in_process'] = CrmRequestStatusHistory::where('status_id', 2)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['complaints_closed'] = CrmRequestStatusHistory::where('status_id', 4)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['complaints_rejected'] = CrmRequestStatusHistory::where('status_id', 7)->whereBetween('created_at',[$thirtyDays,$today]);
+        $sales['total_accounts']=DB::table('users')->select('name')->get();
+        $sales['active_accounts']=User::where('status',3);
+        $sales['inactive_accounts']=User::where('status',4)->where('blacklist',0);
+        $sales['pending_accounts']=User::whereIn('status',[0,1,2]);
+        $sales['blocked_accounts']=User::where('blacklist',1);
 
         if (session('role_id') != 1) {
             $stats['total'] = $stats['total']->where(function($query) {
@@ -265,6 +272,8 @@ class AdminDashboardController extends Controller
             });
         }
 
+
+
         $stats['total'] = number_format($stats['total']->count());
         $stats['booked'] = number_format($stats['booked']->count());
         $stats['canceled'] = number_format($stats['canceled']->count());
@@ -282,6 +291,11 @@ class AdminDashboardController extends Controller
         $stats['complaints_in_process'] =  number_format($stats['complaints_in_process']->count());
         $stats['complaints_closed'] =  number_format($stats['complaints_closed']->count());
         $stats['complaints_rejected'] =  number_format($stats['complaints_rejected']->count());
+        $sales['total_accounts']=number_format($sales['total_accounts']->count());
+        $sales['active_accounts']=number_format($sales['active_accounts']->count());
+        $sales['inactive_accounts']=number_format($sales['inactive_accounts']->count());
+        $sales['pending_accounts']=number_format($sales['pending_accounts']->count());
+        $sales['blocked_accounts']=number_format( $sales['blocked_accounts']->count());
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
@@ -425,7 +439,7 @@ class AdminDashboardController extends Controller
 //        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
 
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
     }
     public function statistics_search(Request $request){
 //        return $request;
@@ -7346,6 +7360,9 @@ if(session('department_id') == 7){
                 if (session('role_id') == 1 || in_array(149, session('permissions'))){
                     $dropdown .= '<button type="button" class="dropdown-item shipment_days_button"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Auto Shipment Cancel Days</div></button>';
                 }
+                if($sale_check){
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -7597,6 +7614,9 @@ if(session('department_id') == 7){
                 }
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
 
+                if($sale_check){
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -7846,7 +7866,7 @@ if(session('department_id') == 7){
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7962,7 +7982,8 @@ if(session('department_id') == 7){
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -7975,7 +7996,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -8011,7 +8033,8 @@ if(session('department_id') == 7){
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -8024,7 +8047,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -8067,7 +8091,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'status'=>1,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             CityHistory::create([
@@ -8081,7 +8106,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             if(!empty($request->walk_in_delivery)) {
@@ -8115,7 +8141,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'status'=>1,
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             CityHistory::create([
@@ -8128,7 +8155,8 @@ if(session('department_id') == 7){
                 'attempt_tat'=>$request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             if(!empty($request->walk_in_delivery)) {
@@ -8370,11 +8398,14 @@ if(session('department_id') == 7){
         return view('admin.management.rider_management')->with(['categories'=>$category]);
     }
     public function riderListAjax(){
+
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
             ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
-            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
+            ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
+            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic',                'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as                           status','riders.created_at','cb.name as created_by', 'ub.name as updated_by']);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -8479,7 +8510,8 @@ if(session('department_id') == 7){
             'rider_category_id'=>$request->rider_category,
             'status'=>1,
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
-            'pin'=> bcrypt($request->pin)
+            'pin'=> bcrypt($request->pin),
+            'created_by' => Auth::id()
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -8540,7 +8572,7 @@ if(session('department_id') == 7){
 
             NotificationsController::send(61, $rider->id, $request->pin);
         }
-
+        $rider->updated_by = Auth::id();
         $rider->save();
 
         if($rider){
@@ -9031,7 +9063,7 @@ if(session('department_id') == 7){
             $new_user_attachment->user_id = $request->user_id;
             $new_user_attachment->save();
 
-            
+
         }
         $user = User::find($request->user_id);
         $user->documents_status = 0;
@@ -9053,6 +9085,75 @@ if(session('department_id') == 7){
             return response()->json(['status' => 1,'success' => 'Files confirmed successfully']);
         }
         return response()->json(['error' => 'User not found!']);
+    }
+    public function edit_rates_user_documents(Request $request){
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if($user_attachment){
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->filled_and_signed_pdf = $filename;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            $user_attachment->save();
+        }
+        else{
+            $new_user_attachment = new UserDocumentAttachment();
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->filled_and_signed_pdf = $filename;
+            }
+
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            $new_user_attachment->user_id = $request->user_id;
+            $new_user_attachment->save();
+        }
+        $user = User::find($request->user_id);
+        $user->documents_status = 0;
+        $user->documents_status_reason = null;
+        $user->save();
+        return ['success' => 'User Document Uploaded!'];
+    }
+
+    public function add_contacts($id){
+        $shipper = User::find($id);
+        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
+        $admin = Admin::find($sale_person->admin_id);
+        $contacts = ShipperContact::where('shipper_id', $id);
+        if($contacts->exists()){
+            $contacts = $contacts->get();
+        }else{
+            $contacts = null;
+        }
+        return view('admin.accounts.multiple_poc')->with(['sale_person' => $admin, 'contacts' => $contacts, 'shipper' => $shipper]);
+    }
+
+    public function add_contacts_store(Request $request){
+        ShipperContact::where('shipper_id', $request->shipper_id)->delete();
+        if($request->has('poc')){
+            foreach($request->poc as $index => $poc){
+                $shipper_contact = new ShipperContact();
+                $shipper_contact->shipper_id = $request->shipper_id;
+                $shipper_contact->poc = $poc;
+                $shipper_contact->designation = $request->designation[$index];
+                $shipper_contact->phone_number = $request->phone[$index];
+                $shipper_contact->save();
+            }
+        }
+        return redirect()->back()->with(['success' => 'Contacts updated successfully']);
     }
 }
 

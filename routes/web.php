@@ -166,6 +166,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('','Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');
             Route::get('list','Shippers\ShipperReturnController@return_reattempt_history_list')->name('list');
         });
+        Route::prefix('confirmed')->name('confirmed.')->group(function (){
+            Route::get('','Shippers\ShipperReturnController@return_confirmed_index')->name('index');
+            Route::get('list','Shippers\ShipperReturnController@return_list')->name('list');
+
+        });
     });
 
     Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function() {
@@ -227,6 +232,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
     });
 
+    Route::prefix('rates')->name('rates.')->group(function (){
+        Route::prefix('view')->name('view.')->group(function (){
+            Route::get('','Shippers\ShipperDashboardController@view_rates_index')->name('index');
+        });
+    });
+
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
@@ -250,6 +261,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
+    Route::get('contacts','Shippers\ShipperDashboardController@contacts')->name('contacts');
 
     Route::prefix('resources')->name('resources.')->group(function (){
         Route::get('','Shippers\ShipperResourcesController@index')->name('index');
@@ -378,6 +390,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
         Route::post('telenor_shipments_arrival','Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
+
+        Route::prefix('self_collection')->name('self_collection.')->group(function () {
+            Route::get('', 'Admins\OrderManagementController@self_collection_index')->name('index');
+            Route::get('list', 'Admins\OrderManagementController@self_collection_list')->name('list');
+        });
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
@@ -451,10 +468,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('add.rates.submit');
     //edit rates
     Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('edit.rates');
+    Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
     Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
     Route::get('accounts/{id}/view_crf_agreement', 'ShipperAgreementController@view_crf_agreement')->name('accounts.view_crf_agreement');
     //
     Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
+    Route::get('/accounts/{id}/add_contacts','Admins\AdminDashboardController@add_contacts')->name('accounts.add_contacts');
+    Route::post('/accounts/add_contacts.store','Admins\AdminDashboardController@add_contacts_store')->name('accounts.add_contacts.store');
 
 
 
@@ -462,6 +482,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
         Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_submit')->name('add.rates');
         Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_index')->name('edit.rates');
+        Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
         Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_submit')->name('edit.rates');
         Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
 
@@ -942,6 +963,82 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('update', 'Admins\AdminCargoController@draft_update')->name('update');
             });
 
+        });
+
+        Route::prefix('mapping')->name('mapping.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@mapping_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@mapping_list')->name('list');
+            Route::post('store', 'Admins\AdminCargoController@mapping_store')->name('store');
+            Route::post('edit', 'Admins\AdminCargoController@mapping_edit')->name('edit');
+            Route::post('update', 'Admins\AdminCargoController@mapping_edit_update')->name('update');
+//            Route::post('print', 'Admins\AdminCargoController@history_cargo_print')->name('print');
+        });
+
+    });
+    Route::prefix('master_cargo')->name('master_cargo.')->group(function () {
+        Route::prefix('bag')->name('bag.')->group(function () {
+            Route::prefix('pending')->name('pending.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@pending_index')->name('index');
+                Route::get('list', 'Admins\AdminMasterCargoController@pending_list')->name('list');
+            });
+
+            Route::prefix('create')->name('create.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@create_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminMasterCargoController@create_shipment_details')->name('shipment_details');
+                Route::post('bag_details', 'Admins\AdminMasterCargoController@create_bag_details')->name('bag_details');
+                Route::get('seal_number', 'Admins\AdminMasterCargoController@create_bag_seal_number')->name('seal_number');
+                Route::post('', 'Admins\AdminMasterCargoController@create_store')->name('store');
+            });
+            Route::post('piece_details', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
+
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@history_index')->name('index');
+                Route::get('list', 'Admins\AdminMasterCargoController@history_list')->name('list');
+            });
+        });
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_pending_index')->name('index');
+            Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_pending_list')->name('list');
+            Route::post('shipments', 'Admins\AdminMasterCargoController@master_cargo_pending_shipments')->name('shipments');
+        });
+
+        Route::prefix('create')->name('create.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_create_index')->name('index');
+            Route::post('bag_details', 'Admins\AdminMasterCargoController@create_master_cargo_bag_details')->name('bag_details');
+            Route::post('bag_cargo_details', 'Admins\AdminMasterCargoController@create_master_cargo_details')->name('cargo_details');
+            Route::post('', 'Admins\AdminMasterCargoController@master_cargo_create_store')->name('store');
+        });
+
+        Route::prefix('in_transit')->name('in_transit.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_in_transit_index')->name('index');
+            Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_in_transit_list')->name('list');
+            Route::post('lost', 'Admins\AdminMasterCargoController@master_cargo_in_transit_lost')->name('lost');
+            Route::post('bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bags')->name('bags');
+            Route::post('short_received_bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_short_received_bags')->name('short_received_bags');
+            Route::post('shipments', 'Admins\AdminMasterCargoController@master_cargo_in_transit_shipments')->name('shipments');
+            Route::post('print', 'Admins\AdminMasterCargoController@master_cargo_in_transit_print')->name('print');
+            Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive')->name('receive');
+        });
+
+        Route::prefix('receive')->name('receive.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_receive_index')->name('index');
+            Route::post('bag_details', 'Admins\AdminMasterCargoController@master_cargo_receive_bag_details')->name('bag_details');
+            Route::post('short_received', 'Admins\AdminMasterCargoController@master_cargo_receive_short_received')->name('short_received');
+            Route::post('', 'Admins\AdminMasterCargoController@master_cargo_receive_store')->name('store');
+
+            Route::prefix('quick')->name('quick.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_index')->name('index');
+                Route::post('bag_details', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_bag_details')->name('bag_details');
+                Route::post('', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_store')->name('store');
+                Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_list_index')->name('list.index');
+                Route::get('list/ajax', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_list_ajax')->name('list.ajax');
+                Route::post('list/ajax', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_list_details')->name('list.details');
+            });
+        });
+
+        Route::prefix('history')->name('history.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_history_index')->name('index');
+            Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_history_list')->name('list');
         });
 
         Route::prefix('mapping')->name('mapping.')->group(function () {

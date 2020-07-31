@@ -5110,15 +5110,17 @@ use Yajra\Datatables\Datatables;
         }
 
         public function crm_index(){
+
             $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id','name')->get();
             $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
+            $zones = DB::connection('reports')->table('zones')->get();
             $agents = DB::connection('reports')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
                 ->where('admin_roles.department_id',3)->get();
             $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
             $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6,7])->get();
             $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-            return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'statuses'=>$statuses, 'shipping_modes' => $shipping_modes]);
+            return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'statuses'=>$statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
         }
 
         public function crm_list(Request $request){
@@ -5132,6 +5134,7 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
                 ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
                 ->leftjoin('cities as h' ,'h.id', '=' , 'dc.hub_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
                 ->leftjoin('crm_request_channels as crc' ,'crc.id', '=' , 'crm_requests.channel_id')
                 ->leftjoin('admins as a' ,'a.id', '=' , 'crm_requests.agent_id')
                 ->leftJoin('admins as al', function ($join) {
@@ -5180,7 +5183,7 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('admins as crta', 'crta.id', '=', 'crt.tagged_id')
                 ->leftjoin('admin_departments as crtad', 'crtad.id', '=', 'crt.tagged_id')
                 ->leftjoin('cities as crtadh', 'crtadh.id', '=', 'crt.hub_id')
-                ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at')
+                ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone')
             ->groupBy('crm_requests.id');
             $datatable = Datatables::of($crm)
                 ->editColumn('tagged_to', function ($crm_request){
@@ -5333,6 +5336,9 @@ use Yajra\Datatables\Datatables;
             if($tracking = $request->get('search_tracking_no')){
                 $datatable->where('s.tracking_number', '=', $tracking);
             }
+            if($rnumber = $request->get('search_request_number')){
+                $datatable->where('crm_requests.id', '=', $rnumber);
+            }
             if($shipper = $request->get('search_shipper')){
                 $datatable->where('u.id', '=', $shipper);
             }
@@ -5344,6 +5350,9 @@ use Yajra\Datatables\Datatables;
             }
             if($hub = $request->get('search_hub')){
                 $datatable->where('h.id', '=', $hub);
+            }
+            if($zone = $request->get('search_zone')){
+                $datatable->where('z.id', '=', $zone);
             }
             if($case_nature = $request->get('search_case_nature')){
                 $datatable->where('crcn.id', '=', $case_nature);
@@ -6267,7 +6276,7 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('cities as dc', 'dc.id', '=', 'cargo_consignments.destination_hub_id')
                 ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'cargo_consignments.shipping_mode_id')
                 ->leftjoin('shipments as s', 's.id', '=', 'css.shipment_id')
-                ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'cargo_consignments.type as cargo_type', 'cargo_consignments.created_at as transited_at')
+                ->select('s.tracking_number as tracking_number','cargo_consignments.id as cargo','oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'cargo_consignments.type as cargo_type', 'cargo_consignments.created_at as transited_at')
                 ->where('cargo_consignments.status_id', 4)
                 ->whereIn('s.shipper_status_id', [3, 21])->get();
 

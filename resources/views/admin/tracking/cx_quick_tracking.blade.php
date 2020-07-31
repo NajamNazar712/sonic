@@ -384,11 +384,7 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
-            $('#search_order_id').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
+
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Shipper',
                 width: '100%',

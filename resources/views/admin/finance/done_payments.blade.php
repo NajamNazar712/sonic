@@ -100,6 +100,8 @@
 										<div class="col ml-auto">
 											<div class="form-group text-right">
 												<a href="{{ asset('file/Done Payment Update Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+
+												<a type="button" class="btn btn-primary white" data-toggle="modal" data-target="#company_banks"><i class="la la-bank"></i> Company Banks</a>
 											</div>
 										</div>
 									</div>
@@ -280,6 +282,41 @@
 													</div>
 												</div>
 											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="modal fade" id="company_banks" role="dialog" aria-labelledby="company_banks_title" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="company_banks_title">Company Bank(s)</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+												<table class="table table-bordered">
+													<thead>
+														<tr>
+															<th>ID</th>
+															<th>Bank</th>
+														</tr>
+													</thead>
+													<tbody>
+														@foreach ($company_banks as $company_bank)
+															<tr>
+																<td>{{ $company_bank->id }}</td>
+																<td>{{ $company_bank->name }}</td>
+															</tr>
+														@endforeach
+													</tbody>
+												</table>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 										</div>
 									</div>
 								</div>
