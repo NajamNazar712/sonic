@@ -36,8 +36,8 @@
                                     @foreach($contacts as $index => $contact)
                                         <tr>
                                             <td>{{$index + 2}}</td>
-                                            <td>{{$contact->name}}</td>
-                                            <td>{{$contact->role->name}}</td>
+                                            <td>{{$contact->poc}}</td>
+                                            <td>{{$contact->designation}}</td>
                                             <td>{{$contact->phone_number}}</td>
                                         </tr>
                                     @endforeach

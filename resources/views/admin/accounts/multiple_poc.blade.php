@@ -37,7 +37,7 @@
                                             @foreach($contacts as $index => $contact)
                                                 <div class="row justify-content-center contact_row mb-1" id="contact_row{{$index}}">
                                                     <div class="col form-group">
-                                                        <input type="text" name="poc[{{$index}}]" class="form-control poc" placeholder="Poc*" data-rule-required="true" data-msg-required="POC is required" value="{{ $contact->name }}">
+                                                        <input type="text" name="poc[{{$index}}]" class="form-control poc" placeholder="Poc*" data-rule-required="true" data-msg-required="POC is required" value="{{ $contact->poc }}">
                                                     </div>
                                                     <div class="col form-group">
                                                         <input type="text" name="designation[{{$index}}]" class="form-control designation" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required" value="{{ $contact->designation }}">
