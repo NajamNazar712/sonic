@@ -1819,22 +1819,25 @@ class AdminCRMController extends Controller
     }
 
     public function bulk_re_open(Request $request){
-        foreach ($request->crm_request_ids as $crm_request_id)
-        {
-            $crm_requests = CrmRequest::find($crm_request_id);
-            if ($crm_requests) {
-                $crm_requests->status_id = 5;
-                $crm_requests->save();
-                CrmRequestStatusHistory::create([
-                    'crm_request_id' => $crm_requests->id,
-                    'status_id' => 5,
-                    'agent_id' => Auth::id()
-                ]);
-                $crm_requests->agent_id = $request->admin_id;
-                $crm_requests->save();
+        if(count($request->crm_request_ids) > 0){
+            foreach ($request->crm_request_ids as $crm_request_id)
+            {
+                $crm_requests = CrmRequest::find($crm_request_id);
+                if ($crm_requests) {
+                    $crm_requests->status_id = 5;
+                    $crm_requests->save();
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $crm_requests->id,
+                        'status_id' => 5,
+                        'agent_id' => Auth::id()
+                    ]);
+                    $crm_requests->agent_id = $request->admin_id;
+                    $crm_requests->save();
+                }
             }
+            return ['status' => 0, 'success' => 'Request(s) has been Re-Opened'];
         }
-        return ['status' => 0, 'success' => 'Request(s) has been Re-Opened'];
+
     }
 
     public function invalid(Request $request)
