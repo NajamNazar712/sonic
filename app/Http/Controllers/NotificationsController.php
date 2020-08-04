@@ -2445,7 +2445,7 @@ class NotificationsController extends Controller
               if ($ceo) {
                   $to[] = $ceo->email;
               }
-              $extra_admins = ['asad@trax.pk','rahat.ali@trax.pk','muhammad.yousuf@trax.pk'];
+              $extra_admins = ['asad@trax.pk','rahat.ali@trax.pk','muhammad.yousuf@trax.pk','noman.aziz@trax.pk','jahanzaib.qamar@trax.pk'];
               $to = array_merge($to, $extra_admins);
 
               self::email($subject, $body, $to);
