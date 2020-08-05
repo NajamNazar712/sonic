@@ -2490,7 +2490,7 @@ class GlobalSettingsController extends Controller
             ->get();
 
         $setting = GlobalSettings::where('type', 'crm_default_agent')->first();
-        return view('admin.settings.crm.default_agent')->with(['agents' => $agents, 'setting' => $setting]);
+        return view('admin.settings.CRM.default_agent')->with(['agents' => $agents, 'setting' => $setting]);
     }
 
     public function crm_default_agent_store(Request $request){
