@@ -3080,7 +3080,7 @@ class ShipperShipmentBookController extends Controller
                 $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'special_instructions', 19 => 'estimated_weight', 20 => 'shipping_mode_id', 21 => 'same_day_timing_id', 22 => 'amount', 23 => 'payment_mode_id', 24 => 'charges_mode_id'];
                 $service_type_check_id = 2;
             }
-            elseif (count($spreadsheet[0]) == 23){
+            elseif (count($spreadsheet[0]) == 22){
                 $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'special_instructions', 16 => 'estimated_weight', 17 => 'shipping_mode_id', 18 => 'same_day_timing_id', 19 => 'amount', 20 => 'payment_mode_id', 21 => 'charges_mode_id'];
                 $service_type_check_id = 5;
             }
