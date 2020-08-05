@@ -1075,4 +1075,49 @@ class AdminReportsEmailController extends Controller
 
         return url('/') . '/' . $file_name_without_path;
     }
+
+    static public function outstanding_shipments($start_date, $end_date){
+        $shipments = DB::connection('reports')->table('delivery_note_shipments')->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+            ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
+            ->join('delivery_notes as delivery_note', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_note.id')
+            ->join('riders as rider', 'delivery_note.rider_id', '=', 'rider.id')
+            ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
+            ->join('users as u', 's.user_id', '=', 'u.id')
+            ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('shipment_payment_status as sps', 's.payment_status_id', '=' , 'sps.id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)'));
+            })
+            ->leftjoin('shipments_journey as sod', function($join) {
+                $join->on('sod.shipment_id', '=', 's.id')
+                    ->where('sod.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id and shipments_journey.verification = 0 and shipments_journey.reference_1_id = delivery_note.id)'));
+            })
+            ->leftjoin('shipments_journey as svd', function($join) {
+                $join->on('svd.shipment_id', '=', 's.id')
+                    ->where('svd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.reference_1_id = delivery_note.id and shipments_journey.shipper_status_id != 5)'));
+            })
+            ->leftjoin('shipments_journey as sjd', function($join) {
+                $join->on('sjd.shipment_id', '=', 's.id')
+                    ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
+            })
+            ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount','s.amount as sum_amount', 'ss.name as current_status', 'sod.created_at as operation_status_date','svd.created_at as verification_status_date', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status','rider.name as rider_name', 's.booking_type_id', 'usi.poc','u.id as account_no')
+            ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,11])
+            ->where('sjd.created_at', '>=', $start_date)
+            ->where('sjd.created_at', '<=', $end_date)->get();
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        foreach ($hubs as $hub){
+            $outstanding_shipments_array[$hub->name]['header'] = ['S. No.', 'Tracking Number', 'Consignee', 'Address', 'Destination', 'Hub', 'Account No.', 'Shipper', 'Service Type', 'Amount', 'Recovery Status', 'Current Status', 'Payment Status', 'Operation Status Date/Time', 'Verification Status Date/Time', 'Rider Name', 'Remarks', 'DNCC', 'SDN', 'Aging'];
+            $outstanding_shipments_array[$hub->name][] = ['S. No.' => '', 'Tracking Number' => '', 'Consignee' => '', 'Address' => '', 'Destination' => '', 'Hub' => '', 'Account No.' => '', 'Shipper' => '', 'Service Type' => '', 'Amount' => '', 'Recovery Status' => '', 'Current Status' => '', 'Payment Status' => '', 'Operation Status Date/Time' => '', 'Verification Status Date/Time' => '', 'Rider Name' => '', 'Remarks' => '', 'DNCC' => '', 'SDN' => '', 'Aging' => ''];
+        }
+        if(count($shipments) > 0){
+            foreach ($shipments as $shipment){
+
+            }
+        }
+        dd($start_date, $end_date);
+    }
 }
