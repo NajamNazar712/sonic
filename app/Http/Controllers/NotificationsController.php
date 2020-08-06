@@ -5183,6 +5183,38 @@ class NotificationsController extends Controller
                       }
                   }
               }
+              else if($id == 76){
+                  $hub = City::find($reference_1_id);
+                  $date = Carbon::today()->format('Y m d');
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+
+                  if (strpos($subject, '[hub]') !== FALSE) {
+                      $subject = str_replace('[hub]', $hub->name, $subject);
+                  }
+
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+
+                  if (strpos($body, '[date]') !== FALSE) {
+                      $body = str_replace('[date]', $date, $body);
+                  }
+
+                  $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                  if (strpos($body, '[link]') !== FALSE) {
+                      $body = str_replace('[link]', $link, $body);
+                  }
+
+//                  $admins = Admin::whereIn('id', [174,60,12]);
+//
+//                  if ($admins->exists()) {
+//                      $to = $admins->pluck('email')->toArray();
+//                  }
+
+                  self::email($subject, $body, 'anas.anwer@trax.pk');
+              }
         }
       }
     }
