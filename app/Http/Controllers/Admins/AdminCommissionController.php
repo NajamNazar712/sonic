@@ -600,13 +600,15 @@ class AdminCommissionController extends Controller
             $sale_commission_users = SalesCommission::where('status', 2)->pluck('shipper_id')->toArray();
         }
         if($request->get('search_date_from')){
-            $first_day = $request->search_date_from;
+            //$first_day = $request->search_date_from;
+            $first_day = Carbon::parse($request->search_date_from)->toDateTimeString();
         }
         else{
             $first_day = Carbon::parse($date)->firstOfMonth();
         }
         if($request->get('search_date_to')){
-            $last_day = $request->search_date_to;
+            $last_day = Carbon::parse($request->search_date_to)->toDateTimeString();
+
         }
         else{
             $last_day = Carbon::parse($date)->lastOfMonth();
