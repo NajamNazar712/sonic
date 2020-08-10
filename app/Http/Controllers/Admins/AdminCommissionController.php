@@ -645,7 +645,7 @@ class AdminCommissionController extends Controller
             $datatable =  Datatables::of($sale_tier_user)
                 ->addColumn('revenue' ,function($sale_tier_user){
                     $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
-                    return $revenue;
+                    return number_format($revenue, 2);
                 })
                 ->addColumn('total_commission_amount' ,function($sale_tier_user) use($first_day,$last_day){
                     $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
@@ -692,7 +692,7 @@ class AdminCommissionController extends Controller
             $datatable =  Datatables::of($sale_tier_user)
                 ->addColumn('revenue' ,function($sale_tier_user){
                     $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
-                    return $revenue;
+                    return number_format($revenue, 2);
                 })
                 ->addColumn('total_commission_amount' ,function($sale_tier_user) use($first_day,$last_day){
                     $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
@@ -771,7 +771,7 @@ class AdminCommissionController extends Controller
                 }
             }
 
-            $stats['revenue'] = $total_revenue;
+            $stats['revenue'] = number_format($total_revenue, 2);
             $stats['commission'] = number_format($total_commission,2,'.','');
 
             return response()->json(['status' => 1, 'stats' => $stats]);

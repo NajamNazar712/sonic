@@ -509,7 +509,6 @@
                             $('#received').text(data.stats.received);
                             $('#revenue').text(data.stats.revenue);
                             $('#commission').text(data.stats.commission);
-                            console.log(data);
                             table.draw();
 
                         }else{
