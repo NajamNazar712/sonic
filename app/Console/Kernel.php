@@ -56,7 +56,8 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\StationRecoveryReport',
 		'\App\Console\Commands\V2PickupCleanDuplicateData',
 		'\App\Console\Commands\QAReportPettyCash',
-		'\App\Console\Commands\SelfCollection'
+		'\App\Console\Commands\SelfCollection',
+		'\App\Console\Commands\OutstandingShipmentEmail'
 
         ];
 
@@ -75,6 +76,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
 //        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
+        $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
 
