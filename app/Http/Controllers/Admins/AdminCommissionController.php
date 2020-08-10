@@ -560,7 +560,7 @@ class AdminCommissionController extends Controller
             $first_day = Carbon::parse($date)->firstOfMonth();
             $last_day = Carbon::parse($date)->lastOfMonth();
             $shippers = User::whereIn('id', $sale_commission_users)->select('id', 'name')->get();
-            $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->get();;
+            $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();;
             $stats['booked'] = ShipmentsJourney::leftjoin('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')->where('shipments_journey.shipper_status_id',1)->whereIn('s.user_id', $sale_commission_users)->whereBetween('shipments_journey.created_at',[$first_day, $last_day])->count();
             $stats['received'] = ShipmentsJourney::leftjoin('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')->where('shipments_journey.shipper_status_id',2)->whereIn('s.user_id', $sale_commission_users)->whereBetween('shipments_journey.created_at',[$first_day, $last_day])->count();
             $total_revenue = 0;
@@ -622,7 +622,7 @@ class AdminCommissionController extends Controller
                 })
                 ->join('sales_commission_users as scu', function ($join) use($admin){
                     $join->on('scu.sales_commission_id', '=', 'sc.id')
-                        ->where('scu.tier_type_id', 1);
+                        ->where('scu.tier_id', 1);
                 })
                 ->select('u.id', 'u.name as shipper_name', 'sc.commission as total_commission', DB::raw('COUNT(IF(sj.shipper_status_id = 1, 1, NULL)) as booked'), DB::raw('COUNT(IF(sj.shipper_status_id = 2, 1, NULL)) as received'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.weight_charges, NULL)) as weight_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.cash_handling_charges, NULL)) as cash_handling_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.insurance_charges, NULL)) as insurance_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.return_charges, NULL)) as return_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.fuel_surcharge, NULL)) as fuel_surcharge'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.replacement_charges, NULL)) as replacement_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.try_and_buy_charges, NULL)) as try_and_buy_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.packaging_material_charges, NULL)) as packaging_material_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.intercept_charges, NULL)) as intercept_charges'), DB::raw('SUM(IF(sj.shipper_status_id = 2, shipments.nsa_osa_charges, NULL)) as nsa_osa_charges'))
                 ->whereIn('u.id', $sale_commission_users)
@@ -721,7 +721,7 @@ class AdminCommissionController extends Controller
         $date = Carbon::now();
         if($request->get('search_shipper')){
             if($request->get('search_admin')){
-                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.user_id', $request->search_admin)->where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
+                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.tier_id',1)->where('scu.user_id', $request->search_admin)->where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
             }
             else{
                 $sale_commission_users = SalesCommission::where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
@@ -729,7 +729,7 @@ class AdminCommissionController extends Controller
         }
         else{
             if($request->get('search_admin')){
-                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.user_id', $request->search_admin)->where('status', 2)->pluck('shipper_id')->toArray();
+                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.tier_id',1)->where('scu.user_id', $request->search_admin)->where('status', 2)->pluck('shipper_id')->toArray();
             }
             else{
                 $sale_commission_users = SalesCommission::where('status', 2)->pluck('shipper_id')->toArray();

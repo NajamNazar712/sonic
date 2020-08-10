@@ -259,12 +259,12 @@
         $(document).ready(function () {
             $('#search_form #search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Shipper*',
+                placeholder: 'Select Shipper',
                 allowClear:true
             });
             $('#search_form #search_admin').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Admin*',
+                placeholder: 'Select Admin',
                 allowClear:true
             });
 
