@@ -639,7 +639,7 @@ class AdminCommissionController extends Controller
                     if($sale_tier['id'] == 1){
                         $name = $sale_tier['tier_name'] . 'commission';
                         $commission_name = strtolower(str_replace(' ', '', $name));
-                        $sale_tier_user->addselect(DB::raw('(select admins.name from sales_commission_users JOIN admins ON admins.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and admins.id = '. $admin .' and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . strtolower(str_replace(' ', '', $sale_tier['tier_name']))), DB::raw('(select commission from sales_commission_users JOIN admins ON admins.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and admins.id = '. $admin .' and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . $commission_name));
+                        $sale_tier_user->addSelect(DB::raw('(select admins.name from sales_commission_users JOIN admins ON admins.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and admins.id = '. $admin .' and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . strtolower(str_replace(' ', '', $sale_tier['tier_name']))), DB::raw('(select commission from sales_commission_users JOIN admins ON admins.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and admins.id = '. $admin .' and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . $commission_name));
                     }
                 }
             }
@@ -688,7 +688,7 @@ class AdminCommissionController extends Controller
                 foreach ($sales_tier as $sale_tier) {
                     $name = $sale_tier['tier_name'] . 'commission';
                     $commission_name = strtolower(str_replace(' ', '', $name));
-                    $sale_tier_user->addselect(DB::raw('(select IF(sales_commission_users.tier_type_id = 1, admins.name, sales_commission_external_users.name) from sales_commission_users LEFT JOIN admins ON admins.id = sales_commission_users.user_id LEFT JOIN sales_commission_external_users ON sales_commission_external_users.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . strtolower(str_replace(' ', '', $sale_tier['tier_name']))), DB::raw('(select commission from sales_commission_users WHERE sales_commission_users.sales_commission_id = sc.id and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . $commission_name));
+                    $sale_tier_user->addSelect(DB::raw('(select IF(sales_commission_users.tier_type_id = 1, admins.name, sales_commission_external_users.name) from sales_commission_users LEFT JOIN admins ON admins.id = sales_commission_users.user_id LEFT JOIN sales_commission_external_users ON sales_commission_external_users.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . strtolower(str_replace(' ', '', $sale_tier['tier_name']))), DB::raw('(select commission from sales_commission_users WHERE sales_commission_users.sales_commission_id = sc.id and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . $commission_name));
                 }
             }
             $datatable =  Datatables::of($sale_tier_user)
