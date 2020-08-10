@@ -11,6 +11,7 @@ use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\DonePaymentCharges;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PendingPaymentCharges;
 use App\Http\Models\RevertStatusRequestLog;
@@ -5865,4 +5866,26 @@ class AdminFinanceController extends Controller
             $pending_payment_charges->save();
         }
     }
+
+    public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable){
+        $done_payment_charges = DonePaymentCharges::where('pending_payment_id', $done_payment_id);
+        if($done_payment_charges->exists()){
+            $done_payment_charges = $done_payment_charges->first();
+            $done_payment_charges->amount = $done_payment_charges->amount + $amount;
+            $done_payment_charges->charges = $done_payment_charges->charges + $charges;
+            $done_payment_charges->gst = $done_payment_charges->gst + $gst;
+            $done_payment_charges->payable = $done_payment_charges->payable + $payable;
+            $done_payment_charges->save();
+        }
+        else{
+            $done_payment_charges = new DonePaymentCharges();
+            $done_payment_charges->pending_payment_id = $done_payment_id;
+            $done_payment_charges->amount = $amount;
+            $done_payment_charges->charges = $charges;
+            $done_payment_charges->gst = $gst;
+            $done_payment_charges->payable = $payable;
+            $done_payment_charges->save();
+        }
+    }
+
 }
