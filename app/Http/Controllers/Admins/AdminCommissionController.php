@@ -721,7 +721,7 @@ class AdminCommissionController extends Controller
         $date = Carbon::now();
         if($request->get('search_shipper')){
             if($request->get('search_admin')){
-                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.tier_id',1)->where('scu.user_id', $request->search_admin)->where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
+                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.user_id', $request->search_admin)->where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
             }
             else{
                 $sale_commission_users = SalesCommission::where('shipper_id', $request->search_shipper)->where('status', 2)->pluck('shipper_id')->toArray();
@@ -729,7 +729,7 @@ class AdminCommissionController extends Controller
         }
         else{
             if($request->get('search_admin')){
-                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.tier_id',1)->where('scu.user_id', $request->search_admin)->where('status', 2)->pluck('shipper_id')->toArray();
+                $sale_commission_users = SalesCommission::join('sales_commission_users as scu', 'scu.sales_commission_id', '=', 'sales_commissions.id')->where('scu.tier_type_id', 1)->where('scu.user_id', $request->search_admin)->where('status', 2)->pluck('shipper_id')->toArray();
             }
             else{
                 $sale_commission_users = SalesCommission::where('status', 2)->pluck('shipper_id')->toArray();
