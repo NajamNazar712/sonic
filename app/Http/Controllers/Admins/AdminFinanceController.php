@@ -12,6 +12,7 @@ use App\Http\Models\ChargesModes;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PendingPaymentCharges;
 use App\Http\Models\RevertStatusRequestLog;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsPaymentJourney;
@@ -5844,4 +5845,24 @@ class AdminFinanceController extends Controller
         }
     }
 
+    public function add_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable){
+        $pending_payment_charges = PendingPaymentCharges::where('pending_payment_id', $pending_payment_id);
+        if($pending_payment_charges->exists()){
+            $pending_payment_charges = $pending_payment_charges->first();
+            $pending_payment_charges->amount = $pending_payment_charges->amount + $amount;
+            $pending_payment_charges->charges = $pending_payment_charges->charges + $charges;
+            $pending_payment_charges->gst = $pending_payment_charges->gst + $gst;
+            $pending_payment_charges->payable = $pending_payment_charges->payable + $payable;
+            $pending_payment_charges->save();
+        }
+        else{
+            $pending_payment_charges = new PendingPaymentCharges();
+            $pending_payment_charges->pending_payment_id = $pending_payment_id;
+            $pending_payment_charges->amount = $amount;
+            $pending_payment_charges->charges = $charges;
+            $pending_payment_charges->gst = $gst;
+            $pending_payment_charges->payable = $payable;
+            $pending_payment_charges->save();
+        }
+    }
 }
