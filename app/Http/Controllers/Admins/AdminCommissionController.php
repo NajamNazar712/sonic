@@ -560,7 +560,7 @@ class AdminCommissionController extends Controller
             $first_day = Carbon::parse($date)->firstOfMonth();
             $last_day = Carbon::parse($date)->lastOfMonth();
             $shippers = User::whereIn('id', $sale_commission_users)->select('id', 'name')->get();
-            $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();;
+            $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->get();;
             $stats['booked'] = ShipmentsJourney::leftjoin('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')->where('shipments_journey.shipper_status_id',1)->whereIn('s.user_id', $sale_commission_users)->whereBetween('shipments_journey.created_at',[$first_day, $last_day])->count();
             $stats['received'] = ShipmentsJourney::leftjoin('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')->where('shipments_journey.shipper_status_id',2)->whereIn('s.user_id', $sale_commission_users)->whereBetween('shipments_journey.created_at',[$first_day, $last_day])->count();
             $total_revenue = 0;
