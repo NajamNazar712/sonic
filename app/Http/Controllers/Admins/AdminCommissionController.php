@@ -698,7 +698,7 @@ class AdminCommissionController extends Controller
                 })
                 ->addColumn('total_commission_amount' ,function($sale_tier_user) use($first_day,$last_day){
                     $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
-                    return number_format($revenue * ($sale_tier_user->total_commission/100),2,'.','');;
+                    return number_format($revenue * ($sale_tier_user->total_commission/100),2,'.','');
                 });
 
             if (!empty($sales_tier)) {
