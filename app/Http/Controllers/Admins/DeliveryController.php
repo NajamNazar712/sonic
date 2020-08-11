@@ -405,7 +405,30 @@ class DeliveryController extends Controller
                                     $consolidation_flag = TRUE;
                                 }
 
-                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details]);
+                                $intercept = false;
+                                if(InterceptReBookRequestHistory::where('shipment_id', $shipment->id)->exists()){
+                                    $intercept = true;
+                                }
+                                $crm_request = array();
+                                if(($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || (ChangeShipmentAmountLog::where('shipment_id', $shipment->id)->exists() && ($shipment->amount_change_log->old_amount != $shipment->amount_change_log->new_amount))){
+                                    $crm_request['cod_change'] =  $shipment->amount_change_log->new_amount;
+                                }
+                                else{
+                                    $crm_request['cod_change'] = null;
+                                }
+                                if(($intercept == true && ($shipment->intercept_history->old_consignee_address != $shipment->intercept_history->new_consignee_address))){
+                                    $crm_request['address_change'] =  $shipment->intercept_history->new_consignee_address;
+                                }
+                            else{
+                                    $crm_request['address_change'] = null;
+                                }
+                                if(($intercept == true && ($shipment->intercept_history->old_consignee_phone_number_1 != $shipment->intercept_history->new_consignee_phone_number_1))){
+                                    $crm_request['phone_one_change'] =  $shipment->intercept_history->new_consignee_phone_number_1;
+                                }
+                                else{
+                                    $crm_request['phone_one_change'] = null;
+                                }
+                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'crm_request' => $crm_request]);
 
                             } else {
                                 return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id];
@@ -453,7 +476,41 @@ class DeliveryController extends Controller
                                 $consolidation_flag = TRUE;
                             }
 
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details]);
+                            $intercept = false;
+                            if(InterceptReBookRequestHistory::where('shipment_id', $shipment->id)->exists()){
+                                $intercept = true;
+                            }
+                            $amount_check = false;
+                            $amount_log = ChangeShipmentAmountLog::where('shipment_id', $shipment->id);
+                            if($amount_log->exists()){
+                                $amount_log = $amount_log->first();
+                                $amount_check = true;
+                            }
+                            $crm_request = array();
+                            if(($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check = true && ($amount_log->old_amount != $amount_log->new_amount))){
+                                if($intercept == true){
+                                    $crm_request['cod_change'] =  $shipment->intercept_history->new_amount;
+                                }
+                                else{
+                                    $crm_request['cod_change'] =  $amount_log->new_amount;
+                                }
+                            }
+                            else{
+                                $crm_request['cod_change'] = null;
+                            }
+                            if(($intercept == true && ($shipment->intercept_history->old_consignee_address != $shipment->intercept_history->new_consignee_address))){
+                                $crm_request['address_change'] =  $shipment->intercept_history->new_consignee_address;
+                            }
+                            else{
+                                $crm_request['address_change'] = null;
+                            }
+                            if(($intercept == true && ($shipment->intercept_history->old_consignee_phone_number_1 != $shipment->intercept_history->new_consignee_phone_number_1))){
+                                $crm_request['phone_one_change'] =  $shipment->intercept_history->new_consignee_phone_number_1;
+                            }
+                            else{
+                                $crm_request['phone_one_change'] = null;
+                            }
+                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'crm_request' => $crm_request]);
                         }
                     } else {
                         return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];

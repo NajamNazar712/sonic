@@ -530,6 +530,8 @@ class Permission
             'crm.closed.list' => 236,
             'crm.escalation_status' => 352,
             'crm.escalate' => 353,
+            'crm.consignee_info.index' => 363,
+            'crm.consignee_info.list' => 363,
 
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
