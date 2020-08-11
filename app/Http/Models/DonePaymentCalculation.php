@@ -4,7 +4,7 @@ namespace App\Http\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class DonePaymentCharges extends Model
+class DonePaymentCalculation extends Model
 {
     //
 }

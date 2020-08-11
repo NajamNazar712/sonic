@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateDonePaymentChargesTable extends Migration
+class CreatePendingPaymentCalculationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateDonePaymentChargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('done_payment_charges', function (Blueprint $table) {
+        Schema::create('pending_payment_calculations', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('done_payment_id');
+            $table->integer('pending_payment_id');
             $table->decimal('amount');
             $table->decimal('charges');
             $table->decimal('gst');
@@ -31,6 +31,6 @@ class CreateDonePaymentChargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('done_payment_charges');
+        Schema::dropIfExists('pending_payment_calculations');
     }
 }
