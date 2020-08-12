@@ -39,5 +39,10 @@ class VisionSoftApi extends Command
     public function handle()
     {
         VisionSoftAPIController::login();
+        VisionSoftAPIController::customers();
+        VisionSoftAPIController::customer_banks();
+        VisionSoftAPIController::city_hub();
+        VisionSoftAPIController::employees();
+        VisionSoftAPIController::cities();
     }
 }
