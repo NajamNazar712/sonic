@@ -770,7 +770,7 @@ class AdminWalkInBookShipmentController extends Controller
             }
 
             $html .= $shipment_details;
-
+            if($shipment->actual_weight > 0){
             $item = $shipment->items->first();
             $invoice = '<div class="invoice p-1">
                     <table class="table table-bordered border">
@@ -885,20 +885,21 @@ class AdminWalkInBookShipmentController extends Controller
                     </div>
                     
             ';
-            $invoice_serial_number = 1;
 
-            $total_weight_charges = 0;
-            $total_weight_charges = $shipment->weight_charges;
-            $total_fuel_surcharge = $shipment->fuel_surcharge;
-            $total_packaging_charges = $shipment->packaging_charges;
-            $total_charges = 0;
-            $total_charges = $total_weight_charges + $total_fuel_surcharge + $total_packaging_charges;
-            $total_gst = 0;
-            $total_gst = $shipment->gst;
-            $total_invoice_amount = 0;
-            $total_invoice_amount = $total_charges + $total_gst;
-            $invoice_details = '';
-            $invoice_details .= '
+                $invoice_serial_number = 1;
+
+                $total_weight_charges = 0;
+                $total_weight_charges = $shipment->weight_charges;
+                $total_fuel_surcharge = $shipment->fuel_surcharge;
+                $total_packaging_charges = $shipment->packaging_charges;
+                $total_charges = 0;
+                $total_charges = $total_weight_charges + $total_fuel_surcharge + $total_packaging_charges;
+                $total_gst = 0;
+                $total_gst = $shipment->gst;
+                $total_invoice_amount = 0;
+                $total_invoice_amount = $total_charges + $total_gst;
+                $invoice_details = '';
+                $invoice_details .= '
             <table class="table table-sm table-bordered border">
                       <tbody>
                         <tr>
@@ -943,8 +944,11 @@ class AdminWalkInBookShipmentController extends Controller
                     </div>
                     <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
             ';
-            $invoice .= $invoice_details;
-            $html .= $invoice;
+                $invoice .= $invoice_details;
+                $html .= $invoice;
+            }
+
+
 
             $html .= '
                         </div>

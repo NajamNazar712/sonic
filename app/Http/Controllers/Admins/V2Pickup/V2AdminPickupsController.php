@@ -683,7 +683,9 @@ class V2AdminPickupsController extends Controller
                     $shipment->save();
                     ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
                 }
-
+                if($shipment->booking_type_id == 4){
+                    $print_shipment_ids[] = $shipment_id;
+                }
                 //Consolidated Shipments
                 $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id);
                 if($consolidated_shipment->exists()){
@@ -1189,6 +1191,9 @@ class V2AdminPickupsController extends Controller
                     $shipment->consignee_status_id = 15;
                     $shipment->save();
                     ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                }
+                if($shipment->booking_type_id == 4){
+                    $print_shipment_ids[] = $shipment_id;
                 }
                 //Consolidated Shipments
                 $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();

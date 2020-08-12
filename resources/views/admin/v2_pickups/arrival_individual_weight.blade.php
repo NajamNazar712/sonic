@@ -223,19 +223,21 @@
         $(document).ready(function() {
 
             @if (session('print_shipment_ids'))
-            $.ajax({
-                url: '{!! route('admin.v2_pickups.pending.print') !!}',
-                method: 'POST',
-                data: {
-                    'ids': ids,
-                    'dispatch': 1,
-                    '_token': '{{ csrf_token() }}'
-                }
-            })
-                .done(function(data) {
+                var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: {
+                        'ids': session('print_shipment_ids'),
+                        'admin': true,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function (data) {
                     var tab = window.open('', '_blank');
 
-                    if(!tab) {
+                    if (!tab) {
                         swal({
                             title: 'Popup Blocker Enabled!',
                             text: 'Please add this site to your exception list.',
@@ -249,8 +251,6 @@
                         tab.document.close();
                         tab.focus();
                     }
-
-                    table.draw('false');
                 });
             @endif
 
