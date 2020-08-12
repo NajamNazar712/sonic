@@ -11,8 +11,10 @@ use App\Http\Models\Admin\VisionSoft\VisionSoftEmployee;
 use App\Http\Models\Admin\VisionSoft\VisionSoftError;
 use App\Http\Models\Admin\VisionSoft\VisionSoftHub;
 use App\Http\Models\City;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
@@ -266,5 +268,26 @@ class VisionSoftAPIController extends Controller
     }
     static public function cod_receivable(){
 
+    }
+
+    static public function arrival_revenue(){
+        $date = Carbon::yesterday()->toDateString();
+        $pickup_cities = City::whereStatusAndPickup(1, 1)->pluck('id')->toArray();
+        if(count($pickup_cities) > 0){
+            foreach ($pickup_cities as $city_id){
+                $journey = ShipmentsJourney::where('shipper_status_id', '=', 2)->whereDate('created_at', $date);
+                if($journey->exists()){
+                    $shipment_ids = $journey->groupBy('shipment_id')->pluck('shipment_id')->toArray();
+                    if(count($shipment_ids) > 0){
+//                        Shipment::whereIn('id', $shipment_ids)->select('SUM(amount)')
+                    }
+                }
+            }
+        }
+    }
+
+    static public function bank_deposit(){
+        $date = Carbon::yesterday()->toDateString();
+        
     }
 }
