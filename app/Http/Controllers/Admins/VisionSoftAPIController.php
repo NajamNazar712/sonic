@@ -31,18 +31,24 @@ class VisionSoftAPIController extends Controller
                     'pin_password' => 'SOFT'
                 ]
             ]);
-
-            if ($response->getStatusCode() != 200) {
+            $status_code = $response->getStatusCode();
+            if ($status_code != 200) {
                 $response = $response->getBody()->getContents();
-
-//                var_dump("NO");
+                $new_error = new VisionSoftError();
+                $new_error->api_id = 1;
+                $new_error->status_code = $status_code;
+                $new_error->error = $response;
+                $new_error->save();
             }
             else {
 //                var_dump("YES");
             }
         }
         catch(RequestException $e){
-//            echo 1;
+            $new_error = new VisionSoftError();
+            $new_error->api_id = 1;
+            $new_error->error = 'API Error';
+            $new_error->save();
         }
     }
     static public function customers(){
@@ -73,7 +79,7 @@ class VisionSoftAPIController extends Controller
                     if ($status_code != 200) {
                         $response = $response->getBody()->getContents();
                         $new_error = new VisionSoftError();
-                        $new_error->api_id = 1;
+                        $new_error->api_id = 2;
                         $new_error->status_code = $status_code;
                         $new_error->error = $response;
                         $new_error->save();
@@ -84,7 +90,7 @@ class VisionSoftAPIController extends Controller
                     }
                 } catch (RequestException $e) {
                     $new_error = new VisionSoftError();
-                    $new_error->api_id = 1;
+                    $new_error->api_id = 2;
                     $new_error->error = 'API Error';
                     $new_error->save();
                 }
@@ -118,7 +124,7 @@ class VisionSoftAPIController extends Controller
                     if ($status_code != 200) {
                         $response = $response->getBody()->getContents();
                         $new_error = new VisionSoftError();
-                        $new_error->api_id = 2;
+                        $new_error->api_id = 3;
                         $new_error->status_code = $status_code;
                         $new_error->error = $response;
                         $new_error->save();
@@ -129,7 +135,7 @@ class VisionSoftAPIController extends Controller
                     }
                 } catch (RequestException $e) {
                     $new_error = new VisionSoftError();
-                    $new_error->api_id = 2;
+                    $new_error->api_id = 3;
                     $new_error->error = 'API Error';
                     $new_error->save();
                 }
@@ -157,7 +163,7 @@ class VisionSoftAPIController extends Controller
                     if ($status_code != 200) {
                         $response = $response->getBody()->getContents();
                         $new_error = new VisionSoftError();
-                        $new_error->api_id = 3;
+                        $new_error->api_id = 4;
                         $new_error->status_code = $status_code;
                         $new_error->error = $response;
                         $new_error->save();
@@ -168,7 +174,7 @@ class VisionSoftAPIController extends Controller
                     }
                 } catch (RequestException $e) {
                     $new_error = new VisionSoftError();
-                    $new_error->api_id = 3;
+                    $new_error->api_id = 4;
                     $new_error->error = 'API Error';
                     $new_error->save();
                 }
@@ -196,7 +202,7 @@ class VisionSoftAPIController extends Controller
                     if ($status_code != 200) {
                         $response = $response->getBody()->getContents();
                         $new_error = new VisionSoftError();
-                        $new_error->api_id = 6;
+                        $new_error->api_id = 5;
                         $new_error->status_code = $status_code;
                         $new_error->error = $response;
                         $new_error->save();
@@ -207,7 +213,7 @@ class VisionSoftAPIController extends Controller
                     }
                 } catch (RequestException $e) {
                     $new_error = new VisionSoftError();
-                    $new_error->api_id = 6;
+                    $new_error->api_id = 5;
                     $new_error->error = 'API Error';
                     $new_error->save();
                 }
@@ -237,7 +243,7 @@ class VisionSoftAPIController extends Controller
                     if ($status_code != 200) {
                         $response = $response->getBody()->getContents();
                         $new_error = new VisionSoftError();
-                        $new_error->api_id = 11;
+                        $new_error->api_id = 12;
                         $new_error->status_code = $status_code;
                         $new_error->error = $response;
                         $new_error->save();
@@ -248,7 +254,7 @@ class VisionSoftAPIController extends Controller
                     }
                 } catch (RequestException $e) {
                     $new_error = new VisionSoftError();
-                    $new_error->api_id = 11;
+                    $new_error->api_id = 12;
                     $new_error->error = 'API Error';
                     $new_error->save();
                 }
