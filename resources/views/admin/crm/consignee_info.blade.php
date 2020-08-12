@@ -205,8 +205,6 @@
                 }
             });
 
-            var selected_rows = [];
-
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -259,15 +257,9 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    $('td:eq(0)', row).addClass('select-checkbox');
-
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }
-
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -514,7 +506,7 @@
             $('body').on('click','.resolve',function () {
                 var row_id = $(this).parents('tr').attr('id');
                 swal({
-                    text: 'Are you sure, you want to Cancel these Pickup(s)?',
+                    text: 'Are you sure, you want to Resolve these Request(s)?',
                     icon: 'warning',
                     buttons: {
                         cancel: {
@@ -537,7 +529,7 @@
                     if (confirm) {
                         swal({
                             title: 'Please Wait!',
-                            text: 'Request is being un tagged.',
+                            text: 'Request is being Resolved.',
                             icon: 'info',
                             buttons: false,
                             closeOnClickOutside: false,
