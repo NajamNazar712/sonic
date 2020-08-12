@@ -71,7 +71,10 @@ class ShipperReturnController extends Controller
 
             if(session('user_type') == 2){
                 if(session('restriction') == 1){
-                    $shipments = $shipments->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+                    $shipments = $shipments->join('substitute_user_shipments as sus', function($join){
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
                 }
             }
 
@@ -452,7 +455,10 @@ class ShipperReturnController extends Controller
 
             if(session('user_type') == 2){
                 if(session('restriction') == 1){
-                    $shipments_journey = $shipments_journey->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 's.id');
+                    $shipments_journey = $shipments_journey->join('substitute_user_shipments as sus', function($join){
+                        $join->on('sus.shipment_id', '=', 's.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
                 }
             }
         return Datatables::of($shipments_journey)
@@ -576,7 +582,10 @@ class ShipperReturnController extends Controller
             ->groupBy('shipments.id');
         if(session('user_type') == 2){
             if(session('restriction') == 1){
-                $shipments = $shipments->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+                $shipments = $shipments->join('substitute_user_shipments as sus', function($join){
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
             }
         }
 

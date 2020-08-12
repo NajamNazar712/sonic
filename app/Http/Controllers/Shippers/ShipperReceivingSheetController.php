@@ -120,7 +120,10 @@ class ShipperReceivingSheetController extends Controller
 
             if(session('user_type') == 2){
                 if(session('restriction') == 1){
-                    $shipments = $shipments->join('substitute_user_shipments as sus', 'sus.shipment_id', '=', 'shipments.id');
+                    $shipments = $shipments->join('substitute_user_shipments as sus', function($join){
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
                 }
             }
 
