@@ -104,40 +104,42 @@ class VisionSoftAPIController extends Controller
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             foreach ($banks as $bank) {
                 $shipper = $bank->user;
-                try {
-                    $response = $client->post('CustomerBanks', [
-                        'form_params' => [
-                            'pin_code' => 6,
-                            'pin_kp' => 'A',
-                            'pin_loginid' => 'GB',
-                            'pin_password' => 'SOFT',
-                            'pin_account_id' => $shipper->id,
-                            'pin_account_type' => $shipper->account_type->name,
-                            'pin_company_name' => $shipper->name,
-                            'pin_account_title' => $bank->account_title,
-                            'pin_phone_no' => $shipper->phone,
-                            'pin_iban_no' => $bank->iban,
-                            'pin_bank_name' => $bank->name
-                        ]
-                    ]);
-                    $status_code = $response->getStatusCode();
-                    if ($status_code != 200) {
-                        $response = $response->getBody()->getContents();
+                if($shipper){
+                    try {
+                        $response = $client->post('CustomerBanks', [
+                            'form_params' => [
+                                'pin_code' => 6,
+                                'pin_kp' => 'A',
+                                'pin_loginid' => 'GB',
+                                'pin_password' => 'SOFT',
+                                'pin_account_id' => $shipper->id,
+                                'pin_account_type' => $shipper->account_type->name,
+                                'pin_company_name' => $shipper->name,
+                                'pin_account_title' => $bank->account_title,
+                                'pin_phone_no' => $shipper->phone,
+                                'pin_iban_no' => $bank->iban,
+                                'pin_bank_name' => $bank->name
+                            ]
+                        ]);
+                        $status_code = $response->getStatusCode();
+                        if ($status_code != 200) {
+                            $response = $response->getBody()->getContents();
+                            $new_error = new VisionSoftError();
+                            $new_error->api_id = 3;
+                            $new_error->status_code = $status_code;
+                            $new_error->error = $response;
+                            $new_error->save();
+                        } else {
+                            $new_shipper = new VisionSoftCustomerBank();
+                            $new_shipper->bank_id = $bank->id;
+                            $new_shipper->save();
+                        }
+                    } catch (RequestException $e) {
                         $new_error = new VisionSoftError();
                         $new_error->api_id = 3;
-                        $new_error->status_code = $status_code;
-                        $new_error->error = $response;
+                        $new_error->error = 'API Error';
                         $new_error->save();
-                    } else {
-                        $new_shipper = new VisionSoftCustomerBank();
-                        $new_shipper->bank_id = $bank->id;
-                        $new_shipper->save();
                     }
-                } catch (RequestException $e) {
-                    $new_error = new VisionSoftError();
-                    $new_error->api_id = 3;
-                    $new_error->error = 'API Error';
-                    $new_error->save();
                 }
             }
         }
