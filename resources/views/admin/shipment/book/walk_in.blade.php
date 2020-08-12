@@ -65,6 +65,11 @@
                                                 </select>
                                             </div>
                                         </div>
+
+                                        <div id="pickup_div" class="form-group text-center p-1 border border-light rounded">
+                                            <label class="d-block">Pickup</label>
+                                            <input type="checkbox" name="pickup" class="switch hidden" id="pickup">
+                                        </div>
                                     </div>
 
                                     <div class="col col_custom">
@@ -148,7 +153,7 @@
                                             </select>
                                         </div>
 
-                                        <div class="form-group">
+                                        <div class="form-group" id="actual_weight_div">
                                             <div class="form-group input-group mb-0">
                                                 <input type="text" name="actual_weight" class="form-control weight" id="actual_weight" placeholder="Total Actual Weight*" data-rule-required="true" data-msg-required="Total Actual Weight is required">
 
@@ -225,26 +230,28 @@
                                             <label>Packaging Charges:</label>
                                             <input type="text" name="packaging_charges" class="form-control packaging_charges" id="packaging_charges" placeholder="Packaging Charges" readonly="readonly" value="0">
                                         </div>
+                                        <div id="shipment_charges_div">
+                                            <div class="form-group">
+                                                <label>Fuel Surcharge:</label>
+                                                <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" id="fuel_surcharge" placeholder="Fuel Surcharge" readonly="readonly">
+                                            </div>
 
-                                        <div class="form-group">
-                                            <label>Fuel Surcharge:</label>
-                                            <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" id="fuel_surcharge" placeholder="Fuel Surcharge" readonly="readonly">
+                                            <div class="form-group">
+                                                <label>Total Charges:</label>
+                                                <input type="text" name="total_charges" class="form-control total_charges" id="total_charges" placeholder="Total Charges" readonly="readonly">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>GST:</label>
+                                                <input type="text" name="gst" class="form-control gst" id="gst" placeholder="GST" readonly="readonly">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Total Receivable:</label>
+                                                <input type="text" name="total_receivable" class="form-control total_receivable" id="total_receivable" placeholder="Total Receivable" readonly="readonly">
+                                            </div>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label>Total Charges:</label>
-                                            <input type="text" name="total_charges" class="form-control total_charges" id="total_charges" placeholder="Total Charges" readonly="readonly">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label>GST:</label>
-                                            <input type="text" name="gst" class="form-control gst" id="gst" placeholder="GST" readonly="readonly">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label>Total Receivable:</label>
-                                            <input type="text" name="total_receivable" class="form-control total_receivable" id="total_receivable" placeholder="Total Receivable" readonly="readonly">
-                                        </div>
 
                                         <div class="form-group">
                                             <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
@@ -358,7 +365,7 @@
                 });
 
             });
-
+            var shipment_pickup = 0;
             $('#actual_weight, #charges_per_kg').change(function(){
                 $('#span').remove();
                 var pickup;
@@ -383,20 +390,22 @@
                         'shipping_mode': $('#shipping_mode').val()
                     }
                 }).done(function (data) {
+                        if(data.status === 0 || data.status === 1 || data.status === 3 || data.status === 4 || data.status === 5 || data.status === 6){
+                            if(shipment_pickup == 0){
+                                $('#sub_book').prop('disabled', true);
+                                $('#sub_book_print').prop('disabled', true);
+                            }
+
+                        }
                         if(data.status === 1){
                             $('#span').remove();
                             var span = '<span id="span" style="color: red">'+data.error+'</span>';
                             $('#actual_weight').parent('div').append(span);
-                            $('#sub_book').prop('disabled', true);
-                            $('#sub_book_print').prop('disabled', true);
-
                         }
                         if(data.status === 0) {
                             $('#span').remove();
                             var span = '<span id="span" style="color: red">'+data.error+'</span>';
                             $('#charges_per_kg').parent('div').append(span);
-                            $('#sub_book').prop('disabled', true);
-                            $('#sub_book_print').prop('disabled', true);
                         }
                         if(data.status === 3) {
                             $('#span').remove();
@@ -410,8 +419,6 @@
                             }
                             $('#actual_weight').val('');
                             $('#charges_per_kg').val('');
-                            $('#sub_book').prop('disabled', true);
-                            $('#sub_book_print').prop('disabled', true);
                         }
                         if(data.status === 4) {
                             $('#span').remove();
@@ -419,8 +426,6 @@
                             $('#delivery_type').parent('div').append(span);
                             $('#actual_weight').val('');
                             $('#charges_per_kg').val('');
-                            $('#sub_book').prop('disabled', true);
-                            $('#sub_book_print').prop('disabled', true);
                         }
                         if(data.status === 5) {
                             $('#span').remove();
@@ -428,8 +433,6 @@
                             $('#consignee_city').parent('div').append(span);
                             $('#actual_weight').val('');
                             $('#charges_per_kg').val('');
-                            $('#sub_book').prop('disabled', true);
-                            $('#sub_book_print').prop('disabled', true);
                         }
                         if(data.status === 6) {
                             $('#span').remove();
@@ -437,8 +440,6 @@
                             $('#shipping_mode').parent('div').append(span);
                             $('#actual_weight').val('');
                             $('#charges_per_kg').val('');
-                            $('#sub_book').prop('disabled', true);
-                            $('#sub_book_print').prop('disabled', true);
                         }
                         if(data.status === 2) {
                             $('#span').remove();
@@ -871,6 +872,22 @@
                 $('#total_receivable').val(total_receivable);
                 ptable.row( $(this).parents('tr') ).remove().draw();
                 
+            });
+
+            $('#pickup').checkboxpicker();
+
+            $('#pickup').checkboxpicker().bind('change', function() {
+
+                if (this.checked) {
+                    shipment_pickup = 1;
+                    $('#actual_weight_div').addClass('d-none');
+                    $('#shipment_charges_div').addClass('d-none');
+                }
+                else {
+                    shipment_pickup = 0;
+                    $('#actual_weight_div').removeClass('d-none');
+                    $('#shipment_charges_div').removeClass('d-none');
+                }
             });
 
         });

@@ -61,7 +61,7 @@ class AdminWalkInBookShipmentController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup) {
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -99,24 +99,31 @@ class AdminWalkInBookShipmentController extends Controller
 
         $self_collection = FALSE;
 
-        if ($delivery_type == 2 && City::find($pickup_city_id)->hub_id == City::find($consignee_city_id)->hub_id) {
-            $shipment->shipper_status_id = 15;
-            $shipment->consignee_status_id = 15;
+        if($pickup == 1){
+            $shipment->shipper_status_id = 1;
+            $shipment->consignee_status_id = 1;
+        }else{
+            if ($delivery_type == 2 && City::find($pickup_city_id)->hub_id == City::find($consignee_city_id)->hub_id) {
+                $shipment->shipper_status_id = 15;
+                $shipment->consignee_status_id = 15;
 
-            $self_collection = TRUE;
+                $self_collection = TRUE;
+            }
+            else {
+                $shipment->shipper_status_id = 2;
+                $shipment->consignee_status_id = 2;
+            }
         }
-        else {
-            $shipment->shipper_status_id = 2;
-            $shipment->consignee_status_id = 2;
-        }
+
 
         $shipment->save();
 
         $shipment_id = $shipment->id;
 
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, NULL, Auth::id());
-
-        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id());
+        if($pickup == 0){
+            ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id());
+        }
 
         if ($self_collection) {
             ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
@@ -175,7 +182,6 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function walk_in_store(Request $request) {
-        
         $test = 0;
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
 
@@ -264,37 +270,47 @@ class AdminWalkInBookShipmentController extends Controller
                         $same_day_timing_id = NULL;
                     }
 
-                    $actual_weight = $request->actual_weight;
-                    $charges_per_kg = $request->charges_per_kg;
-
-                    $charges_mode_id = $request->charges_mode;
                     $delivery_type = $request->delivery_type;
-
-                    $weight_charges = ROUND(($actual_weight * $charges_per_kg), 0, PHP_ROUND_HALF_DOWN);
-
-                    $fuel = StandardFuelSurcharge::where('shipping_mode_id',$shipping_mode_id)->first();
-                    $fuel_surcharge = ROUND(($fuel['fuel_surcharge']/100)*($weight_charges), 0, PHP_ROUND_HALF_DOWN);
-
-                    $city = City::where('id',$pickup_city_id)->first();
-                    $zone = Zone::where('id',$city['zone_id'])->first();
-                    $gst = ROUND(($zone['gst']*($weight_charges + $fuel_surcharge)), 0, PHP_ROUND_HALF_DOWN);
-
-                    if($request->charges_mode == 1) {
-                        $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
-
+                    $charges_mode_id = $request->charges_mode;
+                    $pickup = 0;
+                    if($request->filled('pickup')){
+                        $pickup = 1;
+                        $actual_weight = 0;
+                        $charges_per_kg = 0;
+                        $weight_charges = 0;
+                        $fuel_surcharge = 0;
+                        $gst = 0;
                         $amount = 0;
+                        $r_amount = 0;
+                    }else{
+                        $actual_weight = $request->actual_weight;
+                        $charges_per_kg = $request->charges_per_kg;
+                        $weight_charges = ROUND(($actual_weight * $charges_per_kg), 0, PHP_ROUND_HALF_DOWN);
+                        $fuel = StandardFuelSurcharge::where('shipping_mode_id',$shipping_mode_id)->first();
+                        $fuel_surcharge = ROUND(($fuel['fuel_surcharge']/100)*($weight_charges), 0, PHP_ROUND_HALF_DOWN);
+                        $city = City::where('id',$pickup_city_id)->first();
+                        $zone = Zone::where('id',$city['zone_id'])->first();
+                        $gst = ROUND(($zone['gst']*($weight_charges + $fuel_surcharge)), 0, PHP_ROUND_HALF_DOWN);
 
-                        $r_amount = $receivable;
+                        if($request->charges_mode == 1) {
+                            $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                            $amount = 0;
+
+                            $r_amount = $receivable;
+                        }
+                        else{
+                            $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                            $amount = $receivable;
+
+                            $r_amount = NULL;
+                        }
+
                     }
-                    else{
-                        $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
 
-                        $amount = $receivable;
 
-                        $r_amount = NULL;
-                    }
-
-                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges);
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup);
 
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
