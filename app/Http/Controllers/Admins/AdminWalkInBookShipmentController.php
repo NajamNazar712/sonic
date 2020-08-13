@@ -123,6 +123,8 @@ class AdminWalkInBookShipmentController extends Controller
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, NULL, Auth::id());
         if($pickup == 0){
             ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id());
+        }else{
+            AdminPickupsController::generate($shipment_id);
         }
 
         if ($self_collection) {
