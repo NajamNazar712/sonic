@@ -243,19 +243,21 @@
     <script>
         $(document).ready(function() {
             @if (session('print_shipment_ids'))
+            var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+
             $.ajax({
-                url: '{!! route('admin.v2_pickups.pending.print') !!}',
+                url: url,
                 method: 'POST',
                 data: {
-                    'ids': ids,
-                    'dispatch': 1,
+                    'ids': @json(session('print_shipment_ids')),
+                    'admin': true,
                     '_token': '{{ csrf_token() }}'
                 }
             })
-                .done(function(data) {
+                .done(function (data) {
                     var tab = window.open('', '_blank');
 
-                    if(!tab) {
+                    if (!tab) {
                         swal({
                             title: 'Popup Blocker Enabled!',
                             text: 'Please add this site to your exception list.',
@@ -269,8 +271,6 @@
                         tab.document.close();
                         tab.focus();
                     }
-
-                    table.draw('false');
                 });
             @endif
 
