@@ -210,8 +210,8 @@ class VisionSoftAPIController extends Controller
             })
             ->select('u.id as account_id', 'u.name as account_name', 'shipments.booking_type_id as service_type_id', 'usi.city_id as origin_city_id', 'shipments.weight_charges as weight_charges', 'shipments.insurance_charges as insurance_charges', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.packaging_charges as packing_charges', 'shipments.packaging_material_charges as packaging_charges')
             ->get();
-        VisionSoftArrivalRevenue::truncate();
         if(count($shipments) > 0){
+            VisionSoftArrivalRevenue::truncate();
             $user_shipments = array();
             foreach ($shipments as $shipment){
                 if(array_key_exists($shipment->account_id, $user_shipments)){
@@ -510,4 +510,6 @@ class VisionSoftAPIController extends Controller
             }
         }
     }
+
+    
 }
