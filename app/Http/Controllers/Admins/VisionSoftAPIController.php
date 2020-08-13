@@ -587,6 +587,174 @@ class VisionSoftAPIController extends Controller
             }
         }
     }
+    //13
+    static public function bank_deposits(){
+        $date = Carbon::yesterday();
+        $today = Carbon::today();
+        $station_deposit_notes = StationDepositNote::whereDate('created_at', $date)->where('status', '=', 2);
+        if($station_deposit_notes->exists()){
+            $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            $station_deposit_notes = $station_deposit_notes->get();
+            foreach ($station_deposit_notes as $station_deposit_note){
+                if($station_deposit_note->banks_list_id != null){
+                    try{
+                        $response = $client->post('BankDeposit', [
+                            'form_params' => [
+                                'pin_code' => 6,
+                                'pin_kp' => 'A',
+                                'pin_loginid' => 'GB',
+                                'pin_password' => 'SOFT',
+                                'pin_tr_date' => $today,
+                                'pin_hub_id' => $station_deposit_note->hub_id,
+                                'pin_sdn_number' => $station_deposit_note->id,
+                                'pin_bank' => $station_deposit_note->banks_list_id,
+                                'pin_amount' => $station_deposit_note->sdn_amount,
+                                'pin_adj_amount' => $station_deposit_note->adjustment_amount,
+                                'pin_adj_stmt_head_id' => $station_deposit_note->petty_cash_statement_id
+                            ]
+                        ]);
+                        $status_code = $response->getStatusCode();
+                        if ($status_code != 200) {
+                            $response = $response->getBody()->getContents();
+                            $new_error = new VisionSoftError();
+                            $new_error->api_id = 13;
+                            $new_error->status_code = $status_code;
+                            $new_error->error = $response;
+                            $new_error->save();
+                        } else {
+                            $bank_deposit = new VisionSoftBankDeposit();
+                            $bank_deposit->sdn_id = $station_deposit_note->id;
+                            $bank_deposit->bank_id = $station_deposit_note->banks_list_id;
+                            $bank_deposit->amount = $station_deposit_note->sdn_amount;
+                            $bank_deposit->save();
+                        }
+                    } catch (RequestException $e) {
+                        $new_error = new VisionSoftError();
+                        $new_error->api_id = 13;
+                        $new_error->error = 'API Error';
+                        $new_error->save();
+                    }
+                }else{
+                    $station_deposit_note_slips = $station_deposit_note->deposit_note_slips;
+                    foreach ($station_deposit_note_slips as $slip){
+                        try{
+                            $response = $client->post('BankDeposit', [
+                                'form_params' => [
+                                    'pin_code' => 6,
+                                    'pin_kp' => 'A',
+                                    'pin_loginid' => 'GB',
+                                    'pin_password' => 'SOFT',
+                                    'pin_tr_date' => $today,
+                                    'pin_hub_id' => $station_deposit_note->hub_id,
+                                    'pin_sdn_number' => $station_deposit_note->id,
+                                    'pin_bank' => $slip->bank_id,
+                                    'pin_amount' => $slip->amount,
+                                    'pin_adj_amount' => 0,
+                                    'pin_adj_stmt_head_id' => 0
+                                ]
+                            ]);
+                            $status_code = $response->getStatusCode();
+                            if ($status_code != 200) {
+                                $response = $response->getBody()->getContents();
+                                $new_error = new VisionSoftError();
+                                $new_error->api_id = 13;
+                                $new_error->status_code = $status_code;
+                                $new_error->error = $response;
+                                $new_error->save();
+                            } else {
+                                $bank_deposit = new VisionSoftBankDeposit();
+                                $bank_deposit->sdn_id = $station_deposit_note->id;
+                                $bank_deposit->bank_id = $station_deposit_note->banks_list_id;
+                                $bank_deposit->amount = $station_deposit_note->sdn_amount;
+                                $bank_deposit->save();
+                            }
+                        } catch (RequestException $e) {
+                            $new_error = new VisionSoftError();
+                            $new_error->api_id = 13;
+                            $new_error->error = 'API Error';
+                            $new_error->save();
+                        }
+                    }
+
+                    try{
+                        $response = $client->post('BankDeposit', [
+                            'form_params' => [
+                                'pin_code' => 6,
+                                'pin_kp' => 'A',
+                                'pin_loginid' => 'GB',
+                                'pin_password' => 'SOFT',
+                                'pin_tr_date' => $today,
+                                'pin_hub_id' => $station_deposit_note->hub_id,
+                                'pin_sdn_number' => $station_deposit_note->id,
+                                'pin_bank' => 0,
+                                'pin_amount' => 0,
+                                'pin_adj_amount' => 0,
+                                'pin_adj_stmt_head_id' => $station_deposit_note->petty_cash_statement_id
+                            ]
+                        ]);
+                        $status_code = $response->getStatusCode();
+                        if ($status_code != 200) {
+                            $response = $response->getBody()->getContents();
+                            $new_error = new VisionSoftError();
+                            $new_error->api_id = 13;
+                            $new_error->status_code = $status_code;
+                            $new_error->error = $response;
+                            $new_error->save();
+                        } else {
+                            $bank_deposit = new VisionSoftBankDeposit();
+                            $bank_deposit->sdn_id = $station_deposit_note->id;
+                            $bank_deposit->petty_cash_id = $station_deposit_note->petty_cash_statement_id;
+                            $bank_deposit->save();
+                        }
+                    } catch (RequestException $e) {
+                        $new_error = new VisionSoftError();
+                        $new_error->api_id = 13;
+                        $new_error->error = 'API Error';
+                        $new_error->save();
+                    }
+
+                    try{
+                        $response = $client->post('BankDeposit', [
+                            'form_params' => [
+                                'pin_code' => 6,
+                                'pin_kp' => 'A',
+                                'pin_loginid' => 'GB',
+                                'pin_password' => 'SOFT',
+                                'pin_tr_date' => $today,
+                                'pin_hub_id' => $station_deposit_note->hub_id,
+                                'pin_sdn_number' => $station_deposit_note->id,
+                                'pin_bank' => 0,
+                                'pin_amount' => 0,
+                                'pin_adj_amount' => $station_deposit_note->adjustment_amount,
+                                'pin_adj_stmt_head_id' => 0
+                            ]
+                        ]);
+                        $status_code = $response->getStatusCode();
+                        if ($status_code != 200) {
+                            $response = $response->getBody()->getContents();
+                            $new_error = new VisionSoftError();
+                            $new_error->api_id = 13;
+                            $new_error->status_code = $status_code;
+                            $new_error->error = $response;
+                            $new_error->save();
+                        } else {
+                            $bank_deposit = new VisionSoftBankDeposit();
+                            $bank_deposit->sdn_id = $station_deposit_note->id;
+                            $bank_deposit->adj_amount = $station_deposit_note->adjustment_amount;
+                            $bank_deposit->save();
+                        }
+                    } catch (RequestException $e) {
+                        $new_error = new VisionSoftError();
+                        $new_error->api_id = 13;
+                        $new_error->error = 'API Error';
+                        $new_error->save();
+                    }
+                }
+            }
+        }
+
+
+    }
     //15
     static public function cod_receivable(){
         $date = Carbon::yesterday();
@@ -640,173 +808,5 @@ class VisionSoftAPIController extends Controller
                 }
             }
         }
-    }
-
-    static public function bank_deposits(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
-        $station_deposit_notes = StationDepositNote::whereDate('created_at', $date)->where('status', '=', 2);
-        if($station_deposit_notes->exists()){
-            $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
-            $station_deposit_notes = $station_deposit_notes->get();
-            foreach ($station_deposit_notes as $station_deposit_note){
-                if($station_deposit_note->banks_list_id != null){
-                    try{
-                        $response = $client->post('BankDeposit', [
-                            'form_params' => [
-                                'pin_code' => 6,
-                                'pin_kp' => 'A',
-                                'pin_loginid' => 'GB',
-                                'pin_password' => 'SOFT',
-                                'pin_tr_date' => $today,
-                                'pin_hub_id' => $station_deposit_note->hub_id,
-                                'pin_sdn_number' => $station_deposit_note->id,
-                                'pin_bank' => $station_deposit_note->banks_list_id,
-                                'pin_amount' => $station_deposit_note->sdn_amount,
-                                'pin_adj_amount' => $station_deposit_note->adjustment_amount,
-                                'pin_adj_stmt_head_id' => $station_deposit_note->petty_cash_statement_id
-                            ]
-                        ]);
-                        $status_code = $response->getStatusCode();
-                        if ($status_code != 200) {
-                            $response = $response->getBody()->getContents();
-                            $new_error = new VisionSoftError();
-                            $new_error->api_id = 13;
-                            $new_error->status_code = $status_code;
-                            $new_error->error = $response;
-                            $new_error->save();
-                        } else {
-                            $bank_deposit = new VisionSoftBankDeposit();
-                            $bank_deposit->sdn_id = $station_deposit_note->id;
-                            $bank_deposit->bank_id = $station_deposit_note->banks_list_id;
-                            $bank_deposit->amount = $station_deposit_note->sdn_amount;
-                            $bank_deposit->save();
-                        }
-                    } catch (RequestException $e) {
-                        $new_error = new VisionSoftError();
-                        $new_error->api_id = 13;
-                        $new_error->error = 'API Error';
-                        $new_error->save();
-                    }
-                }else{
-                    $station_deposit_note_slips = $station_deposit_note->deposit_note_slips;
-                    foreach ($station_deposit_note_slips as $slip){
-                           try{
-                               $response = $client->post('BankDeposit', [
-                                   'form_params' => [
-                                       'pin_code' => 6,
-                                       'pin_kp' => 'A',
-                                       'pin_loginid' => 'GB',
-                                       'pin_password' => 'SOFT',
-                                       'pin_tr_date' => $today,
-                                       'pin_hub_id' => $station_deposit_note->hub_id,
-                                       'pin_sdn_number' => $station_deposit_note->id,
-                                       'pin_bank' => $slip->bank_id,
-                                       'pin_amount' => $slip->amount,
-                                       'pin_adj_amount' => 0,
-                                       'pin_adj_stmt_head_id' => 0
-                                   ]
-                               ]);
-                               $status_code = $response->getStatusCode();
-                               if ($status_code != 200) {
-                                   $response = $response->getBody()->getContents();
-                                   $new_error = new VisionSoftError();
-                                   $new_error->api_id = 13;
-                                   $new_error->status_code = $status_code;
-                                   $new_error->error = $response;
-                                   $new_error->save();
-                               } else {
-                                   $bank_deposit = new VisionSoftBankDeposit();
-                                   $bank_deposit->sdn_id = $station_deposit_note->id;
-                                   $bank_deposit->bank_id = $station_deposit_note->banks_list_id;
-                                   $bank_deposit->amount = $station_deposit_note->sdn_amount;
-                                   $bank_deposit->save();
-                               }
-                           } catch (RequestException $e) {
-                               $new_error = new VisionSoftError();
-                               $new_error->api_id = 13;
-                               $new_error->error = 'API Error';
-                               $new_error->save();
-                           }
-                       }
-
-                    try{
-                        $response = $client->post('BankDeposit', [
-                            'form_params' => [
-                                'pin_code' => 6,
-                                'pin_kp' => 'A',
-                                'pin_loginid' => 'GB',
-                                'pin_password' => 'SOFT',
-                                'pin_tr_date' => $today,
-                                'pin_hub_id' => $station_deposit_note->hub_id,
-                                'pin_sdn_number' => $station_deposit_note->id,
-                                'pin_bank' => 0,
-                                'pin_amount' => 0,
-                                'pin_adj_amount' => 0,
-                                'pin_adj_stmt_head_id' => $station_deposit_note->petty_cash_statement_id
-                            ]
-                        ]);
-                        $status_code = $response->getStatusCode();
-                        if ($status_code != 200) {
-                            $response = $response->getBody()->getContents();
-                            $new_error = new VisionSoftError();
-                            $new_error->api_id = 13;
-                            $new_error->status_code = $status_code;
-                            $new_error->error = $response;
-                            $new_error->save();
-                        } else {
-                            $bank_deposit = new VisionSoftBankDeposit();
-                            $bank_deposit->sdn_id = $station_deposit_note->id;
-                            $bank_deposit->petty_cash_id = $station_deposit_note->petty_cash_statement_id;
-                            $bank_deposit->save();
-                        }
-                    } catch (RequestException $e) {
-                        $new_error = new VisionSoftError();
-                        $new_error->api_id = 13;
-                        $new_error->error = 'API Error';
-                        $new_error->save();
-                    }
-
-                   try{
-                    $response = $client->post('BankDeposit', [
-                        'form_params' => [
-                            'pin_code' => 6,
-                            'pin_kp' => 'A',
-                            'pin_loginid' => 'GB',
-                            'pin_password' => 'SOFT',
-                            'pin_tr_date' => $today,
-                            'pin_hub_id' => $station_deposit_note->hub_id,
-                            'pin_sdn_number' => $station_deposit_note->id,
-                            'pin_bank' => 0,
-                            'pin_amount' => 0,
-                            'pin_adj_amount' => $station_deposit_note->adjustment_amount,
-                            'pin_adj_stmt_head_id' => 0
-                        ]
-                    ]);
-                    $status_code = $response->getStatusCode();
-                    if ($status_code != 200) {
-                        $response = $response->getBody()->getContents();
-                        $new_error = new VisionSoftError();
-                        $new_error->api_id = 13;
-                        $new_error->status_code = $status_code;
-                        $new_error->error = $response;
-                        $new_error->save();
-                    } else {
-                        $bank_deposit = new VisionSoftBankDeposit();
-                        $bank_deposit->sdn_id = $station_deposit_note->id;
-                        $bank_deposit->adj_amount = $station_deposit_note->adjustment_amount;
-                        $bank_deposit->save();
-                    }
-                } catch (RequestException $e) {
-                    $new_error = new VisionSoftError();
-                    $new_error->api_id = 13;
-                    $new_error->error = 'API Error';
-                    $new_error->save();
-                }
-                }
-            }
-        }
-
-
     }
 }
