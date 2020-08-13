@@ -229,7 +229,7 @@
                     url: url,
                     method: 'POST',
                     data: {
-                        'ids': session('print_shipment_ids'),
+                        'ids': @json(session('print_shipment_ids')),
                         'admin': true,
                         '_token': '{{ csrf_token() }}'
                     }
