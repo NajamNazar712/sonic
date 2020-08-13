@@ -613,7 +613,7 @@ class VisionSoftAPIController extends Controller
                                 'pin_sdn_number' => $station_deposit_note->id,
                                 'pin_bank' => 0,
                                 'pin_amount' => 0,
-                                'pin_adj_amount' => 0,
+                                'pin_adj_amount' => $station_deposit_note->adjustment_amount,
                                 'pin_adj_stmt_head_id' => $station_deposit_note->petty_cash_statement_id
                             ]
                         ]);
@@ -637,47 +637,12 @@ class VisionSoftAPIController extends Controller
                         $new_error->error = 'API Error';
                         $new_error->save();
                     }
-
-                   try{
-                    $response = $client->post('BankDeposit', [
-                        'form_params' => [
-                            'pin_code' => 6,
-                            'pin_kp' => 'A',
-                            'pin_loginid' => 'GB',
-                            'pin_password' => 'SOFT',
-                            'pin_tr_date' => $today,
-                            'pin_hub_id' => $station_deposit_note->hub_id,
-                            'pin_sdn_number' => $station_deposit_note->id,
-                            'pin_bank' => 0,
-                            'pin_amount' => 0,
-                            'pin_adj_amount' => $station_deposit_note->adjustment_amount,
-                            'pin_adj_stmt_head_id' => 0
-                        ]
-                    ]);
-                    $status_code = $response->getStatusCode();
-                    if ($status_code != 200) {
-                        $response = $response->getBody()->getContents();
-                        $new_error = new VisionSoftError();
-                        $new_error->api_id = 13;
-                        $new_error->status_code = $status_code;
-                        $new_error->error = $response;
-                        $new_error->save();
-                    } else {
-                        $bank_deposit = new VisionSoftBankDeposit();
-                        $bank_deposit->sdn_id = $station_deposit_note->id;
-                        $bank_deposit->adj_amount = $station_deposit_note->adjustment_amount;
-                        $bank_deposit->save();
-                    }
-                } catch (RequestException $e) {
-                    $new_error = new VisionSoftError();
-                    $new_error->api_id = 13;
-                    $new_error->error = 'API Error';
-                    $new_error->save();
-                }
                 }
             }
         }
+    }
 
+    static public function daily_exp(){
 
     }
 }
