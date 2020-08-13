@@ -409,8 +409,14 @@ class DeliveryController extends Controller
                                 if(InterceptReBookRequestHistory::where('shipment_id', $shipment->id)->exists()){
                                     $intercept = true;
                                 }
+                                $amount_check = false;
+                                $amount_log = ChangeShipmentAmountLog::where('shipment_id', $shipment->id);
+                                if($amount_log->exists()){
+                                    $amount_log = $amount_log->first();
+                                    $amount_check = true;
+                                }
                                 $crm_request = array();
-                                if(($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || (ChangeShipmentAmountLog::where('shipment_id', $shipment->id)->exists() && ($shipment->amount_change_log->old_amount != $shipment->amount_change_log->new_amount))){
+                                if(($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))){
                                     $crm_request['cod_change'] =  $shipment->amount_change_log->new_amount;
                                 }
                                 else{
@@ -487,7 +493,7 @@ class DeliveryController extends Controller
                                 $amount_check = true;
                             }
                             $crm_request = array();
-                            if(($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check = true && ($amount_log->old_amount != $amount_log->new_amount))){
+                            if(($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))){
                                 if($intercept == true){
                                     $crm_request['cod_change'] =  $shipment->intercept_history->new_amount;
                                 }
