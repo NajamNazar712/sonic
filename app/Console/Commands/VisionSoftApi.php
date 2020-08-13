@@ -48,5 +48,6 @@ class VisionSoftApi extends Command
         VisionSoftAPIController::cod_receivable();
         VisionSoftAPIController::arrival_revenue();
         VisionSoftAPIController::del_ret_revenue();
+        VisionSoftAPIController::bank_deposits();
     }
 }
