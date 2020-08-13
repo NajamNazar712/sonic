@@ -38,7 +38,7 @@ class VisionSoftApi extends Command
      */
     public function handle()
     {
-        VisionSoftAPIController::login();
+//        VisionSoftAPIController::login();
         VisionSoftAPIController::customers();
         VisionSoftAPIController::customer_banks();
         VisionSoftAPIController::city_hub();
@@ -49,5 +49,7 @@ class VisionSoftApi extends Command
         VisionSoftAPIController::arrival_revenue();
         VisionSoftAPIController::del_ret_revenue();
         VisionSoftAPIController::bank_deposits();
+        VisionSoftAPIController::cod_payment();
+        VisionSoftAPIController::cod_payment_clear();
     }
 }
