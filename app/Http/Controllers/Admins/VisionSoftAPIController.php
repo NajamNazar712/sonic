@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\VisionSoft\VisionSoftArrivalRevenue;
@@ -13,6 +14,8 @@ use App\Http\Models\Admin\VisionSoft\VisionSoftCodPayable;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodReceivable;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCustomer;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCustomerBank;
+use App\Http\Models\Admin\VisionSoft\VisionSoftDailyExp;
+use App\Http\Models\Admin\VisionSoft\VisionSoftDellRetRevenue;
 use App\Http\Models\Admin\VisionSoft\VisionSoftEmployee;
 use App\Http\Models\Admin\VisionSoft\VisionSoftError;
 use App\Http\Models\Admin\VisionSoft\VisionSoftHub;
@@ -199,16 +202,15 @@ class VisionSoftAPIController extends Controller
     }
     //5
     static public function arrival_revenue(){
-        $start_day = Carbon::tomorrow()->startOfDay();
-        $end_day = Carbon::tomorrow()->endOfDay();
+        $date = Carbon::yesterday();
         $today = Carbon::today();
         $shipments = Shipment::join('user_shipping_infos as usi', 'usi.id', '=', 'shipments.pickup_address_id')
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('shipments_journey as sj', function($join) use($start_day, $end_day){
+            ->join('shipments_journey as sj', function($join) use($date){
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.shipper_status_id', DB::raw(14))
-                    ->where('sj.created_at', '>=', $start_day)
-                    ->where('sj.created_at', '<=', $end_day);
+                    ->whereDate('sj.created_at', $date)
+                    ->where('sj.verification', DB::raw(1));
             })
             ->select('u.id as account_id', 'u.name as account_name', 'shipments.booking_type_id as service_type_id', 'usi.city_id as origin_city_id', 'shipments.weight_charges as weight_charges', 'shipments.insurance_charges as insurance_charges', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.packaging_charges as packing_charges', 'shipments.packaging_material_charges as packaging_charges')
             ->get();
@@ -322,15 +324,14 @@ class VisionSoftAPIController extends Controller
     }
     //6
     static public function cod_payable(){
-        $start_day = Carbon::tomorrow()->startOfDay();
-        $end_day = Carbon::tomorrow()->endOfDay();
+        $date = Carbon::yesterday();
         $today = Carbon::today();
         $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
-            ->join('shipments_journey as sj', function($join) use($start_day, $end_day){
+            ->join('shipments_journey as sj', function($join) use($date){
                 $join->on('sj.shipment_id', '=', 's.id')
                     ->where('sj.shipper_status_id', DB::raw(14))
-                    ->where('sj.created_at', '>=', $start_day)
-                    ->where('sj.created_at', '<=', $end_day);
+                    ->whereDate('sj.created_at', $date)
+                    ->where('sj.verification', DB::raw(1));
             })
             ->select('users.id as account_id', 'users.name as account_name', DB::raw('(select sum(s.amount)) as amount'))
             ->groupBy('users.id')
@@ -415,6 +416,137 @@ class VisionSoftAPIController extends Controller
             }
         }
     }
+    //8
+    static public function del_ret_revenue(){
+        $date = Carbon::yesterday();
+        $today = Carbon::today();
+        $shipments = Shipment::join('user_shipping_infos as usi', 'usi.id', '=', 'shipments.pickup_address_id')
+            ->join('users as u', 'u.id', '=', 'shipments.user_id')
+            ->join('shipments_journey as sj', function($join) use($date){
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where(function ($sub_query) {
+                        $sub_query->where('sj.shipper_status_id', DB::raw(14))
+                            ->orWhere('sj.shipper_status_id', DB::raw(31));
+                    })
+                    ->whereDate('sj.created_at', $date)
+                    ->where('sj.verification', DB::raw(1));
+            })
+            ->select('u.id as account_id', 'u.name as account_name', 'shipments.booking_type_id as service_type_id', 'usi.city_id as origin_city_id', 'shipments.try_and_buy_charges as try_and_buy_charges', 'shipments.nsa_osa_charges as nsa_osa_charges', 'shipments.replacement_charges as replacement_charges', 'shipments.cash_handling_charges as cash_handling_charges', 'shipments.gst as gst', 'shipments.return_charges as return_charges')
+            ->get();
+        VisionSoftDellRetRevenue::truncate();
+        if(count($shipments) > 0){
+            $user_shipments = array();
+            foreach ($shipments as $shipment){
+                if(array_key_exists($shipment->account_id, $user_shipments)){
+                    if(array_key_exists($shipment->origin_city_id, $user_shipments[$shipment->account_id])){
+                        if(array_key_exists($shipment->service_type_id, $user_shipments[$shipment->account_id][$shipment->origin_city_id])){
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] += $shipment->try_and_buy_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['nsa_osa_charges'] += $shipment->nsa_osa_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] += $shipment->replacement_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] += $shipment->cash_handling_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] += $shipment->gst;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] += $shipment->return_charges;
+                        }
+                        else{
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_id'] = $shipment->account_id;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_name'] = $shipment->account_name;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['service_type_id'] = $shipment->service_type_id;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['origin_city_id'] = $shipment->origin_city_id;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['nsa_osa_charges'] = $shipment->nsa_osa_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = $shipment->replacement_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] = $shipment->gst;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
+                        }
+                    }
+                    else{
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_id'] = $shipment->account_id;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_name'] = $shipment->account_name;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['service_type_id'] = $shipment->service_type_id;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['origin_city_id'] = $shipment->origin_city_id;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['nsa_osa_charges'] = $shipment->nsa_osa_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = $shipment->replacement_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] = $shipment->gst;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
+                    }
+                }
+                else{
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_id'] = $shipment->account_id;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_name'] = $shipment->account_name;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['service_type_id'] = $shipment->service_type_id;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['origin_city_id'] = $shipment->origin_city_id;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['nsa_osa_charges'] = $shipment->nsa_osa_charges;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = $shipment->replacement_charges;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] = $shipment->gst;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
+                }
+            }
+            if(count($user_shipments) > 0){
+                $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+                foreach ($user_shipments as $user_shipment_origin){
+                    if(count($user_shipment_origin) > 0){
+                        foreach ($user_shipment_origin as $user_shipment_service){
+                            if(count($user_shipment_service) > 0){
+                                foreach ($user_shipment_service as $shipment_charges){
+                                    try {
+                                        $response = $client->post('ArrivalRevenue', [
+                                            'form_params' => [
+                                                'pin_code' => 6,
+                                                'pin_kp' => 'A',
+                                                'pin_loginid' => 'GB',
+                                                'pin_password' => 'SOFT',
+                                                'pin_tr_date' => $today,
+                                                'pin_account_id' => $shipment_charges['account_id'],
+                                                'pin_origin_city' => $shipment_charges['origin_city_id'],
+                                                'pin_service_type' => $shipment_charges['service_type_id'],
+                                                'pin_try_buy_charges' => ($shipment_charges['try_and_buy_charges'] != null) ? $shipment_charges['try_and_buy_charges'] : 0,
+                                                'pin_nsa_osa_charges' => ($shipment_charges['nsa_osa_charges'] != null) ? $shipment_charges['nsa_osa_charges'] : 0,
+                                                'pin_replacement_charges' => ($shipment_charges['replacement_charges'] != null) ? $shipment_charges['replacement_charges'] : 0,
+                                                'pin_cash_handling_charges' => ($shipment_charges['cash_handling_charges'] != null) ? $shipment_charges['cash_handling_charges'] : 0,
+                                                'pin_srb_pra_bra_kpra' => ($shipment_charges['gst'] != null) ? $shipment_charges['gst'] : 0,
+                                                'pin_return_charges' => ($shipment_charges['return_charges'] != null) ? $shipment_charges['return_charges'] : 0
+                                            ]
+                                        ]);
+                                        $status_code = $response->getStatusCode();
+                                        if ($status_code != 200) {
+                                            $response = $response->getBody()->getContents();
+                                            $new_error = new VisionSoftError();
+                                            $new_error->api_id = 8;
+                                            $new_error->status_code = $status_code;
+                                            $new_error->error = $response;
+                                            $new_error->save();
+                                        } else {
+                                            $new_charges = new VisionSoftDellRetRevenue();
+                                            $new_charges->shipper_id = $shipment_charges['account_id'];
+                                            $new_charges->origin_city_id = $shipment_charges['origin_city_id'];
+                                            $new_charges->service_type_id = $shipment_charges['service_type_id'];
+                                            $new_charges->try_and_buy_charges = ($shipment_charges['try_and_buy_charges'] != null) ? $shipment_charges['try_and_buy_charges'] : 0;
+                                            $new_charges->nsa_osa_charges = ($shipment_charges['nsa_osa_charges'] != null) ? $shipment_charges['nsa_osa_charges'] : 0;
+                                            $new_charges->replacement_charges = ($shipment_charges['replacement_charges'] != null) ? $shipment_charges['replacement_charges'] : 0;
+                                            $new_charges->cash_handling_charges = ($shipment_charges['cash_handling_charges'] != null) ? $shipment_charges['cash_handling_charges'] : 0;
+                                            $new_charges->gst = ($shipment_charges['gst'] != null) ? $shipment_charges['gst'] : 0;
+                                            $new_charges->return_charges = ($shipment_charges['return_charges'] != null) ? $shipment_charges['return_charges'] : 0;
+                                            $new_charges->save();
+                                        }
+                                    } catch (RequestException $e) {
+                                        $new_error = new VisionSoftError();
+                                        $new_error->api_id = 8;
+                                        $new_error->error = 'API Error';
+                                        $new_error->save();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     //12
     static public function cities(){
         $old_cities = VisionSoftCity::pluck('city_id')->toArray();
@@ -457,62 +589,7 @@ class VisionSoftAPIController extends Controller
             }
         }
     }
-    //15
-    static public function cod_receivable(){
-        $start_day = Carbon::tomorrow()->startOfDay();
-        $end_day = Carbon::tomorrow()->endOfDay();
-        $today = Carbon::today();
-        $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
-            ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
-            ->join('shipments_journey as sj', function($join) use($start_day, $end_day){
-                $join->on('sj.shipment_id', '=', 's.id')
-                    ->where('sj.shipper_status_id', DB::raw(14))
-                    ->where('sj.created_at', '>=', $start_day)
-                    ->where('sj.created_at', '<=', $end_day);
-            })
-            ->select('hc.id as hub_id', DB::raw('(select sum(s.amount)) as amount'))
-            ->groupBy('hc.id')
-            ->get();
-        VisionSoftCodReceivable::truncate();
-        if(count($cities) > 0){
-            $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
-            foreach ($cities as $city){
-                try {
-                    $response = $client->post('CodReceivable', [
-                        'form_params' => [
-                            'pin_code' => 6,
-                            'pin_kp' => 'A',
-                            'pin_loginid' => 'GB',
-                            'pin_password' => 'SOFT',
-                            'pin_tr_date' => $today,
-                            'pin_hub_id' => $city->hub_id,
-                            'pin_hub_name' => $city->amount
-                        ]
-                    ]);
-                    $status_code = $response->getStatusCode();
-                    if ($status_code != 200) {
-                        $response = $response->getBody()->getContents();
-                        $new_error = new VisionSoftError();
-                        $new_error->api_id = 15;
-                        $new_error->status_code = $status_code;
-                        $new_error->error = $response;
-                        $new_error->save();
-                    } else {
-                        $new_city = new VisionSoftCodReceivable();
-                        $new_city->hub_id = $city->hub_id;
-                        $new_city->amount = $city->amount;
-                        $new_city->save();
-                    }
-                } catch (RequestException $e) {
-                    $new_error = new VisionSoftError();
-                    $new_error->api_id = 15;
-                    $new_error->error = 'API Error';
-                    $new_error->save();
-                }
-            }
-        }
-    }
-
+    //13
     static public function bank_deposits(){
         $date = Carbon::yesterday();
         $today = Carbon::today();
@@ -562,44 +639,44 @@ class VisionSoftAPIController extends Controller
                 }else{
                     $station_deposit_note_slips = $station_deposit_note->deposit_note_slips;
                     foreach ($station_deposit_note_slips as $slip){
-                           try{
-                               $response = $client->post('BankDeposit', [
-                                   'form_params' => [
-                                       'pin_code' => 6,
-                                       'pin_kp' => 'A',
-                                       'pin_loginid' => 'GB',
-                                       'pin_password' => 'SOFT',
-                                       'pin_tr_date' => $today,
-                                       'pin_hub_id' => $station_deposit_note->hub_id,
-                                       'pin_sdn_number' => $station_deposit_note->id,
-                                       'pin_bank' => $slip->bank_id,
-                                       'pin_amount' => $slip->amount,
-                                       'pin_adj_amount' => 0,
-                                       'pin_adj_stmt_head_id' => 0
-                                   ]
-                               ]);
-                               $status_code = $response->getStatusCode();
-                               if ($status_code != 200) {
-                                   $response = $response->getBody()->getContents();
-                                   $new_error = new VisionSoftError();
-                                   $new_error->api_id = 13;
-                                   $new_error->status_code = $status_code;
-                                   $new_error->error = $response;
-                                   $new_error->save();
-                               } else {
-                                   $bank_deposit = new VisionSoftBankDeposit();
-                                   $bank_deposit->sdn_id = $station_deposit_note->id;
-                                   $bank_deposit->bank_id = $station_deposit_note->banks_list_id;
-                                   $bank_deposit->amount = $station_deposit_note->sdn_amount;
-                                   $bank_deposit->save();
-                               }
-                           } catch (RequestException $e) {
-                               $new_error = new VisionSoftError();
-                               $new_error->api_id = 13;
-                               $new_error->error = 'API Error';
-                               $new_error->save();
-                           }
-                       }
+                        try{
+                            $response = $client->post('BankDeposit', [
+                                'form_params' => [
+                                    'pin_code' => 6,
+                                    'pin_kp' => 'A',
+                                    'pin_loginid' => 'GB',
+                                    'pin_password' => 'SOFT',
+                                    'pin_tr_date' => $today,
+                                    'pin_hub_id' => $station_deposit_note->hub_id,
+                                    'pin_sdn_number' => $station_deposit_note->id,
+                                    'pin_bank' => $slip->bank_id,
+                                    'pin_amount' => $slip->amount,
+                                    'pin_adj_amount' => 0,
+                                    'pin_adj_stmt_head_id' => 0
+                                ]
+                            ]);
+                            $status_code = $response->getStatusCode();
+                            if ($status_code != 200) {
+                                $response = $response->getBody()->getContents();
+                                $new_error = new VisionSoftError();
+                                $new_error->api_id = 13;
+                                $new_error->status_code = $status_code;
+                                $new_error->error = $response;
+                                $new_error->save();
+                            } else {
+                                $bank_deposit = new VisionSoftBankDeposit();
+                                $bank_deposit->sdn_id = $station_deposit_note->id;
+                                $bank_deposit->bank_id = $station_deposit_note->banks_list_id;
+                                $bank_deposit->amount = $station_deposit_note->sdn_amount;
+                                $bank_deposit->save();
+                            }
+                        } catch (RequestException $e) {
+                            $new_error = new VisionSoftError();
+                            $new_error->api_id = 13;
+                            $new_error->error = 'API Error';
+                            $new_error->save();
+                        }
+                    }
 
                     try{
                         $response = $client->post('BankDeposit', [
@@ -637,12 +714,129 @@ class VisionSoftAPIController extends Controller
                         $new_error->error = 'API Error';
                         $new_error->save();
                     }
+
+                }
+            }
+        }
+
+
+    }
+    //15
+    static public function cod_receivable(){
+        $date = Carbon::yesterday();
+        $today = Carbon::today();
+        $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
+            ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
+            ->join('shipments_journey as sj', function($join) use($date){
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.shipper_status_id', DB::raw(14))
+                    ->whereDate('sj.created_at', $date)
+                    ->where('sj.verification', DB::raw(1));
+            })
+            ->select('hc.id as hub_id', DB::raw('(select sum(s.amount)) as amount'))
+            ->groupBy('hc.id')
+            ->get();
+        VisionSoftCodReceivable::truncate();
+        if(count($cities) > 0){
+            $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            foreach ($cities as $city){
+                try {
+                    $response = $client->post('CodReceivable', [
+                        'form_params' => [
+                            'pin_code' => 6,
+                            'pin_kp' => 'A',
+                            'pin_loginid' => 'GB',
+                            'pin_password' => 'SOFT',
+                            'pin_tr_date' => $today,
+                            'pin_hub_id' => $city->hub_id,
+                            'pin_hub_name' => $city->amount
+                        ]
+                    ]);
+                    $status_code = $response->getStatusCode();
+                    if ($status_code != 200) {
+                        $response = $response->getBody()->getContents();
+                        $new_error = new VisionSoftError();
+                        $new_error->api_id = 15;
+                        $new_error->status_code = $status_code;
+                        $new_error->error = $response;
+                        $new_error->save();
+                    } else {
+                        $new_city = new VisionSoftCodReceivable();
+                        $new_city->hub_id = $city->hub_id;
+                        $new_city->amount = $city->amount;
+                        $new_city->save();
+                    }
+                } catch (RequestException $e) {
+                    $new_error = new VisionSoftError();
+                    $new_error->api_id = 15;
+                    $new_error->error = 'API Error';
+                    $new_error->save();
                 }
             }
         }
     }
 
     static public function daily_exp(){
+        $date = Carbon::today();
+        $today = Carbon::today();
+        $vision_daily_exp_ids = VisionSoftDailyExp::groupBy('petty_cash_statement_id')->pluck('petty_cash_statement_id')->toArray();
+        $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereDate('created_at', $date)->whereNotIn('id',$vision_daily_exp_ids);
+        if($petty_cash_statements->exists()){
+            $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            $petty_cash_statements = $petty_cash_statements->get();
+            if(count($petty_cash_statements) > 0){
+                foreach ($petty_cash_statements as $petty_cash_statement){
+                    $petty_cash_statement_details = $petty_cash_statement->petty_cash_statement_details()->where('status', 1);
+                    if($petty_cash_statement_details){
+                        foreach ($petty_cash_statement_details as $petty_cash_statement_detail) {
+                            try{
+                                $response = $client->post('DailyExp', [
+                                    'form_params' => [
+                                        'pin_code' => 6,
+                                        'pin_kp' => 'A',
+                                        'pin_loginid' => 'GB',
+                                        'pin_password' => 'SOFT',
+                                        'pin_tr_date' => $today,
+                                        'pin_ref_stmt_no' => $petty_cash_statement->reference_no,
+                                        'pin_amount' => $petty_cash_statement_detail->amount,
+                                        'pin_hub_id' => $petty_cash_statement_detail->hub_id,
+                                        'pin_account_head' => $petty_cash_statement_detail->heads->name,
+                                        'pin_account_title' => $petty_cash_statement_detail->titles->name,
+                                        'pin_details' => $petty_cash_statement_detail->expense_details,
+                                        'pin_stmt_id' => $petty_cash_statement_detail->id,
+                                        'pin_stmt_ref_no' => $petty_cash_statement_detail->reference_no,
+                                        'pin_tracking_number' => $petty_cash_statement->shipment->tracking_number,
+                                        'pin_creation_date' => $petty_cash_statement->created_at,
+                                        'pin_period_from_date' => $petty_cash_statement->from,
+                                        'pin_period_to_date' => $petty_cash_statement->to,
+                                        'pin_statement_head_id' => $petty_cash_statement->id
+                                    ]
+                                ]);
+                                $status_code = $response->getStatusCode();
+                                if ($status_code != 200) {
+                                    $response = $response->getBody()->getContents();
+                                    $new_error = new VisionSoftError();
+                                    $new_error->api_id = 14;
+                                    $new_error->status_code = $status_code;
+                                    $new_error->error = $response;
+                                    $new_error->save();
+                                } else {
+                                    $daily_exp = new VisionSoftDailyExp();
+                                    $daily_exp->petty_cash_statement_id = $petty_cash_statement->id;
+                                    $daily_exp->statement_id = $petty_cash_statement_detail->id;
+                                    $daily_exp->save();
+                                }
+                            } catch (RequestException $e) {
+                                $new_error = new VisionSoftError();
+                                $new_error->api_id = 14;
+                                $new_error->error = 'API Error';
+                                $new_error->save();
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
     }
 }

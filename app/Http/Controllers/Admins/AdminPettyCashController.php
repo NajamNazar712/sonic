@@ -1413,7 +1413,7 @@ class AdminPettyCashController extends Controller
     }
 
     public function create_shipment($petty_cash_statement_id){
-        $user_id = 1690;
+        $user_id = 1087;
         $user = User::find($user_id);
         
         if($petty_cash_statement_id){
@@ -1431,7 +1431,7 @@ class AdminPettyCashController extends Controller
                 $poc_email = Auth::user()->email;
                 $city_name = $petty_cash_statement->hub->name;
                 $address = 'Trax office '.$city_name;
-               $pickup_address_id = $this->add_pickup_address($user_id, $address, $poc, $poc_phone, $poc_email, $city_id);
+                $pickup_address_id = $this->add_pickup_address($user_id, $address, $poc, $poc_phone, $poc_email, $city_id);
             }
 
             $shipment = $this->book($user_id, 1, $pickup_address_id,1,202, 'Fawad Ahmed Finance Manager', 'Trax Head Office Karachi', '0213-8772222',NULL, $user->email, NULL,0,Carbon::now(),$special_instructions,1,1,NULL,0,1,2,2);
