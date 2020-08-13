@@ -11,6 +11,8 @@ use App\Http\Models\Admin\VisionSoft\VisionSoftArrivalRevenue;
 use App\Http\Models\Admin\VisionSoft\VisionSoftBankDeposit;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCity;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPayable;
+use App\Http\Models\Admin\VisionSoft\VisionSoftCodPayment;
+use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodReceivable;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCustomer;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCustomerBank;
@@ -20,6 +22,7 @@ use App\Http\Models\Admin\VisionSoft\VisionSoftEmployee;
 use App\Http\Models\Admin\VisionSoft\VisionSoftError;
 use App\Http\Models\Admin\VisionSoft\VisionSoftHub;
 use App\Http\Models\City;
+use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
@@ -543,6 +546,136 @@ class VisionSoftAPIController extends Controller
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+    //10
+    static public function cod_payment(){
+        $date = Carbon::yesterday();
+        $today = Carbon::today();
+        $payments = DonePaymentCalculation::join('done_payments as dp', 'dp.id', '=', 'done_payment_calculations.done_payment_id')
+            ->join('users as u', 'u.id', '=', 'dp.user_id')
+            ->join('cities as c', 'c.id', '=', 'u.city_id')
+            ->leftjoin('banks_lists as bl', 'bl.id', '=', 'dp.company_bank_id')
+            ->select('dp.id as payment_id', 'u.id as account_id', 'c.name as city_name', 'done_payment_calculations.amount as amount', 'done_payment_calculations.charges as charges', 'done_payment_calculations.gst as gst', 'done_payment_calculations.payable as payable', 'bl.name as bank_name', 'dp.status as status')
+            ->whereDate('done_payment_calculations.created_at', $date)
+            ->get();
+        if(count($payments) > 0){
+            $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            foreach ($payments as $payment){
+                $gst = ($payment->gst) ? $payment->gst : 0;
+                $charges = ($payment->charges) ? $payment->charges : 0;
+                $deductable = $gst + $charges;
+                if ($payment->status == 0) {
+                    $status = 'Processed';
+                }
+                else if ($payment->status == 1) {
+                    $status = 'Paid';
+                }
+                else if ($payment->status == 2) {
+                    $status = 'Reverted';
+                }
+                else {
+                    $status = 'Unknown';
+                }
+                try {
+                    $response = $client->post('CodPayment', [
+                        'form_params' => [
+                            'pin_code' => 6,
+                            'pin_kp' => 'A',
+                            'pin_loginid' => 'GB',
+                            'pin_password' => 'SOFT',
+                            'pin_tr_date' => $today,
+                            'pin_payment_id' => $payment->payment_id,
+                            'pin_account_id' => $payment->account_id,
+                            'pin_cityname' => $payment->city_name,
+                            'pin_tot_amount' => ($payment->amount) ? $payment->amount : 0,
+                            'pin_tot_deductable' => $deductable,
+                            'pin_tot_payable' => ($payment->payable) ? $payment->payable : 0,
+                            'pin_company_bank' => $payment->bank_name,
+                            'pin_status' => $status,
+                        ]
+                    ]);
+                    $status_code = $response->getStatusCode();
+                    if ($status_code != 200) {
+                        $response = $response->getBody()->getContents();
+                        $new_error = new VisionSoftError();
+                        $new_error->api_id = 10;
+                        $new_error->status_code = $status_code;
+                        $new_error->error = $response;
+                        $new_error->save();
+                    } else {
+                        $new_shipper = new VisionSoftCodPayment();
+                        $new_shipper->payment_id = $payment->payment_id;
+                        $new_shipper->shipper_id = $payment->account_id;
+                        $new_shipper->city_name = $payment->city_name;
+                        $new_shipper->amount = ($payment->amount) ? $payment->amount : 0;
+                        $new_shipper->deductable = $deductable;
+                        $new_shipper->payable = ($payment->payable) ? $payment->payable : 0;
+                        $new_shipper->company_bank = $payment->bank_name;
+                        $new_shipper->status = $status;
+                        $new_shipper->save();
+                    }
+                } catch (RequestException $e) {
+                    $new_error = new VisionSoftError();
+                    $new_error->api_id = 10;
+                    $new_error->error = 'API Error';
+                    $new_error->save();
+                }
+            }
+        }
+    }
+    //11
+    static public function cod_payment_clear(){
+        $date = Carbon::yesterday();
+        $today = Carbon::today();
+        $payments_clear = VisionSoftCodPaymentClear::whereDate('vision_soft_cod_payment_clears.created_at', $date)->get();
+        if(count($payments_clear) > 0){
+            $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            foreach ($payments_clear as $payment_clear){
+                if ($payment_clear->status == 0) {
+                    $status = 'Processed';
+                }
+                else if ($payment_clear->status == 1) {
+                    $status = 'Paid';
+                }
+                else if ($payment_clear->status == 2) {
+                    $status = 'Reverted';
+                }
+                else {
+                    $status = 'Unknown';
+                }
+                try {
+                    $response = $client->post('CodPaymentClear', [
+                        'form_params' => [
+                            'pin_code' => 6,
+                            'pin_kp' => 'A',
+                            'pin_loginid' => 'GB',
+                            'pin_password' => 'SOFT',
+                            'pin_tr_date' => $today,
+                            'pin_payment_id' => $payment_clear->payment_id,
+                            'pin_status' => $status,
+                        ]
+                    ]);
+                    $status_code = $response->getStatusCode();
+                    if ($status_code != 200) {
+                        $response = $response->getBody()->getContents();
+                        $new_error = new VisionSoftError();
+                        $new_error->api_id = 11;
+                        $new_error->status_code = $status_code;
+                        $new_error->error = $response;
+                        $new_error->save();
+                    }
+                    else{
+                        $payment_clear->api_status = 1;
+                        $payment_clear->save();
+                    }
+                } catch (RequestException $e) {
+                    $new_error = new VisionSoftError();
+                    $new_error->api_id = 11;
+                    $new_error->error = 'API Error';
+                    $new_error->save();
                 }
             }
         }
