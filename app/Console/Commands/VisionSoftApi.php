@@ -44,6 +44,8 @@ class VisionSoftApi extends Command
 //        VisionSoftAPIController::city_hub();
 //        VisionSoftAPIController::employees();
 //        VisionSoftAPIController::cities();
+//        VisionSoftAPIController::cod_payable();
+//        VisionSoftAPIController::cod_receivable();
         VisionSoftAPIController::arrival_revenue();
     }
 }
