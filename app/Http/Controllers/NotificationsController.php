@@ -5183,6 +5183,50 @@ class NotificationsController extends Controller
                       }
                   }
               }
+              else if($id == 76){
+                  $hub = City::find($reference_1_id);
+                  $date = Carbon::today()->format('Y m d');
+                  $subject = $notification->subject;
+                  $body = $notification->body;
+
+                  $hub_id = $hub->id;
+
+                  if (strpos($subject, '[hub]') !== FALSE) {
+                      $subject = str_replace('[hub]', $hub->name, $subject);
+                  }
+
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+
+                  if (strpos($body, '[date]') !== FALSE) {
+                      $body = str_replace('[date]', $date, $body);
+                  }
+
+                  $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                  if (strpos($body, '[link]') !== FALSE) {
+                      $body = str_replace('[link]', $link, $body);
+                  }
+
+                  $to = array();
+                  $cc = array();
+
+                  $to_admins = Admin::whereIn('role_id', [10, 17, 25, 30])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                      $query->where('hub_id', $hub_id);
+                  });
+                  if ($to_admins->exists()) {
+                      $to = array_merge($to, $to_admins->pluck('email')->toArray());
+                  }
+                  $cc_admins = Admin::whereIn('role_id', [8, 9, 3, 2])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                      $query->where('hub_id', $hub_id);
+                  });
+                  if ($cc_admins->exists()) {
+                      $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
+                  }
+
+                  self::email($subject, $body, $to, $cc);
+              }
         }
       }
     }

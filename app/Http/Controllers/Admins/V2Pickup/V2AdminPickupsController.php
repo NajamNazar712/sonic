@@ -10,6 +10,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\ReceivingSheetReceived;
@@ -665,8 +666,8 @@ class V2AdminPickupsController extends Controller
                 $reference_2_id = NULL;
                 ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
-                $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
-                if($self_collection_shipment){
+                $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
+                if($self_collection_shipment->exists()){
                     if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
                         $shipment->shipper_status_id = 15;
                         $shipment->consignee_status_id = 15;
@@ -675,10 +676,20 @@ class V2AdminPickupsController extends Controller
                         ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
                     }
                 }
-
+                $shipment->fresh();
+                if ($shipment->walk_in_delivery_type_id == 2 && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
+                    $shipment->shipper_status_id = 15;
+                    $shipment->consignee_status_id = 15;
+                    $shipment->save();
+                    ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                }
+                if($shipment->booking_type_id == 4){
+                    $print_shipment_ids[] = $shipment_id;
+                }
                 //Consolidated Shipments
-                $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
-                if($consolidated_shipment){
+                $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id);
+                if($consolidated_shipment->exists()){
+                    $consolidated_shipment = $consolidated_shipment->first();
 //                $user_shipping_info = UserShippingInfo::find($shipment->pickup_address_id);
                     if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
                         $check_all_consolidation_shipments = true;
@@ -796,7 +807,6 @@ class V2AdminPickupsController extends Controller
                 if($pickup_note_requests_count == 0){
                     V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
                 }
-                Log::info('Pickup note id: '.$pickup_note_id);
             }
         }
 
@@ -1165,8 +1175,8 @@ class V2AdminPickupsController extends Controller
                 ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
 
-                $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
-                if($self_collection_shipment){
+                $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
+                if($self_collection_shipment->exists()){
                     if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
                         $shipment->shipper_status_id = 15;
                         $shipment->consignee_status_id = 15;
@@ -1175,7 +1185,16 @@ class V2AdminPickupsController extends Controller
                         ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
                     }
                 }
-
+                $shipment->fresh();
+                if ($shipment->walk_in_delivery_type_id == 2 && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
+                    $shipment->shipper_status_id = 15;
+                    $shipment->consignee_status_id = 15;
+                    $shipment->save();
+                    ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                }
+                if($shipment->booking_type_id == 4){
+                    $print_shipment_ids[] = $shipment_id;
+                }
                 //Consolidated Shipments
                 $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
                 if($consolidated_shipment){

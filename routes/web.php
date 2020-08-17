@@ -1977,6 +1977,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('product_image/{id}', 'Admins\AdminCRMController@product_image')->name('product_image');
             Route::get('invoice_image/{id}', 'Admins\AdminCRMController@invoice_image')->name('invoice_image');
         });
+        Route::prefix('consignee_info')->name('consignee_info.')->group(function(){
+            Route::get('', 'Admins\AdminCRMController@consignee_info_index')->name('index');
+            Route::get('list', 'Admins\AdminCRMController@consignee_info_list')->name('list');
+            Route::post('print_air_waybill', 'Admins\AdminCRMController@print_air_waybill')->name('print_air_waybill');
+            Route::post('resolve', 'Admins\AdminCRMController@consignee_info_resolve')->name('resolve');
+        });
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function (){
