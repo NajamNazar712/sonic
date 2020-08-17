@@ -187,6 +187,13 @@ class DeliveryController extends Controller
                     return " - ";
                 }
             })
+            ->editColumn('destination_arrival', function ($shipments) {
+                if ($shipments->destination_arrival) {
+                    return $shipments->destination_arrival;
+                } else {
+                    return " - ";
+                }
+            })
             ->filterColumn('status', function ($query, $keyword) {
 
                 if ($keyword != '') {
