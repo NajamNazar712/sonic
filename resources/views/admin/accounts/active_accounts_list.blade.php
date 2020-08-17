@@ -40,7 +40,11 @@
                                 </div>
                                 <div class="col-4">
                                     <fieldset class="form-group">
-                                        <input type="text" name="search_shipper" id="search_shipper" class="form-control shipper_name" placeholder="Shipper Name">
+                                        <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                           @foreach($shippers as $shipper)
+                                                <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                            @endforeach
+                                        </select>
                                     </fieldset>
                                 </div>
                                 <div class="col-2">
@@ -208,8 +212,12 @@
             width:'100%',
             placeholder:"Select Sale Persons",
             allowClear:true,
-            dropdownParent:$('#search_form')
         });
+        $('#search_shipper').select2({
+            width:'100%',
+            placeholder:"Select Shipper",
+            allowClear:true,
+         });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -258,7 +266,7 @@
                             row.push(values.shipper_phone);
                             row.push(values.address);
                             row.push(values.email);
-                            row.push(values.product_name);
+                            row.push(values.product_type);
                             row.push(values.status);
                             row.push(values.admin_tag_id);
                             row.push(values.created_at);
@@ -285,98 +293,98 @@
        var selected_rows = [];
        var table = $('#datatable').DataTable({
            dom: '<"d-inline-block"l><"pull-right"B>tipr',
-           scrollX: true, scrollY: '500px',
+           scrollX: true, scrollY: '700px',
            buttons: [
-                    // {{--{--}}
-                    // {{--    text: 'Set Commission',--}}
-                    // {{--    className: 'btn btn-primary set_commission',--}}
-                    // {{--    enabled:false,--}}
-                    // {{--    action: function (e, dt, node, config) {--}}
-                    // {{--        if(selected_rows != ''){--}}
-                    // {{--            swal({--}}
-                    // {{--                title: 'Are You Sure?',--}}
-                    // {{--                text: 'Select Yes to Set Commission!',--}}
-                    // {{--                icon: 'warning',--}}
-                    // {{--                buttons: {--}}
-                    // {{--                    cancel: {--}}
-                    // {{--                        text: 'No',--}}
-                    // {{--                        value: null,--}}
-                    // {{--                        visible: true,--}}
-                    // {{--                        closeModal: true,--}}
-                    // {{--                    },--}}
-                    // {{--                    confirm: {--}}
-                    // {{--                        text: 'Yes',--}}
-                    // {{--                        value: true,--}}
-                    // {{--                        visible: true,--}}
-                    // {{--                        closeModal: true--}}
-                    // {{--                    }--}}
-                    // {{--                },--}}
-                    // {{--                closeOnClickOutside: false,--}}
-                    // {{--                closeOnEsc: false,--}}
-                    // {{--                dangerMode: true--}}
-                    // {{--            }).then(function (confirm) {--}}
-                    // {{--                if (confirm) {--}}
-                    // {{--                    var link = '{{ route('admin.settings.commission.set_commission', ["ids" => 0]) }}';--}}
-                    // {{--                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;--}}
-                    // {{--                }--}}
-                    // {{--            });--}}
+                    {
+                        text: 'Set Commission',
+                        className: 'btn btn-primary set_commission',
+                        enabled:false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to Set Commission!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        var link = '{{ route('admin.settings.commission.set_commission', ["ids" => 0]) }}';
+                                        window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;
+                                    }
+                                });
 
 
-                    // {{--        }--}}
-                    // {{--        else{--}}
-                    // {{--            var error = "Something went wrong please refresh page and try again!";--}}
-                    // {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                            }
+                            else{
+                                var error = "Something went wrong please refresh page and try again!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                    // {{--        }--}}
-                    // {{--    }--}}
-                    // {{--},--}}
-                    // {{--{--}}
-                    // {{--    text: 'Approve Commission',--}}
-                    // {{--    className: 'btn btn-primary approve_commission',--}}
-                    // {{--    enabled:false,--}}
-                    // {{--    action: function (e, dt, node, config) {--}}
-                    // {{--        if(selected_rows != ''){--}}
-                    // {{--            swal({--}}
-                    // {{--                title: 'Are You Sure?',--}}
-                    // {{--                text: 'Select Yes to Approve Commission!',--}}
-                    // {{--                icon: 'warning',--}}
-                    // {{--                buttons: {--}}
-                    // {{--                    cancel: {--}}
-                    // {{--                        text: 'No',--}}
-                    // {{--                        value: null,--}}
-                    // {{--                        visible: true,--}}
-                    // {{--                        closeModal: true,--}}
-                    // {{--                    },--}}
-                    // {{--                    confirm: {--}}
-                    // {{--                        text: 'Yes',--}}
-                    // {{--                        value: true,--}}
-                    // {{--                        visible: true,--}}
-                    // {{--                        closeModal: true--}}
-                    // {{--                    }--}}
-                    // {{--                },--}}
-                    // {{--                closeOnClickOutside: false,--}}
-                    // {{--                closeOnEsc: false,--}}
-                    // {{--                dangerMode: true--}}
-                    // {{--            }).then(function (confirm) {--}}
-                    // {{--                if (confirm) {--}}
-                    // {{--                    var link = '{{ route('admin.settings.commission.approve_commission', ["ids" => 0]) }}';--}}
-                    // {{--                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;--}}
-                    // {{--                }--}}
-                    // {{--            });--}}
+                            }
+                        }
+                    },
+                    {
+                        text: 'Approve Commission',
+                        className: 'btn btn-primary approve_commission',
+                        enabled:false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to Approve Commission!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        var link = '{{ route('admin.settings.commission.approve_commission', ["ids" => 0]) }}';
+                                        window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;
+                                    }
+                                });
 
 
-                    // {{--        }--}}
-                    // {{--        else{--}}
-                    // {{--            var error = "Something went wrong please refresh page and try again!";--}}
-                    // {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                            }
+                            else{
+                                var error = "Something went wrong please refresh page and try again!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                    // {{--        }--}}
-                    // {{--    }--}}
-                    // {{--},--}}
+                            }
+                        }
+                    },
                     @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
                             text: 'Bulk Tagging',
-                            className: 'btn btn-primary assign_rider',
+                            className: 'btn btn-primary bulk_tagging',
                             enabled:false,
                             action: function (e, dt, node, config) {
                            if(selected_rows != ''){
@@ -436,12 +444,13 @@
                                                         $('#saletag1').val('').trigger('change');
                                                         $('#SalesTagModal1').modal('hide');
                                                         table.draw(true);
-                                                        table.button('.assign_rider').disable();
-                                                        
+                                                        table.button('.bulk_tagging').disable();
+                                                        table.button('.set_commission').disable();
+                                                        table.button('.approve_commission').disable();
 
                                                     });
                                             } else {
-                                                var error = "Rider Not Selected!";
+                                                var error = "Account Not Selected!";
                                                 toastr.error(error, 'Error!', {
                                                     positionClass: 'toast-top-center',
                                                     containerId: 'toast-top-center'
@@ -452,7 +461,7 @@
                                 });
 
                             }else{
-                                var error = "Not selected any Rider!";
+                                var error = "Account Not selected!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                         }
@@ -493,8 +502,9 @@
                                             selected_rows.push(id);
                                         }
 
-                                        table.button('.assign_rider').enable();
-                                        
+                                        table.button('.bulk_tagging').enable();
+                                        table.button('.set_commission').enable();
+                                        table.button('.approve_commission').enable();
                                     }
                                 }
                             });
@@ -521,8 +531,9 @@
                                     }
 
                                     if (selected_rows.length == 0) {
-                                        table.button('.assign_rider').disable();
-
+                                        table.button('.bulk_tagging').disable();
+                                        table.button('.set_commission').disable();
+                                        table.button('.approve_commission').disable();
                                         hub_ids.splice(index, 1);
                                     }
                                 }
@@ -1051,11 +1062,15 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button('.assign_rider').enable();
+                    table.button('.bulk_tagging').enable();
+                    table.button('.set_commission').enable();
+                    table.button('.approve_commission').enable();
 
                 }
                 else {
-                    table.button('.assign_rider').disable();
+                    table.button('.bulk_tagging').disable();
+                    table.button('.set_commission').disable();
+                    table.button('.approve_commission').disable();
                 }
         });
     });

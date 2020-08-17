@@ -310,6 +310,98 @@
                     </div>
                 </div>
             </div>
+            {{--For Sales Only--}}
+            @if(session('role_id') == 1 || session('department_id') == 7)
+                <div class="row">
+                    <div class="col-3">
+                        <div class="card pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-grid font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-black text-right">
+                                            <h3 class="text-black">{{$sales['total_accounts']}}</h3>
+                                            <span>Total Accounts</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-in_transit pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-login text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$sales['pending_accounts']}}</h3>
+                                            <span>Pending Accounts</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-return_delivered pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-shuffle text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$sales['active_accounts']}}</h3>
+                                            <span>Active Accounts</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-pending_shipments pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="ft-alert-circle text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$sales['inactive_accounts']}}</h3>
+                                            <span>Inactive Accounts</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-return_confirm pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-close text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{ $sales['blocked_accounts']}}</h3>
+                                            <span>Blocked Accounts</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
             <div class="row mt-2">
                 <div class="card col-12">
                     <div class="card-content collapse show">

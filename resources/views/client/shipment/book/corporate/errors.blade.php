@@ -31,6 +31,9 @@
                                         <th>Consignee Phone Number 1 (03000000000)</th>
                                         <th>Consignee Phone Number 2 (03000000000)</th>
                                         <th>Consignee Email Address</th>
+                                        @if($service_type_check_id == 1 || $service_type_check_id == null)
+                                            <th>Self Collection</th>
+                                        @endif
                                         <th>Order ID</th>
                                         <th>Item Product Type ID</th>
                                         <th>Item Description</th>
@@ -122,6 +125,13 @@
                                                 <td>{!! Form::textarea('form[' . $no . '][consignee_email_address]', $ro['consignee_email_address'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['consignee_email_address']}}</font></td>
                                             @else
                                                 <td>{!! Form::textarea('form[' . $no . '][consignee_email_address]', $ro['consignee_email_address'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                            @if($service_type_check_id == 1 || $service_type_check_id == null)
+                                                @if(isset($errors[$no]['self_collection']))
+                                                    <td>{!! Form::select('form[' . $no . '][self_collection]',['no'=>'no','yes'=>'yes'],null, ['class' => 'form-control is-invalid self_collection select2','id'=>'self_collection','placeholder' => '']) !!}<font color="red">{{$errors[$no]['self_collection']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][self_collection]', $ro['self_collection'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
+                                                @endif
                                             @endif
                                             @if(isset($errors[$no]['order_id']))
                                                 <td>{!! Form::text('form[' . $no . '][order_id]', $ro['order_id'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['order_id']}}</font></td>

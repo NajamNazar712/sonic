@@ -16,6 +16,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Cargo </th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Cargo Type</th>
@@ -117,6 +118,7 @@
 
                             head.push('S. No.');
                             head.push('Tracking No.');
+                            head.push('Cargo No.');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Cargo Type');
@@ -127,6 +129,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.cargo);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.cargo_type);
@@ -167,6 +170,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
+                    { data:'cargo' ,name: 'cargo', class: 'align-middle cargo'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'cargo_type' ,name: 'cargo_consignments.type', class: 'align-middle hub'},

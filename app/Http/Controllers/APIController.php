@@ -58,6 +58,7 @@ class APIController extends Controller
       'consignee_phone_number_1' => 'Consignee Phone Number 1',
       'consignee_phone_number_2' => 'Consignee Phone Number 2',
       'consignee_email_address' => 'Consignee Email Address',
+      'self_collection' => 'Self Collection',
       'order_id' => 'Order ID',
       'package_type' => 'Package Type',
       'special_instructions' => 'Special Instructions',
@@ -292,6 +293,7 @@ class APIController extends Controller
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
+            'self_collection' => ['nullable', 'boolean'],
             'order_id' => ['nullable', 'filled'],
             'package_type' => ['required_if:service_type_id,3', 'boolean'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
@@ -502,6 +504,15 @@ class APIController extends Controller
           $consignee_email_address = NULL;
         }
 
+          $self_collection = FALSE;
+          if($service_type_id == 1 && $request->has('self_collection')){
+              if($request->input('self_collection') != null){
+                  if($request->input('self_collection') == 1){
+                      $self_collection = TRUE;
+                  }
+              }
+          }
+
         if ($request->filled('order_id')) {
           $order_id = $request->input('order_id');
         }
@@ -552,10 +563,10 @@ class APIController extends Controller
               }
           }
           if($user_type['account_type_id'] == 1) {
-              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity);
+              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection);
           }
           else {
-              $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity);
+              $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection);
           }
         $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 

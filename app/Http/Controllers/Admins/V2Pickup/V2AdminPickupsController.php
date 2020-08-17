@@ -14,6 +14,7 @@ use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
+use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\PickupAction;
@@ -599,7 +600,10 @@ class V2AdminPickupsController extends Controller
 
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
-
+            if($shipment->actual_weight == null){
+                unset($shipment_ids[$key]);
+                continue;
+            }
             if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
                 $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
                 if($pickup_request_shipment){
@@ -664,6 +668,16 @@ class V2AdminPickupsController extends Controller
                 $reference_2_id = NULL;
                 ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
+                $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
+                if($self_collection_shipment){
+                    if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
+                        $shipment->shipper_status_id = 15;
+                        $shipment->consignee_status_id = 15;
+
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                    }
+                }
 
                 //Consolidated Shipments
                 $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
@@ -1097,123 +1111,142 @@ class V2AdminPickupsController extends Controller
 
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
+            if($shipment){
+                if($shipment->actual_weight == null){
+                    unset($shipment_ids[$key]);
+                    continue;
+                }
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+                    $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
+                    if($pickup_request_shipment){
+                        $reference_1_id = $pickup_request_shipment->pickup_request_id;
 
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
-                $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
-                if($pickup_request_shipment){
-                    $reference_1_id = $pickup_request_shipment->pickup_request_id;
-
-                    if (!in_array($pickup_request_shipment->pickup_request_id, $pickup_request_ids)) {
-                        $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
+                        if (!in_array($pickup_request_shipment->pickup_request_id, $pickup_request_ids)) {
+                            $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
+                        }
                     }
-                }
-                else{
-                    $reference_1_id = NULL;
-                }
+                    else{
+                        $reference_1_id = NULL;
+                    }
 
-                if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
-                    $receiving_sheet_shipment->status = 1;
-                    $receiving_sheet_shipment->save();
+                    if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
+                        $receiving_sheet_shipment->status = 1;
+                        $receiving_sheet_shipment->save();
 
-                    $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
+                        $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
 
-                    $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
+                        $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
 
-                    $receiving_sheet->received = $receiving_sheet->received + 1;
+                        $receiving_sheet->received = $receiving_sheet->received + 1;
 
-                    $receiving_sheet->save();
+                        $receiving_sheet->save();
 
-                    if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
-                        $receiving_sheet_received = new ReceivingSheetReceived();
+                        if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+                            $receiving_sheet_received = new ReceivingSheetReceived();
 
-                        $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
-                        $receiving_sheet_received->user_id = $shipment->user_id;
-                        $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
-                        $receiving_sheet_received->shipment_id = $shipment_id;
+                            $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+                            $receiving_sheet_received->user_id = $shipment->user_id;
+                            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+                            $receiving_sheet_received->shipment_id = $shipment_id;
 
-                        $receiving_sheet_received->save();
+                            $receiving_sheet_received->save();
+                        }
+                    }
+                    else {
+                        if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+                            $receiving_sheet_received = new ReceivingSheetReceived();
+
+                            $receiving_sheet_received->user_id = $shipment->user_id;
+                            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+                            $receiving_sheet_received->shipment_id = $shipment_id;
+
+                            $receiving_sheet_received->save();
+                        }
+                    }
+
+                    $shipment->shipper_status_id = 2;
+                    $shipment->consignee_status_id = 2;
+
+                    $shipment->save();
+                    $reference_2_id = NULL;
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
+
+
+                    $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
+                    if($self_collection_shipment){
+                        if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
+                            $shipment->shipper_status_id = 15;
+                            $shipment->consignee_status_id = 15;
+
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                        }
+                    }
+
+                    //Consolidated Shipments
+                    $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
+                    if($consolidated_shipment){
+//                $user_shipping_info = UserShippingInfo::find($shipment->pickup_address_id);
+                        if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
+                            $check_all_consolidation_shipments = true;
+
+                            $shipment->shipper_status_id = 58;
+                            $shipment->consignee_status_id = 58;
+                            $shipment->save();
+
+                            ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
+
+                            $consolidation_id = $consolidated_shipment->consolidation_id;
+                            $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+
+                            foreach ($remaining_consolidated_shipments as $remaining_consolidated_shipment){
+                                $check_remaining_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
+                                if($check_remaining_consolidated_shipment->shipper_status_id != 58){
+                                    $check_all_consolidation_shipments = false;
+                                }
+                            }
+
+                            if($check_all_consolidation_shipments == true){
+                                foreach ($remaining_consolidated_shipments as $update_remaining_consolidated_shipment){
+                                    $update_all_consolidated_shipment = Shipment::find($update_remaining_consolidated_shipment->shipment_id);
+
+                                    $update_all_consolidated_shipment->shipper_status_id = 59;
+                                    $update_all_consolidated_shipment->consignee_status_id = 59;
+
+                                    $update_all_consolidated_shipment->save();
+
+                                    ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
+                                }
+                            }
+                        }
+                    }
+                    //Consolidated Shipments
+
+                    NotificationsController::send(3, $shipment_id);
+
+                    ShipmentChargesController::weight($shipment_id);
+                    ShipmentChargesController::cash_handling($shipment_id);
+                    ShipmentChargesController::insurance($shipment_id);
+                    ShipmentChargesController::fuel_surcharge($shipment_id);
+
+                    if ($shipment->charges_mode_id == 2) {
+                        $shipment = Shipment::find($shipment_id);
+
+                        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
+
+                        $gst = Zone::find($shipment->pickup_address->city->zone_id)->gst;
+
+                        $gst = ROUND(($charges * $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                        $shipment->amount = $shipment->amount + $charges + $gst;
+
+                        $shipment->save();
+
+                        $print_shipment_ids[] = $shipment_id;
                     }
                 }
                 else {
-                    if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
-                        $receiving_sheet_received = new ReceivingSheetReceived();
-
-                        $receiving_sheet_received->user_id = $shipment->user_id;
-                        $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
-                        $receiving_sheet_received->shipment_id = $shipment_id;
-
-                        $receiving_sheet_received->save();
-                    }
-                }
-
-                $shipment->shipper_status_id = 2;
-                $shipment->consignee_status_id = 2;
-
-                $shipment->save();
-                $reference_2_id = NULL;
-                ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
-
-
-                //Consolidated Shipments
-                $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
-                if($consolidated_shipment){
-//                $user_shipping_info = UserShippingInfo::find($shipment->pickup_address_id);
-                    if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
-                        $check_all_consolidation_shipments = true;
-
-                        $shipment->shipper_status_id = 58;
-                        $shipment->consignee_status_id = 58;
-                        $shipment->save();
-
-                        ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
-
-                        $consolidation_id = $consolidated_shipment->consolidation_id;
-                        $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
-
-                        foreach ($remaining_consolidated_shipments as $remaining_consolidated_shipment){
-                            $check_remaining_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
-                            if($check_remaining_consolidated_shipment->shipper_status_id != 58){
-                                $check_all_consolidation_shipments = false;
-                            }
-                        }
-
-                        if($check_all_consolidation_shipments == true){
-                            foreach ($remaining_consolidated_shipments as $update_remaining_consolidated_shipment){
-                                $update_all_consolidated_shipment = Shipment::find($update_remaining_consolidated_shipment->shipment_id);
-
-                                $update_all_consolidated_shipment->shipper_status_id = 59;
-                                $update_all_consolidated_shipment->consignee_status_id = 59;
-
-                                $update_all_consolidated_shipment->save();
-
-                                ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
-                            }
-                        }
-                    }
-                }
-                //Consolidated Shipments
-
-                NotificationsController::send(3, $shipment_id);
-
-                ShipmentChargesController::weight($shipment_id);
-                ShipmentChargesController::cash_handling($shipment_id);
-                ShipmentChargesController::insurance($shipment_id);
-                ShipmentChargesController::fuel_surcharge($shipment_id);
-
-                if ($shipment->charges_mode_id == 2) {
-                    $shipment = Shipment::find($shipment_id);
-
-                    $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
-
-                    $gst = Zone::find($shipment->pickup_address->city->zone_id)->gst;
-
-                    $gst = ROUND(($charges * $gst), 0, PHP_ROUND_HALF_DOWN);
-
-                    $shipment->amount = $shipment->amount + $charges + $gst;
-
-                    $shipment->save();
-
-                    $print_shipment_ids[] = $shipment_id;
+                    unset($shipment_ids[$key]);
                 }
             }
             else {

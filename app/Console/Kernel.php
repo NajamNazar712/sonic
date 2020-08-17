@@ -35,8 +35,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\DailyFakeStatusReportEmail',
         '\App\Console\Commands\NegativeBalanceShipperSalesPerson',
         '\App\Console\Commands\ClearDefaultBankDuration',
-        '\App\Console\Commands\OvernightCargoReport',
-        '\App\Console\Commands\OverlandCargoReport',
+//        '\App\Console\Commands\OvernightCargoReport',
+//        '\App\Console\Commands\OverlandCargoReport',
 		'\App\Console\Commands\AccountReconciliationReportFromStart',
         '\App\Console\Commands\AccountReconciliationReportCurrent',
 		'\App\Console\Commands\BusinessProjectionAndRetention',
@@ -54,7 +54,9 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\PendingCashCollectionReport',
 		'\App\Console\Commands\ZeroChargesReport',
 		'\App\Console\Commands\StationRecoveryReport',
-		'\App\Console\Commands\V2PickupCleanDuplicateData'
+		'\App\Console\Commands\V2PickupCleanDuplicateData',
+		'\App\Console\Commands\QAReportPettyCash',
+		'\App\Console\Commands\SelfCollection'
 
         ];
 
@@ -111,6 +113,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
 		$schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
+		$schedule->command('qareport:pettycash')->dailyAt('10:00')->runInBackground();
+		$schedule->command('shipments:self_collection')->dailyAt('09:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
 
@@ -131,8 +135,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
         $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
 
-        $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
-        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
+//        $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
+//        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
 
 //		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
 //      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution

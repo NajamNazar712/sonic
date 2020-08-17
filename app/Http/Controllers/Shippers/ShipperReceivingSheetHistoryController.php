@@ -69,7 +69,10 @@ class ShipperReceivingSheetHistoryController extends Controller
 
         if(session('user_type') == 2){
             if(session('restriction') == 1){
-                $receiving_sheet = $receiving_sheet->join('substitute_user_receiving_sheets as surs', 'surs.receiving_sheet_id', '=', 'receiving_sheets.id');
+                $receiving_sheet = $receiving_sheet->join('substitute_user_receiving_sheets as surs', function($join){
+                    $join->on('surs.receiving_sheet_id', '=', 'receiving_sheets.id')
+                        ->where('surs.substitute_user_id', '=', Auth::id());
+                });
             }
         }
       $datatable = Datatables::of($receiving_sheet)

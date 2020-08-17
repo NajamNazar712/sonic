@@ -111,6 +111,7 @@
                             shipment += '<th><strong>Location Name</strong></th>';
                             shipment += '<th><strong>Account Type</strong></th>';
                             shipment += '<th><strong>Scanned By</strong></th>';
+                            shipment += '<th><strong>City</strong></th>';
                             shipment += '<th><strong>Scanned At</strong></th>';
                             shipment += '</tr>';
                             shipment += '</thead>';
@@ -121,6 +122,7 @@
                                 shipment += '<td>' + history.screen_location + '</td>';
                                 shipment += '<td>' + history.account_type + '</td>';
                                 shipment += '<td>' + history.scanned_by + '</td>';
+                                shipment += '<td>' + history.city + '</td>';
                                 shipment += '<td>' + history.scanned_at + '</td>';
                                 shipment += '</tr>';
                             });
