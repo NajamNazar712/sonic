@@ -39,6 +39,7 @@
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Service Type</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Destination Arrival Date</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
@@ -161,9 +162,10 @@
                         head.push('Shipping Mode');
                         head.push('Service Type');
                         head.push('Status');
+                        head.push('Destination Arrival Date');
                         head.push('Reason');
                         head.push('Remarks');
-                        head.push('Arrival Date');
+                        head.push('Destination Arrival Date');
                         head.push('Status Date');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -181,6 +183,7 @@
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.status);
+                            row.push(values.destination_arrival_date);
                             row.push(values.reason);
                             row.push(values.remarks);
                             row.push(values.arrival);
@@ -238,6 +241,7 @@
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
+                {data: 'destination_arrival', name: 'destination_arrival', class: 'align-middle status'},
                 {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
