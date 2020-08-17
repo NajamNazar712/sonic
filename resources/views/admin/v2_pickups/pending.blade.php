@@ -276,7 +276,7 @@
                         head.push('Trax Remark(s)');
                         head.push('Shipper Remark(s)');
                         head.push('Rider Status');
-                        head.push('Attempt Date');
+                        head.push('Date');
                         head.push('Attempt Date');
                         head.push('Attempt(s)');
 
