@@ -241,7 +241,7 @@
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
-                {data: 'destination_arrival', name: 'destination_arrival', class: 'align-middle status'},
+                {data: 'destination_arrival', name: 'sjd.created_at ', class: 'align-middle destination_arrival'},
                 {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
