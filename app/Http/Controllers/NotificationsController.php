@@ -387,11 +387,11 @@ class NotificationsController extends Controller
 
               $bcc = array();
 
-              $general_admins = Admin::whereIn('role_id', [6])->where('status', 1);
-
-              if ($general_admins->exists()) {
-                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
-              }
+//              $general_admins = Admin::whereIn('role_id', [6])->where('status', 1);
+//
+//              if ($general_admins->exists()) {
+//                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
+//              }
 
               $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
                 $query->whereIn('hub_id', $origin_hub_ids);
@@ -4901,7 +4901,7 @@ class NotificationsController extends Controller
                   $operation_admins =  Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->join('cities','cities.id','=','admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)->where('cities.zone_id','=', $zone_id);
                    $cc = array();
 
-                  $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $zone_id);
+                  $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 8, 15, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $zone_id);
                   if ($operation_admins->exists()) {
                       $to = array_merge($to, $operation_admins->pluck('email')->toArray());
                   }
@@ -4952,7 +4952,7 @@ class NotificationsController extends Controller
                    $to = 'hassan@trax.pk';
                    $cc = array();
 
-                   $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 18, 19, 22, 34, 36])->where('status', 1);
+                   $department_heads = Admin::whereIn('role_id', [2, 3, 4, 15, 18, 19, 22, 34, 36])->where('status', 1);
 
                    if ($department_heads->exists()) {
                      $cc = array_merge($cc, $department_heads->pluck('email')->toArray());
