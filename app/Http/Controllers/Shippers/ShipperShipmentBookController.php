@@ -728,6 +728,7 @@ class ShipperShipmentBookController extends Controller
                   <head>
                     <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/fonts/line-awesome/css/line-awesome.min.css') . '">
             ';
 
             if ($user_type != 4 && $type != 'pdf') {
@@ -1333,7 +1334,8 @@ class ShipperShipmentBookController extends Controller
 
                     if ($type != 'pdf') {
                         $table_end .= '
-                      <hr>
+                      <div class="col m-1 row justify-content-center"><div class="col"><hr></div>
+                      <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                     ';
                     }
 
@@ -1454,7 +1456,9 @@ class ShipperShipmentBookController extends Controller
                                 <td class="border">'. $shipment->created_at .'</td>
 </tr>
                               ';
-                            $shipment_pieces .= '</tbody></table>';
+                            $shipment_pieces .= '</tbody></table>
+                      <div class="col m-1 row justify-content-center"><div class="col"><hr></div>
+                      <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
 
                         }
 
