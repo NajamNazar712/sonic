@@ -147,6 +147,8 @@
 											<input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
 										</div>
 
+
+
 										<div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
 											<label class="d-block">Self Collection</label>
 											<input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
@@ -779,9 +781,9 @@
 			@else
 			service_type = '{{ Session::get('service_type_id') }}';
 
-				if(service_type == 1){
-					$('#pieces_quantity').removeClass('d-none');
-				}
+			if(service_type == 1){
+				$('#pieces_quantity').removeClass('d-none');
+			}
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
 				$('#try_and_buy_charges_div').addClass('d-none');
@@ -891,6 +893,11 @@
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
 						$('#self_collection_div').addClass('d-none');
+						var consignee_email = $('input[name="consignee_email_address"]');
+						consignee_email.attr('data-toggle', 'tooltip');
+						consignee_email.attr('data-placement', 'top');
+						consignee_email.attr('data-original-title', 'Here you enter the no. of items inside the flyer/box.');
+						consignee_email.tooltip('show');
 					}
 					$('#booking_form #selected_service_type').val(service_type);
 
