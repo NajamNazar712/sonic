@@ -704,24 +704,26 @@ class ReturnController extends Controller
                     }
                     $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
-                    if($status == 0){
-                        $shipment_details->shipper_status_id = 20; //Confirmation Pending
-                        ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
-                        NotificationsController::send(15, 0, $shipment_details->id);
-                        NotificationsController::send(16, 0, $shipment_details->id);
+                    if($shipment_details->booking_type_id != 5) {
+                        if ($status == 0) {
+                            $shipment_details->shipper_status_id = 20; //Confirmation Pending
+                            ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+                            NotificationsController::send(15, 0, $shipment_details->id);
+                            NotificationsController::send(16, 0, $shipment_details->id);
 
 //                            ShipmentChargesController::return($shipment_details->id);
 //
 //                            AdminFinanceController::add_payment($shipment_details->id, 1);
-                    }
-                    if($status == 1){
-                        $shipment_details->shipper_status_id = 13; //Re-Attempt
-                        ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+                        }
+                        if ($status == 1) {
+                            $shipment_details->shipper_status_id = 13; //Re-Attempt
+                            ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 //                            NotificationsController::send(15, 0, $shipment_details->id);
 //                            NotificationsController::send(16, 0, $shipment_details->id);
+                        }
+                        $shipment_details->save();
+                        $tracking_numbers['Row #' . $row_id] = $tracking;
                     }
-                    $shipment_details->save();
-                    $tracking_numbers['Row #' . $row_id] = $tracking;
 
                 }
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
