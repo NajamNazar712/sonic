@@ -600,10 +600,7 @@ class V2AdminPickupsController extends Controller
 
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
-            if($shipment->actual_weight == null){
-                unset($shipment_ids[$key]);
-                continue;
-            }
+            
             if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
                 $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
                 if($pickup_request_shipment){
