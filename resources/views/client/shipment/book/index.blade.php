@@ -896,7 +896,7 @@
 						var consignee_email = $('input[name="consignee_email_address"]');
 						consignee_email.attr('data-toggle', 'tooltip');
 						consignee_email.attr('data-placement', 'top');
-						consignee_email.attr('data-original-title', 'Here you enter the no. of items inside the flyer/box.');
+						consignee_email.attr('data-original-title', 'Please add email address so that we can sent address label to your customer.');
 						consignee_email.tooltip('show');
 					}
 					$('#booking_form #selected_service_type').val(service_type);
