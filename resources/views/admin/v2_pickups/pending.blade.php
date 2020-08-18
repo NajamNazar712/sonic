@@ -78,7 +78,7 @@
                                     <th class="border-primary border-darken-1">Trax Remark(s)</th>
                                     <th class="border-primary border-darken-1">Shipper Remark(s)</th>
                                     <th class="border-primary border-darken-1">Rider Status</th>
-                                    <th class="border-primary border-darken-1">Date</th>
+                                    <th class="border-primary border-darken-1">Assigned Date</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
                                     <th class="border-primary border-darken-1">Attempt(s)</th>
                                 </tr>
@@ -276,7 +276,7 @@
                         head.push('Trax Remark(s)');
                         head.push('Shipper Remark(s)');
                         head.push('Rider Status');
-                        head.push('Date');
+                        head.push('Assigned Date');
                         head.push('Attempt Date');
                         head.push('Attempt(s)');
 
