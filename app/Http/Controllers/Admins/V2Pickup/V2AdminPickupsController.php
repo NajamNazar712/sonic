@@ -85,13 +85,24 @@ class V2AdminPickupsController extends Controller
             ->join('v2_pickup_request_rider_statuses as rs', 'rs.id', '=', 'v2_pickup_requests.rider_status')
             ->leftjoin('riders as cr', 'cr.id', '=', 'v2_pickup_requests.current_rider_id')
             ->leftjoin('riders as lr', 'lr.id', '=', 'v2_pickup_requests.last_rider_id')
+            //Assigned Date
+            ->leftJoin('v2_pickup_request_attempts as vpa', function ($join) {
+                $join->on('vpa.pickup_request_id', '=', 'v2_pickup_requests.id')
+                    ->where('vpa.id', '=',
+                        DB::raw('(select max(id) from v2_pickup_request_attempts where v2_pickup_request_attempts.pickup_request_id = v2_pickup_requests.id)'));
+            })
+            //End
             ->leftJoin('v2_pickup_note_requests as vpn', function ($join) {
                 $join->on('vpn.pickup_request_id', '=', 'v2_pickup_requests.id')
                     ->where('vpn.id', '=',
                         DB::raw('(select max(id) from v2_pickup_note_requests where v2_pickup_note_requests.pickup_request_id = v2_pickup_requests.id)'));
             })
+
             ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
-            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' , 'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked')
+            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper',
+                'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' ,
+                'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider',
+                'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked','vpa.created_at as assigned_date')
             ->whereNotIn('v2_pickup_requests.status_id', [2,4]);
 
         if (session('role_id') != 1) {
