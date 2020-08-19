@@ -78,6 +78,7 @@
                                     <th class="border-primary border-darken-1">Trax Remark(s)</th>
                                     <th class="border-primary border-darken-1">Shipper Remark(s)</th>
                                     <th class="border-primary border-darken-1">Rider Status</th>
+                                    <th class="border-primary border-darken-1">Assigned Date</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
                                     <th class="border-primary border-darken-1">Attempt(s)</th>
                                 </tr>
@@ -275,6 +276,7 @@
                         head.push('Trax Remark(s)');
                         head.push('Shipper Remark(s)');
                         head.push('Rider Status');
+                        head.push('Assigned Date');
                         head.push('Attempt Date');
                         head.push('Attempt(s)');
 
@@ -302,6 +304,7 @@
                             row.push(values.trax_remarks);
                             row.push(values.shipper_remarks);
                             row.push(values.rider_status);
+                            row.push(values.attempted_date);
                             row.push(values.attempted_date);
                             row.push(values.attempts);
 
@@ -463,6 +466,7 @@
                 {data: 'trax_remarks', name: 'trax_remarks', class: 'align-middle trax_remarks', orderable: false, searchable: false},
                 {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false},
                 {data: 'rider_status', name: 'rs.id', class: 'align-middle rider_status'},
+                {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempts'},
 
