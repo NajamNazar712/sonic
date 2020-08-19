@@ -39,18 +39,19 @@ class VisionSoftApi extends Command
     public function handle()
     {
 //        VisionSoftAPIController::login();
-        VisionSoftAPIController::customers();
-        VisionSoftAPIController::customer_banks();
-        VisionSoftAPIController::city_hub();
-        VisionSoftAPIController::employees();
-        VisionSoftAPIController::cities();
-        VisionSoftAPIController::cod_payable();
-        VisionSoftAPIController::cod_receivable();
-        VisionSoftAPIController::arrival_revenue();
-        VisionSoftAPIController::del_ret_revenue();
-        VisionSoftAPIController::bank_deposits();
-        VisionSoftAPIController::cod_payment();
-        VisionSoftAPIController::cod_payment_clear();
-		VisionSoftAPIController::daily_exp();
+//        VisionSoftAPIController::customers();
+//        VisionSoftAPIController::customer_banks();
+//        VisionSoftAPIController::city_hub();
+//        VisionSoftAPIController::employees();
+//        VisionSoftAPIController::cities();
+//        VisionSoftAPIController::cod_payable();
+//        VisionSoftAPIController::cod_receivable();
+//        VisionSoftAPIController::arrival_revenue();
+//        VisionSoftAPIController::del_ret_revenue();
+//        VisionSoftAPIController::bank_deposits();
+//        VisionSoftAPIController::cod_payment();
+//        VisionSoftAPIController::cod_payment_clear();
+//		VisionSoftAPIController::daily_exp();
+//		VisionSoftAPIController::prc_load_api_data();
     }
 }
