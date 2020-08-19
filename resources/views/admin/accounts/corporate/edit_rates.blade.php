@@ -4223,6 +4223,7 @@
                         @csrf
                         <input type="hidden" name="user_id" id="user_document_user_id" value="{{$shipper->id}}">
                         <input type="hidden" name="doc_upload" id="doc_upload" value="0">
+                        <input type="hidden" name="shipper_status" id="shipper_status" value="{{$shipper->status}}">
                         <div class="col form-group">
                             <label for="filled_and_signed_image">
                                 Pdf of filled and signed document:
@@ -6054,7 +6055,7 @@
             },
             submitHandler: function(form) {
                 if (overnightSwitch.checked == true || overlandSwitch.checked == true || detainSwitch.checked == true || samedaySwitch.checked == true) {
-                    if($('#authorize').val() != 1 && $('#approve').val() != 1 && $('#doc_upload').val() == 0){
+                    if($('#authorize').val() != 1 && $('#approve').val() != 1 && $('#doc_upload').val() == 0 && $('#shipper_status').val() == 3){
                         $('#UserDocumentModal').modal('show');
                     }
                     else{

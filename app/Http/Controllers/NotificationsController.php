@@ -387,11 +387,11 @@ class NotificationsController extends Controller
 
               $bcc = array();
 
-              $general_admins = Admin::whereIn('role_id', [6])->where('status', 1);
-
-              if ($general_admins->exists()) {
-                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
-              }
+//              $general_admins = Admin::whereIn('role_id', [6])->where('status', 1);
+//
+//              if ($general_admins->exists()) {
+//                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
+//              }
 
               $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
                 $query->whereIn('hub_id', $origin_hub_ids);
