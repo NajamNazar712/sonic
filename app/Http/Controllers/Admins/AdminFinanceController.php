@@ -8,6 +8,7 @@ use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestChannel;
@@ -3785,6 +3786,11 @@ class AdminFinanceController extends Controller
 
                 $done_payment->save();
 
+                $payment_clear = new VisionSoftCodPaymentClear();
+                $payment_clear->payment_id = $done_payment_id;
+                $payment_clear->status = 1;
+                $payment_clear->save();
+
                 foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                     $shipment = $done_payment_shipment->shipment;
 
@@ -3817,6 +3823,11 @@ class AdminFinanceController extends Controller
                 $done_payment->status = 2;
 
                 $done_payment->save();
+
+                $payment_clear = new VisionSoftCodPaymentClear();
+                $payment_clear->payment_id = $done_payment_id;
+                $payment_clear->status = 2;
+                $payment_clear->save();
 
                 foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                     $shipment = $done_payment_shipment->shipment;
