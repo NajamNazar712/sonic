@@ -811,6 +811,7 @@
 				service_type = selected.val();
 
 				if (service_type !== '' && service_type !== undefined && service_type !== null) {
+					var consignee_email = $('input[name="consignee_email_address"]');
 					$('#select_service_type form #service_type-error').addClass('d-none');
 
 					if (service_type == 1) {
@@ -893,11 +894,18 @@
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
 						$('#self_collection_div').addClass('d-none');
-						var consignee_email = $('input[name="consignee_email_address"]');
+
+					}
+					if(service_type == 5){
 						consignee_email.attr('data-toggle', 'tooltip');
 						consignee_email.attr('data-placement', 'top');
 						consignee_email.attr('data-original-title', 'Please add email address so that we can sent address label to your customer.');
 						consignee_email.tooltip('show');
+					}else{
+						consignee_email.attr('data-toggle', '');
+						consignee_email.attr('data-placement', '');
+						consignee_email.attr('data-original-title', '');
+						consignee_email.tooltip('hide');
 					}
 					$('#booking_form #selected_service_type').val(service_type);
 
