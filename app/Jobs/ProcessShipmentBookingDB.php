@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Models\Shipment;
+use App\Http\Models\Shipper\User;
 use App\http\Models\SubstituteUserShipment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -42,36 +43,65 @@ class ProcessShipmentBookingDB implements ShouldQueue
     {
         $user_id = $this->booking['user_id'];
         $service_type_id = $this->booking['service_type_id'];
-        $pickup_address_id = $this->booking['pickup_address_id'];
-        $pickup_city_id = UserShippingInfo::find($this->booking['pickup_address_id'])->city_id;
+        if($service_type_id == 5){
+            if (!empty(trim($this->booking['consignee_email_address']))) {
+                $user_email_id = $this->booking['consignee_email_address'];
+            }
+            else{
+                $user = User::find($user_id);
+                $user_email_id = $user->email;
+            }
+            $pickup_city_id = City::where('name', $this->booking['consignee_city_name'])->first()->id;
+            $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $this->booking['consignee_address'], $this->booking['consignee_name'], NULL, substr_replace($this->booking['consignee_phone_number_1'], '-', 4, 0), $user_email_id, $pickup_city_id, 0, TRUE);
 
-        if (strtolower($this->booking['information_display']) == 'yes') {
-            $information_display = TRUE;
-        } else {
-            $information_display = FALSE;
-        }
+            $pickup_delivery_address_id = $this->booking['pickup_address_id'];
+            $pickup_delivery_address = UserShippingInfo::find($pickup_delivery_address_id);
 
-        $consignee_city_id = City::where('name', $this->booking['consignee_city_name'])->first()->id;
-        $consignee_name = $this->booking['consignee_name'];
-        $consignee_address = $this->booking['consignee_address'];
-        $consignee_phone_number_1 = substr_replace($this->booking['consignee_phone_number_1'], '-', 4, 0);
-
-        if (!empty(trim($this->booking['consignee_phone_number_2']))) {
-            $consignee_phone_number_2 = substr_replace($this->booking['consignee_phone_number_2'], '-', 4, 0);
-        } else {
+            $consignee_city_id = $pickup_delivery_address->city_id;
+            $consignee_name = $pickup_delivery_address->poc;
+            $consignee_address = $pickup_delivery_address->pickup_address;
+            $consignee_phone_number_1 = $pickup_delivery_address->phone;
             $consignee_phone_number_2 = NULL;
-        }
-
-        if (!empty(trim($this->booking['consignee_email_address']))) {
-            $consignee_email_address = $this->booking['consignee_email_address'];
-        } else {
-            $consignee_email_address = NULL;
-        }
-
-        if (strtolower($this->booking['self_collection']) == 'yes') {
-            $self_collection = TRUE;
-        } else {
+            $consignee_email_address = $pickup_delivery_address->email;
+            $information_display = TRUE;
+            $charges_mode_id = 4;
+            $payment_mode_id = 1;
             $self_collection = FALSE;
+        }
+        else{
+            $pickup_address_id = $this->booking['pickup_address_id'];
+            $pickup_city_id = UserShippingInfo::find($this->booking['pickup_address_id'])->city_id;
+
+            if (strtolower($this->booking['information_display']) == 'yes') {
+                $information_display = TRUE;
+            } else {
+                $information_display = FALSE;
+            }
+
+            $consignee_city_id = City::where('name', $this->booking['consignee_city_name'])->first()->id;
+            $consignee_name = $this->booking['consignee_name'];
+            $consignee_address = $this->booking['consignee_address'];
+            $consignee_phone_number_1 = substr_replace($this->booking['consignee_phone_number_1'], '-', 4, 0);
+
+            if (!empty(trim($this->booking['consignee_phone_number_2']))) {
+                $consignee_phone_number_2 = substr_replace($this->booking['consignee_phone_number_2'], '-', 4, 0);
+            } else {
+                $consignee_phone_number_2 = NULL;
+            }
+
+            if (!empty(trim($this->booking['consignee_email_address']))) {
+                $consignee_email_address = $this->booking['consignee_email_address'];
+            } else {
+                $consignee_email_address = NULL;
+            }
+            $charges_mode_id = $this->booking['charges_mode_id'];
+            $payment_mode_id = $this->booking['payment_mode_id'];
+
+            if (strtolower($this->booking['self_collection']) == 'yes') {
+                $self_collection = TRUE;
+            } else {
+                $self_collection = FALSE;
+            }
         }
 
         if (!empty(trim($this->booking['order_id']))) {
@@ -94,10 +124,6 @@ class ProcessShipmentBookingDB implements ShouldQueue
         } else {
             $same_day_timing_id = NULL;
         }
-
-        $payment_mode_id = $this->booking['payment_mode_id'];
-
-        $charges_mode_id = $this->booking['charges_mode_id'];
 
         $package_type = TRUE;
 
