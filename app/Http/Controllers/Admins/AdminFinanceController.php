@@ -5854,7 +5854,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    public function add_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable){
+    static public function add_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable){
         $pending_payment_charges = PendingPaymentCalculation::where('pending_payment_id', $pending_payment_id);
         if($pending_payment_charges->exists()){
             $pending_payment_charges = $pending_payment_charges->first();
@@ -5875,7 +5875,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_charges){
+    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_charges){
         $done_payment_charges = DonePaymentCalculation::where('done_payment_id', $done_payment_id);
         if($done_payment_charges->exists()){
             $done_payment_charges = $done_payment_charges->first();
