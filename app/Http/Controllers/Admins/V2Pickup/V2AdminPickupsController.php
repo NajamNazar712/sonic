@@ -771,12 +771,12 @@ class V2AdminPickupsController extends Controller
                 $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
                 $pickup_request_received_shipment->shipment_id = $shipment->id;
                 $pickup_request_received_shipment->save();
-                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request_shipment->pickup_request->id);
-
                 $pickup_request = $pickup_request_shipment->pickup_request;
+                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request->id);
+
 
                 $pickup_request->received = $pickup_request->received + 1;
-
+                $pickup_request->status_id = 2;
                 $pickup_request->save();
             }
         }
@@ -785,8 +785,6 @@ class V2AdminPickupsController extends Controller
             $pickup_request = V2PickupRequest::find($pickup_request_id);
 
             if($pickup_request->received >= 1){
-                $pickup_request->status_id = 2;
-                $pickup_request->save();
                 $pickup_note_request = $pickup_request->pickup_note_request;
                 if($pickup_note_request){
                     $pickup_note_id = $pickup_note_request->pickup_note_id;
@@ -1284,12 +1282,11 @@ class V2AdminPickupsController extends Controller
                 $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
                 $pickup_request_received_shipment->shipment_id = $shipment->id;
                 $pickup_request_received_shipment->save();
-                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request_shipment->pickup_request->id);
-
                 $pickup_request = $pickup_request_shipment->pickup_request;
+                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request->id);
 
                 $pickup_request->received = $pickup_request->received + 1;
-
+                $pickup_request->status_id = 2;
                 $pickup_request->save();
 
             }
@@ -1298,8 +1295,6 @@ class V2AdminPickupsController extends Controller
         foreach ($pickup_request_ids as $pickup_request_id) {
             $pickup_request = V2PickupRequest::find($pickup_request_id);
             if($pickup_request->received >= 1){
-                $pickup_request->status_id = 2;
-                $pickup_request->save();
                 $pickup_note_request = $pickup_request->pickup_note_request;
                 if($pickup_note_request){
                     $pickup_note_id = $pickup_note_request->pickup_note_id;
