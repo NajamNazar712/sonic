@@ -16,6 +16,7 @@ class PendingPaymentCalculationTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('pending_payment_calculations')->truncate();
         $pending_payments = PendingPayment::pluck('id')->toArray();
         if(count($pending_payments) > 0){
             foreach ($pending_payments as $payment_id){

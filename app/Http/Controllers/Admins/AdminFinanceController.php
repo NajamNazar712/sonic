@@ -3298,18 +3298,18 @@ class AdminFinanceController extends Controller
 
                             $done_payment_shipment->save();
 
-                            $packaging_charges = 0;
+                            $packaging_material_charges = 0;
 
                             $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
                             if ($shipment->packaging_material_request) {
-                                $packaging_charges = $shipment->packaging_charges;
-                                if($packaging_charges == null){
-                                    $packaging_charges = 0;
+                                $packaging_material_charges = $shipment->packaging_material_charges;
+                                if($packaging_material_charges == null){
+                                    $packaging_material_charges = 0;
                                 }
                             }
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_charges);
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges);
                             $pending_payment_shipment->delete();
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
@@ -3394,16 +3394,18 @@ class AdminFinanceController extends Controller
 
                             $packaging_charges = 0;
 
+                            $packaging_material_charges = 0;
+
                             $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
                             if ($shipment->packaging_material_request) {
-                                $packaging_charges = $shipment->packaging_charges;
-                                if($packaging_charges == null){
-                                    $packaging_charges = 0;
+                                $packaging_material_charges = $shipment->packaging_material_charges;
+                                if($packaging_material_charges == null){
+                                    $packaging_material_charges = 0;
                                 }
                             }
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_charges);
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges);
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
@@ -3525,15 +3527,17 @@ class AdminFinanceController extends Controller
         $shipment->payment_status_id = 7;
 
         $shipment->save();
-        $packaging_charges = 0;
+        $packaging_material_charges = 0;
+
+        $shipment = Shipment::find($shipment_id);
 
         if ($shipment->packaging_material_request) {
-            $packaging_charges = $shipment->packaging_charges;
-            if($packaging_charges == null){
-                $packaging_charges = 0;
+            $packaging_material_charges = $shipment->packaging_material_charges;
+            if($packaging_material_charges == null){
+                $packaging_material_charges = 0;
             }
         }
-        self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_charges);
+        self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_material_charges);
         ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
         ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
     }
@@ -5884,7 +5888,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_charges){
+    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_material_charges){
         $done_payment_charges = DonePaymentCalculation::where('done_payment_id', $done_payment_id);
         if($done_payment_charges->exists()){
             $done_payment_charges = $done_payment_charges->first();
@@ -5892,7 +5896,7 @@ class AdminFinanceController extends Controller
             $done_payment_charges->charges = $done_payment_charges->charges + $charges;
             $done_payment_charges->gst = $done_payment_charges->gst + $gst;
             $done_payment_charges->payable = $done_payment_charges->payable + $payable;
-            $done_payment_charges->packaging_charges = $done_payment_charges->packaging_charges + $packaging_charges;
+            $done_payment_charges->packaging_charges = $done_payment_charges->packaging_charges + $packaging_material_charges;
             $done_payment_charges->save();
         }
         else{
@@ -5902,7 +5906,7 @@ class AdminFinanceController extends Controller
             $done_payment_charges->charges = $charges;
             $done_payment_charges->gst = $gst;
             $done_payment_charges->payable = $payable;
-            $done_payment_charges->packaging_charges = $packaging_charges;
+            $done_payment_charges->packaging_charges = $packaging_material_charges;
             $done_payment_charges->save();
         }
     }
