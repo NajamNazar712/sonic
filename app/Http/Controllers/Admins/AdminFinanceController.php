@@ -3304,6 +3304,9 @@ class AdminFinanceController extends Controller
 
                             if ($shipment->packaging_material_request) {
                                 $packaging_charges = $shipment->packaging_charges;
+                                if($packaging_charges == null){
+                                    $packaging_charges = 0;
+                                }
                             }
 
                             self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_charges);
@@ -3395,6 +3398,9 @@ class AdminFinanceController extends Controller
 
                             if ($shipment->packaging_material_request) {
                                 $packaging_charges = $shipment->packaging_charges;
+                                if($packaging_charges == null){
+                                    $packaging_charges = 0;
+                                }
                             }
 
                             self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_charges);
@@ -3523,6 +3529,9 @@ class AdminFinanceController extends Controller
 
         if ($shipment->packaging_material_request) {
             $packaging_charges = $shipment->packaging_charges;
+            if($packaging_charges == null){
+                $packaging_charges = 0;
+            }
         }
         self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_charges);
         ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
