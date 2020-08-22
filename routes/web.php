@@ -1921,6 +1921,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminConsolidatedController@consolidation_history_list')->name('list');
             });
         });
+        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_index')->name('index');
+            Route::get('list', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_list')->name('list');
+            Route::post('print', 'Admins\AdminReceivingSheetHistoryController@print')->name('print');
+        });
+
     });
 
     //CMC Routes
@@ -2042,6 +2048,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('sales', 'Admins\AdminPowerBIController@sales_dashboard_index')->name('sales');
         Route::get('operation', 'Admins\AdminPowerBIController@operation_dashboard_index')->name('operation');
     });
+
+
      
 });
 

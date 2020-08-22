@@ -39,6 +39,7 @@ class Permission
             'accounts.sister_account.edit.submit' => 242,
             'accounts.sister_account.merged_account.mapping.info' => 242,
             'accounts.sister_account.merged_account.mapping.submit' => 242,
+            'accounts.receiving_sheet.index' => 364,
 
             'daily_visit.index' => 265,
             'daily_visit.store' => 265,
