@@ -24,6 +24,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Controller;
@@ -5229,6 +5230,179 @@ class NotificationsController extends Controller
               }
           else if ($id == 77){
 
+          }
+          else if($id == 78){
+              $date = Carbon::today()->toDateString();
+              $hub_shipment = $reference_2_id;
+              $subject = $notification->subject;
+              $body = $notification->body;
+              $hub = City::find($reference_1_id);
+              if (strpos($subject, '[hub]') !== FALSE) {
+                  $subject = str_replace('[hub]', $hub->name, $subject);
+              }
+              if (strpos($subject, '[date]') !== FALSE) {
+                  $subject = str_replace('[date]', $date, $subject);
+              }
+              $html = '<table style="width:100%;">';
+              $html .= '<thead><tr>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Pickups Pending For Today</th>';
+              $html .= '</tr></thead><tbody>';
+              $serial = 1;
+              $check = false;
+              foreach ($hub_shipment as $origin_shipment){
+                  if($origin_shipment['pending'] == 0){
+                      continue;
+                  }
+                  else{
+                      $check = true;
+                  }
+                  $html .= '<tr>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['origin_name'] . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['hub_name'] . '</td>';
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['pending'] . '</td>';
+                  $html .= '</tr>';
+                  $html .= '</tbody></table>';
+                  $serial++;
+              }
+
+              if($check == true) {
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                  $to = array();
+                  $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id);
+                  if ($operation_admins->exists()) {
+                      $to = array_merge($to, $operation_admins->pluck('admins.email')->toArray());
+                  }
+//              $cc = array();
+//
+//              $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $hub_shipment['id']);
+//
+//              if ($general_managers->exists()) {
+//                  $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
+//              }
+                  self::email($subject, $body, $to);
+              }
+          }
+          else if($id == 79){
+              $date = Carbon::today()->toDateString();
+              $zone_hub_shipments = $reference_2_id;
+              $subject = $notification->subject;
+              $body = $notification->body;
+              $zone = Zone::find($reference_1_id);
+              $html = '<table style="width:100%;">';
+              $html .= '<thead><tr>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Pickups Pending For Today</th>';
+              $html .= '</tr></thead><tbody>';
+              $serial = 1;
+              $check = false;
+              foreach($zone_hub_shipments as $zone_hub_shipment) {
+                  foreach ($zone_hub_shipment as $origin_shipment) {
+                      if($origin_shipment['pending'] == 0){
+                          continue;
+                      }
+                      else{
+                          $check = true;
+                      }
+                      $html .= '<tr>';
+                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['origin_name'] . '</td>';
+                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['hub_name'] . '</td>';
+                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['pending'] . '</td>';
+                      $html .= '</tr>';
+                      $html .= '</tbody></table>';
+                      $serial++;
+                  }
+              }
+              $html .= '</tbody></table>';
+                if($check == true){
+                    if (strpos($subject, '[zone]') !== FALSE) {
+                        $subject = str_replace('[zone]', $zone->name, $subject);
+                    }
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+
+                    $to = array();
+
+                    $operation_admins =  Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->join('cities','cities.id','=','admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)->where('cities.zone_id','=', $zone->id);
+                    if ($operation_admins->exists()) {
+                        $to = array_merge($to, $operation_admins->pluck('email')->toArray());
+                    }
+//                    $cc = array();
+//
+//                    $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $zone_id);
+//
+//                    if ($general_managers->exists()) {
+//                        $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
+//                    }
+
+                    self::email($subject, $body, $to);
+                }
+          }
+          else if($id == 80){
+              $date = $reference_1_id;
+              $hub_shipments = $reference_2_id;
+              $subject = $notification->subject;
+              $body = $notification->body;
+              $html = '<table style="width:100%;">';
+              $html .= '<thead><tr>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">No. of Reverse Pickups Pending Yesterday</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">No. of Reverse Pickups Picked Yesterday</th>';
+              $html .= '</tr></thead><tbody>';
+              $serial = 1;
+              $check = false;
+              foreach($hub_shipments as $hub_shipment){
+                  foreach ($hub_shipment as $origin_shipment){
+                      if($origin_shipment['pending'] == 0 && $origin_shipment['picked'] == 0){
+                          continue;
+                      }
+                      else{
+                          $check = true;
+                      }
+                      $html .= '<tr>';
+                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['origin_name'] . '</td>';
+                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['hub_name'] . '</td>';
+                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['pending'] . '</td>';
+                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['picked'] . '</td>';
+                      $html .= '</tr>';
+                      $serial++;
+                  }
+              }
+              $html .= '</tbody></table>';
+              if($check == true){
+                  if (strpos($subject, '[date]') !== FALSE) {
+                      $subject = str_replace('[date]', $date, $subject);
+                  }
+                  if (strpos($body, '[preview]') !== FALSE) {
+                      $body = str_replace('[preview]', $html, $body);
+                  }
+
+                  $to = array();
+//              $cc = array();
+
+                  $department_head = Admin::where('role_id', 3)->where('status', 1);
+
+                  if ($department_head->exists()) {
+                      $to = array_merge($to, $department_head->pluck('email')->toArray());
+                      self::email($subject, $body, $to);
+                  }
+              }
           }
         }
       }
