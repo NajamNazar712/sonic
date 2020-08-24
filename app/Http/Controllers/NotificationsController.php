@@ -5229,7 +5229,28 @@ class NotificationsController extends Controller
                   self::email($subject, $body, $to, $cc);
               }
           else if ($id == 77){
+                $rider_id = $reference_1_id;
+                $shipment_id = $reference_2_id;
+                $rider = Rider::find($rider_id);
+                if($rider){
 
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+
+                    if (strpos($body, '[rider_phone]') !== FALSE) {
+                        $body = str_replace('[rider_phone]', $rider->phone, $body);
+                    }
+                    $shipment = Shipment::find($shipment_id);
+
+                    $to = $shipment->consignee_phone_number_1;
+                    self::sms($body, $to);
+                    if ($shipment->consignee_phone_number_2 != NULL) {
+                        $to = $shipment->consignee_phone_number_2;
+                        self::sms($body, $to);
+                    }
+
+                }
           }
           else if($id == 78){
               $date = Carbon::today()->toDateString();

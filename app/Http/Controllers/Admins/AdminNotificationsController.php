@@ -317,7 +317,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['pickup_request_id', 'tracking_numbers', 'company_name', 'pickup_city'];
         }
 		else if ($id == 77){
-            $details['fields'] = ['rider_name'];
+            $details['fields'] = ['rider_name','rider_phone'];
         }
 		return $details;
     }
