@@ -361,7 +361,7 @@ class V2AdminPickupsController extends Controller
 //                        }
 //                    }
                             if ($shipment->booking_type_id == 5) {
-                                NotificationsController::send(52, $pickup_note_id, $shipment->id);
+                                NotificationsController::send(77, $rider_id, $shipment->id);
                             }
                         }
                     }
