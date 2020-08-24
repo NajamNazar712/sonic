@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Receiving Sheets ')
+
 @section('content')
     <div class="app-content content">
         <div class="content-wrapper">
