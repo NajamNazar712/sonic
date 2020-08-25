@@ -651,7 +651,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bookings/all','Admins\V2Pickup\V2AdminPickupsController@pending_all_bookings')->name('bookings.all');
             Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
-
         });
         Route::prefix('arrival')->name('arrival.')->group(function () {
             Route::prefix('bulk')->name('bulk.')->group(function () {
