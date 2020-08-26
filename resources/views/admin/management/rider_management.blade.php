@@ -18,6 +18,7 @@
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S No.</th>
+                                    <th class="border-primary border-darken-1">Trax ID.</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Name</th>
@@ -77,6 +78,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Trax ID');
                             head.push('City Name');
                             head.push('Hub Name');
                             head.push('Rider Name');
@@ -95,6 +97,7 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.trax_id);
                                 row.push(values.city);
                                 row.push(values.hub);
                                 row.push(values.rider);
@@ -158,6 +161,7 @@
                 order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle name'},

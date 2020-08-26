@@ -38,6 +38,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
+    Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
+    Route::get('ledger/list', 'Shippers\ShipperDashboardController@ledger_list')->name('ledger.list');
 
     Route::get('/welcome', 'Shippers\ShipperDashboardController@welcome_index')->name('welcome');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
@@ -1918,6 +1920,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminConsolidatedController@consolidation_history_list')->name('list');
             });
         });
+        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_index')->name('index');
+            Route::get('list', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_list')->name('list');
+            Route::post('print', 'Admins\AdminReceivingSheetHistoryController@print')->name('print');
+        });
+
     });
 
     //CMC Routes
@@ -2039,6 +2047,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('sales', 'Admins\AdminPowerBIController@sales_dashboard_index')->name('sales');
         Route::get('operation', 'Admins\AdminPowerBIController@operation_dashboard_index')->name('operation');
     });
+
+
      
 });
 

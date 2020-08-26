@@ -102,8 +102,6 @@
                 <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-users"></i>Substitute Accounts</span></a></li>
             @endif
 
-
-
             @if (session('user_type') == 1 || in_array(11, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
@@ -116,6 +114,8 @@
             @endif
 
             <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title"><i class="la la-crosshairs"></i>Tracking</span></a></li>
+
+            <li class=" nav-item"><a href="{{ route('cod.ledger') }}"><span class="menu-title"><i class="la la-book"></i>Ledger</span></a></li>
 
         </ul>
     </div>
