@@ -1619,6 +1619,90 @@ class AdminMasterCargoController extends Controller
 
         return $html;
     }
+
+
+    public function master_cargo_in_transit_junctions(Request $request) {
+        $city_ids = array();
+
+        $cargo_consignments = MasterCargo::whereIn('id', $request->ids)->get();
+
+        foreach ($cargo_consignments as $cargo_consignment) {
+            if ($cargo_consignment->origin_hub_id != $cargo_consignment->junction_hub_1_id && $cargo_consignment->destination_hub_id != $cargo_consignment->junction_hub_1_id && !in_array($cargo_consignment->junction_hub_1_id, $city_ids)) {
+                $city_ids[] = $cargo_consignment->junction_hub_1_id;
+            }
+
+            if ($cargo_consignment->junction_hub_2_id && $cargo_consignment->origin_hub_id != $cargo_consignment->junction_hub_2_id && $cargo_consignment->destination_hub_id != $cargo_consignment->junction_hub_2_id && !in_array($cargo_consignment->junction_hub_2_id, $city_ids)) {
+                $city_ids[] = $cargo_consignment->junction_hub_2_id;
+            }
+        }
+
+        $cities = City::select(['id', 'name'])->whereIn('id', $city_ids);
+
+        if (session('role_id') != 1) {
+            $cities = $cities->whereIn('id', session('hubs'));
+        }
+
+        return $cities->get();
+    }
+
+    public function master_cargo_in_transit_details(Request $request) {
+        $cargo_consignment = MasterCargo::where('id', $request->cargo_number);
+
+        if ($cargo_consignment->exists()) {
+            $cargo_consignment = $cargo_consignment->first();
+
+            if (session('role_id') == 1 || (in_array($cargo_consignment->junction_hub_1_id, session('hubs')) || in_array($cargo_consignment->junction_hub_2_id, session('hubs')))) {
+                if (in_array($cargo_consignment->status_id, [1, 2, 6, 7, 9])) {
+                    $details = array();
+
+                    $details['master_cargo_number'] = str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
+                    $details['origin'] = $cargo_consignment->origin_hub->name;
+                    $details['destination'] = $cargo_consignment->destination_hub->name;
+                    $details['no_of_bags'] = $cargo_consignment->bags;
+                    $details['no_of_shipments'] = $cargo_consignment->shipments;
+
+                    return ['status' => 0, 'success' => 'Master Cargo has been scanned', 'details' => $details];
+                }
+                else {
+                    return ['status' => 1, 'error' => 'Given Master Cargo has already been modified'];
+                }
+            }
+            else {
+                return ['status' => 1, 'error' => 'Given Master Cargo does not have any of your assigned Hub\'s Cities as it\'s Junctions'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Master Cargo with given Number is present'];
+        }
+    }
+
+    public function master_cargo_in_transit_receive_at_link(Request $request) {
+        foreach ($request->master_cargo_consignment_ids as $cargo_consignment_id) {
+            $cargo_consignment_junction_receival = new MasterCargoJunctionReceival();
+
+            $cargo_consignment_junction_receival->master_cargo_id = $cargo_consignment_id;
+            $cargo_consignment_junction_receival->junction_id = $request->junction;
+            $cargo_consignment_junction_receival->receiver_id = Auth::id();
+
+            $cargo_consignment_junction_receival->save();
+
+            $cargo_consignment = MasterCargo::find($cargo_consignment_id);
+
+            if ($cargo_consignment->junction_hub_1_id == $request->junction) {
+                $cargo_consignment->status_id = 6;
+            }
+            else if ($cargo_consignment->junction_hub_2_id == $request->junction) {
+                $cargo_consignment->status_id = 7;
+            }
+            else {
+                $cargo_consignment->status_id = 2;
+            }
+
+            $cargo_consignment->save();
+        }
+
+        return ['status' => 0, 'success' => 'Master Cargo(s) has been received at Junction'];
+    }
     public function master_cargo_in_transit_receive(Request $request) {
         if ($request->has('master_cargo_number')) {
             $cargo_consignment = MasterCargo::find($request->get('master_cargo_number'));
