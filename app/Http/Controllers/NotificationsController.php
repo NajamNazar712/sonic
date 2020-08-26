@@ -5244,13 +5244,8 @@ class NotificationsController extends Controller
                     }
                     $shipment = Shipment::find($shipment_id);
 
-                    $to = $shipment->consignee_phone_number_1;
+                    $to = $shipment->pickup_address->phone;
                     self::sms($body, $to);
-                    if ($shipment->consignee_phone_number_2 != NULL) {
-                        $to = $shipment->consignee_phone_number_2;
-                        self::sms($body, $to);
-                    }
-
                 }
           }
           else if($id == 78){
