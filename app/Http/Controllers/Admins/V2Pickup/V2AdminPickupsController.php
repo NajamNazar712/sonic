@@ -12,14 +12,19 @@ use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
+use App\Http\Models\Route;
 use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\PickupAction;
 use App\Http\Models\ShipmentPiece;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
@@ -39,6 +44,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use Auth;
+
 
 class V2AdminPickupsController extends Controller
 {
@@ -77,6 +83,7 @@ class V2AdminPickupsController extends Controller
     }
 
     public function pending_list(Request $request) {
+
         $today = Carbon::now()->startOfDay();
         $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
             ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
@@ -85,13 +92,24 @@ class V2AdminPickupsController extends Controller
             ->join('v2_pickup_request_rider_statuses as rs', 'rs.id', '=', 'v2_pickup_requests.rider_status')
             ->leftjoin('riders as cr', 'cr.id', '=', 'v2_pickup_requests.current_rider_id')
             ->leftjoin('riders as lr', 'lr.id', '=', 'v2_pickup_requests.last_rider_id')
+            //Assigned Date
+            ->leftJoin('v2_pickup_request_attempts as vpa', function ($join) {
+                $join->on('vpa.pickup_request_id', '=', 'v2_pickup_requests.id')
+                    ->where('vpa.id', '=',
+                        DB::raw('(select max(id) from v2_pickup_request_attempts where v2_pickup_request_attempts.pickup_request_id = v2_pickup_requests.id)'));
+            })
+            //End
             ->leftJoin('v2_pickup_note_requests as vpn', function ($join) {
                 $join->on('vpn.pickup_request_id', '=', 'v2_pickup_requests.id')
                     ->where('vpn.id', '=',
                         DB::raw('(select max(id) from v2_pickup_note_requests where v2_pickup_note_requests.pickup_request_id = v2_pickup_requests.id)'));
             })
+
             ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
-            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' , 'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked')
+            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper',
+                'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' ,
+                'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider',
+                'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked','vpa.created_at as assigned_date')
             ->whereNotIn('v2_pickup_requests.status_id', [2,4]);
 
         if (session('role_id') != 1) {
@@ -217,7 +235,80 @@ class V2AdminPickupsController extends Controller
 
         return $datatables->make(true);
     }
+    //receiving_sheet
+    public function receiving_sheet(){
 
+        $riders = Rider::select('id', 'name')->get();
+        $currentRiders = V2PickupRequest::select('current_rider_id')->get();
+
+        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders, 'currentRiders' =>  $currentRiders ]);
+    }
+
+   public function receiving_sheet_list(Request $request){
+
+       $today = Carbon::now()->startOfDay();
+
+       $rider_id = $request->get('rider_id');
+
+       $pickup_requests = V2PickupRequest::join('riders as cr', 'cr.id', '=', 'v2_pickup_requests.current_rider_id')
+           //Assigned Date
+           ->leftJoin('v2_pickup_request_attempts as vpa', function ($join) {
+               $join->on('vpa.pickup_request_id', '=', 'v2_pickup_requests.id')
+                   ->where('vpa.id', '=',
+                       DB::raw('(select max(id) from v2_pickup_request_attempts where v2_pickup_request_attempts.pickup_request_id = v2_pickup_requests.id)'));
+           })
+           //End
+           ->leftJoin('v2_pickup_note_requests as vpn', function ($join) {
+               $join->on('vpn.pickup_request_id', '=', 'v2_pickup_requests.id')
+                   ->where('vpn.id', '=',
+                       DB::raw('(select max(id) from v2_pickup_note_requests where v2_pickup_note_requests.pickup_request_id = v2_pickup_requests.id)'));
+           })
+           ->select('v2_pickup_requests.id as pickup_request_id',
+               'cr.name as current_rider', 'vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no','vpa.created_at as assigned_date')
+           ->whereNotIn('v2_pickup_requests.status_id', [2,4])
+           ->where('v2_pickup_requests.current_rider_id',$rider_id);
+
+//       dd( $request);
+
+       if (session('role_id') != 1) {
+           $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
+       }
+       if(session('department_id') == 7){
+           if(session('role_id') != 4 ){
+               $pickup_requests = $pickup_requests->whereIn('u.id', session('tagged_shippers'));
+           }
+       }
+       $datatables = Datatables::of($pickup_requests)
+           ->setRowAttr([
+               'class' => function ($pickup_request) use ($today) {
+                   if ($pickup_request->vendor != null) {
+                       return 'vendor_row';
+                   }
+                   else if($pickup_request->try_and_buy == 1){
+                       return 'try_and_buy';
+                   }else if(($pickup_request->status_id == 3)  && ($pickup_request->attempts == 1)){
+                       return 'first_attempt';
+                   }else if(($pickup_request->status_id == 3)  && ($pickup_request->attempts == 2)){
+                       return 'second_attempt';
+                   }else if(($pickup_request->status_id == 3)  && ($pickup_request->attempts > 2)){
+                       return 'multiple_attempt';
+                   }else if($pickup_request->after_cut_off_time){
+                       return 'after_cut_off_time';
+                   }else if (Carbon::parse($pickup_request->pickup_address_created_at)->startOfDay()->diffInDays($today) <= 6) {
+                       return 'new_pickup';
+                   }
+               }
+           ])
+
+           ->editColumn('pickup_note_no', function($pickup_requests) {
+               if($pickup_requests->pickup_note_id != null){
+                   return '<button class="btn btn-sm btn-outline-info align-middle print" rel="'. $pickup_requests->pickup_note_id .'"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_requests->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+               }
+               return '';
+           });
+       return $datatables->make(true);
+
+}
 
     public function pending_assign(Request $request) {
         $pickup_request_ids = $request->input('pickup_request_ids');
@@ -439,7 +530,6 @@ class V2AdminPickupsController extends Controller
         }
     }
 
-
     public function pending_received_bookings(Request $request){
         $pickup_request_id = $request->input('pickup_request_id');
 
@@ -462,6 +552,7 @@ class V2AdminPickupsController extends Controller
             return ['status' => 0, 'success' => 'No Pending Booked Shipments', 'booked' => FALSE];
         }
     }
+
     public function arrival_bulk_index(Request $request){
         return view('admin.v2_pickups.arrival_single_weight');
     }
@@ -476,6 +567,7 @@ class V2AdminPickupsController extends Controller
                 if(!in_array($shipment_origin, session('hubs'))){
                     return ['status' => 1, 'error' => 'You can not do arrival of this hub\'s shipment'];
                 }
+
             }
             if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
                 if($shipment->booking_type_id == 3){

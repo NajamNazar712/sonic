@@ -50,7 +50,6 @@
 
 		                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
 		                            </div>
-
 		                        </div>
 			                    <div class="col-2">
 			                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -169,9 +168,7 @@
                 }
             });
 
-			
-		
-			
+
 			table = $('#datatable').DataTable({
 			dom: '<"d-inline-block"l><"pull-right"B>tipr',
 			buttons: [{
@@ -335,5 +332,7 @@
 				});
 			});
 		});
+
+
 	</script>
 @endsection
