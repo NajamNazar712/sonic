@@ -653,8 +653,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bookings/all','Admins\V2Pickup\V2AdminPickupsController@pending_all_bookings')->name('bookings.all');
             Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
-
         });
+    // Receiving Sheet Rout
+        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet')->name('index');
+            Route::get('list', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet_list')->name('list');
+            Route::put('assign', 'Admins\V2Pickup\V2AdminPickupsController@pending_assign')->name('assign');
+            Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
+        });
+        // End
         Route::prefix('arrival')->name('arrival.')->group(function () {
             Route::prefix('bulk')->name('bulk.')->group(function () {
                 Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_index')->name('index');
@@ -1921,6 +1928,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminConsolidatedController@consolidation_history_list')->name('list');
             });
         });
+        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_index')->name('index');
+            Route::get('list', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_list')->name('list');
+            Route::post('print', 'Admins\AdminReceivingSheetHistoryController@print')->name('print');
+        });
+
     });
 
     //CMC Routes
@@ -2042,6 +2055,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('sales', 'Admins\AdminPowerBIController@sales_dashboard_index')->name('sales');
         Route::get('operation', 'Admins\AdminPowerBIController@operation_dashboard_index')->name('operation');
     });
+
+
      
 });
 

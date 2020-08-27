@@ -83,8 +83,10 @@
                                 @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
                                     <th>Amount</th>
                                 @endif
-                                <th>Mode of Payment ID</th>
-                                <th>Charges Mode ID</th>
+                                @if($service_type_check_id != 5)
+                                    <th>Mode of Payment ID</th>
+                                    <th>Charges Mode ID</th>
+                                @endif
                                 <th>Pieces</th>
                             </tr>
                             </thead>
@@ -373,15 +375,17 @@
                                         <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                     @endif
                                 @endif
-                                @if(isset($errors[$no]['payment_mode_id']))
-                                    <td>{!! Form::select('form[' . $no . '][payment_mode_id]', $payment_modes,null,['class' => 'form-control is-invalid payment_mode_id select2','id'=>'payment_mode_id', 'style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['payment_mode_id']}}</font></td>
-                                @else
-                                    <td>{!! Form::text('form[' . $no . '][payment_mode_id]', $ro['payment_mode_id'],['class' => 'form-control','style'=>'width:40px','readonly' => 'readonly']) !!}</td>
-                                @endif
-                                @if(isset($errors[$no]['charges_mode_id']))
-                                    <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
-                                @else
-                                    <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                @if($service_type_check_id != 5)
+                                    @if(isset($errors[$no]['payment_mode_id']))
+                                        <td>{!! Form::select('form[' . $no . '][payment_mode_id]', $payment_modes,null,['class' => 'form-control is-invalid payment_mode_id select2','id'=>'payment_mode_id', 'style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['payment_mode_id']}}</font></td>
+                                    @else
+                                        <td>{!! Form::text('form[' . $no . '][payment_mode_id]', $ro['payment_mode_id'],['class' => 'form-control','style'=>'width:40px','readonly' => 'readonly']) !!}</td>
+                                    @endif
+                                    @if(isset($errors[$no]['charges_mode_id']))
+                                        <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
+                                    @else
+                                        <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                    @endif
                                 @endif
                                 @if(isset($errors[$no]['pieces_quantity']))
                                     <td>{!! Form::text('form[' . $no . '][pieces_quantity]', $ro['pieces_quantity'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['pieces_quantity']}}</font></td>
