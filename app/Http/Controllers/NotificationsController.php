@@ -1505,7 +1505,7 @@ class NotificationsController extends Controller
             }
 
             if (strpos($subject, '[payment_cycle]') !== FALSE) {
-              $subject = str_replace('[payment_cycle]', $shipper->bank->payment_cycle, $subject);
+              $subject = str_replace('[payment_cycle]', $shipper->payment_cycle->name, $subject);
             }
 
             if (strpos($body, '[account_number]') !== FALSE) {

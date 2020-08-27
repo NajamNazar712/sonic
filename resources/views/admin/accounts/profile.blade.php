@@ -190,7 +190,7 @@
                                 </tr>
                                 <tr>
                                     <td><b>Payment Cycle</b></td>
-                                    <td>{{ucfirst($user_bank_default->payment_cycle)}}</td>
+                                    <td>{{$user->payment_cycle->name}}</td>
                                 </tr>
 
 
@@ -483,18 +483,6 @@
                                         <input id="account_no" class="form-control border-primary" data-rule-maxlength="190" data-msg-maxlength="Account Number can be maximum 190 characters" type="text" value="{{$user_bank_default->account_no}}" data-rule-required="true" data-msg-required="Account Number is required" name="account_no"  required>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <div class="form-group col-md-9">
-                                        <label>Payment Cycle</label>
-                                        <span class="danger">*</span>
-                                        <select name="payment_cycle" id="payment_cycle" data-rule-required="true" data-msg-required="Payment Cycle is required" class="select2 form-control required" style="width: 100%">
-                                            <option value="daily" {{ $user_bank_default->payment_cycle == 'daily' ? 'selected' : '' }}>Daily</option>
-                                            <option value="weekly" {{ $user_bank_default->payment_cycle == 'weekly' ? 'selected' : '' }}>Weekly</option>
-                                            <option value="fortnight" {{ $user_bank_default->payment_cycle == 'fortnight' ? 'selected' : '' }}>Fortnight</option>
-                                            <option value="monthly" {{ $user_bank_default->payment_cycle == 'monthly' ? 'selected' : '' }}>Monthly</option>
-                                        </select>
-                                    </div>
-                                </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group row">
@@ -727,9 +715,6 @@
             $('#bank_city').select2({
                 width: '100%',
             });
-            $('#payment_cycle').select2({
-                width: '100%',
-            });
 
             var weekly = [1, 2, 3, 4, 5, 6, 7];
             var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
@@ -811,7 +796,6 @@
                 $("#bank-form")[0].reset();
                 $("#bank-form").find(".danger").removeClass("danger");
                 $("#bank_name").val("{{$bank->id}}").trigger('change');
-                $("#payment_cycle").val("{{$user_bank_default->payment_cycle}}").trigger('change');
                 $("#bank_city").val("{{$bank_city->id}}").trigger('change');
                 $("#payment_mode").val("{{$user_bank_default->payment_mode}}").trigger('change');
                 $("#tabs").show();

@@ -415,7 +415,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
-
+        Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
+            Route::get('info','Admins\AdminDashboardController@payment_cycle_info')->name('info');
+            Route::post('submit', 'Admins\AdminDashboardController@payment_cycle_submit')->name('submit');
+        });
 
         //user profile
         Route::get('/{id}/view','Admins\AdminDashboardController@userProfile')->name('view.profile');

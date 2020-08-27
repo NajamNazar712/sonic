@@ -573,17 +573,6 @@
                                         
                                     </div>
                                 </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" data-rule-required="true" data-msg-required="Cycle Of Payment is required">
-                                            <option value="Daily">Daily</option>
-                                            <option value="Weekly">Weekly</option>
-                                            <option value="Fortnight">Fortnight</option>
-                                            <option value="Monthly">Monthly</option>
-                                        </select>
-                                    
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     
@@ -1242,11 +1231,7 @@
                 width:'100%',
                 dropdownParent:$('#AddBankModal')
             });
-            $("#cycle_of_payment").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Payment Cycle",
-                width:'100%',
-                dropdownParent:$('#AddBankModal')
-            });
+
 
             $( "#add_bank_form" ).validate({
                 errorClass:"danger",
@@ -1275,7 +1260,6 @@
                 $('#add_bank_form')[0].reset();
                 $('#bank_select').val('').trigger('change');
                 $('#bank_city').val('').trigger('change');
-                $('#cycle_of_payment').val('').trigger('change');
             });
 
 

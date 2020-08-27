@@ -515,7 +515,6 @@ class ShipperDashboardController extends Controller
             $user_bank->account_no = $request->account_no;
             $user_bank->account_title = $request->account_title;
             $user_bank->iban = strtoupper($request->iban_no);
-            $user_bank->payment_cycle = $request->cycle_of_payment;
             $user_bank->city_id = $request->bank_city;
             $user_bank->save();
 

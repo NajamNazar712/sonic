@@ -14,7 +14,7 @@ class UpdateUsersForPaymentCycle extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->integer('payment_cycle_id')->default(1);
+            $table->integer('payment_cycle_id')->default(1)->index();
             $table->integer('payment_day')->nullable();
         });
     }

@@ -330,7 +330,7 @@ otherwise it will be rejected</li>
                                 <td colspan="1">' . $shipper->cnic . '</td>
                                 
                                 <td colspan="1"><strong>Payment Cycle</strong></td>
-                                <td colspan="1">' . ucfirst($shipper_bank->payment_cycle) . '</td>
+                                <td colspan="1">' . ucfirst($shipper->payment_cycle->name) . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>NTN Number</strong></td>
