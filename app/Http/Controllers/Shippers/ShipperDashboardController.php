@@ -190,9 +190,11 @@ class ShipperDashboardController extends Controller
                 $keyword = str_replace('-', '', $keyword);
 
                 if ($keyword != '') {
+                    $keyword = '%' . $keyword . '%';
+
                     $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')
-                        ->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+                        $sub_query->whereRaw('REPLACE(`shipments`.`consignee_phone_number_1`, "-", "") LIKE ?', [$keyword])
+                        ->orWhereRaw('REPLACE(`shipments`.`consignee_phone_number_2`, "-", "") LIKE ?', [$keyword]);
                     });
                 }
 
