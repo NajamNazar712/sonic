@@ -745,7 +745,7 @@ class ShipperDashboardController extends Controller
             ->join('done_payments as dp','dp.id','=','dps.done_payment_id')
             ->leftjoin('user_bank_infos as ubi', 'ubi.id', '=', 'dp.user_bank_info_id')
             ->leftjoin('banks_lists as bl', 'bl.id', '=', 'ubi.bank_name')
-            ->select('shipments.tracking_number as tracking_number', 'shipments.order_id as order_number', 'dps.done_payment_id as payment_id', 'bl.name as bank_name', 'dps.created_at as payment_date', 'dps.payable as cod', 'dps.type as type')
+            ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking_id', 'shipments.order_id as order_number', 'dps.done_payment_id as payment_id', 'bl.name as bank_name', 'dps.created_at as payment_date', 'dps.payable as cod', 'dps.type as type','ubi.iban as account_detail')
             ->where('shipments.user_id', session('user_id'));
 
         $datatable=Datatables::of($shipments)
@@ -756,6 +756,13 @@ class ShipperDashboardController extends Controller
             ->editColumn('order_number',function ($shipments) {
                 if ($shipments->order_number != null) {
                     return $shipments->order_number;
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('account_detail',function ($shipments) {
+                if ($shipments->account_detail != null) {
+                    return $shipments->account_detail;
                 } else {
                     return '-';
                 }
@@ -778,7 +785,19 @@ class ShipperDashboardController extends Controller
                 return 'Adjusted';
             }
             });
-                return $datatable->make(true);
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('dps.created_at', [$from,$to]);
+        }
+        if ($request->get('cod_payable_from') && $request->get('cod_payable_to')) {
+            $from = $request->get('cod_payable_from');
+            $to = $request->get('cod_payable_to');
+            $datatable->whereBetween('dps.payable', [$from,$to]);
+        }
+
+        return $datatable->make(true);
 
     }
 

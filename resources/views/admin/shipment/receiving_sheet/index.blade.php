@@ -20,7 +20,12 @@
                                 <div class="row">
                                    <div class="col-4">
                                        <div class="form-group">
-                                           <input type="text" class="form-control" placeholder="Search Shipper Name" name="shipper_name" id="shipper_name">
+                                          {{-- <input type="text" class="form-control" placeholder="Search Shipper Name" name="shipper_name" id="shipper_name">--}}
+                                           <select name="shipper_name" id="shipper_name" class="form-control select2" >
+                                               @foreach($shipper_name as $shipper)
+                                                   <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                               @endforeach
+                                           </select>
                                        </div>
                                    </div>
                                     <div class="col-4">
@@ -210,7 +215,6 @@
                                 row.push(values.address);
                                 row.push(values.origin);
                                 row.push(values.booking_date);
-
                                 body.push(row);
                             });
                         },
@@ -271,7 +275,7 @@
                 ajax: {
                     url: '{{ route('admin.shipment.receiving_sheet.list') }}',
                     data: function (d) {
-                        d.shipper_name = $('#shipper_name').val();
+                        d.shipper_name = $('select[name="shipper_name"]').val();
                         d.origin = $('#origin').val();
                         d.receiving_sheet_id = $('#receiving_sheet_id').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
@@ -324,16 +328,18 @@
                 }
 
             });
-            $('#track_form').bind('submit', function (e) {
+
+            $('#track_form #shipper_name').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Search Shipper Name',
+                allowClear:true
+            });
+
+           $('#track_form').bind('submit', function (e) {
                 e.preventDefault();
 
-                var origin = $('#track_form #origin').val();
-                var shipper_name = $('#track_form #shipper_name').val();
-                var receiving_sheet_id = $('#track_form #receiving_sheet_id').val();
-                var search_date_from = $('#track_form #search_date_from').val();
-                var search_date_to = $('#track_form #search_date_to').val();
                 table.draw();
             });
+
                 $('.datatable tbody').on('click', 'tr td.receiving_sheet_id button.print', function() {
                     print(parseInt($(this).children('.id').html()));
                 });
