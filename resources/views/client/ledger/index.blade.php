@@ -14,36 +14,44 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('client.inc.messages')
-
-                            <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                <div class="form-group">
-                                    <input type="text" name="cod_payable" class="form-control cod_payable" data-tags-input-name="cod_payable"  id="cod_payable" placeholder="Amount">
-                                </div>
-                                <div class="col-4">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
+                            <div class="row mt-2">
+                                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                    <div class="col-2 mr-2">
+                                        <div class="form-group">
+                                            <input type="text" name="cod_payable_from" class="form-control cod_payable" data-tags-input-name="cod_payable_from"  id="cod_payable_from" placeholder="Amount From">
+                                        </div>
+                                    </div>
+                                    <div class="col-2 mr-2">
+                                        <div class="form-group">
+                                            <input type="text" name="cod_payable_to" class="form-control cod_payable" data-tags-input-name="cod_payable_to"  id="cod_payable_to" placeholder="Amount To">
+                                        </div>
+                                    </div>
+                                    <div class="col-3 mr-2">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
                                       <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o small-calender-icon"></span>
                                       </span>
+                                            </div>
+                                            <input type="text" name="search_date_from"   class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Booking Date From">
                                         </div>
-                                        <input type="text" name="booking_from_date"   class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From">
                                     </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
+                                    <div class="col-3">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
                                         <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                             <span class="la la-calendar-o small-calender-icon"></span>
                                         </span>
+                                            </div>
+                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Booking Date To">
                                         </div>
-                                        <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date" placeholder="Booking Date To">
                                     </div>
-                                </div>
-                                <div class="form-group col-md-5 mt-2 justify-content-center">
-                                    <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                                </div>
+                                    <div class="form-group col-md-5 mt-2 justify-content-center">
+                                        <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                    </div>
 
-                            </form>
+                                </form>
+                            </div>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -55,7 +63,7 @@
                                     <th class="border-primary border-darken-1">Payment ID</th>
                                     <th class="border-primary border-darken-1">Bank</th>
                                     <th class="border-primary border-darken-1">Type</th>
-                                    {{--<th class="border-primary border-darken-1">Account Detail</th>--}}
+                                    <th class="border-primary border-darken-1">Account Detail</th>
                                     <th class="border-primary border-darken-1">Payment Date</th>
                                 </tr>
                                 </thead>
@@ -69,8 +77,9 @@
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-    <style>
+                    <style>
         table.dataTable {
             font-size: 12px;
         }
@@ -140,7 +149,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
 
-    <script type="text/javascript">
+
+                    <script type="text/javascript">
         $(document).ready(function () {
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -162,20 +172,20 @@
                         head.push('Payment ID');
                         head.push('Bank');
                         head.push('Type');
-                       /* head.push('Account Detail');*/
+                        head.push('Account Detail');
                         head.push('Payment Date');
 
                         $.each(result.data, function(index, values) {
                             row = [];
 
                             row.push(index + 1);
-                            row.push(values.tracking_number);
+                            row.push(values.tracking_id);
                             row.push(values.order_number);
                             row.push(values.cod);
                             row.push(values.payment_id);
                             row.push(values.bank_name);
                             row.push(values.type);
-                            /*row.push(values.account_detail);*/
+                            row.push(values.account_detail);
                             row.push(values.payment_date);
 
                             body.push(row);
@@ -188,37 +198,35 @@
                     return {body: body, header: head};
                 }
             } );
-            var booking_from_date = $('#booking_from_date').pickadate({
+
+            var search_date_from = $('#track_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#track_form #booking_to_date').pickadate('picker').set('min', $('#track_form #booking_from_date').pickadate('picker').get('select'));
+                        $('#track_form #search_date_to').pickadate('picker').set('min', $('#track_form #search_date_from').pickadate('picker').get('select'));
                     }
                 }
             });
 
-            var booking_to_date = $('#booking_to_date').pickadate({
+            var search_date_to = $('#track_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
+                        $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
+
 
             var table = $('#datatable').DataTable({
                 scrollX: false, scrollY: '500px',
@@ -227,6 +235,7 @@
                     {
                         extend: 'excelHtml5',
                         title: 'General Ledger',
+                        className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -241,10 +250,11 @@
                 ajax: {
                     url: '{{ route('cod.ledger.list') }}',
                     data: function (d) {
-                       /* d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();*/
-                        d.booking_from_date = $('input[name="booking_from_date_formatted"]').val();
-                        d.booking_to_date = $('input[name="booking_to_date_formatted"]').val();
+                        d.cod_payable_from = $('#cod_payable_from').val();
+                        d.cod_payable_to = $('#cod_payable_to').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+
                     }
                 },
                 rowId: 'id',
@@ -256,8 +266,8 @@
                     {data: 'cod', name: 'dps.payable', class: 'text_center align-middle cod'},
                     {data: 'payment_id', name: 'dps.done_payment_id', class: 'text_center align-middle payment_id'},
                     {data: 'bank_name', name: 'bl.name', class: 'text_center align-middle bank'},
-                    {data: 'type', name: '', class: 'text_center align-middle type'},
-                   /* {data: 'account_detail', name: 'pending_cash_collection_aging_reports.count', class: 'text_center align-middle account_detail'},*/
+                    {data: 'type', name: '', class: 'text_center align-middle type',  },
+                    {data: 'account_detail', name: 'ubi.iban', class: 'text_center align-middle account_detail'},
                     {data: 'payment_date', name: 'dps.created_at', class: 'text_center align-middle payment_date'},
                 ],
                 rowCallback: function(row, data, index) {
@@ -278,23 +288,8 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') /*|| $(header).is('.destination_arrival')*/) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.type')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
-                            $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.shipping_mode')){
-                            $(mode_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.service_type')){
-                            $(service_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -312,13 +307,7 @@
             });
             $('#track_form').bind('submit', function (e) {
                 e.preventDefault();
-                var cod_payable = $('#track_form .cod_payable').val();
-                var booking_from_date = $('#track_form #booking_from_date').val();
-                var booking_to_date = $('#track_form #booking_to_date').val();
-
-                if (cod_payable != ''  || (booking_from_date != '' && booking_to_date != '')) {
-                    table.draw();
-                }
+                table.draw();
             });
         });
     </script>
