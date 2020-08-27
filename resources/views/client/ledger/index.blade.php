@@ -1,5 +1,5 @@
 @extends('client.layout.master')
-
+@section('title','General Ledger')
 @section('content')
     <div class="app-content content">
         <div class="content-wrapper">
