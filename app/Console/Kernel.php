@@ -57,7 +57,8 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\V2PickupCleanDuplicateData',
 		'\App\Console\Commands\QAReportPettyCash',
 		'\App\Console\Commands\SelfCollection',
-		'\App\Console\Commands\OutstandingShipmentEmail'
+		'\App\Console\Commands\OutstandingShipmentEmail',
+		'\App\Console\Commands\ReversePickupSummary'
 
         ];
 
@@ -152,6 +153,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
+        $schedule->command('summary:reversepickup')->dailyAt('8:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 

@@ -8405,7 +8405,7 @@ if(session('department_id') == 7){
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic',                'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as                           status','riders.created_at','cb.name as created_by', 'ub.name as updated_by']);
+            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic',                'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as                           status','riders.created_at','cb.name as created_by', 'ub.name as updated_by']);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -8415,7 +8415,15 @@ if(session('department_id') == 7){
             ->editColumn('status', function ($rider) {
                 return ($rider->status == 0)? 'Inactive': 'Active';
             })
+            ->editColumn('trax_id', function ($rider) {
+                if($rider->trax_id != null){
+                    return $rider->trax_id;
+                }
+                else{
+                    return '-';
+                }
 
+            })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
             })
@@ -8492,7 +8500,8 @@ if(session('department_id') == 7){
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
-            'pin' => 'required|numeric'
+            'pin' => 'required|numeric',
+            'trax_id'=>'required|max:255|string',
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -8511,7 +8520,8 @@ if(session('department_id') == 7){
             'status'=>1,
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
-            'created_by' => Auth::id()
+            'created_by' => Auth::id(),
+            'trax_id' => $request->trax_id,
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -8534,6 +8544,7 @@ if(session('department_id') == 7){
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
+            'trax_id'=>'required|string',
             'rider_category'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -8561,7 +8572,10 @@ if(session('department_id') == 7){
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
         $rider->route_id = $request->route_id;
+
         $rider->rider_category_id = $request->rider_category;
+        $rider->trax_id = $request->trax_id;
+
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;
         }else{

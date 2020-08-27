@@ -162,6 +162,9 @@
                                         @if (session('role_id') == 1 || in_array(272, session('permissions')))
                                             <li><a class="menu-item" href="{{ route('admin.v2_pickups.action_log.index') }}">Rider Action Log</a></li>
                                         @endif
+                                            @if (session('role_id') == 1 || in_array(273, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.v2_pickups.receiving_sheet.index') }}">Receiving Sheet</a></li>
+                                            @endif
                                     </ul>
                                 </li>
                             @endif
