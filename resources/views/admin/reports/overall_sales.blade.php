@@ -405,7 +405,7 @@
                                 row.push(values.try_and_buy_charges);
                                 row.push(values.nsa_osa_charges);
                                 row.push(values.p_gst);
-                                row.push(values.sic);
+                                row.push(values.intercept_charges);
                                 row.push(values.p_total_charges);
                                 row.push(values.estimated_charges);
                                 row.push(values.packaging_charges);
@@ -496,7 +496,7 @@
                     { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
                     { data:'nsa_osa_charges' ,name: 'shipments.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
-                    { data:'sic' ,name: 'shipments.intercept_charges', class: 'align-middle sic'},
+                    { data:'intercept_charges' ,name: 'shipments.intercept_charges', class: 'align-middle intercept_charges'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
                     { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges',sortable:false},

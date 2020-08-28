@@ -41,8 +41,8 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Remarks</th>
-                                    <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">Origin Arrival Date</th>
+                                    <th class="border-primary border-darken-1">Destination Arrival Date</th>
                                     <th class="border-primary border-darken-1">Status Date</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
@@ -164,8 +164,8 @@
                         head.push('Status');
                         head.push('Reason');
                         head.push('Remarks');
-                        head.push('Destination Arrival');
                         head.push('Origin Arrival Date');
+                        head.push('Destination Arrival Date');
                         head.push('Status Date');
                         $.each(result.data, function(index, values) {
                             row = [];
