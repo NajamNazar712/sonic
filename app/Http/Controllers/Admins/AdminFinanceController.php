@@ -3315,7 +3315,18 @@ class AdminFinanceController extends Controller
 
                             $done_payment_shipment->save();
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable);
+                            $packaging_material_charges = 0;
+
+                            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                            if ($shipment->packaging_material_request) {
+                                $packaging_material_charges = $shipment->packaging_material_charges;
+                                if($packaging_material_charges == null){
+                                    $packaging_material_charges = 0;
+                                }
+                            }
+
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges);
                             $pending_payment_shipment->delete();
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
@@ -3398,7 +3409,20 @@ class AdminFinanceController extends Controller
 
                             $done_payment_shipment->save();
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable);
+                            $packaging_charges = 0;
+
+                            $packaging_material_charges = 0;
+
+                            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                            if ($shipment->packaging_material_request) {
+                                $packaging_material_charges = $shipment->packaging_material_charges;
+                                if($packaging_material_charges == null){
+                                    $packaging_material_charges = 0;
+                                }
+                            }
+
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges);
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
@@ -3520,7 +3544,17 @@ class AdminFinanceController extends Controller
         $shipment->payment_status_id = 7;
 
         $shipment->save();
-        self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount);
+        $packaging_material_charges = 0;
+
+        $shipment = Shipment::find($shipment_id);
+
+        if ($shipment->packaging_material_request) {
+            $packaging_material_charges = $shipment->packaging_material_charges;
+            if($packaging_material_charges == null){
+                $packaging_material_charges = 0;
+            }
+        }
+        self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_material_charges);
         ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
         ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
     }
@@ -3545,10 +3579,7 @@ class AdminFinanceController extends Controller
     public function done_payments_list(Request $request) {
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
             ->leftjoin('done_payment_calculations as dpc','dpc.done_payment_id', '=', 'done_payments.id')
-            ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
-            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftJoin('user_bank_infos as ubi', function ($join) {
                 $join->on('ubi.id', '=', 'done_payments.user_bank_info_id');
             })
@@ -3566,8 +3597,7 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dps.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 's.booking_type_id', 'usi.poc', 'done_payments.ibft_charges', 's.packaging_charges')
-            ->groupBy('done_payments.id');
+            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges');
 
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -3590,25 +3620,6 @@ class AdminFinanceController extends Controller
             ->editColumn('payment_id', function($done_payment) {
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
-            ->editColumn('shipper', function ($shipment) {
-                if ($shipment->booking_type_id == 4) {
-                    return $shipment->shipper .' (' . $shipment->poc . ')';
-                }
-                else {
-                    return $shipment->shipper;
-                }
-            })
-            ->filterColumn('u.name', function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('s.booking_type_id', '!=', 4)
-                        ->where('u.name', 'like', '%' . $keyword . '%');
-                })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('s.booking_type_id', '=', 4)
-                            ->where('usi.poc', 'like', '%' . $keyword . '%');
-                    });
-            })
-            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
             ->addColumn('total_deductable', function($done_payment) {
                 return number_format(($done_payment->total_charges + $done_payment->total_gst + $done_payment->ibft_charges), 2);
             })
@@ -3694,31 +3705,6 @@ class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('return_shipments_average_aging', function($done_payment) {
-                if ($done_payment->returned_shipments != 0) {
-                    $shipments = 0;
-                    $days = 0;
-
-                    $now = Carbon::now()->startOfDay();
-
-                    $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $done_payment->id)->where('type', 1)->get();
-
-                    foreach ($done_payment_shipments as $done_payment_shipment) {
-                        $created_at = Carbon::parse($done_payment_shipment->created_at)->startOfDay();
-
-                        $days += $created_at->diffInDays($now);
-
-                        $shipments++;
-                    }
-
-                    $aging = round(($days / $shipments), 2) . 'd';
-
-                    return $aging;
-                }
-                else {
-                    return '-';
-                }
-            })
             ->addColumn('action', function($done_payment) {
                 $dropdown = '<div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -3769,7 +3755,8 @@ class AdminFinanceController extends Controller
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
+            $datatables->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
+                ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
                 ->where('ss.tracking_number', '=', $tracking_number);
         }
 
@@ -5897,7 +5884,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    public function add_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable){
+    static public function add_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable){
         $pending_payment_charges = PendingPaymentCalculation::where('pending_payment_id', $pending_payment_id);
         if($pending_payment_charges->exists()){
             $pending_payment_charges = $pending_payment_charges->first();
@@ -5918,7 +5905,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable){
+    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_material_charges){
         $done_payment_charges = DonePaymentCalculation::where('done_payment_id', $done_payment_id);
         if($done_payment_charges->exists()){
             $done_payment_charges = $done_payment_charges->first();
@@ -5926,6 +5913,7 @@ class AdminFinanceController extends Controller
             $done_payment_charges->charges = $done_payment_charges->charges + $charges;
             $done_payment_charges->gst = $done_payment_charges->gst + $gst;
             $done_payment_charges->payable = $done_payment_charges->payable + $payable;
+            $done_payment_charges->packaging_charges = $done_payment_charges->packaging_charges + $packaging_material_charges;
             $done_payment_charges->save();
         }
         else{
@@ -5935,6 +5923,7 @@ class AdminFinanceController extends Controller
             $done_payment_charges->charges = $charges;
             $done_payment_charges->gst = $gst;
             $done_payment_charges->payable = $payable;
+            $done_payment_charges->packaging_charges = $packaging_material_charges;
             $done_payment_charges->save();
         }
     }

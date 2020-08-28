@@ -235,80 +235,6 @@ class V2AdminPickupsController extends Controller
 
         return $datatables->make(true);
     }
-    //receiving_sheet
-    public function receiving_sheet(){
-
-        $riders = Rider::select('id', 'name')->get();
-        $currentRiders = V2PickupRequest::select('current_rider_id')->get();
-
-        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders, 'currentRiders' =>  $currentRiders ]);
-    }
-
-   public function receiving_sheet_list(Request $request){
-
-       $today = Carbon::now()->startOfDay();
-
-       $rider_id = $request->get('rider_id');
-
-       $pickup_requests = V2PickupRequest::join('riders as cr', 'cr.id', '=', 'v2_pickup_requests.current_rider_id')
-           //Assigned Date
-           ->leftJoin('v2_pickup_request_attempts as vpa', function ($join) {
-               $join->on('vpa.pickup_request_id', '=', 'v2_pickup_requests.id')
-                   ->where('vpa.id', '=',
-                       DB::raw('(select max(id) from v2_pickup_request_attempts where v2_pickup_request_attempts.pickup_request_id = v2_pickup_requests.id)'));
-           })
-           //End
-           ->leftJoin('v2_pickup_note_requests as vpn', function ($join) {
-               $join->on('vpn.pickup_request_id', '=', 'v2_pickup_requests.id')
-                   ->where('vpn.id', '=',
-                       DB::raw('(select max(id) from v2_pickup_note_requests where v2_pickup_note_requests.pickup_request_id = v2_pickup_requests.id)'));
-           })
-           ->select('v2_pickup_requests.id as pickup_request_id',
-               'cr.name as current_rider', 'vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no','vpa.created_at as assigned_date')
-           ->whereNotIn('v2_pickup_requests.status_id', [2,4])
-           ->where('v2_pickup_requests.current_rider_id',$rider_id);
-
-//       dd( $request);
-
-       if (session('role_id') != 1) {
-           $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
-       }
-       if(session('department_id') == 7){
-           if(session('role_id') != 4 ){
-               $pickup_requests = $pickup_requests->whereIn('u.id', session('tagged_shippers'));
-           }
-       }
-       $datatables = Datatables::of($pickup_requests)
-           ->setRowAttr([
-               'class' => function ($pickup_request) use ($today) {
-                   if ($pickup_request->vendor != null) {
-                       return 'vendor_row';
-                   }
-                   else if($pickup_request->try_and_buy == 1){
-                       return 'try_and_buy';
-                   }else if(($pickup_request->status_id == 3)  && ($pickup_request->attempts == 1)){
-                       return 'first_attempt';
-                   }else if(($pickup_request->status_id == 3)  && ($pickup_request->attempts == 2)){
-                       return 'second_attempt';
-                   }else if(($pickup_request->status_id == 3)  && ($pickup_request->attempts > 2)){
-                       return 'multiple_attempt';
-                   }else if($pickup_request->after_cut_off_time){
-                       return 'after_cut_off_time';
-                   }else if (Carbon::parse($pickup_request->pickup_address_created_at)->startOfDay()->diffInDays($today) <= 6) {
-                       return 'new_pickup';
-                   }
-               }
-           ])
-
-           ->editColumn('pickup_note_no', function($pickup_requests) {
-               if($pickup_requests->pickup_note_id != null){
-                   return '<button class="btn btn-sm btn-outline-info align-middle print" rel="'. $pickup_requests->pickup_note_id .'"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_requests->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
-               }
-               return '';
-           });
-       return $datatables->make(true);
-
-}
 
     public function pending_assign(Request $request) {
         $pickup_request_ids = $request->input('pickup_request_ids');
@@ -863,12 +789,12 @@ class V2AdminPickupsController extends Controller
                 $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
                 $pickup_request_received_shipment->shipment_id = $shipment->id;
                 $pickup_request_received_shipment->save();
-                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request_shipment->pickup_request->id);
-
                 $pickup_request = $pickup_request_shipment->pickup_request;
+                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request->id);
+
 
                 $pickup_request->received = $pickup_request->received + 1;
-
+                $pickup_request->status_id = 2;
                 $pickup_request->save();
             }
         }
@@ -877,8 +803,6 @@ class V2AdminPickupsController extends Controller
             $pickup_request = V2PickupRequest::find($pickup_request_id);
 
             if($pickup_request->received >= 1){
-                $pickup_request->status_id = 2;
-                $pickup_request->save();
                 $pickup_note_request = $pickup_request->pickup_note_request;
                 if($pickup_note_request){
                     $pickup_note_id = $pickup_note_request->pickup_note_id;
@@ -1376,12 +1300,11 @@ class V2AdminPickupsController extends Controller
                 $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
                 $pickup_request_received_shipment->shipment_id = $shipment->id;
                 $pickup_request_received_shipment->save();
-                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request_shipment->pickup_request->id);
-
                 $pickup_request = $pickup_request_shipment->pickup_request;
+                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request->id);
 
                 $pickup_request->received = $pickup_request->received + 1;
-
+                $pickup_request->status_id = 2;
                 $pickup_request->save();
 
             }
@@ -1390,8 +1313,6 @@ class V2AdminPickupsController extends Controller
         foreach ($pickup_request_ids as $pickup_request_id) {
             $pickup_request = V2PickupRequest::find($pickup_request_id);
             if($pickup_request->received >= 1){
-                $pickup_request->status_id = 2;
-                $pickup_request->save();
                 $pickup_note_request = $pickup_request->pickup_note_request;
                 if($pickup_note_request){
                     $pickup_note_id = $pickup_note_request->pickup_note_id;
@@ -2044,5 +1965,222 @@ class V2AdminPickupsController extends Controller
 
             return $html;
         }
+    }
+
+    public function rider_receiving_index(){
+        $riders = Rider::select('id', 'name')->where('status', 1)->get();
+        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders ]);
+    }
+
+    public function rider_receiving_check_pickup(Request $request){
+        $pickup_date = $request->pickup_date;
+        $rider_id = $request->rider_id;
+        if($pickup_date != null && $rider_id != null){
+            $pickup_attempt = V2PickupRequestAttempt::whereDate('attempt_date', $pickup_date)->where('rider_id', $rider_id);
+            if($pickup_attempt->exists()){
+                $pickup_attempt = $pickup_attempt->latest()->first();
+                if($pickup_attempt){
+                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_attempt->pickup_request_id);
+                    if($pickup_note_request->exists()){
+                        $pickup_note_request = $pickup_note_request->first();
+                        $pickup_note_id = $pickup_note_request->pickup_note_id;
+                        return response()->json(['status' => 0, 'pickup_note_id' => $pickup_note_id]);
+                    }
+                    return response()->json(['status' => 1, 'error' => 'Pickup Note not found!']);
+                }
+            }
+            return response()->json(['status' => 1, 'error' => 'No Pickups found!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Please Select filters correctly!']);
+    }
+
+    public function rider_receiving_print(Request $request) {
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Pickup Note</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+                      .vendor_pickup_row{
+                        background-color: var(--light);
+                      }
+                      .w-200 {
+                        width: 200px;
+                      }
+
+                      .line {
+                        border-bottom: 1px solid #09262e !important;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+      ';
+            $id = $request->id;
+            $pickup_note = V2PickupNote::find($id);
+            $rider = Rider::find($pickup_note->rider_id);
+            $route = $rider->route;
+
+            $html .= '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle color primary"><strong>Pickup Note</strong></td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Rider Name</strong></td>
+                            <td>' . $rider->name . '</td>
+                            <td rowspan="7" class="text-center align-middle pl-1 pr-1">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Category</strong></td>
+                            <td>' . $rider->rider_category->name . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Route</strong></td>
+                            <td> ' . $route->code . ' (' . $route->start . ' to ' . $route->end . ')</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>City</strong></td>
+                            <td> ' . $pickup_note->rider->city->name . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Pickups</strong></td>
+                            <td>' . $pickup_note->pickups . '</td>
+                          </tr>
+                        </tbody>
+                      </table>
+        ';
+
+            $html .= '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="color primary"><strong>S. No.</strong></td>
+                            <td class="color primary"><strong>Company Name</strong></td>
+                            <td class="color primary"><strong>Contact Person</strong></td>
+                            <td class="color primary"><strong>Vendor</strong></td>
+                            <td class="color primary"><strong>Contact Number</strong></td>
+                            <td class="color primary"><strong>Pickup Address</strong></td>
+                            <td class="color primary"><strong>Bookings</strong></td>
+                            <td class="color primary"><strong>Rider Picked</strong></td>
+                            <td class="color primary"><strong>Arrived</strong></td>
+                            <td class="color primary"><strong>Pickup Date</strong></td>
+                          </tr>
+        ';
+
+            $serial_number = 1;
+
+            $pickup_note_requests = $pickup_note->pickup_note_requests;
+            $reverse_pickup_shipment_ids = array();
+            foreach ($pickup_note_requests as $pickup_note_request) {
+                $pickup_request = $pickup_note_request->pickup_request;
+
+                $shipper = $pickup_request->shipper;
+                $pickup_address = $pickup_request->pickup_address;
+                $color = '';
+                if($pickup_address->vendor != null){
+                    $color = 'vendor_pickup_row';
+                }
+                $rider_pickuped = 0;
+                $pickup_request_received_shipments = 0;
+                $rider_pickups = V2RiderPickup::where('pickup_note_id', $pickup_note_request->pickup_note_id)->where('pickup_request_id', $pickup_request->id);
+                if($rider_pickups->exists()){
+                    $rider_pickups = $rider_pickups->first();
+                    $rider_pickuped = $rider_pickups->shipments;
+                }
+                $pickup_request_received_shipments = count($pickup_request->pickup_request_received_shipments);
+                $html .= '
+                          <tr class="'. $color .'">
+                            <td>' . $serial_number . '</td>
+                            <td>' . $shipper->name . '</td>
+                            <td>' . $pickup_address['poc'] . '</td>
+                            <td>' . $pickup_address['vendor'] . '</td>
+                            <td>' . $pickup_address['phone'] . '</td>
+                            <td>' . $pickup_address['pickup_address'] . '</td>
+                            <td>' . $pickup_request['booked'] . '</td>
+                            <td>' . $rider_pickuped . '</td>
+                            <td>' . $pickup_request_received_shipments . '</td>
+                            <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
+                          </tr>
+          ';
+
+                $serial_number++;
+            }
+
+
+            $html .= '
+                        </tbody>
+                      </table>
+
+                      <hr>
+        ';
+
+
+
+        $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
     }
 }

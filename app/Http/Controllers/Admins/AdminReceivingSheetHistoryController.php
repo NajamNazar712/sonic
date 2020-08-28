@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\ReceivingSheet;
+use App\Http\Models\City;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ReceivingSheetShipment;
 use App\Http\Models\Shipment;
@@ -24,7 +25,8 @@ class AdminReceivingSheetHistoryController extends Controller
     public function receiving_sheet_index()
     {
         $shipper_name=User::select('id','name')->get();
-        return view('admin.shipment.receiving_sheet.index')->with(['shipper_name'=>$shipper_name]);
+        $origin=City::select('id','name')->where('pickup',1)->get();
+        return view('admin.shipment.receiving_sheet.index')->with(['shipper_name'=>$shipper_name,'origin'=> $origin]);
     }
     public function receiving_sheet_list(Request $request)
     {
@@ -35,15 +37,13 @@ class AdminReceivingSheetHistoryController extends Controller
         if($receiving_sheet_number = $request->get('receiving_sheet_id')){
             $receiving_sheet = $receiving_sheet->where('receiving_sheets.id', '=', $receiving_sheet_number);
         }
-        if($origin = $request->get('origin')){
-            $receiving_sheet = $receiving_sheet->where('c.name', 'like', '%' . $origin . '%');
-        }
-      /*  if($shipper_name =$request->get('shipper_name')){
-            $receiving_sheet = $receiving_sheet->join('users as u', function($join) use ($shipper_name){
-                $join->on('receiving_sheets.user_id', '=', 'u.id')
-                    ->where('u.name', $shipper_name);
-            });
+       /* if($city = $request->get('city')){
+            $receiving_sheet = $receiving_sheet->where('usi.city_id','=','c.id')->where('c.name', 'like', '%' . $city . '%');
         }*/
+        if($origin = $request->get('origin')){
+            $receiving_sheet = $receiving_sheet->where('c.id', 'like', '%' . $origin . '%');
+        }
+
         if($shipper_id = $request->get('shipper_name')){
             $receiving_sheet = $receiving_sheet->where('receiving_sheets.user_id', '=',$shipper_id);
         }

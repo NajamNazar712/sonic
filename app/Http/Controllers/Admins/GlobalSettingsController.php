@@ -2423,10 +2423,11 @@ class GlobalSettingsController extends Controller
             DB::table('completed_aging_reports')->truncate();
             foreach ($hubs as $hub_id){
                 $total_count = 0;
-                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
+                $zone_id = City::find($hub_id)->zone_id;
+//                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
                 $completed_aging_report = new CompletedAgingReport();
                 $completed_aging_report->hub_id = $hub_id;
-                $completed_aging_report->zone_id = $zone_id->zone_id;
+                $completed_aging_report->zone_id = $zone_id;
 
                 $completed_aging_report->date = $now;
 
@@ -2458,11 +2459,12 @@ class GlobalSettingsController extends Controller
             DB::table('pending_cash_collection_aging_reports')->truncate();
             foreach ($hubs as $hub_id){
                 $total_count = 0;
-                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
+                $zone_id = City::find($hub_id)->zone_id;
+
                 $pending_cash_collection_aging_report = new PendingCashCollectionAgingReport();
 
                 $pending_cash_collection_aging_report->hub_id = $hub_id;
-                $pending_cash_collection_aging_report->zone_id = $zone_id->zone_id;
+                $pending_cash_collection_aging_report->zone_id = $zone_id;
 
                 $pending_cash_collection_aging_report->date = $now;
 

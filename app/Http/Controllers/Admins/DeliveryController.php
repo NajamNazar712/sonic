@@ -430,7 +430,12 @@ class DeliveryController extends Controller
                                 }
                                 $crm_request = array();
                                 if(($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))){
-                                    $crm_request['cod_change'] =  $shipment->amount_change_log->new_amount;
+                                    if ($amount_check) {
+                                        $crm_request['cod_change'] =  $amount_log->new_amount;
+                                    }
+                                    else {
+                                        $crm_request['cod_change'] =  $shipment->intercept_history->new_amount;
+                                    }
                                 }
                                 else{
                                     $crm_request['cod_change'] = null;
