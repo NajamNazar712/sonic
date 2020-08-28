@@ -76,6 +76,8 @@
                     <ul class="menu-content">
                         <li><a href="{{ route('cod.finance.payments.index') }}">Payments</a></li>
                         <li><a href="{{ route('cod.finance.payments.reconcile_through_receiving_sheet.index') }}">Payments Reconcile through Receiving Sheet</a></li>
+                        <li><a href="{{ route('cod.ledger') }}">General Ledger</a></li>
+
                     </ul>
                 </li>
             @endif
@@ -115,7 +117,6 @@
 
             <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title"><i class="la la-crosshairs"></i>Tracking</span></a></li>
 
-            <li class=" nav-item"><a href="{{ route('cod.ledger') }}"><span class="menu-title"><i class="la la-book"></i>Ledger</span></a></li>
 
         </ul>
     </div>
