@@ -12,11 +12,21 @@
                     Receiving Sheet
                 </h1>
 
-                <div class="card">
+                <div class="card height-400">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
                             <div class="row justify-content-center mb-2" id="search_form">
+                                <div class="col-3">
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                        </div>
+                                        <input type="text" name="pickup_date" class="form-control bg-primary border-primary white rounded-right" id="pickup_date" placeholder="Date" data-rule-required="true" data-msg-required="Date is required">
+                                    </div>
+                                </div>
                                 <div class="col-3">
                                     <fieldset class="form-group">
                                         <select name="search_rider" id="search_rider" class="form-control select2">
@@ -32,17 +42,7 @@
                                     <button type="button" id="search_filter_btn"  class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
                             </div>
-                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Current Rider</th>
-                                    <th class="border-primary border-darken-1">Assigned Date</th>
-                                    <th class="border-primary border-darken-1">Pickup Note ID</th>
-                                </tr>
-                                </thead>
-                            </table>
+
                         </div>
                     </div>
                 </div>
@@ -56,9 +56,14 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -66,50 +71,28 @@
 
     <script>
         $(document).ready(function () {
-
-            var selected_rows = [];
-            var table = $('#datatable').DataTable({
-                "searching": false,
-                rider:id=$('#search_rider').val(),
-                serverSide: true,
-                ajax: {
-                    url: '{{ route('admin.v2_pickups.receiving_sheet.list') }}',
-                    data: function (d) {
-                        d.rider_id = $('#search_rider').val();
-                    }
-                },
-                rowId: 'id',
-                deferLoading: 0,
-                order: [[1, 'asc']],
-                columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider', orderable: false},
-                    {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
-                    {data: 'pickup_note_no', name: 'vpn.pickup_note_id', class: 'align-middle pickup_note_no', orderable: false, searchable: false},
-                ],
-                rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }
+            var pickup_date = $('#pickup_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                max: '{!! Carbon\Carbon::now() !!}',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#pickup_date_root').css('top','40px');
                 },
             });
 
-            $('#datatable tbody').on('click', 'tr td.pickup_note_no button.print', function() {
-                var pickup_note_id = parseInt($(this).attr('rel'));
 
-                print(pickup_note_id);
-            });
+
             function print(id) {
                 $.ajax({
                     url: '{!! route('admin.v2_pickups.receiving_sheet.print') !!}',
                     method: 'POST',
                     data: {
-                        'ids': [id],
+                        'id': id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
@@ -140,15 +123,38 @@
 
 
             $('#search_filter_btn').on('click', function () {
+                var errors = 0;
                 var rider = $('#search_rider').val();
+                var date = $('input[name="pickup_date_formatted"]').val();
                 if(rider == null || rider == ''){
-                    var error = "Rider not selected!"
+                    var error = "Rider not selected!";
+                    errors = 1;
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-              else{
-
-                    table.draw();
+                if(date == null || date == ''){
+                    var error = "Date not selected!";
+                    errors = 1;
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
+                if(errors == 0){
+                    $.ajax({
+                        url: '{!! route('admin.v2_pickups.receiving_sheet.check_pickup') !!}',
+                        method: 'POST',
+                        data: {
+                            'rider_id': rider,
+                            'pickup_date': date,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            print(data.pickup_note_id);
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+                    });
+                }
+
 
             });
         });
