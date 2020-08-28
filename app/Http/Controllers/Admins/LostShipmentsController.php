@@ -229,7 +229,7 @@ class LostShipmentsController extends Controller
                         $data['service_type'] = $shipment->booking_type->booking_type;
                         $data['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
 
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null,null);
+                        ShipmentScanningJourneyController::add($shipment->id, 11, 1, Auth::id(), null,null);
                         return response()->json(['status' => 1, 'details' => $data]);
                     }
                     else

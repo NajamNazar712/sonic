@@ -19,6 +19,16 @@
 
 							<div class="row text-center">
 								<div class="col-3">
+									<form id="payment_cycle_filter_form" class="mb-1 justify-content-center" novalidate="novalidate">
+										<div class="form-group">
+											<select name="payment_cycle_filter" class="select2 payment_cycle_filter">
+												<option value="1" selected>Filtered</option>
+												<option value="2">All</option>
+											</select>
+										</div>
+									</form>
+								</div>
+								<div class="col-3">
 									<form id="tracking_number_search_form" class="mb-1 justify-content-center" novalidate="novalidate">
 										<div class="form-group">
 										<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
@@ -349,6 +359,14 @@
 				table.draw(false);
 			});
 
+			$('#payment_cycle_filter_form select.payment_cycle_filter').select2({
+                placeholder:'Payment Cycle Filter',
+                width:'100%',
+            }).bind('change', function() {
+				table.draw();
+			});
+			// $('#payment_cycle_filter_form select.payment_cycle_filter').val(1).trigger('change');
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -546,6 +564,7 @@
 				ajax: {
 					url: '{{ route('admin.finance.make_payments.list') }}',
 					data: function (d) {
+						d.payment_filter = $('#payment_cycle_filter_form select.payment_cycle_filter').val();
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
 						d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
 						d.shipper_status = $('#shipper_status_form select.shipper_status').val();
@@ -580,7 +599,7 @@
 					{data:'account_title', name: 'ubi.account_title', class: 'align-middle text-center account_title'},
 					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
 					{data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
-					{data:'payment_cycle', name: 'ubi.payment_cycle', class: 'align-middle text-center payment_cycle'},
+					{data:'payment_cycle', name: 'pc.id', class: 'align-middle text-center payment_cycle'},
 					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
@@ -611,10 +630,9 @@
                     //     '<option value="invoices">Invoices</option>' +
                     //     '</select>';
                     var payment_cycle_select = '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
-                        '<option value="daily">Daily</option>' +
-                        '<option value="weekly">Weekly</option>' +
-                        '<option value="fortnight">Fortnight</option>' +
-                        '<option value="monthly">Monthly</option>' +
+                        '<option value="1">Daily</option>' +
+                        '<option value="2">Weekly</option>' +
+                        '<option value="3">Monthly</option>' +
                         '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;

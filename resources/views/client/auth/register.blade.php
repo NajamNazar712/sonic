@@ -474,20 +474,6 @@
                                                             <span class="danger">*</span></label>
                                                         <input type="text" class="form-control required" value="{{ old('account_no.0') }}" name="account_no[]" placeholder="Account Number*">
                                                     </div>
-                                                    <div class="form-group">
-
-                                                        <label for="cycle_of_payment">Cycle of Payment:
-                                                            <span class="danger">*</span>
-                                                        </label>
-                                                        <div>
-                                                            <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                                <option value="Daily" {{ old('cycle_of_payment') == 'Daily' ? 'selected' : '' }}>Daily</option>
-                                                                <option value="Weekly" {{ old('cycle_of_payment') == 'Weekly' ? 'selected' : '' }}>Weekly</option>
-                                                                <option value="Fortnight" {{ old('cycle_of_payment') == 'Fortnight' ? 'selected' : '' }}>Fortnight</option>
-                                                                <option value="Monthly" {{ old('cycle_of_payment') == 'Monthly' ? 'selected' : '' }}>Monthly</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
 
                                                 </div>
                                                 <div class="col-md-6">
@@ -888,10 +874,6 @@
        });
        $('select[name="bank_city[]"]').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank City',
-        
-       });
-       $('#cycle_of_payment').prepend('<option value="" selected="selected"></option>').select2({
-           placeholder:'Select Cycle of Payment',
         
        });
 

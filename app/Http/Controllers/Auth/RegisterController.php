@@ -115,7 +115,6 @@ class RegisterController extends Controller
                 'account_no.*'=>'required|string|max:255',
                 'account_title.*'=>'required|string|max:255',
                 'iban_no.*'=>'required|string|max:255',
-                'cycle_of_payment'=>'required|string|max:255',
                 'filled_and_signed_pdf' => 'mimes:pdf',
                 'signed_acknowledgement_pdf' => 'mimes:pdf',
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
@@ -152,7 +151,6 @@ class RegisterController extends Controller
                 'account_no.*'=>'required|string|max:255',
                 'account_title.*'=>'required|string|max:255',
                 'iban_no.*'=>'required|string|max:255',
-                'cycle_of_payment'=>'required|string|max:255',
                 'cycle_of_invoicing' => 'required',
 //                'generation_date' => 'required_if:cycle_of_invoicing,==,1|required_if:cycle_of_invoicing,==,3|numeric',
                 'billing_person_name' => 'required|string|max:255',
@@ -402,7 +400,6 @@ class RegisterController extends Controller
                         'account_no'=>$data['account_no'][$rowId],
                         'account_title'=>$data['account_title'][$rowId],
                         'iban'=> strtoupper($data['iban_no'][$rowId]),
-                        'payment_cycle'=>$data['cycle_of_payment'],
                         'city_id'=>$data['bank_city'][$rowId],
                         'default_bank' => 1
                     ]);
@@ -416,7 +413,6 @@ class RegisterController extends Controller
                         'account_no'=>$data['account_no'][$rowId],
                         'account_title'=>$data['account_title'][$rowId],
                         'iban'=> strtoupper($data['iban_no'][$rowId]),
-                        'payment_cycle'=>$data['cycle_of_payment'],
                         'city_id'=>$data['bank_city'][$rowId]
                     ]);
                     $iban_array[] = $data['iban_no'][$rowId];
@@ -437,7 +433,6 @@ class RegisterController extends Controller
                     'account_no'=>$data['account_no'][$rowId],
                     'account_title'=>$data['account_title'][$rowId],
                     'iban'=> strtoupper($data['iban_no'][$rowId]),
-                    'payment_cycle'=> $data['cycle_of_payment'],
                     'city_id'=> $data['bank_city'][$rowId],
                     'invoicing_cycle_id' => $data['cycle_of_invoicing'],
                     'generation_date' => $generation_date,

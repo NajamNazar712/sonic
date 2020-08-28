@@ -415,7 +415,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
-
+        Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
+            Route::get('info','Admins\AdminDashboardController@payment_cycle_info')->name('info');
+            Route::post('submit', 'Admins\AdminDashboardController@payment_cycle_submit')->name('submit');
+        });
 
         //user profile
         Route::get('/{id}/view','Admins\AdminDashboardController@userProfile')->name('view.profile');
@@ -656,10 +659,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     // Receiving Sheet Rout
         Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
-            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet')->name('index');
-            Route::get('list', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet_list')->name('list');
-            Route::put('assign', 'Admins\V2Pickup\V2AdminPickupsController@pending_assign')->name('assign');
-            Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet_index')->name('index');
+            Route::post('check_pickup', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet_check_pickup')->name('check_pickup');
+            Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet_print')->name('print');
         });
         // End
         Route::prefix('arrival')->name('arrival.')->group(function () {

@@ -28,6 +28,7 @@ use App\Http\Models\DuplicateUser;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\Operataions\OperationForecast;
+use App\Http\Models\PaymentCycle;
 use App\Http\Models\RateRemark;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
@@ -1370,7 +1371,8 @@ class AdminDashboardController extends Controller
         $shippers = User::where('status', 3)->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers]);
+        $payment_cycles = PaymentCycle::all();
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
 
     }
     public function blockAccountsList(){
@@ -7363,6 +7365,9 @@ if(session('department_id') == 7){
                 if($sale_check){
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
                 }
+                if(session('role_id') == 1 || in_array(365, session('permissions'))){
+                    $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -7761,13 +7766,12 @@ if(session('department_id') == 7){
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
             'iban'=>'required|string|max:255',
-            'payment_cycle'=>'required|string|max:255'
         ]);
         $old_bank_detail = UserBankInfo::where('user_id',$user_id)->select('bank_name')->first();
 
         if($user->account_type_id == 1){
             UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_cycle'=>$request->payment_cycle]);
+                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city]);
 
         }else{
             $generation_date = null;
@@ -7783,7 +7787,6 @@ if(session('department_id') == 7){
                     'account_title'=>$request->account_title,
                     'iban'=>$request->iban,
                     'city_id'=>$request->bank_city,
-                    'payment_cycle'=>$request->payment_cycle,
                     'invoicing_cycle_id' => $request->invoicing_cycle_id,
                     'generation_date' => $generation_date,
                     'billing_person_name' => $request->billing_person_name,
@@ -9168,6 +9171,62 @@ if(session('department_id') == 7){
             }
         }
         return redirect()->back()->with(['success' => 'Contacts updated successfully']);
+    }
+
+    public function payment_cycle_info(Request $request){
+        $user_id = $request->shipper_id;
+        if($user_id){
+            $user = User::find($user_id);
+            if($user){
+                $details = ['payment_cycle_id' => $user->payment_cycle_id, 'payment_day' => $user->payment_day];
+                return response()->json(['status' => 0, 'details' => $details]);
+
+            }else{
+                return response()->json(['status' => 1, 'error' => 'User not found!']);
+            }
+        }
+    }
+    public function payment_cycle_submit(Request $request){
+        $payment_cycle_id = $request->payment_cycle_select;
+        if($payment_cycle_id){
+            if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                $payment_day = $request->payment_day;
+            }
+            if($request->has('shipper_ids')){
+                $shipper_ids = explode(',' , $request->shipper_ids);
+                if(count($shipper_ids) > 0){
+                    foreach ($shipper_ids as $shipper_id){
+                        $shipper = User::find($shipper_id);
+                        if($shipper){
+                            $shipper->payment_cycle_id = $payment_cycle_id;
+                            if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                                $shipper->payment_day = $payment_day;
+                            }else{
+                                $shipper->payment_day = NULL;
+                            }
+                            $shipper->save();
+                        }
+                    }
+                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
+                }
+            }else{
+                $shipper_id = $request->shipper_id;
+                $shipper = User::find($shipper_id);
+                if($shipper){
+                    $shipper->payment_cycle_id = $payment_cycle_id;
+                    if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                        $shipper->payment_day = $payment_day;
+                    }else{
+                        $shipper->payment_day = NULL;
+                    }
+                    $shipper->save();
+                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
+                }
+            }
+
+            return redirect()->back()->with('error', 'Shipper not found!');
+        }
+        return redirect()->back()->with('error', 'Payment Cycle not selected!');
     }
 }
 

@@ -804,6 +804,7 @@
                         if(data.status){
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }else{
+
                             $('#ViewDepositSlip').modal('show');
                             deposit_slip_table = $('#deposit_slip_table').DataTable({
                                 dom: 'ltipr',
@@ -824,7 +825,7 @@
 
                                 }
                             });
-
+							deposit_slip_table.clear();
                             $.each(data.slips, function (index, value) {
                                 deposit_slip_table.row.add([0, value.date, value.bank, value.amount, value.image]);
                                 deposit_slip_table.draw(true);
