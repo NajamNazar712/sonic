@@ -29,8 +29,15 @@
                                        </div>
                                    </div>
                                     <div class="col-4">
-                                        <div class="form-group">
+                                        {{--<div class="form-group">
                                             <input type="text" class="form-control" placeholder="Search Pickup City" name="origin" id="origin">
+                                        </div>--}}
+                                        <div class="form-group">
+                                            <select name="origin" id="origin" class="form-control select2" >
+                                                @foreach($origin as $city)
+                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="col-4">
@@ -276,7 +283,7 @@
                     url: '{{ route('admin.shipment.receiving_sheet.list') }}',
                     data: function (d) {
                         d.shipper_name = $('select[name="shipper_name"]').val();
-                        d.origin = $('#origin').val();
+                        d.origin =$('select[name="origin"]').val();
                         d.receiving_sheet_id = $('#receiving_sheet_id').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
@@ -331,6 +338,10 @@
 
             $('#track_form #shipper_name').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Search Shipper Name',
+                allowClear:true
+            });
+            $('#track_form #origin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Search Pickup City',
                 allowClear:true
             });
 
