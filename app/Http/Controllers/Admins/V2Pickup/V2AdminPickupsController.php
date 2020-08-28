@@ -2114,7 +2114,7 @@ class V2AdminPickupsController extends Controller
                             <td class="color primary"><strong>Contact Number</strong></td>
                             <td class="color primary"><strong>Pickup Address</strong></td>
                             <td class="color primary"><strong>Bookings</strong></td>
-                            <td class="color primary"><strong>Rider Pickuped</strong></td>
+                            <td class="color primary"><strong>Rider Picked</strong></td>
                             <td class="color primary"><strong>Arrived</strong></td>
                             <td class="color primary"><strong>Pickup Date</strong></td>
                           </tr>
