@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Receiving Sheet')
+@section('title', 'Rider Receiving')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Receiving Sheet
+                    Rider Receiving
                 </h1>
 
                 <div class="card height-400">
@@ -89,7 +89,7 @@
 
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.v2_pickups.receiving_sheet.print') !!}',
+                    url: '{!! route('admin.v2_pickups.rider_receiving.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -138,7 +138,7 @@
                 }
                 if(errors == 0){
                     $.ajax({
-                        url: '{!! route('admin.v2_pickups.receiving_sheet.check_pickup') !!}',
+                        url: '{!! route('admin.v2_pickups.rider_receiving.check_pickup') !!}',
                         method: 'POST',
                         data: {
                             'rider_id': rider,

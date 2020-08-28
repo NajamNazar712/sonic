@@ -658,10 +658,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
         });
     // Receiving Sheet Rout
-        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
-            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet_index')->name('index');
-            Route::post('check_pickup', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet_check_pickup')->name('check_pickup');
-            Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@receiving_sheet_print')->name('print');
+        Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_index')->name('index');
+            Route::post('check_pickup', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_check_pickup')->name('check_pickup');
+            Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_print')->name('print');
         });
         // End
         Route::prefix('arrival')->name('arrival.')->group(function () {

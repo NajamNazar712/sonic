@@ -235,11 +235,6 @@ class V2AdminPickupsController extends Controller
 
         return $datatables->make(true);
     }
-    //receiving_sheet
-    public function receiving_sheet_index(){
-        $riders = Rider::select('id', 'name')->where('status', 1)->get();
-        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders ]);
-    }
 
     public function pending_assign(Request $request) {
         $pickup_request_ids = $request->input('pickup_request_ids');
@@ -1972,7 +1967,12 @@ class V2AdminPickupsController extends Controller
         }
     }
 
-    public function receiving_sheet_check_pickup(Request $request){
+    public function rider_receiving_index(){
+        $riders = Rider::select('id', 'name')->where('status', 1)->get();
+        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders ]);
+    }
+
+    public function rider_receiving_check_pickup(Request $request){
         $pickup_date = $request->pickup_date;
         $rider_id = $request->rider_id;
         if($pickup_date != null && $rider_id != null){
@@ -1994,7 +1994,7 @@ class V2AdminPickupsController extends Controller
         return response()->json(['status' => 1, 'error' => 'Please Select filters correctly!']);
     }
 
-    public function receiving_sheet_print(Request $request) {
+    public function rider_receiving_print(Request $request) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $html = '
