@@ -405,7 +405,7 @@
                                 row.push(values.try_and_buy_charges);
                                 row.push(values.nsa_osa_charges);
                                 row.push(values.p_gst);
-                                row.push(values.intecept_charges);
+                                row.push(values.intercept_charges);
                                 row.push(values.p_total_charges);
                                 row.push(values.estimated_charges);
                                 row.push(values.packaging_charges);
