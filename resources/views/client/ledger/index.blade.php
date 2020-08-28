@@ -63,7 +63,7 @@
                                     <th class="border-primary border-darken-1">Payment ID</th>
                                     <th class="border-primary border-darken-1">Bank</th>
                                     <th class="border-primary border-darken-1">Type</th>
-                                    <th class="border-primary border-darken-1">Account Detail</th>
+                                    <th class="border-primary border-darken-1">IBAN No.</th>
                                     <th class="border-primary border-darken-1">Payment Date</th>
                                 </tr>
                                 </thead>
@@ -172,7 +172,7 @@
                         head.push('Payment ID');
                         head.push('Bank');
                         head.push('Type');
-                        head.push('Account Detail');
+                        head.push('IBAN No.');
                         head.push('Payment Date');
 
                         $.each(result.data, function(index, values) {
