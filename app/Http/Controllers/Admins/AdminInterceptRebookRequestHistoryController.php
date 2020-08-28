@@ -59,19 +59,25 @@ class AdminInterceptRebookRequestHistoryController extends Controller
     }
 
     public function intercept_re_book_index($shipment_id){
-        $shipment = Shipment::where('id',$shipment_id)->first();
-        $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
-            ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
-            ->select('c.id as id', 'c.name as name')
-            ->where('shipments.id', $shipment_id)
-            ->where('c.status', 1)
-            ->whereNotNull('c.zone_id')
-            ->orderBy('c.name')
-            ->groupBy('c.name')
-            ->get();
+        if($shipment_id){
+            $shipment = Shipment::where('id',$shipment_id)->first();
+            if($shipment){
+                $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
+                    ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
+                    ->select('c.id as id', 'c.name as name')
+                    ->where('shipments.id', $shipment_id)
+                    ->where('c.status', 1)
+                    ->whereNotNull('c.zone_id')
+                    ->orderBy('c.name')
+                    ->groupBy('c.name')
+                    ->get();
 //        dd($consignee_cities);
 //        $consignee_cities = City::leftjoin('city_deliveries as cd', 'cd.city_id', '=', 'cities.id')->leftjoin('')->where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
-        return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+                return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+            }
+            return redirect()->back()->with('error', 'Shipment not found!');
+        }
+        return redirect()->back()->with('error', 'Shipment not found!');
     }
 
     public function intercept_re_book_update(Request $request)

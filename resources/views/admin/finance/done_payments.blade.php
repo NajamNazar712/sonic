@@ -131,7 +131,6 @@
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
-										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
 										<th class="border-primary border-darken-1">Reference No.</th>
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
@@ -431,7 +430,6 @@
                             head.push('Total Deductable');
                             head.push('Total Payable');
                             head.push('Bank');
-                            head.push('Return Shipments Avg. Aging');
                             head.push('Reference No.');
                             head.push('Done Datetime');
                             head.push('Company Bank');
@@ -457,7 +455,6 @@
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
-                                row.push(values.return_shipments_average_aging);
                                 row.push(values.reference_number);
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
@@ -659,11 +656,10 @@
 					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
-					{data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
+					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'dpc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
-					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},

@@ -1,13 +1,11 @@
 <?php
 
-
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PendingPaymentShipment;
 use Illuminate\Database\Seeder;
 
-
-class PendingPaymentCalculationTableSeeder extends Seeder
+class UpdateDonePaymentCalculationForMissingPayments extends Seeder
 {
     /**
      * Run the database seeds.
