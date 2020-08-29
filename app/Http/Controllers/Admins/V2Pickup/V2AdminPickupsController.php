@@ -278,17 +278,26 @@ class V2AdminPickupsController extends Controller
 //        }
 
         $pickups = 0;
-        $bookings = 0;
+
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+        $arrival_cut_off_time = '8';
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $arrival_cut_off_time = $settings->setting_value;
+        }
 
         $start_date = Carbon::now()->startOfDay();
         $end_date = Carbon::now()->endOfDay();
         $today = Carbon::today();
+        $today->hour($arrival_cut_off_time)->minute(0)->second(0);
+
         $allowed_pickup_requests = array();
         foreach ($pickup_request_ids as $pickup_request_id) {
 //            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('rider_id', $rider_id)->whereBetween('attempt_date', [$start_date, $end_date]);
-            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->whereDate('attempt_date', $today);
+            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('attempt_date', '>',$today);
             if(!$existing_pickup_request_attempt->exists()){
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
+
                 $pickup_request->rider_status = 2;
                 $pickup_request->attempts = $pickup_request->attempts + 1;
                 $pickup_request->current_rider_id = $rider_id;
@@ -307,7 +316,7 @@ class V2AdminPickupsController extends Controller
                 }
 
                 $pickups++;
-                $bookings += $pickup_request->booked;
+
             }else{
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request->current_rider_id == $rider_id){
@@ -318,9 +327,23 @@ class V2AdminPickupsController extends Controller
                     $pickup_request->save();
                     $existing_pickup_request_attempt = $existing_pickup_request_attempt->latest('id')->first();
 
+                    $existing_pickup_rider = $existing_pickup_request_attempt->rider_id;
+
                     $existing_pickup_request_attempt->rider_id = $rider_id;
                     $existing_pickup_request_attempt->assigned_by = Auth::id();
                     $existing_pickup_request_attempt->save();
+
+                    $pickup_note_request = $pickup_request->pickup_note_request;
+                    if($pickup_note_request){
+                        $pickup_note = $pickup_note_request->pickup_note;
+                        $pickup_note_rider = $pickup_note->rider_id;
+                        if($existing_pickup_rider == $pickup_note_rider){
+                            $pickup_request->pickup_note_request->delete();
+                            $pickup_note->pickups = $pickup_note->pickups - 1;
+                            $pickup_note->save();
+                        }
+                    }
+                    $pickups++;
                     if(!in_array($pickup_request_id, $allowed_pickup_requests)){
                         $allowed_pickup_requests[] = $pickup_request_id;
                     }
