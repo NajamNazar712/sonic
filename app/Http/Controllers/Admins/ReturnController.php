@@ -710,10 +710,6 @@ class ReturnController extends Controller
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
 
-//                            ShipmentChargesController::return($shipment_details->id);
-//
-//                            AdminFinanceController::add_payment($shipment_details->id, 1);
-
                         if ($shipment_details->booking_type_id != 4) {
                             ShipmentChargesController::return($shipment_details->id);
 
