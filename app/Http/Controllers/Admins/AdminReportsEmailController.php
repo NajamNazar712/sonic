@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Console\Commands\DonePaymentReport;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
@@ -15,6 +16,8 @@ use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\DonePaymentCalculation;
+use App\http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\NotAttemptedShipmentAging;
@@ -1182,6 +1185,76 @@ class AdminReportsEmailController extends Controller
 
                 NotificationsController::send(76, $hub->id, url('/') . '/' . $file_name_without_path);
             }
+        }
+    }
+
+    static public function done_payment($date){
+        $done_payments = DonePaymentCalculation::whereDate('created_at', $date);
+        DonePaymentsReport::truncate();
+        if($done_payments->exists()){
+            $total_amount = 0;
+            $done_payment_array = array();
+            $done_payments_array = array();
+            $done_payment_array['header'] = ['Payment ID', 'Shipper Name', 'Amount', 'IBAN Number'];
+            $done_payment_array[] = ['Payment ID' => '', 'Shipper Name' => '', 'Amount' => '', 'IBAN Number' => ''];
+            $done_payments = $done_payments->get();
+            $shippers = array();
+            foreach ($done_payments as $done_payment){
+                if(!in_array($done_payment->done_payment->shipper->id, $shippers)){
+                    $shippers[$done_payment->done_payment->shipper->id] = $done_payment->done_payment->shipper->id;
+                }
+                $done_payment_report = new DonePaymentsReport();
+                $done_payment_report->payment_id = $done_payment->done_payment_id;
+                $done_payment_report->shipper_id = $done_payment->done_payment->shipper->id;
+                $done_payment_report->shipper_name = $done_payment->done_payment->shipper->name;
+                $done_payment_report->amount = $done_payment->payable;
+                $done_payment_report->iban_number = $done_payment->done_payment->shipper_bank->iban;
+                $done_payment_report->save();
+                $done_payment_array[] = ['Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'Amount' => $done_payment->payable, 'IBAN Number' => $done_payment->done_payment->shipper_bank->iban];
+                $total_amount = $total_amount + $done_payment->payable;
+            }
+            $done_payments_array['summary_header'] = ['', 'Total Shippers', 'Total Amount'];
+            $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
+            $done_payments_array[] = ['' => '', 'Total Shippers' => count($shippers), 'Total Amount' => $total_amount];
+            $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
+            $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
+            $done_payment_array[] = ['Payment ID' => 'Total', 'Shipper Name' => '', 'Amount' => $total_amount, 'IBAN Number' => ''];
+            $done_payment_array = array_merge($done_payments_array, $done_payment_array);
+
+            $cell_s = [
+                'font' => ['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => array(
+                    'outline' => array(
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
+                        'color' => array('argb' => '000000'),
+                    ),
+                ),
+            ];
+
+            $cell_st = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+            $sheet->fromArray($done_payment_array, NULL, 'A2', true);
+            $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
+            $sheet->getStyle("A7:D7")->applyFromArray($cell_st);
+            $date_file_name = Carbon::today()->format('Y_m_d');
+            $sheet->setTitle('Done Payments ' . $date_file_name);
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="done_payment_report.xlsx"');
+            header('Cache-Control: max-age=0');
+            $file_name_without_path = "reports/done_payment_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/done_payment_report_" . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+
+            NotificationsController::send(82, $date, url('/') . '/' . $file_name_without_path);
         }
     }
 }
