@@ -638,6 +638,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('multiple_piece')->name('multiple_piece.')->group(function (){
+        Route::prefix('hold')->name('hold.')->group(function () {
+            Route::get('', 'Admins\AdminShipmentPieceController@hold_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminShipmentPieceController@hold_shipment_details')->name('shipment_details');
+
+        });
+    });
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@v2_pickups_index')->name('index');
