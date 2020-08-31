@@ -211,8 +211,44 @@
                     camera_scanning_stop();
                 }
             });
+            $('#datatable tbody').on('click', 'tr td.remove button', function() {
+                var parent = $(this).parents('tr');
+                var id = parseInt(parent.attr('id'));
 
+                $.ajax({
+                    url: '{!! route('admin.pickups.receive.shipment_remove') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    },
+                    timeout: 5000,
+                    error: function (data) {
+                        toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    },
+                    success: function (data) {
+                        if (data.status == 0) {
+                            table.row(parent).remove();
+                            table.draw(false);
 
+                            var index = $.inArray(id, shipment_ids);
+
+                            if (index !== -1) {
+                                shipment_ids.splice(index, 1);
+
+                                if (shipment_ids.length == 0) {
+                                    $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
+                                }
+                            }
+
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    }
+                });
+            });
 
 
         });
