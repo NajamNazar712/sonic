@@ -1407,16 +1407,27 @@ class AdminDashboardController extends Controller
         $shipper_id = $request->shipper_id;
         $user = User::find($shipper_id);
         $shipper_hub_id = $user->city->hub_id;
+        $sale_persons = array();
+        $old_sale_person = '';
+        $new_sale_person = '';
         if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
-            if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){  
+            if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
+                $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
+                if($old_sale_person){
+                    $old_sale_person = $old_sale_person->sales_person->name;
+                }
+                $new_sale_person = Admin::find($tag_id)->name;
                 $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->get();
                 if($shipper_data->count() > 0){
                     SalePersonTag::where('user_id',$shipper_id)->where('status',0)->update(['status' => 1]);
                 }
+                $shipper = User::find($shipper_id);
                 $sale_person_tag = new SalePersonTag();
                 $sale_person_tag->admin_id=$tag_id;
                 $sale_person_tag->user_id=$shipper_id;
                 $sale_person_tag->save();
+                $sale_persons = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
+                NotificationsController::send(81, $shipper->name, $sale_persons);
             }
             else{
                 return ['status'=>0,'error'=>"Shipper is already tagged to  Sales Person!"];

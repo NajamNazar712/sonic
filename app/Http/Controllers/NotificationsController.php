@@ -5421,7 +5421,43 @@ class NotificationsController extends Controller
                   }
               }
           }
+          elseif ($id == 81){
+              $subject = $notification->subject;
+              $body = $notification->body;
+             $shipper_name = $reference_1_id;
+             $sale_person = $reference_2_id;
+
+              if(count($reference_1_id) > 0){
+                  foreach($reference_1_id as $shipper_id => $sale_persons){
+
+                      $shipper_name = User::find($shipper_id)->name;
+                      if($shipper_name)
+                      {
+                          if (strpos($body, '[shipper_name]') !== FALSE) {
+                              $body = str_replace('[shipper_name]', $shipper_name, $body);
+                          }
+                          /*if (strpos($body, '[preview]') !== FALSE) {
+                              $body = str_replace('[preview]', $html, $body);
+                          }*/
+                          $to = array();
+                          $cc = array();
+                          $shipper = User::find($shipper_id);
+                          if ($shipper->exists()) {
+                              $to = array_merge($to, $shipper->pluck('email')->toArray());
+                          }
+
+                          self::email($subject, $body, $to);
+                      }
+                      $old_salesperson_name=
+                  }
+              }
+
+
+
+
+          }
         }
+
       }
     }
 
