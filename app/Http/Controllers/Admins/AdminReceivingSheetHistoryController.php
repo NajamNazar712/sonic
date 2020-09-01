@@ -32,7 +32,8 @@ class AdminReceivingSheetHistoryController extends Controller
     {
         $receiving_sheet = ReceivingSheet::join('user_shipping_infos as usi', 'receiving_sheets.pickup_address_id', '=', 'usi.id')
             ->join('cities as c', 'usi.city_id', '=', 'c.id')
-            ->select('receiving_sheets.id as receiving_sheet_id','receiving_sheets.id as id','receiving_sheets.booked as bookings', 'receiving_sheets.received as receiving', 'c.name as origin', 'usi.pickup_address as address', 'receiving_sheets.created_at as booking_date');
+            ->join('users as u','u.id','=','receiving_sheets.user_id')
+            ->select('receiving_sheets.id as receiving_sheet_id','receiving_sheets.id as id','receiving_sheets.booked as bookings', 'receiving_sheets.received as receiving', 'c.name as origin', 'usi.pickup_address as address', 'receiving_sheets.created_at as booking_date','u.name as shipper_name');
 
         if($receiving_sheet_number = $request->get('receiving_sheet_id')){
             $receiving_sheet = $receiving_sheet->where('receiving_sheets.id', '=', $receiving_sheet_number);
