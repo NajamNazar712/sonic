@@ -98,6 +98,7 @@
                     {name: 'amount', class: 'align-middle amount', orderable: false, searchable: false},
                     {name: 'origin', class: 'align-middle origin', orderable: false, searchable: false},
                     {name: 'destination', class: 'align-middle destination', sortable: false, orderable: false, searchable: false},
+                    {name: 'pieces', class: 'align-middle pieces', sortable: false, orderable: false, searchable: false},
                     {name: 'remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -168,7 +169,7 @@
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.amount, data.details.origin, data.details.destination, remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.amount, data.details.origin, data.details.destination,data.details.pieces, remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -214,40 +215,15 @@
             $('#datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
                 var id = parseInt(parent.attr('id'));
+                var index = $.inArray(id, shipment_ids);
+                if (index !== -1) {
+                    table.row(parent).remove();
+                    table.draw(false);
+                    var piece_rowNo = table.rows().count();
+                    shipment_ids.splice(index, 1);
+                    console.table(shipment_ids);
+                }
 
-                $.ajax({
-                    url: '{!! route('admin.pickups.receive.shipment_remove') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    },
-                    timeout: 5000,
-                    error: function (data) {
-                        toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    },
-                    success: function (data) {
-                        if (data.status == 0) {
-                            table.row(parent).remove();
-                            table.draw(false);
-
-                            var index = $.inArray(id, shipment_ids);
-
-                            if (index !== -1) {
-                                shipment_ids.splice(index, 1);
-
-                                if (shipment_ids.length == 0) {
-                                    $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
-                                }
-                            }
-
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-                        else {
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                    }
-                });
             });
 
 
