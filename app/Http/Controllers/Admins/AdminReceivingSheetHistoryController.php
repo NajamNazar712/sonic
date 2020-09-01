@@ -31,23 +31,9 @@ class AdminReceivingSheetHistoryController extends Controller
     public function receiving_sheet_list(Request $request)
     {
         $receiving_sheet = ReceivingSheet::join('user_shipping_infos as usi', 'receiving_sheets.pickup_address_id', '=', 'usi.id')
-            ->join('cities as c', 'usi.city_id', '=', 'c.id')
+            ->leftjoin('cities as c', 'usi.city_id', '=', 'c.id')
             ->join('users as u','u.id','=','receiving_sheets.user_id')
             ->select('receiving_sheets.id as receiving_sheet_id','receiving_sheets.id as id','receiving_sheets.booked as bookings', 'receiving_sheets.received as receiving', 'c.name as origin', 'usi.pickup_address as address', 'receiving_sheets.created_at as booking_date','u.name as shipper_name');
-
-        if($receiving_sheet_number = $request->get('receiving_sheet_id')){
-            $receiving_sheet = $receiving_sheet->where('receiving_sheets.id', '=', $receiving_sheet_number);
-        }
-       /* if($city = $request->get('city')){
-            $receiving_sheet = $receiving_sheet->where('usi.city_id','=','c.id')->where('c.name', 'like', '%' . $city . '%');
-        }*/
-        if($origin = $request->get('origin')){
-            $receiving_sheet = $receiving_sheet->where('c.id', 'like', '%' . $origin . '%');
-        }
-
-        if($shipper_id = $request->get('shipper_name')){
-            $receiving_sheet = $receiving_sheet->where('receiving_sheets.user_id', '=',$shipper_id);
-        }
 
         $datatable = Datatables::of($receiving_sheet)
             ->editColumn('receiving_sheet_id', function ($receiving_sheet) {
@@ -58,6 +44,17 @@ class AdminReceivingSheetHistoryController extends Controller
                 return '-';
             });
 
+        if($receiving_sheet_number = $request->get('receiving_sheet_id')){
+            $receiving_sheet = $receiving_sheet->where('receiving_sheets.id', '=', $receiving_sheet_number);
+        }
+
+        if($origin = $request->get('origin')){
+            $receiving_sheet = $receiving_sheet->where('c.id', $origin);
+        }
+
+        if($shipper_id = $request->get('shipper_name')){
+            $receiving_sheet = $receiving_sheet->where('receiving_sheets.user_id', '=',$shipper_id);
+        }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');

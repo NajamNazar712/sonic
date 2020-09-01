@@ -301,7 +301,7 @@
                     {data: 'shipper_name', name: 'u.name', class: 'align-middle text_center shipper_name'},
                     {data: 'bookings', name: 'receiving_sheets.booked', class: 'align-middle text_center bookings'},
                     {data: 'address', name: 'usi.pickup_address', class: 'text_center align-middle address'},
-                    {data: 'origin', name: 'c.name ', class: 'text_center align-middle origin', orderable:false},
+                    {data: 'origin', name: 'c.name', class: 'text_center align-middle origin'},
                     {data: 'booking_date', name: 'receiving_sheets.created_at', class: 'text_center align-middle booking_date'},
                 ],
                 rowCallback: function(row, data, index) {
@@ -322,7 +322,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.origin')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number')) {
                             $(td).appendTo($(search));
                         }
                         else {
