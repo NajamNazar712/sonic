@@ -3411,6 +3411,8 @@ class AdminFinanceController extends Controller
 
                             $pending_payment_shipment->delete();
 
+                            self::sub_pending_payment_charges($pending_payment_shipment->pending_payment_id,$pending_payment_shipment->amount,$pending_payment_shipment->charges,$pending_payment_shipment->gst,$pending_payment_shipment->payable);
+
                             if ($done_payment_shipment->type == 1) {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
@@ -5908,6 +5910,18 @@ class AdminFinanceController extends Controller
             $done_payment_charges->payable = $payable;
             $done_payment_charges->packaging_charges = $packaging_material_charges;
             $done_payment_charges->save();
+        }
+    }
+
+    static public function sub_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable){
+        $pending_payment_charges = PendingPaymentCalculation::where('pending_payment_id', $pending_payment_id);
+        if($pending_payment_charges->exists()){
+            $pending_payment_charges = $pending_payment_charges->first();
+            $pending_payment_charges->amount = $pending_payment_charges->amount - $amount;
+            $pending_payment_charges->charges = $pending_payment_charges->charges - $charges;
+            $pending_payment_charges->gst = $pending_payment_charges->gst - $gst;
+            $pending_payment_charges->payable = $pending_payment_charges->payable - $payable;
+            $pending_payment_charges->save();
         }
     }
 
