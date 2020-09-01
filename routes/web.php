@@ -97,6 +97,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('new','Shippers\ShipperReceivingSheetController@create_view')->name('new');
             Route::post('info','Shippers\ShipperReceivingSheetController@get_shipment_details')->name('info');
             Route::post('print_receiving_sheet_and_air_waybill', 'Shippers\ShipperReceivingSheetController@print_receiving_sheet_and_air_waybill')->name('print_receiving_sheet_and_air_waybill');
+            Route::post('cn/info','Shippers\ShipperReceivingSheetController@update_cn_info')->name('cn.info');
+            Route::post('cn/update','Shippers\ShipperReceivingSheetController@update_consignee_info_and_special_instructions')->name('cn.update');
         });
 
         Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
