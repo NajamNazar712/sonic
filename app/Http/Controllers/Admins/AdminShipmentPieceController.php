@@ -18,9 +18,17 @@ class AdminShipmentPieceController extends Controller
         return view('admin.shipment_pieces.index');
     }
     public function hold_shipment_details(Request $request){
-        $shipment = Shipment::where('tracking_number',$request->tracking_number)->where('shipper_status_id', 1)->where('pieces', '>', 1);
+        $shipment = Shipment::where('tracking_number',$request->tracking_number);
         if($shipment->exists()) {
             $shipment = $shipment->first();
+            if($shipment->pieces <= 1){
+                return response()->json(['status' => 1, 'error' => 'Shipment doesn\'t have Multiple Pieces!']);
+            }
+
+            if($shipment->shipper_status_id != 1){
+                return response()->json(['status' => 1, 'error' => 'Shipment not on Booked status anymore!']);
+            }
+
             $details = array();
             $details['id'] = $shipment->id;
             $details['tracking_number'] = $shipment->tracking_number;
@@ -33,5 +41,9 @@ class AdminShipmentPieceController extends Controller
         }else{
             return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
         }
+    }
+
+    public function hold_shipment_submit(Request $request){
+        return $request;
     }
 }
