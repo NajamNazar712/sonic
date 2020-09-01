@@ -11,6 +11,6 @@ class UpdateModulePermissionForRiderReceivingTableSeeder extends Seeder
      */
     public function run()
     {
-        array('id' => 366, 'name' => 'Rider Receiving - View', 'module_id' => 2);
+        array('id' => 366, 'name' => 'Rider Receiving - View', 'module_id' => 3);
     }
 }
