@@ -185,14 +185,14 @@ class Kernel extends ConsoleKernel
             $zero_charges_report_time = $settings->setting_value . ':00';
             $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time);
         }
-        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $station_recovery_cron_time = $settings->setting_value . ':00';
-            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
-        }
+//        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+//
+//        if ($settings->exists()) {
+//            $settings = $settings->first();
+//
+//            $station_recovery_cron_time = $settings->setting_value . ':00';
+//            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
+//        }
     }
 	 /**
      * Register the commands for the application.

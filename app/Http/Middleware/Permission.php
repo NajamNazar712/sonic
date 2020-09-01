@@ -85,6 +85,14 @@ class Permission
             'pickups.history.list' => 123,
             'pickups.history.bookings.all' => 123,
 
+            'v2_pickups.pending.index' => 17,
+            'v2_pickups.arrival.individual.index' => 24,
+            'v2_pickups.arrival.bulk.index' => 24,
+            'v2_pickups.rider.index' => 271,
+            'v2_pickups.action_log.index' => 272,
+            'v2_pickups.rider_receiving.index' => 366,
+
+
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
             'cargo.draft.index' => 26,
