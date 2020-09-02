@@ -520,18 +520,14 @@ class APIController extends Controller
               $charges_mode_id = 4;
               $payment_mode_id = 1;
               $self_collection = FALSE;
+              $delivery_type_id = 1;
           }
           else{
               $pickup_address_id = $request->input('pickup_address_id');
               $consignee_city_id = $request->input('consignee_city_id');
 
               if($user_type['account_type_id'] == 2) {
-                  if($service_type_id == 5){
-                      $delivery_type_id = 1;
-                  }
-                  else{
-                      $delivery_type_id = $request->input('delivery_type_id');
-                  }
+                    $delivery_type_id = $request->input('delivery_type_id');
                   $consignee_city_name = City::where('id', $consignee_city_id)->first();
                   if($delivery_type_id == 2){
                       $consignee_address = 'TRAX Office ' . $consignee_city_name['name'];
