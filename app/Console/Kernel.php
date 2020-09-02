@@ -153,8 +153,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
-		
-//      $schedule->command('report:donepayment')->dailyAt('21:00')->runInBackground();		$schedule->command('summary:reversepickup')->dailyAt('8:00')->runInBackground();
+
+        $schedule->command('report:donepayment')->dailyAt('21:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
