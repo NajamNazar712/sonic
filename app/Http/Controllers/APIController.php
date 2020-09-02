@@ -281,12 +281,12 @@ class APIController extends Controller
       if($user_type['account_type_id'] == 1) {
         $rules = [
             'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
-				$query->whereNotIn('id', [4, 5]);
+				$query->whereNotIn('id', [4]);
             })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
-            'information_display' => ['required', 'boolean'],
+            'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
             'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,190'],
@@ -302,18 +302,18 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required_if:service_type_id,1,2,5', 'nullable', 'numeric', 'min:0'],
-            'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric', 'min:0'],
+            'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [4]);
             })],
 
-            'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,1000'],
-            'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
-            'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
+            'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
+            'item_quantity' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean'],
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'pieces_quantity' => ['nullable','integer', 'digits_between:1,10', 'between:1,10'],
@@ -334,13 +334,13 @@ class APIController extends Controller
       else {
         $rules = [
             'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
-                $query->whereNotIn('id', [3, 4, 5]);
+                $query->whereNotIn('id', [3, 4]);
             })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
-            'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
-            'information_display' => ['required', 'boolean'],
+            'delivery_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
+            'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
             'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,190'],
@@ -355,8 +355,8 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required', 'numeric', 'between:0,1000000'],
-            'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+            'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
+            'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
@@ -391,124 +391,196 @@ class APIController extends Controller
         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
       }
       else {
-        $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
+          $service_type_id = $request->input('service_type_id');
 
-        if (!$user_shipping_info->status) {
-          return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
-        }
+          if($service_type_id != 5){
+              $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
-        if (!$user_shipping_info->city->status) {
-          return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
-        }
+              if (!$user_shipping_info->status) {
+                  return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
+              }
 
-        if (!$user_shipping_info->city->zone_id) {
-          return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
-        }
+              if (!$user_shipping_info->city->status) {
+                  return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
+              }
 
-        if (!$user_shipping_info->city->pickup) {
-          return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
-        }
+              if (!$user_shipping_info->city->zone_id) {
+                  return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
+              }
 
-        $consignee_city = City::find($request->input('consignee_city_id'));
+              if (!$user_shipping_info->city->pickup) {
+                  return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
+              }
 
-        if (!$consignee_city->status) {
-          return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
-        }
+              $consignee_city = City::find($request->input('consignee_city_id'));
 
-        if (!$consignee_city->zone_id) {
-          return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
-        }
+              if (!$consignee_city->status) {
+                  return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+              }
 
-        $pickup_city_id = $user_shipping_info->city_id;
+              if (!$consignee_city->zone_id) {
+                  return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+              }
 
-        if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
-          return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
-        }
+              $pickup_city_id = $user_shipping_info->city_id;
 
-          if ($user_shipping_info->city->id != $consignee_city->id) {
-              $city_zone = City::where('id', $consignee_city->id)->first();
-              $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
-              $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
-              $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
-              $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
-              $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
-              if ($zone->exists()) {
-                  $zone = $zone->first();
+              if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
+                  return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
+              }
 
-                  if ($zone['class'] == 0) {
-                      $check_zone = $class_a['setting_value'];
-                  } elseif ($zone['class'] == 1) {
-                      $check_zone = $class_b['setting_value'];
-                  } elseif ($zone['class'] == 2) {
-                      $check_zone = $class_c['setting_value'];
+              if ($user_shipping_info->city->id != $consignee_city->id) {
+                  $city_zone = City::where('id', $consignee_city->id)->first();
+                  $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
+                  $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
+                  $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
+                  $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
+                  $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
+                  if ($zone->exists()) {
+                      $zone = $zone->first();
+
+                      if ($zone['class'] == 0) {
+                          $check_zone = $class_a['setting_value'];
+                      } elseif ($zone['class'] == 1) {
+                          $check_zone = $class_b['setting_value'];
+                      } elseif ($zone['class'] == 2) {
+                          $check_zone = $class_c['setting_value'];
+                      } else {
+                          $check_zone = $class_d['setting_value'];
+                      }
+                      if ((int)$request->input('amount') > $check_zone) {
+                          return response()->json(['status' => 1, 'message' => 'Amount must be smaller then or equal to ' . $check_zone]);
+                      }
                   } else {
-                      $check_zone = $class_d['setting_value'];
+                      return response()->json(['status' => 1, 'message' => "Zone class does'nt exists"]);
                   }
-                  if ((int)$request->input('amount') > $check_zone) {
-                      return response()->json(['status' => 1, 'message' => 'Amount must be smaller then or equal to ' . $check_zone]);
-                  }
-              } else {
-                  return response()->json(['status' => 1, 'message' => "Zone class does'nt exists"]);
+              }
+
+              if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
+                  return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
               }
           }
+          else{
+              $pickup_consignee_city = City::find($request->input('consignee_city_id'));
+              if (!$pickup_consignee_city->status) {
+                  return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id]) . ' is deactivated';
+              }
 
-        if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
-          return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
-        }
+              if (!$pickup_consignee_city->zone_id) {
+                  return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id]) . ' is deactivated';
+              }
 
-        $service_type_id = $request->input('service_type_id');
-        $pickup_address_id = $request->input('pickup_address_id');
-        $information_display = $request->input('information_display');
-        $consignee_city_id = $request->input('consignee_city_id');
+              if (!$pickup_consignee_city->pickup) {
+                  return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $pickup_consignee_city->city_id]);
+              }
 
-        if ($request->filled('charges_mode_id')) {
-          $charges_mode_id = $request->input('charges_mode_id');
-        }
-        else {
-          if($user_type['account_type_id'] == 1) {
-            $charges_mode_id = 4;
+              $pickup_address_id_for_delivery = $request->input('pickup_address_id');
+              $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
+              $delivery_city = City::find($pickup_address_for_delivery->city_id);
+
+              if (!$delivery_city->status) {
+                  return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+              }
+
+              if (!$delivery_city->zone_id) {
+                  return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+              }
+
+              $pickup_city_id = $pickup_consignee_city->id;
+
+              if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
+                  return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
+              }
+
+              if (!CityDelivery::where('city_id', $delivery_city->id)->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
+                  return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
+              }
           }
-          else {
-            $charges_mode_id = 3;
+          if($service_type_id == 5){
+
+              if ($request->filled('consignee_email_address')) {
+                  $user_email_id = $request->input('consignee_email_address');
+              }
+              else {
+                  $user = User::find($user_id);
+                  $user_email_id = $user->email;
+              }
+              $pickup_city_id = $request->input('consignee_city_id');
+              $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, substr_replace($request->input('consignee_phone_number_1'), '-', 4, 0), $user_email_id, $pickup_city_id, 0, TRUE);
+
+              $pickup_delivery_address_id = $request->input('pickup_address_id');
+              $pickup_delivery_address = UserShippingInfo::find($pickup_delivery_address_id);
+
+              $consignee_city_id = $pickup_delivery_address->city_id;
+              $consignee_name = $pickup_delivery_address->poc;
+              $consignee_address = $pickup_delivery_address->pickup_address;
+              $consignee_phone_number_1 = $pickup_delivery_address->phone;
+              $consignee_phone_number_2 = NULL;
+              $consignee_email_address = $pickup_delivery_address->email;
+              $information_display = TRUE;
+              $charges_mode_id = 4;
+              $payment_mode_id = 1;
+              $self_collection = FALSE;
           }
-        }
+          else{
+              $pickup_address_id = $request->input('pickup_address_id');
+              $consignee_city_id = $request->input('consignee_city_id');
 
-        if($user_type['account_type_id'] == 2) {
-            $delivery_type_id = $request->input('delivery_type_id');
-            $consignee_city_name = City::where('id', $consignee_city_id)->first();
-            if($delivery_type_id == 2){
-                $consignee_address = 'TRAX Office ' . $consignee_city_name['name'];
-            }
-            else {
-                $consignee_address = $request->input('consignee_address');
-            }
-        }
-        else{
-            $consignee_address = $request->input('consignee_address');
-        }
+              if($user_type['account_type_id'] == 2) {
+                  if($service_type_id == 5){
+                      $delivery_type_id = 1;
+                  }
+                  else{
+                      $delivery_type_id = $request->input('delivery_type_id');
+                  }
+                  $consignee_city_name = City::where('id', $consignee_city_id)->first();
+                  if($delivery_type_id == 2){
+                      $consignee_address = 'TRAX Office ' . $consignee_city_name['name'];
+                  }
+                  else {
+                      $consignee_address = $request->input('consignee_address');
+                  }
+              }
+              else{
+                  $consignee_address = $request->input('consignee_address');
+              }
 
-        $consignee_name = $request->input('consignee_name');
-        $consignee_phone_number_1 = substr_replace($request->input('consignee_phone_number_1'), '-', 4, 0);
+              $consignee_name = $request->input('consignee_name');
+              $consignee_phone_number_1 = substr_replace($request->input('consignee_phone_number_1'), '-', 4, 0);
 
-        if ($request->filled('consignee_phone_number_2')) {
-            $consignee_phone_number_2 = substr_replace($request->input('consignee_phone_number_2'), '-', 4, 0);
-        }
-        else {
-          $consignee_phone_number_2 = NULL;
-        }
+              if ($request->filled('consignee_phone_number_2')) {
+                  $consignee_phone_number_2 = substr_replace($request->input('consignee_phone_number_2'), '-', 4, 0);
+              }
+              else {
+                  $consignee_phone_number_2 = NULL;
+              }
 
-        if ($request->filled('consignee_email_address')) {
-          $consignee_email_address = $request->input('consignee_email_address');
-        }
-        else {
-          $consignee_email_address = NULL;
-        }
+              if ($request->filled('consignee_email_address')) {
+                  $consignee_email_address = $request->input('consignee_email_address');
+              }
+              else {
+                  $consignee_email_address = NULL;
+              }
+              $information_display = $request->input('information_display');
 
-          $self_collection = FALSE;
-          if($service_type_id == 1 && $request->has('self_collection')){
-              if($request->input('self_collection') != null){
-                  if($request->input('self_collection') == 1){
-                      $self_collection = TRUE;
+              if ($request->filled('charges_mode_id')) {
+                  $charges_mode_id = $request->input('charges_mode_id');
+              }
+              else {
+                  if($user_type['account_type_id'] == 1) {
+                      $charges_mode_id = 4;
+                  }
+                  else {
+                      $charges_mode_id = 3;
+                  }
+              }
+
+              $payment_mode_id = $request->input('payment_mode_id');
+              $self_collection = FALSE;
+              if($service_type_id == 1 && $request->has('self_collection')){
+                  if($request->input('self_collection') != null){
+                      if($request->input('self_collection') == 1){
+                          $self_collection = TRUE;
+                      }
                   }
               }
           }
@@ -545,15 +617,18 @@ class APIController extends Controller
           $same_day_timing_id = NULL;
         }
 
-        $amount = $request->input('amount');
-        $payment_mode_id = $request->input('payment_mode_id');
 		if ($service_type_id == 3) {
               $try_and_buy_charges = $request->input('try_and_buy_fees');
               $amount = 0;
           }
-          else {
-              $try_and_buy_charges = NULL;
-          }
+        elseif ($service_type_id == 5){
+            $try_and_buy_charges = NULL;
+            $amount = 0;
+        }
+		else {
+		    $try_and_buy_charges = NULL;
+            $amount = $request->input('amount');
+		}
           $pieces_quantity = 1;
           if($service_type_id == 1 && $request->has('pieces_quantity')){
               if($request->input('pieces_quantity') != null){

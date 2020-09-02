@@ -2078,12 +2078,9 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['pickup_address_id'] = 'Delivery is not allowed for City: ' . $delivery_city->name . ' with Service Type ID #' . $row['service_type_id'] . ' and Shipping Mode ID #' . $row['shipping_mode_id'];
                         }
                     }
-//                            dd($row['consignee_address']);
-
                 }
             }
-//                dd($blacklist_found_categories);
-//            dd($rows);
+
                 if (empty($errors)) {
                     if (empty($nsa_error)) {
                         if(empty($blacklist_errors)){
@@ -3062,7 +3059,7 @@ class ShipperShipmentBookController extends Controller
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
             })],
-            'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
+            'delivery_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [2, 3]);
             })],
