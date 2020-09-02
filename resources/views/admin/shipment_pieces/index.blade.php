@@ -53,13 +53,13 @@
                                 </thead>
                             </table>
 
-                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.v2_pickups.arrival.bulk.store') }}" novalidate="novalidate">
+                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.multiple_piece.hold.submit') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
 
                                 <div class="form-group ml-1">
-                                    <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
+                                    <button type="submit" id="form_submit" name="confirm" class="btn btn-primary submit" value="Submit" disabled="disabled">Submit</button>
                                 </div>
                             </form>
                         </div>
@@ -177,7 +177,7 @@
 
                                         $('#add_shipment_form button.add').prop('disabled', false);
 
-                                        $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+                                        $('#arrival_of_shipments_form button.submit').prop('disabled', false);
 
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
@@ -221,7 +221,9 @@
                     table.draw(false);
                     var piece_rowNo = table.rows().count();
                     shipment_ids.splice(index, 1);
-                    console.table(shipment_ids);
+                    if(shipment_ids.length == 0){
+                        $('#form_submit').prop('disabled', true);
+                    }
                 }
 
             });

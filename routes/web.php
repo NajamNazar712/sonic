@@ -642,6 +642,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('hold')->name('hold.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminShipmentPieceController@hold_shipment_details')->name('shipment_details');
+            Route::post('submit', 'Admins\AdminShipmentPieceController@hold_shipment_submit')->name('submit');
 
         });
     });
