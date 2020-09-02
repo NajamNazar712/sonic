@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Auth;
 
 class AdminShipmentPieceController extends Controller
 {
@@ -54,9 +55,12 @@ class AdminShipmentPieceController extends Controller
                     $shipment->consignee_status_id = 62;
                     $shipment->save();
                     ShipmentsJourneyController::add($shipment_id, 62, 62, NULL, NULL, NULL, Auth::id());
-
                 }
             }
+
+            return redirect()->back()->with('success', 'Shipments successfully updated!');
+
         }
+        return redirect()->back()->with('error', 'No Shipments Selected!');
     }
 }
