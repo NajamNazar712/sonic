@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -44,6 +45,18 @@ class AdminShipmentPieceController extends Controller
     }
 
     public function hold_shipment_submit(Request $request){
-        return $request;
+        $shipment_ids = explode(',', $request->shipment_ids);
+        if(count($shipment_ids) > 0){
+            foreach ($shipment_ids as $shipment_id){
+                $shipment = Shipment::find($shipment_id);
+                if($shipment){
+                    $shipment->shipper_status_id = 62;
+                    $shipment->consignee_status_id = 62;
+                    $shipment->save();
+                    ShipmentsJourneyController::add($shipment_id, 62, 62, NULL, NULL, NULL, Auth::id());
+
+                }
+            }
+        }
     }
 }

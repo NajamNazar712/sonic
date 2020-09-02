@@ -227,7 +227,48 @@
                 }
 
             });
+            $('#arrival_of_shipments_form').bind('submit', function(e) {
+                e.preventDefault();
 
+                $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
+
+                var form = this;
+
+                swal({
+                    text: 'Are you sure, you want to Mark these Shipments as Short Pieces?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Shipments are being Updated!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        blockPagePermanently();
+                        form.submit();
+                    }
+                });
+            });
 
         });
 
