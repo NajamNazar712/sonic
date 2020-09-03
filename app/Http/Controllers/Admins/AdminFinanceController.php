@@ -1811,7 +1811,7 @@ class AdminFinanceController extends Controller
         $replacement_weight = null;
 
         $shipment = Shipment::find($shipment_id);
-        $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges + $shipment->gst;
+        $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
 
         if($shipment->actual_weight == null){
             return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
@@ -1845,17 +1845,33 @@ class AdminFinanceController extends Controller
         ShipmentChargesController::fuel_surcharge($shipment_id);
 
         $shipment = Shipment::find($shipment_id);
-        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges + $shipment->gst;
+        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
 
         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
         $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
 
         if($pending_payment->exists()){
+            $pending_payment = $pending_payment->first();
+
+            $previous_gst = $pending_payment->gst;
+
+            $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+
+            $adjustment_amount += $previous_gst - $new_gst;
+
             self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
         }else{
             $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
             if($done_payment->exists()){
+                $done_payment = $done_payment->first();
+
+                $previous_gst = $done_payment->gst;
+
+                $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+
+                $adjustment_amount += $previous_gst - $new_gst;
+
                 self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
             }
         }
