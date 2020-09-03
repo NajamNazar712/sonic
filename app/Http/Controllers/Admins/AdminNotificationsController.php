@@ -319,6 +319,7 @@ class AdminNotificationsController extends Controller
 		else if ($id == 77){
             $details['fields'] = ['rider_name','rider_phone'];
         }
+
 		return $details;
     }
 
