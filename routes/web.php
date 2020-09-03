@@ -638,12 +638,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
-    Route::prefix('multiple_piece')->name('multiple_piece.')->group(function (){
+    Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function (){
         Route::prefix('hold')->name('hold.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_index')->name('index');
+            Route::get('list.', 'Admins\AdminShipmentPieceController@hold_index')->name('list');
+        });
+        Route::prefix('add')->name('add.')->group(function () {
+            Route::get('', 'Admins\AdminShipmentPieceController@hold_add_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminShipmentPieceController@hold_shipment_details')->name('shipment_details');
             Route::post('submit', 'Admins\AdminShipmentPieceController@hold_shipment_submit')->name('submit');
-
         });
     });
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {

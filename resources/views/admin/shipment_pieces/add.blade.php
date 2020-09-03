@@ -53,7 +53,7 @@
                                 </thead>
                             </table>
 
-                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.multiple_piece.hold.submit') }}" novalidate="novalidate">
+                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.multiple_pieces.add.submit') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
@@ -139,7 +139,7 @@
                     var tracking_number = $(form).find('input.tracking_number').val();
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         $.ajax({
-                            url: '{!! route('admin.multiple_piece.hold.shipment_details') !!}',
+                            url: '{!! route('admin.multiple_pieces.add.shipment_details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,

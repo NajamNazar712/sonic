@@ -16,8 +16,8 @@ class AdminShipmentPieceController extends Controller
         $this->middleware('Permission');
     }
 
-    public function hold_index(){
-        return view('admin.shipment_pieces.index');
+    public function hold_add_index(){
+        return view('admin.shipment_pieces.add');
     }
     public function hold_shipment_details(Request $request){
         $shipment = Shipment::where('tracking_number',$request->tracking_number);
@@ -62,5 +62,9 @@ class AdminShipmentPieceController extends Controller
 
         }
         return redirect()->back()->with('error', 'No Shipments Selected!');
+    }
+
+    public function hold_index(){
+        return view('admin.shipment_pieces.list');
     }
 }
