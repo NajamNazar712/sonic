@@ -64,7 +64,6 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             $consignee_phone_number_2 = NULL;
             $consignee_email_address = $pickup_delivery_address->email;
             $information_display = TRUE;
-            $charges_mode_id = 4;
             $payment_mode_id = 1;
             $self_collection = FALSE;
         }
@@ -94,7 +93,6 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             } else {
                 $consignee_email_address = NULL;
             }
-            $charges_mode_id = $this->booking['charges_mode_id'];
             $payment_mode_id = $this->booking['payment_mode_id'];
 
             if (strtolower($this->booking['self_collection']) == 'yes') {
@@ -103,6 +101,7 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
                 $self_collection = FALSE;
             }
         }
+        $charges_mode_id = $this->booking['charges_mode_id'];
 
         if (!empty(trim($this->booking['order_id']))) {
             $order_id = $this->booking['order_id'];
