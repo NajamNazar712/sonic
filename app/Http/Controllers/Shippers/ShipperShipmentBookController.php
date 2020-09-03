@@ -3430,7 +3430,6 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else {
-                dd($errors);
                 $cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                 $booking_types = BookingType::whereNotIn('id', [3, 4])->pluck('booking_type','id');
                 $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
