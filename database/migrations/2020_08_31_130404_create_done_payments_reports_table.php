@@ -18,7 +18,7 @@ class CreateDonePaymentsReportsTable extends Migration
             $table->integer('payment_id');
             $table->string('shipper_id');
             $table->string('shipper_name');
-            $table->decimal('amount', 8, 2);
+            $table->decimal('amount', 20,2);
             $table->string('iban_number');
             $table->timestamps();
         });
