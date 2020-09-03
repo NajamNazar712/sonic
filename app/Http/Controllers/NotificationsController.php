@@ -5445,7 +5445,7 @@ class NotificationsController extends Controller
                       if (strpos($body, '[link]') !== FALSE) {
                           $body = str_replace('[link]', $link, $body);
                       }
-                      $summary_html = '<table style="width:100%;">';
+                      $summary_html = '<div style="margin-bottom: 100px;"><table style="width:100%;">';
                       $summary_html .= '<thead><tr>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Shippers</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Amount</th>
@@ -5483,7 +5483,7 @@ class NotificationsController extends Controller
                       $summary_html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. count($shippers) .'</td>';
                       $summary_html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_amount . '</td>';
                       $summary_html .='</tr>';
-                      $summary_html .= '</tbody></table>';
+                      $summary_html .= '</tbody></table></div>';
 
                       $html = $summary_html . $html;
                       if (strpos($body, '[preview]') !== FALSE) {
