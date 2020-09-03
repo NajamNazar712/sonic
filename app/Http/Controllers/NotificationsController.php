@@ -5425,7 +5425,7 @@ class NotificationsController extends Controller
 		  else if($id == 82){
                   $done_payment_report = DonePaymentsReport::get();
                   if($done_payment_report){
-                      $date = Carbon::today()->format('Y-m-d');
+                      $date = Carbon::yesterday()->format('Y-m-d');
                       $subject = $notification->subject;
                       $body = $notification->body;
                       if (strpos($subject, '[date]') !== FALSE) {

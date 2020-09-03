@@ -40,7 +40,7 @@ class DonePaymentReport extends Command
      */
     public function handle()
     {
-        $date = Carbon::today()->format('Y-m-d');
+        $date = Carbon::yesterday()->format('Y-m-d');
         $response = AdminReportsEmailController::done_payment($date . ' 00:00:00');
     }
 }
