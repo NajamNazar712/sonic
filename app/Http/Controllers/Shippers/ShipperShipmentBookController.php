@@ -1870,7 +1870,8 @@ class ShipperShipmentBookController extends Controller
                 if($service_type_check_id != null){
                     $rows[$key]['service_type_id'] = $service_type_check_id;
                     $row['service_type_id'] = $service_type_check_id;
-
+                }
+                else{
                     $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
                         $query->whereNotIn('id', [4]);
                     })];
@@ -3183,6 +3184,8 @@ class ShipperShipmentBookController extends Controller
                 if($service_type_check_id != null){
                     $rows[$key]['service_type_id'] = $service_type_check_id;
                     $row['service_type_id'] = $service_type_check_id;
+                }
+                else{
                     $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
                         $query->whereNotIn('id', [4]);
                     })];
