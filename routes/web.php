@@ -690,7 +690,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@individual_arrival_submit')->name('store');
             });
         });
-        
+
         Route::prefix('arrival_service')->name('arrival_service.')->group(function () {
             Route::prefix('service')->name('service.')->group(function () {
                 Route::get('', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_service_index')->name('index');
