@@ -831,6 +831,10 @@
                                     @if (session('role_id') == 1 || in_array(318, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.sales.projection.shipments.index')}}">Projection Shipments</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(302, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.nsa_account.index') }}">NSA Accounts</a>
+                                        </li>
+                                    @endif
                                 </ul>
 
                             </li>

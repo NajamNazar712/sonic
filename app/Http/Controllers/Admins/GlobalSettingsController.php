@@ -2650,4 +2650,43 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+
+    public function nsa_account_index(){
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        $settings = GlobalSettings::where('type', 'nsa_accounts');
+        $nsa_accounts = array();
+        if($settings->exists()){
+            $settings = $settings->first();
+            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.nsa_account')->with(['shippers' => $shippers,'nsa_accounts' => $nsa_accounts]);
+    }
+
+    public function nsa_account_store(Request $request){
+        if($request->has('shippers')){
+            if(count($request->shippers) > 0){
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'foc_account_tag');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                }
+                else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'foc_account_tag';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        }else{
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
+    }
 }

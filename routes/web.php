@@ -1735,6 +1735,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        Route::prefix('nsa_account')->name('nsa_account.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@nsa_account_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@nsa_account_store')->name('store');
+        });
+
         Route::prefix('minimum_chargeable_weight')->name('minimum_chargeable_weight.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
