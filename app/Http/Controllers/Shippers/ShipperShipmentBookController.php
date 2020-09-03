@@ -1849,9 +1849,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $rows[] = $row;
                 }
-                if($request->service_type_check_id != null){
-                    $service_type_check_id = $request->service_type_check_id;
-                }
+                $service_type_check_id = $request->service_type_check_id;
             }
 
             $errors = array();
@@ -1872,6 +1870,10 @@ class ShipperShipmentBookController extends Controller
                 if($service_type_check_id != null){
                     $rows[$key]['service_type_id'] = $service_type_check_id;
                     $row['service_type_id'] = $service_type_check_id;
+
+                    $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
+                        $query->whereNotIn('id', [4]);
+                    })];
                 }
 
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
@@ -3162,9 +3164,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $rows[] = $row;
                 }
-                if($request->service_type_check_id != null){
-                    $service_type_check_id = $request->service_type_check_id;
-                }
+                $service_type_check_id = $request->service_type_check_id;
             }
 
             $errors = array();
@@ -3183,6 +3183,9 @@ class ShipperShipmentBookController extends Controller
                 if($service_type_check_id != null){
                     $rows[$key]['service_type_id'] = $service_type_check_id;
                     $row['service_type_id'] = $service_type_check_id;
+                    $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
+                        $query->whereNotIn('id', [4]);
+                    })];
                 }
 
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
