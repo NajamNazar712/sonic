@@ -3091,8 +3091,8 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required', 'integer', 'digits_between:1,20', 'min:0'],
-            'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })]
         ];
@@ -3430,6 +3430,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else {
+                dd($errors);
                 $cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                 $booking_types = BookingType::whereNotIn('id', [3, 4])->pluck('booking_type','id');
                 $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {

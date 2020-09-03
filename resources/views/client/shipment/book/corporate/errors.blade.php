@@ -23,7 +23,9 @@
                                         <th>S.No</th>
                                         <th>Service Type ID</th>
                                         <th>Pickup Address ID</th>
-                                        <th>Delivery Type ID</th>
+                                        @if($service_type_check_id != 5)
+                                            <th>Delivery Type ID</th>
+                                        @endif
                                         <th>Show Information on Air Waybill (Optional)</th>
                                         <th>Consignee City Name</th>
                                         <th>Consignee Name</th>
@@ -88,10 +90,12 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][pickup_address_id]', $ro['pickup_address_id'], ['class' => 'form-control','style'=>'width:80px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            @if(isset($errors[$no]['delivery_type_id']))
-                                                <td>{!! Form::select('form[' . $no . '][delivery_type_id]',$delivery_types,null, ['class' => 'form-control is-invalid delivery_type_id select2','id'=>'delivery_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['delivery_type_id']}}</font></td>
-                                            @else
-                                                <td>{!! Form::text('form[' . $no . '][delivery_type_id]', $ro['delivery_type_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                            @if($service_type_check_id != 5)
+                                                @if(isset($errors[$no]['delivery_type_id']))
+                                                    <td>{!! Form::select('form[' . $no . '][delivery_type_id]',$delivery_types,null, ['class' => 'form-control is-invalid delivery_type_id select2','id'=>'delivery_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['delivery_type_id']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][delivery_type_id]', $ro['delivery_type_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                                @endif
                                             @endif
                                             @if(isset($errors[$no]['information_display']))
                                                 <td>{!! Form::select('form[' . $no . '][information_display]',['no'=>'no','yes'=>'yes'],null, ['class' => 'form-control is-invalid select2','id'=>'information_display','placeholder' => '']) !!}<font color="red">{{$errors[$no]['information_display']}}</font></td>
