@@ -1861,7 +1861,7 @@ class DeliveryController extends Controller
                 $statusId = "reason_drop.$shipment";
                 $status_drop = "status_drop.$shipment";
                 $shipment_status = Shipment::where('id', $shipment)->first();
-                if($shipment_status->booking_type_id == 5 && $request->status_drop[$shipment] == 12){
+                if($shipment_status->booking_type_id == 5 && ($request->has($status_drop) && $request->status_drop[$shipment] == 12)){
                     continue;
                 }
                 if(count($open_box_ids) > 0){
@@ -2435,7 +2435,7 @@ class DeliveryController extends Controller
                     $reasonId = "reason_drop.$shipment";
                     $open_box_shipment = "open_box.$shipment";
                     $confirm_location_shipment = "confirm_location.$shipment";
-                    if($shipment_details->booking_type_id == 5 && ($request->has($status_drop) &&  $request->status_drop[$shipment] == 12)){
+                    if($shipment_details->booking_type_id == 5 && ($request->has($status_drop) && $request->status_drop[$shipment] == 12)){
                         continue;
                     }
                     $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();

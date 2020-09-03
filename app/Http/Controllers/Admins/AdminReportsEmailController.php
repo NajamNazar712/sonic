@@ -28,6 +28,7 @@ use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -1203,14 +1204,34 @@ class AdminReportsEmailController extends Controller
                 if(!in_array($done_payment->done_payment->shipper->id, $shippers)){
                     $shippers[$done_payment->done_payment->shipper->id] = $done_payment->done_payment->shipper->id;
                 }
+                if($done_payment->done_payment->user_bank_info_id != null){
+                    $iban = $done_payment->done_payment->shipper_bank->iban;
+                }
+                else{
+                    $shipper_bank = UserBankInfo::where('user_id', $done_payment->done_payment->shipper->id)->where('default_bank', 1);
+                    if($shipper_bank->exists()){
+                        $shipper_bank = $shipper_bank->first();
+                        $iban = $shipper_bank->iban;
+                    }
+                    else{
+                        $shipper_bank = UserBankInfo::where('user_id', $done_payment->done_payment->shipper->id);
+                        if($shipper_bank->exists()){
+                            $shipper_bank = $shipper_bank->first();
+                            $iban = $shipper_bank->iban;
+                        }
+                        else{
+                            $iban = '-';
+                        }
+                    }
+                }
                 $done_payment_report = new DonePaymentsReport();
                 $done_payment_report->payment_id = $done_payment->done_payment_id;
                 $done_payment_report->shipper_id = $done_payment->done_payment->shipper->id;
                 $done_payment_report->shipper_name = $done_payment->done_payment->shipper->name;
                 $done_payment_report->amount = $done_payment->payable;
-                $done_payment_report->iban_number = $done_payment->done_payment->shipper_bank->iban;
+                $done_payment_report->iban_number = $iban;
                 $done_payment_report->save();
-                $done_payment_array[] = ['Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'Amount' => $done_payment->payable, 'IBAN Number' => $done_payment->done_payment->shipper_bank->iban];
+                $done_payment_array[] = ['Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'Amount' => $done_payment->payable, 'IBAN Number' => $iban];
                 $total_amount = $total_amount + $done_payment->payable;
             }
             $done_payments_array['summary_header'] = ['', 'Total Shippers', 'Total Amount'];
