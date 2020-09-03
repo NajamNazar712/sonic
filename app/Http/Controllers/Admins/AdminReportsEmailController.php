@@ -1201,8 +1201,8 @@ class AdminReportsEmailController extends Controller
             $total_amount = 0;
             $done_payment_array = array();
             $done_payments_array = array();
-            $done_payment_array['header'] = ['Payment ID', 'Shipper Name', 'Amount', 'IBAN Number'];
-            $done_payment_array[] = ['Payment ID' => '', 'Shipper Name' => '', 'Amount' => '', 'IBAN Number' => ''];
+            $done_payment_array['header'] = ['Payment ID', 'Shipper Name', 'IBAN Number', 'Amount'];
+            $done_payment_array[] = ['Payment ID' => '', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => ''];
             $done_payments = $done_payments->get();
             $shippers = array();
             $shipper_ids = array();
@@ -1246,16 +1246,16 @@ class AdminReportsEmailController extends Controller
                     $done_payment_report->amount = $done_payment->payable;
                     $done_payment_report->iban_number = $iban;
                     $done_payment_report->save();
-                    $done_payment_array[] = ['Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'Amount' => $done_payment->payable, 'IBAN Number' => $iban];
+                    $done_payment_array[] = ['Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'IBAN Number' => $iban, 'Amount' => number_format($done_payment->payable)];
                     $total_amount = $total_amount + $done_payment->payable;
                 }
             }
             $done_payments_array['summary_header'] = ['', 'Total Shippers', 'Total Amount'];
             $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
-            $done_payments_array[] = ['' => '', 'Total Shippers' => count($shippers), 'Total Amount' => $total_amount];
+            $done_payments_array[] = ['' => '', 'Total Shippers' => count($shippers), 'Total Amount' => number_format($total_amount)];
             $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
             $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
-            $done_payment_array[] = ['Payment ID' => 'Total', 'Shipper Name' => '', 'Amount' => $total_amount, 'IBAN Number' => ''];
+            $done_payment_array[] = ['Payment ID' => 'Total', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => number_format($total_amount)];
             $done_payment_array = array_merge($done_payments_array, $done_payment_array);
 
             $cell_s = [

@@ -5455,8 +5455,8 @@ class NotificationsController extends Controller
                       $html .= '<thead><tr>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Payment ID</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBAN Number</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
                                            </tr></thead><tbody>';
                       $total_amount = 0;
                       foreach ($done_payment_report as $done_payment){
@@ -5466,22 +5466,22 @@ class NotificationsController extends Controller
                           $html .='<tr>';
                           $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. str_pad($done_payment->payment_id, 6, '0', STR_PAD_LEFT).'</td>';
                           $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$done_payment->shipper_name.'</td>';
-                          $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$done_payment->amount.'</td>';
                           $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$done_payment->iban_number.'</td>';
+                          $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.number_format($done_payment->amount).'</td>';
                           $html .='</tr>';
                           $total_amount = $total_amount + $done_payment->amount;
                       }
                       $html .='<tr>';
                       $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                       $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_amount . '</td>';
                       $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
                       $html .='</tr>';
                       $html .= '</tbody></table>';
 
                       $summary_html .='<tr>';
                       $summary_html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. count($shippers) .'</td>';
-                      $summary_html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_amount . '</td>';
+                      $summary_html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
                       $summary_html .='</tr>';
                       $summary_html .= '</tbody></table></div>';
 
