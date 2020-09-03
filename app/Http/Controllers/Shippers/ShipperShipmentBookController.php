@@ -1849,7 +1849,9 @@ class ShipperShipmentBookController extends Controller
                     }
                     $rows[] = $row;
                 }
-                $service_type_check_id = $request->service_type_check_id;
+                if($request->service_type_check_id != null){
+                    $service_type_check_id = $request->service_type_check_id;
+                }
             }
 
             $errors = array();
@@ -3160,7 +3162,9 @@ class ShipperShipmentBookController extends Controller
                     }
                     $rows[] = $row;
                 }
-                $service_type_check_id = $request->service_type_check_id;
+                if($request->service_type_check_id != null){
+                    $service_type_check_id = $request->service_type_check_id;
+                }
             }
 
             $errors = array();
