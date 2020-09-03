@@ -1174,7 +1174,12 @@ class AdminReportsEmailController extends Controller
                     );
                 $sheet->fromArray($outstanding_shipments_array[$hub->name], NULL, 'A2', true);
                 $sheet->getStyle("A2:T2")->applyFromArray($cell_st);
-                $sheet->setTitle('Outstanding Shipments ' . $hub->name);
+                $title = 'Outstanding Shipments ' . $hub->name;
+                if(strlen($title) > 31){
+                    $title = substr($title, 0, 28);
+                    $title = $title . '...';
+                }
+                $sheet->setTitle($title);
                 $writer = new Xlsx($spreadsheet);
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename="outstanding_shipment_report.xlsx"');
