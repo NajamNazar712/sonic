@@ -154,7 +154,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
-        $schedule->command('report:donepayment')->dailyAt('21:00')->runInBackground();
+        $schedule->command('report:donepayment')->dailyAt('19:30')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 

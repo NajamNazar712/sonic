@@ -5425,7 +5425,7 @@ class NotificationsController extends Controller
 		  else if($id == 82){
                   $done_payment_report = DonePaymentsReport::get();
                   if($done_payment_report){
-                      $date = Carbon::yesterday()->format('Y-m-d');
+                      $date = Carbon::today()->format('Y-m-d');
                       $subject = $notification->subject;
                       $body = $notification->body;
                       if (strpos($subject, '[date]') !== FALSE) {
@@ -5492,8 +5492,7 @@ class NotificationsController extends Controller
 
                       $to = array();
 //                      $to[] = 'hassan@trax.pk';
-//                      $to[] = 'fawad.ahmed@trax.pk';
-                      $to[] = 'anas.anwer@trax.pk';
+                      $to[] = 'fawad.ahmed@trax.pk';
 
                       self::email($subject, $body, $to);
                   }
