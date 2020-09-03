@@ -5445,7 +5445,7 @@ class NotificationsController extends Controller
                       if (strpos($body, '[link]') !== FALSE) {
                           $body = str_replace('[link]', $link, $body);
                       }
-                      $summary_html = '<table style="width:100%;">';
+                      $summary_html = '<table style="width:100%; margin-bottom: 100px;">';
                       $summary_html .= '<thead><tr>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Shippers</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Amount</th>
@@ -5492,7 +5492,8 @@ class NotificationsController extends Controller
 
                       $to = array();
 //                      $to[] = 'hassan@trax.pk';
-                      $to[] = 'fawad.ahmed@trax.pk';
+//                      $to[] = 'fawad.ahmed@trax.pk';
+                      $to[] = 'anas.anwer@trax.pk';
 
                       self::email($subject, $body, $to);
                   }
