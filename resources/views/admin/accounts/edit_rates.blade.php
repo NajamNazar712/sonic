@@ -3706,40 +3706,40 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="UserDocumentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UserDocumentModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Document Attachment</h4>
-                </div>
-                <div class="modal-body">
-                    <form id="user_document_form" novalidate="novalidate" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" name="user_id" id="user_document_user_id" value="{{$shipper->id}}">
-                        <input type="hidden" name="doc_upload" id="doc_upload" value="0">
-                        <input type="hidden" name="shipper_status" id="shipper_status" value="{{$shipper->status}}">
-                        <div class="col form-group">
-                            <label for="filled_and_signed_image">
-                                Pdf of filled and signed document:
-                            </label>
-                            <input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
-                        </div>
-                        <div class="col form-group">
-                            <label for="signed_acknowledgement_image">
-                                Pdf of signed Acknowledgement form:
-                            </label>
-                            <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf" id="signed_acknowledgement_pdf" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="UserDocumentSubmit">Upload</button>
-                </div>
-            </div>
-        </div>
-    </div>
+{{--    <div class="modal fade text-left" id="UserDocumentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UserDocumentModal"--}}
+{{--         aria-hidden="true">--}}
+{{--        <div class="modal-dialog modal-md" role="document">--}}
+{{--            <div class="modal-content">--}}
+{{--                <div class="modal-header">--}}
+{{--                    <h4 class="modal-title" id="">Document Attachment</h4>--}}
+{{--                </div>--}}
+{{--                <div class="modal-body">--}}
+{{--                    <form id="user_document_form" novalidate="novalidate" enctype="multipart/form-data">--}}
+{{--                        @csrf--}}
+{{--                        <input type="hidden" name="user_id" id="user_document_user_id" value="{{$shipper->id}}">--}}
+{{--                        <input type="hidden" name="doc_upload" id="doc_upload" value="0">--}}
+{{--                        <input type="hidden" name="shipper_status" id="shipper_status" value="{{$shipper->status}}">--}}
+{{--                        <div class="col form-group">--}}
+{{--                            <label for="filled_and_signed_image">--}}
+{{--                                Pdf of filled and signed document:--}}
+{{--                            </label>--}}
+{{--                            <input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">--}}
+{{--                        </div>--}}
+{{--                        <div class="col form-group">--}}
+{{--                            <label for="signed_acknowledgement_image">--}}
+{{--                                Pdf of signed Acknowledgement form:--}}
+{{--                            </label>--}}
+{{--                            <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf" id="signed_acknowledgement_pdf" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">--}}
+{{--                        </div>--}}
+{{--                    </form>--}}
+{{--                </div>--}}
+{{--                <div class="modal-footer">--}}
+{{--                    <button type="button" class="btn btn" data-dismiss="modal">Cancel</button>--}}
+{{--                    <button type="button" class="btn btn-danger" id="UserDocumentSubmit">Upload</button>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
             @else
             <h1>Standard rates not set.</h1>
             @endif
@@ -5540,10 +5540,10 @@
             },
             submitHandler: function(form) {
                 if (overnightSwitch.checked == true || overlandSwitch.checked == true || detainSwitch.checked == true || samedaySwitch.checked == true) {
-                    if($('#authorize').val() != 1 && $('#approve').val() != 1 && $('#doc_upload').val() == 0 && $('#shipper_status').val() == 3){
-                        $('#UserDocumentModal').modal('show');
-                    }
-                    else{
+                    // if($('#authorize').val() != 1 && $('#approve').val() != 1 && $('#doc_upload').val() == 0 && $('#shipper_status').val() == 3){
+                    //     $('#UserDocumentModal').modal('show');
+                    // }
+                    // else{
                         $(form).find('button[type=submit]').attr('disabled', 'disabled');
                         var msg = "";
                         if($('#authorize').val() == 1){
@@ -5563,7 +5563,7 @@
                         });
 
                         form.submit();
-                    }
+                    // }
                 }
                 else {
                     swal({
