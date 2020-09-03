@@ -777,7 +777,7 @@ class APIController extends Controller
 
             $filename = 'air_waybill' . '.jpg';
 
-            return $image->download($filename);
+            return $image->setOption('disable-smart-width', TRUE)->download($filename);
           }
           else {
             $pdf = SnappyPDF::loadHTML($air_waybill);
@@ -1334,7 +1334,7 @@ class APIController extends Controller
 
           $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
 
-          return $image->download($filename);
+          return $image->setOption('disable-smart-width', TRUE)->download($filename);
         }
         else {
           $pdf = SnappyPDF::loadHTML($receiving_sheet);
