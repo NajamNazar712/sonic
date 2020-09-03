@@ -3364,7 +3364,7 @@ class AdminFinanceController extends Controller
                     $done_payment->delivered_shipments = 0;
                     $done_payment->returned_shipments = 0;
                     $done_payment->adjusted_shipments = 0;
-
+                    $done_payment->user_bank_info_id = $user_bank_id;
                     $settings = GlobalSettings::where('type', 'ibft_charges');
 
                     if ($settings->exists()) {
@@ -3515,6 +3515,14 @@ class AdminFinanceController extends Controller
     static public function done_payment($shipment_id, $type) {
         $shipment = Shipment::find($shipment_id);
 
+        $user_bank_id = NULL;
+
+        $user_bank_id = UserBankInfo::where('user_id', $shipment->user_id)->where('default_bank', 1)->select('id')->first();
+
+        if($user_bank_id){
+            $user_bank_id = $user_bank_id->id;
+        }
+
         $done_payment = new DonePayment();
 
         $done_payment->user_id = $shipment->user_id;
@@ -3526,7 +3534,7 @@ class AdminFinanceController extends Controller
         else {
             $done_payment->returned_shipments = 1;
         }
-
+        $done_payment->user_bank_info_id = $user_bank_id;
         $done_payment->status = 1;
 
         $done_payment->save();
