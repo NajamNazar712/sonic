@@ -5480,6 +5480,7 @@ class NotificationsController extends Controller
 
               $v2_pickup=V2PickupRequest::select('id','shipper_id','created_at');
 
+
           }
         }
       }
