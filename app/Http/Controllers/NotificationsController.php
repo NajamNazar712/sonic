@@ -5442,12 +5442,7 @@ class NotificationsController extends Controller
                   $shipper =  User::find($index);
                   $html .= '<tr>';
                   $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .$shipper->name . '</td>';
-                  /*if( $person['old_sale_person']->name != null){
-                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name . '</td>';
-                  }
-                  else{
-                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . '-' . '</td>';
-                  }*/
+
                   if($person['old_sale_person'] != null){
                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name . '</td>';
                   }
@@ -5472,16 +5467,19 @@ class NotificationsController extends Controller
               if (strpos($body, '[preview]') !== FALSE) {
                   $body = str_replace('[preview]', $html , $body);
               }
+              $sale_head_email=Admin::where('role_id', 4)->select('email')->first();
 
-          $sale_head_email=Admin::where('role_id', 4)->select('email')->first();
+              if($sale_head_email != ''){
+                $cc[] = $sale_head_email->email;
+              }
+            self::email($subject, $body, $to,$cc);
+          }
+          else if($id == 83){
+              $subject = $notification->subject;
+              $body = $notification->body;
 
+              $v2_pickup=V2PickupRequest::select('id','shipper_id','created_at');
 
-         if($sale_head_email != ''){
-             $cc[] = $sale_head_email->email;
-         }
-
-
-         self::email($subject, $body, $to,$cc);
           }
         }
       }
