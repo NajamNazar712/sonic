@@ -26,6 +26,8 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -5477,9 +5479,45 @@ class NotificationsController extends Controller
           else if($id == 83){
               $subject = $notification->subject;
               $body = $notification->body;
+              $pickup_request_id = $reference_1_id;
+              $pickup_note_id = $reference_2_id;
 
-              $v2_pickup=V2PickupRequest::select('id','shipper_id','created_at');
+              if($pickup_request_id) {
+                  $pickup = v2PickupRequest::find($pickup_request_id);
+                  if($pickup){
+                      $shipper_name = $pickup->shipper->name;
+                      $rider_name = $pickup->rider->name;
+                      $number = 0;
+                      $shipment_pickup_date = '';
+                      $rider_pickup = V2RiderPickup::where('pickup_request_id', $pickup_request_id)->where('pickup_note_id', $pickup_note_id);
+                      if($rider_pickup->exists()){
+                          $rider_pickup = $rider_pickup->first();
+                          $number = $rider_pickup->shipments;
+                          $shipment_pickup_date = $rider_pickup->created_at;
+                      }
+                      if (strpos($body, '[rider_name]') !== FALSE) {
+                          $body = str_replace('[rider_name]', $rider_name, $body);
+                      }
+                      if (strpos($body, '[shipper_name]') !== FALSE) {
+                          $body = str_replace('[shipper_name]', $shipper_name, $body);
+                      }
+                      if (strpos($body, '[requested_date]') !== FALSE) {
+                          $body = str_replace('[requested_date]', $pickup->created_at, $body);
+                      }
+                      if (strpos($body, '[number]') !== FALSE) {
+                          $body = str_replace('[number]', $pickup->number, $body);
+                      }
+                      if (strpos($body, '[shipment_picked_date]') !== FALSE) {
+                          $body = str_replace('[shipment_picked_date]', $shipment_pickup_date, $body);
+                      }
 
+                      if ($pickup->shipper->email) {
+                          $to[] = $pickup->shipper->email;
+                      }
+                      self::email($subject, $body, $to);
+                  }
+
+              }
 
           }
         }
