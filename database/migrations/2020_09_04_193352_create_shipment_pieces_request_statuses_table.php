@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateShipmentMultiplePieceStatusesTable extends Migration
+class CreateShipmentPiecesRequestStatusesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateShipmentMultiplePieceStatusesTable extends Migration
      */
     public function up()
     {
-        Schema::create('shipment_multiple_piece_statuses', function (Blueprint $table) {
+        Schema::create('shipment_pieces_request_statuses', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->timestamps();
@@ -27,6 +27,6 @@ class CreateShipmentMultiplePieceStatusesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('shipment_multiple_piece_statuses');
+        Schema::dropIfExists('shipment_pieces_request_statuses');
     }
 }

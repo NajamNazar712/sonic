@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentPiece;
+use App\Http\Models\ShipmentPiecesRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -53,6 +56,13 @@ class AdminShipmentPieceController extends Controller
             foreach ($shipment_ids as $shipment_id){
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
+                    $shipment_piece_request = new ShipmentPiecesRequest();
+                    $shipment_piece_request->shipment_id = $shipment_id;
+                    $shipment_piece_request->added_by = Auth::id();
+                    $shipment_piece_request->status = 1;
+                    $shipment_piece_request->department_id = session('department_id');
+                    $shipment_piece_request->save();
+
                     $shipment->shipper_status_id = 62;
                     $shipment->consignee_status_id = 62;
                     $shipment->save();
@@ -71,41 +81,22 @@ class AdminShipmentPieceController extends Controller
     }
 
     public function hold_list(Request $request){
-        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+        $shipments = ShipmentPiecesRequest::join('shipments', 'shipments.id', '=', 'shipment_pieces_requests.shipment_id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->leftJoin('shipments_journey', function ($join) {
-                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                    ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
-            })
-            ->leftJoin('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 62)'));
-            })
-            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub','shipments.amount', 'ss.name as status', 'sj.created_at as current_status_date')
-            ->where('shipments.shipper_status_id', 62);
+            ->leftjoin('shipment_pieces_request_statuses as ss', 'ss.id', '=', 'shipment_pieces_requests.request_status_id')
+            ->leftjoin('admins','admins.id', '=', 'shipment_pieces_requests.last_updated_by_admin')
+            ->leftjoin('users as lub','lub.id', '=', 'shipment_pieces_requests.last_updated_by_user')
+            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub','shipments.amount', 'ss.name as status', 'shipment_pieces_requests.created_at','shipment_pieces_requests.last_updated_at','shipment_pieces_requests.last_updated_by_admin', 'shipment_pieces_requests.last_updated_by_user', 'lub.name as updated_by_shipper', 'admins.name as updated_by_admin','shipment_pieces_requests.created_at','shipment_pieces_requests.request_status_id');
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($shipments)
-            ->setRowAttr([
-                'class' => function ($shipments) {
-                    if ($shipments->complaint != null) {
-                        return 'complaint_row';
-                    }else if($shipments->booking_type_id == 3){
-                        return "tnb_row";
-                    } else {
-                        return '';
-                    }
-                },
-            ])
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -132,13 +123,6 @@ class AdminShipmentPieceController extends Controller
                     });
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
-            ->editColumn('arrival', function ($shipments) {
-                if ($shipments->arrival) {
-                    return $shipments->arrival;
-                } else {
-                    return " - ";
-                }
-            })
             ->filterColumn('status', function ($query, $keyword) {
 
                 if ($keyword != '') {
@@ -147,16 +131,34 @@ class AdminShipmentPieceController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->addColumn('last_updated_by', function ($data){
+                 if($data->last_updated_by_admin != null){
+                     return $data->updated_by_admin;
+                 }else if($data->last_updated_by_user){
+                     return $data->updated_by_shipper;
+                 }
+            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || in_array(34, session('permissions'))) {
+                    $single_piece_button = '<a href="javascript:void(0);" class="dropdown-item single_piece"><i class="ft-plus-circle primary"></i> Switch to Single Piece</a>';
+                    $remaining_piece_button = '<a href="javascript:void(0);" class="dropdown-item remaining_piece"><i class="ft-plus-circle primary"></i> Wait for Remaining Piece</a>';
+                    $return_button = '<a href="javascript:void(0);" class="dropdown-item return_to_shipper"><i class="ft-plus-circle primary"></i> Return Back to Shipper</a>';
+
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                            <a href="#" class="dropdown-item dispute_modal"><i class="ft-alert-circle primary"></i> Dispute</a>
-                        </div>
+                        <div class="dropdown-menu dropdown-menu-sm">';
+                    if($result->request_status_id == null){
+                        $dropdown .= $single_piece_button;
+                        $dropdown .= $remaining_piece_button;
+                        $dropdown .= $return_button;
+                        $dropdown .= '</div>
                       </div>
                     ';
+                    }else{
+                        $dropdown = '';
+                    }
+
 
                     return $dropdown;
 
@@ -165,6 +167,38 @@ class AdminShipmentPieceController extends Controller
                 }
             });
 
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('shipment_pieces_requests.created_at', [$from,$to]);
+        }
+
         return $datatables->make(true);
+    }
+    public function single_piece(Request $request){
+        $shipment_id = $request->shipment_id;
+        if($shipment_id){
+            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id);
+            if($shipment_piece_request->exists()){
+                $shipment_piece_request = $shipment_piece_request->first();
+                $shipment = Shipment::find($shipment_id);
+                $shipment->pieces = 1;
+                $shipment->save();
+
+                ShipmentPiece::where('shipment_id', $shipment_id)->delete();
+                $shipment_piece_request->status = 2;
+                $shipment_piece_request->request_status_id = 1;
+                $shipment_piece_request->last_updated_by_admin = Auth::id();
+                $shipment_piece_request->last_updated_at = Carbon::now();
+                $shipment_piece_request->department_id = session('department_id');
+                $shipment_piece_request->save();
+
+                return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+            }
+            return response()->json(['status' => 1,'error' => 'Shipment request not found!']);
+        }
+    }
+    public function remaining_piece(Request $request){
+        return $request;
     }
 }

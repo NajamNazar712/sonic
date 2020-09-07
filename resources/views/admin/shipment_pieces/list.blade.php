@@ -51,6 +51,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Last Status By Date</th>
                         <th class="border-primary border-darken-1">Last Status By</th>
+                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -260,9 +261,11 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'current_status_date', name: 'sj.created_at', class: 'align-middle current_status_date'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
+                    {data: 'created_at', name: 'shipment_pieces_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'last_updated_by', name: 'last_updated_by', class: 'align-middle last_updated_by'},
+                    {data: 'last_updated_at', name: 'shipment_pieces_requests.last_updated_at', class: 'align-middle last_updated_at'},
+                    {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -276,16 +279,14 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Pending for Update</option>' +
-                        '<option value="3">Updated</option>' +
-                        '<option value="1">Verified</option>' +
-                        '<option value="2">Cancelled</option>' +
+                        '<option value="1">Pending</option>' +
+                        '<option value="3">Resolved</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.image')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -316,277 +317,64 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
-            $('#search_tracking').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            }).bind('input', function() {
-                if (this.value.length == 0 || this.value.length >= 10) {
-                    table.draw();
-                }
-            });
 
-            $('#scan_return_note').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            }).bind('input', function() {
-                table.draw();
-            });
-
-            function print(id) {
-                $.ajax({
-                    url: '{!! route('admin.return.receive.rn.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
-            $('body').on('click','.printreturnnote',function () {
-                var returnnote = $(this).parents('tr').attr('id');
-                print(returnnote);
-                // console.log(returnnote)
-            });
-
-            var route = '{!! route('admin.tracking.index') !!}';
-
-            $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
+            $('#datatable tbody').on('click','tr td.action a',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                $('#shipments_modal .modal-body').html('');
-                $('#shipments_modal').modal('show');
+                if(id){
+                    if($(this).hasClass('single_piece')){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to change shipment to Single Piece!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                blockPagePermanently();
+                                $.ajax({
+                                    url:"{{route('admin.multiple_pieces.hold.single_piece')}}",
+                                    method:'POST',
+                                    data:{
+                                        'shipment_id':id,
+                                        '_token':'{{ csrf_token() }}',
+                                    }
+                                }).done(function (data) {
+                                    if(data.status == 0){
+                                        table.draw('false');
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                $.ajax({
-                    url: '{!! route('admin.return.history.shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'return_note_id': id
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            var html = '';
+                                    }
+                                    UnblockPagePermanently();
 
-                            if (data.shipments) {
-                                $.each(data.shipments, function(index, tracking_number) {
-                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                 });
                             }
-                            $('#shipments_modal .modal-body').html(html);
-                        }
-                    });
+                        });
 
-            });
-
-            var selected_rows = [];
-            var rows_count = 0;
-            $('#datatable tbody').on('click', 'tr td.image a.image-popup', function () {
-                var return_note_id = $(this).parents('tr').attr('id');
-                if(return_note_id){
-                    $.ajax({
-                        url: '{!! route('admin.return.history.get_images') !!}',
-                        method: 'POST',
-                        data: {
-                            'return_note_id': return_note_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if(data.status == 0) {
-                            $('#image_return_note_id').val(return_note_id);
-                            var image_html = '';
-                            $.each(data.images, function (index, image) {
-                                index++;
-                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                                var remove = '';
-                                @if (session('role_id') == 1 || in_array(109, session('permissions')))
-                                    remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-                                @endif
-                                    image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
-                            });
-                            $('#return_note_image_view_table tbody').append(image_html);
-                            $('#uploadReturnNote').modal('show');
-                        }else if(data.status == 2){
-                            $('#image_return_note_id').val(return_note_id);
-                            var image_html = '<tr><td colspan="4">No Images found!</td></tr>';
-
-                            $('#return_note_image_view_table tbody').append(image_html);
-                            $('#uploadReturnNote').modal('show');
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                    });
-
-                }
-            });
-            $.validator.addMethod('maxsize', function(value, element, params) {
-                if ($(element).attr('type') === 'file') {
-                    if (element.files && element.files.length) {
-                        for (var c = 0; c < element.files.length; c++) {
-                            if (element.files[c].size > params) {
-                                return false;
-                            }
-                        }
+                    }else if($(this).hasClass('remaining_piece')){
+                        console.log('remaining_pieces');
+                    }else if($(this).hasClass('return_to_shipper')){
+                        console.log('return_to_shipper');
                     }
                 }
 
-                return true;
-            }, $.validator.format("File Size must not exceed {0} bytes."));
-            var return_image_table;
-            function add_row() {
-                rows_count++;
 
-                var return_image = '<input class="form-control form-control-sm" type="file" name="return_note_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
-                if(rows_count == 1){
-                    var remove = '';
-                }else{
-                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-
-                }
-                return_image_table.row.add([0, return_image,remove]).node().id = rows_count;
-                return_image_table.draw(true);
-                $('#ReturnNoteImageSubmitButton').attr('disabled', false);
-                selected_rows.push(rows_count);
-            }
-            return_image_table = $('#return_upload_table').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons:[{
-                    title: 'Add Row',
-                    className: 'btn btn-primary mb-1',
-                    text: '<i class="la la-plus"></i> Add Row',
-                    action:function (e) {
-                        add_row();
-                    }
-                }],
-                ordering:false,
-                paging:false,
-                columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {name: 'image', class: 'align-middle image form-group'},
-                    {name: 'action', class: 'align-middle action'},
-                ],
-
-                rowCallback: function(row, data, index) {
-                    var info = return_image_table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
-                },
-                initComplete: function() {
-
-                    // this.api().table().columns.adjust();
-                }
-            });
-
-            $('#return_note_image_view_table').on('click','a.remove_row', function () {
-                var row_id = $(this).parents('tr').attr('id');
-                var return_id = $('#image_return_note_id').val();
-                var current = $(this);
-                if(row_id){
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes if you want to delete this image!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if (confirm) {
-                            $.ajax({
-                                url: '{!! route('admin.return.history.delete_image') !!}',
-                                method: 'POST',
-                                data: {
-                                    'return_note_image_id': row_id,
-                                    'return_note_id':return_id,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                if(data.status == 0){
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    current.parents('tr').remove();
-                                }else{
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-
-            $('body').on('click', 'a.remove_row',function () {
-                var rid = parseInt($(this).parents('tr').attr('id'));
-                var index = $.inArray(rid, selected_rows);
-
-                if (index !== -1) {
-                    selected_rows.splice(index, 1);
-                }
-                return_image_table.row( $(this).parents('tr') ).remove().draw();
-            });
-
-            $('#return_note_upload_form').validate({
-
-                errorClass: 'danger',
-                successClass: 'success',
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    $('#selected_ids').val(selected_rows);
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Image is being uploaded!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
-                }
-            });
-            $('#uploadReturnNote').on('hidden.bs.modal', function () {
-                $('#image_return_note_id').val('');
-                return_image_table.clear();
-                return_image_table.draw();
-                selected_rows = [];
-                rows_count = 0;
-                $('#return_note_image_view_table tbody').html('');
             });
 
         });
