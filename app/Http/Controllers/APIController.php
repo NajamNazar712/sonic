@@ -363,10 +363,10 @@ class APIController extends Controller
                 $query->whereIn('id', [2, 3]);
             })],
 
-            'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,500'],
-            'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
-            'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
+            'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,500'],
+            'item_quantity' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean'],
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -517,7 +517,12 @@ class APIController extends Controller
               $consignee_phone_number_2 = NULL;
               $consignee_email_address = $pickup_delivery_address->email;
               $information_display = TRUE;
-              $charges_mode_id = 4;
+              if($user_type['account_type_id'] == 1) {
+                  $charges_mode_id = 4;
+              }
+              else {
+                  $charges_mode_id = 3;
+              }
               $payment_mode_id = 1;
               $self_collection = FALSE;
               $delivery_type_id = 1;
@@ -641,7 +646,7 @@ class APIController extends Controller
           }
         $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-        if ($service_type_id == 1) {
+        if ($service_type_id == 1 || $service_type_id == 5) {
           $item_product_type_id = $request->input('item_product_type_id');
 
           if ($request->filled('item_description')) {
