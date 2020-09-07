@@ -1,10 +1,9 @@
-
 @extends('admin.layout.master')
-@section('title','Shipment Pieces')
+@section('title','Shipment Pieces Resolved')
 
 @section('content')
     <h1 class="mb-1">
-        Shipment Pieces
+        Shipment Pieces Resolved
     </h1>
 
     <div class="card">

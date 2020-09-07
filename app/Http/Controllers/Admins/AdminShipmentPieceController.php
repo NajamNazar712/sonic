@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\ShipmentPiecesRequestStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -77,7 +78,8 @@ class AdminShipmentPieceController extends Controller
     }
 
     public function hold_index(){
-        return view('admin.shipment_pieces.list');
+        $request_status = ShipmentPiecesRequestStatus::all();
+        return view('admin.shipment_pieces.list')->with(['request_status' => $request_status]);
     }
 
     public function hold_list(Request $request){
@@ -90,7 +92,8 @@ class AdminShipmentPieceController extends Controller
             ->leftjoin('shipment_pieces_request_statuses as ss', 'ss.id', '=', 'shipment_pieces_requests.request_status_id')
             ->leftjoin('admins','admins.id', '=', 'shipment_pieces_requests.last_updated_by_admin')
             ->leftjoin('users as lub','lub.id', '=', 'shipment_pieces_requests.last_updated_by_user')
-            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub','shipments.amount', 'ss.name as status', 'shipment_pieces_requests.created_at','shipment_pieces_requests.last_updated_at','shipment_pieces_requests.last_updated_by_admin', 'shipment_pieces_requests.last_updated_by_user', 'lub.name as updated_by_shipper', 'admins.name as updated_by_admin','shipment_pieces_requests.created_at','shipment_pieces_requests.request_status_id');
+            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub','shipments.amount', 'ss.name as request_status', 'shipment_pieces_requests.created_at','shipment_pieces_requests.last_updated_at','shipment_pieces_requests.last_updated_by_admin', 'shipment_pieces_requests.last_updated_by_user', 'lub.name as updated_by_shipper', 'admins.name as updated_by_admin','shipment_pieces_requests.created_at','shipment_pieces_requests.request_status_id', 'shipment_pieces_requests.status')
+        ->where('shipments.shipper_status_id', 62);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -122,8 +125,22 @@ class AdminShipmentPieceController extends Controller
                             ->where('usi.poc', 'like', '%' . $keyword . '%');
                     });
             })
-            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
+            ->editColumn('status', function ($shipment){
+                if($shipment->status == 1){
+                    return 'Pending';
+                }else{
+                    return 'Resolved';
+                }
+            })
             ->filterColumn('status', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('shipment_pieces_requests.status', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('request_status', function ($query, $keyword) {
 
                 if ($keyword != '') {
                     $query->where('ss.id', $keyword);
@@ -198,7 +215,41 @@ class AdminShipmentPieceController extends Controller
             return response()->json(['status' => 1,'error' => 'Shipment request not found!']);
         }
     }
-    public function remaining_piece(Request $request){
-        return $request;
+    public function wait_remaining_pieces(Request $request){
+        $shipment_id = $request->shipment_id;
+        if($shipment_id){
+            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id);
+            if($shipment_piece_request->exists()){
+                $shipment_piece_request = $shipment_piece_request->first();
+                $shipment_piece_request->status = 2;
+                $shipment_piece_request->request_status_id = 2;
+                $shipment_piece_request->last_updated_by_admin = Auth::id();
+                $shipment_piece_request->last_updated_at = Carbon::now();
+                $shipment_piece_request->department_id = session('department_id');
+                $shipment_piece_request->save();
+
+                return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+            }
+            return response()->json(['status' => 1,'error' => 'Shipment request not found!']);
+        }
+    }
+    //in progress
+    public function return_back_to_shipper(Request $request){
+        $shipment_id = $request->shipment_id;
+        if($shipment_id){
+            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id);
+            if($shipment_piece_request->exists()){
+                $shipment_piece_request = $shipment_piece_request->first();
+                $shipment_piece_request->status = 2;
+                $shipment_piece_request->request_status_id = 2;
+                $shipment_piece_request->last_updated_by_admin = Auth::id();
+                $shipment_piece_request->last_updated_at = Carbon::now();
+                $shipment_piece_request->department_id = session('department_id');
+                $shipment_piece_request->save();
+
+                return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+            }
+            return response()->json(['status' => 1,'error' => 'Shipment request not found!']);
+        }
     }
 }

@@ -643,12 +643,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_index')->name('index');
             Route::get('list', 'Admins\AdminShipmentPieceController@hold_list')->name('list');
             Route::post('single_piece','Admins\AdminShipmentPieceController@single_piece')->name('single_piece');
+            Route::post('wait_remaining_pieces','Admins\AdminShipmentPieceController@wait_remaining_pieces')->name('wait_remaining_pieces');
+            Route::post('return_back_to_shipper','Admins\AdminShipmentPieceController@return_back_to_shipper')->name('return_back_to_shipper');
         });
         Route::prefix('add')->name('add.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_add_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminShipmentPieceController@hold_shipment_details')->name('shipment_details');
             Route::post('submit', 'Admins\AdminShipmentPieceController@hold_shipment_submit')->name('submit');
         });
+
+        Route::prefix('resolved')->name('resolved.')->group(function () {
+            Route::get('', 'Admins\AdminShipmentPieceController@hold_resolved_index')->name('index');
+            Route::get('list', 'Admins\AdminShipmentPieceController@hold_resolved_list')->name('list');
+        });
+
     });
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
