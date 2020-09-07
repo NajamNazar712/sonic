@@ -286,7 +286,7 @@ class APIController extends Controller
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
-            'information_display' => ['required_if:service_type_id,1,2,3,5', 'nullable', 'boolean'],
+            'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
             'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,190'],
@@ -340,7 +340,7 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
             'delivery_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
-            'information_display' => ['required_if:service_type_id,1,2,3,5', 'nullable', 'boolean'],
+            'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
             'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,190'],
