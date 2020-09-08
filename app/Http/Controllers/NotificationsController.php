@@ -5505,10 +5505,40 @@ class NotificationsController extends Controller
                           $body = str_replace('[requested_date]', $pickup->created_at, $body);
                       }
                       if (strpos($body, '[number]') !== FALSE) {
-                          $body = str_replace('[number]', $pickup->number, $body);
+                          if($number == 0)
+                          {
+                              $body = str_replace('[number]', 0, $body);
+                          }
+                          else{
+                              $body = str_replace('[number]', $pickup->number, $body);
+                          }
+
                       }
-                      if (strpos($body, '[shipment_picked_date]') !== FALSE) {
-                          $body = str_replace('[shipment_picked_date]', $shipment_pickup_date, $body);
+                      if (strpos($subject, '[rider_name]') !== FALSE) {
+                          $subject = str_replace('[rider_name]', $rider_name, $subject);
+                      }
+                      if (strpos($subject, '[shipper_name]') !== FALSE) {
+                          $subject = str_replace('[shipper_name]', $shipper_name, $subject);
+                      }
+                      if (strpos($subject, '[requested_date]') !== FALSE) {
+                          $subject = str_replace('[requested_date]', $pickup->created_at, $subject);
+                      }
+                      if (strpos($subject, '[number]') !== FALSE) {
+                          if($number == 0)
+                          {
+                              $subject = str_replace('[number]', 0, $subject);
+                          }
+                          else{
+                              $subject = str_replace('[number]', $pickup->number, $subject);
+                          }
+                      }
+                      if (strpos($subject, '[shipment_picked_date]') !== FALSE) {
+                          if($shipment_pickup_date != null){
+                              $subject = str_replace('[shipment_picked_date]', $shipment_pickup_date, $subject);
+                          }
+                         else{
+                             $subject = str_replace('[shipment_picked_date]', '-' , $subject);
+                         }
                       }
 
                       if ($pickup->shipper->email) {
