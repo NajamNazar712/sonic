@@ -68,88 +68,126 @@
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-3">
-                        <div class="card pull-up">
-                            <div class="card-content border rounded" id="total_shipments">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-grid font-large-2 float-left"></i>
+                <div id="report_data">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="card pull-up">
+                                <div class="card-content border rounded" id="total_shipments">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-grid font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-right">
+                                                <h3 id="total">{{$stats['total']}}</h3>
+                                                <span>Total Shipment(s)</span>
+                                            </div>
                                         </div>
-                                        <div class="media-body text-right">
-                                            <h3 id="total">{{$stats['total']}}</h3>
-                                            <span>Total Shipment(s)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-primary pull-up">
+                                <div class="card-content" id="total_pending">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="booked">{{$stats['booked']}}</h3>
+                                                <span>Booked Shipment(s)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-info pull-up">
+                                <div class="card-content" id="total_received">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-layers text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="received">{{$stats['received']}}</h3>
+                                                <span class="font-13">Received / In-Transit Shipment(s)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-success pull-up">
+                                <div class="card-content" id="total_delivered">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-check text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="delivered">{{$stats['delivered']}}</h3>
+                                                <span>Delivered Shipment(s)</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-primary pull-up">
-                            <div class="card-content" id="total_pending">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-hourglass text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="booked">{{$stats['booked']}}</h3>
-                                            <span>Booked Shipment(s)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-info pull-up">
-                            <div class="card-content" id="total_received">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-layers text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="received">{{$stats['received']}}</h3>
-                                            <span class="font-13">Received / In-Transit Shipment(s)</span>
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-inprocess pull-up">
+                                <div class="card-content" id="total_inprocess">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-shuffle text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="in_process">{{$stats['in_process']}}</h3>
+                                                <span>In Process Shipment(s)</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-success pull-up">
-                            <div class="card-content" id="total_delivered">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-check text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="delivered">{{$stats['delivered']}}</h3>
-                                            <span>Delivered Shipment(s)</span>
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-warning pull-up">
+                                <div class="card-content" id="total_return">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-loop text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="return">{{$stats['return']}}</h3>
+                                                <span>Returned Shipment(s)</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="row justify-content-center">
-                <div class="col-3">
-                    <div class="card bg-gradient-directional-inprocess pull-up">
-                        <div class="card-content" id="total_inprocess">
-                            <div class="card-body">
-                                <div class="media d-flex">
-                                    <div class="align-self-center">
-                                        <i class="icon-shuffle text-white font-large-2 float-left"></i>
-                                    </div>
-                                    <div class="media-body text-white text-right">
-                                        <h3 class="text-white" id="in_process">{{$stats['in_process']}}</h3>
-                                        <span>In Process Shipment(s)</span>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-red pull-up">
+                                <div class="card-content" id="total_cancelled">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-close text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="canceled">{{$stats['canceled']}}</h3>
+                                                <span>Cancelled Shipment(s)</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -157,41 +195,6 @@
                     </div>
                 </div>
 
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-warning pull-up">
-                            <div class="card-content" id="total_return">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-loop text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="return">{{$stats['return']}}</h3>
-                                            <span>Returned Shipment(s)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-red pull-up">
-                            <div class="card-content" id="total_cancelled">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-close text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="canceled">{{$stats['canceled']}}</h3>
-                                            <span>Cancelled Shipment(s)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 {{--row end--}}
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -566,6 +569,7 @@
                 }
             });
             function add_animation(box) {
+                console.log($('#cards_filter_input').val());
                 $("#report_data div").removeClass("show_active");
                 box.addClass('show_active');
             }
