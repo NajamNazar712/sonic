@@ -72,12 +72,19 @@
                 width:'100%',
                 allowClear:true
             });
-
+            @if($rider_id != null)
+            $('#rider_select').select2({
+                placeholder:'Rider',
+                width:'100%',
+                allowClear:true
+            });
+            @else
             $('#rider_select').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Rider',
                 width:'100%',
                 allowClear:true
             });
+            @endif
 
             @if(count($nsa_accounts) > 0)
                 var ids = @json($nsa_accounts);
