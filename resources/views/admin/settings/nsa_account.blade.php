@@ -19,13 +19,26 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-6">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.foc_account.store') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.nsa_account.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
                                                 <select name="shippers[]" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-require="true" required="required">
                                                     @foreach($shippers as $shipper)
                                                         <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-2 justify-content-center">
+                                            <div class="col-12 form-group">
+                                                <select name="rider" id="rider_select" class="form-control select2" data-msg-required="Rider is required" data-rule-require="true" required="required">
+                                                    @foreach($riders as $rider)
+                                                        @if($rider->id == $rider_id)
+                                                            <option value="{{$rider->id}}" selected>{{$rider->name}}</option>
+                                                        @else
+                                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                        @endif
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -54,16 +67,19 @@
 
     <script>
         $(document).ready(function() {
-
-
-
             $('#shippers_select').select2({
                 placeholder:'Shippers',
                 width:'100%',
                 allowClear:true
             });
 
-            @if(count($foc_account_tags) > 0)
+            $('#rider_select').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Rider',
+                width:'100%',
+                allowClear:true
+            });
+
+            @if(count($nsa_accounts) > 0)
                 var ids = @json($nsa_accounts);
                 $('#shippers_select').val(ids).trigger('change');
             @endif
@@ -78,7 +94,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update FOC Accounts!',
+                        text: 'Select Yes to update NSA Accounts!',
                         icon: 'warning',
                         buttons: {
                             cancel: {

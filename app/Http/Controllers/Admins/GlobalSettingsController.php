@@ -30,6 +30,7 @@ use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
 use App\Http\Models\Holiday;
+use App\Http\Models\Rider;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
@@ -2654,20 +2655,23 @@ class GlobalSettingsController extends Controller
 
     public function nsa_account_index(){
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        $riders = Rider::where('status', 1)->select('id','name')->get();
         $settings = GlobalSettings::where('type', 'nsa_accounts');
+        $rider_id = null;
         $nsa_accounts = array();
         if($settings->exists()){
             $settings = $settings->first();
             $nsa_accounts = array_map('intval', explode(',', $settings->text));
+            $rider_id = $settings->setting_value;
         }
-        return view('admin.settings.nsa_account')->with(['shippers' => $shippers,'nsa_accounts' => $nsa_accounts]);
+        return view('admin.settings.nsa_account')->with(['shippers' => $shippers, 'riders' => $riders, 'rider_id' => $rider_id, 'nsa_accounts' => $nsa_accounts]);
     }
 
     public function nsa_account_store(Request $request){
         if($request->has('shippers')){
             if(count($request->shippers) > 0){
                 $shippers = implode(',', $request->shippers);
-                $settings = GlobalSettings::where('type', 'foc_account_tag');
+                $settings = GlobalSettings::where('type', 'nsa_accounts');
 
                 if ($settings->exists()) {
                     $settings = $settings->first();
@@ -2675,10 +2679,10 @@ class GlobalSettingsController extends Controller
                 else {
                     $settings = new GlobalSettings();
 
-                    $settings->type = 'foc_account_tag';
-                    $settings->setting_value = 0;
+                    $settings->type = 'nsa_accounts';
 
                 }
+                $settings->setting_value = $request->rider;
                 $settings->text = $shippers;
                 $settings->save();
             }
