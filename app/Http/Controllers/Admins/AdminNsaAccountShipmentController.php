@@ -104,9 +104,9 @@ class AdminNsaAccountShipmentController extends Controller
                         $shipment_data->consignee_status_id = 20;
                         $shipment_data->save();
 
-                        ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $rider_id);
-                        ShipmentsJourneyController::add($shipment, 12,12, 34, NULL, NULL, Auth::id(), $note->id, NULL, 0);
-                        ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, Auth::id(), $note->id, NULL, 1);
+                        ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                        ShipmentsJourneyController::add($shipment, 12,12, 34, NULL, NULL, 50, $note->id, NULL, 0);
+                        ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1);
 
                         DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                     }
@@ -124,7 +124,7 @@ class AdminNsaAccountShipmentController extends Controller
                         $shipment->shipper_status_id = 23;
                         $shipment->consignee_status_id = 23;
                         $shipment->save();
-                        ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, 50);
+                        ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
                     }
                 }
             }
