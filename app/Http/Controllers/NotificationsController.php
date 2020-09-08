@@ -7,6 +7,8 @@ use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestTagging;
@@ -5421,10 +5423,68 @@ class NotificationsController extends Controller
                   }
               }
           }
+          elseif ($id == 81)
+          {
+          $subject = $notification->subject;
+          $body = $notification->body;
+          $sales_person = $reference_1_id;
+
+          $html = '<table style="width:100%;">';
+          $html .= '<thead><tr>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Sales Person</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>';
+          $html .= '</tr></thead><tbody>';
+
+          $to = array();
+          $cc = array();
+          foreach($sales_person as $index => $person ) {
+              $shipper =  User::find($index);
+              $html .= '<tr>';
+              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .$shipper->name . '</td>';
+
+              if($person['old_sale_person'] != null){
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name . '</td>';
+              }
+              else{
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+              }
+              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['new_sale_person']->name . '</td>';
+              $html .= '</tr>';
+
+              $concern=SalesCommission::join('sales_commission_users as sc','sc.sales_commission_id','=','sales_commissions.id')->join('admins as a','a.id', '=' ,'sc.user_id')->where('sales_commissions.shipper_id', $shipper->id)->whereIn('sc.tier_id', [1,2,3,4]);
+              if($concern->exists())
+              {
+                  $cc = array_merge($cc, $concern->pluck('email')->toArray());
+              }
+              if ($person['new_sale_person']->email) {
+                  $to[] = $person['new_sale_person']->email;
+              }
+          }
+
+          $html .= '</tbody></table>';
+
+          if (strpos($body, '[preview]') !== FALSE) {
+              $body = str_replace('[preview]', $html , $body);
+          }
+
+         $sale_head_email=Admin::where('role_id', 4)->select('email')->first();
+
+         if($sale_head_email != ''){
+             $cc[] = $sale_head_email->email;
+         }
+              if($to == null)
+              {
+                  $cc = null;
+              }
+
+        /*  if($to != null){*/
+              self::email($subject, $body, $to,$cc);
+          //}
+          }
         }
       }
     }
-
     static public function custom($type, $subject, $body, $to) {
       if ($type == 1) {
         self::email($subject, $body, $to);

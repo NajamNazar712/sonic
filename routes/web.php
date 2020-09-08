@@ -680,6 +680,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 });
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@bulk_arrival_submit')->name('store');
             });
+
             Route::prefix('individual')->name('individual.')->group(function () {
                 Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index')->name('index');
                 Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_details')->name('shipment_details');
@@ -691,7 +692,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@individual_arrival_submit')->name('store');
             });
         });
+
+        Route::prefix('arrival_service')->name('arrival_service.')->group(function () {
+            Route::prefix('service')->name('service.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_service_index')->name('index');
+                Route::post('shipment_details', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_service_details')->name('shipment_details');
+                Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
+            });
+
+        });
+
     });
+
     Route::prefix('delivery')->name('delivery.')->group(function(){
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('','Admins\DeliveryController@pending_delivery_index')->name('index');
@@ -2064,8 +2076,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('sales', 'Admins\AdminPowerBIController@sales_dashboard_index')->name('sales');
         Route::get('operation', 'Admins\AdminPowerBIController@operation_dashboard_index')->name('operation');
     });
+    //Arrival Service Center
+    Route::prefix('arrival_service')->name('arrival_service.')->group(function () {
+        Route::get('', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_service_index')->name('index');
+        Route::post('shipment_details', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_service_details')->name('shipment_details');
+        Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+            Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+            Route::post('shipment_details', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_try_and_buy_shipment_details')->name('shipment_details');
+        });
+    });
 
-
-     
 });
 
