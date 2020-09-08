@@ -1201,8 +1201,8 @@ class AdminReportsEmailController extends Controller
             $total_amount = 0;
             $done_payment_array = array();
             $done_payments_array = array();
-            $done_payment_array['header'] = ['Payment ID', 'Shipper Name', 'IBAN Number', 'Amount'];
-            $done_payment_array[] = ['Payment ID' => '', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => ''];
+            $done_payment_array['header'] = ['S No.', 'Payment ID', 'Shipper Name', 'IBAN Number', 'Amount'];
+            $done_payment_array[] = ['S No.' => '', 'Payment ID' => '', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => ''];
             $done_payments = $done_payments->get();
             $shippers = array();
             $shipper_ids = array();
@@ -1217,6 +1217,7 @@ class AdminReportsEmailController extends Controller
                 $foc_account_tags = array_map('intval', explode(',', $foc_shippers->text));
                 $shipper_ids = array_merge($shipper_ids, $foc_account_tags);
             }
+            $serial = 0;
             foreach ($done_payments as $done_payment) {
                 if (!in_array($done_payment->done_payment->shipper->id, $shipper_ids)) {
                     if (!in_array($done_payment->done_payment->shipper->id, $shippers)) {
@@ -1246,7 +1247,8 @@ class AdminReportsEmailController extends Controller
                     $done_payment_report->amount = $done_payment->payable;
                     $done_payment_report->iban_number = $iban;
                     $done_payment_report->save();
-                    $done_payment_array[] = ['Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'IBAN Number' => $iban, 'Amount' => number_format($done_payment->payable)];
+                    $serial++;
+                    $done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'IBAN Number' => $iban, 'Amount' => number_format($done_payment->payable)];
                     $total_amount = $total_amount + $done_payment->payable;
                 }
             }
@@ -1255,7 +1257,7 @@ class AdminReportsEmailController extends Controller
             $done_payments_array[] = ['' => '', 'Total Shippers' => count($shippers), 'Total Amount' => number_format($total_amount)];
             $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
             $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
-            $done_payment_array[] = ['Payment ID' => 'Total', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => number_format($total_amount)];
+            $done_payment_array[] = ['S No.' => '', 'Payment ID' => 'Total', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => number_format($total_amount)];
             $done_payment_array = array_merge($done_payments_array, $done_payment_array);
 
             $cell_s = [
@@ -1280,7 +1282,7 @@ class AdminReportsEmailController extends Controller
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($done_payment_array, NULL, 'A2', true);
             $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
-            $sheet->getStyle("A7:D7")->applyFromArray($cell_st);
+            $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
             $date_file_name = Carbon::today()->format('Y_m_d');
             $sheet->setTitle('Done Payments ' . $date_file_name);
             $writer = new Xlsx($spreadsheet);
