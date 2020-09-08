@@ -78,7 +78,7 @@ class AdminNsaAccountShipmentController extends Controller
                     'total_cod_amount' => $total_cod_amount,
                     'password' => NULL,
                     'last_updated_at' => Carbon::now(),
-                    'special_rider' => 1,
+                    'special_rider' => 0,
                     'order' => $order
                 ]);
 
