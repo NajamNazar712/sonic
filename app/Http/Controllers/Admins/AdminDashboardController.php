@@ -1431,6 +1431,8 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->save();
                 $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
                 NotificationsController::send(81, $sale_persons);
+
+
             }
             else{
                 return ['status'=>0,'error'=>"Shipper is already tagged to  Sales Person!"];
