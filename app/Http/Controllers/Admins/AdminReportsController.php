@@ -6633,7 +6633,7 @@ use Yajra\Datatables\Datatables;
         }
 
         public function daily_monthly_adjustment_index(){
-            return view('admin.reports.daily_monthly_adjustment_list');
+            return view('admin.reports.daily_monthly_adjustment');
         }
 
         public function daily_monthly_adjustment_list(Request $request){
@@ -6649,6 +6649,23 @@ use Yajra\Datatables\Datatables;
                     $route = route('admin.tracking.index');
                     return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
                 });
+                if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                    $from = $request->get('search_date_from');
+                    $to = $request->get('search_date_to');
+                    $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from,$to]);
+                }
+            return $datatable->make(true);
+        }
+
+        public function daily_monthly_adjustment_summary_list(Request $request){
+            $adjustments = DB::connection('reports')->table('adjustment_logs')
+                ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+                ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+                ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+                ->join('cities AS h', 'dc.hub_id', '=', 'h.id')
+                ->select(, 'h.name as hub')
+                ->whereIn('adjustment_logs.type', [1,2]);
+            $datatable = Datatables::of($adjustments);
                 if ($request->get('search_date_from') && $request->get('search_date_to')) {
                     $from = $request->get('search_date_from');
                     $to = $request->get('search_date_to');
