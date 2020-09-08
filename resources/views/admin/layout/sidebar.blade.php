@@ -149,11 +149,11 @@
                                 <li class=" nav-item"><a href="#"><span class="menu-title">V2 Pickups</span></a>
                                     <ul class="menu-content">
                                         @if (session('role_id') == 1 || in_array(17, session('permissions')))
-                                            <li><a class="menu-item" href="{{ route('admin.arrival_service.index') }}">Arrival Service Center</a></li>
-                                        @endif
-                                        @if (session('role_id') == 1 || in_array(17, session('permissions')))
                                             <li><a class="menu-item" href="{{ route('admin.v2_pickups.pending.index') }}">Pending</a></li>
                                         @endif
+                                            @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.arrival_service.index') }}">Arrival Service Center</a></li>
+                                            @endif
                                         @if (session('role_id') == 1 || in_array(24, session('permissions')))
                                                 <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Individual Arrival</a></li>
                                                 <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk Arrival</a></li>
@@ -833,6 +833,10 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(318, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.sales.projection.shipments.index')}}">Projection Shipments</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(302, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.nsa_account.index') }}">NSA Accounts</a>
+                                        </li>
                                     @endif
                                 </ul>
 

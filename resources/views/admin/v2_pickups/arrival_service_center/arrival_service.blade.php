@@ -110,62 +110,7 @@
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="ShipmentWeightModal" data-backdrop="static" role="dialog" aria-labelledby="ShipmentWeightModal" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="delivered_shipments_modal_title">Update Weight</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="add_shipment_weight_form" class="form-inline mb-1 justify-content-center" method="post" action="{{ route('admin.v2_pickups.arrival_service.service.store') }}" novalidate="novalidate">
-                        {{ csrf_field() }}
-
-                        <input type="hidden" name="shipment_ids" class="shipment_ids">
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group ml-1">
-                                    <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group text-center  mb-1 p-1 border border-light rounded">
-                                    <label class="mr-1">Volumetric Weight</label>
-                                    <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                </div>
-                            </div>
-                            <div class="col-1">
-                                <div class="form-group ml-1">
-                                    <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
     <div class="modal fade" id="ShipmentPiecesModal" data-backdrop="static" role="dialog" aria-labelledby="ShipmentPiecesModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -727,17 +672,17 @@
 
                 $('#add_shipment_weight_form input.shipment_ids').val(shipment_ids);
 
-                $('#ShipmentWeightModal').modal('show');
+                // $('#ShipmentWeightModal').modal('show');
             });
 
-            $('#add_shipment_weight_form').validate({
+            $('#arrival_of_shipments_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function (form) {
-
+                    $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
                     swal({
                         text: 'Are you sure, you want to Receive these Shipments?',
                         icon: 'warning',

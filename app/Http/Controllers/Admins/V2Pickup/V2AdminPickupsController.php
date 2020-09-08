@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins\V2Pickup;
 
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\AdminNsaAccountShipmentController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\NotificationsController;
@@ -640,6 +641,14 @@ class V2AdminPickupsController extends Controller
 
         $print_shipment_ids = array();
 
+        $settings = GlobalSettings::where('type', 'nsa_accounts');
+        $rider_id = null;
+        $nsa_accounts = array();
+        if($settings->exists()){
+            $settings = $settings->first();
+            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+        }
+
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if($shipment){
@@ -707,6 +716,12 @@ class V2AdminPickupsController extends Controller
                     $shipment->save();
                     $reference_2_id = NULL;
                     ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
+
+                    if(count($nsa_accounts) > 0){
+                        if(in_array($shipment->user_id, $nsa_accounts)){
+                            AdminNsaAccountShipmentController::nsa_account_shipment($shipment->id);
+                        }
+                    }
 
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if($self_collection_shipment->exists()){
@@ -1157,6 +1172,14 @@ class V2AdminPickupsController extends Controller
 
         $print_shipment_ids = array();
 
+        $settings = GlobalSettings::where('type', 'nsa_accounts');
+        $rider_id = null;
+        $nsa_accounts = array();
+        if($settings->exists()){
+            $settings = $settings->first();
+            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+        }
+
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if($shipment){
@@ -1219,6 +1242,11 @@ class V2AdminPickupsController extends Controller
                     $reference_2_id = NULL;
                     ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
+                    if(count($nsa_accounts) > 0){
+                        if(in_array($shipment->user_id, $nsa_accounts)){
+                            AdminNsaAccountShipmentController::nsa_account_shipment($shipment->id);
+                        }
+                    }
 
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if($self_collection_shipment->exists()){

@@ -141,6 +141,7 @@ class V2AdminArrivalServiceController extends Controller
         return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
         }
     public function service_arrival_submit(Request $request){
+      //  dd($request);
         $shipment_ids = explode(',', $request->shipment_ids);
 
         $pickup_request_ids = array();
@@ -163,14 +164,7 @@ class V2AdminArrivalServiceController extends Controller
                     else{
                         $reference_1_id = NULL;
                     }
-                    if ($request->volumetric_weight == "on") {
-                        $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
-                        $shipment->length = $request->length;
-                        $shipment->breadth = $request->breadth;
-                        $shipment->height = $request->height;
-                    } else {
-                        $shipment->actual_weight = $request->weight;
-                    }
+
                    $shipment->shipper_status_id = 61;
                     //dd($data);
                     $shipment->consignee_status_id = 61;
@@ -179,7 +173,6 @@ class V2AdminArrivalServiceController extends Controller
                     ShipmentsJourneyController::add($shipment_id, 61, 61, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
                     $shipment->fresh();
-
                 }
             }else {
                 unset($shipment_ids[$key]);
@@ -187,7 +180,6 @@ class V2AdminArrivalServiceController extends Controller
 
         }
 
-        NotificationsController::send(4, $shipment_ids);
         if (empty($print_shipment_ids)) {
             return redirect()->back()->with(['success' => 'Arrival Done']);
         }

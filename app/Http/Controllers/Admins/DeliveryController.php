@@ -5103,8 +5103,9 @@ class DeliveryController extends Controller
 
     public function reject(Request $request){
         $shipment_ids = $request->ids;
+        $remarks = $request->remarks;
 
-        if (!empty($shipment_ids)) {
+        if (!empty($shipment_ids) && !empty($remarks)) {
             $valid = FALSE;
 
             foreach ($shipment_ids as $shipment_id) {
@@ -5143,7 +5144,7 @@ class DeliveryController extends Controller
                         'updated_by_date' => Carbon::now()
                     ]);
 
-                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, $remarks, NULL, Auth::id());
                 }
             }
 
