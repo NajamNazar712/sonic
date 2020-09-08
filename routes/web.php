@@ -645,6 +645,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('single_piece','Admins\AdminShipmentPieceController@single_piece')->name('single_piece');
             Route::post('wait_remaining_pieces','Admins\AdminShipmentPieceController@wait_remaining_pieces')->name('wait_remaining_pieces');
             Route::post('return_back_to_shipper','Admins\AdminShipmentPieceController@return_back_to_shipper')->name('return_back_to_shipper');
+            Route::post('return_note_create', 'Admins\AdminShipmentPieceController@return_note_create')->name('return_note_create');
+            Route::post('return_note_print', 'Admins\AdminShipmentPieceController@return_note_print')->name('return_note_print');
         });
         Route::prefix('add')->name('add.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_add_index')->name('index');

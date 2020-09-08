@@ -40,6 +40,7 @@
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
+                        <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
@@ -60,26 +61,44 @@
             </div>
         </div>
     </div>
-    <!--Shipments popup -->
-    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+    <!--Rider popup -->
+    <div class="modal fade text-left" id="RiderModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RiderModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="shipments_modal_title">Return Note Shipment(s)</h4>
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Rider (Return Note)</h4>
 
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
                 </div>
-                <div class="modal-body text-center">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+                <form id="return_rider_form" class="justify-content-center" novalidate="novalidate" method="post" action="{{ route('admin.multiple_pieces.hold.return_note_create') }}">
+                    @csrf
+                    @method('POST')
+                    <div class="modal-body text-center">
+                        <input type="hidden" name="shipment_ids" id="shipment_ids">
+                        <div class="form-group">
+                            <select name="rider_select" id="rider_select" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
+                                @foreach($riders as $rider)
+                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <select name="route" id="route" class="form-control select2" data-rule-required="true" data-msg-required="Route is required">
+                                @foreach($routes as $route)
+                                    <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer text-center">
+                        <button type="submit" class="btn btn-primary">Create & Print</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <!--Shipments popup -->
+    <!--Rider popup -->
 
 
 @endsection
@@ -179,6 +198,7 @@
                     }
                 }
             });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -186,35 +206,38 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.history.list') }}',
+                        url: '{{ route('admin.multiple_pieces.hold.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Return Note No.');
-                            head.push('Status');
+                            head.push('Tracking No.');
+                            head.push('Shipper');
+                            head.push('COD');
+                            head.push('Origin');
+                            head.push('Destination');
                             head.push('Hub');
-                            head.push('Rider');
-                            head.push('No. Of Shipments');
-                            head.push('Created By');
-                            head.push('Created Date');
-                            head.push('Submitted By');
-                            head.push('Submitted Date');
-
+                            head.push('Date & Time Entered');
+                            head.push('Status');
+                            head.push('Request Status');
+                            head.push('Last Status By Date');
+                            head.push('Last Status By');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.return_note_id_padded);
-                                row.push(values.main_status);
+                                row.push(values.tracking_number);
+                                row.push(values.shipper);
+                                row.push(values.amount);
+                                row.push(values.origin);
+                                row.push(values.destination);
                                 row.push(values.hub);
-                                row.push(values.rider);
-                                row.push(values.shipments_count);
-                                row.push(values.assigned_by);
                                 row.push(values.created_at);
-                                row.push(values.submitted_by);
-                                row.push(values.submitted_at);
+                                row.push(values.status);
+                                row.push(values.request_status);
+                                row.push(values.last_updated_by);
+                                row.push(values.last_updated_at);
 
                                 body.push(row);
                             });
@@ -225,10 +248,77 @@
                     return {body: body, header: head};
                 }
             } );
+            var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
+                    @if (session('role_id') == 1 || in_array(372, session('permissions')))
+                    {
+                        text: '<i class="la la-print"></i> Print',
+                        className: 'btn btn-primary print',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                $('#RiderModal').modal('show');
+                            }
+
+                        }
+                    },
+                    @endif
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.print').enable();
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.print').disable();
+                                    }
+                                }
+                            });
+                        }
+                    },
                     {
                         extend: 'excel',
                         title: 'Shipment Pieces',
@@ -237,6 +327,12 @@
                     },
                     'reset'
                 ],
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -255,6 +351,7 @@
                 rowId: 'shId',
                 order: [[7, 'desc']],
                 columns: [
+                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
@@ -265,14 +362,21 @@
                     {data: 'created_at', name: 'shipment_pieces_requests.created_at', class: 'align-middle created_at'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'request_status', name: 'request_status', class: 'align-middle request_status'},
-                    {data: 'last_updated_by', name: 'last_updated_by', class: 'align-middle last_updated_by'},
                     {data: 'last_updated_at', name: 'shipment_pieces_requests.last_updated_at', class: 'align-middle last_updated_at'},
+                    {data: 'last_updated_by', name: 'last_updated_by', class: 'align-middle last_updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if (data.request_status_id == 3) {
+                        $('td:eq(0)', row).addClass('select-checkbox');
+
+                        if ($.inArray(data.shId, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
+                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -289,7 +393,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -305,7 +409,7 @@
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
+                                    column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
                             if (column.search()) {
@@ -332,6 +436,41 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
+                }
+            });
+
+            $("#rider_select").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider*",
+                width:'100%',
+                dropdownParent:$('#return_rider_form')
+            });
+            $('#route').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Route*',
+                width:'100%',
+                dropdownParent:$('#return_rider_form')
+            });
+            $('#rider_name').on('change',function () {
+                var route = $(this).find(":selected").data("id");
+                $('#route').val(route).trigger('change');
+            });
+
+            $('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.print').enable();
+                }
+                else {
+                    table.button('.print').disable();
                 }
             });
 
@@ -436,7 +575,7 @@
                     }else if($(this).hasClass('return_to_shipper')){
                         swal({
                             title: 'Are You Sure?',
-                            text: 'Select Yes to wait for remaining pieces!',
+                            text: 'Select Yes to wait for Return Back To Shipper!',
                             icon: 'warning',
                             buttons: {
                                 cancel: {
@@ -459,7 +598,7 @@
                             if(confirm){
                                 blockPagePermanently();
                                 $.ajax({
-                                    url:"{{route('admin.multiple_pieces.hold.wait_remaining_pieces')}}",
+                                    url:"{{route('admin.multiple_pieces.hold.return_back_to_shipper')}}",
                                     method:'POST',
                                     data:{
                                         'shipment_id':id,
@@ -483,6 +622,62 @@
 
 
             });
+
+            $('#return_rider_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $('#shipment_ids').val(selected_rows);
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Return Note is being created!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+
+                }
+            });
+
+            @if(session('print'))
+            var pid = '{{ session('print') }}';
+            print(pid);
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.multiple_pieces.hold.return_note_print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            @endif
 
         });
     </script>

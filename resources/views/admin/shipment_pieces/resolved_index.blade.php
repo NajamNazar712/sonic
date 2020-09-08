@@ -47,11 +47,9 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Date & Time Entered</th>
-                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Request Status</th>
                         <th class="border-primary border-darken-1">Last Status By Date</th>
                         <th class="border-primary border-darken-1">Last Status By</th>
-                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -59,26 +57,6 @@
             </div>
         </div>
     </div>
-    <!--Shipments popup -->
-    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="shipments_modal_title">Return Note Shipment(s)</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--Shipments popup -->
 
 
 @endsection
@@ -185,35 +163,36 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.history.list') }}',
+                        url: '{{ route('admin.multiple_pieces.resolved.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Return Note No.');
-                            head.push('Status');
+                            head.push('Tracking No.');
+                            head.push('Shipper');
+                            head.push('COD');
+                            head.push('Origin');
+                            head.push('Destination');
                             head.push('Hub');
-                            head.push('Rider');
-                            head.push('No. Of Shipments');
-                            head.push('Created By');
-                            head.push('Created Date');
-                            head.push('Submitted By');
-                            head.push('Submitted Date');
-
+                            head.push('Date & Time Entered');
+                            head.push('Request Status');
+                            head.push('Last Status By Date');
+                            head.push('Last Status By');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.return_note_id_padded);
-                                row.push(values.main_status);
+                                row.push(values.tracking_number);
+                                row.push(values.shipper);
+                                row.push(values.amount);
+                                row.push(values.origin);
+                                row.push(values.destination);
                                 row.push(values.hub);
-                                row.push(values.rider);
-                                row.push(values.shipments_count);
-                                row.push(values.assigned_by);
                                 row.push(values.created_at);
-                                row.push(values.submitted_by);
-                                row.push(values.submitted_at);
+                                row.push(values.request_status);
+                                row.push(values.last_updated_at);
+                                row.push(values.last_updated_by);
 
                                 body.push(row);
                             });
@@ -245,7 +224,7 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.multiple_pieces.hold.list') }}',
+                    url: '{{ route('admin.multiple_pieces.resolved.list') }}',
                     data: function (d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
@@ -262,11 +241,9 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'created_at', name: 'shipment_pieces_requests.created_at', class: 'align-middle created_at'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'request_status', name: 'request_status', class: 'align-middle request_status'},
-                    {data: 'last_updated_by', name: 'last_updated_by', class: 'align-middle last_updated_by'},
                     {data: 'last_updated_at', name: 'shipment_pieces_requests.last_updated_at', class: 'align-middle last_updated_at'},
-                    {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
+                    {data: 'last_updated_by', name: 'last_updated_by', class: 'align-middle last_updated_by'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -280,21 +257,13 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var request_status_select = '<select name="request_status_select" id="request_status_select" class="select2 form-control"></select>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="1">Pending</option>' +
-                        '<option value="2">Resolved</option>' +
-                        '</select>';
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
-                            $(status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
                         else if($(header).is('.request_status')){
                             $(request_status_select).appendTo($(search))
@@ -317,12 +286,6 @@
                         obj.text = obj.name;
                         return obj;
                     });
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
                     $("#request_status_select").prepend('<option value="" selected></option>').select2({
                         data:data,
                         placeholder: "Select Request Status",
@@ -336,151 +299,6 @@
 
             $('#search_filter_btn').on('click',function () {
                 table.draw();
-            });
-
-            $('#datatable tbody').on('click','tr td.action a',function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                if(id){
-                    if($(this).hasClass('single_piece')){
-                        swal({
-                            title: 'Are You Sure?',
-                            text: 'Select Yes to change shipment to Single Piece!',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if(confirm){
-                                blockPagePermanently();
-                                $.ajax({
-                                    url:"{{route('admin.multiple_pieces.hold.single_piece')}}",
-                                    method:'POST',
-                                    data:{
-                                        'shipment_id':id,
-                                        '_token':'{{ csrf_token() }}',
-                                    }
-                                }).done(function (data) {
-                                    if(data.status == 0){
-                                        table.draw('false');
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }else{
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                    }
-                                    UnblockPagePermanently();
-
-                                });
-                            }
-                        });
-
-                    }else if($(this).hasClass('remaining_piece')){
-                        swal({
-                            title: 'Are You Sure?',
-                            text: 'Select Yes to wait for remaining pieces!',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if(confirm){
-                                blockPagePermanently();
-                                $.ajax({
-                                    url:"{{route('admin.multiple_pieces.hold.wait_remaining_pieces')}}",
-                                    method:'POST',
-                                    data:{
-                                        'shipment_id':id,
-                                        '_token':'{{ csrf_token() }}',
-                                    }
-                                }).done(function (data) {
-                                    if(data.status == 0){
-                                        table.draw('false');
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }else{
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                    }
-                                    UnblockPagePermanently();
-
-                                });
-                            }
-                        });
-                    }else if($(this).hasClass('return_to_shipper')){
-                        swal({
-                            title: 'Are You Sure?',
-                            text: 'Select Yes to wait for remaining pieces!',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if(confirm){
-                                blockPagePermanently();
-                                $.ajax({
-                                    url:"{{route('admin.multiple_pieces.hold.wait_remaining_pieces')}}",
-                                    method:'POST',
-                                    data:{
-                                        'shipment_id':id,
-                                        '_token':'{{ csrf_token() }}',
-                                    }
-                                }).done(function (data) {
-                                    if(data.status == 0){
-                                        table.draw('false');
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }else{
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                    }
-                                    UnblockPagePermanently();
-
-                                });
-                            }
-                        });
-                    }
-                }
-
-
             });
 
         });
