@@ -7,6 +7,8 @@ use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestTagging;
@@ -24,6 +26,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -5421,10 +5424,142 @@ class NotificationsController extends Controller
                   }
               }
           }
+          elseif ($id == 81)
+          {
+          $subject = $notification->subject;
+          $body = $notification->body;
+          $sales_person = $reference_1_id;
+
+          $html = '<table style="width:100%;">';
+          $html .= '<thead><tr>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Sales Person</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>';
+          $html .= '</tr></thead><tbody>';
+
+          $to = array();
+          $cc = array();
+          foreach($sales_person as $index => $person ) {
+              $shipper =  User::find($index);
+              $html .= '<tr>';
+              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .$shipper->name . '</td>';
+
+              if($person['old_sale_person'] != null){
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name . '</td>';
+              }
+              else{
+                  $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+              }
+              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['new_sale_person']->name . '</td>';
+              $html .= '</tr>';
+
+              $concern=SalesCommission::join('sales_commission_users as sc','sc.sales_commission_id','=','sales_commissions.id')->join('admins as a','a.id', '=' ,'sc.user_id')->where('sales_commissions.shipper_id', $shipper->id)->whereIn('sc.tier_id', [1,2,3,4]);
+              if($concern->exists())
+              {
+                  $cc = array_merge($cc, $concern->pluck('email')->toArray());
+              }
+              if ($person['new_sale_person']->email) {
+                  $to[] = $person['new_sale_person']->email;
+              }
+          }
+
+          $html .= '</tbody></table>';
+
+          if (strpos($body, '[preview]') !== FALSE) {
+              $body = str_replace('[preview]', $html , $body);
+          }
+
+         $sale_head_email=Admin::where('role_id', 4)->select('email')->first();
+
+         if($sale_head_email != ''){
+             $cc[] = $sale_head_email->email;
+         }
+              if($to == null)
+              {
+                  $cc = null;
+              }
+
+        /*  if($to != null){*/
+              self::email($subject, $body, $to,$cc);
+          //}
+          }
+          else if($id == 83){
+              $subject = $notification->subject;
+              $body = $notification->body;
+              $pickup_request_id = $reference_1_id;
+              $pickup_note_id = $reference_2_id;
+
+              if($pickup_request_id) {
+                  $pickup = v2PickupRequest::find($pickup_request_id);
+                  if($pickup){
+                      $shipper_name = $pickup->shipper->name;
+                      $rider_name = $pickup->rider->name;
+                      $number = 0;
+                      $shipment_pickup_date = '';
+                      $rider_pickup = V2RiderPickup::where('pickup_request_id', $pickup_request_id)->where('pickup_note_id', $pickup_note_id);
+                      if($rider_pickup->exists()){
+                          $rider_pickup = $rider_pickup->first();
+                          $number = $rider_pickup->shipments;
+                          $shipment_pickup_date = $rider_pickup->created_at;
+                      }
+                      if (strpos($body, '[rider_name]') !== FALSE) {
+                          $body = str_replace('[rider_name]', $rider_name, $body);
+                      }
+                      if (strpos($body, '[shipper_name]') !== FALSE) {
+                          $body = str_replace('[shipper_name]', $shipper_name, $body);
+                      }
+                      if (strpos($body, '[requested_date]') !== FALSE) {
+                          $body = str_replace('[requested_date]', $pickup->created_at, $body);
+                      }
+                      if (strpos($body, '[number]') !== FALSE) {
+                          if($number == 0)
+                          {
+                              $body = str_replace('[number]', 0, $body);
+                          }
+                          else{
+                              $body = str_replace('[number]', $pickup->number, $body);
+                          }
+
+                      }
+                      if (strpos($subject, '[rider_name]') !== FALSE) {
+                          $subject = str_replace('[rider_name]', $rider_name, $subject);
+                      }
+                      if (strpos($subject, '[shipper_name]') !== FALSE) {
+                          $subject = str_replace('[shipper_name]', $shipper_name, $subject);
+                      }
+                      if (strpos($subject, '[requested_date]') !== FALSE) {
+                          $subject = str_replace('[requested_date]', $pickup->created_at, $subject);
+                      }
+                      if (strpos($subject, '[number]') !== FALSE) {
+                          if($number == 0)
+                          {
+                              $subject = str_replace('[number]', 0, $subject);
+                          }
+                          else{
+                              $subject = str_replace('[number]', $pickup->number, $subject);
+                          }
+                      }
+                      if (strpos($subject, '[shipment_picked_date]') !== FALSE) {
+                          if($shipment_pickup_date != null){
+                              $subject = str_replace('[shipment_picked_date]', $shipment_pickup_date, $subject);
+                          }
+                          else{
+                              $subject = str_replace('[shipment_picked_date]', '-' , $subject);
+                          }
+                      }
+
+                      if ($pickup->shipper->email) {
+                          $to[] = $pickup->shipper->email;
+                      }
+                      self::email($subject, $body, $to);
+                  }
+
+              }
+
+          }
         }
       }
     }
-
     static public function custom($type, $subject, $body, $to) {
       if ($type == 1) {
         self::email($subject, $body, $to);

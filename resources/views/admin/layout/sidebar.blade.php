@@ -110,6 +110,21 @@
             @if (session('role_id') == 1 || count(array_intersect([17, 20, 23, 123, 368, 369, 370], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cubes"></i>First Mile</span></a>
                     <ul class="menu-content">
+                        @if (session('role_id') == 1 || count(array_intersect([368, 369, 370], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Multiple Pieces</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(368, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.multiple_pieces.add.index') }}">Add</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(369, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.multiple_pieces.hold.index') }}">List</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(370, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.multiple_pieces.resolved.index') }}">Resolved</a></li>
+                                    @endif
+                                </ul>
+                            </li>
+                        @endif
                         @if (session('role_id') == 1 || count(array_intersect([17, 20, 23, 123, 271, 272], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Pickups</span></a>
                                 <ul class="menu-content">
@@ -145,7 +160,33 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([368, 369, 370], session('permissions'))) !== 0)
+                            @if (session('role_id') == 1 || count(array_intersect([17], session('permissions'))) !== 0)
+                                <li class=" nav-item"><a href="#"><span class="menu-title">V2 Pickups</span></a>
+                                    <ul class="menu-content">
+                                        @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                                            <li><a class="menu-item" href="{{ route('admin.v2_pickups.pending.index') }}">Pending</a></li>
+                                        @endif
+                                            @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.arrival_service.index') }}">Arrival Service Center</a></li>
+                                            @endif
+                                        @if (session('role_id') == 1 || in_array(24, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Individual Arrival</a></li>
+                                                <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk Arrival</a></li>
+                                        @endif
+                                        @if (session('role_id') == 1 || in_array(271, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.v2_pickups.rider.index') }}">Rider</a></li>
+                                        @endif
+
+                                        @if (session('role_id') == 1 || in_array(272, session('permissions')))
+                                            <li><a class="menu-item" href="{{ route('admin.v2_pickups.action_log.index') }}">Rider Action Log</a></li>
+                                        @endif
+                                            @if (session('role_id') == 1 || in_array(273, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.v2_pickups.rider_receiving.index') }}">Rider Receiving</a></li>
+                                            @endif
+                                    </ul>
+                                </li>
+                            @endif
+						@if (session('role_id') == 1 || count(array_intersect([368, 369, 370], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Multiple Pieces</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(368, session('permissions')))
@@ -157,30 +198,6 @@
                                     @if (session('role_id') == 1 || in_array(370, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.multiple_pieces.resolved.index') }}">Resolved</a></li>
                                     @endif
-                                </ul>
-                            </li>
-                        @endif
-
-                        @if (session('role_id') == 1 || count(array_intersect([17], session('permissions'))) !== 0)
-                            <li class=" nav-item"><a href="#"><span class="menu-title">V2 Pickups</span></a>
-                                <ul class="menu-content">
-                                    @if (session('role_id') == 1 || in_array(17, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.v2_pickups.pending.index') }}">Pending</a></li>
-                                    @endif
-                                    @if (session('role_id') == 1 || in_array(24, session('permissions')))
-                                            <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Individual Arrival</a></li>
-                                            <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk Arrival</a></li>
-                                    @endif
-                                    @if (session('role_id') == 1 || in_array(271, session('permissions')))
-                                    <li><a class="menu-item" href="{{ route('admin.v2_pickups.rider.index') }}">Rider</a></li>
-                                    @endif
-
-                                    @if (session('role_id') == 1 || in_array(272, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.v2_pickups.action_log.index') }}">Rider Action Log</a></li>
-                                    @endif
-                                        @if (session('role_id') == 1 || in_array(273, session('permissions')))
-                                            <li><a class="menu-item" href="{{ route('admin.v2_pickups.rider_receiving.index') }}">Rider Receiving</a></li>
-                                        @endif
                                 </ul>
                             </li>
                         @endif
@@ -846,6 +863,10 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(318, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.sales.projection.shipments.index')}}">Projection Shipments</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(302, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.nsa_account.index') }}">NSA Accounts</a>
+                                        </li>
                                     @endif
                                 </ul>
 

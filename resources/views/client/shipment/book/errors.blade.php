@@ -88,6 +88,7 @@
                                     <th>Charges Mode ID</th>
                                 @endif
                                 <th>Pieces</th>
+                                <th></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -392,6 +393,9 @@
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][pieces_quantity]', $ro['pieces_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
+
+                                    <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
+
                             </tr>
 
                             @endforeach
@@ -477,6 +481,21 @@
                 width: '100%',
                 placeholder: 'Charges Mode'
             });
+
+            var rowCount = $("#tbl td").closest("tr").length;
+            if(rowCount == 1){
+                $('.cancel_shipment').addClass('d-none');
+            }
+            else{
+                $('#tbl .cancel_shipment').on('click', function(e){
+                    $(this).closest('tr').remove();
+                     rowCount = $("#tbl td").closest("tr").length;
+                    if(rowCount == 1){
+                        $('.cancel_shipment').addClass('d-none');
+                    }
+                });
+            }
         });
+
     </script>
 @endsection
