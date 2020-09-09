@@ -9,6 +9,7 @@ use App\Http\Models\ShipmentPiecesRequestStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Controller;
 
 class ShipperShipmentPieceController extends Controller
 {
@@ -30,7 +31,7 @@ class ShipperShipmentPieceController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('shipment_pieces_request_statuses as ss', 'ss.id', '=', 'shipment_pieces_requests.request_status_id')
             ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','shipments.amount', 'ss.name as request_status', 'shipment_pieces_requests.created_at', 'shipment_pieces_requests.request_status_id', 'shipment_pieces_requests.status')
-            ->where('shipments.shipper_status_id', 62);
+            ->where('shipments.shipper_status_id', 62)->where('shipment_pieces_requests.status', 1);
 
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -186,7 +187,7 @@ class ShipperShipmentPieceController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('shipment_pieces_request_statuses as ss', 'ss.id', '=', 'shipment_pieces_requests.request_status_id')
             ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','shipments.amount', 'ss.name as request_status', 'shipment_pieces_requests.created_at', 'shipment_pieces_requests.request_status_id', 'shipment_pieces_requests.status')
-            ->where('shipments.shipper_status_id', 62);
+            ->where('shipments.shipper_status_id', 62)->where('shipment_pieces_requests.status', 2);
 
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
