@@ -519,7 +519,7 @@ class V2AdminPickupsController extends Controller
                 }
 
             }
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->booking_type_id == 3){
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
@@ -595,7 +595,7 @@ class V2AdminPickupsController extends Controller
         $shipment_item = ShipmentItem::find($request->tracking_number);
         if($shipment_item){
             $shipment = Shipment::find($shipment_item->shipment_id);
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
                     $shipment_items_count = count($shipment_items);
@@ -616,7 +616,7 @@ class V2AdminPickupsController extends Controller
         if($shipment_pieces->exists()){
             $shipment_pieces = $shipment_pieces->first();
             $shipment = Shipment::find($shipment_pieces->shipment_id);
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 $details = array();
                 $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
                 $details['id'] = $shipment->id;
@@ -653,7 +653,7 @@ class V2AdminPickupsController extends Controller
             $shipment = Shipment::find($shipment_id);
             if($shipment){
                 
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
                     if($pickup_request_shipment){
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;
@@ -947,7 +947,7 @@ class V2AdminPickupsController extends Controller
                 }
             }
 
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->booking_type_id == 3){
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
@@ -1034,7 +1034,7 @@ class V2AdminPickupsController extends Controller
             $shipment_item = ShipmentItem::find($request->tracking_number);
             if($shipment_item){
                 $shipment = Shipment::find($shipment_item->shipment_id);
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
                     $shipment_items_count = count($shipment_items);
@@ -1056,7 +1056,7 @@ class V2AdminPickupsController extends Controller
                 if($shipment_pieces->exists()){
                     $shipment_pieces = $shipment_pieces->first();
                     $shipment = Shipment::find($shipment_pieces->shipment_id);
-                    if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+                    if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                         $details = array();
                         $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
                         $details['id'] = $shipment->id;
@@ -1081,7 +1081,7 @@ class V2AdminPickupsController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->booking_type_id == 3){
                     if($shipment->shipper_status_id == 17){
                         AdminPickupsController::generate($shipment->id);
@@ -1146,7 +1146,7 @@ class V2AdminPickupsController extends Controller
         $shipment = Shipment::find($request->id);
 
         if ($shipment) {
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 $shipment->actual_weight = NULL;
                 $shipment->length = NULL;
                 $shipment->breadth = NULL;
@@ -1187,7 +1187,7 @@ class V2AdminPickupsController extends Controller
                     unset($shipment_ids[$key]);
                     continue;
                 }
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
                     if($pickup_request_shipment){
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;
@@ -1755,7 +1755,7 @@ class V2AdminPickupsController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->pieces > 1){
                     if($shipment->shipper_status_id == 17){
                         AdminPickupsController::generate($shipment->id);
