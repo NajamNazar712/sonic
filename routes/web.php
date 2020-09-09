@@ -1618,6 +1618,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@station_recovery_list')->name('list');
             Route::post('update', 'Admins\AdminReportsController@station_recovery_update')->name('update');
         });
+        Route::prefix('daily_monthly_adjustment')->name('daily_monthly_adjustment.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@daily_monthly_adjustment_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@daily_monthly_adjustment_list')->name('list');
+            Route::get('summary_list', 'Admins\AdminReportsController@daily_monthly_adjustment_summary_list')->name('summary_list');
+        });
     });
 
     //Reports end

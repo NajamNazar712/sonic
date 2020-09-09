@@ -5508,7 +5508,7 @@ class NotificationsController extends Controller
                           $body = str_replace('[shipper_name]', $shipper_name, $body);
                       }
                       if (strpos($body, '[requested_date]') !== FALSE) {
-                          $body = str_replace('[requested_date]', $pickup->created_at, $body);
+                          $body = str_replace('[requested_date]', $pickup->created_at, $body);U
                       }
                       if (strpos($body, '[number]') !== FALSE) {
                           if($number == 0)
