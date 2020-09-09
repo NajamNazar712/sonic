@@ -42,6 +42,15 @@
             @endif
 
             @if (session('user_type') == 1)
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-list-ul"></i>Multiple Piece</span></a>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{ route('cod.multiple_pieces.index') }}">Pending</a></li>
+                        <li><a class="menu-item" href="{{ route('cod.multiple_pieces.resolved.index') }}">Resolved</a></li>
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('user_type') == 1)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-list-ul"></i>Rates</span></a>
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('cod.rates.view.index') }}">View</a></li>

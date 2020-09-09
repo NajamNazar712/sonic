@@ -1800,6 +1800,7 @@ class V2AdminPickupsController extends Controller
                     $details['shipper'] = $shipment->user->name;
                     $details['pickup_request_id'] = str_pad($pickup_request->id, 6, '0', STR_PAD_LEFT);
                     $details['rider'] = $rider;
+                    $details['amount'] = $shipment->amount;
                     $details['weight'] = floatval($shipment->actual_weight);
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);

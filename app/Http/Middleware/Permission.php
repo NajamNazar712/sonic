@@ -716,6 +716,11 @@ class Permission
             'handover.responsibles.status' => 340,
             'handover.responsibles.details' => 340,
             'handover.responsibles.edit' => 340,
+
+
+            'multiple_pieces.add.index' => 368,
+            'multiple_pieces.hold.index' => 369,
+            'multiple_pieces.resolved.index' => 370,
         ],
 
         'shipper' => [

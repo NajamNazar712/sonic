@@ -4868,7 +4868,7 @@ use Yajra\Datatables\Datatables;
     //            $yesterday = Carbon::now()->subDays(3);
     //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
     //        }
-
+            return $sales->toSql();
             if (session('role_id') != 1) {
                 if (session('department_id') == 7 && session('role_id') != 4) {
                     $sales = $sales->whereIn('u.id', session('tagged_shippers'));
