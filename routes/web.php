@@ -335,7 +335,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('return_back_to_shipper','Shippers\ShipperShipmentPieceController@return_back_to_shipper')->name('return_back_to_shipper');
         Route::prefix('resolved')->name('resolved.')->group(function (){
             Route::get('', 'Shippers\ShipperShipmentPieceController@resolved_index')->name('index');
-            Route::get('list', 'Shippers\ShipperPickupController@resolved_list')->name('list');
+            Route::get('list', 'Shippers\ShipperShipmentPieceController@resolved_list')->name('list');
         });
 
     });

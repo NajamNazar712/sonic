@@ -25,6 +25,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\PickupAction;
 use App\Http\Models\ShipmentPiece;
+use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
@@ -655,6 +656,20 @@ class V2AdminPickupsController extends Controller
                 
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
+
+                    if($shipment->shipper_status_id == 62){
+                        $shipment_pieces_request = ShipmentPiecesRequest::where('shipment_id', $shipment->id)->where('status', 1);
+                        if($shipment_pieces_request->exists()){
+                            $shipment_pieces_request = $shipment_pieces_request->first();
+                            $shipment_pieces_request->status = 2;
+                            $shipment_pieces_request->request_status_id = 4;
+                            $shipment_pieces_request->last_updated_by_admin = Auth::id();
+                            $shipment_pieces_request->last_updated_at = Carbon::now();
+                            $shipment_pieces_request->department_id = session('department_id');
+                            $shipment_pieces_request->save();
+                        }
+                    }
+
                     if($pickup_request_shipment){
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;
 
@@ -1188,6 +1203,21 @@ class V2AdminPickupsController extends Controller
                     continue;
                 }
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+
+                    if($shipment->shipper_status_id == 62){
+                        $shipment_pieces_request = ShipmentPiecesRequest::where('shipment_id', $shipment->id)->where('status', 1);
+                        if($shipment_pieces_request->exists()){
+                            $shipment_pieces_request = $shipment_pieces_request->first();
+                            $shipment_pieces_request->status = 2;
+                            $shipment_pieces_request->request_status_id = 4;
+                            $shipment_pieces_request->last_updated_by_admin = Auth::id();
+                            $shipment_pieces_request->last_updated_at = Carbon::now();
+                            $shipment_pieces_request->department_id = session('department_id');
+                            $shipment_pieces_request->save();
+                        }
+                    }
+
+
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
                     if($pickup_request_shipment){
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;

@@ -172,7 +172,7 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('cod.multiple_pieces.list') }}',
+                    url: '{{ route('cod.multiple_pieces.resolved.list') }}',
                     data: function (d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();

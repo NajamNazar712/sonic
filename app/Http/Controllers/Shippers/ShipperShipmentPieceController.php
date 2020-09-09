@@ -31,7 +31,9 @@ class ShipperShipmentPieceController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('shipment_pieces_request_statuses as ss', 'ss.id', '=', 'shipment_pieces_requests.request_status_id')
             ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','shipments.amount', 'ss.name as request_status', 'shipment_pieces_requests.created_at', 'shipment_pieces_requests.request_status_id', 'shipment_pieces_requests.status')
-            ->where('shipments.shipper_status_id', 62)->where('shipment_pieces_requests.status', 1);
+            ->where('shipments.user_id', session('user_id'))
+            ->where('shipments.shipper_status_id', 62)
+            ->where('shipment_pieces_requests.status', 1);
 
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -115,7 +117,6 @@ class ShipperShipmentPieceController extends Controller
                     $shipment_piece_request->request_status_id = 1;
                     $shipment_piece_request->last_updated_by_user = Auth::id();
                     $shipment_piece_request->last_updated_at = Carbon::now();
-                    $shipment_piece_request->department_id = session('department_id');
                     $shipment_piece_request->save();
 
                     return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
@@ -187,6 +188,7 @@ class ShipperShipmentPieceController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('shipment_pieces_request_statuses as ss', 'ss.id', '=', 'shipment_pieces_requests.request_status_id')
             ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','shipments.amount', 'ss.name as request_status', 'shipment_pieces_requests.created_at', 'shipment_pieces_requests.request_status_id', 'shipment_pieces_requests.status')
+            ->where('shipments.user_id', session('user_id'))
             ->where('shipment_pieces_requests.status', 2);
 
         $datatables = Datatables::of($shipments)
@@ -196,24 +198,6 @@ class ShipperShipmentPieceController extends Controller
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
-            })
-            ->editColumn('shipper', function ($shipment) {
-                if ($shipment->booking_type_id == 4) {
-                    return $shipment->shipper .' (' . $shipment->poc . ')';
-                }
-                else {
-                    return $shipment->shipper;
-                }
-            })
-            ->filterColumn('u.name', function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '!=', 4)
-                        ->where('u.name', 'like', '%' . $keyword . '%');
-                })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.booking_type_id', '=', 4)
-                            ->where('usi.poc', 'like', '%' . $keyword . '%');
-                    });
             })
             ->filterColumn('request_status', function ($query, $keyword) {
 
