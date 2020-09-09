@@ -39,15 +39,31 @@
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                    <thead>
-                    <tr role="row" class="bg-primary white">
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                    </tr>
-                    </thead>
-                </table>
+                <div class="row justify-content-center">
+                    <div class="col mt-3">
+                        <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Tracking No.</th>
+                                <th class="border-primary border-darken-1">Hub</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <table class="table table-bordered datatable" id="sum_datatable" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Hub</th>
+                                <th class="border-primary border-darken-1">Adjustment No.</th>
+                                <th class="border-primary border-darken-1">Ratio %</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -160,10 +176,29 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
+                    body_sum = [];
                     body = [];
+                    var params_sum = sum_table.ajax.params();
                     var params = table.ajax.params();
+                    params_sum.start = 0;
+                    params_sum.length = -1;
                     params.start = 0;
                     params.length = -1;
+                    var jsonResult_sum = $.ajax({
+                        url: '{{ route('admin.reports.daily_monthly_adjustment.summary_list') }}',
+                        data: params_sum,
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.hub);
+                                row.push(values.shipment_count);
+                                row.push(values.ratio);
+                                body_sum.push(row);
+                            });
+                        },
+                        async: false
+                    });
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.daily_monthly_adjustment.list') }}',
                         data: params,
@@ -173,17 +208,46 @@
                             head.push('S. No.');
                             head.push('Tracking No.');
                             head.push('Hub');
+                            head.push('');
+                            head.push('');
+                            head.push('');
+                            head.push('S. No.');
+                            head.push('Hub');
+                            head.push('Adjustment No.');
+                            head.push('Ratio %');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.hub);
+                                row.push('');
+                                row.push('');
+                                row.push('');
+                                if(body_sum[index]){
+                                    row.push(body_sum[index][0]);
+                                    row.push(body_sum[index][1]);
+                                    row.push(body_sum[index][2]);
+                                    row.push(body_sum[index][3]);
+                                }
+                                else{
+                                    row.push('');
+                                    row.push('');
+                                    row.push('');
+                                    row.push('');
+                                }
                                 body.push(row);
                             });
 
                             footer.push('-');
                             footer.push('Total Adjustments Made');
                             footer.push(shipments_count);
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
                         },
                         async: false
                     });
@@ -194,21 +258,10 @@
             });
             $('#datatable').append("<tfoot><tr><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                dom: 'lrtip',
                 scrollX: true, scrollY: '500px',
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        title: 'Daily and Monthly Adjustments Report',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                        footer: true
-                    },
-                ],
-                // autoWidth : false,
-                // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                // pageLength: 50,
-                // pagingType: 'full_numbers',
                 paging: false,
+                autoWidth: false,
                 processing: true,
                 language: {
                     processing: data_table_loader
@@ -227,7 +280,6 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'}
-
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -256,8 +308,51 @@
                     });
                 }
             });
+
+            var sum_table = $('#sum_datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '500px',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        title: 'Daily and Monthly Adjustments and Summary Report',
+                        text:'<i class="la la-file-excel-o"></i> Excel',
+                        footer: true
+                    },
+                ],
+                paging: false,
+                autoWidth: false,
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                rowId:'shipment_id',
+                serverSide: true,
+                ajax: {
+                    url: '{{ route('admin.reports.daily_monthly_adjustment.summary_list') }}',
+                    data: function (d) {
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
+                },
+                order: [[1, 'desc']],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
+                    { data:'shipment_count' ,name: 'shipment_count', class: 'align-middle text-center shipment_count', orderable: false, searchable: false},
+                    { data:'ratio' ,name: 'ratio', class: 'align-middle text-center ratio', orderable: false, searchable: false},
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
             $('#search_filter_btn').on('click',function () {
                 table.draw();
+                sum_table.draw();
             });
 
         });

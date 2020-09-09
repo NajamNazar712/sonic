@@ -6658,13 +6658,26 @@ use Yajra\Datatables\Datatables;
         }
 
         public function daily_monthly_adjustment_summary_list(Request $request){
+            $adjustments_count = DB::connection('reports')->table('adjustment_logs')
+                ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+                ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+                ->whereIn('adjustment_logs.type', [1,2]);
+
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $adjustments_count = $adjustments_count->whereBetween('adjustment_logs.created_at', [$from,$to]);
+            }
+            $adjustments_count = $adjustments_count->count();
+
             $adjustments = DB::connection('reports')->table('adjustment_logs')
                 ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
                 ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
                 ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
                 ->join('cities AS h', 'dc.hub_id', '=', 'h.id')
-                ->select(, 'h.name as hub')
-                ->whereIn('adjustment_logs.type', [1,2]);
+                ->select('h.name as hub', DB::raw('(select count(s.id)) as shipment_count'), DB::raw('(ROUND((count(s.id)/'. $adjustments_count .')*100, 0)) as ratio'))
+                ->whereIn('adjustment_logs.type', [1,2])
+                ->groupBy('h.id');
             $datatable = Datatables::of($adjustments);
                 if ($request->get('search_date_from') && $request->get('search_date_to')) {
                     $from = $request->get('search_date_from');
