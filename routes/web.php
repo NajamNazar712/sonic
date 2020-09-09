@@ -327,6 +327,19 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('renew', 'Shippers\ShipperPickupController@renew')->name('renew');
     });
 
+    Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function (){
+        Route::get('', 'Shippers\ShipperShipmentPieceController@hold_index')->name('index');
+        Route::get('list', 'Shippers\ShipperShipmentPieceController@hold_list')->name('list');
+        Route::post('single_piece','Shippers\ShipperShipmentPieceController@single_piece')->name('single_piece');
+        Route::post('wait_remaining_pieces','Shippers\ShipperShipmentPieceController@wait_remaining_pieces')->name('wait_remaining_pieces');
+        Route::post('return_back_to_shipper','Shippers\ShipperShipmentPieceController@return_back_to_shipper')->name('return_back_to_shipper');
+        Route::prefix('resolved')->name('resolved.')->group(function (){
+            Route::get('', 'Shippers\ShipperShipmentPieceController@resolved_index')->name('index');
+            Route::get('list', 'Shippers\ShipperPickupController@resolved_list')->name('list');
+        });
+
+    });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {

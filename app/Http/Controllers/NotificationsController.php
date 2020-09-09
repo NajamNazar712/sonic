@@ -22,6 +22,7 @@ use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -5484,8 +5485,6 @@ class NotificationsController extends Controller
           //}
           }
           else if($id == 83){
-              $subject = $notification->subject;
-              $body = $notification->body;
               $pickup_request_id = $reference_1_id;
               $pickup_note_id = $reference_2_id;
 
@@ -5556,6 +5555,149 @@ class NotificationsController extends Controller
 
               }
 
+          }
+          else if ($id == 84){
+              $yesterday = Carbon::yesterday();
+              $shipper_wise_shipments = array();
+              $shipment_requests = ShipmentPiecesRequest::whereDate('created_at', $yesterday);
+              if ($shipment_requests->exists()){
+                  $shipment_ids = $shipment_requests->pluck('shipment_id')->toArray();
+                  if(count($shipment_ids) > 0){
+                      foreach ($shipment_ids as $shipment_id){
+                          $user_id = Shipment::find($shipment_id)->user_id;
+                          if(!array_key_exists($user_id , $shipper_wise_shipments)){
+                              $shipper_wise_shipments[$user_id] = array();
+                          }
+                          if(!in_array($shipment_id, $shipper_wise_shipments[$user_id])){
+                              $shipper_wise_shipments[$user_id][] = $shipment_id;
+                          }
+                      }
+                      if(count($shipper_wise_shipments) > 0){
+                          foreach ($shipper_wise_shipments as $shipper_id => $shipments){
+                              $subject = $notification->subject;
+                              $body = $notification->body;
+                              $shipper = User::find($shipper_id);
+                              if (strpos($subject, '[date]') !== FALSE) {
+                                  $subject = str_replace('[date]', $yesterday->toDateString(), $subject);
+                              }
+                              if (strpos($body, '[date]') !== FALSE) {
+                                  $body = str_replace('[date]', $yesterday->toDateString(), $body);
+                              }
+                              if (strpos($subject, '[shipper_name]') !== FALSE) {
+                                  $subject = str_replace('[shipper_name]', $shipper->name, $subject);
+                              }
+                              if (strpos($body, '[shipper_name]') !== FALSE) {
+                                  $body = str_replace('[shipper_name]', $shipper->name, $body);
+                              }
+                              $tracking_number = FALSE;
+
+                              $product_description = FALSE;
+
+                              $cod_amount = FALSE;
+
+                              $origin = FALSE;
+
+                              $destination = FALSE;
+
+                              $status = FALSE;
+
+                              if (strpos($body, '[tracking_number]') !== FALSE) {
+                                  $tracking_number = TRUE;
+                                  $body = str_replace('[tracking_number]', '', $body);
+                              }
+
+                              if (strpos($body, '[product_description]') !== FALSE) {
+                                  $product_description = TRUE;
+                                  $body = str_replace('[product_description]', '', $body);
+
+                              }
+
+                              if (strpos($body, '[cod_amount]') !== FALSE) {
+                                  $cod_amount = TRUE;
+                                  $body = str_replace('[cod_amount]', '', $body);
+                              }
+
+                              if (strpos($body, '[origin]') !== FALSE) {
+                                  $origin = TRUE;
+                                  $body = str_replace('[origin]', '', $body);
+                              }
+
+                              if (strpos($body, '[destination]') !== FALSE) {
+                                  $destination = TRUE;
+                                  $body = str_replace('[destination]', '', $body);
+                              }
+
+                              if (strpos($body, '[status]') !== FALSE) {
+                                  $status = TRUE;
+                                  $body = str_replace('[status]', '', $body);
+                              }
+
+                              $html = '<table style="width:100%;">';
+
+                              $html .= '<thead><tr>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>';
+
+                              if($tracking_number){
+                                  $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking No.</th>';
+                              }
+                              if($product_description){
+                                  $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Product Description</th>';
+                              }
+                              if($cod_amount){
+                                  $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>';
+                              }
+                              if($origin){
+                                  $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>';
+                              }
+                              if($destination){
+                                  $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th>';
+                              }
+                              if($status){
+                                  $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th>';
+                              }
+                              $html .= '</tr></thead><tbody>';
+                              $serial = 1;
+                              foreach ($shipments as $shipment_id){
+                                  $shipment = Shipment::find($shipment_id);
+                                  $html .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $serial .'</td>';
+                                  if($tracking_number){
+                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
+                                  }
+                                  if($product_description){
+                                      $description = '';
+                                      foreach($shipment->items as $item){
+                                            $description .= $item->product->product_name . ' (x' . $item->quantity . '), ';
+                                      }
+                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $description . '</td>';
+                                  }
+                                  if($cod_amount){
+                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->amount . '</td>';
+                                  }
+                                  if($origin){
+                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->pickup_address->city->name . '</td>';
+                                  }
+                                  if($destination){
+                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
+                                  }
+                                  if($status){
+                                      $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->status_shipper->name . '</td>';
+                                  }
+                                  $html .= '</tr>';
+                              }
+                              $html .= '</tbody></table>';
+
+                              if (strpos($body, '[preview]') !== FALSE) {
+                                  $body = str_replace('[preview]', $html, $body);
+                              }
+                              $to = array();
+                              if ($shipper->email) {
+                                  $to[] = $shipper->email;
+                              }
+                              self::email($subject, $body, $to);
+                          }
+                      }
+                  }
+              }
           }
         }
       }

@@ -223,22 +223,26 @@ class AdminShipmentPieceController extends Controller
     public function single_piece(Request $request){
         $shipment_id = $request->shipment_id;
         if($shipment_id){
-            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id);
+            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id)->where('status', 1);
             if($shipment_piece_request->exists()){
-                $shipment_piece_request = $shipment_piece_request->first();
                 $shipment = Shipment::find($shipment_id);
-                $shipment->pieces = 1;
-                $shipment->save();
+                if($shipment->shipper_status_id == 62){
+                    $shipment_piece_request = $shipment_piece_request->first();
 
-                ShipmentPiece::where('shipment_id', $shipment_id)->delete();
-                $shipment_piece_request->status = 2;
-                $shipment_piece_request->request_status_id = 1;
-                $shipment_piece_request->last_updated_by_admin = Auth::id();
-                $shipment_piece_request->last_updated_at = Carbon::now();
-                $shipment_piece_request->department_id = session('department_id');
-                $shipment_piece_request->save();
+                    $shipment->pieces = 1;
+                    $shipment->save();
 
-                return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+                    ShipmentPiece::where('shipment_id', $shipment_id)->delete();
+                    $shipment_piece_request->status = 2;
+                    $shipment_piece_request->request_status_id = 1;
+                    $shipment_piece_request->last_updated_by_admin = Auth::id();
+                    $shipment_piece_request->last_updated_at = Carbon::now();
+                    $shipment_piece_request->department_id = session('department_id');
+                    $shipment_piece_request->save();
+
+                    return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+                }
+                return response()->json(['status' => 1,'error' => 'Shipment is already modified!']);
             }
             return response()->json(['status' => 1,'error' => 'Shipment request not found!']);
         }
@@ -246,17 +250,21 @@ class AdminShipmentPieceController extends Controller
     public function wait_remaining_pieces(Request $request){
         $shipment_id = $request->shipment_id;
         if($shipment_id){
-            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id);
+            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id)->where('status', 1);
             if($shipment_piece_request->exists()){
-                $shipment_piece_request = $shipment_piece_request->first();
-                $shipment_piece_request->status = 2;
-                $shipment_piece_request->request_status_id = 2;
-                $shipment_piece_request->last_updated_by_admin = Auth::id();
-                $shipment_piece_request->last_updated_at = Carbon::now();
-                $shipment_piece_request->department_id = session('department_id');
-                $shipment_piece_request->save();
+                $shipment = Shipment::find($shipment_id);
+                if($shipment->shipper_status_id == 62){
+                    $shipment_piece_request = $shipment_piece_request->first();
+                    $shipment_piece_request->status = 2;
+                    $shipment_piece_request->request_status_id = 2;
+                    $shipment_piece_request->last_updated_by_admin = Auth::id();
+                    $shipment_piece_request->last_updated_at = Carbon::now();
+                    $shipment_piece_request->department_id = session('department_id');
+                    $shipment_piece_request->save();
 
-                return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+                    return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+                }
+
             }
             return response()->json(['status' => 1,'error' => 'Shipment request not found!']);
         }
