@@ -610,27 +610,23 @@
 
                                             </div>
                                             <div id="billing_information_div" class="row d-none">
-{{--                                                <div class="col-md-6">--}}
+                                                <div class="col-md-6">
 
-{{--                                                <div class="form-group">--}}
+                                                <div class="form-group">
 
-{{--                                                    <label for="cycle_of_invoicing">Cycle Of Invoicing:--}}
-{{--                                                        <span class="danger">*</span>--}}
-{{--                                                    </label>--}}
-{{--                                                    <div>--}}
-{{--                                                        <select name="cycle_of_invoicing" id="cycle_of_invoicing" class="select2 form-control required">--}}
-{{--                                                            @foreach($invoicing_cycle as $cycle)--}}
-{{--                                                                <option value="{{$cycle->id}}"  {{ old('cycle_of_invoicing') == $cycle->id ? 'selected' : '' }} >{{$cycle->name}}</option>--}}
-{{--                                                            @endforeach--}}
-{{--                                                        </select>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                                </div>--}}
+                                                    <label for="cycle_of_invoicing">Cycle Of Invoicing:
+                                                        <span class="danger">*</span>
+                                                    </label>
+                                                    <div>
+                                                        <input type='text' class="form-control" value="Monthly" placeholder="Invoicing Cycle*" readonly>
+                                                    </div>
+                                                </div>
+                                                </div>
                                                 <div class="col-md-6">
 
                                                 <div class="form-group d-none" id="generation_div">
 
-                                                    <label for="generation_date">Invoice Generation Date:
+                                                    <label for="generation_date">Generation Date:
                                                         <span class="danger">*</span>
                                                     </label>
                                                     <div>
