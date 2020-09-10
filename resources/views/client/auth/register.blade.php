@@ -610,31 +610,31 @@
 
                                             </div>
                                             <div id="billing_information_div" class="row d-none">
-                                                <div class="col-md-6">
+{{--                                                <div class="col-md-6">--}}
 
-                                                <div class="form-group">
+{{--                                                <div class="form-group">--}}
 
-                                                    <label for="cycle_of_invoicing">Cycle Of Invoicing:
-                                                        <span class="danger">*</span>
-                                                    </label>
-                                                    <div>
-                                                        <select name="cycle_of_invoicing" id="cycle_of_invoicing" class="select2 form-control required">
-                                                            @foreach($invoicing_cycle as $cycle)
-                                                                <option value="{{$cycle->id}}"  {{ old('cycle_of_invoicing') == $cycle->id ? 'selected' : '' }} >{{$cycle->name}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                </div>
+{{--                                                    <label for="cycle_of_invoicing">Cycle Of Invoicing:--}}
+{{--                                                        <span class="danger">*</span>--}}
+{{--                                                    </label>--}}
+{{--                                                    <div>--}}
+{{--                                                        <select name="cycle_of_invoicing" id="cycle_of_invoicing" class="select2 form-control required">--}}
+{{--                                                            @foreach($invoicing_cycle as $cycle)--}}
+{{--                                                                <option value="{{$cycle->id}}"  {{ old('cycle_of_invoicing') == $cycle->id ? 'selected' : '' }} >{{$cycle->name}}</option>--}}
+{{--                                                            @endforeach--}}
+{{--                                                        </select>--}}
+{{--                                                    </div>--}}
+{{--                                                </div>--}}
+{{--                                                </div>--}}
                                                 <div class="col-md-6">
 
                                                 <div class="form-group d-none" id="generation_div">
 
-                                                    <label for="generation_date">Generation Date:
+                                                    <label for="generation_date">Invoice Generation Date:
                                                         <span class="danger">*</span>
                                                     </label>
                                                     <div>
-                                                        <select name="generation_date" id="generation_date" class="select2 form-control d-none"></select>
+                                                        <select name="generation_date" id="generation_date" class="select2 form-control required"></select>
                                                     </div>
                                                 </div>
                                                 </div>
@@ -816,31 +816,6 @@
             placeholder:'Select Date',
             // dropdownParent:$('#registership')
         });
-        $('#cycle_of_invoicing').prepend('<option value="" selected="selected"></option>').select2({
-           width:'100%',
-           placeholder:'Select Cycle Of Invoicing',
-        
-       }).bind('change', function() {
-
-           if (this.value == 1) {
-               $('#generation_div').removeClass('d-none');
-               $('#generation_date').removeClass('d-none');
-               $('#generation_date').addClass('required');
-               $('#generation_date').empty().trigger('change');
-               $('#generation_date').select2({data:weekly,placeholder:'Select Date'});
-           }
-           else if(this.value == 3){
-               $('#generation_div').removeClass('d-none');
-               $('#generation_date').removeClass('d-none');
-               $('#generation_date').addClass('required');
-               $('#generation_date').empty().trigger('change');
-               $('#generation_date').select2({data:monthly,placeholder:'Select Date'});
-           }else if(this.value == 2){
-               $('#generation_div').addClass('d-none');
-               $('#generation_date').addClass('d-none');
-               $('#generation_date').removeClass('required');
-           }
-       });
        //multiple banks
        $('select[name="bank_name[]"]').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank',
