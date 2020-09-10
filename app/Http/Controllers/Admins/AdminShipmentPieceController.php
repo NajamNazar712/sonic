@@ -198,7 +198,7 @@ class AdminShipmentPieceController extends Controller
                         $dropdown .= '</div>
                       </div>
                     ';
-                    }else if(($result->request_status_id == 2) && (Carbon::parse($result->last_updated_at)->diffInDays(Carbon::now()) >= 0)){
+                    }else if(($result->request_status_id == 2) && (Carbon::parse($result->last_updated_at)->diffInDays(Carbon::now()) >= 7)){
                         $dropdown .= $return_button;
                     }else{
                         return '-';

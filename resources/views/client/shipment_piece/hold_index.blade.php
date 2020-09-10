@@ -72,6 +72,9 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+
+
 @endsection
 
 @section('js')
@@ -83,6 +86,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function () {
@@ -245,6 +249,156 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
+
+            $('#datatable tbody').on('click','tr td.action a',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    if($(this).hasClass('single_piece')){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to change shipment to Single Piece!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                blockPagePermanently();
+                                $.ajax({
+                                    url:"{{route('cod.multiple_pieces.single_piece')}}",
+                                    method:'POST',
+                                    data:{
+                                        'shipment_id':id,
+                                        '_token':'{{ csrf_token() }}',
+                                    }
+                                }).done(function (data) {
+                                    if(data.status == 0){
+                                        table.draw('false');
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                    }
+                                    UnblockPagePermanently();
+
+                                });
+                            }
+                        });
+
+                    }else if($(this).hasClass('remaining_piece')){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to wait for remaining pieces!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                blockPagePermanently();
+                                $.ajax({
+                                    url:"{{route('cod.multiple_pieces.wait_remaining_pieces')}}",
+                                    method:'POST',
+                                    data:{
+                                        'shipment_id':id,
+                                        '_token':'{{ csrf_token() }}',
+                                    }
+                                }).done(function (data) {
+                                    if(data.status == 0){
+                                        table.draw('false');
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                    }
+                                    UnblockPagePermanently();
+
+                                });
+                            }
+                        });
+                    }else if($(this).hasClass('return_to_shipper')){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to wait for Return Back To Shipper!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                blockPagePermanently();
+                                $.ajax({
+                                    url:"{{route('cod.multiple_pieces.return_back_to_shipper')}}",
+                                    method:'POST',
+                                    data:{
+                                        'shipment_id':id,
+                                        '_token':'{{ csrf_token() }}',
+                                    }
+                                }).done(function (data) {
+                                    if(data.status == 0){
+                                        table.draw('false');
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                    }
+                                    UnblockPagePermanently();
+
+                                });
+                            }
+                        });
+                    }
+                }
+
+
+            });
+
         });
     </script>
 @endsection

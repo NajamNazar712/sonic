@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Controller;
-
+use Auth;
 class ShipperShipmentPieceController extends Controller
 {
     public function __construct() {
@@ -37,7 +37,7 @@ class ShipperShipmentPieceController extends Controller
 
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
-                $route = route('admin.tracking.index');
+                $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('amount', function($shipment){
@@ -115,7 +115,7 @@ class ShipperShipmentPieceController extends Controller
                     ShipmentPiece::where('shipment_id', $shipment_id)->delete();
                     $shipment_piece_request->status = 2;
                     $shipment_piece_request->request_status_id = 1;
-                    $shipment_piece_request->last_updated_by_user = Auth::id();
+                    $shipment_piece_request->last_updated_by_user = session('user_id');
                     $shipment_piece_request->last_updated_at = Carbon::now();
                     $shipment_piece_request->save();
 
@@ -137,7 +137,7 @@ class ShipperShipmentPieceController extends Controller
                     $shipment_piece_request = $shipment_piece_request->first();
                     $shipment_piece_request->status = 2;
                     $shipment_piece_request->request_status_id = 2;
-                    $shipment_piece_request->last_updated_by_user = Auth::id();
+                    $shipment_piece_request->last_updated_by_user = session('user_id');
                     $shipment_piece_request->last_updated_at = Carbon::now();
                     $shipment_piece_request->save();
 
@@ -161,7 +161,7 @@ class ShipperShipmentPieceController extends Controller
                         $shipment_piece_request = $shipment_piece_request->first();
                         $shipment_piece_request->status = 2;
                         $shipment_piece_request->request_status_id = 3;
-                        $shipment_piece_request->last_updated_by_user = Auth::id();
+                        $shipment_piece_request->last_updated_by_user = session('user_id');
                         $shipment_piece_request->last_updated_at = Carbon::now();
                         $shipment_piece_request->save();
 
@@ -193,7 +193,7 @@ class ShipperShipmentPieceController extends Controller
 
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
-                $route = route('admin.tracking.index');
+                $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('amount', function($shipment){

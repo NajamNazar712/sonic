@@ -118,7 +118,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('cod.multiple_pieces.list') }}',
+                        url: '{{ route('cod.multiple_pieces.resolved.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
