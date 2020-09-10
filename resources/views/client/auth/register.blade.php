@@ -618,7 +618,7 @@
                                                         <span class="danger">*</span>
                                                     </label>
                                                     <div>
-                                                        <input type='text' class="form-control" value="Monthly" placeholder="Invoicing Cycle*">
+                                                        <input type='text' class="form-control" value="Monthly" placeholder="Invoicing Cycle*" readonly>
                                                     </div>
                                                 </div>
                                                 </div>
