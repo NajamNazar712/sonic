@@ -1,10 +1,10 @@
 
 @extends('admin.layout.master')
-@section('title','Shipment Pieces')
+@section('title','Shipment Pieces List')
 
 @section('content')
     <h1 class="mb-1">
-        Shipment Pieces
+        Shipment Pieces List
     </h1>
 
     <div class="card">
@@ -321,7 +321,7 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'Shipment Pieces',
+                        title: 'Shipment Pieces List',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },

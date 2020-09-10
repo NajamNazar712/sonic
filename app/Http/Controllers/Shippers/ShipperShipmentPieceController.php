@@ -29,8 +29,7 @@ class ShipperShipmentPieceController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->leftjoin('shipment_pieces_request_statuses as ss', 'ss.id', '=', 'shipment_pieces_requests.request_status_id')
-            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','shipments.amount', 'ss.name as request_status', 'shipment_pieces_requests.created_at', 'shipment_pieces_requests.request_status_id', 'shipment_pieces_requests.status')
+            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','shipments.amount', 'shipment_pieces_requests.created_at', 'shipment_pieces_requests.status')
             ->where('shipments.user_id', session('user_id'))
             ->where('shipments.shipper_status_id', 62)
             ->where('shipment_pieces_requests.status', 1);
@@ -60,14 +59,6 @@ class ShipperShipmentPieceController extends Controller
                         $sub_query->where('shipments.booking_type_id', '=', 4)
                             ->where('usi.poc', 'like', '%' . $keyword . '%');
                     });
-            })
-            ->filterColumn('request_status', function ($query, $keyword) {
-
-                if ($keyword != '') {
-                    $query->where('ss.id', $keyword);
-                } else {
-                    $query->whereRaw('false');
-                }
             })
             ->addColumn("action", function ($result) {
 
