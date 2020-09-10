@@ -5683,6 +5683,7 @@ class NotificationsController extends Controller
                                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->status_shipper->name . '</td>';
                                   }
                                   $html .= '</tr>';
+                                  $serial++;
                               }
                               $html .= '</tbody></table>';
 
