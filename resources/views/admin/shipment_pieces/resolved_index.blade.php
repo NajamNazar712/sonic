@@ -209,7 +209,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Shipment Pieces',
+                        title: 'Shipment Pieces Resolved',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },

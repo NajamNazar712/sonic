@@ -52,7 +52,6 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Date & Time Scanned</th>
-                                    <th class="border-primary border-darken-1">Screen Status</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -135,7 +134,6 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Date & Time Scanned');
-                            head.push('Request Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -147,7 +145,6 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.created_at);
-                                row.push(values.request_status);
 
                                 body.push(row);
                             });
@@ -164,7 +161,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Shipment Pieces',
+                        title: 'Multiple Piece Short Shipments',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -194,7 +191,6 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'created_at', name: 'shipment_pieces_requests.created_at', class: 'align-middle created_at'},
-                    {data: 'request_status', name: 'request_status', class: 'align-middle request_status'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -208,7 +204,6 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var request_status_select = '<select name="request_status_select" id="request_status_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -216,12 +211,6 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }
-                        else if($(header).is('.request_status')){
-                            $(request_status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -233,19 +222,7 @@
                             }
                         }
                     });
-                    var data = $.map({!! $request_status !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-                        return obj;
-                    });
 
-                    $("#request_status_select").prepend('<option value="" selected></option>').select2({
-                        data:data,
-                        placeholder: "Select Request Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
                     this.api().table().columns.adjust();
                 }
             });

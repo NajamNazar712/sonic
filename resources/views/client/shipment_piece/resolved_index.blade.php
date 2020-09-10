@@ -158,7 +158,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Shipment Pieces',
+                        title: 'Multiple Piece Shipments Resolved',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
