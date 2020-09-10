@@ -5329,6 +5329,28 @@ use Yajra\Datatables\Datatables;
                         return '-';
                     }
                 })
+                ->addColumn('launched_to_today', function($requests){
+
+                    if($requests->launched_date){
+                        Carbon::setWeekendDays([
+                            Carbon::SUNDAY,
+                        ]);
+
+                        $launched_date = Carbon::parse($requests->launched_date);
+                        $today = Carbon::now();
+                        $days = $launched_date->diffInDays($today);
+                        if($days <= 0){
+                            return '-';
+                        }
+                        else{
+                            return $days . 'days';
+                        }
+
+                    }
+                    else{
+                        return '-';
+                    }
+                })
                 ->editColumn('resolved_date', function($requests){
                     if($requests->current_status_id == 3 || $requests->current_status_id == 4) {
                         return $requests->resolved_date;
