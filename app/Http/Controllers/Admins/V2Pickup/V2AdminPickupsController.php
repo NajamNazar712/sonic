@@ -25,6 +25,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\PickupAction;
 use App\Http\Models\ShipmentPiece;
+use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
@@ -519,7 +520,7 @@ class V2AdminPickupsController extends Controller
                 }
 
             }
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->booking_type_id == 3){
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
@@ -595,7 +596,7 @@ class V2AdminPickupsController extends Controller
         $shipment_item = ShipmentItem::find($request->tracking_number);
         if($shipment_item){
             $shipment = Shipment::find($shipment_item->shipment_id);
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
                     $shipment_items_count = count($shipment_items);
@@ -616,7 +617,7 @@ class V2AdminPickupsController extends Controller
         if($shipment_pieces->exists()){
             $shipment_pieces = $shipment_pieces->first();
             $shipment = Shipment::find($shipment_pieces->shipment_id);
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 $details = array();
                 $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
                 $details['id'] = $shipment->id;
@@ -652,9 +653,24 @@ class V2AdminPickupsController extends Controller
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if($shipment){
-                
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+                $piece_request_remarks = NULL;
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
+
+                    if($shipment->shipper_status_id == 62){
+                        $shipment_pieces_request = ShipmentPiecesRequest::where('shipment_id', $shipment->id)->where('status', 1);
+                        if($shipment_pieces_request->exists()){
+                            $shipment_pieces_request = $shipment_pieces_request->first();
+                            $shipment_pieces_request->status = 2;
+                            $shipment_pieces_request->request_status_id = 4;
+                            $shipment_pieces_request->last_updated_by_admin = Auth::id();
+                            $shipment_pieces_request->last_updated_at = Carbon::now();
+                            $shipment_pieces_request->department_id = session('department_id');
+                            $shipment_pieces_request->save();
+                            $piece_request_remarks = 'Resolved through Arrival';
+                        }
+                    }
+
                     if($pickup_request_shipment){
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;
 
@@ -715,7 +731,7 @@ class V2AdminPickupsController extends Controller
 
                     $shipment->save();
                     $reference_2_id = NULL;
-                    ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, $piece_request_remarks, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
                     if(count($nsa_accounts) > 0){
                         if(in_array($shipment->user_id, $nsa_accounts)){
@@ -730,7 +746,7 @@ class V2AdminPickupsController extends Controller
                             $shipment->consignee_status_id = 15;
 
                             $shipment->save();
-                            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
                         }
                     }
                     $shipment->fresh();
@@ -738,7 +754,7 @@ class V2AdminPickupsController extends Controller
                         $shipment->shipper_status_id = 15;
                         $shipment->consignee_status_id = 15;
                         $shipment->save();
-                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
                     }
                     if($shipment->booking_type_id == 4){
                         $print_shipment_ids[] = $shipment_id;
@@ -755,7 +771,7 @@ class V2AdminPickupsController extends Controller
                             $shipment->consignee_status_id = 58;
                             $shipment->save();
 
-                            ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, $piece_request_remarks, NULL, Auth::id());
 
                             $consolidation_id = $consolidated_shipment->consolidation_id;
                             $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
@@ -776,7 +792,7 @@ class V2AdminPickupsController extends Controller
 
                                     $update_all_consolidated_shipment->save();
 
-                                    ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
+                                    ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, $piece_request_remarks, NULL, Auth::id());
                                 }
                             }
                         }
@@ -947,7 +963,7 @@ class V2AdminPickupsController extends Controller
                 }
             }
 
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->booking_type_id == 3){
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
@@ -1034,7 +1050,7 @@ class V2AdminPickupsController extends Controller
             $shipment_item = ShipmentItem::find($request->tracking_number);
             if($shipment_item){
                 $shipment = Shipment::find($shipment_item->shipment_id);
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
                     $shipment_items_count = count($shipment_items);
@@ -1056,7 +1072,7 @@ class V2AdminPickupsController extends Controller
                 if($shipment_pieces->exists()){
                     $shipment_pieces = $shipment_pieces->first();
                     $shipment = Shipment::find($shipment_pieces->shipment_id);
-                    if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+                    if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                         $details = array();
                         $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
                         $details['id'] = $shipment->id;
@@ -1081,7 +1097,7 @@ class V2AdminPickupsController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->booking_type_id == 3){
                     if($shipment->shipper_status_id == 17){
                         AdminPickupsController::generate($shipment->id);
@@ -1146,7 +1162,7 @@ class V2AdminPickupsController extends Controller
         $shipment = Shipment::find($request->id);
 
         if ($shipment) {
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 $shipment->actual_weight = NULL;
                 $shipment->length = NULL;
                 $shipment->breadth = NULL;
@@ -1187,7 +1203,23 @@ class V2AdminPickupsController extends Controller
                     unset($shipment_ids[$key]);
                     continue;
                 }
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                    $piece_request_remarks = NULL;
+                    if($shipment->shipper_status_id == 62){
+                        $shipment_pieces_request = ShipmentPiecesRequest::where('shipment_id', $shipment->id)->where('status', 1);
+                        if($shipment_pieces_request->exists()){
+                            $shipment_pieces_request = $shipment_pieces_request->first();
+                            $shipment_pieces_request->status = 2;
+                            $shipment_pieces_request->request_status_id = 4;
+                            $shipment_pieces_request->last_updated_by_admin = Auth::id();
+                            $shipment_pieces_request->last_updated_at = Carbon::now();
+                            $shipment_pieces_request->department_id = session('department_id');
+                            $shipment_pieces_request->save();
+                            $piece_request_remarks = 'Resolved through Arrival';
+                        }
+                    }
+
+
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
                     if($pickup_request_shipment){
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;
@@ -1240,7 +1272,7 @@ class V2AdminPickupsController extends Controller
 
                     $shipment->save();
                     $reference_2_id = NULL;
-                    ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, $piece_request_remarks, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
                     if(count($nsa_accounts) > 0){
                         if(in_array($shipment->user_id, $nsa_accounts)){
@@ -1255,7 +1287,7 @@ class V2AdminPickupsController extends Controller
                             $shipment->consignee_status_id = 15;
 
                             $shipment->save();
-                            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
                         }
                     }
                     $shipment->fresh();
@@ -1263,7 +1295,7 @@ class V2AdminPickupsController extends Controller
                         $shipment->shipper_status_id = 15;
                         $shipment->consignee_status_id = 15;
                         $shipment->save();
-                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
                     }
                     if($shipment->booking_type_id == 4){
                         $print_shipment_ids[] = $shipment_id;
@@ -1279,7 +1311,7 @@ class V2AdminPickupsController extends Controller
                             $shipment->consignee_status_id = 58;
                             $shipment->save();
 
-                            ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, $piece_request_remarks, NULL, Auth::id());
 
                             $consolidation_id = $consolidated_shipment->consolidation_id;
                             $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
@@ -1300,7 +1332,7 @@ class V2AdminPickupsController extends Controller
 
                                     $update_all_consolidated_shipment->save();
 
-                                    ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
+                                    ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, $piece_request_remarks, NULL, Auth::id());
                                 }
                             }
                         }
@@ -1622,7 +1654,7 @@ class V2AdminPickupsController extends Controller
             ->join('users as u', 'pr.shipper_id', 'u.id')
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
-            ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked);
+            ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.created_at', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked);
             if (session('role_id') != 1) {
                 $rider_pickups = $rider_pickups->whereIn('c.hub_id', session('hubs'));
             }
@@ -1755,7 +1787,7 @@ class V2AdminPickupsController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->pieces > 1){
                     if($shipment->shipper_status_id == 17){
                         AdminPickupsController::generate($shipment->id);
@@ -1800,6 +1832,7 @@ class V2AdminPickupsController extends Controller
                     $details['shipper'] = $shipment->user->name;
                     $details['pickup_request_id'] = str_pad($pickup_request->id, 6, '0', STR_PAD_LEFT);
                     $details['rider'] = $rider;
+                    $details['amount'] = $shipment->amount;
                     $details['weight'] = floatval($shipment->actual_weight);
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);

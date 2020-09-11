@@ -439,6 +439,9 @@ class Permission
             'reports.pickup_report.data' => 337,
             'reports.not_attempted_aging.index' => 360,
             'reports.not_attempted_aging.list' => 360,
+            'reports.daily_monthly_adjustment.index' => 373,
+            'reports.daily_monthly_adjustment.list' => 373,
+            'reports.daily_monthly_adjustment.summary_list' => 373,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -654,6 +657,12 @@ class Permission
             'settings.not_attempted_cron.index' => 359,
             'settings.not_attempted_cron.store' => 359,
 
+            'settings.nsa_account.index' => 367,
+            'settings.nsa_account.store' => 367,
+
+            'settings.restrict_cities_intercept.index' => 375,
+            'settings.restrict_cities_intercept.store' => 375,
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -710,6 +719,11 @@ class Permission
             'handover.responsibles.status' => 340,
             'handover.responsibles.details' => 340,
             'handover.responsibles.edit' => 340,
+
+
+            'multiple_pieces.add.index' => 368,
+            'multiple_pieces.hold.index' => 369,
+            'multiple_pieces.resolved.index' => 370,
         ],
 
         'shipper' => [

@@ -4868,7 +4868,7 @@ use Yajra\Datatables\Datatables;
     //            $yesterday = Carbon::now()->subDays(3);
     //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
     //        }
-
+            return $sales->toSql();
             if (session('role_id') != 1) {
                 if (session('department_id') == 7 && session('role_id') != 4) {
                     $sales = $sales->whereIn('u.id', session('tagged_shippers'));
@@ -5324,6 +5324,28 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('closed_date', function($requests){
                     if($requests->current_status_id == 4) {
                         return $requests->closed_date;
+                    }
+                    else{
+                        return '-';
+                    }
+                })
+                ->addColumn('launched_to_today', function($requests){
+
+                    if($requests->launched_date){
+                        Carbon::setWeekendDays([
+                            Carbon::SUNDAY,
+                        ]);
+
+                        $launched_date = Carbon::parse($requests->launched_date);
+                        $today = Carbon::now();
+                        $days = $launched_date->diffInDays($today);
+                        if($days <= 0){
+                            return '-';
+                        }
+                        else{
+                            return $days . 'days';
+                        }
+
                     }
                     else{
                         return '-';
@@ -6632,5 +6654,59 @@ use Yajra\Datatables\Datatables;
             }
         }
 
+        public function daily_monthly_adjustment_index(){
+            return view('admin.reports.daily_monthly_adjustment');
+        }
+
+        public function daily_monthly_adjustment_list(Request $request){
+            $adjustments = DB::connection('reports')->table('adjustment_logs')
+                ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+                ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+                ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+                ->join('cities AS h', 'dc.hub_id', '=', 'h.id')
+                ->select('s.id as shipment_id', 's.tracking_number as tracking_number', 'h.name as hub')
+                ->whereIn('adjustment_logs.type', [1,2]);
+            $datatable = Datatables::of($adjustments)
+                ->addColumn('tracking_number_link', function ($shipments) {
+                    $route = route('admin.tracking.index');
+                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                });
+                if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                    $from = $request->get('search_date_from');
+                    $to = $request->get('search_date_to');
+                    $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from,$to]);
+                }
+            return $datatable->make(true);
+        }
+
+        public function daily_monthly_adjustment_summary_list(Request $request){
+            $adjustments_count = DB::connection('reports')->table('adjustment_logs')
+                ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+                ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+                ->whereIn('adjustment_logs.type', [1,2]);
+
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $adjustments_count = $adjustments_count->whereBetween('adjustment_logs.created_at', [$from,$to]);
+            }
+            $adjustments_count = $adjustments_count->count();
+
+            $adjustments = DB::connection('reports')->table('adjustment_logs')
+                ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+                ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+                ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+                ->join('cities AS h', 'dc.hub_id', '=', 'h.id')
+                ->select('h.name as hub', DB::raw('(select count(s.id)) as shipment_count'), DB::raw('(ROUND((count(s.id)/'. $adjustments_count .')*100, 0)) as ratio'))
+                ->whereIn('adjustment_logs.type', [1,2])
+                ->groupBy('h.id');
+            $datatable = Datatables::of($adjustments);
+                if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                    $from = $request->get('search_date_from');
+                    $to = $request->get('search_date_to');
+                    $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from,$to]);
+                }
+            return $datatable->make(true);
+        }
     }
 

@@ -166,7 +166,7 @@
 								<div class="col-8">
 									<fieldset class="form-group">
 										<label for="update_pieces"><b>Pieces:</b></label>
-										<input type="text" name="update_pieces" class="form-control pieces" id="update_pieces" placeholder="Update Pieces*" data-rule-required="true" data-msg-required="Pieces is required">
+										<input type="text" name="update_pieces" class="form-control pieces" id="update_pieces" placeholder="Update Pieces*" data-rule-required="true" data-msg-required="Pieces is required" max="10">
 									</fieldset>
 								</div>
 							</div>

@@ -323,6 +323,9 @@ class AdminNotificationsController extends Controller
 		{
             $details['fields'] = ['shipment_picked_date','rider_name','shipper_name','requested_date','number'];
         }
+		else if ($id == 84){
+            $details['fields'] = ['date','tracking_number','shipper_name','product_description','cod_amount','origin', 'destination', 'status','preview'];
+        }
 
 		return $details;
     }
