@@ -2006,6 +2006,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@launched')->name('launched');
             Route::get('{id}', 'Admins\AdminCRMController@request_details')->name('details');
             Route::post('edit', 'Admins\AdminCRMController@edit_request')->name('edit');
+            Route::post('image_details','Admins\AdminCRMController@crm_image_details')->name('image_details');
+            Route::post('image_submit','Admins\AdminCRMController@crm_image_submit')->name('image_submit');
+            Route::post('image_delete','Admins\AdminCRMController@crm_image_delete')->name('image_delete');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
