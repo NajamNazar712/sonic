@@ -1910,6 +1910,7 @@
             var rows_count = 0;
             var selected_rows = [];
             $('#image_upload_btn').on('click', function () {
+                $('#image_upload_btn').attr('disabled', true);
                 var crm_request_id = $('#crm_request_id').val();
                 if(crm_request_id){
                     $('#image_crm_request_id').val(crm_request_id);
@@ -1941,6 +1942,8 @@
                         }else{
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
+                        $('#image_upload_btn').attr('disabled', false);
+
                     });
                 }
             });

@@ -3893,7 +3893,7 @@ class AdminCRMController extends Controller
                     $crm_image->save();
             }
 
-            return redirect()->back()->with(['status' => 1, 'success' => 'Return Note updated successfully']);
+            return redirect()->back()->with(['status' => 1, 'success' => 'CRM Images updated successfully']);
 
         }
         return redirect()->back()->with(['status' => 0, 'error' => 'CRM Request Not found!']);
