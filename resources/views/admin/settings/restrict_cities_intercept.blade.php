@@ -23,7 +23,7 @@
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
-                                                <select name="cities[]" id="cities_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one City is required" data-rule-require="true" required="required">
+                                                <select name="cities[]" id="cities_select" class="form-control select2" multiple="multiple">
                                                     @foreach($cities as $city)
                                                         <option value="{{$city->id}}">{{$city->name}}</option>
                                                     @endforeach
@@ -59,20 +59,9 @@
 
 
             $('#cities_select').select2({
-                placeholder:'Cities',
+                placeholder:'Cities*',
                 width:'100%',
                 allowClear:true
-            }).bind('select2:select', function () {
-
-                if($(this).val().length != 0){
-                    $('#settings_form').find('button[type=submit]').prop('disabled', false);
-                }
-            });
-
-            $('#cities_select').on('select2:unselect', function () {
-                if($(this).val().length == 0){
-                    $('#settings_form').find('button[type=submit]').prop('disabled', true);
-                }
             });
 
             @if(count($restricted_cities) > 0)

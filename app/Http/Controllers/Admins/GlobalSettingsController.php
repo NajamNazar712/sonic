@@ -2702,6 +2702,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function restrict_cities_intercept_store(Request $request){
+        RestrictedCityIntercept::truncate();
         if($request->has('cities')){
             if(count($request->cities) > 0){
                 $cities = $request->cities;
@@ -2711,11 +2712,8 @@ class GlobalSettingsController extends Controller
                     $restricted_city->save();
                 }
             }
-            return redirect()->back()->with('success', 'Settings Updated!');
-
-        }else{
-            return redirect()->back()->with('error', 'No Cities selected!');
         }
+        return redirect()->back()->with('success', 'Settings Updated!');
 
     }
 }
