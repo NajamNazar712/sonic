@@ -7,6 +7,7 @@ use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
+use App\http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -62,13 +63,25 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         if($shipment_id){
             $shipment = Shipment::where('id',$shipment_id)->first();
             if($shipment){
+                if($shipment->shipping_mode_id == 2){
+                    $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
                 $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
                     ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
                     ->select('c.id as id', 'c.name as name')
                     ->where('shipments.id', $shipment_id)
                     ->where('c.status', 1)
                     ->whereNotNull('c.zone_id')
-                    ->orderBy('c.name')
+                    ->whereNotIn('c.id', $restricted_cities);
+                }
+                else{
+                    $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
+                        ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
+                        ->select('c.id as id', 'c.name as name')
+                        ->where('shipments.id', $shipment_id)
+                        ->where('c.status', 1)
+                        ->whereNotNull('c.zone_id');
+                }
+                $consignee_cities = $consignee_cities->orderBy('c.name')
                     ->groupBy('c.name')
                     ->get();
 //        dd($consignee_cities);
