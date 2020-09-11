@@ -630,7 +630,7 @@
                                                         <span class="danger">*</span>
                                                     </label>
                                                     <div>
-                                                        <select name="generation_date" id="generation_date" class="select2 form-control required"></select>
+                                                        <select name="generation_date" id="generation_date" class="select2 form-control required" style="width: 100%"></select>
                                                     </div>
                                                 </div>
                                                 </div>
@@ -802,7 +802,7 @@
 
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select City',
-        
+
        });
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
@@ -812,6 +812,9 @@
             placeholder:'Select Date',
             // dropdownParent:$('#registership')
         });
+        var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+
+        $('#generation_date').select2({data:monthly,placeholder:'Select Date'});
        //multiple banks
        $('select[name="bank_name[]"]').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank',
