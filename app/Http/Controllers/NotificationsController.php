@@ -5453,35 +5453,40 @@ class NotificationsController extends Controller
                       $shippers =array();
                       $html = '<table style="width:100%;">';
                       $html .= '<thead><tr>
+                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Payment ID</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBAN Number</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
                                            </tr></thead><tbody>';
                       $total_amount = 0;
+                      $serial = 1;
                       foreach ($done_payment_report as $done_payment){
                           if(!in_array($done_payment->shipper_id, $shippers)){
                               $shippers[$done_payment->shipper_id] = $done_payment->shipper_id;
                           }
                           $html .='<tr>';
+                          $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                           $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. str_pad($done_payment->payment_id, 6, '0', STR_PAD_LEFT).'</td>';
                           $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$done_payment->shipper_name.'</td>';
-                          $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$done_payment->amount.'</td>';
                           $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$done_payment->iban_number.'</td>';
+                          $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.number_format($done_payment->amount).'</td>';
                           $html .='</tr>';
                           $total_amount = $total_amount + $done_payment->amount;
+                          $serial++;
                       }
                       $html .='<tr>';
                       $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                       $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_amount . '</td>';
                       $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                      $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
                       $html .='</tr>';
                       $html .= '</tbody></table>';
 
                       $summary_html .='<tr>';
                       $summary_html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. count($shippers) .'</td>';
-                      $summary_html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_amount . '</td>';
+                      $summary_html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
                       $summary_html .='</tr>';
                       $summary_html .= '</tbody></table></div>';
 
@@ -5491,10 +5496,16 @@ class NotificationsController extends Controller
                       }
 
                       $to = array();
+                      $bcc = array();
 //                      $to[] = 'hassan@trax.pk';
                       $to[] = 'fawad.ahmed@trax.pk';
+                      $to[] = 'talha.motiwala@trax.pk';
+                      $to[] = 'shafay.tariq@trax.pk';
+                      $to[] = 'wajiha.majeed@trax.pk';
+                      $bcc[] = 'muhammad.yousuf@trax.pk';
+                      $bcc[] = 'anas.anwer@trax.pk';
 
-                      self::email($subject, $body, $to);
+                      self::email($subject, $body, $to, NULL, $bcc);
                   }
               }
         }
