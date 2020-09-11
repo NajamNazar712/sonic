@@ -30,6 +30,7 @@ use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
 use App\Http\Models\Holiday;
+use App\http\Models\RestrictedCityIntercept;
 use App\Http\Models\Rider;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
@@ -2691,6 +2692,28 @@ class GlobalSettingsController extends Controller
         }else{
             return redirect()->back()->with('error', 'No shippers selected!');
         }
+
+    }
+
+    public function restrict_cities_intercept_index(){
+        $cities = City::where('status', 1)->select('id','name')->get();
+        $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
+        return view('admin.settings.restrict_cities_intercept')->with(['cities' => $cities, 'restricted_cities' => $restricted_cities]);
+    }
+
+    public function restrict_cities_intercept_store(Request $request){
+        RestrictedCityIntercept::truncate();
+        if($request->has('cities')){
+            if(count($request->cities) > 0){
+                $cities = $request->cities;
+                foreach ($cities as $city_id){
+                    $restricted_city = new RestrictedCityIntercept();
+                    $restricted_city->city_id = $city_id;
+                    $restricted_city->save();
+                }
+            }
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
 
     }
 }

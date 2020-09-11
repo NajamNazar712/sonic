@@ -1792,6 +1792,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@nsa_account_store')->name('store');
         });
 
+        Route::prefix('restrict_cities_intercept')->name('restrict_cities_intercept.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@restrict_cities_intercept_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@restrict_cities_intercept_store')->name('store');
+        });
+
         Route::prefix('minimum_chargeable_weight')->name('minimum_chargeable_weight.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');

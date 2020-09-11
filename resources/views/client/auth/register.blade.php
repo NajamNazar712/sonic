@@ -624,7 +624,7 @@
                                                 </div>
                                                 <div class="col-md-6">
 
-                                                <div class="form-group d-none" id="generation_div">
+                                                <div class="form-group" id="generation_div">
 
                                                     <label for="generation_date">Generation Date:
                                                         <span class="danger">*</span>

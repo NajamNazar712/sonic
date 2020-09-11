@@ -660,6 +660,9 @@ class Permission
             'settings.nsa_account.index' => 367,
             'settings.nsa_account.store' => 367,
 
+            'settings.restrict_cities_intercept.index' => 375,
+            'settings.restrict_cities_intercept.store' => 375,
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
