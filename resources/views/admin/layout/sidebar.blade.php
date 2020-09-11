@@ -110,7 +110,7 @@
             @if (session('role_id') == 1 || count(array_intersect([17, 20, 23, 123, 368, 369, 370], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cubes"></i>First Mile</span></a>
                     <ul class="menu-content">
-							@if (session('role_id') == 1 || count(array_intersect([368, 369, 370], session('permissions'))) !== 0)
+						 @if (session('role_id') == 1 || count(array_intersect([368, 369, 370], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Multiple Pieces</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(368, session('permissions')))
@@ -125,7 +125,7 @@
                                 </ul>
                             </li>
                         @endif
-					                            <li class=" nav-item"><a href="#"><span class="menu-title">Pickups</span></a>
+                             <li class=" nav-item"><a href="#"><span class="menu-title">Pickups</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(17, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.pickups.pending.index') }}">Pending</a></li>
@@ -157,7 +157,7 @@
 {{--                                    @endif--}}
                                 </ul>
                             </li>
-                        @endif
+                            
 
                             @if (session('role_id') == 1 || count(array_intersect([17,24,271,272,366], session('permissions'))) !== 0)
                                 <li class=" nav-item"><a href="#"><span class="menu-title">V2 Pickups</span></a>
