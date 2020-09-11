@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BanksList;
@@ -219,28 +220,8 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('return_note_link', function($return_note) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($return_note->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
                 })
-                ->editColumn('image', function ($return_note) {
-                    $now = Carbon::now();
-                    if($return_note->image == null){
-                        return "-";
-                    }else {
-                        $url = 'uploads/return_notes/' . $return_note->image;
-
-                        if(file_exists($url)){
-                            $img = asset('uploads/return_notes/' . $return_note->image);
-                            return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                        }else{
-                            $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note->image);
-                            if($exists){
-                                $img = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note->image, now()->addMinutes(5));
-                                return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                            }else{
-                                return "-";
-                            }
-                        }
-
-                    }
-
+                ->addColumn('image', function ($return_note) {
+                    return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
                 })
                 ->editColumn('shipments_count_link', function($return_note) {
                     if ($return_note->shipments_count != 0) {

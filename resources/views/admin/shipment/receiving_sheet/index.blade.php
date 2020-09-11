@@ -82,6 +82,7 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1 ">Receiving Sheet</th>
+                                    <th class="border-primary border-darken-1 ">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Booked</th>
                                     <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">Origin</th>
@@ -208,6 +209,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('Receiving Sheet');
+                            head.push('Shipper Name');
                             head.push('Booked');
                             head.push('Address');
                             head.push('Origin');
@@ -218,6 +220,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.id);
+                                row.push(values.shipper_name);
                                 row.push(values.bookings);
                                 row.push(values.address);
                                 row.push(values.origin);
@@ -295,9 +298,10 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'receiving_sheet_id', name: 'receiving_sheets.id', class: 'align-middle text_center receiving_sheet_id '},
+                    {data: 'shipper_name', name: 'u.name', class: 'align-middle text_center shipper_name'},
                     {data: 'bookings', name: 'receiving_sheets.booked', class: 'align-middle text_center bookings'},
                     {data: 'address', name: 'usi.pickup_address', class: 'text_center align-middle address'},
-                    {data: 'origin', name: 'c.name ', class: 'text_center align-middle origin', orderable:false},
+                    {data: 'origin', name: 'c.name', class: 'text_center align-middle origin'},
                     {data: 'booking_date', name: 'receiving_sheets.created_at', class: 'text_center align-middle booking_date'},
                 ],
                 rowCallback: function(row, data, index) {
@@ -318,7 +322,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.origin')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number')) {
                             $(td).appendTo($(search));
                         }
                         else {

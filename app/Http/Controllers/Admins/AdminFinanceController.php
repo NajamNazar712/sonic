@@ -1811,7 +1811,7 @@ class AdminFinanceController extends Controller
         $replacement_weight = null;
 
         $shipment = Shipment::find($shipment_id);
-        $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges + $shipment->gst;
+        $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
 
         if($shipment->actual_weight == null){
             return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
@@ -1845,17 +1845,33 @@ class AdminFinanceController extends Controller
         ShipmentChargesController::fuel_surcharge($shipment_id);
 
         $shipment = Shipment::find($shipment_id);
-        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges + $shipment->gst;
+        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
 
         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
         $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
 
         if($pending_payment->exists()){
+            $pending_payment = $pending_payment->first();
+
+            $previous_gst = $pending_payment->gst;
+
+            $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+
+            $adjustment_amount += $previous_gst - $new_gst;
+
             self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
         }else{
             $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
             if($done_payment->exists()){
+                $done_payment = $done_payment->first();
+
+                $previous_gst = $done_payment->gst;
+
+                $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+
+                $adjustment_amount += $previous_gst - $new_gst;
+
                 self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
             }
         }
@@ -3364,7 +3380,7 @@ class AdminFinanceController extends Controller
                     $done_payment->delivered_shipments = 0;
                     $done_payment->returned_shipments = 0;
                     $done_payment->adjusted_shipments = 0;
-
+                    $done_payment->user_bank_info_id = $user_bank_id;
                     $settings = GlobalSettings::where('type', 'ibft_charges');
 
                     if ($settings->exists()) {
@@ -3427,6 +3443,8 @@ class AdminFinanceController extends Controller
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
                             $pending_payment_shipment->delete();
+
+                            self::sub_pending_payment_charges($pending_payment_shipment->pending_payment_id,$pending_payment_shipment->amount,$pending_payment_shipment->charges,$pending_payment_shipment->gst,$pending_payment_shipment->payable);
 
                             if ($done_payment_shipment->type == 1) {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
@@ -3513,6 +3531,14 @@ class AdminFinanceController extends Controller
     static public function done_payment($shipment_id, $type) {
         $shipment = Shipment::find($shipment_id);
 
+        $user_bank_id = NULL;
+
+        $user_bank_id = UserBankInfo::where('user_id', $shipment->user_id)->where('default_bank', 1)->select('id')->first();
+
+        if($user_bank_id){
+            $user_bank_id = $user_bank_id->id;
+        }
+
         $done_payment = new DonePayment();
 
         $done_payment->user_id = $shipment->user_id;
@@ -3524,7 +3550,7 @@ class AdminFinanceController extends Controller
         else {
             $done_payment->returned_shipments = 1;
         }
-
+        $done_payment->user_bank_info_id = $user_bank_id;
         $done_payment->status = 1;
 
         $done_payment->save();
@@ -5925,6 +5951,18 @@ class AdminFinanceController extends Controller
             $done_payment_charges->payable = $payable;
             $done_payment_charges->packaging_charges = $packaging_material_charges;
             $done_payment_charges->save();
+        }
+    }
+
+    static public function sub_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable){
+        $pending_payment_charges = PendingPaymentCalculation::where('pending_payment_id', $pending_payment_id);
+        if($pending_payment_charges->exists()){
+            $pending_payment_charges = $pending_payment_charges->first();
+            $pending_payment_charges->amount = $pending_payment_charges->amount - $amount;
+            $pending_payment_charges->charges = $pending_payment_charges->charges - $charges;
+            $pending_payment_charges->gst = $pending_payment_charges->gst - $gst;
+            $pending_payment_charges->payable = $pending_payment_charges->payable - $payable;
+            $pending_payment_charges->save();
         }
     }
 

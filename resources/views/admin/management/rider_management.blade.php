@@ -158,7 +158,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.management.rider.ajax') }}',
-                order: [[8, 'desc']],
+                order: [[10, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},

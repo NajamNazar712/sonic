@@ -351,6 +351,9 @@ class ReturnController extends Controller
 
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
+                if($parcel->booking_type_id == 5){
+                    continue;
+                }
                 $remark_inp = "remark.$shipment";
                 if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
 
@@ -455,6 +458,9 @@ class ReturnController extends Controller
         if($request->action == 'confirm'){
             $return_reason = $request->single_return_reason_select;
             $parcel = Shipment::find($request->shipment_id);
+            if($parcel->booking_type_id == 5){
+                return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
+            }
             if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
 
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
@@ -704,26 +710,71 @@ class ReturnController extends Controller
                     }
                     $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
-                    if($shipment_details->booking_type_id != 5) {
-                        if ($status == 0) {
-                            $shipment_details->shipper_status_id = 20; //Confirmation Pending
-                            ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
-                            NotificationsController::send(15, 0, $shipment_details->id);
-                            NotificationsController::send(16, 0, $shipment_details->id);
+                    if($status == 0){
+                        if($shipment_details->booking_type_id == 5){
+                            continue;
+                        }
+                        $shipment_details->shipper_status_id = 20; //Confirmation Pending
+                        ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+                        NotificationsController::send(15, 0, $shipment_details->id);
+                        NotificationsController::send(16, 0, $shipment_details->id);
 
-//                            ShipmentChargesController::return($shipment_details->id);
-//
-//                            AdminFinanceController::add_payment($shipment_details->id, 1);
+
+                        if ($shipment_details->booking_type_id != 4) {
+                            ShipmentChargesController::return($shipment_details->id);
+
+                            if ($shipment_details->packaging_material_request != 1) {
+
+                                AdminFinanceController::add_payment($shipment_details->id, 1);
+
+                            }
                         }
-                        if ($status == 1) {
-                            $shipment_details->shipper_status_id = 13; //Re-Attempt
-                            ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
-//                            NotificationsController::send(15, 0, $shipment_details->id);
-//                            NotificationsController::send(16, 0, $shipment_details->id);
+                        else {
+                            ShipmentChargesController::walk_in_return($shipment_details->id);
+
+                            $shipment_details->walk_in_status = 2;
+
+                            AdminFinanceController::done_payment($shipment_details->id, 1);
                         }
-                        $shipment_details->save();
-                        $tracking_numbers['Row #' . $row_id] = $tracking;
+
                     }
+                    if($status == 1){
+                        $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
+                        if($journey){
+                            if ($shipment_details->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
+                                $shipment_details->nsa_osa_status = 1;
+                                $shipment_details->save();
+                                ShipmentChargesController::nsa_osa_charges($shipment_details->id);
+
+                                NotificationsController::send(33, $shipment_details->id);
+                            }
+                            else if ($shipment_details->shipper_status_id == 52) {
+                                $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                                if ($journey && ($journey->status_reason_id == 12)) {
+                                    $shipment_details->nsa_osa_status = 1;
+
+                                    $shipment_details->save();
+
+                                    ShipmentChargesController::nsa_osa_charges($shipment_details->id);
+                                }
+                            }
+                        }
+                        $shipment_details->shipper_status_id = 13; //Re-Attempt
+                        $shipment_details->consignee_status_id = 13;
+                        ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+
+                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
+                        if($return_assign_shipment){
+                            $return_assign_shipment->status = 0;
+                            $return_assign_shipment->save();
+                        }
+                        NotificationsController::send(15, 0, $shipment_details->id);
+                        NotificationsController::send(16, 0, $shipment_details->id);
+
+                    }
+                    $shipment_details->save();
+                    $tracking_numbers['Row #' . $row_id] = $tracking;
 
                 }
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {

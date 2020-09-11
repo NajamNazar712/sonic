@@ -81,7 +81,7 @@
                     </div>
                     <div class="col-4">
 
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -92,7 +92,7 @@
                         </div>
                     </div>
                     <div class="col-4 ">
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -147,6 +147,40 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+    <div class="modal fade text-left" id="uploadReturnNote" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadReturnNote"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Return Note Image Upload</h4>
+
+                </div>
+                <div class="modal-body  text-center">
+                    <table class="table table-bordered" id="return_note_image_view_table" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Date Added</th>
+                            <th class="border-primary border-darken-1">Image</th>
+
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+
+                    <div class="col-3">
+                        <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -453,6 +487,46 @@
                         }
                     });
 
+            });
+
+            $('#datatable tbody').on('click', 'tr td.image a.image-popup', function () {
+                var return_note_id = $(this).parents('tr').attr('id');
+                if(return_note_id){
+                    $.ajax({
+                        url: '{!! route('admin.return.history.get_images') !!}',
+                        method: 'POST',
+                        data: {
+                            'return_note_id': return_note_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0) {
+                            $('#image_return_note_id').val(return_note_id);
+                            var image_html = '';
+                            $.each(data.images, function (index, image) {
+                                index++;
+                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                                    image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td></tr>';
+                            });
+                            $('#return_note_image_view_table tbody').append(image_html);
+                            $('#uploadReturnNote').modal('show');
+                        }else if(data.status == 2){
+                            $('#image_return_note_id').val(return_note_id);
+                            var image_html = '<tr><td colspan="4">No Images found!</td></tr>';
+
+                            $('#return_note_image_view_table tbody').append(image_html);
+                            $('#uploadReturnNote').modal('show');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+
+                }
+            });
+
+            $('#uploadReturnNote').on('hidden.bs.modal', function () {
+                $('#image_return_note_id').val('');
+                $('#return_note_image_view_table tbody').html('');
             });
         });
 

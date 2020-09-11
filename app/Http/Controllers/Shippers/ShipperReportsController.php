@@ -140,6 +140,8 @@ class ShipperReportsController extends Controller
         $origin = $request->origin;
         $user = $request->user;
         $destination = $request->destination;
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         if($from == null || $to == null){
             $today = Carbon::now()->endOfDay();
             $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
@@ -147,8 +149,6 @@ class ShipperReportsController extends Controller
             $thirtyDays = $from;
             $today = $to;
         }
-        $today = Carbon::now()->endOfDay();
-        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         $restriction = false;
         if(session('user_type') == 2){
             if(session('restriction') == 1){
@@ -156,6 +156,7 @@ class ShipperReportsController extends Controller
             }
         }
         $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
+
         $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
         $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
         $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('shipments.created_at',[$thirtyDays,$today])->where('user_id', $user);
@@ -394,9 +395,7 @@ class ShipperReportsController extends Controller
             if($card = $request->get('cards_filter')){
                 switch ($card) {
                     case 'total':
-                        $today = Carbon::now()->endOfDay();
-                        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
-                $datatable->whereBetween('shipments.created_at',[$thirtyDays,$today]);
+                $datatable->whereBetween('shipments.shipper_status_id',[1,2,3,4,5,6,7,8,9,10,11,12,13,15,18,19,49,52,14,16,30, 36,37,39,40,41,47,20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50,17]);
                         break;
                     case 'booked':
                         $datatable->where('shipments.shipper_status_id',1);
