@@ -12,7 +12,7 @@ class UpdateShipmentStatusForMultiplePiecesHoldSeeder extends Seeder
     public function run()
     {
         DB::table('shipment_status')->insert(array(
-            array('id' => 62, 'code' => 'HAO-S', 'name' => 'Multiple Pieces Hold', 'description' => 'Shipment is being held due to short pieces receiving')
+            array('id' => 62, 'code' => 'HAO-S', 'name' => 'Shipment - Multiple Pieces Hold', 'description' => 'Shipment is being held due to short pieces received')
         ));
     }
 }
