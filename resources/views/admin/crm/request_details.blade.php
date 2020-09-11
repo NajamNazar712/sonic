@@ -409,6 +409,9 @@
                                                 <div class="col-2">
                                                     <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>
                                                 </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Image Upload</button>
+                                                </div>
                                             </div>
                                             @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)) || ($sale_person && $sale_person->admin_id == Auth::id()))
                                                 <section class="chat-app-form">
@@ -850,6 +853,62 @@
             </div>
         @endif
     </section>
+
+
+    <div class="modal fade text-left" id="image_upload_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="image_upload_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">CRM Image Upload</h4>
+
+                </div>
+                <div class="modal-body  text-center">
+                    <table class="table table-bordered" id="crm_image_view_table" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Date Added</th>
+                            <th class="border-primary border-darken-1">Image</th>
+                            <th class="border-primary border-darken-1"></th>
+
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+
+
+                    <form id="crm_upload_form" class="form" action="{{route('admin.crm.request.image_submit')}}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="image_crm_request_id" id="image_crm_request_id"/>
+                        <input type="hidden" name="selected_ids" id="selected_ids"/>
+                        <table class="table table-bordered datatable" id="image_upload_table" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
+
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Image</th>
+                                <th class="border-primary border-darken-1"></th>
+
+                            </tr>
+                            </thead>
+                        </table>
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
+                                <button id="CRMImageSubmitButton" type="submit" class="btn btn-primary btn-block" disabled>Upload</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -947,7 +1006,8 @@
             type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/ui/scrollable.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             $('#claim_product_cost').inputmask({
@@ -1768,83 +1828,287 @@
                     });
                 }
             });
-        });
 
-        $('#valid_form').on('submit', function (e) {
-            blockPagePermanently();
-        });
-        $('#invalid_form').on('submit', function (e) {
-            blockPagePermanently();
-        })
 
-        @foreach($comments as $comment)
+            $('#valid_form').on('submit', function (e) {
+                blockPagePermanently();
+            });
+            $('#invalid_form').on('submit', function (e) {
+                blockPagePermanently();
+            })
+
+            @foreach($comments as $comment)
             @if($comment->comment_by == 0)
-                @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
-                    $('#edit_comment_{{$comment->id}}').on('click', function (e) {
-                        var comment_id = $(this).attr("value");
-                        e.preventDefault();
+            @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
+            $('#edit_comment_{{$comment->id}}').on('click', function (e) {
+                var comment_id = $(this).attr("value");
+                e.preventDefault();
+                swal({
+                    text: 'Are you sure, you want to edit this comment as Internal?\n\t "{{$comment->comment}}"',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if(confirm){
                         swal({
-                            text: 'Are you sure, you want to edit this comment as Internal?\n\t "{{$comment->comment}}"',
+                            title: 'Please Wait!',
+                            text: 'Comment is being updated.',
                             icon: 'info',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
+                            buttons: false,
                             closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function(confirm) {
-                            if(confirm){
-                                swal({
-                                    title: 'Please Wait!',
-                                    text: 'Comment is being updated.',
-                                    icon: 'info',
-                                    buttons: false,
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
-                                });
-                                $.ajax({
-                                    url: '{!! route('admin.crm.comment.edit') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        'comment_id': comment_id,
-                                        '_token': '{{ csrf_token() }}'
-                                    }
-                                })
-                                    .done(function (data) {
-                                        if (data.status == 0) {
-                                            $('#edit_comment_{{$comment->id}}').remove();
-                                            $('#chat_{{$comment->id}}').addClass('internal');
-                                            $('#updated_by_div_{{$comment->id}}').append('<small>Updated by: ' + data.updated_by + ' (' + data.updated_at + ')</small>');
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                        }
-                                        else {
-                                            toastr.error(data.error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                        }
-                                        swal.close();
-                                    });
-                            }
+                            closeOnEsc: false
                         });
-                    });
-                @endif
+                        $.ajax({
+                            url: '{!! route('admin.crm.comment.edit') !!}',
+                            method: 'POST',
+                            data: {
+                                'comment_id': comment_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    $('#edit_comment_{{$comment->id}}').remove();
+                                    $('#chat_{{$comment->id}}').addClass('internal');
+                                    $('#updated_by_div_{{$comment->id}}').append('<small>Updated by: ' + data.updated_by + ' (' + data.updated_at + ')</small>');
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                            });
+                    }
+                });
+            });
             @endif
-        @endforeach
+            @endif
+            @endforeach
+
+            var images_count = {{ $crm_images_count }};
+            var rows_count = 0;
+            var selected_rows = [];
+            $('#image_upload_btn').on('click', function () {
+                var crm_request_id = $('#crm_request_id').val();
+                if(crm_request_id){
+                    $('#image_crm_request_id').val(crm_request_id);
+                    $.ajax({
+                        url: '{!! route('admin.crm.request.image_details') !!}',
+                        method: 'POST',
+                        data: {
+                            'crm_request_id': crm_request_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if(data.status == 0){
+                            var image_html = '';
+                            $.each(data.images, function (index, image) {
+                                index++;
+                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                                var remove = '';
+                                remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
+                            });
+                            $('#crm_image_view_table tbody').append(image_html);
+                            $('#image_upload_modal').modal('show');
+                        }else if(data.status == 2){
+                            var image_html = '<tr><td colspan="4">No Images found!</td></tr>';
+
+                            $('#crm_image_view_table tbody').append(image_html);
+                            $('#image_upload_modal').modal('show');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            });
+            $.validator.addMethod('maxsize', function(value, element, params) {
+                if ($(element).attr('type') === 'file') {
+                    if (element.files && element.files.length) {
+                        for (var c = 0; c < element.files.length; c++) {
+                            if (element.files[c].size > params) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }, $.validator.format("File Size must not exceed {0} bytes."));
+            var crm_image_table;
+            function add_row() {
+                var tr_id = $('#image_upload_table tbody tr').attr('id');
+                if (typeof tr_id !== typeof undefined && tr_id !== false) {
+                    var new_img_rows = $('#image_upload_table tbody tr').length;
+                    new_img_rows = images_count + new_img_rows;
+                    if(new_img_rows >= 2){
+                        $('#image_upload_table .img_add_btn').attr('disabled', true);
+                        return false;
+                    }
+                }
+
+                rows_count++;
+
+                var crm_image = '<input class="form-control form-control-sm" type="file" name="crm_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                if(rows_count == 1){
+                    var remove = '';
+                }else{
+                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                }
+                crm_image_table.row.add([0, crm_image,remove]).node().id = rows_count;
+                crm_image_table.draw(true);
+                $('#CRMImageSubmitButton').attr('disabled', false);
+                selected_rows.push(rows_count);
+            }
+            crm_image_table = $('#image_upload_table').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons:[{
+                    title: 'Add Row',
+                    className: 'btn btn-primary img_add_btn',
+                    text: '<i class="la la-plus"></i> Add Row',
+                    action:function (e) {
+                        if(images_count < 2){
+                            add_row();
+                        }
+                    }
+                }],
+                ordering:false,
+                paging:false,
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {name: 'image', class: 'align-middle image form-group'},
+                    {name: 'action', class: 'align-middle action'},
+                ],
+
+                rowCallback: function(row, data, index) {
+                    var info = crm_image_table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+
+                    // this.api().table().columns.adjust();
+                }
+            });
+            $('#crm_image_view_table').on('click','a.remove_row', function () {
+                var row_id = $(this).parents('tr').attr('id');
+                var crm_request_id = $('#image_crm_request_id').val();
+                var current = $(this);
+                if(row_id){
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes if you want to delete this image!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.crm.request.image_delete') !!}',
+                                method: 'POST',
+                                data: {
+                                    'crm_image_id': row_id,
+                                    'crm_request_id':crm_request_id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if(data.status == 0){
+                                    images_count = images_count - 1;
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    current.parents('tr').remove();
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('body').on('click', 'a.remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, selected_rows);
+
+                if (index !== -1) {
+                    selected_rows.splice(index, 1);
+                }
+                crm_image_table.row( $(this).parents('tr') ).remove().draw();
+            });
+            $('#crm_upload_form').validate({
+
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    $('#selected_ids').val(selected_rows);
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Image is being uploaded!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+            });
+            $('#image_upload_modal').on('hidden.bs.modal', function () {
+                $('#image_crm_request_id').val('');
+                crm_image_table.clear();
+                crm_image_table.draw();
+                selected_rows = [];
+                rows_count = 0;
+                $('#crm_image_view_table tbody').html('');
+            });
+
+        });
+
+
 
     </script>
 @endsection
