@@ -419,6 +419,9 @@
 
     <script>
         $(document).ready(function() {
+            $('#multi_piece').on('hide.bs.modal', function (e) {
+                $('#existing-iframe-example').attr('src',"");
+            });
             $('#close_btn').addClass('d-none');
             var check = 0 ;
             $.validator.addMethod('maxsize', function(value, element, params) {

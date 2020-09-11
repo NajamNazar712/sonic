@@ -36,6 +36,26 @@
                                         <div class="form-group">
                                             <p class="border-bottom border-light text-center font-medium-1 text-bold-600">{{ $user->phone }}</p>
                                         </div>
+
+                                        <div class="form-group">
+                                            <select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
+                                                <option value="0">New</option>
+
+                                                @php ($default_pickup_address = FALSE)
+
+                                                @foreach($user->shipping as $shipping_information)
+                                                    @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+                                                        @if ($shipping_information['default_address'] == 1)
+                                                            @php ($default_pickup_address = TRUE)
+
+                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+                                                        @else
+                                                            <option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+                                                        @endif
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </div>
                                         <div class="modal fade" id="multi_piece" role="dialog" aria-labelledby="multi_piece" aria-hidden="true" data-backdrop="static" data-keyboard="false">
                                             <div class="modal-dialog modal-lg justify-content-center" >
                                                 <div class="modal-content">
@@ -62,26 +82,6 @@
                                             </div>
                                         </div>
 
-
-                                        <div class="form-group">
-                                            <select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
-                                                <option value="0">New</option>
-
-                                                @php ($default_pickup_address = FALSE)
-
-                                                @foreach($user->shipping as $shipping_information)
-                                                    @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
-                                                        @if ($shipping_information['default_address'] == 1)
-                                                            @php ($default_pickup_address = TRUE)
-
-                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
-                                                        @else
-                                                            <option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
-                                                        @endif
-                                                    @endif
-                                                @endforeach
-                                            </select>
-                                        </div>
 
                                         <div class="form-group">
                                             <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="pickup_city_name"></p>
@@ -211,7 +211,7 @@
                                                 <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
                                             </div>
                                             <div id="pieces_quantity" class="form-group input-group d-none">
-                                                <input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required">
+                                                <input  type="text" name="pieces_quantity" class="form-control text-center pieces" id="pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required">
                                             </div>
                                             <div class="form-group text-center p-1 border border-light rounded">
                                                 <label class="d-block">Insurance</label>
@@ -456,7 +456,6 @@
         $(document).ready(function() {
             $('#close_btn').addClass('d-none');
             var no_of_pieces;
-
             $(this).find('.pieces').TouchSpin({
                 min: 1,
                 max: 10,
@@ -1162,20 +1161,25 @@
                 $(this).valid();
             });
 
-            var check = @json($check);
+            var check = 0;
+            var piece_check = false;
+            $('#multi_piece').on('hide.bs.modal', function (e) {
+                $('#existing-iframe-example').attr('src',"");
+            });
+
             $('#booking_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
-                normalizer: function (value) {
+                normalizer: function(value) {
                     return $.trim(value);
                 },
-                errorPlacement: function (error, element) {
+                errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
-                submitHandler: function (form) {
+                submitHandler: function(form) {
                     var quantity = $('#pieces').val();
                     var piece_status = @json($multi_piece);
-                    if ((piece_status == 0 || (piece_status == 1 && quantity > 1)) && check == 0) {
+                    if( (piece_status == 0 || (piece_status == 1 && quantity > 1)) && check == 0) {
                         if (piece_check == false) {
                             piece_check = true;
                             swal({
@@ -1196,8 +1200,7 @@
                                 dangerMode: true
                             }).then(function (confirm) {
                                 if (confirm) {
-                                    if (check === 0) {
-
+                                    if (check == 0) {
                                         check = 1;
                                         $('#multi_piece').modal('show');
                                         $('#book_btn').removeAttr("disabled");
@@ -1210,7 +1213,8 @@
                                         });
                                         $('#book_btn').removeAttr("disabled");
                                         $('#book_print').removeAttr("disabled");
-                                    } else {
+                                    }
+                                    else{
                                         var pressed_button = $(this.submitButton);
 
                                         $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
@@ -1219,9 +1223,9 @@
                                         var consignee_address = $('#consignee_address').val();
                                         var strArray = consignee_address.split(/[ ,]+/);
                                         var present = [];
-                                        for (k = 0; k < strArray.length; k++) {
+                                        for(k=0;k<strArray.length;k++) {
                                             for (i = 0; i < check.length; i++) {
-                                                if (JSON.stringify(strArray[k]).toLowerCase() === JSON.stringify(check[i]).toLowerCase()) {
+                                                if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
                                                     present.push(strArray[k]);
                                                 }
                                             }
@@ -1237,24 +1241,23 @@
                                                 'delivery_type': $('#delivery_type').val(),
                                                 'estimated_weight': $('#estimated_weight').val()
                                             }
-                                        }).done(function (data) {
-                                            if (data.status == 1) {
+                                        }).done(function(data) {
+                                            if(data.status == 1){
                                                 swal({
                                                     title: 'Warning',
                                                     text: 'Dear Customer, this shipment will be charged to a minimum of ' + data.min + ' kg, based on your mode of shipping and delivery type',
                                                     icon: 'info',
-                                                    buttons: {
+                                                    buttons:{
                                                         confirm: {
                                                             text: 'Ok',
                                                             value: false,
                                                             visible: true,
                                                             closeModal: true
-                                                        }
-                                                    },
+                                                        }},
                                                     closeOnClickOutside: false,
                                                     closeOnEsc: false
-                                                }).then(function () {
-                                                    if (present.length > 0) {
+                                                }).then(function() {
+                                                    if(present.length > 0){
                                                         var html = '<div class="text-left">In case of,<br/>';
                                                         html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
                                                         html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
@@ -1282,10 +1285,10 @@
                                                             closeOnClickOutside: false,
                                                             closeOnEsc: false,
                                                             // dangerMode: true
-                                                        }).then(function (confirm) {
-                                                            if (confirm) {
-                                                                if (blacklist == true) {
-                                                                    var html = '<div class="row justify-content-center p-1" style="background-color: ' + blacklist_color + '; color:white;">' + blacklist_message + '</div>';
+                                                        }).then(function(confirm) {
+                                                            if(confirm) {
+                                                                if(blacklist == true){
+                                                                    var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
                                                                     content = document.createElement('div');
                                                                     content.innerHTML = html;
                                                                     swal({
@@ -1307,7 +1310,7 @@
                                                                         closeOnClickOutside: false,
                                                                         closeOnEsc: false,
                                                                         // dangerMode: true
-                                                                    }).then(function (confirm) {
+                                                                    }).then(function(confirm) {
                                                                         if (confirm) {
                                                                             swal({
                                                                                 title: 'Please Wait!',
@@ -1319,11 +1322,12 @@
                                                                             });
 
                                                                             form.submit();
-                                                                        } else {
+                                                                        }
+                                                                        else{
                                                                             $(form).find('button[type=submit]').prop('disabled', false);
                                                                         }
                                                                     });
-                                                                } else {
+                                                                }else{
                                                                     swal({
                                                                         title: 'Please Wait!',
                                                                         text: 'Your shipment is being booked!',
@@ -1335,13 +1339,15 @@
 
                                                                     form.submit();
                                                                 }
-                                                            } else {
+                                                            }
+                                                            else{
                                                                 $(form).find('button[type=submit]').prop('disabled', false);
                                                             }
                                                         });
-                                                    } else {
-                                                        if (blacklist == true) {
-                                                            var html = '<div class="row justify-content-center p-1" style="background-color: ' + blacklist_color + '; color:white;">' + blacklist_message + '</div>';
+                                                    }
+                                                    else {
+                                                        if(blacklist == true) {
+                                                            var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
                                                             content = document.createElement('div');
                                                             content.innerHTML = html;
                                                             swal({
@@ -1375,11 +1381,12 @@
                                                                     });
 
                                                                     form.submit();
-                                                                } else {
+                                                                }
+                                                                else{
                                                                     $(form).find('button[type=submit]').prop('disabled', false);
                                                                 }
                                                             });
-                                                        } else {
+                                                        }else{
                                                             swal({
                                                                 title: 'Please Wait!',
                                                                 text: 'Your shipment is being booked!',
@@ -1393,8 +1400,9 @@
                                                         }
                                                     }
                                                 });
-                                            } else {
-                                                if (present.length > 0) {
+                                            }
+                                            else {
+                                                if(present.length > 0){
                                                     var html = '<div class="text-left">In case of,<br/>';
                                                     html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
                                                     html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
@@ -1422,7 +1430,7 @@
                                                         closeOnClickOutside: false,
                                                         closeOnEsc: false,
                                                         // dangerMode: true
-                                                    }).then(function () {
+                                                    }).then(function() {
                                                         swal({
                                                             title: 'Please Wait!',
                                                             text: 'Your shipment is being booked!',
@@ -1433,7 +1441,8 @@
                                                         });
                                                         form.submit();
                                                     });
-                                                } else {
+                                                }
+                                                else {
                                                     swal({
                                                         title: 'Please Wait!',
                                                         text: 'Your shipment is being booked!',
@@ -1447,177 +1456,110 @@
                                                 }
                                             }
                                         });
+
                                     }
-                                } else {
-                                    var pressed_button = $(this.submitButton);
+                                }
+                            });
+                        }
+                    }
+                   else{
+                    var pressed_button = $(this.submitButton);
 
-                                    $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
+                    $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
 
-                                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                                    var consignee_address = $('#consignee_address').val();
-                                    var strArray = consignee_address.split(/[ ,]+/);
-                                    var present = [];
-                                    for (k = 0; k < strArray.length; k++) {
-                                        for (i = 0; i < check.length; i++) {
-                                            if (JSON.stringify(strArray[k]).toLowerCase() === JSON.stringify(check[i]).toLowerCase()) {
-                                                present.push(strArray[k]);
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    var consignee_address = $('#consignee_address').val();
+                    var strArray = consignee_address.split(/[ ,]+/);
+                    var present = [];
+                    for(k=0;k<strArray.length;k++) {
+                        for (i = 0; i < check.length; i++) {
+                            if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
+                                present.push(strArray[k]);
+                            }
+                        }
+                    }
+                    // console.log(present.length);
+                    // console.log(present);
+                    $.ajax({
+                        url: '{!! route('cod.shipment.book.corporate_min_chargeable_weight') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipping_mode': $('#shipping_mode').val(),
+                            'delivery_type': $('#delivery_type').val(),
+                            'estimated_weight': $('#estimated_weight').val()
+                        }
+                    }).done(function(data) {
+                        if(data.status == 1){
+                            swal({
+                                title: 'Warning',
+                                text: 'Dear Customer, this shipment will be charged to a minimum of ' + data.min + ' kg, based on your mode of shipping and delivery type',
+                                icon: 'info',
+                                buttons:{
+                                    confirm: {
+                                        text: 'Ok',
+                                        value: false,
+                                        visible: true,
+                                        closeModal: true
+                                    }},
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            }).then(function() {
+                                if(present.length > 0){
+                                    var html = '<div class="text-left">In case of,<br/>';
+                                    html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+                                    html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+                                    html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+                                    swal({
+                                        title: 'A Possible Address Anomaly: ' + present + ' Detected!',
+                                        content: content,
+                                        icon: 'info',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Cancel',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Continue to Booking',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
                                             }
-                                        }
-                                    }
-                                    // console.log(present.length);
-                                    // console.log(present);
-                                    $.ajax({
-                                        url: '{!! route('cod.shipment.book.corporate_min_chargeable_weight') !!}',
-                                        method: 'POST',
-                                        data: {
-                                            '_token': '{{ csrf_token() }}',
-                                            'shipping_mode': $('#shipping_mode').val(),
-                                            'delivery_type': $('#delivery_type').val(),
-                                            'estimated_weight': $('#estimated_weight').val()
-                                        }
-                                    }).done(function (data) {
-                                        if (data.status == 1) {
-                                            swal({
-                                                title: 'Warning',
-                                                text: 'Dear Customer, this shipment will be charged to a minimum of ' + data.min + ' kg, based on your mode of shipping and delivery type',
-                                                icon: 'info',
-                                                buttons: {
-                                                    confirm: {
-                                                        text: 'Ok',
-                                                        value: false,
-                                                        visible: true,
-                                                        closeModal: true
-                                                    }
-                                                },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false
-                                            }).then(function () {
-                                                if (present.length > 0) {
-                                                    var html = '<div class="text-left">In case of,<br/>';
-                                                    html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
-                                                    html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
-                                                    html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
-                                                    content = document.createElement('div');
-                                                    content.innerHTML = html;
-                                                    swal({
-                                                        title: 'A Possible Address Anomaly: ' + present + ' Detected!',
-                                                        content: content,
-                                                        icon: 'info',
-                                                        buttons: {
-                                                            cancel: {
-                                                                text: 'Cancel',
-                                                                value: null,
-                                                                visible: true,
-                                                                closeModal: true,
-                                                            },
-                                                            confirm: {
-                                                                text: 'Continue to Booking',
-                                                                value: true,
-                                                                visible: true,
-                                                                closeModal: true
-                                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        // dangerMode: true
+                                    }).then(function(confirm) {
+                                        if(confirm) {
+                                            if(blacklist == true){
+                                                var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                swal({
+                                                    content: content,
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Cancel',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
                                                         },
-                                                        closeOnClickOutside: false,
-                                                        closeOnEsc: false,
-                                                        // dangerMode: true
-                                                    }).then(function (confirm) {
-                                                        if (confirm) {
-                                                            if (blacklist == true) {
-                                                                var html = '<div class="row justify-content-center p-1" style="background-color: ' + blacklist_color + '; color:white;">' + blacklist_message + '</div>';
-                                                                content = document.createElement('div');
-                                                                content.innerHTML = html;
-                                                                swal({
-                                                                    content: content,
-                                                                    buttons: {
-                                                                        cancel: {
-                                                                            text: 'Cancel',
-                                                                            value: null,
-                                                                            visible: true,
-                                                                            closeModal: true,
-                                                                        },
-                                                                        confirm: {
-                                                                            text: 'Book Anyway',
-                                                                            value: true,
-                                                                            visible: true,
-                                                                            closeModal: true
-                                                                        }
-                                                                    },
-                                                                    closeOnClickOutside: false,
-                                                                    closeOnEsc: false,
-                                                                    // dangerMode: true
-                                                                }).then(function (confirm) {
-                                                                    if (confirm) {
-                                                                        swal({
-                                                                            title: 'Please Wait!',
-                                                                            text: 'Your shipment is being booked!',
-                                                                            icon: 'info',
-                                                                            buttons: false,
-                                                                            closeOnClickOutside: false,
-                                                                            closeOnEsc: false
-                                                                        });
-
-                                                                        form.submit();
-                                                                    } else {
-                                                                        $(form).find('button[type=submit]').prop('disabled', false);
-                                                                    }
-                                                                });
-                                                            } else {
-                                                                swal({
-                                                                    title: 'Please Wait!',
-                                                                    text: 'Your shipment is being booked!',
-                                                                    icon: 'info',
-                                                                    buttons: false,
-                                                                    closeOnClickOutside: false,
-                                                                    closeOnEsc: false
-                                                                });
-
-                                                                form.submit();
-                                                            }
-                                                        } else {
-                                                            $(form).find('button[type=submit]').prop('disabled', false);
+                                                        confirm: {
+                                                            text: 'Book Anyway',
+                                                            value: true,
+                                                            visible: true,
+                                                            closeModal: true
                                                         }
-                                                    });
-                                                } else {
-                                                    if (blacklist == true) {
-                                                        var html = '<div class="row justify-content-center p-1" style="background-color: ' + blacklist_color + '; color:white;">' + blacklist_message + '</div>';
-                                                        content = document.createElement('div');
-                                                        content.innerHTML = html;
-                                                        swal({
-                                                            content: content,
-                                                            buttons: {
-                                                                cancel: {
-                                                                    text: 'Cancel',
-                                                                    value: null,
-                                                                    visible: true,
-                                                                    closeModal: true,
-                                                                },
-                                                                confirm: {
-                                                                    text: 'Book Anyway',
-                                                                    value: true,
-                                                                    visible: true,
-                                                                    closeModal: true
-                                                                }
-                                                            },
-                                                            closeOnClickOutside: false,
-                                                            closeOnEsc: false,
-                                                            // dangerMode: true
-                                                        }).then(function (confirm) {
-                                                            if (confirm) {
-                                                                swal({
-                                                                    title: 'Please Wait!',
-                                                                    text: 'Your shipment is being booked!',
-                                                                    icon: 'info',
-                                                                    buttons: false,
-                                                                    closeOnClickOutside: false,
-                                                                    closeOnEsc: false
-                                                                });
-
-                                                                form.submit();
-                                                            } else {
-                                                                $(form).find('button[type=submit]').prop('disabled', false);
-                                                            }
-                                                        });
-                                                    } else {
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    // dangerMode: true
+                                                }).then(function(confirm) {
+                                                    if (confirm) {
                                                         swal({
                                                             title: 'Please Wait!',
                                                             text: 'Your shipment is being booked!',
@@ -1629,49 +1571,11 @@
 
                                                         form.submit();
                                                     }
-                                                }
-                                            });
-                                        } else {
-                                            if (present.length > 0) {
-                                                var html = '<div class="text-left">In case of,<br/>';
-                                                html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
-                                                html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
-                                                html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
-                                                content = document.createElement('div');
-                                                content.innerHTML = html;
-                                                swal({
-                                                    title: present + ' Detected!',
-                                                    content: content,
-                                                    icon: 'info',
-                                                    buttons: {
-                                                        cancel: {
-                                                            text: 'No',
-                                                            value: null,
-                                                            visible: true,
-                                                            closeModal: true,
-                                                        },
-                                                        confirm: {
-                                                            text: 'Yes',
-                                                            value: true,
-                                                            visible: true,
-                                                            closeModal: true
-                                                        }
-                                                    },
-                                                    closeOnClickOutside: false,
-                                                    closeOnEsc: false,
-                                                    // dangerMode: true
-                                                }).then(function () {
-                                                    swal({
-                                                        title: 'Please Wait!',
-                                                        text: 'Your shipment is being booked!',
-                                                        icon: 'info',
-                                                        buttons: false,
-                                                        closeOnClickOutside: false,
-                                                        closeOnEsc: false
-                                                    });
-                                                    form.submit();
+                                                    else{
+                                                        $(form).find('button[type=submit]').prop('disabled', false);
+                                                    }
                                                 });
-                                            } else {
+                                            }else{
                                                 swal({
                                                     title: 'Please Wait!',
                                                     text: 'Your shipment is being booked!',
@@ -1684,13 +1588,124 @@
                                                 form.submit();
                                             }
                                         }
+                                        else{
+                                            $(form).find('button[type=submit]').prop('disabled', false);
+                                        }
                                     });
                                 }
+                                else {
+                                    if(blacklist == true) {
+                                        var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+                                        swal({
+                                            content: content,
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Cancel',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                                confirm: {
+                                                    text: 'Book Anyway',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
+                                                }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            // dangerMode: true
+                                        }).then(function (confirm) {
+                                            if (confirm) {
+                                                swal({
+                                                    title: 'Please Wait!',
+                                                    text: 'Your shipment is being booked!',
+                                                    icon: 'info',
+                                                    buttons: false,
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false
+                                                });
 
+                                                form.submit();
+                                            }
+                                            else{
+                                                $(form).find('button[type=submit]').prop('disabled', false);
+                                            }
+                                        });
+                                    }else{
+                                        swal({
+                                            title: 'Please Wait!',
+                                            text: 'Your shipment is being booked!',
+                                            icon: 'info',
+                                            buttons: false,
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false
+                                        });
 
+                                        form.submit();
+                                    }
+                                }
                             });
                         }
-                    }
+                        else {
+                            if(present.length > 0){
+                                var html = '<div class="text-left">In case of,<br/>';
+                                html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+                                html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+                                html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+                                content = document.createElement('div');
+                                content.innerHTML = html;
+                                swal({
+                                    title: present + ' Detected!',
+                                    content: content,
+                                    icon: 'info',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    // dangerMode: true
+                                }).then(function() {
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Your shipment is being booked!',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                    form.submit();
+                                });
+                            }
+                            else {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Your shipment is being booked!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+
+                                form.submit();
+                            }
+                        }
+                    });
+
+                }
                 }
             });
 

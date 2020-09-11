@@ -578,6 +578,9 @@
 
 	<script>
 		$(document).ready(function() {
+			$('#multi_piece').on('hide.bs.modal', function (e) {
+				$('#existing-iframe-example').attr('src',"");
+			});
 
 			$('#close_btn').addClass('d-none');
 			var no_of_pieces;
@@ -1366,7 +1369,7 @@
 			var check = 0;
 			var piece_check = false;
 			$('#multi_piece').on('hide.bs.modal', function (e) {
-				$('#video').attr('src',"");
+				$('#player').attr('src',"");
 			});
 			$('#booking_form').validate({
 				errorClass: 'danger',

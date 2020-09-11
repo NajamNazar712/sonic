@@ -378,6 +378,9 @@
 
 	<script>
 		$(document).ready(function() {
+			$('#multi_piece').on('hide.bs.modal', function (e) {
+				$('#existing-iframe-example').attr('src',"");
+			});
 			$('#close_btn').addClass('d-none');
 			var check = 0 ;
 			$.validator.addMethod('maxsize', function(value, element, params) {
@@ -443,26 +446,6 @@
 				}
 			});
 
-
-			/*var tag = document.createElement('script');
-            tag.src = 'https://www.youtube.com/iframe_api/';
-            var firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    */
-
-			/*var player;
-            function onYouTubeIframeAPIReady() {
-                player = new YT.Player('player', {
-                    videoId: 'Uy0KAIx3xHQ',
-                    height: '390',
-                    width: '100%',
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange
-                    }
-                });
-
-    */
 		}
 
 		// autoplay video
