@@ -33,6 +33,31 @@
                                         </div>
                                     </div>
 
+                                    <div class="modal fade" id="multi_piece" role="dialog" aria-labelledby="multi_piece" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+                                        <div class="modal-dialog modal-lg justify-content-center" >
+                                            <div class="modal-content" style="text-align: center">
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title" id="add_in_receiving_sheet_title">Multi Piece Tutorial</h4>
+                                                    @if($user->multipiece_status == 1)
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                                <div class="modal-body">
+                                                    <iframe id="existing-iframe-example"
+                                                            width="100%" height="480"
+                                                            src="https://www.youtube.com/embed/Uy0KAIx3xHQ?enablejsapi=1"
+                                                            frameborder="0"
+                                                    ></iframe>
+                                                </div>
+                                                <div class="modal-footer justify-content-center" id="multi_piece_footer">
+                                                    <button id="close_btn" class="btn btn-primary">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
                                             <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Overall Template</a>
@@ -394,6 +419,8 @@
 
     <script>
         $(document).ready(function() {
+            $('#close_btn').addClass('d-none');
+            var check = 0 ;
             $.validator.addMethod('maxsize', function(value, element, params) {
                 if ($(element).attr('type') === 'file') {
                     if (element.files && element.files.length) {
@@ -419,20 +446,64 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    if (check == 0) {
+                        check = 1;
+                        $('#multi_piece').modal('show');
+                    } else {
 
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Your shipment(s) are being booked!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
 
-                    form.submit();
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Your shipment(s) are being booked!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }
                 }
             });
         });
+    </script>
+    <script type="text/javascript">
+        var tag = document.createElement('script');
+        tag.id = 'iframe-demo';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('existing-iframe-example', {
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+
+        }
+
+        // autoplay video
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        // when video ends
+        var done = false;
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING && !done) {
+                setTimeout(stopVideo, 59000);
+                done = true;
+            }
+        }
+        function stopVideo() {
+            player.stopVideo();
+            $('#close_btn').removeClass('d-none');
+        }
+
     </script>
 @endsection
