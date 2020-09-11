@@ -255,7 +255,7 @@
                 buttons: [
                     @if (session('role_id') == 1 || in_array(372, session('permissions')))
                     {
-                        text: '<i class="la la-print"></i> Print',
+                        text: '<i class="la la-print"></i> Print & Create Return Note',
                         className: 'btn btn-primary print',
                         enabled: false,
                         action: function (e, dt, node, config) {
