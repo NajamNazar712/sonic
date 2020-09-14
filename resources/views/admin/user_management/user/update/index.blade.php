@@ -80,7 +80,11 @@
 
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>
-
+										<div class=" text-center mt-2">
+											<button type="button" id="selectAll"  class="btn btn-primary" >Select All</button>
+											<button type="button" id="unselect" class="btn btn-primary">Un Select</button>
+											</di>
+										</div>
 										@foreach($hubs as $hub)
 											<fieldset class="d-inline-block m-1">
 												@if (in_array($hub->id, $user_hubs))
@@ -186,6 +190,24 @@
 
 					form.submit();
 				}
+			});
+			$("#selectAll").click(function() {
+
+				$('input.hub').each(function () {
+					var _this = $(this);
+					if(_this.is(':checked') == false) {
+						_this.iCheck('check');
+					}
+				});
+			});
+			$("#unselect").click(function() {
+
+				$('input.hub').each(function () {
+					var _this = $(this);
+					if(_this.is(':checked') == true) {
+						_this.iCheck('uncheck');
+					}
+				});
 			});
 		});
 	</script>
