@@ -104,6 +104,7 @@
 										<th class="border-primary border-darken-1">Recovery Status</th>
 										<th class="border-primary border-darken-1">Recovery Status Date</th>
 										<th class="border-primary border-darken-1">Revert Requested Image</th>
+                                        <th class="border-primary border-darken-1">Revert Requested By</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Status Updated Datetime</th>
 										<th class="border-primary border-darken-1">Remarks</th>
@@ -281,6 +282,7 @@
                             head.push('Service Type');
                             head.push('Amount');
                             head.push('Recovery Status');
+                            head.push('Request Reverted By');
                             head.push('Recovery Status Date');
                             head.push('Status');
                             head.push('Status Updated Datetime');
@@ -296,7 +298,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
+                                row.push(values.tracking_id);
                                 row.push(values.consignee);
                                 row.push(values.address);
                                 row.push(values.destination);
@@ -305,6 +307,7 @@
                                 row.push(values.service_type);
                                 row.push(values.amount);
                                 row.push(values.shipment_recovery_status);
+                                row.push(values.request_reverted_by);
                                 row.push(values.recovery_date);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
@@ -627,6 +630,7 @@
 					{data:'shipment_recovery_status', name: 'delivery_note_shipments.status', class: 'align-middle text-center shipment_recovery_status'},
                     {data:'recovery_date', name: 'sj.remarks', class: 'align-middle text-center recovery_date'},
                     {data:'revert_requested_image_button', name: 'revert_requested_image_button', class: 'align-middle text-center revert_requested_image_button', orderable: false, searchable: false},
+                    {data:'request_reverted_by', name: 'a.name', class: 'align-middle text-center request_reverted_by'},
                     {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
                     {data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},

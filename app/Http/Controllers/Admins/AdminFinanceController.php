@@ -692,6 +692,7 @@ class AdminFinanceController extends Controller
                 $join->on('rsrl.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
                     ->where('rsrl.id', '=', DB::raw('(SELECT MAX(id) FROM revert_status_request_logs WHERE revert_status_request_logs.delivery_note_id = delivery_note_shipments.delivery_note_id AND shipment_id = s.id)'));
             })
+            ->join('admins as a','a.id','=','rsrl.updated_by')
             ->leftjoin('revert_status_requests as rsr', function($join){
                 $join->on('rsr.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
                     ->where('rsr.id', '=', DB::raw('(SELECT MAX(id) FROM revert_status_requests WHERE revert_status_requests.delivery_note_id = delivery_note_shipments.delivery_note_id AND shipment_id = s.id)'));
@@ -701,7 +702,7 @@ class AdminFinanceController extends Controller
                     ->where('consolidations.consolidation_id','=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
-            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id','consolidations.consolidation_id');
+            ->select('s.id', 's.tracking_number','s.tracking_number as tracking_id', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id','consolidations.consolidation_id','a.name as request_reverted_by');
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
@@ -770,6 +771,13 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
+            })
+            ->editColumn('request_reverted_by',function ($shipments) {
+                if ($shipments->request_reverted_by != null) {
+                    return $shipments->request_reverted_by;
+                } else {
+                    return '-';
+                }
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
             ->editColumn('tracking_number',function ($shipments){
