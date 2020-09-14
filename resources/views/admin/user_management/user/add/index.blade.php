@@ -198,7 +198,6 @@
 				$('input.hub').each(function () {
 					var _this = $(this);
 					if(_this.is(':checked') == false) {
-						//console.log('here')
 						_this.iCheck('check');
 					}
 				});
@@ -207,8 +206,7 @@
 
 				$('input.hub').each(function () {
 					var _this = $(this);
-					if(_this.is(':unchecked') == false) {
-						//console.log('here')
+					if(_this.is(':checked') == true) {
 						_this.iCheck('uncheck');
 					}
 				});
