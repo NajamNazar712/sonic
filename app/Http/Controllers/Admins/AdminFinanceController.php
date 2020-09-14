@@ -692,7 +692,7 @@ class AdminFinanceController extends Controller
                 $join->on('rsrl.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
                     ->where('rsrl.id', '=', DB::raw('(SELECT MAX(id) FROM revert_status_request_logs WHERE revert_status_request_logs.delivery_note_id = delivery_note_shipments.delivery_note_id AND shipment_id = s.id)'));
             })
-            ->join('admins as a','a.id','=','rsrl.updated_by')
+            ->leftjoin('admins as a','a.id','=','rsrl.updated_by')
             ->leftjoin('revert_status_requests as rsr', function($join){
                 $join->on('rsr.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
                     ->where('rsr.id', '=', DB::raw('(SELECT MAX(id) FROM revert_status_requests WHERE revert_status_requests.delivery_note_id = delivery_note_shipments.delivery_note_id AND shipment_id = s.id)'));
