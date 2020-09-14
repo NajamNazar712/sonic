@@ -72,23 +72,31 @@
 
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>
-
-										@foreach($hubs as $hub)
-											<fieldset class="d-inline-block m-1">
-												<input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
-												<label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
-											</fieldset>
-										@endforeach
-									</div>
-
-
-									<div class="col-12">
-										<div class="form-group text-center mt-2">
-											<button type="submit" class="btn btn-primary">Add</button>
+										<div class=" text-center mt-2">
+											<button type="button" id="selectAll"  class="btn btn-primary" >Select All</button>
+											<button type="button" id="unselect" class="btn btn-primary">Un Select</button>
+											</di>
 										</div>
 									</div>
-								</form>
+
+									@foreach($hubs as $hub)
+										<fieldset class="d-inline-block m-1">
+											<input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
+											<label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
+										</fieldset>
+									@endforeach
+								</div>
+
+
+								<div class="col-12">
+									<div class="form-group text-center mt-2">
+										<button type="submit" class="btn btn-primary">Add</button>
+									</div>
+								</div>
 							</form>
+							</form>
+
+
 						</div>
 					</div>
 				</div>
@@ -107,6 +115,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+
 
 	<script>
 		$(document).ready(function() {
@@ -169,6 +178,42 @@
 					form.submit();
 				}
 			});
+			$('#selectAll .hub').each(function() {
+				var checkbox = $(this);
+				var label = checkbox.next();
+				var text = label.text();
+
+				label.remove();
+
+				checkbox.iCheck({
+					checkboxClass: 'icheckbox_line pt-1 pb-1',
+					checkedClass: 'checked bg-success',
+					uncheckedClass: 'bg-danger',
+					insert: '<div class="icheck_line-icon"></div>' + text
+				});
+			});
+
+			$("#selectAll").click(function() {
+
+				$('input.hub').each(function () {
+					var _this = $(this);
+					if(_this.is(':checked') == false) {
+						//console.log('here')
+						_this.iCheck('check');
+					}
+				});
+			});
+			$("#unselect").click(function() {
+
+				$('input.hub').each(function () {
+					var _this = $(this);
+					if(_this.is(':unchecked') == false) {
+						//console.log('here')
+						_this.iCheck('uncheck');
+					}
+				});
+			});
 		});
+
 	</script>
 @endsection
