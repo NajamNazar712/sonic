@@ -343,6 +343,7 @@ class AdminWalkInBookShipmentController extends Controller
                             $warehouse_id = $fulfilment_hub->warehouse_id;
                             
 
+
                             $packaging_types = PackagingMaterialTypes::all();
                             $packaging_sizes = PackagingMaterialTypeSizes::all();
                             foreach ($packaging_types as $ptype) {
@@ -369,7 +370,9 @@ class AdminWalkInBookShipmentController extends Controller
                                 }
                             }
                         }
+
                     NotificationsController::send(2, $shipment_id);
+                    NotificationsController::send(85, $shipment_id);
 
                     if ($request->filled('book_and_print')) {
                         $print = $shipment_id;
