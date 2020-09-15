@@ -5792,7 +5792,15 @@ class NotificationsController extends Controller
               $body = $notification->body;
               $shipment = Shipment::find($reference_1_id);
               $tracking = $shipment->tracking_number;
-              $total_charges = $shipment->amount;
+              if($shipment->packaging_charges == null){
+                  $total_charges = $shipment->amount;
+              }
+              else{
+                  $amount = $shipment->amount;
+                  $packaging = $shipment->packaging_charges;
+                  $total_charges = $amount + $packaging;
+              }
+
               $origin = $shipment->pickup_address;
               $destination = $shipment->consignee_city;
 
