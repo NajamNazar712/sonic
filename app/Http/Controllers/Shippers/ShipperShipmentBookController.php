@@ -172,9 +172,14 @@ class ShipperShipmentBookController extends Controller
             $shipment_coordinates->save();
         }
         //Existing Coordinates
-        $user=User::find($user_id);
-        $user->multipiece_status = 1;
-        $user->save();
+//        if($pieces > 1){
+//            $user = User::where('id', $user_id)->where('multipiece_status', 0);
+//            if($user->exists()){
+//                $user = $user->first();
+//                $user->multipiece_status = 1;
+//                $user->save();
+//            }
+//        }
 
         return $shipment_id;
     }
@@ -2230,9 +2235,14 @@ class ShipperShipmentBookController extends Controller
             $shipment_coordinates->save();
         }
         //Existing Coordinates
-        $user=User::find($user_id);
-        $user->multipiece_status = 1;
-        $user->save();
+        //        if($pieces > 1){
+//            $user = User::where('id', $user_id)->where('multipiece_status', 0);
+//            if($user->exists()){
+//                $user = $user->first();
+//                $user->multipiece_status = 1;
+//                $user->save();
+//            }
+//        }
 
         return $shipment_id;
     }
