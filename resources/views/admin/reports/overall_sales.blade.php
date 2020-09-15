@@ -31,7 +31,7 @@
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    {{--<div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -39,7 +39,16 @@
                                 @endforeach
                             </select>
                         </fieldset>
-                    </div>
+                    </div>--}}
+                        <div class="col-4 mb-1">
+                            <fieldset class="form-group">
+                                <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                    @foreach($shippers as $shipper)
+                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
@@ -241,11 +250,11 @@
                 placeholder: 'Select Sales Person',
                 allowClear:true
             });
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+           /* $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipper',
                 width:'100%',
                 allowClear:true
-            });
+            });*/
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
                 width:'100%',
@@ -265,6 +274,11 @@
                 placeholder:'Select Status',
                 width:'100%',
                 allowClear:true
+            });
+            $('#search_shipper').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
             });
 
             var submission_date = $('#submission_date').pickadate({

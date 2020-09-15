@@ -153,8 +153,11 @@ use Yajra\Datatables\Datatables;
                         return $days;
                     }
                 });
-            if ($shipper = $request->get('search_shipper')) {
+            /*if ($shipper = $request->get('search_shipper')) {
                 $datatable->where('u.id', '=', $shipper);
+            }*/
+            if($search_shipper = $request->get('search_shipper')){
+                $shipments = $shipments->whereIn('shipments.user_id',$search_shipper);
             }
             if ($origin = $request->get('search_origin')) {
                 $datatable->where('oc.id', '=', $origin);
@@ -3162,6 +3165,9 @@ use Yajra\Datatables\Datatables;
     //            $yesterday = Carbon::now()->subDays(3);
     //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
     //        }
+            if($search_shipper = $request->get('search_shipper')){
+                $sales = $sales->whereIn('shipments.user_id',$search_shipper);
+            }
 
             if (session('role_id') != 1) {
                 if (session('department_id') == 7 && session('role_id') != 4) {
@@ -3331,9 +3337,9 @@ use Yajra\Datatables\Datatables;
             if($sales_person = $request->get('search_sales_person')){
                 $datatable->where('adsp.id', '=', $sales_person);
             }
-            if($shipper = $request->get('search_shipper')){
+            /*if($shipper = $request->get('search_shipper')){
                 $datatable->where('u.id', '=', $shipper);
-            }
+            }*/
             if($origin = $request->get('search_origin')){
                 $datatable->where('oc.id', '=', $origin);
             }
@@ -5519,10 +5525,13 @@ use Yajra\Datatables\Datatables;
                         ->where('si.type','=',0);
                 })
                 ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','u.name as shipper','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.created_at as booking_date']);
-            if( $request->get('search_shipper')){
+          /*  if( $request->get('search_shipper')){
                 $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
             }else{
                 $shipments->where('shipments.user_id', '=', null);
+            }*/
+            if($search_shipper = $request->get('search_shipper')){
+                $shipments = $shipments->whereIn('shipments.user_id',  $search_shipper);
             }
 
 

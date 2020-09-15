@@ -15,14 +15,23 @@
                     <div class="col-12 ">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="post" action="{{route('admin.reports.customer_sales.export_to_excel')}}">
 
-                            <div class="col-4">
+                           {{-- <div class="col-4">
                                 <div class="form-group pb-1">
                                     <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
                                         @foreach($shippers as $shipper)
                                             <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
                                         @endforeach
                                     </select>
-                                </div></div>
+                                </div></div>--}}
+                            <div class="col-4">
+                                <fieldset class="form-group pb-1">
+                                    <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($shippers as $shipper)
+                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
                             <div class="col-4">
                                 <div class="form-group pb-1">
                                     <select name="origin" class="select2" id="origin">
@@ -292,6 +301,11 @@
                 placeholder: 'Select Shipper',
                 allowClear:true
             });
+            $('#search_shipper').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+            });
             var thirtydays = '{{ $thirtyday }}';
             var today = '{{ $today }}';
             var from_date = $('#from_date').pickadate({
@@ -466,7 +480,8 @@
                     data: function (d) {
                         d.search_origin = $('#origin').val();
                         d.search_destination = $('#destination').val();
-                        d.search_shipper = $('#shipper').val();
+                       /* d.search_shipper = $('#shipper').val();*/
+                        d.search_shipper = $('#search_shipper').val();
                         d.cards_filter = $('#cards_filter_input').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
