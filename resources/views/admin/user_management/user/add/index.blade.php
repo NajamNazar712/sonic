@@ -73,8 +73,8 @@
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>
 										<div class=" text-center mt-2">
-											<button type="button" id="selectAll"  class="btn btn-primary" >Select All</button>
-											<button type="button" id="unselect" class="btn btn-primary">Un Select</button>
+											<button type="button" id="selectAll"  class="btn btn-primary" >Select All Hubs</button>
+											<button type="button" id="unselect" class="btn btn-primary">Unselect All Hubs</button>
 											</di>
 										</div>
 									</div>
