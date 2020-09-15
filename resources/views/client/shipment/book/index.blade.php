@@ -92,6 +92,31 @@
 											</div>
 
 										</div>
+										<div class="modal fade" id="multi_piece" role="dialog" aria-labelledby="multi_piece" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+											<div class="modal-dialog modal-lg justify-content-center" >
+												<div class="modal-content">
+													<div class="modal-header">
+														<h4 class="modal-title" id="add_in_receiving_sheet_title">Multi Piece Tutorial</h4>
+														@if($user->multipiece_status == 1)
+															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+																<span aria-hidden="true">&times;</span>
+															</button>
+														@endif
+													</div>
+													<div class="modal-body justify-content-center" id="player">
+														<iframe id="existing-iframe-example"
+																width="100%" height="480"
+																src="https://www.youtube.com/embed/Uy0KAIx3xHQ?enablejsapi=1"
+																frameborder="0"
+														></iframe>
+													</div>
+													<div class="modal-footer justify-content-center" id="multi_piece_footer" >
+														<button id="close_btn" class="btn btn-primary">Close</button>
+													</div>
+
+												</div>
+											</div>
+										</div>
 
 										
 										@if($air_waybill != null)
@@ -308,7 +333,7 @@
 										<h6 class="form-text mb-1 text-justify text-muted text-italic">*Charges will be subjected to the Final Weight measured at the time of Shipment Arrival.</h6>
 
 										<div id="pieces_quantity" class="form-group input-group d-none">
-											<input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
+											<input  type="text" name="pieces_quantity" id="pieces" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
 										</div>
 
 										<div class="form-group">
@@ -372,8 +397,8 @@
 								<div class="row mt-2">
 									<div class="col">
 										<div class="form-group text-center">
-											<button type="submit" name="book" class="btn btn-primary submission" value="Book">Book</button>
-											<button type="submit" name="book_and_print" class="btn btn-primary ml-1 submission" value="Book & Print">Book & Print</button>
+											<button type="submit" name="book" class="btn btn-primary submission" id="book_btn" value="Book">Book</button>
+											<button type="submit" name="book_and_print" class="btn btn-primary ml-1 submission" id="book_print_btn" value="Book & Print">Book & Print</button>
 										</div>
 									</div>
 								</div>
@@ -547,13 +572,18 @@
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
+	{{--<script src="http://www.youtube.com/player_api"></script>--}}
 	<script src="{{asset('app-assets/js/scripts/tooltip/tooltip.js')}}" type="text/javascript"></script>
 
+
 	<script>
-
 		$(document).ready(function() {
+			$('#multi_piece').on('hide.bs.modal', function (e) {
+				$('#existing-iframe-example').attr('src',"");
+			});
 
-
+			$('#close_btn').addClass('d-none');
+			var no_of_pieces;
 			$(this).find('.pieces').TouchSpin({
 						min: 1,
 						max: 10,
@@ -563,7 +593,7 @@
 						buttonup_txt: '<i class="ft-plus"></i>'
 					}).bind('input change', function() {
 						$(this).tooltip('show');
-
+						no_of_pieces = $(this).val();
 						if ($(this).hasClass('danger')) {
 							$(this).valid();
 						}
@@ -1334,11 +1364,13 @@
 				}
 				return true;
 			}
-
 			var breakup_rows = {};
 
-			var check = @json($check);
-
+			var check = 0;
+			var piece_check = false;
+			$('#multi_piece').on('hide.bs.modal', function (e) {
+				$('#player').attr('src',"");
+			});
 			$('#booking_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
@@ -1349,132 +1381,271 @@
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
-					check_consignee_return_ratio();
-					var pressed_button = $(this.submitButton);
 
-					$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
-
-					$(form).find('button[type=submit]').attr('disabled', 'disabled');
-					var consignee_address = $('#consignee_address').val();
-					var strArray = consignee_address.split(/[ ,]+/);
-					var present = [];
-					for(k=0;k<strArray.length;k++) {
-						for (i = 0; i < check.length; i++) {
-							if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
-								present.push(strArray[k]);
-							}
-						}
-					}
-					if(!isEmpty(breakup_rows)){
-						$(form).append('<input type="hidden" name="cod_breakup" value="TRUE">');
-						var cod_breakup_shipping_charges = $('#cod_breakup_shipping_charges').val();
-						var cod_breakup_total_cod = $('#cod_breakup_total').val();
-						$(form).append('<input type="hidden" name="cod_breakup_shipping_charges" value="' +cod_breakup_shipping_charges + '">');
-						$(form).append('<input type="hidden" name="cod_breakup_total_cod" value="' + cod_breakup_total_cod + '">');
-
-						$.each(breakup_rows, function (index, value) {
-							$(form).append('<input type="hidden" name="cod_breakup_description[]" value="' + value.description + '">');
-							$(form).append('<input type="hidden" name="cod_breakup_amount[]" value="' + value.amount + '">');
-						});
-					}
-
-					if(present.length > 0){
-						var url = '{{asset('img/nsa_osa.png')}}';
-						var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
-						html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
-						html += '<div class="text-left">In case of,<br/>';
-						html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
-						html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
-						html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
-						content = document.createElement('div');
-						content.innerHTML = html;
-						swal({
-							content: content,
-							buttons: {
-								cancel: {
-									text: 'Cancel',
-									value: null,
-									visible: true,
-									closeModal: true,
+					var quantity = $('#pieces').val();
+					var piece_status = @json($multi_piece);
+					if( (piece_status == 0 || (piece_status == 1 && quantity > 1)) && check == 0){
+						if(piece_check == false){
+							piece_check = true;
+							swal({
+								title: 'Piece(s) Notice!',
+								text: 'You are going to book multiple pieces shipment, please make sure to pack it in '+no_of_pieces+' number of boxes or flyers',
+								icon: 'info',
+								buttons: {
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
 								},
-								confirm: {
-									text: 'Continue to Booking',
-									value: true,
-									visible: true,
-									closeModal: true
-								}
-							},
-							closeOnClickOutside: false,
-							closeOnEsc: false,
-							// dangerMode: true
-						}).then(function(confirm) {
-							if(confirm) {
 
-								if(blacklist == true){
-									var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
-									content = document.createElement('div');
-									content.innerHTML = html;
-									swal({
-										content: content,
-										buttons: {
-											cancel: {
-												text: 'Cancel',
-												value: null,
-												visible: true,
-												closeModal: true,
-											},
-											confirm: {
-												text: 'Book Anyway',
-												value: true,
-												visible: true,
-												closeModal: true
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								dangerMode: true
+							}).then(function(confirm){
+								if(confirm)
+								{
+									if( check === 0){
+
+										check = 1;
+										$('#multi_piece').modal('show');
+										$('#book_btn').removeAttr("disabled");
+										$('#book_print').removeAttr("disabled");
+									}
+									else if(check === 1)
+									{
+
+										check = 2;
+										$('#close_btn').click(function(){
+											$('#multi_piece').modal('hide');
+										});
+										$('#book_btn').removeAttr("disabled");
+										$('#book_print').removeAttr("disabled");
+									}
+									else{
+
+										check_consignee_return_ratio();
+										var pressed_button = $(this.submitButton);
+
+										$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
+										console.log(4);
+										$(form).find('button[type=submit]').attr('disabled', 'disabled');
+										var consignee_address = $('#consignee_address').val();
+										var strArray = consignee_address.split(/[ ,]+/);
+										var present = [];
+										for(k=0;k<strArray.length;k++) {
+											for (i = 0; i < check.length; i++) {
+												if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
+													present.push(strArray[k]);
+												}
 											}
-										},
-										closeOnClickOutside: false,
-										closeOnEsc: false,
-										// dangerMode: true
-									}).then(function(confirm) {
-										if (confirm) {
-											swal({
-												title: 'Please Wait!',
-												text: 'Your shipment is being booked!',
-												icon: 'info',
-												buttons: false,
-												closeOnClickOutside: false,
-												closeOnEsc: false
-											});
+										}
+										if(!isEmpty(breakup_rows)){
+											$(form).append('<input type="hidden" name="cod_breakup" value="TRUE">');
+											var cod_breakup_shipping_charges = $('#cod_breakup_shipping_charges').val();
+											var cod_breakup_total_cod = $('#cod_breakup_total').val();
+											$(form).append('<input type="hidden" name="cod_breakup_shipping_charges" value="' +cod_breakup_shipping_charges + '">');
+											$(form).append('<input type="hidden" name="cod_breakup_total_cod" value="' + cod_breakup_total_cod + '">');
 
+											$.each(breakup_rows, function (index, value) {
+												$(form).append('<input type="hidden" name="cod_breakup_description[]" value="' + value.description + '">');
+												$(form).append('<input type="hidden" name="cod_breakup_amount[]" value="' + value.amount + '">');
+											});
+										}
+
+										if(present.length > 0){
+											var url = '{{asset('img/nsa_osa.png')}}';
+											var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
+											html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
+											html += '<div class="text-left">In case of,<br/>';
+											html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+											html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+											html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+											content = document.createElement('div');
+											content.innerHTML = html;
+											swal({
+
+												content: content,
+												buttons: {
+													cancel: {
+														text: 'Cancel',
+														value: null,
+														visible: true,
+														closeModal: true,
+													},
+													confirm: {
+														text: 'Continue to Booking',
+														value: true,
+														visible: true,
+														closeModal: true
+													}
+												},
+												closeOnClickOutside: false,
+												closeOnEsc: false,
+												// dangerMode: true
+											}).then(function(confirm) {
+												if(confirm) {
+													if(blacklist == true){
+														var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+														content = document.createElement('div');
+														content.innerHTML = html;
+														swal({
+															content: content,
+															buttons: {
+																cancel: {
+																	text: 'Cancel',
+																	value: null,
+																	visible: true,
+																	closeModal: true,
+																},
+																confirm: {
+																	text: 'Book Anyway',
+																	value: true,
+																	visible: true,
+																	closeModal: true
+																}
+															},
+															closeOnClickOutside: false,
+															closeOnEsc: false,
+															// dangerMode: true
+														}).then(function(confirm) {
+															if (confirm) {
+																swal({
+																	title: 'Please Wait!',
+																	text: 'Your shipment is being booked!',
+																	icon: 'info',
+																	buttons: false,
+																	closeOnClickOutside: false,
+																	closeOnEsc: false
+																});
+																form.submit();
+															}
+															else{
+																$(form).find('button[type=submit]').prop('disabled', false);
+															}
+														});
+													}else{
+														swal({
+															title: 'Please Wait!',
+															text: 'Your shipment is being booked!',
+															icon: 'info',
+															buttons: false,
+															closeOnClickOutside: false,
+															closeOnEsc: false
+														});
+														form.submit();
+													}
+												}
+												else{
+													$(form).find('button[type=submit]').prop('disabled', false);
+												}
+											});
+										}
+										else {
+											if(blacklist == true) {
+												var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
+												content = document.createElement('div');
+												content.innerHTML = html;
+												swal({
+													content: content,
+													buttons: {
+														cancel: {
+															text: 'Cancel',
+															value: null,
+															visible: true,
+															closeModal: true,
+														},
+														confirm: {
+															text: 'Book Anyway',
+															value: true,
+															visible: true,
+															closeModal: true
+														}
+													},
+													closeOnClickOutside: false,
+													closeOnEsc: false,
+													// dangerMode: true
+												}).then(function (confirm) {
+													if (confirm) {
+														swal({
+															title: 'Please Wait!',
+															text: 'Your shipment is being booked!',
+															icon: 'info',
+															buttons: false,
+															closeOnClickOutside: false,
+															closeOnEsc: false
+														});
+
+														form.submit();
+													}
+													else{
+														$(form).find('button[type=submit]').prop('disabled', false);
+													}
+												});
+											}
+											else{
+												swal({
+													title: 'Please Wait!',
+													text: 'Your shipment is being booked!',
+													icon: 'info',
+													buttons: false,
+													closeOnClickOutside: false,
+													closeOnEsc: false
+												});
+											}
 											form.submit();
 										}
-										else{
-											$(form).find('button[type=submit]').prop('disabled', false);
-										}
-									});
-								}else{
-									swal({
-										title: 'Please Wait!',
-										text: 'Your shipment is being booked!',
-										icon: 'info',
-										buttons: false,
-										closeOnClickOutside: false,
-										closeOnEsc: false
-									});
-
-									form.submit();
+									}
 								}
+							})
+						}
 
-							}
-							else{
-								$(form).find('button[type=submit]').prop('disabled', false);
-							}
-						});
+
+
 					}
-					else {
-						if(blacklist == true) {
-							var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
+					else{
+						check_consignee_return_ratio();
+						var pressed_button = $(this.submitButton);
+
+						$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
+						console.log(1);
+						$(form).find('button[type=submit]').attr('disabled', 'disabled');
+						var consignee_address = $('#consignee_address').val();
+						var strArray = consignee_address.split(/[ ,]+/);
+						var present = [];
+						for(k=0;k<strArray.length;k++) {
+							for (i = 0; i < check.length; i++) {
+								if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
+									present.push(strArray[k]);
+								}
+							}
+						}
+						if(!isEmpty(breakup_rows)){
+							$(form).append('<input type="hidden" name="cod_breakup" value="TRUE">');
+							var cod_breakup_shipping_charges = $('#cod_breakup_shipping_charges').val();
+							var cod_breakup_total_cod = $('#cod_breakup_total').val();
+							$(form).append('<input type="hidden" name="cod_breakup_shipping_charges" value="' +cod_breakup_shipping_charges + '">');
+							$(form).append('<input type="hidden" name="cod_breakup_total_cod" value="' + cod_breakup_total_cod + '">');
+
+							$.each(breakup_rows, function (index, value) {
+								$(form).append('<input type="hidden" name="cod_breakup_description[]" value="' + value.description + '">');
+								$(form).append('<input type="hidden" name="cod_breakup_amount[]" value="' + value.amount + '">');
+							});
+						}
+
+						if(present.length > 0){
+							var url = '{{asset('img/nsa_osa.png')}}';
+							var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
+							html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
+							html += '<div class="text-left">In case of,<br/>';
+							html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+							html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+							html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
 							content = document.createElement('div');
 							content.innerHTML = html;
 							swal({
+
 								content: content,
 								buttons: {
 									cancel: {
@@ -1484,7 +1655,7 @@
 										closeModal: true,
 									},
 									confirm: {
-										text: 'Book Anyway',
+										text: 'Continue to Booking',
 										value: true,
 										visible: true,
 										closeModal: true
@@ -1493,41 +1664,122 @@
 								closeOnClickOutside: false,
 								closeOnEsc: false,
 								// dangerMode: true
-							}).then(function (confirm) {
-								if (confirm) {
-									swal({
-										title: 'Please Wait!',
-										text: 'Your shipment is being booked!',
-										icon: 'info',
-										buttons: false,
-										closeOnClickOutside: false,
-										closeOnEsc: false
-									});
-
-									form.submit();
+							}).then(function(confirm) {
+								if(confirm) {
+									if(blacklist == true){
+										var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+										content = document.createElement('div');
+										content.innerHTML = html;
+										swal({
+											content: content,
+											buttons: {
+												cancel: {
+													text: 'Cancel',
+													value: null,
+													visible: true,
+													closeModal: true,
+												},
+												confirm: {
+													text: 'Book Anyway',
+													value: true,
+													visible: true,
+													closeModal: true
+												}
+											},
+											closeOnClickOutside: false,
+											closeOnEsc: false,
+											// dangerMode: true
+										}).then(function(confirm) {
+											if (confirm) {
+													swal({
+														title: 'Please Wait!',
+														text: 'Your shipment is being booked!',
+														icon: 'info',
+														buttons: false,
+														closeOnClickOutside: false,
+														closeOnEsc: false
+													});
+												form.submit();
+											}
+											else{
+												$(form).find('button[type=submit]').prop('disabled', false);
+											}
+										});
+									}else{
+										swal({
+                                            title: 'Please Wait!',
+                                            text: 'Your shipment is being booked!',
+                                            icon: 'info',
+                                            buttons: false,
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false
+                                        });
+                                        form.submit();
+									}
 								}
 								else{
 									$(form).find('button[type=submit]').prop('disabled', false);
 								}
 							});
-						}else{
-							swal({
-								title: 'Please Wait!',
-								text: 'Your shipment is being booked!',
-								icon: 'info',
-								buttons: false,
-								closeOnClickOutside: false,
-								closeOnEsc: false
-							});
+						}
+						else {
+							if(blacklist == true) {
+								var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
+								content = document.createElement('div');
+								content.innerHTML = html;
+								swal({
+									content: content,
+									buttons: {
+										cancel: {
+											text: 'Cancel',
+											value: null,
+											visible: true,
+											closeModal: true,
+										},
+										confirm: {
+											text: 'Book Anyway',
+											value: true,
+											visible: true,
+											closeModal: true
+										}
+									},
+									closeOnClickOutside: false,
+									closeOnEsc: false,
+									// dangerMode: true
+								}).then(function (confirm) {
+									if (confirm) {
+										swal({
+											title: 'Please Wait!',
+											text: 'Your shipment is being booked!',
+											icon: 'info',
+											buttons: false,
+											closeOnClickOutside: false,
+											closeOnEsc: false
+										});
 
+										form.submit();
+									}
+									else{
+										$(form).find('button[type=submit]').prop('disabled', false);
+									}
+								});
+							}
+							else{
+								swal({
+									title: 'Please Wait!',
+									text: 'Your shipment is being booked!',
+									icon: 'info',
+									buttons: false,
+									closeOnClickOutside: false,
+									closeOnEsc: false
+								});
+							}
 							form.submit();
 						}
-
 					}
-				}
+					}
+
 			});
-
-
 
 			$('.phone_number').inputmask({
 				'mask': '9999-9999999',
@@ -1690,5 +1942,42 @@
 			});
 			@endif
 		});
+	</script>
+	<script type="text/javascript">
+		var tag = document.createElement('script');
+		tag.id = 'iframe-demo';
+		tag.src = 'https://www.youtube.com/iframe_api';
+		var firstScriptTag = document.getElementsByTagName('script')[0];
+		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+		var player;
+		function onYouTubeIframeAPIReady() {
+			player = new YT.Player('existing-iframe-example', {
+				events: {
+					'onReady': onPlayerReady,
+					'onStateChange': onPlayerStateChange
+				}
+			});
+
+		}
+
+		// autoplay video
+		function onPlayerReady(event) {
+			event.target.playVideo();
+		}
+
+		// when video ends
+		var done = false;
+		function onPlayerStateChange(event) {
+			if (event.data == YT.PlayerState.PLAYING && !done) {
+				setTimeout(stopVideo, 59000);
+				done = true;
+			}
+		}
+		function stopVideo() {
+			player.stopVideo();
+			$('#close_btn').removeClass('d-none');
+		}
+
 	</script>
 @endsection

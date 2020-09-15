@@ -58,7 +58,7 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\QAReportPettyCash',
 		'\App\Console\Commands\SelfCollection',
 		'\App\Console\Commands\OutstandingShipmentEmail',
-		'\App\Console\Commands\ReversePickupSummary'
+        'App\Console\Commands\ShipmentPieceOnHold'
 
         ];
 
@@ -194,6 +194,7 @@ class Kernel extends ConsoleKernel
 //            $station_recovery_cron_time = $settings->setting_value . ':00';
 //            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
 //        }
+        $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00');
     }
 	 /**
      * Register the commands for the application.

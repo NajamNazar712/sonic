@@ -102,6 +102,7 @@ class ShipperShipmentBookController extends Controller
 
         $shipment = new Shipment();
 
+
         $shipment->user_id = $user_id;
         $shipment->booking_type_id = $service_type_id;
         $shipment->pickup_address_id = $pickup_address_id;
@@ -133,6 +134,7 @@ class ShipperShipmentBookController extends Controller
         $shipment->try_and_buy_fees = $try_and_buy_charges;
         $shipment->booked_by = session('user_type');
         $shipment->pieces = $pieces;
+
         $shipment->save();
 
         $shipment_id = $shipment->id;
@@ -170,6 +172,9 @@ class ShipperShipmentBookController extends Controller
             $shipment_coordinates->save();
         }
         //Existing Coordinates
+        $user=User::find($user_id);
+        $user->multipiece_status = 1;
+        $user->save();
 
         return $shipment_id;
     }
@@ -230,6 +235,7 @@ class ShipperShipmentBookController extends Controller
         // }
         $booking_types = BookingType::where('id','!=', 4)->get();
         $user = User::with('shipping.city')->find(session('user_id'));
+        $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
@@ -245,7 +251,7 @@ class ShipperShipmentBookController extends Controller
             $air_waybill = null;
         }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill]);
+        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill]);
     }
 
     public function shipping_modes(Request $request) {
@@ -489,6 +495,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     $pieces_quantity = 1;
+
 
                     if($service_type_id == 1){
                         $pieces_quantity = $request->pieces_quantity;
@@ -1604,6 +1611,7 @@ class ShipperShipmentBookController extends Controller
 
     public function excel_index() {
         $booking_types = BookingType::whereNotIn('id',[4])->get();
+        $user = User::find(session('user_id'));
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
@@ -1624,7 +1632,7 @@ class ShipperShipmentBookController extends Controller
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
-        return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
+        return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
     }
 
     public function excel_store(Request $request) {
@@ -2222,6 +2230,9 @@ class ShipperShipmentBookController extends Controller
             $shipment_coordinates->save();
         }
         //Existing Coordinates
+        $user=User::find($user_id);
+        $user->multipiece_status = 1;
+        $user->save();
 
         return $shipment_id;
     }
@@ -2235,6 +2246,7 @@ class ShipperShipmentBookController extends Controller
         // }
         $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
+        $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
@@ -2251,7 +2263,7 @@ class ShipperShipmentBookController extends Controller
             $air_waybill = null;
         }
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill]);
     }
 
     public function corporate_store(Request $request) {
@@ -2935,6 +2947,7 @@ class ShipperShipmentBookController extends Controller
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
         $cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         $products = Product::all();
+        $user = User::find(session('user_id'));
         $delivery_types = DeliveryType::all();
         $charges_modes = ChargesModes::whereIn('id', [2, 3])->get();
         $min_chargeable_weights = CorporateMinChargeableWeight::where('user_id', session('user_id'))->get();
@@ -2952,7 +2965,7 @@ class ShipperShipmentBookController extends Controller
 
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
 
-        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);
+        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);
     }
 
     public function corporate_min_chargeable_weight(Request $request){
@@ -3064,9 +3077,9 @@ class ShipperShipmentBookController extends Controller
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
             })->where('hidden', 0)],
-            'delivery_type_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
+            'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
-                $query->whereIn('id', [2, 3]);
+                $query->whereIn('id', [2]);
             })],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'consignee_city_name' => ['required', 'string', 'between:1,100', 'exists:cities,name'],

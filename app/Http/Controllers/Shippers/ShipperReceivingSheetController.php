@@ -3,6 +3,12 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\BookingType;
+use App\Http\Models\CityDelivery;
+use App\Http\Models\RateStatus;
+use App\Http\Models\ShipmentInformationLog;
+use App\Http\Models\ShipmentPiece;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\http\Models\SubstituteUserReceivingSheet;
 use App\http\Models\SubstituteUserShipment;
@@ -107,7 +113,7 @@ class ShipperReceivingSheetController extends Controller
             ->leftjoin('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
             ->leftjoin('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
             ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'usi.pickup_address', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet', 'rs.id AS receiving_sheet_no','shipments.amount', 'u.name as user', 'u.id as user_id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'usi.pickup_address', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet', 'rs.id AS receiving_sheet_no','shipments.amount', 'u.name as user', 'u.id as user_id', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no', 'shipments.consignee_address as address', 'shipments.shipper_status_id as status_id', 'shipments.special_instructions as special_instructions', 'oc.id as origin_id', 'dc.id as destination_id')
             ->where('shipments.shipper_status_id', 1)
             ->where('shipments.packaging_material_request', 0)
             ->where(function ($query) {
@@ -153,6 +159,7 @@ class ShipperReceivingSheetController extends Controller
                     }
                     else {
                         $dropdown .= '<button type="button" class="dropdown-item add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Add</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item edit_cn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Edit CN</div></button>';
                     }
 
                     $dropdown .= '
@@ -917,5 +924,105 @@ class ShipperReceivingSheetController extends Controller
         }
 
         return $html;
+    }
+
+    public function update_cn_info(Request $request){
+        $shipment_id = $request->shipment_id;
+        if($shipment_id != null){
+            $shipment = Shipment::find($shipment_id);
+            if($shipment){
+                $consignee_city_id = $shipment->consignee_city_id;
+                $service_type_id = $shipment->booking_type_id;
+                $pickup_city_id = $shipment->pickup_address->city_id;
+                $shipment_info = array();
+                $shipper_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1);
+                $shipping_modes = null;
+                if ($shipper_shipping_modes->exists()) {
+                    $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+                    $city_shipping_modes = CityDelivery::where('city_id', $consignee_city_id)->where('booking_type_id', $service_type_id)->whereIn('shipping_mode_id', $shipper_shipping_modes);
+                    if ($city_shipping_modes->exists()) {
+                        $city_shipping_modes = $city_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+                        if ($pickup_city_id != $consignee_city_id) {
+                            $city_shipping_modes = array_diff($city_shipping_modes, [4]);
+                        }
+
+                        if (!empty($city_shipping_modes)) {
+                            $shipping_modes = ShippingMode::whereIn('id', $city_shipping_modes)->get();
+                        }
+                    }
+                }
+                $shipment_info['tracking_number'] = $shipment->tracking_number;
+                $shipment_info['consignee_name'] = $shipment->consignee_name;
+                $shipment_info['consignee_address'] = $shipment->consignee_address;
+                $shipment_info['consignee_phone_number_1'] = $shipment->consignee_phone_number_1;
+                $shipment_info['order_id'] = $shipment->order_id;
+                $shipment_info['special_instructions'] = $shipment->special_instructions;
+                $shipment_info['amount'] = $shipment->amount;
+                $shipment_info['pieces'] = $shipment->pieces;
+                $shipment_info['shipping_mode_id'] = $shipment->shipping_mode_id;
+                $shipment_info['consignee_city_id'] = $consignee_city_id;
+                $shipment_info['service_type_id'] = $service_type_id;
+                $shipment_info['pickup_city_id'] = $pickup_city_id;
+
+                return ['status' => 0, 'shipment_info' => $shipment_info, 'shipping_modes' => $shipping_modes];
+            }
+            else{
+                return ['status' => 1, 'error' => 'Shipment not found'];
+            }
+        }
+        else{
+            return ['status' => 1, 'error' => 'Shipment not selected'];
+        }
+    }
+
+    public function update_consignee_info_and_special_instructions(Request $request){
+        $shipment_id = $request->update_consignee_info_shipment_id;
+        $consignee_name = $request->update_consignee_name;
+        $consignee_address = $request->update_consignee_address;
+        $consignee_phone = $request->update_consignee_phone;
+        $special_instructions = $request->update_special_instructions;
+        $pieces = $request->update_pieces;
+        $amount = $request->update_amount;
+        if($shipment_id != null){
+            if($consignee_name != null && $consignee_address != null && $consignee_phone != null){
+                $shipment = Shipment::find($shipment_id);
+
+                $shipment->consignee_name = $consignee_name;
+                $shipment->consignee_address = $consignee_address;
+                $shipment->consignee_phone_number_1 = $consignee_phone;
+                $shipment->special_instructions = $special_instructions;
+                if($request->has('update_order_id')){
+                    $shipment->order_id = $request->update_order_id;
+                }
+                if($request->has('shipping_mode')){
+                    $shipment->shipping_mode_id = $request->shipping_mode;
+                }
+                $shipment->amount = $amount;
+                $shipment->pieces = $pieces;
+                $shipment->save();
+                ShipmentPiece::where('shipment_id', $shipment->id)->delete();
+                $total_pieces= 0;
+                if($pieces > 1){
+                    for($i=1; $i<=$pieces; $i++){
+                        $shipment_piece = new ShipmentPiece();
+                        $shipment_piece->shipment_id = $shipment->id;
+                        $total_pieces++;
+                        $shipment_piece->numbering=$total_pieces;
+                        $shipment_piece->tracking_number= $shipment->id . $total_pieces;
+                        $shipment_piece->save();
+                    }
+
+                }
+                return redirect()->back()->with('success', 'Shipment updated successfully!');
+            }
+            else{
+                return redirect()->back()->with('error', 'Please fill required fields');
+            }
+        }
+        else{
+            return redirect()->back()->with('error', 'Shipment not selected!');
+        }
     }
 }

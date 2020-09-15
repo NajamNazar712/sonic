@@ -22,6 +22,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
 use App\http\Models\CRM\CrmRequestEscalationTagging;
+use App\Http\Models\CRM\CrmRequestImage;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
@@ -414,7 +415,10 @@ class AdminCRMController extends Controller
                         $escalation_tagging_id = $crm_request_escalation_log->escalation_tagging_id;
                     }
             }
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels]);
+
+            $crm_images_count = $crm_request->images->count();
+
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -3835,5 +3839,80 @@ class AdminCRMController extends Controller
                 return response()->json(['status' => 0, 'error' => 'Request is already marked as Resolved']);
             }
         }
+    }
+
+    public function crm_image_details(Request $request){
+
+        $crm_request_id = $request->crm_request_id;
+        if($crm_request_id){
+            $crm_request = CrmRequest::find($crm_request_id);
+            if($crm_request){
+                $details = array();
+                $crm_images = CrmRequestImage::where('crm_request_id', $crm_request_id);
+                if($crm_images->exists()){
+                    $crm_images = $crm_images->get();
+                    foreach ($crm_images as $crm_image) {
+                        $img_url = asset('uploads/crm_request_images/'.$crm_image->image);
+                        $details[] = array('id' => $crm_image->id,'date' => Carbon::parse($crm_image->created_at)->toDateTimeString(),'image'=> $img_url);
+                    }
+                    return response()->json(['status' => 0, 'images' => $details]);
+                }
+                return response()->json(['status' => 2]);
+            }
+            return response()->json(['status' => 1, 'error' => 'CRM Request not found!']);
+        }
+    }
+
+    public function crm_image_submit(Request $request){
+        $crm_request_id = $request->image_crm_request_id;
+        $image_ids = explode(',', $request->selected_ids);
+        if(count($image_ids) == 0){
+            return redirect()->back()->with('error', 'No images selected!');
+        }
+        $crm_request = CrmRequest::find($crm_request_id);
+        if($crm_request){
+            $crm_request_images = $crm_request->images->count();
+            if($crm_request_images == 2){
+                return redirect()->back()->with('error', 'Two images are already uploaded!');
+            }
+
+            foreach ($image_ids as $id){
+                    $file_name = 'crm_image_'.$id;
+                    $image = $request->file($file_name);
+
+                    $extension = $image->getClientOriginalExtension();
+                    $random = rand(1000, 100000);
+                    $now = Carbon::now();
+                    $time = $now->year . '_' . $now->month;
+                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('uploads/crm_request_images'), $generated_image_name);
+                    $crm_image = new CrmRequestImage();
+                    $crm_image->crm_request_id = $crm_request_id;
+                    $crm_image->added_by = Auth::id();
+                    $crm_image->image = $generated_image_name;
+                    $crm_image->save();
+            }
+
+            return redirect()->back()->with(['status' => 1, 'success' => 'CRM Images updated successfully']);
+
+        }
+        return redirect()->back()->with(['status' => 0, 'error' => 'CRM Request Not found!']);
+    }
+    public function crm_image_delete(Request $request){
+        $crm_image_id = $request->crm_image_id;
+        if($crm_image_id){
+            $crm_image = CrmRequestImage::find($crm_image_id);
+            if($crm_image){
+                $crm_image_name = public_path('uploads/crm_request_images/'.$crm_image->image);
+                if (is_file($crm_image_name))
+                {
+                    unlink($crm_image_name);
+                }
+                $crm_image->delete();
+                return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Image not found!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Image ID not selected!']);
     }
 }

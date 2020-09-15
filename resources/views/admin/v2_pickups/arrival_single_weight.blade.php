@@ -1040,12 +1040,8 @@
         function camera_scan_detected(tracking_number) {
             $('#add_shipment_form input.tracking_number').val(tracking_number);
 
-            if (!$('#add_shipment_form input.volumetric_weight').is(':checked')) {
-                $('#add_shipment_form input.weight').focus();
-            }
-            else {
-                $('#add_shipment_form input.length').focus();
-            }
+            $('#add_shipment_form input.tracking_number').focus();
+
         }
     </script>
 @endsection

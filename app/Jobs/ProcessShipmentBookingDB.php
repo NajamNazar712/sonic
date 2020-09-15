@@ -64,7 +64,6 @@ class ProcessShipmentBookingDB implements ShouldQueue
             $consignee_phone_number_2 = NULL;
             $consignee_email_address = $pickup_delivery_address->email;
             $information_display = TRUE;
-            $charges_mode_id = 4;
             $payment_mode_id = 1;
             $self_collection = FALSE;
         }
@@ -94,7 +93,6 @@ class ProcessShipmentBookingDB implements ShouldQueue
             } else {
                 $consignee_email_address = NULL;
             }
-            $charges_mode_id = $this->booking['charges_mode_id'];
             $payment_mode_id = $this->booking['payment_mode_id'];
 
             if (strtolower($this->booking['self_collection']) == 'yes') {
@@ -104,6 +102,7 @@ class ProcessShipmentBookingDB implements ShouldQueue
             }
         }
 
+        $charges_mode_id = $this->booking['charges_mode_id'];
         if (!empty(trim($this->booking['order_id']))) {
             $order_id = $this->booking['order_id'];
         } else {
@@ -150,7 +149,12 @@ class ProcessShipmentBookingDB implements ShouldQueue
             $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges,$pieces_quantity, $self_collection);
         }
         else {
-            $delivery_type_id = $this->booking['delivery_type_id'];
+            if($service_type_id == 5){
+                $delivery_type_id = 1;
+            }
+            else{
+                $delivery_type_id = $this->booking['delivery_type_id'];
+            }
 
             if ($delivery_type_id == 2) {
                 $consignee_address = 'TRAX Office ' . $this->booking['consignee_city_name'];

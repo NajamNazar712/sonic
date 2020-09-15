@@ -1886,10 +1886,10 @@ class AdminFinanceController extends Controller
         $charges = 0;
         $gst = 0;
 
-        if ($payable > 0) {
-            $payment_type = 0;
-        }
-        else {
+//        if ($payable > 0) {
+//            $payment_type = 0;
+//        }
+//        else {
             $account_type_id = $shipment->user->account_type_id;
 
             if ($account_type_id == 1) {
@@ -1898,7 +1898,7 @@ class AdminFinanceController extends Controller
             else {
                 $payment_type = 1;
             }
-        }
+//        }
 
         if ($payment_type == 0) {
             $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
