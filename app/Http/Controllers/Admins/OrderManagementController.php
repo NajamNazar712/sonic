@@ -583,7 +583,7 @@ class OrderManagementController extends Controller
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
-        return view('admin.supply_chain.index');
+        return view('admin.supply_chain.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);;
     }
     public function supply_chain_list(){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')

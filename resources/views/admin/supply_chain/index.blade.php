@@ -13,17 +13,21 @@
             <div class="card-body">
                 <div class="col mt-2">
                     <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="form-group">
-                               {{-- <select name="shipment_status" id="shipment_status" class="form-control select2 dt_search" multiple="multiple" >
-                                    --}}{{--@foreach($shipment_status as $status)
+                                <select name="shipment_status" id="shipment_status" class="form-control select2 dt_search" multiple="multiple" >
+                                    @foreach($shipment_status as $status)
                                         <option value="{{$status->id}}">{{$status->name}}</option>
-                                    @endforeach--}}{{--
+                                    @endforeach
                                     Shipper
-                                </select>--}}
-                                <input type="text" name="Shipper" class="dt_search tracking_numbers"
-                                       placeholder="Shipper" data-tags-input-name="tracking_number">
-
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <button id="datatable_filter_btn" type="submit" class=" btn btn-outline-primary btn-min-width" disabled><i
+                                            class="la la-search"></i> Search
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -101,14 +105,14 @@
         $(document).ready(function () {
 
 
-           /* $('#shipment_status').select2({
+            $('#shipment_status').select2({
                 placeholder:'Search Shipment Status',
                 width:'100%',
                 allowClear:true
             }).bind('select2:select', function () {
                 $('#datatable_filter_btn').attr('disabled', false);
             });
-            $('#shipment_status').on("select2:unselect", function(e) {
+            /*$('#shipment_status').on("select2:unselect", function(e) {
                 if($('#shipment_status').val() == '' && $('input[name="tracking_numbers"]').val() == ''){
                     $('#datatable_filter_btn').attr('disabled', true);
                 }
@@ -216,73 +220,7 @@
                 dropdownParent:$('#add_request_form')
             });*/
 
-            function print(selected_rows) {
-                $.ajax({
-                    url: '{!! route('admin.orders.shipment_print_status') !!}',
-                    data: {
-                        'shipment_ids': selected_rows
-                    }
-                })
-                    .done(function(data) {
-                        if (data.status == 0) {
-                            if (data.sticker) {
-                                $.ajax({
-                                    url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
-                                    xhrFields: {
-                                        responseType: 'blob'
-                                    },
-                                    method: 'POST',
-                                    data: {
-                                        'ids[]': data.valid_ids,
-                                        'admin': {!! Auth::id() !!},
-                                        'sticker': 1,
-                                        '_token': '{{ csrf_token() }}'
-                                    }
-                                })
-                                    .done(function(data) {
-                                        var blob = new Blob([data]);
-                                        var link = document.createElement('a');
-                                        link.href = window.URL.createObjectURL(blob);
-                                        link.download = 'air_waybills.pdf';
-                                        link.click();
-                                    });
-                            }
-                            else {
-                                $.ajax({
-                                    url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        'ids[]': data.valid_ids,
-                                        'admin': {!! Auth::id() !!},
-                                        'sticker': 0,
-                                        '_token': '{{ csrf_token() }}'
-                                    }
-                                })
-                                    .done(function(data) {
-                                        var tab = window.open('', '_blank');
 
-                                        if(!tab) {
-                                            swal({
-                                                title: 'Popup Blocker Enabled!',
-                                                text: 'Please add this site to your exception list.',
-                                                icon: 'error',
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false
-                                            });
-                                        }
-                                        else {
-                                            tab.document.write(data);
-                                            tab.document.close();
-                                            tab.focus();
-                                        }
-                                    });
-                            }
-                        }
-                        else {
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                    });
-            }
 
             var selected_rows = [];
             var table = $('#datatable').DataTable({
