@@ -65,6 +65,7 @@
                                     <th class="border-primary border-darken-1">Bag Quantity</th>
                                     <th class="border-primary border-darken-1">Short Received Bags</th>
                                     <th class="border-primary border-darken-1">No. of Shipments</th>
+                                    <th class="border-primary border-darken-1">Quantity</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -185,6 +186,7 @@
                             head.push('Bag Quantity');
                             head.push('Short Received Bags');
                             head.push('No. of Shipments');
+                            head.push('Quantity');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Shipping Mode');
@@ -212,6 +214,7 @@
                                 row.push(values.bags_count);
                                 row.push(values.short_received_bags_count);
                                 row.push(values.shipments_count);
+                                row.push(values.quantity);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.shipping_mode);
@@ -265,7 +268,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[17, 'desc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'master_cargoes.id', class: 'align-middle master_cargo_number'},
@@ -273,6 +276,7 @@
                     {data: 'bags', name: 'master_cargoes.bags', class: 'align-middle bags'},
                     {data: 'short_received_bags', name: 'master_cargoes.bags', class: 'align-middle short_received_bags'},
                     {data: 'shipments', name: 'master_cargoes.shipments', class: 'align-middle text-center shipments'},
+                    {data: 'quantity', name: 'master_cargoes.quantity', class: 'align-middle text-center quantity'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
@@ -451,6 +455,7 @@
                         }
                     });
             });
+            var route = '{!! route('admin.tracking.index') !!}';
             $('#datatable tbody').on('click', 'tr td.short_received_bags button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
 
@@ -474,8 +479,14 @@
                                 '<span aria-hidden="true">×</span>\n' +
                                 '</button>';
 
-                            $.each(data, function(index, bag_number) {
+                            $.each(data.bag_numbers, function(index, bag_number) {
                                 bag_numbers += bag_number + '<br>';
+                                $.each(data.tracking_numbers, function(index, tracking_number) {
+                                    if(index == bag_number){
+                                        bag_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                    }
+                                });
+                                bag_numbers += '<br>';
                             });
 
                             $('#info_modal .modal-header').html(head);
@@ -485,7 +496,6 @@
                         }
                     });
             });
-            var route = '{!! route('admin.tracking.index') !!}';
             $('#datatable tbody').on('click', 'tr td.shipments button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
 

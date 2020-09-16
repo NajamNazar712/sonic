@@ -454,8 +454,14 @@
                                 '<span aria-hidden="true">×</span>\n' +
                                 '</button>';
 
-                            $.each(data, function (index, bag_number) {
+                            $.each(data.bag_numbers, function(index, bag_number) {
                                 bag_numbers += bag_number + '<br>';
+                                $.each(data.tracking_numbers, function(index, tracking_number) {
+                                    if(index == bag_number){
+                                        bag_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                    }
+                                });
+                                bag_numbers += '<br>';
                             });
 
                             $('#info_modal .modal-header').html(head);
