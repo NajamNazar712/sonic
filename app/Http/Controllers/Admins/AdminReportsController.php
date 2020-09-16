@@ -5413,7 +5413,7 @@ use Yajra\Datatables\Datatables;
                 $toDays = $to;
             }
 
-            $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
+            $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
             $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
             $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
             $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
