@@ -80,7 +80,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-2">
+                            <div class="col-2 mt-2">
                                 <div class="form-group">
                                     <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
@@ -361,7 +361,7 @@
                     var to_date = $('#search_form input[name="to_date_formatted"]').val();
                     var origin = $('#origin').val();
                     var destination = $('#destination').val();
-                    var shipper = $('#shipper').val();
+                    var shipper = $('#search_shipper').val();
                     $.ajax({
                         url: '{!! route('admin.reports.summary.data') !!}',
                         method: 'post',

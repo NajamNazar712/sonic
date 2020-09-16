@@ -5533,6 +5533,9 @@ use Yajra\Datatables\Datatables;
             if($search_shipper = $request->get('search_shipper')){
                 $shipments = $shipments->whereIn('shipments.user_id',  $search_shipper);
             }
+            else{
+                $shipments->where('shipments.user_id', '=', null);
+            }
 
 
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
