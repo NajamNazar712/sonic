@@ -5787,6 +5787,52 @@ class NotificationsController extends Controller
                   }
               }
           }
+          else if($id == 85){
+              $subject = $notification->subject;
+              $body = $notification->body;
+              $shipment = Shipment::find($reference_1_id);
+              $tracking = $shipment->tracking_number;
+              if($shipment->packaging_charges == null){
+                  $total_charges = $shipment->amount;
+              }
+              else{
+                  $amount = $shipment->amount;
+                  $packaging = $shipment->packaging_charges;
+                  $total_charges = $amount + $packaging;
+              }
+
+              $origin = $shipment->pickup_address;
+              $destination = $shipment->consignee_city;
+
+              if (strpos($subject, '[tracking_number]') !== FALSE) {
+                  $subject = str_replace('[tracking_number]', $tracking, $subject);
+              }
+              if (strpos($body, '[tracking_number]') !== FALSE) {
+                  $body = str_replace('[tracking_number]', $tracking, $body);
+              }
+              if (strpos($body, '[origin]') !== FALSE) {
+                  $body = str_replace('[origin]', $origin->pickup_address, $body);
+              }
+              if (strpos($body, '[destination]') !== FALSE) {
+                  $body = str_replace('[destination]', $destination->name, $body);
+              }
+              if (strpos($body, '[total_charges]') !== FALSE) {
+                  $body = str_replace('[total_charges]', $total_charges, $body);
+              }
+
+              $finance = Admin::whereIn('id', [12, 60, 49])->where('status', 1);
+
+              $to = array();
+              if($shipment->consignee_email){
+                  $to[] = $shipment->consignee_email;
+              }
+
+              if ($finance->exists()) {
+                  $to = array_merge($to, $finance->pluck('email')->toArray());
+              }
+
+              self::email($subject, $body, $to);
+          }
         }
       }
     }
