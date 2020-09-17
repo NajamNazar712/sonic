@@ -803,8 +803,8 @@ class AdminMasterCargoController extends Controller
         $shipping_mode = ShippingMode::all();
         $transport_vendor = TransportModeVendor::all();
         $transport_mode = TransportMode::all();
-        $bag_status = BagStatus::all();
-        return view('admin.master_cargo.pending')->with(['shipping_mode'=>$shipping_mode,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor,'bag_status'=>$bag_status]);
+        $bag_statuses = BagStatus::all();
+        return view('admin.master_cargo.pending')->with(['shipping_mode'=>$shipping_mode,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor,'bag_statuses'=>$bag_statuses]);
     }
 
     public function master_cargo_pending_list(Request $request) {
@@ -2280,6 +2280,7 @@ class AdminMasterCargoController extends Controller
         $shipping_mode = ShippingMode::all();
         $transport_vendor = TransportModeVendor::all();
         $transport_mode = TransportMode::all();
+        $bag_statuses = BagStatus::all();
         return view('admin.master_cargo.bag.in_transit')->with(['shipping_mode'=>$shipping_mode,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor]);
     }
 
@@ -2340,7 +2341,7 @@ class AdminMasterCargoController extends Controller
                 return str_pad($bag->id, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('id_padded_link', function ($bag) {
-                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($bag->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($bag->master_cargo_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
             ->addColumn('shipments', function ($bag) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $bag->shipments . '</button>';
