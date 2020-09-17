@@ -2281,7 +2281,7 @@ class AdminMasterCargoController extends Controller
         $transport_vendor = TransportModeVendor::all();
         $transport_mode = TransportMode::all();
         $bag_statuses = BagStatus::all();
-        return view('admin.master_cargo.bag.in_transit')->with(['shipping_mode'=>$shipping_mode,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor]);
+        return view('admin.master_cargo.bag.in_transit')->with(['shipping_mode'=>$shipping_mode,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor,'bag_statuses'=>$bag_statuses]);
     }
 
     public function master_cargo_in_transit_bag_list(Request $request) {

@@ -272,6 +272,7 @@
                     var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
                     var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
                     var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
+                    var bag_statuses_select = '<select name="bag_statuses_select" id="bag_statuses_select" class="select2 form-control"></select>';
                     var bag_type_select = '<select name="bag_type_select" id="bag_type_select" class="select2 form-control">' +
                         '<option value="1">Normal</option>' +
                         '<option value="2">Return</option>' +
@@ -311,6 +312,12 @@
                         }
                         else if($(header).is('.cargo_type')){
                             $(cargo_type_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.status')){
+                            $(bag_statuses_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -373,6 +380,20 @@
                     $("#vendor_select").prepend('<option value="" selected></option>').select2({
                         data:data4,
                         placeholder: "Select Transport",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data5 = $.map({!! $bag_statuses !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+
+                    $("#bag_statuses_select").prepend('<option value="" selected></option>').select2({
+                        data:data5,
+                        placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
