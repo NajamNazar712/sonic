@@ -574,7 +574,7 @@ class OrderManagementController extends Controller
 
     public function supply_chain_index()
     {
-        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id',[1,2,3,20,21])->get();
+        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id',[1,2,3,4,20,21])->get();
         $service_type = BookingType::all();
         $shippers = User::select('id','name')->get();
         $products = Product::select('id','product_name')->get();
@@ -584,7 +584,10 @@ class OrderManagementController extends Controller
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities AS dc', function($join){
+                $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                    ->where('dc.hub_id', '!=', DB::raw('oc.hub_id'));
+            })
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
@@ -596,7 +599,8 @@ class OrderManagementController extends Controller
             })
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.pieces as pieces','si.quantity as quantity','shipments_journey.created_at as status_date','shipments.actual_weight as weight','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.created_at as booking_date','shipments.shipper_status_id','shipments.booking_type_id','shipments_journey.shipper_status_id as status_id']);
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.pieces as pieces','si.quantity as quantity','shipments_journey.created_at as status_date','shipments.actual_weight as weight','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.created_at as booking_date','shipments.shipper_status_id','shipments.booking_type_id','shipments_journey.shipper_status_id as status_id'])
+        ->whereIn('ss.id',[1,2,3,4,20,21]);
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {

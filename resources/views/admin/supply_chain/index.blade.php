@@ -183,7 +183,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking);
-                                row.push(values.shipper_name);
+                                row.push(values.shipper);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.weight);
@@ -248,7 +248,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Supply Chain',
+                        title: 'Supply Chain Order Management',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -286,8 +286,8 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle vendor'},
-                    {data: 'weight', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'quantity', name: 'oc.name', class: 'align-middle origin'},
+                    {data: 'weight', name: 'shipments.actual_weight', class: 'align-middle shipper'},
+                    {data: 'quantity', name: 'si.quantity', class: 'align-middle origin'},
                     {data: 'pieces', name: 'shipments.pieces', class: 'align-middle pieces'},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
