@@ -22,6 +22,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
@@ -574,18 +575,13 @@ class OrderManagementController extends Controller
 
     public function supply_chain_index()
     {
-        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id',[1,2,3,20,21])->get();
         $service_type = BookingType::all();
+        $shippers = User::select('id','name')->get();
         $products = Product::select('id','product_name')->get();
-        $payment_status = ShipmentPaymentStatus::all();
-        $case_nature = CrmRequestCaseNature::get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
-        $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
-        return view('admin.supply_chain.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);;
+        return view('admin.supply_chain.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products ,'shippers' =>$shippers ]);;
     }
-    public function supply_chain_list(){
+    public function supply_chain_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -593,14 +589,15 @@ class OrderManagementController extends Controller
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->leftJoin('shipments_journey', function ($join) {
+            ->leftJoin('shipment_items as si','si.shipment_id','=','shipments.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id']);
+            ->select(['shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.pieces as pieces','si.quantity as quantity','sj.created_at as status_date','shipments.actual_weight as weight','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.created_at as booking_date','shipments.shipper_status_id','shipments.booking_type_id','shipments_journey.shipper_status_id as status_id']);
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
@@ -615,43 +612,22 @@ class OrderManagementController extends Controller
                     return $shipment->shipper;
                 }
             })
-            /*->filterColumn('u.name', function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '!=', 4)
-                        ->where('u.name', 'like', '%' . $keyword . '%');
-                })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.booking_type_id', '=', 4)
-                            ->where('usi.poc', 'like', '%' . $keyword . '%');
-                    });
-            })
-            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
-            ->filterColumn('u.id', function ($query, $keyword) {
-                return $query->where('u.id', '=', $keyword);
-            })
-            ->editColumn('amount', function($shipment){
-                return number_format($shipment->amount);
-            })
-            ->editColumn('phone',function ($shipments){
-                return $shipments->phone1."<br>".$shipments->phone2;
-            })
-            ->filterColumn('phone', function ($query, $keyword) {
-                $keyword = strtolower($keyword);
-
-                $keyword = str_replace('-', '', $keyword);
-
-                if ($keyword != '') {
-                    $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')
-                            ->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
-                    });
+            ->editColumn('weight',function($shipment){
+                if ($shipment->weight != null ) {
+                    return $shipment->weight ;
                 }
-
                 else {
-                    $query->whereRaw('false');
+                    return '-';
                 }
             })
-            ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')*/
+            ->editColumn('status_date',function($shipment){
+                if ($shipment->status_date != null ) {
+                    return $shipment->status_date ;
+                }
+                else {
+                    return '-';
+                }
+            })
             ->filterColumn('status',function ($query,$keyword){
                 if ($keyword != '') {
                     $query->where('ss.id',$keyword);
@@ -664,24 +640,6 @@ class OrderManagementController extends Controller
 
                 if ($keyword != '') {
                     $query->where('bt.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->filterColumn('payment_status',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('sps.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->filterColumn('product_type',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('p.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -704,8 +662,12 @@ class OrderManagementController extends Controller
                     return '';
                 }
             });
-
-
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($shipment_status_select = $request->get('shipment_status_select')) {
+            $datatable->whereIn('ss.id', $shipment_status_select);
+        }
 
         return $datatable->make(true);
     }
