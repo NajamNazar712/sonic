@@ -4967,7 +4967,7 @@ class NotificationsController extends Controller
                    self::email($subject, $body, $to, $cc);
               }
           else if($id == 71){
-                  $completed_agings = CompletedAgingReport::get();
+                  $completed_agings = CompletedAgingReport::orderBy('count', 'desc')->get();
 
                   $subject = $notification->subject;
                   $body = $notification->body;
