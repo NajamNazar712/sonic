@@ -569,7 +569,6 @@ class OrderManagementController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
-
         return $datatable->make(true);
     }
 
@@ -590,14 +589,14 @@ class OrderManagementController extends Controller
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftJoin('shipment_items as si','si.shipment_id','=','shipments.id')
-            ->leftJoin('shipments_journey as sj', function ($join) {
+            ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.pieces as pieces','si.quantity as quantity','sj.created_at as status_date','shipments.actual_weight as weight','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.created_at as booking_date','shipments.shipper_status_id','shipments.booking_type_id','shipments_journey.shipper_status_id as status_id']);
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.pieces as pieces','si.quantity as quantity','shipments_journey.created_at as status_date','shipments.actual_weight as weight','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.created_at as booking_date','shipments.shipper_status_id','shipments.booking_type_id','shipments_journey.shipper_status_id as status_id']);
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
@@ -644,31 +643,22 @@ class OrderManagementController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
-            ->addColumn('action',function ($shipments) {
-                if ($shipments->shipper_status_id != 17 && $shipments->shipper_status_id > 1) {
-                    $dropdown = '
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-sm">
-                                <button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div></button>
-                            </div>
-                        </div>
-                    ';
-
-                    return $dropdown;
-                }
-                else {
-                    return '';
-                }
             });
+
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            $datatable->where('shipments.tracking_number',$tracking_numbers );
         }
         if ($shipment_status_select = $request->get('shipment_status_select')) {
             $datatable->whereIn('ss.id', $shipment_status_select);
         }
-
+        if ($shipper = $request->get('shipper')) {
+            $datatable->whereIn('shipments.user_id', $shipper);
+        }
+        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
+            $from = $request->get('booking_from_date');
+            $to = $request->get('booking_to_date');
+            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+        }
         return $datatable->make(true);
     }
 }
