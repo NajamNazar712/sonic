@@ -453,7 +453,7 @@
                                 '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
                                 '<span aria-hidden="true">×</span>\n' +
                                 '</button>';
-                            
+
                             $.each(data.bag_numbers, function(index, bag_number) {
                                 bag_numbers += bag_number + '<br>';
                                 $.each(data.tracking_numbers, function(index, tracking_numbers) {

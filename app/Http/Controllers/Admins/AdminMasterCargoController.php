@@ -910,7 +910,7 @@ class AdminMasterCargoController extends Controller
         if ($bag->exists()) {
             $bag = $bag->first();
 
-            if ($bag->status_id == 1) {
+            if (in_array($bag->status_id, [1, 3, 5, 6])) {
                 $hub_id = $bag->origin_hub_id;
                 $destination_hub_id = $bag->destination_hub_id;
 
