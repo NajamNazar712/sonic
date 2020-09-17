@@ -565,9 +565,11 @@
 
                             $.each(data.bag_numbers, function(index, bag_number) {
                                 bag_numbers += bag_number + '<br>';
-                                $.each(data.tracking_numbers, function(index, tracking_number) {
+                                $.each(data.tracking_numbers, function(index, tracking_numbers) {
                                     if(index == bag_number){
-                                        bag_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                        $.each(tracking_numbers, function(tracking_index, tracking_number) {
+                                                bag_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                        });
                                     }
                                 });
                                 bag_numbers += '<br>';
@@ -931,7 +933,9 @@
                 submitHandler: function(form) {
                     var cargo_number = $(form).find('.master_cargo_number').val();
 
-                    if (receive_at_link_table.columns('.master_cargo_number').data().eq(0).indexOf(parseInt(cargo_number)) === -1) {
+                    var index = $.inArray(cargo_number, master_cargo_consignment_ids);
+
+                    if (index === -1) {
                         $.ajax({
                             url: '{!! route('admin.master_cargo.in_transit.details') !!}',
                             method: 'POST',

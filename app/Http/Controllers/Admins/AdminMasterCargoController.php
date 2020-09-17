@@ -2638,7 +2638,7 @@ class AdminMasterCargoController extends Controller
 
         //dispute for short received
         if($bag->status_id == 7){
-            $bag_short_received_shipments = BagShipment::where(['bag_id'=>$bag_id,'status'=>0])->select('shipment_id')->get();
+            $bag_short_received_shipments = BagShipment::where(['bag_id'=>$bag_id,'status'=>0])->pluck('shipment_id')->toArray();
             if(!empty($bag_short_received_shipments)){
                 DisputeController::add_cargo_short_received($bag->seal_number,$bag_short_received_shipments,2);
             }
