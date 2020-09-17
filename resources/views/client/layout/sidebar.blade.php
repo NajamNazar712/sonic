@@ -21,16 +21,15 @@
                             @endif
                         </ul>
                         </li>
-                        <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Receiving Sheet</span></a>
-                            <ul class="menu-content">
                         @if (session('user_type') == 1 || in_array(3, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
-                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
-                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
+                            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Receiving Sheet</span></a>
+                                <ul class="menu-content">
+                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
+                                </ul>
+                            </li>
                         @endif
-                            </ul>
-                        </li>
-
                         @if (Session::has('air_waybill_type') && session('air_waybill_type') == 3)
                             <li class=" nav-item"><a href="{{ route('cod.shipment.list.index') }}"><span class="menu-title" data-i18n="nav.dash.main">List</span></a></li>
                             <li class=" nav-item"><a href="{{ route('cod.shipment.verify.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Verify</span></a></li>
@@ -42,6 +41,23 @@
                 </li>
             @endif
 
+            @if (session('user_type') == 1)
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-list-ul"></i>Multiple Piece</span></a>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{ route('cod.multiple_pieces.index') }}">Pending</a></li>
+                        <li><a class="menu-item" href="{{ route('cod.multiple_pieces.resolved.index') }}">Resolved</a></li>
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('user_type') == 1)
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-list-ul"></i>Rates</span></a>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{ route('cod.rates.view.index') }}">View</a></li>
+                    </ul>
+                </li>
+            @endif
+
             @if (session('user_type') == 1 || in_array(9, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-rotate-left"></i>Return</span></a>
                     <ul class="menu-content">
@@ -49,6 +65,9 @@
                     </ul>
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('cod.return.reattempt_history.index') }}">Re-Attempt Request</a></li>
+                    </ul>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{route('cod.return.confirmed.index')}}">Confirmed</a></li>
                     </ul>
                 </li>
             @endif
@@ -66,6 +85,8 @@
                     <ul class="menu-content">
                         <li><a href="{{ route('cod.finance.payments.index') }}">Payments</a></li>
                         <li><a href="{{ route('cod.finance.payments.reconcile_through_receiving_sheet.index') }}">Payments Reconcile through Receiving Sheet</a></li>
+                        <li><a href="{{ route('cod.ledger') }}">General Ledger</a></li>
+
                     </ul>
                 </li>
             @endif
@@ -84,13 +105,13 @@
                     </ul>
                 </li>
             @endif
-            <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Requests</span></a></li>
-
+            @if (session('user_type') == 1 || in_array(10, session('permissions')))
+                <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Requests</span></a></li>
+            @endif
+            
             @if (session('user_type') == 1)
                 <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-users"></i>Substitute Accounts</span></a></li>
             @endif
-
-
 
             @if (session('user_type') == 1 || in_array(11, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
@@ -104,6 +125,7 @@
             @endif
 
             <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title"><i class="la la-crosshairs"></i>Tracking</span></a></li>
+
 
         </ul>
     </div>

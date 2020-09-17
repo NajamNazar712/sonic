@@ -25,7 +25,6 @@ class AdminPowerBIController extends Controller
         }
         else if($user_id == 66){
             $link = 'https://app.powerbi.com/view?r=eyJrIjoiMmEwNTFjYWQtNjY3ZS00MzIzLWJlNzgtNDZkY2MzZjIyZDBkIiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
-
         }
         else if($user_id == 109){
             $link = 'https://app.powerbi.com/view?r=eyJrIjoiNjUzNzg5YjYtNGIyZS00N2FhLTgzNDItMjcxOWVkNDg2MTFhIiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
@@ -59,8 +58,15 @@ class AdminPowerBIController extends Controller
         }
         else if($user_id == 11){
             $link = 'https://app.powerbi.com/view?r=eyJrIjoiYWVlYzhjZjAtYTFhYi00MDI2LTgwNjYtNWNlZWRiMDIwNjFjIiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
+        }else if($user_id == 309){
+            $link = 'https://app.powerbi.com/view?r=eyJrIjoiY2NhZjU2YjQtZjk3NS00OGE0LWEyMzktNWI3YzM2YmZlMGQ3IiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
         }
-
+        else if($user_id == 304){
+            $link = 'https://app.powerbi.com/view?r=eyJrIjoiZjg1YmE4YzgtZWRhZi00ZTA0LTg4MzMtMjM0NjVmNjgzZjNkIiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
+        }
+        else if($user_id == 386){
+            $link = 'https://app.powerbi.com/view?r=eyJrIjoiNTQzMjQ2NjQtMGE5My00YjFjLWJiODEtM2Y0M2Q3ZjMyMjI3IiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
+        }
         return view('admin.reports.power_bi_sales_dashboard')->with(['link' => $link]);
     }
 

@@ -143,7 +143,9 @@
                         title: 'Completed Aging Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
+
                 ],
+
                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',

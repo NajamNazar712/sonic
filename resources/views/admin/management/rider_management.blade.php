@@ -18,6 +18,7 @@
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S No.</th>
+                                    <th class="border-primary border-darken-1">Trax ID.</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Name</th>
@@ -28,6 +29,8 @@
                                     <th class="border-primary border-darken-1">Category</th>
                                     <th class="border-primary border-darken-1">Added On</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Created By</th>
+                                    <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -75,6 +78,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Trax ID');
                             head.push('City Name');
                             head.push('Hub Name');
                             head.push('Rider Name');
@@ -85,12 +89,15 @@
                             head.push('Category');
                             head.push('Added On');
                             head.push('Status');
+                            head.push('Created By');
+                            head.push('Updated By');
 
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.trax_id);
                                 row.push(values.city);
                                 row.push(values.hub);
                                 row.push(values.rider);
@@ -101,7 +108,8 @@
                                 row.push(values.category);
                                 row.push(values.created_at);
                                 row.push(values.status);
-
+                                row.push(values.created_by);
+                                row.push(values.updated_by);
                                 body.push(row);
                             });
                         },
@@ -150,9 +158,10 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.management.rider.ajax') }}',
-                order: [[8, 'desc']],
+                order: [[10, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle name'},
@@ -163,6 +172,8 @@
                     {data: 'category', name: 'rider_categories.id', class: 'align-middle category'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'status', name: 'riders.status', class: 'align-middle status'},
+                    {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
+                    {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {

@@ -38,6 +38,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
+    Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
+    Route::get('ledger/list', 'Shippers\ShipperDashboardController@ledger_list')->name('ledger.list');
 
     Route::get('/welcome', 'Shippers\ShipperDashboardController@welcome_index')->name('welcome');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
@@ -95,6 +97,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('new','Shippers\ShipperReceivingSheetController@create_view')->name('new');
             Route::post('info','Shippers\ShipperReceivingSheetController@get_shipment_details')->name('info');
             Route::post('print_receiving_sheet_and_air_waybill', 'Shippers\ShipperReceivingSheetController@print_receiving_sheet_and_air_waybill')->name('print_receiving_sheet_and_air_waybill');
+            Route::post('cn/info','Shippers\ShipperReceivingSheetController@update_cn_info')->name('cn.info');
+            Route::post('cn/update','Shippers\ShipperReceivingSheetController@update_consignee_info_and_special_instructions')->name('cn.update');
         });
 
         Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
@@ -166,6 +170,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('','Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');
             Route::get('list','Shippers\ShipperReturnController@return_reattempt_history_list')->name('list');
         });
+        Route::prefix('confirmed')->name('confirmed.')->group(function (){
+            Route::get('','Shippers\ShipperReturnController@return_confirmed_index')->name('index');
+            Route::get('list','Shippers\ShipperReturnController@return_list')->name('list');
+
+        });
     });
 
     Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function() {
@@ -227,6 +236,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
     });
 
+    Route::prefix('rates')->name('rates.')->group(function (){
+        Route::prefix('view')->name('view.')->group(function (){
+            Route::get('','Shippers\ShipperDashboardController@view_rates_index')->name('index');
+        });
+    });
+
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
@@ -250,6 +265,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
+    Route::get('contacts','Shippers\ShipperDashboardController@contacts')->name('contacts');
 
     Route::prefix('resources')->name('resources.')->group(function (){
         Route::get('','Shippers\ShipperResourcesController@index')->name('index');
@@ -309,6 +325,19 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('add_remarks', 'Shippers\ShipperPickupController@add_remarks')->name('add_remarks');
         Route::post('cancel', 'Shippers\ShipperPickupController@cancel')->name('cancel');
         Route::post('renew', 'Shippers\ShipperPickupController@renew')->name('renew');
+    });
+
+    Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function (){
+        Route::get('', 'Shippers\ShipperShipmentPieceController@hold_index')->name('index');
+        Route::get('list', 'Shippers\ShipperShipmentPieceController@hold_list')->name('list');
+        Route::post('single_piece','Shippers\ShipperShipmentPieceController@single_piece')->name('single_piece');
+        Route::post('wait_remaining_pieces','Shippers\ShipperShipmentPieceController@wait_remaining_pieces')->name('wait_remaining_pieces');
+        Route::post('return_back_to_shipper','Shippers\ShipperShipmentPieceController@return_back_to_shipper')->name('return_back_to_shipper');
+        Route::prefix('resolved')->name('resolved.')->group(function (){
+            Route::get('', 'Shippers\ShipperShipmentPieceController@resolved_index')->name('index');
+            Route::get('list', 'Shippers\ShipperShipmentPieceController@resolved_list')->name('list');
+        });
+
     });
 
 });
@@ -378,6 +407,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
         Route::post('telenor_shipments_arrival','Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
+
+        Route::prefix('self_collection')->name('self_collection.')->group(function () {
+            Route::get('', 'Admins\OrderManagementController@self_collection_index')->name('index');
+            Route::get('list', 'Admins\OrderManagementController@self_collection_list')->name('list');
+        });
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
@@ -391,11 +425,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('status/change','Admins\AdminDashboardController@UserStatusChange')->name('status.change');
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
         Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
+        Route::post('tag/submit/bulk','Admins\AdminDashboardController@tagSubmitBulk')->name('tag.submit.bulk');
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
-
+        Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
+            Route::get('info','Admins\AdminDashboardController@payment_cycle_info')->name('info');
+            Route::post('submit', 'Admins\AdminDashboardController@payment_cycle_submit')->name('submit');
+        });
 
         //user profile
         Route::get('/{id}/view','Admins\AdminDashboardController@userProfile')->name('view.profile');
@@ -450,10 +488,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('add.rates.submit');
     //edit rates
     Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('edit.rates');
+    Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
     Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
     Route::get('accounts/{id}/view_crf_agreement', 'ShipperAgreementController@view_crf_agreement')->name('accounts.view_crf_agreement');
     //
     Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
+    Route::get('/accounts/{id}/add_contacts','Admins\AdminDashboardController@add_contacts')->name('accounts.add_contacts');
+    Route::post('/accounts/add_contacts.store','Admins\AdminDashboardController@add_contacts_store')->name('accounts.add_contacts.store');
 
 
 
@@ -461,6 +502,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
         Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_submit')->name('add.rates');
         Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_index')->name('edit.rates');
+        Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
         Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_submit')->name('edit.rates');
         Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
 
@@ -611,6 +653,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function (){
+        Route::prefix('hold')->name('hold.')->group(function () {
+            Route::get('', 'Admins\AdminShipmentPieceController@hold_index')->name('index');
+            Route::get('list', 'Admins\AdminShipmentPieceController@hold_list')->name('list');
+            Route::post('single_piece','Admins\AdminShipmentPieceController@single_piece')->name('single_piece');
+            Route::post('wait_remaining_pieces','Admins\AdminShipmentPieceController@wait_remaining_pieces')->name('wait_remaining_pieces');
+            Route::post('return_back_to_shipper','Admins\AdminShipmentPieceController@return_back_to_shipper')->name('return_back_to_shipper');
+            Route::post('return_note_create', 'Admins\AdminShipmentPieceController@return_note_create')->name('return_note_create');
+            Route::post('return_note_print', 'Admins\AdminShipmentPieceController@return_note_print')->name('return_note_print');
+        });
+        Route::prefix('add')->name('add.')->group(function () {
+            Route::get('', 'Admins\AdminShipmentPieceController@hold_add_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminShipmentPieceController@hold_shipment_details')->name('shipment_details');
+            Route::post('submit', 'Admins\AdminShipmentPieceController@hold_shipment_submit')->name('submit');
+        });
+
+        Route::prefix('resolved')->name('resolved.')->group(function () {
+            Route::get('', 'Admins\AdminShipmentPieceController@hold_resolved_index')->name('index');
+            Route::get('list', 'Admins\AdminShipmentPieceController@hold_resolved_list')->name('list');
+        });
+
+    });
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@v2_pickups_index')->name('index');
@@ -629,8 +693,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bookings/all','Admins\V2Pickup\V2AdminPickupsController@pending_all_bookings')->name('bookings.all');
             Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
-
         });
+    // Receiving Sheet Rout
+        Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_index')->name('index');
+            Route::post('check_pickup', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_check_pickup')->name('check_pickup');
+            Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_print')->name('print');
+        });
+        // End
         Route::prefix('arrival')->name('arrival.')->group(function () {
             Route::prefix('bulk')->name('bulk.')->group(function () {
                 Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_index')->name('index');
@@ -645,6 +715,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 });
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@bulk_arrival_submit')->name('store');
             });
+
             Route::prefix('individual')->name('individual.')->group(function () {
                 Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index')->name('index');
                 Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_details')->name('shipment_details');
@@ -656,7 +727,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@individual_arrival_submit')->name('store');
             });
         });
+
+        Route::prefix('arrival_service')->name('arrival_service.')->group(function () {
+            Route::prefix('service')->name('service.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_service_index')->name('index');
+                Route::post('shipment_details', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_service_details')->name('shipment_details');
+                Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
+            });
+
+        });
+
     });
+
     Route::prefix('delivery')->name('delivery.')->group(function(){
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('','Admins\DeliveryController@pending_delivery_index')->name('index');
@@ -828,7 +910,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
         Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
-        Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');
+        Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');   
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
@@ -941,6 +1023,82 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('update', 'Admins\AdminCargoController@draft_update')->name('update');
             });
 
+        });
+
+        Route::prefix('mapping')->name('mapping.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@mapping_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@mapping_list')->name('list');
+            Route::post('store', 'Admins\AdminCargoController@mapping_store')->name('store');
+            Route::post('edit', 'Admins\AdminCargoController@mapping_edit')->name('edit');
+            Route::post('update', 'Admins\AdminCargoController@mapping_edit_update')->name('update');
+//            Route::post('print', 'Admins\AdminCargoController@history_cargo_print')->name('print');
+        });
+
+    });
+    Route::prefix('master_cargo')->name('master_cargo.')->group(function () {
+        Route::prefix('bag')->name('bag.')->group(function () {
+            Route::prefix('pending')->name('pending.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@pending_index')->name('index');
+                Route::get('list', 'Admins\AdminMasterCargoController@pending_list')->name('list');
+            });
+
+            Route::prefix('create')->name('create.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@create_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminMasterCargoController@create_shipment_details')->name('shipment_details');
+                Route::post('bag_details', 'Admins\AdminMasterCargoController@create_bag_details')->name('bag_details');
+                Route::get('seal_number', 'Admins\AdminMasterCargoController@create_bag_seal_number')->name('seal_number');
+                Route::post('', 'Admins\AdminMasterCargoController@create_store')->name('store');
+            });
+            Route::post('piece_details', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
+
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@history_index')->name('index');
+                Route::get('list', 'Admins\AdminMasterCargoController@history_list')->name('list');
+            });
+        });
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_pending_index')->name('index');
+            Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_pending_list')->name('list');
+            Route::post('shipments', 'Admins\AdminMasterCargoController@master_cargo_pending_shipments')->name('shipments');
+        });
+
+        Route::prefix('create')->name('create.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_create_index')->name('index');
+            Route::post('bag_details', 'Admins\AdminMasterCargoController@create_master_cargo_bag_details')->name('bag_details');
+            Route::post('bag_cargo_details', 'Admins\AdminMasterCargoController@create_master_cargo_details')->name('cargo_details');
+            Route::post('', 'Admins\AdminMasterCargoController@master_cargo_create_store')->name('store');
+        });
+
+        Route::prefix('in_transit')->name('in_transit.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_in_transit_index')->name('index');
+            Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_in_transit_list')->name('list');
+            Route::post('lost', 'Admins\AdminMasterCargoController@master_cargo_in_transit_lost')->name('lost');
+            Route::post('bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bags')->name('bags');
+            Route::post('short_received_bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_short_received_bags')->name('short_received_bags');
+            Route::post('shipments', 'Admins\AdminMasterCargoController@master_cargo_in_transit_shipments')->name('shipments');
+            Route::post('print', 'Admins\AdminMasterCargoController@master_cargo_in_transit_print')->name('print');
+            Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive')->name('receive');
+        });
+
+        Route::prefix('receive')->name('receive.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_receive_index')->name('index');
+            Route::post('bag_details', 'Admins\AdminMasterCargoController@master_cargo_receive_bag_details')->name('bag_details');
+            Route::post('short_received', 'Admins\AdminMasterCargoController@master_cargo_receive_short_received')->name('short_received');
+            Route::post('', 'Admins\AdminMasterCargoController@master_cargo_receive_store')->name('store');
+
+            Route::prefix('quick')->name('quick.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_index')->name('index');
+                Route::post('bag_details', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_bag_details')->name('bag_details');
+                Route::post('', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_store')->name('store');
+                Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_list_index')->name('list.index');
+                Route::get('list/ajax', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_list_ajax')->name('list.ajax');
+                Route::post('list/ajax', 'Admins\AdminMasterCargoController@master_cargo_quick_receive_list_details')->name('list.details');
+            });
+        });
+
+        Route::prefix('history')->name('history.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_history_index')->name('index');
+            Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_history_list')->name('list');
         });
 
         Route::prefix('mapping')->name('mapping.')->group(function () {
@@ -1450,6 +1608,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\V2Pickup\V2AdminReportController@pickup_report_list')->name('list');
             Route::post('/data', 'Admins\V2Pickup\V2AdminReportController@pickup_report_data')->name('data');
         });
+
+        Route::prefix('not_attempted_aging')->name('not_attempted_aging.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@not_attempted_aging_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@not_attempted_aging_list')->name('list');
+        });
+		Route::prefix('station_recovery')->name('station_recovery.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@station_recovery_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@station_recovery_list')->name('list');
+            Route::post('update', 'Admins\AdminReportsController@station_recovery_update')->name('update');
+        });
+        Route::prefix('daily_monthly_adjustment')->name('daily_monthly_adjustment.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@daily_monthly_adjustment_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@daily_monthly_adjustment_list')->name('list');
+            Route::get('summary_list', 'Admins\AdminReportsController@daily_monthly_adjustment_summary_list')->name('summary_list');
+        });
     });
 
     //Reports end
@@ -1614,6 +1787,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        Route::prefix('nsa_account')->name('nsa_account.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@nsa_account_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@nsa_account_store')->name('store');
+        });
+
+        Route::prefix('restrict_cities_intercept')->name('restrict_cities_intercept.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@restrict_cities_intercept_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@restrict_cities_intercept_store')->name('store');
+        });
+
         Route::prefix('minimum_chargeable_weight')->name('minimum_chargeable_weight.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
@@ -1649,13 +1832,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 });
 
             });
-
         });
 
 
         Route::prefix('aging_report')->name('aging_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@completed_aging_report_settings_index')->name('index');
             Route::post('aging_settings_store', 'Admins\GlobalSettingsController@completed_aging_report_settings_store')->name('aging_settings_store');
+        });
+
+        Route::prefix('zero_charges')->name('zero_charges.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@zero_charges_report_settings_index')->name('index');
+            Route::post('zero_charges_store', 'Admins\GlobalSettingsController@zero_charges_report_settings_store')->name('zero_charges_store');
         });
 
         Route::prefix('overnight_overland_cargo_report')->name('overnight_overland_cargo_report.')->group(function () {
@@ -1761,6 +1948,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/levels', 'Admins\AdminCrmSettingsController@escalation_level_index')->name('levels.index');
             Route::post('/levels/store', 'Admins\AdminCrmSettingsController@escalation_level_store')->name('levels.store');
         });
+
+
+        Route::prefix('holidays')->name('holidays.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@holidays_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@holidays_update')->name('update');
+            Route::post('list', 'Admins\GlobalSettingsController@holidays_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@holidays_add')->name('add');
+        });
+
+        Route::prefix('not_attempted_cron')->name('not_attempted_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@not_attempted_cron_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@not_attempted_cron_store')->name('store');
+        });
+		Route::prefix('station_recovery_cron')->name('station_recovery_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@station_recovery_cron_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@station_recovery_cron_store')->name('store');
+        });
+
+        Route::prefix('over_payment_limit')->name('over_payment_limit.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@over_payment_limit_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@over_payment_limit_store')->name('store');
+        });
     });
 
 
@@ -1785,6 +1994,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminConsolidatedController@consolidation_history_list')->name('list');
             });
         });
+        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_index')->name('index');
+            Route::get('list', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_list')->name('list');
+            Route::post('print', 'Admins\AdminReceivingSheetHistoryController@print')->name('print');
+        });
+
     });
 
     //CMC Routes
@@ -1796,6 +2011,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@launched')->name('launched');
             Route::get('{id}', 'Admins\AdminCRMController@request_details')->name('details');
             Route::post('edit', 'Admins\AdminCRMController@edit_request')->name('edit');
+            Route::post('image_details','Admins\AdminCRMController@crm_image_details')->name('image_details');
+            Route::post('image_submit','Admins\AdminCRMController@crm_image_submit')->name('image_submit');
+            Route::post('image_delete','Admins\AdminCRMController@crm_image_delete')->name('image_delete');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
@@ -1842,6 +2060,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('claim')->name('claim.')->group(function(){
             Route::get('product_image/{id}', 'Admins\AdminCRMController@product_image')->name('product_image');
             Route::get('invoice_image/{id}', 'Admins\AdminCRMController@invoice_image')->name('invoice_image');
+        });
+        Route::prefix('consignee_info')->name('consignee_info.')->group(function(){
+            Route::get('', 'Admins\AdminCRMController@consignee_info_index')->name('index');
+            Route::get('list', 'Admins\AdminCRMController@consignee_info_list')->name('list');
+            Route::post('print_air_waybill', 'Admins\AdminCRMController@print_air_waybill')->name('print_air_waybill');
+            Route::post('resolve', 'Admins\AdminCRMController@consignee_info_resolve')->name('resolve');
         });
     });
 
@@ -1900,6 +2124,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('sales', 'Admins\AdminPowerBIController@sales_dashboard_index')->name('sales');
         Route::get('operation', 'Admins\AdminPowerBIController@operation_dashboard_index')->name('operation');
     });
-     
+    //Arrival Service Center
+    Route::prefix('arrival_service')->name('arrival_service.')->group(function () {
+        Route::get('', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_service_index')->name('index');
+        Route::post('shipment_details', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_service_details')->name('shipment_details');
+        Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+            Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+            Route::post('shipment_details', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_try_and_buy_shipment_details')->name('shipment_details');
+        });
+    });
+
 });
 

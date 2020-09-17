@@ -57,6 +57,28 @@
         </div>
     </div>
 
+    <div class="row mb-2">
+        <div class="col">
+            <fieldset class="form-group">
+                <textarea type="text" name="address" id="address" class="form-control address" placeholder="Office Address">{{$city->address}}</textarea>
+            </fieldset>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2">
+            <h4 class="card-title font-weight-bold">Location</h4>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" name="latitude" id="latitude" class="form-control latitude" placeholder="Latitude" value="{{$city->location_latitude}}">
+            </fieldset>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" name="longitude" id="longitude" class="form-control longitude" placeholder="Longitude" value="{{$city->location_longitude}}">
+            </fieldset>
+        </div>
+    </div>
     <div class="row">
         <div class="col-3">
             <h4 class="card-title font-weight-bold">GC Area</h4>
@@ -157,6 +179,20 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+        $('#latitude').inputmask({
+            'alias': 'decimal',
+            'allowMinus': true,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 6,
+        });
+        $('#longitude').inputmask({
+            'alias': 'decimal',
+            'allowMinus': true,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 6,
+        });
         var errors = 0;
         function checkAtleastOne(targ,id) {
             if($(targ).is(':checked') === true ){

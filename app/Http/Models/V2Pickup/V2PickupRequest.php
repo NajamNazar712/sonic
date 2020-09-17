@@ -15,6 +15,9 @@ class V2PickupRequest extends Model
     public function pickup_address() {
         return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo');
     }
+    public function pickup_city() {
+        return $this->belongsTo('App\Http\Models\City', 'city_id');
+    }
     public function pickup_request_shipments() {
         return $this->hasMany('App\Http\Models\V2Pickup\V2PickupRequestShipment', 'pickup_request_id');
     }
@@ -30,4 +33,5 @@ class V2PickupRequest extends Model
     public function pickup_note_request(){
         return $this->belongsTo('App\Http\Models\V2Pickup\V2PickupNoteRequest','id','pickup_request_id')->latest('id');
     }
+    protected $guarded = [];
 }

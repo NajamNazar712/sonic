@@ -81,6 +81,8 @@
         </div>
     </div>
 
+    
+
 
 @endsection
 
@@ -143,7 +145,8 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
@@ -259,7 +262,7 @@
                                             var row = table.row(index);
                                             if ($(row.node()).hasClass('selected')) {
                                                 var id = parseInt(row.id());
-                                                var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                                                var remarks = $(row.node()).find('td.shipment_remarks textarea').val();
                                                 shipment_remarks[id] = remarks;
                                             }
                                         });
@@ -332,7 +335,7 @@
                                                 var row = table.row(index);
                                                 if ($(row.node()).hasClass('selected')) {
                                                     var id = parseInt(row.id());
-                                                    var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                                                    var remarks = $(row.node()).find('td.shipment_remarks textarea').val();
                                                     shipment_remarks[id] = remarks;
                                                 }
                                             });
@@ -680,7 +683,7 @@
                     var row = table.row(index);
                     if ($(row.node()).hasClass('selected')) {
                         var id = parseInt(row.id());
-                        var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                        var remarks = $(row.node()).find('td.shipment_remarks textarea').val();
                         shipment_remarks[id] = remarks;
                     }
 
@@ -796,7 +799,7 @@
 
                         if (index === -1) {
                             selected_rows.push(id);
-                        }
+                     }
                         else {
                             selected_rows.splice(index, 1);
                         }
@@ -841,7 +844,7 @@
 
             $('body').on('click','.returnMarkStatus',function () {
                 var row_id = $(this).parents('tr').attr('id');
-                var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
+                var remark = $(this).parents('tr').find('td.shipment_remarks textarea').val();
 
 
                 if(row_id != ''){
@@ -895,7 +898,7 @@
             });
             $('body').on('click','.returnReattemptStatus',function () {
                 var row_id = $(this).parents('tr').attr('id');
-                var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
+                var remark = $(this).parents('tr').find('td.shipment_remarks textarea').val();
 
                 if(row_id != ''){
                     swal({
@@ -1028,7 +1031,7 @@
 
             $('#datatable').on('click', '.selfCollection', function () {
                 var row_id = $(this).parents('tr').attr('id');
-                var remark = $.trim($('tr#' + row_id).find('td.shipment_remarks input').val());
+                var remark = $.trim($('tr#' + row_id).find('td.shipment_remarks textarea').val());
                 if(row_id){
                     swal({
                         text: 'Are you sure you want to mark shipment for Self-Collection?',
@@ -1143,6 +1146,7 @@
                         });
                 }
             });
+
 
         });
     </script>

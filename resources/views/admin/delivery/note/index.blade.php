@@ -541,7 +541,38 @@
                                 notification_ids.push(1);
                                 rider_info_ids.push(1);
                                 $('#hub_id').val(data.hub);
+                                if(data.crm_request.cod_change != null || data.crm_request.address_change != null || data.crm_request.phone_one_change != null){
+                                    var html = '';
 
+                                    html += 'This Shipment with Tracking Number: ' + data.tracking_number + ' has following changes:<br/>';
+                                    if(data.crm_request.cod_change != null){
+                                        html += 'COD : '+ data.crm_request.cod_change + '<br/>';
+                                    }
+                                    if(data.crm_request.address_change != null){
+                                        html += 'Address : '+ data.crm_request.address_change + '<br/>';
+                                    }
+                                    if(data.crm_request.phone_one_change != null){
+                                        html += 'Phone : '+ data.crm_request.phone_one_change + '<br/>';
+                                    }
+
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+                                    swal({
+                                        content: content,
+                                        icon: 'info',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }
                             }
                             scan.val('');
                             scan.attr('disabled', false);
@@ -643,8 +674,41 @@
                                     notification_ids.push(1);
                                     rider_info_ids.push(1);
                                     table.order([0, 'desc']).draw();
+                                    console.log(data.crm_request);
+                                    if(data.crm_request.cod_change != null || data.crm_request.address_change != null || data.crm_request.phone_one_change != null){
+                                        var html = '';
 
-                                }
+                                        html += 'This Shipment with Tracking Number: ' + data.tracking_number + ' has following changes:<br/>';
+                                        if(data.crm_request.cod_change != null){
+                                            html += 'COD : '+ data.crm_request.cod_change + '<br/>';
+                                        }
+                                        if(data.crm_request.address_change != null){
+                                            html += 'Address : '+ data.crm_request.address_change + '<br/>';
+                                        }
+                                        if(data.crm_request.phone_one_change != null){
+                                            html += 'Phone : '+ data.crm_request.phone_one_change + '<br/>';
+                                        }
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+                                        swal({
+                                            content: content,
+                                            icon: 'info',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+
+                                    }
+                                    }
                                 scan.val('');
                                 scan.attr('disabled', false);
                                 scan.focus();

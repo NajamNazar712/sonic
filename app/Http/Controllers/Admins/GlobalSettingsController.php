@@ -29,6 +29,9 @@ use App\Http\Models\Blacklist\BlacklistSettingCondition;
 use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
+use App\Http\Models\Holiday;
+use App\http\Models\RestrictedCityIntercept;
+use App\Http\Models\Rider;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
@@ -2422,10 +2425,11 @@ class GlobalSettingsController extends Controller
             DB::table('completed_aging_reports')->truncate();
             foreach ($hubs as $hub_id){
                 $total_count = 0;
-                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
+                $zone_id = City::find($hub_id)->zone_id;
+//                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
                 $completed_aging_report = new CompletedAgingReport();
                 $completed_aging_report->hub_id = $hub_id;
-                $completed_aging_report->zone_id = $zone_id->zone_id;
+                $completed_aging_report->zone_id = $zone_id;
 
                 $completed_aging_report->date = $now;
 
@@ -2457,11 +2461,12 @@ class GlobalSettingsController extends Controller
             DB::table('pending_cash_collection_aging_reports')->truncate();
             foreach ($hubs as $hub_id){
                 $total_count = 0;
-                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
+                $zone_id = City::find($hub_id)->zone_id;
+
                 $pending_cash_collection_aging_report = new PendingCashCollectionAgingReport();
 
                 $pending_cash_collection_aging_report->hub_id = $hub_id;
-                $pending_cash_collection_aging_report->zone_id = $zone_id->zone_id;
+                $pending_cash_collection_aging_report->zone_id = $zone_id;
 
                 $pending_cash_collection_aging_report->date = $now;
 
@@ -2489,7 +2494,7 @@ class GlobalSettingsController extends Controller
             ->get();
 
         $setting = GlobalSettings::where('type', 'crm_default_agent')->first();
-        return view('admin.settings.crm.default_agent')->with(['agents' => $agents, 'setting' => $setting]);
+        return view('admin.settings.CRM.default_agent')->with(['agents' => $agents, 'setting' => $setting]);
     }
 
     public function crm_default_agent_store(Request $request){
@@ -2508,4 +2513,207 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    public function zero_charges_report_settings_index() {
+       
+        $settings = GlobalSettings::where('type', 'zero_charges_report_time')->first();
+
+        if ($settings) {
+            $zero_charges_report_time = $settings->setting_value;
+        }
+        else {
+            $zero_charges_report_time = 10;
+        }
+
+        return view('admin.settings.zero_charges_report_settings')->with(['zero_charges_report_time' => $zero_charges_report_time]);
+    }
+
+    public function zero_charges_report_settings_store(Request $request) {
+        $request_settings = GlobalSettings::where('type', 'zero_charges_report_time');
+
+        if ($request_settings->exists()) {
+            $request_settings = $request_settings->first();
+        }
+        else {
+            $request_settings = new GlobalSettings();
+
+            $request_settings->type = 'zero_charges_report_time';
+        }
+
+        $request_settings->setting_value = $request->zero_charges_report_time;
+
+        $request_settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function not_attempted_cron_index(){
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time')->first();
+
+        return view('admin.settings.not_attempted_report_cron_time')->with('settings', $settings);
+    }
+    public function not_attempted_cron_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
+        if($settings->exists()){
+            $settings = $settings->first();
+        }
+        else{
+            $settings = new GlobalSettings();
+            $settings->type = 'not_attempted_cron_time';
+        }
+
+        $settings->setting_value = $request->not_attempted_cron_time;
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function holidays_index(){
+        return view('admin.settings.holidays');
+    }
+    public function holidays_list(){
+        $holidays = Holiday::leftjoin('admins as a', 'a.id', '=', 'holidays.created_by')
+            ->select('holidays.reason as reason', 'holidays.holiday as holiday', 'holidays.created_at as created_at', 'a.name as created_by');
+
+        return Datatables::of($holidays)
+            ->make(true);
+    }
+    public function holidays_add(Request $request){
+        $holiday_date = $request->holiday_date;
+        $holiday_reason = $request->holiday_reason;
+        $existing_holiday = CrmTatHolidays::where('holiday', $holiday_date);
+        if ($existing_holiday->exists()){
+            return ['status' => 0, 'error' => 'Holiday is already marked on the selected date!'];
+        }
+        else{
+            $new_holiday = new Holiday();
+            $new_holiday->holiday = $holiday_date;
+            $new_holiday->reason = $holiday_reason;
+            $new_holiday->created_by = Auth::id();
+            $new_holiday->save();
+            return ['status' => 1, 'success' => 'Holiday added successfully!'];
+        }
+    }
+	public function station_recovery_cron_index(){
+        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+        $time = '';
+        if($settings->exists()){
+            $settings = $settings->first();
+            $time = $settings->setting_value;
+        }
+
+        return view('admin.settings.station_recovery.station_recovery_cron_time')->with('time', $time);
+    }
+    public function station_recovery_cron_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+        if($settings->exists()){
+            $settings = $settings->first();
+        }else{
+            $settings = new GlobalSettings();
+            $settings->type = 'station_recovery_cron_time';
+        }
+        $settings->setting_value = $request->station_recovery_cron_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function over_payment_limit_index() {
+        $settings = GlobalSettings::where('type', 'over_payment_limit');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $over_payment_limit = $settings->setting_value;
+        }
+        else {
+            $over_payment_limit = 6000000;
+        }
+
+        return view('admin.settings.over_payment_limit')->with('over_payment_limit', $over_payment_limit);
+    }
+
+
+    public function over_payment_limit_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'over_payment_limit');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'over_payment_limit';
+        }
+
+        $settings->setting_value = $request->over_payment_limit;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+
+    public function nsa_account_index(){
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        $riders = Rider::where('status', 1)->select('id','name')->get();
+        $settings = GlobalSettings::where('type', 'nsa_accounts');
+        $rider_id = null;
+        $nsa_accounts = array();
+        if($settings->exists()){
+            $settings = $settings->first();
+            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+            $rider_id = $settings->setting_value;
+        }
+        return view('admin.settings.nsa_account')->with(['shippers' => $shippers, 'riders' => $riders, 'rider_id' => $rider_id, 'nsa_accounts' => $nsa_accounts]);
+    }
+
+    public function nsa_account_store(Request $request){
+        if($request->has('shippers')){
+            if(count($request->shippers) > 0){
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'nsa_accounts');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                }
+                else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'nsa_accounts';
+
+                }
+                $settings->setting_value = $request->rider;
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        }else{
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
+    }
+
+    public function restrict_cities_intercept_index(){
+        $cities = City::where('status', 1)->select('id','name')->get();
+        $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
+        return view('admin.settings.restrict_cities_intercept')->with(['cities' => $cities, 'restricted_cities' => $restricted_cities]);
+    }
+
+    public function restrict_cities_intercept_store(Request $request){
+        RestrictedCityIntercept::truncate();
+        if($request->has('cities')){
+            if(count($request->cities) > 0){
+                $cities = $request->cities;
+                foreach ($cities as $city_id){
+                    $restricted_city = new RestrictedCityIntercept();
+                    $restricted_city->city_id = $city_id;
+                    $restricted_city->save();
+                }
+            }
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
+
+    }
 }

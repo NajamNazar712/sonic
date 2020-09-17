@@ -35,7 +35,16 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                            <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Overall Template</a>
+                                        </div>
+                                        <div class="form-group text-right">
+                                            <a href="{{ asset('file/Trax Book Corporate Regular Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Regular Template</a>
+                                        </div>
+                                        <div class="form-group text-right">
+                                            <a href="{{ asset('file/Trax Book Corporate Replacement Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Replacement Template</a>
+                                        </div>
+                                        <div class="form-group text-right">
+                                            <a href="{{ asset('file/Trax Book Corporate Reverse Pickup Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Reverse Pickup Template</a>
                                         </div>
                                     </div>
                                 </div>
@@ -107,6 +116,20 @@
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
                                             <th colspan="2" class="border-primary border-darken-1">Show Information on Air Waybill</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr role="row">
+                                            <td class="text-center">No</td>
+                                            <td class="text-center">Yes</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr role="row" class="bg-primary white text-center">
+                                            <th colspan="2" class="border-primary border-darken-1">Self Collection</th>
                                         </tr>
                                         </thead>
                                         <tbody>

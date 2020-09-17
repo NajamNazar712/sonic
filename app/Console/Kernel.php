@@ -35,8 +35,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\DailyFakeStatusReportEmail',
         '\App\Console\Commands\NegativeBalanceShipperSalesPerson',
         '\App\Console\Commands\ClearDefaultBankDuration',
-        '\App\Console\Commands\OvernightCargoReport',
-        '\App\Console\Commands\OverlandCargoReport',
+//        '\App\Console\Commands\OvernightCargoReport',
+//        '\App\Console\Commands\OverlandCargoReport',
 		'\App\Console\Commands\AccountReconciliationReportFromStart',
         '\App\Console\Commands\AccountReconciliationReportCurrent',
 		'\App\Console\Commands\BusinessProjectionAndRetention',
@@ -52,7 +52,13 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\CancelledPickupRequestEmail',
 		'\App\Console\Commands\CompletedAgingReport',
 		'\App\Console\Commands\PendingCashCollectionReport',
-		'\App\Console\Commands\V2PickupCleanDuplicateData'
+		'\App\Console\Commands\ZeroChargesReport',
+		'\App\Console\Commands\StationRecoveryReport',
+		'\App\Console\Commands\V2PickupCleanDuplicateData',
+		'\App\Console\Commands\QAReportPettyCash',
+		'\App\Console\Commands\SelfCollection',
+		'\App\Console\Commands\OutstandingShipmentEmail',
+        'App\Console\Commands\ShipmentPieceOnHold'
 
         ];
 
@@ -71,6 +77,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
 //        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
+        $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
 
@@ -92,6 +99,15 @@ class Kernel extends ConsoleKernel
             $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
         }
 
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $time = $settings->setting_value . ':00';
+
+            $schedule->command('email:notattemptedagingreport')->dailyAt($time)->runInBackground();
+        }
         // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
 
         $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
@@ -100,6 +116,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
 		$schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
+		$schedule->command('qareport:pettycash')->dailyAt('10:00')->runInBackground();
+		$schedule->command('shipments:self_collection')->dailyAt('09:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
 
@@ -120,8 +138,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
         $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
 
-        $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
-        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
+//        $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
+//        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
 
 //		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
 //      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
@@ -135,6 +153,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
+
+        $schedule->command('report:donepayment')->dailyAt('17:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -157,6 +177,24 @@ class Kernel extends ConsoleKernel
             $schedule->command('completedAging:report')->dailyAt($completed_aging_report_time)->runInBackground();
             $schedule->command('pendingCashCollection:report')->dailyAt($completed_aging_report_time)->runInBackground();
         }
+
+        $settings = GlobalSettings::where('type', 'zero_charges_report_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $zero_charges_report_time = $settings->setting_value . ':00';
+            $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time);
+        }
+//        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+//
+//        if ($settings->exists()) {
+//            $settings = $settings->first();
+//
+//            $station_recovery_cron_time = $settings->setting_value . ':00';
+//            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
+//        }
+        $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00');
     }
 	 /**
      * Register the commands for the application.

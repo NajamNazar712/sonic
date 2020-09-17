@@ -39,6 +39,7 @@ class Permission
             'accounts.sister_account.edit.submit' => 242,
             'accounts.sister_account.merged_account.mapping.info' => 242,
             'accounts.sister_account.merged_account.mapping.submit' => 242,
+            'accounts.receiving_sheet.index' => 364,
 
             'daily_visit.index' => 265,
             'daily_visit.store' => 265,
@@ -84,6 +85,14 @@ class Permission
             'pickups.history.list' => 123,
             'pickups.history.bookings.all' => 123,
 
+            'v2_pickups.pending.index' => 17,
+            'v2_pickups.arrival.individual.index' => 24,
+            'v2_pickups.arrival.bulk.index' => 24,
+            'v2_pickups.rider.index' => 271,
+            'v2_pickups.action_log.index' => 272,
+            'v2_pickups.rider_receiving.index' => 366,
+
+
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
             'cargo.draft.index' => 26,
@@ -120,6 +129,41 @@ class Permission
             'cargo.receive.quick.list.index' => 31,
             'cargo.receive.quick.list.details' => 31,
             'cargo.receive.quick.list.ajax' => 31,
+
+            'master_cargo.bag.pending.index' => 25,
+            'master_cargo.bag.pending.list' => 25,
+            'master_cargo.bag.create.index' => 26,
+            'master_cargo.bag.create.shipment_details' => 26,
+            'master_cargo.bag.create.bag_details' => 26,
+            'master_cargo.bag.create.store' => 26,
+            'master_cargo.bag.history.index' => 124,
+            'master_cargo.bag.history.list' => 124,
+
+            'master_cargo.pending.index' => 25,
+            'master_cargo.pending.list' => 25,
+            'master_cargo.pending.shipments' => 25,
+            'master_cargo.create.index' => 26,
+            'master_cargo.create.bag_details' => 26,
+            'master_cargo.create.cargo_details' => 26,
+            'master_cargo.create.store' => 26,
+            'master_cargo.in_transit.index' => 27,
+            'master_cargo.in_transit.list' => 27,
+            'master_cargo.in_transit.bags' => 27,
+            'master_cargo.in_transit.shipments' => 27,
+            'master_cargo.in_transit.receive' => 31,
+            'master_cargo.receive.index' => 31,
+            'master_cargo.receive.bag_details' => 31,
+            'master_cargo.receive.short_received' => 31,
+            'master_cargo.receive.store' => 31,
+            'master_cargo.history.index' => 124,
+            'master_cargo.history.list' => 124,
+            'master_cargo.receive.quick.index' => 31,
+            'master_cargo.receive.quick.bag_details' => 31,
+            'master_cargo.receive.quick.store' => 31,
+            'master_cargo.receive.quick.list.index' => 31,
+            'master_cargo.receive.quick.list.details' => 31,
+            'master_cargo.receive.quick.list.ajax' => 31,
+
             'sameday.index' => 32,
             'sameday.list' => 32,
 
@@ -401,6 +445,11 @@ class Permission
             'reports.pickup_report.index' => 337,
             'reports.pickup_report.list' => 337,
             'reports.pickup_report.data' => 337,
+            'reports.not_attempted_aging.index' => 360,
+            'reports.not_attempted_aging.list' => 360,
+            'reports.daily_monthly_adjustment.index' => 373,
+            'reports.daily_monthly_adjustment.list' => 373,
+            'reports.daily_monthly_adjustment.summary_list' => 373,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -493,6 +542,8 @@ class Permission
             'crm.closed.list' => 236,
             'crm.escalation_status' => 352,
             'crm.escalate' => 353,
+            'crm.consignee_info.index' => 363,
+            'crm.consignee_info.list' => 363,
 
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
@@ -607,6 +658,19 @@ class Permission
 
             'settings.default_agent.index' => 351,
 
+            'settings.holidays.index' => 358,
+            'settings.holidays.list' => 358,
+            'settings.holidays.add' => 358,
+
+            'settings.not_attempted_cron.index' => 359,
+            'settings.not_attempted_cron.store' => 359,
+
+            'settings.nsa_account.index' => 367,
+            'settings.nsa_account.store' => 367,
+
+            'settings.restrict_cities_intercept.index' => 375,
+            'settings.restrict_cities_intercept.store' => 375,
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -663,6 +727,11 @@ class Permission
             'handover.responsibles.status' => 340,
             'handover.responsibles.details' => 340,
             'handover.responsibles.edit' => 340,
+
+
+            'multiple_pieces.add.index' => 368,
+            'multiple_pieces.hold.index' => 369,
+            'multiple_pieces.resolved.index' => 370,
         ],
 
         'shipper' => [

@@ -47,6 +47,7 @@
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
+                        <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Total Collection</th>
@@ -205,6 +206,7 @@
                             head.push('Rider');
                             head.push('Route');
                             head.push('No. Of Shipments');
+                            head.push('No. Of Pending Shipments');
                             head.push('Assigned By');
                             head.push('Assigned Date');
                             head.push('Total COD');
@@ -221,6 +223,7 @@
                                 row.push(values.rider);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
+                                row.push(values.shipments_unverified_count);
                                 row.push(values.assignee);
                                 row.push(values.created_at);
                                 row.push(values.amount);
@@ -272,6 +275,7 @@
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data:'shipments_unverified_link' ,name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center',orderable: false, searchable: false},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
@@ -310,7 +314,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipments_unverified_link')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.pending_status')){
                             $(drop_select).appendTo($(search))

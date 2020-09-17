@@ -112,7 +112,7 @@ class ShipperAgreementController extends Controller
                             color: #ffffff;
                        }
                        .new-page{page-break-before:always}
-                       .terms_conditions{page-break-before:always}
+                       /*.terms_conditions{page-break-before:always}*/
                     </style>
                   </head>
                   <body>
@@ -132,7 +132,141 @@ class ShipperAgreementController extends Controller
         if($sales_person){
             $sales_person_name = Admin::find($sales_person->admin_id)->name;
         }
+        $claim_policy = '<h2 class="text-center mt-4">Claim Policy</h2>
+<style> .table1 tr:nth-child(even) {background-color: #d9e2f3;}</style>
+<table class="table table-bordered table1 p-4" >
+                                    <thead style="/*background-color: #4472c4; color: white;*/font-weight: bold;">
+                                        <tr>
+                                            <td>S.no</td>
+                                            <td>Claim Type</td>
+                                            <td>Pre-Requisition</td>
+                                            <td>Cut Off</td>
+                                            <td>Action</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Damage + Short Content
+                                                    on Delivery (Consignee).</td>
+                                            <td>Within 24
+                                                Hours</td>
+                                            <td>Product details + Marketing
+                                                    picture + Damage parcel picture
+                                                    by consignee + Invoice.</td>
+                                            <td>For all the damage & short
+                                                content at delivery, shipper
+                                                must inform through claim form
+                                                within given cut-off time</td>        
+                                        </tr>
+                                        <tr>
+                                            <td>2-a</td>
+                                            <td>Lost - Booked not
+                                                  arrived.</td>
+                                            <td>4 Days of
+                                            Booking</td>
+                                            <td>Scanned signed receiving sheet+
+                                                invoice</td>
+                                            <td>For all the shipments booked
+                                                but not arrived at Trax, shipper
+                                                must inform within given cut-off
+                                                time</td>    
+                                        </tr>
+                                        <tr>
+                                            <td>2-b</td>
+                                            <td>Lost – After arrival
+                                                before delivery.</td>
+                                            <td>45 Days</td>
+                                            <td>Product details + Marketing
+                                            picture + Invoice</td>
+                                            <td>For all the shipments arrived at
+                                                Trax office but not delivered or
+                                                returned, shipper must inform
+                                                within given cut-off time</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2-c</td>
+                                            <td>Lost –
+                                            Returned/Charges
+                                            Deducted.</td>
+                                            <td>3 Days</td>
+                                            <td>Product Details + Marketing
+                                                picture + Invoice</td>
+                                                <td>For all the return shipments,
+                                                which are not received
+                                                physically to shipper.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Theft & Snatching</td>
+                                            <td>2 Days Notice</td>
+                                            <td>Product Details</td>
+                                                <td>No Claim</td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Weight Dispute</td>
+                                            <td>3 Days of Arrival</td>
+                                            <td>Product details + Picture +
+                                                Actual weight of product + or
+                                                Alternate CN# of similar
+                                                product.</td>
+                                                <td>Claim amount disburse upon
+                                                calculation & Shipper can claim
+                                                it within given cut-off time.</td>
+                                        </tr>
+                                         <tr>
+                                            <td>5</td>
+                                            <td>Tariff</td>
+                                            <td>2 Days of Invoice</td>
+                                            <td>Proposal copy + Calculation Error</td>
+                                                <td>Claim amount disburse upon
+                                                    calculation & Shipper can claim
+                                                    it within given cut-off time</td>
+                                        </tr>
+                                         <tr>
+                                            <td>6</td>
+                                            <td>Damage + Content Short
+                                            Return (Shipper).</td>
+                                            <td>24 Hours of Return.</td>
+                                            <td>Product details + Picture + Invoice</td>
+                                                <td>Shipper can claim any damage
+                                                    short content in return
+                                                    shipment within given cut-off
+                                                    time.</td>
+                                        </tr>
+</tbody>
+</table>
 
+<table class="table table-bordered " >
+    <tbody>
+        <tr>
+            <td>Flyer/Packing un intact while delivery claim
+            amount will be Up to 80% of product value.</td>
+            <td>Flyer/Packing burnt + damage claim amount
+            will be up to 80% of invoice.</td>
+        </tr>
+        <tr>
+            <td>Flyer/Packing un intact and mishandled at
+            time of return, shipper needs write broken
+            received on return receiving document -
+            claim amount will be up to 50%.</td>
+            <td>Packing intact and no mishandling no amount
+            disburse. </td>
+        </tr>
+        </tbody>
+</table>
+
+<ul>Note:
+<li>If Cod amount is 0-25,000/- claim would be up to 80% of product cost</li>
+<li>If COD amount is 25000+ Trax will not entertain any claim</li>
+<li>Shipper using Trax flyers or approved packaging only then the claim will be entertained
+otherwise it will be rejected</li>
+<li>No claim will be entertained in case of theft and snatching</li>
+<li>Total claim processing time is 15 working days</li>
+
+</ul>
+';
 
         $page = '<table class="table table-sm table-borderless mb-0">
                         <tbody>
@@ -196,7 +330,7 @@ class ShipperAgreementController extends Controller
                                 <td colspan="1">' . $shipper->cnic . '</td>
                                 
                                 <td colspan="1"><strong>Payment Cycle</strong></td>
-                                <td colspan="1">' . ucfirst($shipper_bank->payment_cycle) . '</td>
+                                <td colspan="1">' . ucfirst($shipper->payment_cycle->name) . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>NTN Number</strong></td>
@@ -262,7 +396,11 @@ class ShipperAgreementController extends Controller
                 $chargeable_weight_details = '';
                 $weight_charges_details = '';
                 $service_type = ShippingMode::find($rate->shipping_mode_id);
-                $service_type_details = '<div class="row p-1"><div class="col-3 p-1 color secondary rounded border"><h4><strong>Shipping Mode </strong></h4></div><div class="col-3 pt-1 color border rounded text-center"><h4>' . $service_type->mode . '</h4></div></div>';
+                $service_type_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Shipping Mode </strong></td>
+<td>' . $service_type->mode . '</td>
+</tr></thead></table></div></div>';
 
 
                 if($shipper->account_type_id == 1){
@@ -272,16 +410,16 @@ class ShipperAgreementController extends Controller
                 }
 
                 if($weight_charges){
-                    $weight_charges_details = '<div class="row p-1"><div class="col-3 p-1 color secondary rounded border"><h4><strong>Weight Charges </strong></h4></div></div>';
+                    $weight_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
                     if($shipper->account_type_id == 2){
                         $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 1)->first();
 
-                        $chargeable_weight_details = '<div class="row mb-1"><div class="col-5"><table class="table table-sm table-bordered mb-0">
+                        $chargeable_weight_details = '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0 mt-0">
                             <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
                           </table></div></div>';
                         $weight_charges_details .= $chargeable_weight_details;
                         if($rate->shipping_mode_id != 4){
-                            $weight_charges_details .= '<table class="table table-sm table-bordered"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
+                            $weight_charges_details .= '<table class="table table-sm table-bordered mt-0 mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
 
                             foreach ($weight_charges as $weight_charge){
                                 if($weight_charge->delivery_type_id == 1){
@@ -292,11 +430,11 @@ class ShipperAgreementController extends Controller
 
                             $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2)->first();
 
-                            $chargeable_weight_details = '<div class="row mb-1"><div class="col-5"><table class="table table-sm table-bordered mb-0">
+                            $chargeable_weight_details = '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
                             <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
                           </table></div></div>';
                             $weight_charges_details .= $chargeable_weight_details;
-                            $weight_charges_details .= '<table class="table table-sm table-bordered"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
+                            $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
                             foreach ($weight_charges as $weight_charge){
                                 if($weight_charge->delivery_type_id == 2){
                                     $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
@@ -364,7 +502,7 @@ class ShipperAgreementController extends Controller
                     $cash_handling = CorporateCashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                 }
                 if($cash_handling){
-                    $cash_handling_details = '<div class="row p-1"><div class="col-3 p-1 color secondary rounded border"><h4><strong>Cash Handling Charges </strong></h4></div></div>';
+                    $cash_handling_details = '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Cash Handling Charges </strong></thead></table></div></div>';
                     $cash_handling_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Charges</th></tr></thead><tbody>';
                     foreach ($cash_handling as $cash){
                         $cash_handling_details .= '<tr><td>' . $cash->range_up . '</td><td>' . $cash->range_down . '</td><td>' . $cash->charges . '</td></tr>';
@@ -379,8 +517,8 @@ class ShipperAgreementController extends Controller
                     $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
                 }
                 if($fuel_surcharge){
-                    $fuel_surcharge_charges_details = '<div class="row p-1"><div class="col-3 p-1 color secondary rounded border"><h4><strong>Fuel Surcharge </strong></h4></div></div>';
-                    $fuel_surcharge_charges_details .= '<div class="row mb-1"><div class="col-5"><table class="table table-sm table-bordered mb-0">
+                    $fuel_surcharge_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Fuel Surcharge </strong></thead></table></div></div>';
+                    $fuel_surcharge_charges_details .= '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
                             <tbody><tr><td class="color primary" ><strong>Fuel Charges</strong></td><td>' . $fuel_surcharge->fuel_surcharge . '%</td></tr></tr></tbody>
                           </table></div></div>';
                 }
@@ -392,7 +530,7 @@ class ShipperAgreementController extends Controller
                     $return_charges = CorporateReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
                 }
                 if($return_charges){
-                    $return_charges_details .= '<div class="row p-1"><div class="col-3 p-1 color secondary rounded border"><h4><strong>Return Charges </strong></h4></div></div>';
+                    $return_charges_details .= '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Return Charges </strong></thead></table></div></div>';
                     if($rate->shipping_mode_id != 4){
 
 
@@ -414,12 +552,13 @@ class ShipperAgreementController extends Controller
                 }
 
 
+
             $rate_details .= $service_type_details;
             $rate_details .= $weight_charges_details;
             $rate_details .= $cash_handling_details;
-            $rate_details .= '<div class="new-page"></div>';
             $rate_details .= $fuel_surcharge_charges_details;
             $rate_details .= $return_charges_details;
+            $rate_details .= '<div class="new-page"></div>';
             }
 
 
@@ -429,6 +568,7 @@ class ShipperAgreementController extends Controller
         $html .= $packaging_details;
 
         $html .= $rate_details;
+        $html .=$claim_policy;
         $html .= '</div>';
         $fuel_charge = '';
         if($shipper->account_type_id == 1){
@@ -443,7 +583,7 @@ class ShipperAgreementController extends Controller
         if($shipper->term_and_conditions){
             $check = 'checked';
         }
-        $terms_conditions = '<div class="terms_conditions p-2"><h2><u>General Terms & Conditions </u></h2>';
+        $terms_conditions = '<div class="terms_conditions pl-2 pt-6"><h2><u>General Terms & Conditions </u></h2>';
         $terms_conditions .= '<ul class="">
                                <li>The client must agree to the following terms and conditions: </li>
                                <li><strong>TRAX Online (Pvt) Ltd.</strong> will act as an agent on behalf of the customer. We shall have complete legal authority to collect the cash and transfer the ownership of goods to the consignee. </li>
@@ -461,8 +601,8 @@ class ShipperAgreementController extends Controller
                                <li>Shipper and its consignee shall indemnify Trax Online from any legal claims arising against each other in light of such exchange.</li>
                                <li><strong>TRAX Online (Pvt) Ltd.</strong> may add new terms & conditions at any point in time.</li>
                              </ul>';
-        $terms_conditions .= '<h2><u>Acknowledgment & Signature</u></h2>';
-        $terms_conditions .= '<div class="ml-2"><input class="form-check-input" type="checkbox" value="1" disabled '.$check.'> <span class="ml-2">I hereby accept all the terms and conditions mention above along with the agreed upon rates mentioned within.</span> </div><div class="row mt-3"><div class="col-6"><span class="border-bottom"><strong>Rates Added By</strong></span><p class="pt-1">'.$sales_person_name.'</p></div><div class="col-6"><p><span class="border-bottom"><strong>Shipper Signature</strong></span></p><p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p></div></div>';
+        $terms_conditions .= '<h2 class="mt-0"><u>Acknowledgment & Signature</u></h2>';
+        $terms_conditions .= '<div class="m-2"><input class="form-check-input" type="checkbox" value="1" disabled '.$check.'> <span class="mt-2">I hereby accept all the terms and conditions mention above along with the agreed upon rates mentioned within.</span> </div><div class="row mt-2"><div class="col-6"><span class="border-bottom"><strong>Rates Added By</strong></span><p class="pt-2">'.$sales_person_name.'</p></div><div class="col-6"><p><span class="border-bottom"><strong>Shipper Signature</strong></span></p><p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p></div></div>';
 
 
         $terms_conditions .= '</div>';

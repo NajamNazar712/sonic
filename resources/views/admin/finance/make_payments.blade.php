@@ -19,6 +19,16 @@
 
 							<div class="row text-center">
 								<div class="col-3">
+									<form id="payment_cycle_filter_form" class="mb-1 justify-content-center" novalidate="novalidate">
+										<div class="form-group">
+											<select name="payment_cycle_filter" class="select2 payment_cycle_filter">
+												<option value="1" selected>Filtered</option>
+												<option value="2">All</option>
+											</select>
+										</div>
+									</form>
+								</div>
+								<div class="col-3">
 									<form id="tracking_number_search_form" class="mb-1 justify-content-center" novalidate="novalidate">
 										<div class="form-group">
 										<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
@@ -349,6 +359,14 @@
 				table.draw(false);
 			});
 
+			$('#payment_cycle_filter_form select.payment_cycle_filter').select2({
+                placeholder:'Payment Cycle Filter',
+                width:'100%',
+            }).bind('change', function() {
+				table.draw();
+			});
+			// $('#payment_cycle_filter_form select.payment_cycle_filter').val(1).trigger('change');
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -546,6 +564,7 @@
 				ajax: {
 					url: '{{ route('admin.finance.make_payments.list') }}',
 					data: function (d) {
+						d.payment_filter = $('#payment_cycle_filter_form select.payment_cycle_filter').val();
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
 						d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
 						d.shipper_status = $('#shipper_status_form select.shipper_status').val();
@@ -567,12 +586,12 @@
 					{data:'delivered_shipments', name: 'pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'pending_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
-					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', orderable: false},
-					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', orderable: false},
-					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'total_amount', name: 'ppc.amount', class: 'align-middle text-center total_amount', orderable: false},
+					{data:'total_charges', name: 'ppc.charges', class: 'align-middle text-center total_charges', orderable: false},
+					{data:'total_gst', name: 'ppc.gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
-					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
+					{data:'total_payable', name: 'ppc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'total_adjustments', name: 'total_adjustments', class: 'align-middle text-center total_adjustments', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
 					{data:'bank_branch', name: 'ubi.bank_branch', class: 'align-middle text-center bank_branch'},
@@ -580,7 +599,7 @@
 					{data:'account_title', name: 'ubi.account_title', class: 'align-middle text-center account_title'},
 					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
 					{data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
-					{data:'payment_cycle', name: 'ubi.payment_cycle', class: 'align-middle text-center payment_cycle'},
+					{data:'payment_cycle', name: 'pc.id', class: 'align-middle text-center payment_cycle'},
 					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
@@ -611,10 +630,9 @@
                     //     '<option value="invoices">Invoices</option>' +
                     //     '</select>';
                     var payment_cycle_select = '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
-                        '<option value="daily">Daily</option>' +
-                        '<option value="weekly">Weekly</option>' +
-                        '<option value="fortnight">Fortnight</option>' +
-                        '<option value="monthly">Monthly</option>' +
+                        '<option value="1">Daily</option>' +
+                        '<option value="2">Weekly</option>' +
+                        '<option value="3">Monthly</option>' +
                         '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -1216,11 +1234,97 @@
 				})
 				.done(function(data) {
 					if (data.status == 0) {
-						if (data.duplicate_shipments) {
+						if (data.duplicate_shipments && data.over_payments) {
 							var html = 'The following Shipment(s) have Duplicate Same Type Payments:<br/>';
 
 							$.each(data.duplicate_shipments, function(index, duplicate_shipment) {
 								html += duplicate_shipment + '<br/>';
+							});
+
+							html += 'The following Shipment(s) have Payments above the Limit:<br/>';
+
+							$.each(data.over_payments, function(index, over_payment) {
+								html += over_payment.shipper + ' ' + '<b>' + over_payment.payable + '</b>' + '<br/>';
+							});
+
+							html += '<br/>Are you sure, you want to make the Payments?';
+
+							content = document.createElement('div');
+							content.innerHTML = html;
+
+							swal({
+								content: content,
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc	: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									$('#make_payments #make_payments_form button').remove();
+
+									form.submit();
+								}
+							});
+						}
+						else if (data.duplicate_shipments) {
+							var html = 'The following Shipment(s) have Duplicate Same Type Payments:<br/>';
+
+							$.each(data.duplicate_shipments, function(index, duplicate_shipment) {
+								html += duplicate_shipment + '<br/>';
+							});
+
+							html += '<br/>Are you sure, you want to make the Payments?';
+
+							content = document.createElement('div');
+							content.innerHTML = html;
+
+							swal({
+								content: content,
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc	: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									$('#make_payments #make_payments_form button').remove();
+
+									form.submit();
+								}
+							});
+						}
+						else if (data.over_payments) {
+							var html = 'The following Shipment(s) have Payments above the Limit:<br/>';
+
+							$.each(data.over_payments, function(index, over_payment) {
+								html += over_payment.shipper + ': ' + '<b>' + over_payment.payable + '</b>' + '<br/>';
 							});
 
 							html += '<br/>Are you sure, you want to make the Payments?';

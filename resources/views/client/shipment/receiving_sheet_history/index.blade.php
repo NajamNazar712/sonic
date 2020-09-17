@@ -19,6 +19,18 @@
 
 							<h3 class="mb-1">Over Received Shipments</h3>
 
+							<div class="row mb-2 justify-content-center">
+								<form id="tracking_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group ml-1">
+										<input type="text" class="input-group form-control" name="search_tracking_number" id="search_tracking_number" placeholder="Tracking Number">
+									</div>
+									<div class="form-group ml-1">
+										<button type="submit" id="search_filter_btn" class="btn btn-primary">Search</button>
+									</div>
+								</form>
+
+							</div>
+
 							<table class="table table-stripped table-bordered datatable" id="short_received_datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
@@ -34,6 +46,18 @@
 							<hr class="mt-2 mb-2">
 
 							<h3 class="mb-1">Receiving Sheets</h3>
+
+							<div class="row mb-2 justify-content-center">
+								<form id="tracking_number_search_form_received" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group ml-1">
+										<input type="text" class="input-group form-control" name="search_tracking_number_received" id="search_tracking_number_received" placeholder="Tracking Number">
+									</div>
+									<div class="form-group ml-1">
+										<button type="submit" id="search_filter_btn" class="btn btn-primary">Search</button>
+									</div>
+								</form>
+
+							</div>
 
 							<table class="table table-stripped table-bordered datatable" id="receiving_sheet_datatable" style="z-index: 3;">
 								<thead>
@@ -170,7 +194,13 @@
                     processing: data_table_loader
                 },
 				serverSide: true,
-				ajax: '{{ route('cod.shipment.receiving_sheet_history.short_received_list') }}',
+				ajax: {
+                    url: '{{ route('cod.shipment.receiving_sheet_history.short_received_list') }}',
+                    data: function (d) {
+                        d.tracking_number = $('#tracking_number_search_form #search_tracking_number').val();
+                    }
+                },
+				//ajax: '{{ route('cod.shipment.receiving_sheet_history.short_received_list') }}',
 				rowId: 'pickup_address_id',
 				order: [[3, 'desc']],
 				columns: [
@@ -330,7 +360,13 @@
                     processing: data_table_loader
                 },
 				serverSide: true,
-				ajax: '{{ route('cod.shipment.receiving_sheet_history.receiving_sheet_list') }}',
+				ajax: {
+                    url: '{{ route('cod.shipment.receiving_sheet_history.receiving_sheet_list') }}',
+                    data: function (d) {
+                        d.tracking_number = $('#tracking_number_search_form_received #search_tracking_number_received').val();
+                    }
+                },
+				//ajax: '{{ route('cod.shipment.receiving_sheet_history.receiving_sheet_list') }}',
 				rowId: 'id',
 				order: [[6, 'desc']],
 				columns: [
@@ -376,6 +412,15 @@
 					this.api().table().columns.adjust();
 				}
 			});
+
+			$('#tracking_number_search_form').on('submit',function (e) {
+                e.preventDefault();
+                short_received_table.draw();
+            });
+			$('#tracking_number_search_form_received').on('submit',function (e) {
+                e.preventDefault();
+				receiving_sheet_table.draw();
+            });
 
 			$('#receiving_sheet_datatable tbody').on('click', 'tr td.receiving_sheet button', function() {
 				print(parseInt($(this).children('.id').html()));

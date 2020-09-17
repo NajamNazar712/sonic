@@ -45,4 +45,7 @@ class User extends Authenticatable
     public function account_type(){
         return $this->belongsTo('App\Http\Models\AccountType');
     }
+    public function payment_cycle(){
+        return $this->belongsTo('App\Http\Models\PaymentCycle');
+    }
 }

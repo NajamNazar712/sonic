@@ -600,13 +600,15 @@ class AdminCommissionController extends Controller
             $sale_commission_users = SalesCommission::where('status', 2)->pluck('shipper_id')->toArray();
         }
         if($request->get('search_date_from')){
-            $first_day = $request->search_date_from;
+            //$first_day = $request->search_date_from;
+            $first_day = Carbon::parse($request->search_date_from)->toDateTimeString();
         }
         else{
             $first_day = Carbon::parse($date)->firstOfMonth();
         }
         if($request->get('search_date_to')){
-            $last_day = $request->search_date_to;
+            $last_day = Carbon::parse($request->search_date_to)->toDateTimeString();
+
         }
         else{
             $last_day = Carbon::parse($date)->lastOfMonth();
@@ -637,7 +639,7 @@ class AdminCommissionController extends Controller
                     if($sale_tier['id'] == 1){
                         $name = $sale_tier['tier_name'] . 'commission';
                         $commission_name = strtolower(str_replace(' ', '', $name));
-                        $sale_tier_user->addselect(DB::raw('(select admins.name from sales_commission_users JOIN admins ON admins.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and admins.id = '. $admin .' and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . strtolower(str_replace(' ', '', $sale_tier['tier_name']))), DB::raw('(select commission from sales_commission_users JOIN admins ON admins.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and admins.id = '. $admin .' and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . $commission_name));
+                        $sale_tier_user->addSelect(DB::raw('(select admins.name from sales_commission_users JOIN admins ON admins.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and admins.id = '. $admin .' and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . strtolower(str_replace(' ', '', $sale_tier['tier_name']))), DB::raw('(select commission from sales_commission_users JOIN admins ON admins.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and admins.id = '. $admin .' and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . $commission_name));
                     }
                 }
             }
@@ -645,7 +647,7 @@ class AdminCommissionController extends Controller
             $datatable =  Datatables::of($sale_tier_user)
                 ->addColumn('revenue' ,function($sale_tier_user){
                     $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
-                    return $revenue;
+                    return number_format($revenue, 2);
                 })
                 ->addColumn('total_commission_amount' ,function($sale_tier_user) use($first_day,$last_day){
                     $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
@@ -686,17 +688,17 @@ class AdminCommissionController extends Controller
                 foreach ($sales_tier as $sale_tier) {
                     $name = $sale_tier['tier_name'] . 'commission';
                     $commission_name = strtolower(str_replace(' ', '', $name));
-                    $sale_tier_user->addselect(DB::raw('(select IF(sales_commission_users.tier_type_id = 1, admins.name, sales_commission_external_users.name) from sales_commission_users LEFT JOIN admins ON admins.id = sales_commission_users.user_id LEFT JOIN sales_commission_external_users ON sales_commission_external_users.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . strtolower(str_replace(' ', '', $sale_tier['tier_name']))), DB::raw('(select commission from sales_commission_users WHERE sales_commission_users.sales_commission_id = sc.id and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . $commission_name));
+                    $sale_tier_user->addSelect(DB::raw('(select IF(sales_commission_users.tier_type_id = 1, admins.name, sales_commission_external_users.name) from sales_commission_users LEFT JOIN admins ON admins.id = sales_commission_users.user_id LEFT JOIN sales_commission_external_users ON sales_commission_external_users.id = sales_commission_users.user_id WHERE sales_commission_users.sales_commission_id = sc.id and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . strtolower(str_replace(' ', '', $sale_tier['tier_name']))), DB::raw('(select commission from sales_commission_users WHERE sales_commission_users.sales_commission_id = sc.id and sales_commission_users.tier_id = ' . $sale_tier['id'] . ') as ' . $commission_name));
                 }
             }
             $datatable =  Datatables::of($sale_tier_user)
                 ->addColumn('revenue' ,function($sale_tier_user){
                     $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
-                    return $revenue;
+                    return number_format($revenue, 2);
                 })
                 ->addColumn('total_commission_amount' ,function($sale_tier_user) use($first_day,$last_day){
                     $revenue = $sale_tier_user->weight_charges + $sale_tier_user->cash_handling_charges + $sale_tier_user->insurance_charges + $sale_tier_user->return_charges + $sale_tier_user->fuel_surcharge + $sale_tier_user->replacement_charges + $sale_tier_user->try_and_buy_charges + $sale_tier_user->packaging_material_charges + $sale_tier_user->intercept_charges + $sale_tier_user->nsa_osa_charges;
-                    return number_format($revenue * ($sale_tier_user->total_commission/100),2,'.','');;
+                    return number_format($revenue * ($sale_tier_user->total_commission/100),2,'.','');
                 });
 
             if (!empty($sales_tier)) {
@@ -771,7 +773,7 @@ class AdminCommissionController extends Controller
                 }
             }
 
-            $stats['revenue'] = $total_revenue;
+            $stats['revenue'] = number_format($total_revenue, 2);
             $stats['commission'] = number_format($total_commission,2,'.','');
 
             return response()->json(['status' => 1, 'stats' => $stats]);

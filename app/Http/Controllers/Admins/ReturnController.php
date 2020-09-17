@@ -43,7 +43,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -227,9 +227,11 @@ class ReturnController extends Controller
                 }
             })
             ->orderColumn('shipper_phone', 'u.phone $1, u.phone2 $1')
+
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+
             ->addColumn('shipment_remarks',function ($shipments){
-                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
+                $remark = '<textarea style="width:200px;" placeholder="Enter Remarks" class="form-control form-control-sm" rows="4" cols="100">'.$shipments->remarks.'</textarea>';
                 return $remark;
             })
             ->editColumn('status_date',function ($shipments){
@@ -343,10 +345,15 @@ class ReturnController extends Controller
 
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
+        // $remarks = $request->remark;
+        
         if($request->action == 'confirm'){
 
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
+                if($parcel->booking_type_id == 5){
+                    continue;
+                }
                 $remark_inp = "remark.$shipment";
                 if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
 
@@ -451,6 +458,9 @@ class ReturnController extends Controller
         if($request->action == 'confirm'){
             $return_reason = $request->single_return_reason_select;
             $parcel = Shipment::find($request->shipment_id);
+            if($parcel->booking_type_id == 5){
+                return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
+            }
             if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
 
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
@@ -701,20 +711,67 @@ class ReturnController extends Controller
                     $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
                     if($status == 0){
+                        if($shipment_details->booking_type_id == 5){
+                            continue;
+                        }
                         $shipment_details->shipper_status_id = 20; //Confirmation Pending
                         ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
 
-//                            ShipmentChargesController::return($shipment_details->id);
-//
-//                            AdminFinanceController::add_payment($shipment_details->id, 1);
+
+                        if ($shipment_details->booking_type_id != 4) {
+                            ShipmentChargesController::return($shipment_details->id);
+
+                            if ($shipment_details->packaging_material_request != 1) {
+
+                                AdminFinanceController::add_payment($shipment_details->id, 1);
+
+                            }
+                        }
+                        else {
+                            ShipmentChargesController::walk_in_return($shipment_details->id);
+
+                            $shipment_details->walk_in_status = 2;
+
+                            AdminFinanceController::done_payment($shipment_details->id, 1);
+                        }
+
                     }
                     if($status == 1){
+                        $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
+                        if($journey){
+                            if ($shipment_details->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
+                                $shipment_details->nsa_osa_status = 1;
+                                $shipment_details->save();
+                                ShipmentChargesController::nsa_osa_charges($shipment_details->id);
+
+                                NotificationsController::send(33, $shipment_details->id);
+                            }
+                            else if ($shipment_details->shipper_status_id == 52) {
+                                $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                                if ($journey && ($journey->status_reason_id == 12)) {
+                                    $shipment_details->nsa_osa_status = 1;
+
+                                    $shipment_details->save();
+
+                                    ShipmentChargesController::nsa_osa_charges($shipment_details->id);
+                                }
+                            }
+                        }
                         $shipment_details->shipper_status_id = 13; //Re-Attempt
+                        $shipment_details->consignee_status_id = 13;
                         ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
-//                            NotificationsController::send(15, 0, $shipment_details->id);
-//                            NotificationsController::send(16, 0, $shipment_details->id);
+
+                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
+                        if($return_assign_shipment){
+                            $return_assign_shipment->status = 0;
+                            $return_assign_shipment->save();
+                        }
+                        NotificationsController::send(15, 0, $shipment_details->id);
+                        NotificationsController::send(16, 0, $shipment_details->id);
+
                     }
                     $shipment_details->save();
                     $tracking_numbers['Row #' . $row_id] = $tracking;
@@ -1313,6 +1370,7 @@ class ReturnController extends Controller
             return ['status' => 1, 'error' => 'No Shipment Item with given Item ID is present'];
         }
     }
+
     public function return_note_create(Request $request)
     {
         $trackings = explode(',', $request->shipment_ids);
@@ -1413,7 +1471,7 @@ class ReturnController extends Controller
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
-            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status'])
+            ->select(['return_notes.id as return_note', 'return_notes.id','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status',DB::raw('(SELECT COUNT(r.id) FROM return_notes AS r INNER JOIN return_note_shipments AS rns ON r.id = rns.return_note_id WHERE rns.return_note_id = return_notes.id AND rns.status = 0) AS shipments_unverified_count')])
             ->whereIn('return_notes.status',[0,3]);
 
         if (session('role_id') != 1) {
@@ -1430,6 +1488,14 @@ class ReturnController extends Controller
             ->editColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('shipments_unverified_link', function($deliveries) {
+                if ($deliveries->shipments_unverified_count != 0) {
+                    return  $deliveries->shipments_unverified_count ;
                 }
                 else {
                     return 0;
@@ -1759,8 +1825,10 @@ class ReturnController extends Controller
         $return_note_id = $request->return_note_id;
         $array_returned = array(25,31,38);
         $array_returned_status = array(24,29,35,47,48, 60);
+        $actual_date = $request->actual_date_formatted;
         if($return_note_id != '') {
             $return_note_details = ReturnNote::find($return_note_id);
+
             foreach ($shipments as $shipment) {
                 $reasonId = "reason_drop.$shipment";
                 $parcel = Shipment::where('id', $shipment)->first();
@@ -1797,6 +1865,7 @@ class ReturnController extends Controller
                     $return_note_details->status = 3;
                     $return_note_details->updated_by = Auth::id();
                 }
+                $return_note_details->actual_date = $actual_date;
                 $return_note_details->save();
             }
 
@@ -1820,6 +1889,7 @@ class ReturnController extends Controller
     public function return_status_delivered(Request $request){
         if(!empty($request->shipment_ids)){
             $open_box_ids = array();
+            $actual_date = $request->actual_date;
             if($request->has('open_box_ids')){
                 $open_box_ids = $request->open_box_ids;
             }
@@ -1841,9 +1911,6 @@ class ReturnController extends Controller
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-
-
-
 
                         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
                         if ($packaging_material_shipment != null) {
@@ -1910,8 +1977,9 @@ class ReturnController extends Controller
             if($shipment_status == 0){
                 $return_note_details->status = 3;
                 $return_note_details->updated_by = Auth::id();
-                $return_note_details->save();
             }
+            $return_note_details->actual_date = $actual_date;
+            $return_note_details->save();
 
             NotificationsController::send(15, $request->return_note_id);
             NotificationsController::send(16, $request->return_note_id);
@@ -1924,10 +1992,10 @@ class ReturnController extends Controller
     }
 
     public function receive_return_status_submit_all(Request $request){
-
         if(!empty($request->shipment_ids)){
             $shipment_ids = $request->shipment_ids;
             $shipment_status = $request->shipment_status;
+            $actual_date = $request->actual_date;
             $open_box_ids = array();
             if($request->has('open_box_ids')){
                 $open_box_ids = $request->open_box_ids;
@@ -2008,12 +2076,13 @@ class ReturnController extends Controller
                         $return_note_details->save();
                     }
                 }
-                $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
+                $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status' => 0])->count();
                 if($shipment_status_count == 0){
                     $return_note_details->updated_by = Auth::id();
                     $return_note_details->status = 3;
-                    $return_note_details->save();
                 }
+                $return_note_details->actual_date = $actual_date;
+                $return_note_details->save();
 
                 NotificationsController::send(15, $request->return_note_id);
                 NotificationsController::send(16, $request->return_note_id);
@@ -2048,6 +2117,7 @@ class ReturnController extends Controller
                         $return_note_details->status = 3;
                         $return_note_details->updated_by = Auth::id();
                     }
+                    $return_note_details->actual_date = $actual_date;
                     $return_note_details->save();
 
                 }

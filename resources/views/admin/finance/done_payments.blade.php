@@ -100,6 +100,8 @@
 										<div class="col ml-auto">
 											<div class="form-group text-right">
 												<a href="{{ asset('file/Done Payment Update Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+
+												<a type="button" class="btn btn-primary white" data-toggle="modal" data-target="#company_banks"><i class="la la-bank"></i> Company Banks</a>
 											</div>
 										</div>
 									</div>
@@ -129,7 +131,6 @@
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
-										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
 										<th class="border-primary border-darken-1">Reference No.</th>
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
@@ -284,6 +285,41 @@
 									</div>
 								</div>
 							</div>
+
+							<div class="modal fade" id="company_banks" role="dialog" aria-labelledby="company_banks_title" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="company_banks_title">Company Bank(s)</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+												<table class="table table-bordered">
+													<thead>
+														<tr>
+															<th>ID</th>
+															<th>Bank</th>
+														</tr>
+													</thead>
+													<tbody>
+														@foreach ($company_banks as $company_bank)
+															<tr>
+																<td>{{ $company_bank->id }}</td>
+																<td>{{ $company_bank->name }}</td>
+															</tr>
+														@endforeach
+													</tbody>
+												</table>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -394,7 +430,6 @@
                             head.push('Total Deductable');
                             head.push('Total Payable');
                             head.push('Bank');
-                            head.push('Return Shipments Avg. Aging');
                             head.push('Reference No.');
                             head.push('Done Datetime');
                             head.push('Company Bank');
@@ -420,7 +455,6 @@
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
-                                row.push(values.return_shipments_average_aging);
                                 row.push(values.reference_number);
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
@@ -619,14 +653,13 @@
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
-					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', orderable: false},
-					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', orderable: false},
-					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
-					{data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
+					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
+					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
+					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
-					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
+					{data:'total_payable', name: 'dpc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
-					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},

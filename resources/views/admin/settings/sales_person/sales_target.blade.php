@@ -40,7 +40,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Target Shipments/Day</span>
                                                 </div>
-                                                <input type="text" name="target_shipment_days" class="form-control class" placeholder="Target Shipments/Day*" data-rule-required="true" data-msg-required="Target Shipments/Day is required" value="">
+                                                <input type="text" name="target_shipment_days" id="target_shipment_days" class="form-control class" placeholder="Target Shipments/Day*" data-rule-required="true" data-msg-required="Target Shipments/Day is required" value="">
                                                 
                                             </div>
                                         </div>
@@ -49,7 +49,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Target Shipments/Week</span>
                                                 </div>
-                                                <input type="text" name="target_shipment_week" class="form-control class" placeholder="Target Shipments/Week*" data-rule-required="true" data-msg-required="Target Shipments/Week is required" value="">
+                                                <input type="text" name="target_shipment_week" id="target_shipment_week" class="form-control class" placeholder="Target Shipments/Week*" data-rule-required="true" data-msg-required="Target Shipments/Week is required" value="">
                                                 
                                             </div>
                                         </div>
@@ -139,6 +139,11 @@
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
+            });
+            $('#target_shipment_days').on('change', function(){
+                var days = $(this).val();
+
+                $('#target_shipment_week').val(days * 6);
             });
         });
 

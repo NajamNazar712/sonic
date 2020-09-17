@@ -1378,6 +1378,7 @@ class AdminPickupsController extends Controller
             return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
         }
     }
+
     public function try_and_buy_item_details(Request $request){
         $shipment_id = $request->shipment_id;
         $shipment_item_id = $request->item_id;
@@ -1397,6 +1398,7 @@ class AdminPickupsController extends Controller
             return ['status' => 1, 'error' => 'No Shipment Item with given Item ID is present'];
         }
     }
+
 
     public function receive_shipment_remove(Request $request) {
       $shipment = Shipment::find($request->id);

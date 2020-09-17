@@ -10,7 +10,7 @@
             <div class="content-body">
                 <h1 class="mb-1">
                     Book a Shipment (Corporate)
-{{--                    @php(dd($min_chargeable_weight[0]['id']))--}}
+                    {{--                    @php(dd($min_chargeable_weight[0]['id']))--}}
                     <span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
                     <button type="button" class="btn btn-primary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
                 </h1>
@@ -149,6 +149,11 @@
 
                                         <div class="form-group">
                                             <input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
+                                        </div>
+
+                                        <div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
+                                            <label class="d-block">Self Collection</label>
+                                            <input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
                                         </div>
                                     </div>
 
@@ -619,7 +624,7 @@
             @if (!Session::has('service_type_id'))
             $('#select_service_type').modal('show');
             @else
-            service_type = '{{ Session::get('service_type_id') }}';
+                service_type = '{{ Session::get('service_type_id') }}';
 
             if(service_type == 1){
                 $('#pieces_quantity').removeClass('d-none');
@@ -664,6 +669,7 @@
                         $('#shipper_header_info').html('Shipper Information');
                         $('#consignee_header_info').html('Consignee Information');
                         $('#pieces_quantity').removeClass('d-none');
+                        $('#self_collection_div').removeClass('d-none');
                     }
                     else if (service_type == 2) {
                         $('#shipping_header_div').removeClass('col col_6');
@@ -683,6 +689,7 @@
                         $('#shipping_header_info').removeClass('mt-2');
                         $('#shipper_header_info').html('Shipper Information');
                         $('#consignee_header_info').html('Consignee Information');
+                        $('#self_collection_div').addClass('d-none');
                     }
                     else if (service_type == 3) {
                         $('#shipping_header_div').removeClass('col col_6');
@@ -702,6 +709,7 @@
                         $('#shipping_header_info').removeClass('mt-2');
                         $('#shipper_header_info').html('Shipper Information');
                         $('#consignee_header_info').html('Consignee Information');
+                        $('#self_collection_div').addClass('d-none');
                     }
                     else if (service_type == 5) {
                         $('#shipping_header_div').removeClass('col col_custom');
@@ -721,6 +729,12 @@
                         $('#info_display').addClass('d-none');
                         $('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
                         $('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
+                        $('#self_collection_div').addClass('d-none');
+                        var consignee_email = $('input[name="consignee_email_address"]');
+                        consignee_email.attr('data-toggle', 'tooltip');
+                        consignee_email.attr('data-placement', 'top');
+                        consignee_email.attr('data-original-title', 'Please add email address so that we can sent address label to your customer.');
+                        consignee_email.tooltip('show');
                     }
                     $('#booking_form #selected_service_type').val(service_type);
 
@@ -879,6 +893,7 @@
             });
 
             $('#information_display').checkboxpicker();
+            $('#self_collection').checkboxpicker();
 
             $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',

@@ -93,7 +93,7 @@
 
 										</div>
 
-										
+
 										@if($air_waybill != null)
 											<div id="info_display" class="form-group text-center p-1 border border-light rounded">
 												<label class="d-block">Show Information on Air Waybill</label>
@@ -109,7 +109,7 @@
 												<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
 											</div>
 										@endif
-									
+
 									</div>
 
 									<div id="consignee_header_div" class="col col_custom">
@@ -145,6 +145,13 @@
 
 										<div class="form-group">
 											<input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
+										</div>
+
+
+
+										<div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
+											<label class="d-block">Self Collection</label>
+											<input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
 										</div>
 									</div>
 
@@ -207,7 +214,7 @@
 												</div>
 
 												<div class="form-group">
-													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" data-toggle="tooltip" data-placement="top" title="" data-original-title="Please enter another flyer with the airway bill"></textarea>													
+													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" data-toggle="tooltip" data-placement="top" title="" data-original-title="Please enter another flyer with the airway bill"></textarea>
 												</div>
 
 												<div class="form-group input-group">
@@ -274,12 +281,12 @@
 												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
 											</div>
 
-{{--											<div class="form-group">--}}
-{{--												<div class="form-group text-center p-1 border border-light rounded">--}}
-{{--													<label class="d-block">Type of Package</label>--}}
-{{--													<input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">--}}
-{{--												</div>--}}
-{{--											</div>--}}
+											{{--											<div class="form-group">--}}
+											{{--												<div class="form-group text-center p-1 border border-light rounded">--}}
+											{{--													<label class="d-block">Type of Package</label>--}}
+											{{--													<input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">--}}
+											{{--												</div>--}}
+											{{--											</div>--}}
 										</div>
 
 										<div class="form-group">
@@ -320,25 +327,25 @@
 										</div>
 
 										<div id="charges_mode_div" class="form-group">
-                                            <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
-                                                @foreach($charges_modes as $charges_mode)
-                                                	@if ($charges_mode->id == 4)
-                                                        <option value="{{ $charges_mode->id }}" selected="selected">{{ $charges_mode->charges_mode }}</option>
-                                                    @else
-                                                        <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
-                                                    @endif
-                                                @endforeach
-                                            </select>
-                                        </div>
+											<select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
+												@foreach($charges_modes as $charges_mode)
+													@if ($charges_mode->id == 4)
+														<option value="{{ $charges_mode->id }}" selected="selected">{{ $charges_mode->charges_mode }}</option>
+													@else
+														<option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
+													@endif
+												@endforeach
+											</select>
+										</div>
 									</div>
 
 									<div id="payment_info" class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Payment Information</h4>
 										@if($user->logo_status)
-										<div id="cod_breakup" class="form-group text-center p-1 border border-light rounded">
-											<label class="d-block">COD Breakup</label>
-											<input type="checkbox" name="cod_breakup_checkbox" class="switch" id="cod_breakup_checkbox">
-										</div>
+											<div id="cod_breakup" class="form-group text-center p-1 border border-light rounded">
+												<label class="d-block">COD Breakup</label>
+												<input type="checkbox" name="cod_breakup_checkbox" class="switch" id="cod_breakup_checkbox">
+											</div>
 										@endif
 										<div class="form-group input-group">
 											<div class="input-group-prepend">
@@ -405,62 +412,62 @@
 					</div>
 				</div>
 			@if($user->logo_status)
-			<!--items modal-->
-				<div class="modal fade" id="cod_breakup_modal" role="dialog" aria-labelledby="cod_breakup_modal_title" aria-hidden="true">
-					<div class="modal-dialog modal-xl" role="document">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h4 class="modal-title" id="cod_breakup_modal_title">COD Breakup</h4>
-								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-								</button>
-							</div>
-							<form id="cod_breakup_form" class="form" style="width: 100%;">
-								{{ csrf_field() }}
-								<div class="modal-body">
-									<table class="table table-bordered datatable" id="cod_breakup_table" style="z-index: 3;min-width: 100%;">
-										<thead>
-										<tr role="row" class="bg-primary white">
-											<th class="border-primary border-darken-1">S. No.</th>
-											<th class="border-primary border-darken-1">Item Description</th>
-											<th class="border-primary border-darken-1">Amount</th>
-											<th class="border-primary border-darken-1"></th>
-										</tr>
-										</thead>
-									</table>
-									<div class="row">
-										<div class="col-3">
-											<div class="form-group">
+				<!--items modal-->
+					<div class="modal fade" id="cod_breakup_modal" role="dialog" aria-labelledby="cod_breakup_modal_title" aria-hidden="true">
+						<div class="modal-dialog modal-xl" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h4 class="modal-title" id="cod_breakup_modal_title">COD Breakup</h4>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<form id="cod_breakup_form" class="form" style="width: 100%;">
+									{{ csrf_field() }}
+									<div class="modal-body">
+										<table class="table table-bordered datatable" id="cod_breakup_table" style="z-index: 3;min-width: 100%;">
+											<thead>
+											<tr role="row" class="bg-primary white">
+												<th class="border-primary border-darken-1">S. No.</th>
+												<th class="border-primary border-darken-1">Item Description</th>
+												<th class="border-primary border-darken-1">Amount</th>
+												<th class="border-primary border-darken-1"></th>
+											</tr>
+											</thead>
+										</table>
+										<div class="row">
+											<div class="col-3">
+												<div class="form-group">
 
-												<div class="input-group">
-													<div class="input-group-prepend">
-														<span class="input-group-text">Shipping Charges</span>
+													<div class="input-group">
+														<div class="input-group-prepend">
+															<span class="input-group-text">Shipping Charges</span>
+														</div>
+														<input type="text" name="cod_breakup_shipping_charges" id="cod_breakup_shipping_charges" class="form-control amount" placeholder="Shipping Charges*" data-rule-required="true" data-msg-required="Shipping Charges is required" value="">
 													</div>
-													<input type="text" name="cod_breakup_shipping_charges" id="cod_breakup_shipping_charges" class="form-control amount" placeholder="Shipping Charges*" data-rule-required="true" data-msg-required="Shipping Charges is required" value="">
 												</div>
 											</div>
-										</div>
-										<div class="col-3">
-											<div class="form-group">
+											<div class="col-3">
+												<div class="form-group">
 
-												<div class="input-group">
-													<div class="input-group-prepend">
-														<span class="input-group-text">Total COD</span>
+													<div class="input-group">
+														<div class="input-group-prepend">
+															<span class="input-group-text">Total COD</span>
+														</div>
+														<input type="text" name="cod_breakup_total" id="cod_breakup_total" class="form-control amount" placeholder="Total COD*" data-rule-required="true" data-msg-required="Total COD is required" value="">
 													</div>
-													<input type="text" name="cod_breakup_total" id="cod_breakup_total" class="form-control amount" placeholder="Total COD*" data-rule-required="true" data-msg-required="Total COD is required" value="">
 												</div>
 											</div>
 										</div>
 									</div>
-								</div>
-								<div class="modal-footer">
-									<button type="submit" id="cod_breakup_submit_btn" disabled class="btn btn-primary mx-auto">Update</button>
-								</div>
-							</form>
+									<div class="modal-footer">
+										<button type="submit" id="cod_breakup_submit_btn" disabled class="btn btn-primary mx-auto">Update</button>
+									</div>
+								</form>
+							</div>
 						</div>
 					</div>
-				</div>
-			<!--items modal-->
-			@endif
+					<!--items modal-->
+				@endif
 			</div>
 		</div>
 	</div>
@@ -548,19 +555,19 @@
 
 
 			$(this).find('.pieces').TouchSpin({
-						min: 1,
-						max: 10,
-						buttondown_class: 'btn btn-primary rounded-left',
-						buttonup_class: 'btn btn-primary rounded-right',
-						buttondown_txt: '<i class="ft-minus"></i>',
-						buttonup_txt: '<i class="ft-plus"></i>'
-					}).bind('input change', function() {
-						$(this).tooltip('show');
+				min: 1,
+				max: 10,
+				buttondown_class: 'btn btn-primary rounded-left',
+				buttonup_class: 'btn btn-primary rounded-right',
+				buttondown_txt: '<i class="ft-minus"></i>',
+				buttonup_txt: '<i class="ft-plus"></i>'
+			}).bind('input change', function() {
+				$(this).tooltip('show');
 
-						if ($(this).hasClass('danger')) {
-							$(this).valid();
-						}
-					});
+				if ($(this).hasClass('danger')) {
+					$(this).valid();
+				}
+			});
 
 
 			@if (session('print'))
@@ -656,13 +663,13 @@
 			}
 
 			$('#charges_mode').select2({
-                width: '100%',
-                placeholder: 'Charges Mode*'
-            }).bind('change', function() {
-                if ($(this).hasClass('danger')) {
-                    $(this).valid();
-                }
-            });
+				width: '100%',
+				placeholder: 'Charges Mode*'
+			}).bind('change', function() {
+				if ($(this).hasClass('danger')) {
+					$(this).valid();
+				}
+			});
 
 			function shipping_modes() {
 				if ($('#pickup_address').val() == 0) {
@@ -772,15 +779,15 @@
 			@if (!Session::has('service_type_id'))
 			$('#select_service_type').modal('show');
 			@else
-			service_type = '{{ Session::get('service_type_id') }}';
+					service_type = '{{ Session::get('service_type_id') }}';
 
-				if(service_type == 1){
-					$('#pieces_quantity').removeClass('d-none');
-				}
+			if(service_type == 1){
+				$('#pieces_quantity').removeClass('d-none');
+			}
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
 				$('#try_and_buy_charges_div').addClass('d-none');
-			
+
 			}
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
@@ -804,6 +811,7 @@
 				service_type = selected.val();
 
 				if (service_type !== '' && service_type !== undefined && service_type !== null) {
+					var consignee_email = $('input[name="consignee_email_address"]');
 					$('#select_service_type form #service_type-error').addClass('d-none');
 
 					if (service_type == 1) {
@@ -824,6 +832,7 @@
 						$('#consignee_header_info').html('Consignee Information');
 						$('#amount').prop('disabled', false);
 						$('#pieces_quantity').removeClass('d-none');
+						$('#self_collection_div').removeClass('d-none');
 					}
 					else if (service_type == 2) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -843,6 +852,7 @@
 						$('#amount').prop('disabled', false);
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
+						$('#self_collection_div').addClass('d-none');
 					}
 					else if (service_type == 3) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -862,6 +872,7 @@
 						$('#amount').prop('disabled', true);
 						$('#try_and_buy_charges_div').removeClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
+						$('#self_collection_div').addClass('d-none');
 					}
 					else if (service_type == 5) {
 						$('#shipping_header_div').removeClass('col col_custom');
@@ -882,6 +893,19 @@
 						$('#amount').prop('disabled', false);
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
+						$('#self_collection_div').addClass('d-none');
+
+					}
+					if(service_type == 5){
+						consignee_email.attr('data-toggle', 'tooltip');
+						consignee_email.attr('data-placement', 'top');
+						consignee_email.attr('data-original-title', 'Please add email address so that we can sent address label to your customer.');
+						consignee_email.tooltip('show');
+					}else{
+						consignee_email.attr('data-toggle', '');
+						consignee_email.attr('data-placement', '');
+						consignee_email.attr('data-original-title', '');
+						consignee_email.tooltip('hide');
 					}
 					$('#booking_form #selected_service_type').val(service_type);
 
@@ -936,48 +960,48 @@
 				shipping_mode_same_day(pickup_city, consignee_city);
 			});
 
-            $("#consignee_info").select2({
+			$("#consignee_info").select2({
 				width:'100%',
-                placeholder: "Search Here...",
-                minimumInputLength: 5,
-                ajax: {
-                    url: '{{ route('cod.shipment.book.get_consignee_infos') }}',
-                    dataType: 'json',
-                    type: "GET",
-                    quietMillis: 50,
-                    data: function (params) {
-                        return {
-                            q: params.term,
-                            page: params.page,
+				placeholder: "Search Here...",
+				minimumInputLength: 5,
+				ajax: {
+					url: '{{ route('cod.shipment.book.get_consignee_infos') }}',
+					dataType: 'json',
+					type: "GET",
+					quietMillis: 50,
+					data: function (params) {
+						return {
+							q: params.term,
+							page: params.page,
 							'shipper': '{{session('user_id')}}'
-                        };
-                    },
-                    processResults: function (data, params) {
-                        params.page = params.page || 1;
+						};
+					},
+					processResults: function (data, params) {
+						params.page = params.page || 1;
 
-                        return {
-                            results: data.data,
-                            pagination: {
-                                more: (params.page * 30) < data.total_count
-                            }
-                        };
-                    },
-                    cache: true
-                },
-                escapeMarkup: function (markup) { return markup; },
-                templateResult: formatRepo,
-                templateSelection: formatRepoSelection
+						return {
+							results: data.data,
+							pagination: {
+								more: (params.page * 30) < data.total_count
+							}
+						};
+					},
+					cache: true
+				},
+				escapeMarkup: function (markup) { return markup; },
+				templateResult: formatRepo,
+				templateSelection: formatRepoSelection
 
-            });
-            function formatRepo (repo) {
-                if (repo.loading) return repo.text;
-                var markup = "<option value='" + repo.id + "'>"+ repo.full_name +"</option>";
+			});
+			function formatRepo (repo) {
+				if (repo.loading) return repo.text;
+				var markup = "<option value='" + repo.id + "'>"+ repo.full_name +"</option>";
 
-                return markup;
-            }
-            function formatRepoSelection (repo) {
-                return repo.full_name || repo.text;
-            }
+				return markup;
+			}
+			function formatRepoSelection (repo) {
+				return repo.full_name || repo.text;
+			}
 
 			var blacklist = false;
 			var blacklist_message = '';
@@ -1003,26 +1027,26 @@
 				}
 			}
 
-            $('#consignee_info').on('select2:select', function () {
-                var id = parseInt($(this).val());
-                if(id){
-                    $.ajax({
-                        url:'{!! route('cod.shipment.book.get_consignee_info') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': id,
-                        }
-                    }).done(function (data) {
-                        if(data.status){
-                            $('#consignee_city').val(data.details.city_id).trigger('change');
-                            $('input[name="consignee_name"]').val(data.details.name);
-                            $('#consignee_address').val(data.details.address);
-                            $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
-                            $('input[name="consignee_phone_number_2"]').val(data.details.phone_number_2);
-                            $('input[name="consignee_email_address"]').val(data.details.email);
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+			$('#consignee_info').on('select2:select', function () {
+				var id = parseInt($(this).val());
+				if(id){
+					$.ajax({
+						url:'{!! route('cod.shipment.book.get_consignee_info') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'id': id,
+						}
+					}).done(function (data) {
+						if(data.status){
+							$('#consignee_city').val(data.details.city_id).trigger('change');
+							$('input[name="consignee_name"]').val(data.details.name);
+							$('#consignee_address').val(data.details.address);
+							$('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
+							$('input[name="consignee_phone_number_2"]').val(data.details.phone_number_2);
+							$('input[name="consignee_email_address"]').val(data.details.email);
+						}else{
+							toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 						}
 					});
 				}
@@ -1038,6 +1062,7 @@
 			});
 
 			$('#information_display').checkboxpicker();
+			$('#self_collection').checkboxpicker();
 
 
 			$('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
@@ -1085,7 +1110,7 @@
 
 			var current_date = '{{$date}}';
 
-            $('#replacement_product_type').select2({
+			$('#replacement_product_type').select2({
 				width: '100%',
 				placeholder: 'Product Type*'
 			}).bind('change', function() {
@@ -1137,9 +1162,6 @@
 							try_and_buy_total_quantity();
 						}
 					});
-
-					
-					
 
 					$('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
 
@@ -1561,43 +1583,43 @@
 				'allowMinus': false,
 				'allowPlus': false
 			});
-			@if($user->logo_status)
+					@if($user->logo_status)
 			var cb_table = $('#cod_breakup_table').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					title: 'Add Row',
-					className: 'btn btn-primary mb-1',
-					text: '<i class="la la-plus"></i> Add Row',
-					action: function (e) {
-						add_row();
-					}
-				}],
-				ordering: false,
-				paging: false,
-				columns: [
-					{
-						orderable: false,
-						searchable: false,
-						name: 'serial_number',
-						class: 'align-middle serial_number',
-						targets: 0,
-						render: function (data, type, row) {
-							return '';
-						}
-					},
-					{name: 'item_description', class: 'align-middle item_description form-group', width: '40%'},
-					{name: 'amount', class: 'align-middle amount form-group'},
-					{name: 'action', class: 'align-middle action'},
-				],
-				rowCallback: function (row, data, index) {
-					var info = cb_table.page.info();
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+						dom: '<"d-inline-block"l><"pull-right"B>tipr',
+						buttons: [{
+							title: 'Add Row',
+							className: 'btn btn-primary mb-1',
+							text: '<i class="la la-plus"></i> Add Row',
+							action: function (e) {
+								add_row();
+							}
+						}],
+						ordering: false,
+						paging: false,
+						columns: [
+							{
+								orderable: false,
+								searchable: false,
+								name: 'serial_number',
+								class: 'align-middle serial_number',
+								targets: 0,
+								render: function (data, type, row) {
+									return '';
+								}
+							},
+							{name: 'item_description', class: 'align-middle item_description form-group', width: '40%'},
+							{name: 'amount', class: 'align-middle amount form-group'},
+							{name: 'action', class: 'align-middle action'},
+						],
+						rowCallback: function (row, data, index) {
+							var info = cb_table.page.info();
+							$('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
-				},
-				initComplete: function () {
-					this.api().table().columns.adjust();
-				}
-			});
+						},
+						initComplete: function () {
+							this.api().table().columns.adjust();
+						}
+					});
 			$('#cod_breakup_checkbox').checkboxpicker();
 			$('#cod_breakup_checkbox').on('change', function() {
 				var check = $(this);
@@ -1656,9 +1678,9 @@
 						breakup_rows[id] = {description: description, amount: amount};
 					});
 					$('#cod_breakup_modal').modal('hide');
-                    var total_cod_breakup = $('#cod_breakup_total').val();
+					var total_cod_breakup = $('#cod_breakup_total').val();
 
-                    $('#amount').val(total_cod_breakup);
+					$('#amount').val(total_cod_breakup);
 
 				}
 			});

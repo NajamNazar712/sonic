@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\ShipmentsJourney;
+use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStockRequest;
+use App\Http\Models\WarehouseStockRequestHistory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -33,6 +40,8 @@ use App\Http\Models\PickupRequestAssignedShipment;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Models\RiderPickup;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\RiderPickupActionLog;
@@ -283,7 +292,7 @@ class RiderAPIController extends Controller {
     private function verify_pickup_address_location($pickup_address_id) {
         $number_of_entries = 5;
 
-        $pickup_requests = PickupRequest::where('pickup_address_id', $pickup_address_id)->where('status', 2);
+        $pickup_requests = PickupRequest::where('pickup_address_id', $pickup_address_id)->where('status_id', 2);
 
         if ($pickup_requests->exists() && $pickup_requests->count() >= $number_of_entries) {
             $pickup_request_ids = $pickup_requests->latest('id')->take($number_of_entries)->pluck('id')->toArray();
@@ -338,7 +347,7 @@ class RiderAPIController extends Controller {
     private function verify_pickup_address_location_v2($pickup_address_id) {
         $number_of_entries = 5;
 
-        $pickup_requests = V2PickupRequest::where('pickup_address_id', $pickup_address_id)->where('status', 2);
+        $pickup_requests = V2PickupRequest::where('pickup_address_id', $pickup_address_id)->where('status_id', 2);
 
         if ($pickup_requests->exists() && $pickup_requests->count() >= $number_of_entries) {
             $pickup_request_ids = $pickup_requests->latest('id')->take($number_of_entries)->pluck('id')->toArray();
@@ -1048,11 +1057,54 @@ class RiderAPIController extends Controller {
                 $rider_delivery->save();
 
                 if(DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()){
-                    $shipment->shipper_status_id = 14;
-                    $shipment->consignee_status_id = 14;
-                    $shipment->save();
+                    if($shipment->booking_type_id == 2){
+                        $shipment->shipper_status_id = 30;
+                        $shipment->consignee_status_id = 30;
 
-                    ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+                        $shipment->received_amount = $shipment->amount;
+                        DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2]);
+                        ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+                    }else if ($shipment->booking_type_id == 3){
+                        $shipment->shipper_status_id = 36;
+                        $shipment->consignee_status_id = 36;
+
+                        $shipment->received_amount = $shipment->amount;
+                        DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 3]);
+                        ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+                    }else if($shipment->booking_type_id == 4){
+                        ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+
+                        if($shipment->charges_mode_id == 1){
+                            $shipment->shipper_status_id = 14;
+                            $shipment->consignee_status_id = 14;
+
+                            DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 7]);
+
+                        }else{
+                            $shipment->shipper_status_id = 14;
+                            $shipment->consignee_status_id = 14;
+                            $shipment->received_amount = $shipment->amount;
+                            DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6]);
+
+                        }
+                    }else{
+                        $shipment->shipper_status_id = 14;
+                        $shipment->consignee_status_id = 14;
+                        $shipment->received_amount = $shipment->amount;
+                        DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6]);
+                        ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+
+                        if($shipment->packaging_material_request == 1){
+                            self::delivery_packaging_material_update($shipment->tracking_number);
+                        }
+                    }
+                    $shipment->save();
+                }
+
+                $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+                if($updated_shipments_count == 0){
+                    DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+
                 }
             }
 
@@ -1166,12 +1218,19 @@ class RiderAPIController extends Controller {
                 }
 
                 ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
+//                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1]);
             }
+            
+
+//            $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+//            if($updated_shipments_count == 0){
+//                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+//            }
 
             return response()->json(['status' => 0, 'message' => 'Shipment is marked as Undelivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
         }
     }
-    //updated pickup module revamp
+    
     public function pickup_summary_v2(Request $request) {
         $rider_id = $request->rider_id;
 
@@ -1326,6 +1385,23 @@ class RiderAPIController extends Controller {
                 if($pickup_note_requests_count == 0){
                     V2PickupNote::where('id', $request->pickup_note_id)->update(['status' => 1]);
                 }
+
+                if($request->has('tracking_numbers')){
+                    foreach ($request->tracking_numbers as $tracking_number) {
+                        $shipment = Shipment::where('tracking_number', $tracking_number);
+                        if($shipment->exists()){
+                            $shipment = $shipment->first();
+                            if($shipment->shipper_status_id == 17){
+                                AdminPickupsController::generate($shipment->id);
+                            }
+                            $shipment->shipper_status_id = 53;
+                            $shipment->consignee_status_id = 53;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment->id,53,53,NULL,NULL,NULL,NULL,$request->pickup_request_id,$request->pickup_note_id,1,NULL,$rider_id);
+                        }
+                    }
+                    NotificationsController::send(73,$request->tracking_numbers, $request->pickup_request_id);
+                }
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
@@ -1460,5 +1536,120 @@ class RiderAPIController extends Controller {
 
             return response()->json(['status' => 0, 'message' => 'Pickup Action Log(s) Successfully']);
         }
+    }
+
+    public function pickup_check_tracking_number(Request $request) {
+      $rules = [
+        'tracking_number' => ['required']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+          return response()->json(['status' => 1, 'message' => 'Tracking Number Required']);
+      }
+      else {
+        $tracking_number = NULL;
+        $items = NULL;
+        $pieces = NULL;
+
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            $tracking_number = $shipment->tracking_number;
+
+            if ($shipment->booking_type_id == 3) {
+                $items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+            }
+            else if ($shipment->pieces > 1) {
+                $pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+            }
+        }
+        else {
+            $shipment_item = ShipmentItem::find($request->tracking_number);
+
+            if ($shipment_item) {
+                $shipment = Shipment::find('tracking_number', $shipment_item->shipment_id);
+
+                $tracking_number = $shipment->tracking_number;
+
+                $items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+            }
+            else {
+                $shipment_piece = ShipmentPiece::where('tracking_number', $request->tracking_number);
+
+                if ($shipment_piece->exists()) {
+                    $shipment_piece = $shipment_piece->first();
+
+                    $shipment = Shipment::find('tracking_number', $shipment_piece->shipment_id);
+
+                    $tracking_number = $shipment->tracking_number;
+
+                    $pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+                }
+            }
+        }
+
+        if ($tracking_number) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+                return response()->json(['status' => 0, 'message' => 'Shipment Found', 'tracking_number' => $tracking_number, 'items' => $items, 'pieces' => $pieces]);
+            }
+            else {
+                return response()->json(['status' => 1, 'message' => 'Shipment is already Picked!']);
+            }
+        }
+        else {
+            return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number!']);
+        }
+      }
+    }
+
+    public function delivery_packaging_material_update($tracking_number){
+        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
+        if($packaging_material_shipment != null){
+            $packaging_material_shipment->status_id = 4;
+            $packaging_material_shipment->save();
+
+            $packaging_request_history = new PackagingMaterialRequestHistory();
+            $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+            $packaging_request_history->status = 4;
+            $packaging_request_history->updated_by = 6;
+            $packaging_request_history->save();
+        }
+        $warehouse_stock_request = WarehouseStockRequest::where('tracking_number', $tracking_number);
+        if($warehouse_stock_request->exists()){
+            $warehouse_stock_request = $warehouse_stock_request->first();
+            $warehouse_stock_request->status_id = 4;
+            $warehouse_stock_request->save();
+
+            $warehouse_stock_request_history = new WarehouseStockRequestHistory();
+            $warehouse_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
+            $warehouse_stock_request_history->status = 4;
+            $warehouse_stock_request_history->updated_by = 6;
+            $warehouse_stock_request_history->save();
+            foreach ($warehouse_stock_request->stock_request_details as $detail){
+                if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->exists()){
+                    $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->first();
+                    $receiver_stock->stock += $detail->quantity;
+                    $receiver_stock->save();
+                }else{
+
+                    $receiver_stock = new WarehouseStock();
+                    $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
+                    $receiver_stock->type_id = $detail->type_id;
+                    $receiver_stock->type_size_id = $detail->size_id;
+                    $receiver_stock->stock = $detail->quantity;
+                    $receiver_stock->save();
+
+                }
+            }
+
+
+        }
+
     }
 }

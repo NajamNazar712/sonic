@@ -159,10 +159,63 @@
 						className: 'btn btn-primary assign',
 						enabled:false,
 						action: function (e, dt, node, config) {
-							console.log(selected_rows);
-							$('input:hidden[name=id]').val(selected_rows);
-						$('#AssignHubModal').modal('show');
 
+							$('input:hidden[name=id]').val(selected_rows);
+							$('#AssignHubModal').modal('show');
+
+						}
+					},
+					{
+						extend: 'selectAll',
+						text: 'Select All',
+						className: 'select_all',
+						action : function(e) {
+							e.preventDefault();
+
+							table.rows().nodes().each(function(index) {
+								var row = table.row(index);
+
+								if ($(row.node().firstChild).hasClass('select-checkbox')) {
+									row.select();
+
+									id = parseInt(row.id());
+
+									var index = $.inArray(id, selected_rows);
+
+									if (index === -1) {
+										selected_rows.push(id);
+									}
+
+									table.button('.assign').enable();
+								}
+							});
+						}
+					}, {
+						extend: 'selectNone',
+						text: 'Select None',
+						className: 'select_none',
+						action : function(e) {
+							e.preventDefault();
+
+							table.rows().nodes().each(function(index) {
+								var row = table.row(index);
+
+								if ($(row.node().firstChild).hasClass('select-checkbox')) {
+									row.deselect();
+
+									id = parseInt(row.id());
+
+									var index = $.inArray(id, selected_rows);
+
+									if (index !== -1) {
+										selected_rows.splice(index, 1);
+									}
+
+									if (selected_rows.length == 0) {
+										table.button('.assign').disable();
+									}
+								}
+							});
 						}
 					},{
                         extend: 'excel',

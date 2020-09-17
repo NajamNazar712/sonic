@@ -28,6 +28,7 @@ use App\Http\Models\DuplicateUser;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\Operataions\OperationForecast;
+use App\Http\Models\PaymentCycle;
 use App\Http\Models\RateRemark;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
@@ -55,6 +56,7 @@ use App\Http\Models\Rates\RateHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\Sister_account\MergedSisterAccount;
@@ -144,6 +146,7 @@ class AdminDashboardController extends Controller
     public function index(){
         $stats = array();
         $graph = array();
+        $sales=array();
         $graph_dates = array();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
@@ -165,6 +168,11 @@ class AdminDashboardController extends Controller
         $stats['complaints_in_process'] = CrmRequestStatusHistory::where('status_id', 2)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['complaints_closed'] = CrmRequestStatusHistory::where('status_id', 4)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['complaints_rejected'] = CrmRequestStatusHistory::where('status_id', 7)->whereBetween('created_at',[$thirtyDays,$today]);
+        $sales['total_accounts']=DB::table('users')->select('name')->get();
+        $sales['active_accounts']=User::where('status',3);
+        $sales['inactive_accounts']=User::where('status',4)->where('blacklist',0);
+        $sales['pending_accounts']=User::whereIn('status',[0,1,2]);
+        $sales['blocked_accounts']=User::where('blacklist',1);
 
         if (session('role_id') != 1) {
             $stats['total'] = $stats['total']->where(function($query) {
@@ -265,6 +273,8 @@ class AdminDashboardController extends Controller
             });
         }
 
+
+
         $stats['total'] = number_format($stats['total']->count());
         $stats['booked'] = number_format($stats['booked']->count());
         $stats['canceled'] = number_format($stats['canceled']->count());
@@ -282,6 +292,11 @@ class AdminDashboardController extends Controller
         $stats['complaints_in_process'] =  number_format($stats['complaints_in_process']->count());
         $stats['complaints_closed'] =  number_format($stats['complaints_closed']->count());
         $stats['complaints_rejected'] =  number_format($stats['complaints_rejected']->count());
+        $sales['total_accounts']=number_format($sales['total_accounts']->count());
+        $sales['active_accounts']=number_format($sales['active_accounts']->count());
+        $sales['inactive_accounts']=number_format($sales['inactive_accounts']->count());
+        $sales['pending_accounts']=number_format($sales['pending_accounts']->count());
+        $sales['blocked_accounts']=number_format( $sales['blocked_accounts']->count());
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
@@ -425,7 +440,7 @@ class AdminDashboardController extends Controller
 //        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
 
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
     }
     public function statistics_search(Request $request){
 //        return $request;
@@ -1353,9 +1368,11 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
     }
     public function activeAccountsList(){
+        $shippers = User::where('status', 3)->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
+        $payment_cycles = PaymentCycle::all();
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
 
     }
     public function blockAccountsList(){
@@ -1390,29 +1407,93 @@ class AdminDashboardController extends Controller
         $shipper_id = $request->shipper_id;
         $user = User::find($shipper_id);
         $shipper_hub_id = $user->city->hub_id;
+        $sale_persons = array();
+        $old_sale_person = '';
+        $new_sale_person = '';
         if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
             if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
+                $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
+                if($old_sale_person){
+                    $old_sale_person = $old_sale_person->sales_person;
+                }
+                else{
+                    $old_sale_person = null;
+                }
+                $new_sale_person = Admin::find($tag_id);
                 $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->get();
                 if($shipper_data->count() > 0){
                     SalePersonTag::where('user_id',$shipper_id)->where('status',0)->update(['status' => 1]);
                 }
+                $shipper = User::find($shipper_id);
                 $sale_person_tag = new SalePersonTag();
                 $sale_person_tag->admin_id=$tag_id;
                 $sale_person_tag->user_id=$shipper_id;
                 $sale_person_tag->save();
+                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
+                NotificationsController::send(81, $sale_persons);
+
+
             }
             else{
-                return ['status'=>0,'error'=>"Shipper is already assigned to Tagged Sales Person!"];
+                return ['status'=>0,'error'=>"Shipper is already tagged to  Sales Person!"];
             }
 
-            return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
+            return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
         }
         else{
-            return ['status'=>0,'error'=>"Shipper Hub is not assigned to Tagged Sales Person!"];
+            return ['status'=>0,'error'=>"Shipper is not tagged to Sales Person!"];
 
         }
 
     }
+    public function tagSubmitBulk(Request $request){
+        $tag_id = $request->admin_id;
+        $shipper_ids = $request->shipper_ids;
+        $sale_persons = array();
+        $old_sale_person ='';
+        $new_sale_person ='';
+        if($shipper_ids){
+            foreach ($shipper_ids as $shipper_id){
+                $user = User::find($shipper_id);
+                $shipper_hub_id = $user->city->hub_id;
+                if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
+                    if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
+                        $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
+                        if($old_sale_person){
+                            $old_sale_person = $old_sale_person->sales_person;
+                        }
+                        $new_sale_person = Admin::find($tag_id);
+                        $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->get();
+                        if($shipper_data->count() > 0){
+                            SalePersonTag::where('user_id',$shipper_id)->where('status',0)->update(['status' => 1,'admin_id' => $tag_id]);
+                        }
+                        $shipper = User::find($shipper_id);
+                        $sale_person_tag = new SalePersonTag();
+                        $sale_person_tag->admin_id=$tag_id;
+                        $sale_person_tag->user_id=$shipper_id;
+                        $sale_person_tag->save();
+                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
+                        /*NotificationsController::send(81, $shipper->id, $sale_persons);*/
+                    }
+                    // else{
+                    //     $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->first();
+                    //     $shipper_data->admin_id=$tag_id;
+                    //     $sale_person_tag->user_id=$shipper_id;
+                    //     $sale_person_tag->save();
+                        
+                    // }
+
+            // return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
+                 }
+            }
+            NotificationsController::send(81,$sale_persons);
+            return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
+        }
+        else{
+            return ['status'=>0,'error'=>"Shipper is not tagged to Sales Person!"];
+        }
+    }
+
     public function rejectReasonSubmit(Request $request)
     {
         $shipper_id = $request->shipper_id;
@@ -7112,7 +7193,7 @@ if(session('department_id') == 7){
             $users = $users->where('users.cnic', $search_cnic);
         }
         if($search_shipper = $request->get('search_shipper')){
-            $users = $users->where('users.name', 'like', '%' . $search_shipper . '%');
+            $users = $users->whereIn('users.id', $search_shipper);
         }
 
         if($search_iban = $request->get('search_iban')){
@@ -7307,6 +7388,12 @@ if(session('department_id') == 7){
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
                 if (session('role_id') == 1 || in_array(149, session('permissions'))){
                     $dropdown .= '<button type="button" class="dropdown-item shipment_days_button"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Auto Shipment Cancel Days</div></button>';
+                }
+                if($sale_check){
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
+                }
+                if(session('role_id') == 1 || in_array(365, session('permissions'))){
+                    $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
                 }
                 $dropdown .= '
                     </div>
@@ -7559,6 +7646,9 @@ if(session('department_id') == 7){
                 }
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
 
+                if($sale_check){
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -7703,13 +7793,12 @@ if(session('department_id') == 7){
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
             'iban'=>'required|string|max:255',
-            'payment_cycle'=>'required|string|max:255'
         ]);
         $old_bank_detail = UserBankInfo::where('user_id',$user_id)->select('bank_name')->first();
 
         if($user->account_type_id == 1){
             UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_cycle'=>$request->payment_cycle]);
+                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city]);
 
         }else{
             $generation_date = null;
@@ -7725,7 +7814,6 @@ if(session('department_id') == 7){
                     'account_title'=>$request->account_title,
                     'iban'=>$request->iban,
                     'city_id'=>$request->bank_city,
-                    'payment_cycle'=>$request->payment_cycle,
                     'invoicing_cycle_id' => $request->invoicing_cycle_id,
                     'generation_date' => $generation_date,
                     'billing_person_name' => $request->billing_person_name,
@@ -7808,7 +7896,7 @@ if(session('department_id') == 7){
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7830,6 +7918,16 @@ if(session('department_id') == 7){
 //                $query->whereRaw('false');
 //            }
 //        })
+            ->addColumn('location', function ($result){
+                $location = '<div class="text-center">';
+                if($result->location_latitude != null && $result->location_longitude != null) {
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->location_latitude . ',' . $result->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    $location .= '</div>';
+                    return $location;
+                }else{
+                    return '-';
+                }
+            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -7873,7 +7971,6 @@ if(session('department_id') == 7){
         return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking]);
     }
     public function getEditCityForm($id){
-//        return $id;
         $city = City::find($id);
         if($city->hub == 1){
             $cityhub = '';
@@ -7884,7 +7981,6 @@ if(session('department_id') == 7){
 
         }
         $delivery_array = CityDelivery::where('city_id',$city->id)->select(['booking_type_id','shipping_mode_id'])->get();
-//        $delivery_row_id = CityDelivery::where('city_id',$city->id)->select('id')->get();
         $delivery = array();
         foreach ($delivery_array as $delivery_details) {
             $delivery[$delivery_details['booking_type_id']][] = $delivery_details['shipping_mode_id'];
@@ -7905,7 +8001,6 @@ if(session('department_id') == 7){
     }
 
     public function updateCity(Request $request,$id){
-
         $city_id = City::where('id',$id)->first();
         if($request->postType == 'city'){
             City::where('id',$id)->update([
@@ -7915,7 +8010,10 @@ if(session('department_id') == 7){
                 'zone_id'=>City::find($request->hubs)->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat
+                'attempt_tat'=>$request->attempt_tat,
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -7926,7 +8024,10 @@ if(session('department_id') == 7){
                 'status' => $city_id->status,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -7961,6 +8062,9 @@ if(session('department_id') == 7){
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             CityHistory::create([
                 'city_id'=> $id,
@@ -7971,7 +8075,10 @@ if(session('department_id') == 7){
                 'status' => $city_id->status,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -8012,7 +8119,10 @@ if(session('department_id') == 7){
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'status'=>1
+                'status'=>1,
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             CityHistory::create([
@@ -8024,7 +8134,10 @@ if(session('department_id') == 7){
                 'status'=>1,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             if(!empty($request->walk_in_delivery)) {
@@ -8056,7 +8169,10 @@ if(session('department_id') == 7){
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'status'=>1
+                'status'=>1,
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             CityHistory::create([
@@ -8067,7 +8183,10 @@ if(session('department_id') == 7){
                 'status'=>1,
                 'gc_area'=>($request->has('gc_area'))? 1:0,
                 'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
+                'location_latitude' => $request->latitude,
+                'location_longitude' => $request->longitude,
+                'address' => $request->address
             ]);
 
             if(!empty($request->walk_in_delivery)) {
@@ -8309,11 +8428,14 @@ if(session('department_id') == 7){
         return view('admin.management.rider_management')->with(['categories'=>$category]);
     }
     public function riderListAjax(){
+
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
             ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
-            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
+            ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
+            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic',                'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as                           status','riders.created_at','cb.name as created_by', 'ub.name as updated_by']);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -8323,7 +8445,15 @@ if(session('department_id') == 7){
             ->editColumn('status', function ($rider) {
                 return ($rider->status == 0)? 'Inactive': 'Active';
             })
+            ->editColumn('trax_id', function ($rider) {
+                if($rider->trax_id != null){
+                    return $rider->trax_id;
+                }
+                else{
+                    return '-';
+                }
 
+            })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
             })
@@ -8400,7 +8530,8 @@ if(session('department_id') == 7){
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
-            'pin' => 'required|numeric'
+            'pin' => 'required|numeric',
+            'trax_id'=>'required|max:255|string',
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -8418,7 +8549,9 @@ if(session('department_id') == 7){
             'rider_category_id'=>$request->rider_category,
             'status'=>1,
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
-            'pin'=> bcrypt($request->pin)
+            'pin'=> bcrypt($request->pin),
+            'created_by' => Auth::id(),
+            'trax_id' => $request->trax_id,
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -8441,6 +8574,7 @@ if(session('department_id') == 7){
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
+            'trax_id'=>'required|string',
             'rider_category'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -8468,7 +8602,10 @@ if(session('department_id') == 7){
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
         $rider->route_id = $request->route_id;
+
         $rider->rider_category_id = $request->rider_category;
+        $rider->trax_id = $request->trax_id;
+
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;
         }else{
@@ -8479,7 +8616,7 @@ if(session('department_id') == 7){
 
             NotificationsController::send(61, $rider->id, $request->pin);
         }
-
+        $rider->updated_by = Auth::id();
         $rider->save();
 
         if($rider){
@@ -8970,7 +9107,7 @@ if(session('department_id') == 7){
             $new_user_attachment->user_id = $request->user_id;
             $new_user_attachment->save();
 
-            
+
         }
         $user = User::find($request->user_id);
         $user->documents_status = 0;
@@ -8992,6 +9129,131 @@ if(session('department_id') == 7){
             return response()->json(['status' => 1,'success' => 'Files confirmed successfully']);
         }
         return response()->json(['error' => 'User not found!']);
+    }
+    public function edit_rates_user_documents(Request $request){
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if($user_attachment){
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->filled_and_signed_pdf = $filename;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            $user_attachment->save();
+        }
+        else{
+            $new_user_attachment = new UserDocumentAttachment();
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->filled_and_signed_pdf = $filename;
+            }
+
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                $new_user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            $new_user_attachment->user_id = $request->user_id;
+            $new_user_attachment->save();
+        }
+        $user = User::find($request->user_id);
+        $user->documents_status = 0;
+        $user->documents_status_reason = null;
+        $user->save();
+        return ['success' => 'User Document Uploaded!'];
+    }
+
+    public function add_contacts($id){
+        $shipper = User::find($id);
+        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
+        $admin = Admin::find($sale_person->admin_id);
+        $contacts = ShipperContact::where('shipper_id', $id);
+        if($contacts->exists()){
+            $contacts = $contacts->get();
+        }else{
+            $contacts = null;
+        }
+        return view('admin.accounts.multiple_poc')->with(['sale_person' => $admin, 'contacts' => $contacts, 'shipper' => $shipper]);
+    }
+
+    public function add_contacts_store(Request $request){
+        ShipperContact::where('shipper_id', $request->shipper_id)->delete();
+        if($request->has('poc')){
+            foreach($request->poc as $index => $poc){
+                $shipper_contact = new ShipperContact();
+                $shipper_contact->shipper_id = $request->shipper_id;
+                $shipper_contact->poc = $poc;
+                $shipper_contact->designation = $request->designation[$index];
+                $shipper_contact->phone_number = $request->phone[$index];
+                $shipper_contact->save();
+            }
+        }
+        return redirect()->back()->with(['success' => 'Contacts updated successfully']);
+    }
+
+    public function payment_cycle_info(Request $request){
+        $user_id = $request->shipper_id;
+        if($user_id){
+            $user = User::find($user_id);
+            if($user){
+                $details = ['payment_cycle_id' => $user->payment_cycle_id, 'payment_day' => $user->payment_day];
+                return response()->json(['status' => 0, 'details' => $details]);
+
+            }else{
+                return response()->json(['status' => 1, 'error' => 'User not found!']);
+            }
+        }
+    }
+    public function payment_cycle_submit(Request $request){
+        $payment_cycle_id = $request->payment_cycle_select;
+        if($payment_cycle_id){
+            if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                $payment_day = $request->payment_day;
+            }
+            if($request->has('shipper_ids')){
+                $shipper_ids = explode(',' , $request->shipper_ids);
+                if(count($shipper_ids) > 0){
+                    foreach ($shipper_ids as $shipper_id){
+                        $shipper = User::find($shipper_id);
+                        if($shipper){
+                            $shipper->payment_cycle_id = $payment_cycle_id;
+                            if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                                $shipper->payment_day = $payment_day;
+                            }else{
+                                $shipper->payment_day = NULL;
+                            }
+                            $shipper->save();
+                        }
+                    }
+                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
+                }
+            }else{
+                $shipper_id = $request->shipper_id;
+                $shipper = User::find($shipper_id);
+                if($shipper){
+                    $shipper->payment_cycle_id = $payment_cycle_id;
+                    if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                        $shipper->payment_day = $payment_day;
+                    }else{
+                        $shipper->payment_day = NULL;
+                    }
+                    $shipper->save();
+                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
+                }
+            }
+
+            return redirect()->back()->with('error', 'Shipper not found!');
+        }
+        return redirect()->back()->with('error', 'Payment Cycle not selected!');
     }
 }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\City;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
+use App\http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
@@ -22,19 +23,37 @@ class ShipperInterceptReBookController extends Controller
     }
 
     public function intercept_re_book_index($shipment_id){
-//        dd(session('user_id'));
-        $shipment = Shipment::where('id',$shipment_id)->first();
-        $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
-            ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
-            ->select('c.id as id', 'c.name as name')
-            ->where('shipments.id', $shipment_id)
-            ->where('c.status', 1)
-            ->whereNotNull('c.zone_id')
-            ->orderBy('c.name')
-            ->groupBy('c.name')
-            ->get();
+        if($shipment_id){
+            $shipment = Shipment::where('id',$shipment_id)->first();
+            if($shipment){
+                if($shipment->shipping_mode_id == 2){
+                    $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
+                    $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
+                        ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
+                        ->select('c.id as id', 'c.name as name')
+                        ->where('shipments.id', $shipment_id)
+                        ->where('c.status', 1)
+                        ->whereNotNull('c.zone_id')
+                        ->whereNotIn('c.id', $restricted_cities);
+                }
+                else{
+                    $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
+                        ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
+                        ->select('c.id as id', 'c.name as name')
+                        ->where('shipments.id', $shipment_id)
+                        ->where('c.status', 1)
+                        ->whereNotNull('c.zone_id');
+                }
+                $consignee_cities = $consignee_cities->orderBy('c.name')
+                    ->groupBy('c.name')
+                    ->get();
 //        $consignee_cities = City::where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
-        return view('client.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+                return view('client.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+            }
+            return redirect()->back()->with('error', 'Shipment not found!');
+        }
+        return redirect()->back()->with('error', 'Shipment not found!');
+
     }
 
     public function intercept_re_book_update(Request $request)

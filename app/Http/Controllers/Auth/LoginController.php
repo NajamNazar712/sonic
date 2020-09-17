@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -101,6 +103,12 @@ class LoginController extends Controller
                 $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
                 session(['sister_users' => $sister_users]);
                 session(['user_id' => $user->id]);
+                if (SalePersonTag::where('user_id', session('user_id'))->where('status', 0)->exists()){
+                    session(['sale_person_status' => 1]);
+                }
+                else{
+                    session(['sale_person_status' => 0]);
+                }
                 session(['account_type' => $user->account_type_id]);
                 if (PackagingCharge::where('user_id', $user->id)->exists()) {
                     $packaging_charges_check = TRUE;
@@ -134,12 +142,14 @@ class LoginController extends Controller
                 return back()->with('info', 'Your Account is Disabled');
             }
             else {
+                $substitute_user = SubstituteUser::find($user->id);
                 $permissions = SubstituteUserPermission::where('substitute_user_id', $user->id)->pluck('permission_id')->toArray();
                 $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
                 session(['sister_users' => $sister_users]);
                 session(['permissions' => $permissions]);
                 session(['user_id' => $user->user_id]);
                 session(['account_type' => $shipper->account_type_id]);
+                session(['restriction' => $substitute_user->restriction]);
 
                 if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
                     $packaging_charges_check = TRUE;
@@ -159,7 +169,6 @@ class LoginController extends Controller
         }
 
         session(['packaging_charges_check' => $packaging_charges_check]);
-
         return redirect()->route('cod.welcome');
     }
 

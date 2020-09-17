@@ -41,7 +41,8 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Remarks</th>
-                                    <th class="border-primary border-darken-1">Arrival Date</th>
+                                    <th class="border-primary border-darken-1">Origin Arrival Date</th>
+                                    <th class="border-primary border-darken-1">Destination Arrival Date</th>
                                     <th class="border-primary border-darken-1">Status Date</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
@@ -163,7 +164,8 @@
                         head.push('Status');
                         head.push('Reason');
                         head.push('Remarks');
-                        head.push('Arrival Date');
+                        head.push('Origin Arrival Date');
+                        head.push('Destination Arrival Date');
                         head.push('Status Date');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -184,6 +186,7 @@
                             row.push(values.reason);
                             row.push(values.remarks);
                             row.push(values.arrival);
+                            row.push(values.destination_arrival);
                             row.push(values.current_status_date);
 
                             body.push(row);
@@ -223,7 +226,7 @@
                 }
             },
             rowId: 'shId',
-            order: [[16, 'desc']],
+            order: [[15, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -241,6 +244,7 @@
                 {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
+                {data: 'destination_arrival', name: 'sjd.created_at ', class: 'align-middle destination_arrival', orderable: false, searchable: false},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -264,7 +268,7 @@
                     var header = column.header();
 
 
-                    if ($(header).is('.action') || $(header).is('.serial_number')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))

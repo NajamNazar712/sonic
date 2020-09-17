@@ -18,6 +18,11 @@
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_request_number" id="search_request_number" placeholder="Search Request Number">
+                        </fieldset>
+                    </div>
 
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -44,6 +49,16 @@
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -89,6 +104,7 @@
                         </fieldset>
                     </div>
 
+
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -130,6 +146,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Channel</th>
                         <th class="border-primary border-darken-1">Agent</th>
@@ -137,6 +154,7 @@
                         <th class="border-primary border-darken-1">Launched By</th>
                         <th class="border-primary border-darken-1">Launched By User Type</th>
                         <th class="border-primary border-darken-1">Launched Date</th>
+                        <th class="border-primary border-darken-1">Launched To Date (TAT)</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Valid/Invalid Date</th>
@@ -224,6 +242,11 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+            $('#search_request_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipping Mode',
                 width:'100%',
@@ -236,6 +259,11 @@
             });
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Hub',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Zone',
                 width:'100%',
                 allowClear:true
             });
@@ -312,6 +340,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Arrival Date');
                             head.push('Channel');
                             head.push('Agent');
@@ -319,6 +348,7 @@
                             head.push('Launched By');
                             head.push('Launched By User Type');
                             head.push('Launched Date');
+                            head.push('Launched To Date (TAT)');
                             head.push('Assigned Date');
                             head.push('Status');
                             head.push('Valid/Invalid Date');
@@ -342,6 +372,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.zone);
                                 row.push(values.arrival_date);
                                 row.push(values.channel);
                                 row.push(values.agent);
@@ -349,6 +380,7 @@
                                 row.push(values.launched_by_name);
                                 row.push(values.launched_by_type);
                                 row.push(values.launched_date);
+                                row.push(values.launched_to_today);
                                 row.push(values.assigned_date);
                                 row.push(values.valid_invalid_status);
                                 row.push(values.valid_invalid_date);
@@ -391,10 +423,12 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
+
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();
+                        d.search_zone = $('#search_zone').val();
                         d.search_agent = $('#search_agent').val();
                         d.search_case_nature = $('#search_case_nature').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
@@ -402,6 +436,8 @@
                         d.search_status = $('#search_status').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.search_request_number = $('#search_request_number').val();
+
                     }
                 },
                 // rowId: 'shipment_id',
@@ -418,6 +454,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'agent', name: 'a.name', class: 'align-middle agent'},
@@ -425,6 +462,7 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name'},
                     {data: 'launched_by_type', name: 'crm_requests.launched_by', class: 'align-middle launched_by_type'},
                     {data: 'launched_date', name: 'crm_requests.created_at', class: 'align-middle launched_date'},
+                    {data: 'launched_to_today', name: 'launched_to_today', class: 'align-middle launched_to_today', orderable: false, searchable: false},
                     {data: 'assigned_date', name: 'crah.created_at', class: 'align-middle assigned_date'},
                     {data: 'valid_invalid_status', name: 'crm_requests.status', class: 'align-middle valid_invalid_status', orderable: false, searchable: false},
                     {data: 'valid_invalid_date', name: 'crsh.created_at', class: 'align-middle valid_invalid_date', orderable: false, searchable: false},
@@ -446,7 +484,6 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-                console.log($('#search_status').val());
                 table.draw();
             });
 

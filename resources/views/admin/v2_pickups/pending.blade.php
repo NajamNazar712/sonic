@@ -78,6 +78,7 @@
                                     <th class="border-primary border-darken-1">Trax Remark(s)</th>
                                     <th class="border-primary border-darken-1">Shipper Remark(s)</th>
                                     <th class="border-primary border-darken-1">Rider Status</th>
+                                    <th class="border-primary border-darken-1">Assigned Date</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
                                     <th class="border-primary border-darken-1">Attempt(s)</th>
                                 </tr>
@@ -87,15 +88,16 @@
                     </div>
                 </div>
 
-                <div class="modal fade" id="assign_to_rider" role="dialog" aria-labelledby="assign_to_rider_title" aria-hidden="true">
+                <div class="modal fade" id="assign_to_rider" data-backdrop="static" role="dialog" aria-labelledby="assign_to_rider_title" aria-hidden="true">
                     <div class="modal-dialog modal-sm" role="document">
                         <div class="modal-content">
-                            <form class="form-horizontal">
+                            <form class="form-horizontal" action="{{route('admin.v2_pickups.pending.assign')}}" method="post">
                                 {{ csrf_field() }}
-
+                                @method('put')
                                 <div class="modal-header">
                                     <h4 class="modal-title" id="assign_to_rider_title">Assign to Rider</h4>
                                 </div>
+                                <input type="hidden" name="pickup_request_ids" id="assign_pickup_request_ids">
                                 <div class="modal-body">
                                     <div class="form-group m-0">
                                         <select name="rider" class="select2 rider" data-rule-required="true" data-msg-required="Rider is required">
@@ -114,15 +116,16 @@
                     </div>
                 </div>
 
-                <div class="modal fade" id="update_pickup_modal" role="dialog" aria-labelledby="update_pickup_modal_title" aria-hidden="true">
+                <div class="modal fade" id="update_pickup_modal" data-backdrop="static" role="dialog" aria-labelledby="update_pickup_modal_title" aria-hidden="true">
                     <div class="modal-dialog modal-sm" role="document">
                         <div class="modal-content">
-                            <form class="form-horizontal">
+                            <form class="form-horizontal" action="{{ route('admin.v2_pickups.pending.update') }}" method="post">
                                 {{ csrf_field() }}
-
+                                @method('put')
                                 <div class="modal-header">
-                                    <h4 class="modal-title" id="assign_to_rider_title">Update Pickup Request</h4>
+                                    <h4 class="modal-title" id="update_pickup_modal_title">Update Pickup Request</h4>
                                 </div>
+                                <input type="hidden" name="pickup_request_ids" id="update_pickup_request_ids">
                                 <div class="modal-body">
                                     <div class="form-group m-0 mb-1">
                                         <select name="reason" class="select2 reason" data-rule-required="true" data-msg-required="Reason is required">
@@ -273,6 +276,7 @@
                         head.push('Trax Remark(s)');
                         head.push('Shipper Remark(s)');
                         head.push('Rider Status');
+                        head.push('Assigned Date');
                         head.push('Attempt Date');
                         head.push('Attempt(s)');
 
@@ -300,6 +304,7 @@
                             row.push(values.trax_remarks);
                             row.push(values.shipper_remarks);
                             row.push(values.rider_status);
+                            row.push(values.assigned_date);
                             row.push(values.attempted_date);
                             row.push(values.attempts);
 
@@ -461,6 +466,7 @@
                 {data: 'trax_remarks', name: 'trax_remarks', class: 'align-middle trax_remarks', orderable: false, searchable: false},
                 {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false},
                 {data: 'rider_status', name: 'rs.id', class: 'align-middle rider_status'},
+                {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempts'},
 
@@ -578,7 +584,6 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-
                     swal({
                         text: 'Are you sure, you want to assign rider to the following pickup(s)?',
                         icon: 'info',
@@ -601,37 +606,12 @@
                         dangerMode: true
                     }).then(function(confirm) {
                         if(confirm){
-                            var rider_id = parseInt($(form).find('select.rider').val());
-
-                            $.ajax({
-                                url: '{!! route('admin.v2_pickups.pending.assign') !!}',
-                                method: 'PUT',
-                                data: {
-                                    'pickup_request_ids': selected_rows,
-                                    'rider_id': rider_id,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                                .done(function(data) {
-                                    if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-
-                                    table.rows().deselect();
-
-                                    selected_rows = [];
-
-                                    table.button('.assign').disable();
-                                    table.button('.update').disable();
-
-                                    table.draw('false');
-
-                                    $('#assign_to_rider').modal('hide');
-                                });
+                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                            $('#assign_pickup_request_ids').val(selected_rows);
+                            form.submit();
                         }
+                        $(form).find('button[type=submit]').attr('disabled', false);
+
                     });
 
                 }
@@ -656,6 +636,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+
                     swal({
                         text: 'Are you sure, you want to update the following pickup(s)?',
                         icon: 'info',
@@ -678,41 +659,15 @@
                         dangerMode: true
                     }).then(function(confirm) {
                         if(confirm){
-                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                            var reason_id = parseInt($(form).find('select.reason').val());
-                            var remarks = $('#trax_remarks').val();
-                            $.ajax({
-                                url: '{!! route('admin.v2_pickups.pending.update') !!}',
-                                method: 'PUT',
-                                data: {
-                                    'pickup_request_ids': selected_rows,
-                                    'reason_id': reason_id,
-                                    'trax_remarks': remarks,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                                .done(function(data) {
-                                    if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
+                            $('#update_pickup_request_btn_submit').prop('disabled', true);
 
-                                    table.rows().deselect();
+                            $('#update_pickup_request_ids').val(selected_rows);
+                            form.submit();
 
-                                    selected_rows = [];
-
-                                    table.button('.assign').disable();
-                                    table.button('.update').disable();
-
-                                    table.draw('false');
-
-                                    $('#update_pickup_modal').modal('hide');
-                                });
-                            $('#update_pickup_request_btn_submit').attr('disabled', false);
                         }
+
                     });
+                    $('#update_pickup_request_btn_submit').prop('disabled', false);
                 }
             });
             var route = '{!! route('admin.tracking.index') !!}';

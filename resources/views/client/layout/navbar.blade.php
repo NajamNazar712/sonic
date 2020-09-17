@@ -49,10 +49,17 @@
                 <i class="ft-chevron-down"></i>
               </a>
               <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="{{ route('cod.edit.profile') }}"><span class="menu-title"><i class="ft-user"></i>Profile</span></a>
+                  @if(session('user_type') == 1)
+                    <a class="dropdown-item" href="{{ route('cod.edit.profile') }}"><span class="menu-title"><i class="ft-user"></i>Profile</span></a>
+                  @endif
                   <a class="dropdown-item" href="{{ route('cod.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
-                <a class="dropdown-item" href="{{route('cod.logout')}}" onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
+                  @if(session('sale_person_status') == 1)
+                      <a class="dropdown-item" href="{{ route('cod.contacts') }}"><span class="menu-title"><i class="ft-phone"></i>Contacts</span></a>
+                  @endif
+                  <a class="dropdown-item" href="{{route('cod.logout')}}" onclick="event.preventDefault();
+
+
+                document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
                 <form id="logout-form" action="{{ route('cod.logout') }}" method="POST" style="display: none;">
                   @csrf
                 </form>

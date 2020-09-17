@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Console\Commands\DonePaymentReport;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\CargoConsignment;
@@ -14,12 +16,19 @@ use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\DonePaymentCalculation;
+use App\http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
+use App\Http\Models\Excel_reports\NotAttemptedShipmentAging;
+use App\http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
+use App\Http\Models\Holiday;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -859,4 +868,433 @@ class AdminReportsEmailController extends Controller
 
         return url('/') . '/' . $file_name_without_path;
     }
+
+    static public function not_attempted_aging($date){
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
+        Carbon::setWeekendDays([
+            Carbon::SUNDAY,
+        ]);
+        if($settings->exists()){
+            $settings = $settings->first();
+            $cut_off_time = $settings->setting_value;
+            $time = $settings->setting_value . ':00';
+            $formatted_date = Carbon::createFromFormat("Y-m-d H:i:s", $date . " " .$time .":00");
+            $from = Carbon::today()->addHour($cut_off_time)->toDateTimeString();
+            $formatted_date_from = Carbon::parse($date)->subDays(30)->addHour($cut_off_time)->toDateTimeString();
+            $del_formatted_date_from = Carbon::parse($date)->subDays(30)->toDateTimeString();
+            $to_cut = Carbon::tomorrow()->addHour($cut_off_time)->subSecond()->toDateTimeString();
+            $hubs = City::where('hub', 1)->where('status', 1)->get();
+            $from_id = DB::connection('reports')->table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $formatted_date_from)->first()->id;
+            $to_id = DB::connection('reports')->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to_cut)->first()->id;
+            $hub_shipments = array();
+            $zone_hub_shipments = array();
+            NotAttemptedShipmentAging::where('created_at', '<', $del_formatted_date_from)->delete();
+            $shipments = array();
+            foreach ($hubs as $hub){
+                $hub_shipments[$hub->name]['id'] = $hub->id;
+                $hub_shipments[$hub->name]['name'] = $hub->name;
+                $hub_shipments[$hub->name]['zone_id'] = $hub->zone_id;
+                $hub_shipments[$hub->name]['zone'] = $hub->zone->name;
+                $hub_shipments[$hub->name]['zero'] = 0;
+                $hub_shipments[$hub->name]['one'] = 0;
+                $hub_shipments[$hub->name]['two'] = 0;
+                $hub_shipments[$hub->name]['three'] = 0;
+                $hub_shipments[$hub->name]['four'] = 0;
+                $hub_shipments[$hub->name]['five'] = 0;
+                $hub_shipments[$hub->name]['six_plus'] = 0;
+                $cities_shipments = DB::connection('reports')->table('cities')->join('shipments as s', function($join) {
+                    $join->where(function($query) {
+                        $query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->on('cities.id', '=', DB::connection('reports')->raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
+                            });
+                    });
+                })
+                    ->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+                    ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
+                    ->leftjoin('cities as sch', 's.consignee_city_id', '=', 'sch.id')
+                    ->leftjoin('zone_class_cities as zcc', function($join) {
+                        $join->on('pc.zone_id', '=', 'zcc.zone_id')
+                            ->on('s.consignee_city_id', '=', 'zcc.city_id');
+                    })
+                    ->join('shipments_journey as sj', function($join) use ($from_id, $to_id) {
+                        $join->on('s.id', '=', 'sj.shipment_id')
+                            ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
+                    })
+                    ->join('shipments_journey as sja', function($join){
+                        $join->on('s.id', '=', 'sja.shipment_id')
+                            ->where('sja.id', '=',DB::connection('reports')->raw('(select max(shipments_journeya.id) from shipments_journey as shipments_journeya where shipments_journeya.shipment_id = s.id and shipments_journeya.shipper_status_id = 2)'));
+                    })
+                    ->select('s.id as shipment_id', 'sja.created_at as arrival_date')
+                    ->where(function ($query) use ($cut_off_time, $from){
+                        $query->where(function($sub_query){
+                            $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                ->where('sj.shipper_status_id', '=', 7);
+                        })
+                            ->orWhere(function ($sub_query) use ($cut_off_time, $from) {
+                                $sub_query->where(function ($sub_sub_query) use ($cut_off_time, $from) {
+                                    $sub_sub_query->where(function ($sub_sub_sub_query){
+                                        $sub_sub_sub_query->where(function ($sub_sub_sub_sub_query){
+                                            $sub_sub_sub_sub_query->where(function ($sub_sub_sub_sub_sub_query) {
+                                                $sub_sub_sub_sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                                    ->orWhereNull('zcc.class')
+                                                    ->orWhereIn('zcc.class', [0, 1]);
+                                            })
+                                                ->where(function ($sub_sub_sub_sub_sub_sub_sub_query) {
+                                                    $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::connection('reports')->raw('usi.city_id'))
+                                                        ->where('sj.shipper_status_id', '=', 2);
+                                                });
+                                        });
+                                    })
+                                        ->where(function ($sub_sub_sub_query) use ($cut_off_time, $from) {
+                                            $sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) < date(?)', [$from])
+                                                ->orWhere(function ($sub_sub_sub_sub_query) use ($cut_off_time, $from) {
+                                                    $sub_sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) = date(?)', [$from])
+                                                        ->whereRaw('hour(`sj`.`created_at`) < ?', [$cut_off_time]);
+                                                });
+                                        });
+                                });
+                            })
+                            ->orWhere(function ($sub_query) use ($cut_off_time, $from) {
+                                $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    ->whereIn('sj.shipper_status_id', [8, 13])
+                                    ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
+                            });
+                    })
+                    ->where('cities.hub_id', $hub->id);
+
+                if($cities_shipments->exists()) {
+                    $cities_shipments = $cities_shipments->groupBy('s.id')->get();
+                    foreach ($cities_shipments as $cities_shipment) {
+                        $arrival_date = Carbon::parse($cities_shipment->arrival_date);
+                        $check_arrival_date = Carbon::parse($cities_shipment->arrival_date)->format("Y-m-d");
+                        $now_date = Carbon::today()->format("Y-m-d");
+                        $holidays = Holiday::whereBetween('holiday', [$check_arrival_date, $now_date])->count();
+                        $count_without_holidays = $arrival_date->diffInWeekdays($formatted_date);
+                        $count_with_holidays = $count_without_holidays - $holidays;
+                        if ($count_with_holidays == 0) {
+                            $hub_shipments[$hub->name]['zero']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 0;
+                        } elseif ($count_with_holidays == 1) {
+                            $hub_shipments[$hub->name]['one']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 1;
+                        } elseif ($count_with_holidays == 2) {
+                            $hub_shipments[$hub->name]['two']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 2;
+                        } elseif ($count_with_holidays == 3) {
+                            $hub_shipments[$hub->name]['three']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 3;
+                        } elseif ($count_with_holidays == 4) {
+                            $hub_shipments[$hub->name]['four']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 4;
+                        } elseif ($count_with_holidays == 5) {
+                            $hub_shipments[$hub->name]['five']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 5;
+                        } elseif ($count_with_holidays >= 6) {
+                            $hub_shipments[$hub->name]['six_plus']++;
+                            $shipments[$hub->name]['id'][$cities_shipment->shipment_id] = 6;
+                        }
+                    }
+                }
+            }
+            foreach($hub_shipments as $hub_shipment){
+                $not_attempted_shipment_aging = new NotAttemptedShipmentAging();
+                $not_attempted_shipment_aging->hub_id = $hub_shipment['id'];
+                $not_attempted_shipment_aging->zone_id = $hub_shipment['zone_id'];
+                $not_attempted_shipment_aging->zero = $hub_shipment['zero'];
+                $not_attempted_shipment_aging->one = $hub_shipment['one'];
+                $not_attempted_shipment_aging->two = $hub_shipment['two'];
+                $not_attempted_shipment_aging->three = $hub_shipment['three'];
+                $not_attempted_shipment_aging->four = $hub_shipment['four'];
+                $not_attempted_shipment_aging->five = $hub_shipment['five'];
+                $not_attempted_shipment_aging->six_plus = $hub_shipment['six_plus'];
+                $not_attempted_shipment_aging->save();
+
+                NotificationsController::send(68, $date, $hub_shipment);
+
+                $zone_hub_shipments[$hub_shipment['zone_id']][$hub_shipment['name']] = $hub_shipment;
+            }
+            foreach ($zone_hub_shipments as $zone_hub_shipment){
+                NotificationsController::send(69, $date, $zone_hub_shipment);
+            }
+            NotificationsController::send(70, $date, $hub_shipments);
+        }
+    }
+
+    static public function qa_petty_cash_report(){
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $qa_report_petty_cash_array['header'] = ['S. No.', 'Hub Name', 'Station Approval', 'Operation Approval', 'Finance Approval'];
+        $qa_report_petty_cash_array[] = ['S. No.' => '', 'Hub Name' => '', 'Station Approval' => '', 'Operation Approval' => '', 'Finance Approval' => ''];
+        foreach ($hubs as $hub){
+            $hub_approvals[$hub->id]['name'] = $hub->name;
+            $hub_approvals[$hub->id]['station_approval'] = 0;
+            $hub_approvals[$hub->id]['operation_approval'] = 0;
+            $hub_approvals[$hub->id]['finance_approval'] = 0;
+            $petty_cash_statements = PettyCashStatement::where('hub_id', $hub->id)->get();
+            foreach ($petty_cash_statements as $petty_cash_statement){
+                if($petty_cash_statement->station_approved_by == null){
+                    $hub_approvals[$hub->id]['station_approval']++;
+                }
+                if($petty_cash_statement->operation_approved_by == null){
+                    $hub_approvals[$hub->id]['operation_approval']++;
+                }
+                if($petty_cash_statement->finance_approved_by == null){
+                    $hub_approvals[$hub->id]['finance_approval']++;
+                }
+            }
+        }
+        QaReportPettyCash::truncate();
+
+        foreach ($hub_approvals as $index => $hub_approval){
+            $qa_report_petty_cash = new QaReportPettyCash();
+            $qa_report_petty_cash->hub_id = $index;
+            $qa_report_petty_cash->hub_name = $hub_approval['name'];
+            $qa_report_petty_cash->station_approval = $hub_approval['station_approval'];
+            $qa_report_petty_cash->operation_approval = $hub_approval['operation_approval'];
+            $qa_report_petty_cash->finance_approval = $hub_approval['finance_approval'];
+            $qa_report_petty_cash->save();
+            $qa_report_petty_cash_array[] = ['S. No.' => '', 'Hub Name' => $hub_approval['name'], 'Station Approval' => $hub_approval['station_approval'], 'Operation Approval' => $hub_approval['operation_approval'], 'Finance Approval' => $hub_approval['finance_approval']];
+        }
+
+        $cell_st = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getDefaultColumnDimension()->setWidth(20);
+        $sheet->fromArray($qa_report_petty_cash_array, NULL, 'A2', true);
+        $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
+        $sheet->setTitle('QA Report Petty Cash');
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="qa_report_petty_cash.xlsx"');
+        header('Cache-Control: max-age=0');
+        $date_file_name = Carbon::today()->format('Y_m_d');
+        $file_name_without_path = "reports/qa_report_petty_cash_" . $date_file_name . ".xlsx";
+        $file_name = public_path() . "/reports/qa_report_petty_cash_" . $date_file_name . ".xlsx";
+        $writer->save($file_name);
+
+        return url('/') . '/' . $file_name_without_path;
+    }
+
+    static public function outstanding_shipments($start_date, $end_date){
+        $shipments = DB::connection('reports')->table('delivery_note_shipments')->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+            ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
+            ->join('delivery_notes as delivery_note', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_note.id')
+            ->join('riders as rider', 'delivery_note.rider_id', '=', 'rider.id')
+            ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
+            ->join('users as u', 's.user_id', '=', 'u.id')
+            ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('shipment_payment_status as sps', 's.payment_status_id', '=' , 'sps.id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)'));
+            })
+            ->leftjoin('shipments_journey as sod', function($join) {
+                $join->on('sod.shipment_id', '=', 's.id')
+                    ->where('sod.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id and shipments_journey.verification = 0 and shipments_journey.reference_1_id = delivery_note.id)'));
+            })
+            ->leftjoin('shipments_journey as svd', function($join) {
+                $join->on('svd.shipment_id', '=', 's.id')
+                    ->where('svd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.reference_1_id = delivery_note.id and shipments_journey.shipper_status_id != 5)'));
+            })
+            ->leftjoin('shipments_journey as sjd', function($join) {
+                $join->on('sjd.shipment_id', '=', 's.id')
+                    ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
+            })
+            ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'hc.id as hub_id', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount','s.amount as sum_amount', 'ss.name as current_status', 'sod.created_at as operation_status_date','svd.created_at as verification_status_date', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status','rider.name as rider_name', 's.booking_type_id', 'usi.poc','u.id as account_no')
+            ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,11])
+            ->where('sjd.created_at', '>=', $start_date)
+            ->where('sjd.created_at', '<=', $end_date)
+            ->get();
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        foreach ($hubs as $hub){
+            $serial[$hub->name] = 0;
+            $outstanding_shipments_array[$hub->name]['header'] = ['S. No.', 'Tracking Number', 'Consignee', 'Address', 'Destination', 'Hub', 'Account No.', 'Shipper', 'Service Type', 'Amount', 'Recovery Status', 'Current Status', 'Payment Status', 'Operation Status Date/Time', 'Verification Status Date/Time', 'Rider Name', 'Remarks', 'DNCC', 'SDN', 'Aging'];
+            $outstanding_shipments_array[$hub->name][] = ['S. No.' => '', 'Tracking Number' => '', 'Consignee' => '', 'Address' => '', 'Destination' => '', 'Hub' => '', 'Account No.' => '', 'Shipper' => '', 'Service Type' => '', 'Amount' => '', 'Recovery Status' => '', 'Current Status' => '', 'Payment Status' => '', 'Operation Status Date/Time' => '', 'Verification Status Date/Time' => '', 'Rider Name' => '', 'Remarks' => '', 'DNCC' => '', 'SDN' => '', 'Aging' => ''];
+            if(count($shipments) > 0){
+                foreach ($shipments as $shipment){
+                    if($hub->id == $shipment->hub_id){
+                        $serial[$hub->name]++;
+                        if(in_array($shipment->recovery_status, [4,5,6])){
+                            $recovery_status = "Outstanding";
+                        }else if($shipment->recovery_status == 7){
+                            $recovery_status = "Resolved";
+                        }else if($shipment->recovery_status == 8){
+                            $recovery_status = "Payment Adjusted";
+                        }else if($shipment->recovery_status == 11){
+                            $recovery_status = "Revert Requested";
+                        } else{
+                            $recovery_status = "-";
+                        }
+                        $updated_at = Carbon::parse($shipment->operation_status_date)->startOfDay();
+
+                        $now = Carbon::now()->startOfDay();
+
+                        $aging = $updated_at->diffInDays($now) . 'd';
+
+                        if ($shipment->booking_type_id == 4) {
+                            $shipper = $shipment->shipper .' (' . $shipment->poc . ')';
+                        }
+                        else {
+                            $shipper = $shipment->shipper;
+                        }
+
+                        if($shipment->sdn != null){
+                            $sdn = str_pad($shipment->sdn, 6, '0', STR_PAD_LEFT);
+                        }
+                        else{
+                            $sdn = '-';
+                        }
+                        $outstanding_shipments_array[$hub->name][] = ['S. No.' => $serial[$hub->name], 'Tracking Number' => strval($shipment->tracking_number), 'Consignee' => $shipment->consignee, 'Address' => $shipment->address, 'Destination' => $shipment->destination, 'Hub' => $shipment->hub, 'Account No.' => str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT), 'Shipper' => $shipper, 'Service Type' => $shipment->service_type, 'Amount' => $shipment->sum_amount, 'Recovery Status' => $recovery_status, 'Current Status' => $shipment->current_status, 'Payment Status' => $shipment->payment_status, 'Operation Status Date/Time' => $shipment->operation_status_date, 'Verification Status Date/Time' => $shipment->verification_status_date, 'Rider Name' => $shipment->rider_name, 'Remarks' => '', 'DNCC' => str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT), 'SDN' => $sdn, 'Aging' => $aging];
+                    }
+                }
+            }
+        }
+        foreach ($hubs as $hub){
+            if(count($outstanding_shipments_array[$hub->name]) > 2){
+                $cell_st = [
+                    'font' => ['bold' => true],
+                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+                ];
+
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->getDefaultColumnDimension()->setWidth(20);
+                $sheet->getStyle("B2:B4000")->getNumberFormat()
+                    ->setFormatCode(
+                        \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
+                    );
+                $sheet->fromArray($outstanding_shipments_array[$hub->name], NULL, 'A2', true);
+                $sheet->getStyle("A2:T2")->applyFromArray($cell_st);
+                $title = 'Outstanding Shipments ' . $hub->name;
+                if(strlen($title) > 31){
+                    $title = substr($title, 0, 28);
+                    $title = $title . '...';
+                }
+                $sheet->setTitle($title);
+                $writer = new Xlsx($spreadsheet);
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename="outstanding_shipment_report.xlsx"');
+                header('Cache-Control: max-age=0');
+                $date_file_name = Carbon::today()->format('Y_m_d');
+                $file_name_without_path = "reports/outstanding_shipment_report_" . strtolower($hub->name) . "_" . $date_file_name . ".xlsx";
+                $file_name = public_path() . "/reports/outstanding_shipment_report_" . strtolower($hub->name) . "_"  . $date_file_name . ".xlsx";
+                $writer->save($file_name);
+
+                NotificationsController::send(76, $hub->id, url('/') . '/' . $file_name_without_path);
+            }
+        }
+    }
+	
+	static public function done_payment($date){
+        $done_payments = DonePaymentCalculation::whereDate('created_at', $date);
+        DonePaymentsReport::truncate();
+        if($done_payments->exists()){
+            $total_amount = 0;
+            $done_payment_array = array();
+            $done_payments_array = array();
+            $done_payment_array['header'] = ['S No.', 'Payment ID', 'Shipper Name', 'IBAN Number', 'Amount'];
+            $done_payment_array[] = ['S No.' => '', 'Payment ID' => '', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => ''];
+            $done_payments = $done_payments->get();
+            $shippers = array();
+            $shipper_ids = array();
+            $walk_in_shipper = GlobalSettings::where('type', 'Walk-In');
+            if($walk_in_shipper->exists()){
+                $walk_in_shipper = $walk_in_shipper->first();
+                $shipper_ids[] = $walk_in_shipper->setting_value;
+            }
+            $foc_shippers = GlobalSettings::where('type', 'foc_account_tag');
+            if($foc_shippers->exists()){
+                $foc_shippers = $foc_shippers->first();
+                $foc_account_tags = array_map('intval', explode(',', $foc_shippers->text));
+                $shipper_ids = array_merge($shipper_ids, $foc_account_tags);
+            }
+            $serial = 0;
+            foreach ($done_payments as $done_payment) {
+                if (!in_array($done_payment->done_payment->shipper->id, $shipper_ids)) {
+                    if (!in_array($done_payment->done_payment->shipper->id, $shippers)) {
+                        $shippers[$done_payment->done_payment->shipper->id] = $done_payment->done_payment->shipper->id;
+                    }
+                    if ($done_payment->done_payment->user_bank_info_id != null) {
+                        $iban = $done_payment->done_payment->shipper_bank->iban;
+                    } else {
+                        $shipper_bank = UserBankInfo::where('user_id', $done_payment->done_payment->shipper->id)->where('default_bank', 1);
+                        if ($shipper_bank->exists()) {
+                            $shipper_bank = $shipper_bank->first();
+                            $iban = $shipper_bank->iban;
+                        } else {
+                            $shipper_bank = UserBankInfo::where('user_id', $done_payment->done_payment->shipper->id);
+                            if ($shipper_bank->exists()) {
+                                $shipper_bank = $shipper_bank->first();
+                                $iban = $shipper_bank->iban;
+                            } else {
+                                $iban = '-';
+                            }
+                        }
+                    }
+                    $done_payment_report = new DonePaymentsReport();
+                    $done_payment_report->payment_id = $done_payment->done_payment_id;
+                    $done_payment_report->shipper_id = $done_payment->done_payment->shipper->id;
+                    $done_payment_report->shipper_name = $done_payment->done_payment->shipper->name;
+                    $done_payment_report->amount = $done_payment->payable;
+                    $done_payment_report->iban_number = $iban;
+                    $done_payment_report->save();
+                    $serial++;
+                    $done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'IBAN Number' => $iban, 'Amount' => number_format($done_payment->payable)];
+                    $total_amount = $total_amount + $done_payment->payable;
+                }
+            }
+            $done_payments_array['summary_header'] = ['', 'Total Shippers', 'Total Amount'];
+            $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
+            $done_payments_array[] = ['' => '', 'Total Shippers' => count($shippers), 'Total Amount' => number_format($total_amount)];
+            $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
+            $done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
+            $done_payment_array[] = ['S No.' => '', 'Payment ID' => 'Total', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => number_format($total_amount)];
+            $done_payment_array = array_merge($done_payments_array, $done_payment_array);
+
+            $cell_s = [
+                'font' => ['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => array(
+                    'outline' => array(
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
+                        'color' => array('argb' => '000000'),
+                    ),
+                ),
+            ];
+
+            $cell_st = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+            $sheet->fromArray($done_payment_array, NULL, 'A2', true);
+            $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
+            $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
+            $date_file_name = Carbon::today()->format('Y_m_d');
+            $sheet->setTitle('Done Payments ' . $date_file_name);
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="done_payment_report.xlsx"');
+            header('Cache-Control: max-age=0');
+            $file_name_without_path = "reports/done_payment_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/done_payment_report_" . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+
+            NotificationsController::send(82, $date, url('/') . '/' . $file_name_without_path);
+        }
+    }
+
 }
