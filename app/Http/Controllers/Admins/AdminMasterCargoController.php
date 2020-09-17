@@ -2521,7 +2521,7 @@ class AdminMasterCargoController extends Controller
                 $shipper_status_id = NULL;
                 $consignee_status_id = NULL;
 
-                if ($bag_shipment->type == 1) {
+                if ($bag->type == 1) {
                     if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
                         ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
                         $shipper_status_id = 15;
@@ -2569,7 +2569,7 @@ class AdminMasterCargoController extends Controller
                 ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
                 //Consolidated Shipments
 
-                if ($bag_shipment->type == 1) {
+                if ($bag->type == 1) {
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
                     if($self_collection_shipment) {
                         $shipment->shipper_status_id = 15;
