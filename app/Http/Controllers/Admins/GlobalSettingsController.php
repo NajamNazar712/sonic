@@ -30,6 +30,8 @@ use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
 use App\Http\Models\Holiday;
+use App\http\Models\RestrictedCityIntercept;
+use App\Http\Models\Rider;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
@@ -2423,10 +2425,11 @@ class GlobalSettingsController extends Controller
             DB::table('completed_aging_reports')->truncate();
             foreach ($hubs as $hub_id){
                 $total_count = 0;
-                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
+                $zone_id = City::find($hub_id)->zone_id;
+//                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
                 $completed_aging_report = new CompletedAgingReport();
                 $completed_aging_report->hub_id = $hub_id;
-                $completed_aging_report->zone_id = $zone_id->zone_id;
+                $completed_aging_report->zone_id = $zone_id;
 
                 $completed_aging_report->date = $now;
 
@@ -2458,11 +2461,12 @@ class GlobalSettingsController extends Controller
             DB::table('pending_cash_collection_aging_reports')->truncate();
             foreach ($hubs as $hub_id){
                 $total_count = 0;
-                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
+                $zone_id = City::find($hub_id)->zone_id;
+
                 $pending_cash_collection_aging_report = new PendingCashCollectionAgingReport();
 
                 $pending_cash_collection_aging_report->hub_id = $hub_id;
-                $pending_cash_collection_aging_report->zone_id = $zone_id->zone_id;
+                $pending_cash_collection_aging_report->zone_id = $zone_id;
 
                 $pending_cash_collection_aging_report->date = $now;
 
@@ -2647,5 +2651,69 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+
+    public function nsa_account_index(){
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        $riders = Rider::where('status', 1)->select('id','name')->get();
+        $settings = GlobalSettings::where('type', 'nsa_accounts');
+        $rider_id = null;
+        $nsa_accounts = array();
+        if($settings->exists()){
+            $settings = $settings->first();
+            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+            $rider_id = $settings->setting_value;
+        }
+        return view('admin.settings.nsa_account')->with(['shippers' => $shippers, 'riders' => $riders, 'rider_id' => $rider_id, 'nsa_accounts' => $nsa_accounts]);
+    }
+
+    public function nsa_account_store(Request $request){
+        if($request->has('shippers')){
+            if(count($request->shippers) > 0){
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'nsa_accounts');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                }
+                else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'nsa_accounts';
+
+                }
+                $settings->setting_value = $request->rider;
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        }else{
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
+    }
+
+    public function restrict_cities_intercept_index(){
+        $cities = City::where('status', 1)->select('id','name')->get();
+        $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
+        return view('admin.settings.restrict_cities_intercept')->with(['cities' => $cities, 'restricted_cities' => $restricted_cities]);
+    }
+
+    public function restrict_cities_intercept_store(Request $request){
+        RestrictedCityIntercept::truncate();
+        if($request->has('cities')){
+            if(count($request->cities) > 0){
+                $cities = $request->cities;
+                foreach ($cities as $city_id){
+                    $restricted_city = new RestrictedCityIntercept();
+                    $restricted_city->city_id = $city_id;
+                    $restricted_city->save();
+                }
+            }
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
+
     }
 }

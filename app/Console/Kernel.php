@@ -56,7 +56,9 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\StationRecoveryReport',
 		'\App\Console\Commands\V2PickupCleanDuplicateData',
 		'\App\Console\Commands\QAReportPettyCash',
-		'\App\Console\Commands\SelfCollection'
+		'\App\Console\Commands\SelfCollection',
+		'\App\Console\Commands\OutstandingShipmentEmail',
+        'App\Console\Commands\ShipmentPieceOnHold'
 
         ];
 
@@ -75,6 +77,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
 //        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
+        $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
 
@@ -151,6 +154,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
+        $schedule->command('report:donepayment')->dailyAt('17:00')->runInBackground();
+
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
         if ($settings->exists()) {
@@ -181,14 +186,15 @@ class Kernel extends ConsoleKernel
             $zero_charges_report_time = $settings->setting_value . ':00';
             $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time);
         }
-        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $station_recovery_cron_time = $settings->setting_value . ':00';
-            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
-        }
+//        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
+//
+//        if ($settings->exists()) {
+//            $settings = $settings->first();
+//
+//            $station_recovery_cron_time = $settings->setting_value . ':00';
+//            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
+//        }
+        $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00');
     }
 	 /**
      * Register the commands for the application.

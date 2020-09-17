@@ -46,9 +46,9 @@
 										<div class="form-group text-right">
 											<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Try And Buy Template</a>
 										</div>
-{{--										<div class="form-group text-right">--}}
-{{--											<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Reverse Pickup Template</a>--}}
-{{--										</div>--}}
+										<div class="form-group text-right">
+											<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Reverse Pickup Template</a>
+										</div>
 									</div>
 								</div>
 							</form>
@@ -57,144 +57,144 @@
 								<div class="col">
 									<table class="table table-bordered">
 										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Service Types</th>
-											</tr>
-											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="text-center border-primary border-lighten-2">ID</th>
-												<th class="border-primary border-lighten-2">Name</th>
-											</tr>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Service Types</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+											<th class="text-center border-primary border-lighten-2">ID</th>
+											<th class="border-primary border-lighten-2">Name</th>
+										</tr>
 										</thead>
 										<tbody>
-											@foreach ($booking_types as $booking_type)
-												<tr role="row">
-													<td class="text-center">{{ $booking_type->id }}</td>
-													<td>{{ $booking_type->booking_type }}</td>
-												</tr>
-											@endforeach
-										</tbody>
-									</table>
-
-									<table class="table table-bordered">
-                                        <thead>
-                                        <tr role="row" class="bg-primary white text-center">
-                                            <th colspan="2" class="border-primary border-darken-1">Charges Modes</th>
-                                        </tr>
-                                        <tr role="row" class="bg-primary bg-lighten-1 white">
-                                            <th class="text-center border-primary border-lighten-2">ID</th>
-                                            <th class="border-primary border-lighten-2">Name</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @foreach ($charges_modes as $charges_mode)
-                                            <tr role="row">
-                                                <td class="text-center">{{ $charges_mode->id }}</td>
-                                                <td>{{ $charges_mode->charges_mode }}</td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-
-									<table class="table table-bordered">
-										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Show Information on Air Waybill</th>
-											</tr>
-										</thead>
-										<tbody>
+										@foreach ($booking_types as $booking_type)
 											<tr role="row">
-												<td class="text-center">No</td>
-												<td class="text-center">Yes</td>
+												<td class="text-center">{{ $booking_type->id }}</td>
+												<td>{{ $booking_type->booking_type }}</td>
 											</tr>
-										</tbody>
-									</table>
-									<table class="table table-bordered">
-										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Self Collection</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr role="row">
-												<td class="text-center">No</td>
-												<td class="text-center">Yes</td>
-											</tr>
+										@endforeach
 										</tbody>
 									</table>
 
 									<table class="table table-bordered">
 										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Item Insurance</th>
-											</tr>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Charges Modes</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+											<th class="text-center border-primary border-lighten-2">ID</th>
+											<th class="border-primary border-lighten-2">Name</th>
+										</tr>
 										</thead>
 										<tbody>
+										@foreach ($charges_modes as $charges_mode)
 											<tr role="row">
-												<td class="text-center">No</td>
-												<td class="text-center">Yes</td>
+												<td class="text-center">{{ $charges_mode->id }}</td>
+												<td>{{ $charges_mode->charges_mode }}</td>
 											</tr>
+										@endforeach
 										</tbody>
 									</table>
 
 									<table class="table table-bordered">
 										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Shipping Modes</th>
-											</tr>
-											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="text-center border-primary border-lighten-2">ID</th>
-												<th class="border-primary border-lighten-2">Name</th>
-											</tr>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Show Information on Air Waybill</th>
+										</tr>
 										</thead>
 										<tbody>
-											@foreach ($shipping_modes as $shipping_mode)
-												<tr role="row">
-													<td class="text-center">{{ $shipping_mode->id }}</td>
-													<td>{{ $shipping_mode->mode }}</td>
-												</tr>
-											@endforeach
+										<tr role="row">
+											<td class="text-center">No</td>
+											<td class="text-center">Yes</td>
+										</tr>
+										</tbody>
+									</table>
+									<table class="table table-bordered">
+										<thead>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Self Collection</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr role="row">
+											<td class="text-center">No</td>
+											<td class="text-center">Yes</td>
+										</tr>
+										</tbody>
+									</table>
+
+									<table class="table table-bordered">
+										<thead>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Item Insurance</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr role="row">
+											<td class="text-center">No</td>
+											<td class="text-center">Yes</td>
+										</tr>
+										</tbody>
+									</table>
+
+									<table class="table table-bordered">
+										<thead>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Shipping Modes</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+											<th class="text-center border-primary border-lighten-2">ID</th>
+											<th class="border-primary border-lighten-2">Name</th>
+										</tr>
+										</thead>
+										<tbody>
+										@foreach ($shipping_modes as $shipping_mode)
+											<tr role="row">
+												<td class="text-center">{{ $shipping_mode->id }}</td>
+												<td>{{ $shipping_mode->mode }}</td>
+											</tr>
+										@endforeach
 										</tbody>
 									</table>
 
 									@if ($shipping_mode_same_day_timings)
 										<table class="table table-bordered">
 											<thead>
-												<tr role="row" class="bg-primary white text-center">
-													<th colspan="2" class="border-primary border-darken-1">Same Day Timings</th>
-												</tr>
-												<tr role="row" class="bg-primary bg-lighten-1 white">
-													<th class="text-center border-primary border-lighten-2">ID</th>
-													<th class="border-primary border-lighten-2">Name</th>
-												</tr>
+											<tr role="row" class="bg-primary white text-center">
+												<th colspan="2" class="border-primary border-darken-1">Same Day Timings</th>
+											</tr>
+											<tr role="row" class="bg-primary bg-lighten-1 white">
+												<th class="text-center border-primary border-lighten-2">ID</th>
+												<th class="border-primary border-lighten-2">Name</th>
+											</tr>
 											</thead>
 											<tbody>
-												@foreach ($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
-													<tr role="row">
-														<td class="text-center">{{ $shipping_mode_same_day_timing->id }}</td>
-														<td>{{ $shipping_mode_same_day_timing->timing }}</td>
-													</tr>
-												@endforeach
+											@foreach ($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
+												<tr role="row">
+													<td class="text-center">{{ $shipping_mode_same_day_timing->id }}</td>
+													<td>{{ $shipping_mode_same_day_timing->timing }}</td>
+												</tr>
+											@endforeach
 											</tbody>
 										</table>
 									@endif
 
 									<table class="table table-bordered">
 										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Payment Modes</th>
-											</tr>
-											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="text-center border-primary border-lighten-2">ID</th>
-												<th class="border-primary border-lighten-2">Name</th>
-											</tr>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Payment Modes</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+											<th class="text-center border-primary border-lighten-2">ID</th>
+											<th class="border-primary border-lighten-2">Name</th>
+										</tr>
 										</thead>
 										<tbody>
-											@foreach ($payment_modes as $payment_mode)
-												<tr role="row">
-													<td class="text-center">{{ $payment_mode->id }}</td>
-													<td>{{ $payment_mode->mode }}</td>
-												</tr>
-											@endforeach
+										@foreach ($payment_modes as $payment_mode)
+											<tr role="row">
+												<td class="text-center">{{ $payment_mode->id }}</td>
+												<td>{{ $payment_mode->mode }}</td>
+											</tr>
+										@endforeach
 										</tbody>
 									</table>
 								</div>
@@ -202,93 +202,93 @@
 								<div class="col">
 									<table class="table table-bordered">
 										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Pickup Addresses</th>
-											</tr>
-											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="text-center border-primary border-lighten-2">ID</th>
-												<th class="border-primary border-lighten-2">Address</th>
-											</tr>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Pickup Addresses</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+											<th class="text-center border-primary border-lighten-2">ID</th>
+											<th class="border-primary border-lighten-2">Address</th>
+										</tr>
 										</thead>
 										<tbody>
-											@if ($pickup_addresses->count())
-												@foreach ($pickup_addresses as $pickup_address)
-													<tr role="row">
-														<td class="text-center">{{ $pickup_address->id }}</td>
-														<td>{{ $pickup_address->pickup_address }}, {{ $pickup_address->city->name }}</td>
-													</tr>
-												@endforeach
-											@else
-													<tr role="row">
-														<td colspan="2" class="text-center">No Active Pickup Addresses</td>
-													</tr>
-											@endif
+										@if ($pickup_addresses->count())
+											@foreach ($pickup_addresses as $pickup_address)
+												<tr role="row">
+													<td class="text-center">{{ $pickup_address->id }}</td>
+													<td>{{ $pickup_address->pickup_address }}, {{ $pickup_address->city->name }}</td>
+												</tr>
+											@endforeach
+										@else
+											<tr role="row">
+												<td colspan="2" class="text-center">No Active Pickup Addresses</td>
+											</tr>
+										@endif
 										</tbody>
 									</table>
 
 									<table class="table table-bordered">
 										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Character Limits</th>
-											</tr>
-											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="border-primary border-lighten-2">Field</th>
-												<th class="text-center border-primary border-lighten-2">Limit</th>
-											</tr>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Character Limits</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+											<th class="border-primary border-lighten-2">Field</th>
+											<th class="text-center border-primary border-lighten-2">Limit</th>
+										</tr>
 										</thead>
 										<tbody>
-											<tr role="row">
-												<td>Consignee City Name</td>
-												<td class="text-center">190</td>
-											</tr>
-											<tr role="row">
-												<td>Consignee Name</td>
-												<td class="text-center">100</td>
-											</tr>
-											<tr role="row">
-												<td>Consignee Address</td>
-												<td class="text-center">190</td>
-											</tr>
-											<tr role="row">
-												<td>Consignee Email Address</td>
-												<td class="text-center">100</td>
-											</tr>
-											<tr role="row">
-												<td>Order ID</td>
-												<td class="text-center">100</td>
-											</tr>
-											<tr role="row">
-												<td>Item Description</td>
-												<td class="text-center">1000</td>
-											</tr>
-											<tr role="row">
-												<td>Item Quantity</td>
-												<td class="text-center">1000</td>
-											</tr>
-											<tr role="row">
-												<td>Product Value</td>
-												<td class="text-center">100000</td>
-											</tr>
-											<tr role="row">
-												<td>Replacement Item Description</td>
-												<td class="text-center">190</td>
-											</tr>
-											<tr role="row">
-												<td>Replacement Item Quantity</td>
-												<td class="text-center">1000</td>
-											</tr>
-											<tr role="row">
-												<td>Special Instructions</td>
-												<td class="text-center">190</td>
-											</tr>
-											<tr role="row">
-												<td>Estimated Weight (kg)</td>
-												<td class="text-center">10000</td>
-											</tr>
-											<tr role="row">
-												<td>Collection Amount</td>
-												<td class="text-center">1000000</td>
-											</tr>
+										<tr role="row">
+											<td>Consignee City Name</td>
+											<td class="text-center">190</td>
+										</tr>
+										<tr role="row">
+											<td>Consignee Name</td>
+											<td class="text-center">100</td>
+										</tr>
+										<tr role="row">
+											<td>Consignee Address</td>
+											<td class="text-center">190</td>
+										</tr>
+										<tr role="row">
+											<td>Consignee Email Address</td>
+											<td class="text-center">100</td>
+										</tr>
+										<tr role="row">
+											<td>Order ID</td>
+											<td class="text-center">100</td>
+										</tr>
+										<tr role="row">
+											<td>Item Description</td>
+											<td class="text-center">1000</td>
+										</tr>
+										<tr role="row">
+											<td>Item Quantity</td>
+											<td class="text-center">1000</td>
+										</tr>
+										<tr role="row">
+											<td>Product Value</td>
+											<td class="text-center">100000</td>
+										</tr>
+										<tr role="row">
+											<td>Replacement Item Description</td>
+											<td class="text-center">190</td>
+										</tr>
+										<tr role="row">
+											<td>Replacement Item Quantity</td>
+											<td class="text-center">1000</td>
+										</tr>
+										<tr role="row">
+											<td>Special Instructions</td>
+											<td class="text-center">190</td>
+										</tr>
+										<tr role="row">
+											<td>Estimated Weight (kg)</td>
+											<td class="text-center">10000</td>
+										</tr>
+										<tr role="row">
+											<td>Collection Amount</td>
+											<td class="text-center">1000000</td>
+										</tr>
 										</tbody>
 									</table>
 								</div>
@@ -296,21 +296,21 @@
 								<div class="col">
 									<table class="table table-bordered">
 										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Product Types</th>
-											</tr>
-											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="text-center border-primary border-lighten-2">ID</th>
-												<th class="border-primary border-lighten-2">Name</th>
-											</tr>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Product Types</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+											<th class="text-center border-primary border-lighten-2">ID</th>
+											<th class="border-primary border-lighten-2">Name</th>
+										</tr>
 										</thead>
 										<tbody>
-											@foreach ($products as $product)
-												<tr role="row">
-													<td class="text-center">{{ $product->id }}</td>
-													<td>{{ $product->product_name }}</td>
-												</tr>
-											@endforeach
+										@foreach ($products as $product)
+											<tr role="row">
+												<td class="text-center">{{ $product->id }}</td>
+												<td>{{ $product->product_name }}</td>
+											</tr>
+										@endforeach
 										</tbody>
 									</table>
 								</div>
@@ -318,19 +318,19 @@
 								<div class="col">
 									<table class="table table-bordered">
 										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Cities</th>
-											</tr>
-											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="border-primary border-lighten-2">Name</th>
-											</tr>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Cities</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+											<th class="border-primary border-lighten-2">Name</th>
+										</tr>
 										</thead>
 										<tbody>
-											@foreach ($cities as $city)
-												<tr role="row">
-													<td>{{ $city }}</td>
-												</tr>
-											@endforeach
+										@foreach ($cities as $city)
+											<tr role="row">
+												<td>{{ $city }}</td>
+											</tr>
+										@endforeach
 										</tbody>
 									</table>
 								</div>

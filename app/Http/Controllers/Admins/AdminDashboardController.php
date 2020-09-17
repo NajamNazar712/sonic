@@ -28,6 +28,7 @@ use App\Http\Models\DuplicateUser;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\Operataions\OperationForecast;
+use App\Http\Models\PaymentCycle;
 use App\Http\Models\RateRemark;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
@@ -1370,7 +1371,8 @@ class AdminDashboardController extends Controller
         $shippers = User::where('status', 3)->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers]);
+        $payment_cycles = PaymentCycle::all();
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
 
     }
     public function blockAccountsList(){
@@ -1405,16 +1407,32 @@ class AdminDashboardController extends Controller
         $shipper_id = $request->shipper_id;
         $user = User::find($shipper_id);
         $shipper_hub_id = $user->city->hub_id;
+        $sale_persons = array();
+        $old_sale_person = '';
+        $new_sale_person = '';
         if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
-            if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){  
+            if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
+                $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
+                if($old_sale_person){
+                    $old_sale_person = $old_sale_person->sales_person;
+                }
+                else{
+                    $old_sale_person = null;
+                }
+                $new_sale_person = Admin::find($tag_id);
                 $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->get();
                 if($shipper_data->count() > 0){
                     SalePersonTag::where('user_id',$shipper_id)->where('status',0)->update(['status' => 1]);
                 }
+                $shipper = User::find($shipper_id);
                 $sale_person_tag = new SalePersonTag();
                 $sale_person_tag->admin_id=$tag_id;
                 $sale_person_tag->user_id=$shipper_id;
                 $sale_person_tag->save();
+                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
+                NotificationsController::send(81, $sale_persons);
+
+
             }
             else{
                 return ['status'=>0,'error'=>"Shipper is already tagged to  Sales Person!"];
@@ -1431,21 +1449,31 @@ class AdminDashboardController extends Controller
     public function tagSubmitBulk(Request $request){
         $tag_id = $request->admin_id;
         $shipper_ids = $request->shipper_ids;
+        $sale_persons = array();
+        $old_sale_person ='';
+        $new_sale_person ='';
         if($shipper_ids){
             foreach ($shipper_ids as $shipper_id){
                 $user = User::find($shipper_id);
                 $shipper_hub_id = $user->city->hub_id;
                 if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
-                    
                     if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
+                        $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
+                        if($old_sale_person){
+                            $old_sale_person = $old_sale_person->sales_person;
+                        }
+                        $new_sale_person = Admin::find($tag_id);
                         $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->get();
                         if($shipper_data->count() > 0){
                             SalePersonTag::where('user_id',$shipper_id)->where('status',0)->update(['status' => 1,'admin_id' => $tag_id]);
                         }
+                        $shipper = User::find($shipper_id);
                         $sale_person_tag = new SalePersonTag();
                         $sale_person_tag->admin_id=$tag_id;
                         $sale_person_tag->user_id=$shipper_id;
                         $sale_person_tag->save();
+                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
+                        /*NotificationsController::send(81, $shipper->id, $sale_persons);*/
                     }
                     // else{
                     //     $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->first();
@@ -1458,6 +1486,7 @@ class AdminDashboardController extends Controller
             // return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
                  }
             }
+            NotificationsController::send(81,$sale_persons);
             return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
         }
         else{
@@ -7363,6 +7392,9 @@ if(session('department_id') == 7){
                 if($sale_check){
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
                 }
+                if(session('role_id') == 1 || in_array(365, session('permissions'))){
+                    $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -7761,13 +7793,12 @@ if(session('department_id') == 7){
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
             'iban'=>'required|string|max:255',
-            'payment_cycle'=>'required|string|max:255'
         ]);
         $old_bank_detail = UserBankInfo::where('user_id',$user_id)->select('bank_name')->first();
 
         if($user->account_type_id == 1){
             UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_cycle'=>$request->payment_cycle]);
+                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city]);
 
         }else{
             $generation_date = null;
@@ -7783,7 +7814,6 @@ if(session('department_id') == 7){
                     'account_title'=>$request->account_title,
                     'iban'=>$request->iban,
                     'city_id'=>$request->bank_city,
-                    'payment_cycle'=>$request->payment_cycle,
                     'invoicing_cycle_id' => $request->invoicing_cycle_id,
                     'generation_date' => $generation_date,
                     'billing_person_name' => $request->billing_person_name,
@@ -8405,7 +8435,7 @@ if(session('department_id') == 7){
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic',                'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as                           status','riders.created_at','cb.name as created_by', 'ub.name as updated_by']);
+            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic',                'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as                           status','riders.created_at','cb.name as created_by', 'ub.name as updated_by']);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -8415,7 +8445,15 @@ if(session('department_id') == 7){
             ->editColumn('status', function ($rider) {
                 return ($rider->status == 0)? 'Inactive': 'Active';
             })
+            ->editColumn('trax_id', function ($rider) {
+                if($rider->trax_id != null){
+                    return $rider->trax_id;
+                }
+                else{
+                    return '-';
+                }
 
+            })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
             })
@@ -8492,7 +8530,8 @@ if(session('department_id') == 7){
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
-            'pin' => 'required|numeric'
+            'pin' => 'required|numeric',
+            'trax_id'=>'required|max:255|string',
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -8511,7 +8550,8 @@ if(session('department_id') == 7){
             'status'=>1,
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
-            'created_by' => Auth::id()
+            'created_by' => Auth::id(),
+            'trax_id' => $request->trax_id,
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -8534,6 +8574,7 @@ if(session('department_id') == 7){
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
+            'trax_id'=>'required|string',
             'rider_category'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -8561,7 +8602,10 @@ if(session('department_id') == 7){
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
         $rider->route_id = $request->route_id;
+
         $rider->rider_category_id = $request->rider_category;
+        $rider->trax_id = $request->trax_id;
+
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;
         }else{
@@ -9154,6 +9198,62 @@ if(session('department_id') == 7){
             }
         }
         return redirect()->back()->with(['success' => 'Contacts updated successfully']);
+    }
+
+    public function payment_cycle_info(Request $request){
+        $user_id = $request->shipper_id;
+        if($user_id){
+            $user = User::find($user_id);
+            if($user){
+                $details = ['payment_cycle_id' => $user->payment_cycle_id, 'payment_day' => $user->payment_day];
+                return response()->json(['status' => 0, 'details' => $details]);
+
+            }else{
+                return response()->json(['status' => 1, 'error' => 'User not found!']);
+            }
+        }
+    }
+    public function payment_cycle_submit(Request $request){
+        $payment_cycle_id = $request->payment_cycle_select;
+        if($payment_cycle_id){
+            if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                $payment_day = $request->payment_day;
+            }
+            if($request->has('shipper_ids')){
+                $shipper_ids = explode(',' , $request->shipper_ids);
+                if(count($shipper_ids) > 0){
+                    foreach ($shipper_ids as $shipper_id){
+                        $shipper = User::find($shipper_id);
+                        if($shipper){
+                            $shipper->payment_cycle_id = $payment_cycle_id;
+                            if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                                $shipper->payment_day = $payment_day;
+                            }else{
+                                $shipper->payment_day = NULL;
+                            }
+                            $shipper->save();
+                        }
+                    }
+                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
+                }
+            }else{
+                $shipper_id = $request->shipper_id;
+                $shipper = User::find($shipper_id);
+                if($shipper){
+                    $shipper->payment_cycle_id = $payment_cycle_id;
+                    if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                        $shipper->payment_day = $payment_day;
+                    }else{
+                        $shipper->payment_day = NULL;
+                    }
+                    $shipper->save();
+                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
+                }
+            }
+
+            return redirect()->back()->with('error', 'Shipper not found!');
+        }
+        return redirect()->back()->with('error', 'Payment Cycle not selected!');
     }
 }
 

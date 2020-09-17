@@ -154,6 +154,7 @@
                         <th class="border-primary border-darken-1">Launched By</th>
                         <th class="border-primary border-darken-1">Launched By User Type</th>
                         <th class="border-primary border-darken-1">Launched Date</th>
+                        <th class="border-primary border-darken-1">Launched To Date (TAT)</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Valid/Invalid Date</th>
@@ -347,6 +348,7 @@
                             head.push('Launched By');
                             head.push('Launched By User Type');
                             head.push('Launched Date');
+                            head.push('Launched To Date (TAT)');
                             head.push('Assigned Date');
                             head.push('Status');
                             head.push('Valid/Invalid Date');
@@ -378,6 +380,7 @@
                                 row.push(values.launched_by_name);
                                 row.push(values.launched_by_type);
                                 row.push(values.launched_date);
+                                row.push(values.launched_to_today);
                                 row.push(values.assigned_date);
                                 row.push(values.valid_invalid_status);
                                 row.push(values.valid_invalid_date);
@@ -459,6 +462,7 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name'},
                     {data: 'launched_by_type', name: 'crm_requests.launched_by', class: 'align-middle launched_by_type'},
                     {data: 'launched_date', name: 'crm_requests.created_at', class: 'align-middle launched_date'},
+                    {data: 'launched_to_today', name: 'launched_to_today', class: 'align-middle launched_to_today', orderable: false, searchable: false},
                     {data: 'assigned_date', name: 'crah.created_at', class: 'align-middle assigned_date'},
                     {data: 'valid_invalid_status', name: 'crm_requests.status', class: 'align-middle valid_invalid_status', orderable: false, searchable: false},
                     {data: 'valid_invalid_date', name: 'crsh.created_at', class: 'align-middle valid_invalid_date', orderable: false, searchable: false},
@@ -480,7 +484,6 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-                console.log($('#search_status').val());
                 table.draw();
             });
 

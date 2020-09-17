@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\City;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
+use App\http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -58,19 +60,37 @@ class AdminInterceptRebookRequestHistoryController extends Controller
     }
 
     public function intercept_re_book_index($shipment_id){
-        $shipment = Shipment::where('id',$shipment_id)->first();
-        $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
-            ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
-            ->select('c.id as id', 'c.name as name')
-            ->where('shipments.id', $shipment_id)
-            ->where('c.status', 1)
-            ->whereNotNull('c.zone_id')
-            ->orderBy('c.name')
-            ->groupBy('c.name')
-            ->get();
+        if($shipment_id){
+            $shipment = Shipment::where('id',$shipment_id)->first();
+            if($shipment){
+                if($shipment->shipping_mode_id == 2){
+                    $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
+                $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
+                    ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
+                    ->select('c.id as id', 'c.name as name')
+                    ->where('shipments.id', $shipment_id)
+                    ->where('c.status', 1)
+                    ->whereNotNull('c.zone_id')
+                    ->whereNotIn('c.id', $restricted_cities);
+                }
+                else{
+                    $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
+                        ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
+                        ->select('c.id as id', 'c.name as name')
+                        ->where('shipments.id', $shipment_id)
+                        ->where('c.status', 1)
+                        ->whereNotNull('c.zone_id');
+                }
+                $consignee_cities = $consignee_cities->orderBy('c.name')
+                    ->groupBy('c.name')
+                    ->get();
 //        dd($consignee_cities);
 //        $consignee_cities = City::leftjoin('city_deliveries as cd', 'cd.city_id', '=', 'cities.id')->leftjoin('')->where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
-        return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+                return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+            }
+            return redirect()->back()->with('error', 'Shipment not found!');
+        }
+        return redirect()->back()->with('error', 'Shipment not found!');
     }
 
     public function intercept_re_book_update(Request $request)
@@ -81,8 +101,12 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         $user_id = $shipment->user_id;
 
         $shipment_status = $shipment->status_shipper->name;
-
-        if ($shipment['shipper_status_id'] == 12 || $shipment['shipper_status_id'] == 52 ) {
+        $crm = false;
+        $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_type_id', 11);
+        if($crm_request->exists()){
+            $crm = true;
+        }
+        if ($shipment['shipper_status_id'] == 12 || $shipment['shipper_status_id'] == 52 || $crm == true) {
             if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
                 if ($shipment['intercepted'] == 1) {
                     return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
@@ -111,13 +135,13 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
                     ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
 
-                    return redirect()->route('admin.return.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
+                    return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                 }
             } else {
                 return redirect()->back()->with('error', 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']);
             }
         } else {
-            return redirect()->route('admin.return.index')->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
+            return redirect()->back()->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
         }
     }
 }

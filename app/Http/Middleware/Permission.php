@@ -39,6 +39,7 @@ class Permission
             'accounts.sister_account.edit.submit' => 242,
             'accounts.sister_account.merged_account.mapping.info' => 242,
             'accounts.sister_account.merged_account.mapping.submit' => 242,
+            'accounts.receiving_sheet.index' => 364,
 
             'daily_visit.index' => 265,
             'daily_visit.store' => 265,
@@ -83,6 +84,14 @@ class Permission
             'pickups.history.index' => 123,
             'pickups.history.list' => 123,
             'pickups.history.bookings.all' => 123,
+
+            'v2_pickups.pending.index' => 17,
+            'v2_pickups.arrival.individual.index' => 24,
+            'v2_pickups.arrival.bulk.index' => 24,
+            'v2_pickups.rider.index' => 271,
+            'v2_pickups.action_log.index' => 272,
+            'v2_pickups.rider_receiving.index' => 366,
+
 
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
@@ -438,6 +447,9 @@ class Permission
             'reports.pickup_report.data' => 337,
             'reports.not_attempted_aging.index' => 360,
             'reports.not_attempted_aging.list' => 360,
+            'reports.daily_monthly_adjustment.index' => 373,
+            'reports.daily_monthly_adjustment.list' => 373,
+            'reports.daily_monthly_adjustment.summary_list' => 373,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -530,6 +542,8 @@ class Permission
             'crm.closed.list' => 236,
             'crm.escalation_status' => 352,
             'crm.escalate' => 353,
+            'crm.consignee_info.index' => 363,
+            'crm.consignee_info.list' => 363,
 
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
@@ -651,6 +665,12 @@ class Permission
             'settings.not_attempted_cron.index' => 359,
             'settings.not_attempted_cron.store' => 359,
 
+            'settings.nsa_account.index' => 367,
+            'settings.nsa_account.store' => 367,
+
+            'settings.restrict_cities_intercept.index' => 375,
+            'settings.restrict_cities_intercept.store' => 375,
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -707,6 +727,11 @@ class Permission
             'handover.responsibles.status' => 340,
             'handover.responsibles.details' => 340,
             'handover.responsibles.edit' => 340,
+
+
+            'multiple_pieces.add.index' => 368,
+            'multiple_pieces.hold.index' => 369,
+            'multiple_pieces.resolved.index' => 370,
         ],
 
         'shipper' => [

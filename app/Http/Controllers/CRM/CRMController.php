@@ -64,6 +64,21 @@ class CRMController extends Controller
         $crm_request_status_history->save();
         NotificationsController::send(31, $id);
 
+        if($case_nature_type_id != null){
+            if(in_array($case_nature_type_id, [11, 12, 13])){
+                $crm_request->status_id = 2;
+                $crm_request->save();
+                NotificationsController::send(41, $id);
+
+                $crm_request_status_history = new CrmRequestStatusHistory();
+
+                $crm_request_status_history->crm_request_id = $id;
+                $crm_request_status_history->status_id = 2;
+
+                $crm_request_status_history->save();
+            }
+        }
+
         if($case_nature_id == 1 && ($launched_by == 1 || $launched_by == 2)){
             $settings = GlobalSettings::where('type', 'auto_crm_comment');
             if($settings->exists()){

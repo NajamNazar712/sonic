@@ -23,7 +23,9 @@
                                         <th>S.No</th>
                                         <th>Service Type ID</th>
                                         <th>Pickup Address ID</th>
-                                        <th>Delivery Type ID</th>
+                                        @if($service_type_check_id != 5)
+                                            <th>Delivery Type ID</th>
+                                        @endif
                                         <th>Show Information on Air Waybill (Optional)</th>
                                         <th>Consignee City Name</th>
                                         <th>Consignee Name</th>
@@ -52,9 +54,12 @@
                                         @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
                                             <th>Amount</th>
                                         @endif
-                                        <th>Mode of Payment ID</th>
-                                        <th>Charges Mode ID</th>
+                                        @if($service_type_check_id != 5)
+                                            <th>Mode of Payment ID</th>
+                                            <th>Charges Mode ID</th>
+                                        @endif
                                         <th>Pieces</th>
+                                        <th></th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -86,10 +91,12 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][pickup_address_id]', $ro['pickup_address_id'], ['class' => 'form-control','style'=>'width:80px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            @if(isset($errors[$no]['delivery_type_id']))
-                                                <td>{!! Form::select('form[' . $no . '][delivery_type_id]',$delivery_types,null, ['class' => 'form-control is-invalid delivery_type_id select2','id'=>'delivery_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['delivery_type_id']}}</font></td>
-                                            @else
-                                                <td>{!! Form::text('form[' . $no . '][delivery_type_id]', $ro['delivery_type_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                            @if($service_type_check_id != 5)
+                                                @if(isset($errors[$no]['delivery_type_id']))
+                                                    <td>{!! Form::select('form[' . $no . '][delivery_type_id]',$delivery_types,null, ['class' => 'form-control is-invalid delivery_type_id select2','id'=>'delivery_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['delivery_type_id']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][delivery_type_id]', $ro['delivery_type_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                                @endif
                                             @endif
                                             @if(isset($errors[$no]['information_display']))
                                                 <td>{!! Form::select('form[' . $no . '][information_display]',['no'=>'no','yes'=>'yes'],null, ['class' => 'form-control is-invalid select2','id'=>'information_display','placeholder' => '']) !!}<font color="red">{{$errors[$no]['information_display']}}</font></td>
@@ -211,23 +218,25 @@
                                                     <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                                 @endif
                                             @endif
-                                            @if(isset($errors[$no]['payment_mode_id']))
-                                                <td>{!! Form::select('form[' . $no . '][payment_mode_id]', $payment_modes,null,['class' => 'form-control is-invalid payment_mode_id select2','id'=>'payment_mode_id', 'style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['payment_mode_id']}}</font></td>
-                                            @else
-                                                <td>{!! Form::text('form[' . $no . '][payment_mode_id]', $ro['payment_mode_id'],['class' => 'form-control','style'=>'width:40px','readonly' => 'readonly']) !!}</td>
-                                            @endif
-                                            @if(isset($errors[$no]['charges_mode_id']))
-                                                <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
-                                            @else
-                                                <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                            @if($service_type_check_id != 5)
+                                                @if(isset($errors[$no]['payment_mode_id']))
+                                                    <td>{!! Form::select('form[' . $no . '][payment_mode_id]', $payment_modes,null,['class' => 'form-control is-invalid payment_mode_id select2','id'=>'payment_mode_id', 'style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['payment_mode_id']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][payment_mode_id]', $ro['payment_mode_id'],['class' => 'form-control','style'=>'width:40px','readonly' => 'readonly']) !!}</td>
+                                                @endif
+                                                @if(isset($errors[$no]['charges_mode_id']))
+                                                    <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                                @endif
                                             @endif
                                             @if(isset($errors[$no]['pieces_quantity']))
                                                 <td>{!! Form::text('form[' . $no . '][pieces_quantity]', $ro['pieces_quantity'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['pieces_quantity']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][pieces_quantity]', $ro['pieces_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                             @endif
+                                                <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                         </tr>
-
                                     @endforeach
                                     </tbody>
                                 </table>
@@ -311,6 +320,20 @@
                 width: '100%',
                 placeholder: 'Charges Mode'
             });
+            var rowCount = $("#tbl td").closest("tr").length;
+            if(rowCount == 1){
+                $('.cancel_shipment').addClass('d-none');
+            }
+            else{
+                $('#tbl .cancel_shipment').on('click', function(e){
+                    $(this).closest('tr').remove();
+                    rowCount = $("#tbl td").closest("tr").length;
+                    if(rowCount == 1){
+                        $('.cancel_shipment').addClass('d-none');
+                    }
+                });
+            }
+
         });
     </script>
 @endsection

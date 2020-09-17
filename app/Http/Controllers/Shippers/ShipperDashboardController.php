@@ -26,6 +26,8 @@ use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\DiscountCharge;
+use App\Http\Models\DonePayment;
+use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\InvoicingCycle;
@@ -188,9 +190,11 @@ class ShipperDashboardController extends Controller
                 $keyword = str_replace('-', '', $keyword);
 
                 if ($keyword != '') {
+                    $keyword = '%' . $keyword . '%';
+
                     $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')
-                        ->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+                        $sub_query->whereRaw('REPLACE(`shipments`.`consignee_phone_number_1`, "-", "") LIKE ?', [$keyword])
+                        ->orWhereRaw('REPLACE(`shipments`.`consignee_phone_number_2`, "-", "") LIKE ?', [$keyword]);
                     });
                 }
 
@@ -513,7 +517,6 @@ class ShipperDashboardController extends Controller
             $user_bank->account_no = $request->account_no;
             $user_bank->account_title = $request->account_title;
             $user_bank->iban = strtoupper($request->iban_no);
-            $user_bank->payment_cycle = $request->cycle_of_payment;
             $user_bank->city_id = $request->bank_city;
             $user_bank->save();
 
@@ -732,8 +735,73 @@ class ShipperDashboardController extends Controller
     }
 
 
+    public function ledger_index()
+    {
+        return view('client.ledger.index');
+    }
 
+    public function ledger_list(Request $request)
+    {
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('done_payment_shipments as dps','dps.shipment_id','=','shipments.id')
+            ->join('done_payments as dp','dp.id','=','dps.done_payment_id')
+            ->leftjoin('user_bank_infos as ubi', 'ubi.id', '=', 'dp.user_bank_info_id')
+            ->leftjoin('banks_lists as bl', 'bl.id', '=', 'ubi.bank_name')
+            ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking_id', 'shipments.order_id as order_number', 'dps.done_payment_id as payment_id', 'bl.name as bank_name', 'dps.created_at as payment_date', 'dps.payable as cod', 'dps.type as type','ubi.iban as account_detail')
+            ->where('shipments.user_id', session('user_id'));
 
+        $datatable=Datatables::of($shipments)
+            ->editColumn('tracking_number', function ($shipments) {
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('order_number',function ($shipments) {
+                if ($shipments->order_number != null) {
+                    return $shipments->order_number;
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('account_detail',function ($shipments) {
+                if ($shipments->account_detail != null) {
+                    return $shipments->account_detail;
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('bank_name',function ($shipments) {
+                if ($shipments->bank_name != null) {
+                    return $shipments->bank_name;
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('type',function ($shipments) {
+            if ($shipments->type == 0) {
+                return 'Delivered';
+            }
+            elseif($shipments->type == 1) {
+                return 'Returned';
+            }
+            else{
+                return 'Adjusted';
+            }
+            });
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('dps.created_at', [$from,$to]);
+        }
+        if ($request->get('cod_payable_from') && $request->get('cod_payable_to')) {
+            $from = $request->get('cod_payable_from');
+            $to = $request->get('cod_payable_to');
+            $datatable->whereBetween('dps.payable', [$from,$to]);
+        }
+
+        return $datatable->make(true);
+
+    }
 
     public function updateProfile(Request $request)
     {

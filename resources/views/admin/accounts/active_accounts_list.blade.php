@@ -173,6 +173,38 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="PaymentCycleModal" data-backdrop="static" role="dialog" aria-labelledby="PaymentCycleModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Payment Cycle</h4>
+                </div>
+                <form id="payment_cycle_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.payment_cycle.submit') }}">
+                    @csrf
+                <div class="modal-body">
+                    <input type="hidden" name="shipper_id" id="shipper_id">
+                    <div class="form-group">
+                        <select name="payment_cycle_select" id="payment_cycle_select" class="form-control select2" data-rule-required="true" data-msg-required="Payment Cycle is required">
+                            @foreach($payment_cycles as $pc)
+                                <option value="{{ $pc->id }}" > {{ $pc->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group" id="payment_day_div">
+                        <label for="payment_day">1 for Monday, 5 for Friday or For Monthly select date between (1 - 29)</label>
+                        <input type="text" name="payment_day" id="payment_day" class="form-control" data-rule-required="true" data-msg-required="Payment Day is required">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" id="payment_cycle_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -190,6 +222,7 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -1073,6 +1106,86 @@
                     table.button('.approve_commission').disable();
                 }
         });
+        $('#payment_cycle_select').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Payment Cycle'
+        }).bind('change', function() {
+            var id = parseInt($(this).val());
+            if(id == 1){
+                $('#payment_day_div').addClass('d-none');
+            }else if(id == 2){
+                $('#payment_day_div').removeClass('d-none');
+                $('#payment_day').inputmask({
+                    'alias': 'integer',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                    'min': 1,
+                    'max': 5
+                });
+            }else if(id == 3){
+                $('#payment_day_div').removeClass('d-none');
+                $('#payment_day').inputmask({
+                    'alias': 'integer',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                    'min': 1,
+                    'max': 29
+                });
+            }
+        });
+
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            var id = $(this).parents('tr').attr('id');
+            if($(this).hasClass('payment_cycle')){
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.payment_cycle.info') !!}',
+                        data: {
+                            'shipper_id': id,
+                        }
+                    }).done(function(data){
+                        if(data.status == 0){
+                            $('#payment_cycle_form #shipper_id').val(id);
+                            $('#payment_cycle_select').val(data.details.payment_cycle_id).trigger('change');
+                            if(data.details.payment_cycle_id != 1){
+                                $('#payment_day').val(data.details.payment_day);
+                            }else{
+                                $('#payment_day_div').addClass('d-none');
+                            }
+                            $('#PaymentCycleModal').modal('show');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            }
+        });
+
+        $('#payment_cycle_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Payment Cycle is being Updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+            }
+        });
+
     });
 
 </script>

@@ -286,7 +286,18 @@ class ShipperCRMController extends Controller
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                 }
                                 else{
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                    if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
+                                        if(in_array($complaint_id, [11, 12, 13])){
+                                            $present_shipments[] = $shipment->tracking_number;
+                                            $flag = true;
+                                        }
+                                        else{
+                                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                        }
+                                    }
+                                    else{
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                    }
                                 }
                             }else{
 
@@ -298,7 +309,18 @@ class ShipperCRMController extends Controller
                                 CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                             }
                             else{
-                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
+                                    if(in_array($complaint_id, [11, 12, 13])){
+                                        $present_shipments[] = $shipment->tracking_number;
+                                        $flag = true;
+                                    }
+                                    else{
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                    }
+                                }
+                                else{
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                }
                             }
                         }
                     }
@@ -313,14 +335,35 @@ class ShipperCRMController extends Controller
                     $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                     if($is_shipment){
                         if($is_shipment->case_nature_id != $nature_id){
-                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
+                                if(in_array($complaint_id, [11, 12, 13])){
+                                    $present_shipments[] = $shipment->tracking_number;
+                                    $flag = true;
+                                }
+                                else{
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                }
+                            }
+                            else{
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            }
                         }else{
-
                             $present_shipments[] = $shipment->tracking_number;
                             $flag = true;
                         }
                     }else{
-                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                        if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
+                            if(in_array($complaint_id, [11, 12, 13])){
+                                $present_shipments[] = $shipment->tracking_number;
+                                $flag = true;
+                            }
+                            else{
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            }
+                        }
+                        else{
+                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                        }
                     }
                 }
                 return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];

@@ -84,6 +84,7 @@
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Type</th>
+										<th class="border-primary border-darken-1">Updated At</th>
 										<th class="border-primary border-darken-1">Start Location Latitude</th>
 										<th class="border-primary border-darken-1">Start Location Longitude</th>
 										<th class="border-primary border-darken-1">Actual Location Latitude</th>
@@ -197,7 +198,7 @@
 				}
 			},
 			rowId: 'id',
-			order: [[0, 'desc']],
+			order: [[6, 'desc']],
 			columns: [
 				{data: 'added_at', name: 'v2_rider_pickups.added_at', class: 'align-middle added_at'},
 				{data: 'rider', name: 'r.name', class: 'align-middle rider'},
@@ -205,6 +206,7 @@
 				{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 				{data: 'city', name: 'c.name', class: 'align-middle city'},
 				{data: 'pickup_type', name: 'v2_rider_pickups.pickup_type', class: 'align-middle pickup_type'},
+				{data: 'created_at', name: 'v2_rider_pickups.created_at', class: 'align-middle created_at'},
 				{data: 'start_location_latitude', name: 'v2_rider_pickups.start_location_latitude', class: 'align-middle start_location_latitude'},
 				{data: 'start_location_longitude', name: 'v2_rider_pickups.start_location_longitude', class: 'align-middle start_location_longitude'},
 				{data: 'actual_location_latitude', name: 'v2_rider_pickups.actual_location_latitude', class: 'align-middle actual_location_latitude'},

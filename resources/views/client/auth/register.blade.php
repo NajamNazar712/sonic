@@ -474,20 +474,6 @@
                                                             <span class="danger">*</span></label>
                                                         <input type="text" class="form-control required" value="{{ old('account_no.0') }}" name="account_no[]" placeholder="Account Number*">
                                                     </div>
-                                                    <div class="form-group">
-
-                                                        <label for="cycle_of_payment">Cycle of Payment:
-                                                            <span class="danger">*</span>
-                                                        </label>
-                                                        <div>
-                                                            <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                                <option value="Daily" {{ old('cycle_of_payment') == 'Daily' ? 'selected' : '' }}>Daily</option>
-                                                                <option value="Weekly" {{ old('cycle_of_payment') == 'Weekly' ? 'selected' : '' }}>Weekly</option>
-                                                                <option value="Fortnight" {{ old('cycle_of_payment') == 'Fortnight' ? 'selected' : '' }}>Fortnight</option>
-                                                                <option value="Monthly" {{ old('cycle_of_payment') == 'Monthly' ? 'selected' : '' }}>Monthly</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
 
                                                 </div>
                                                 <div class="col-md-6">
@@ -632,23 +618,19 @@
                                                         <span class="danger">*</span>
                                                     </label>
                                                     <div>
-                                                        <select name="cycle_of_invoicing" id="cycle_of_invoicing" class="select2 form-control required">
-                                                            @foreach($invoicing_cycle as $cycle)
-                                                                <option value="{{$cycle->id}}"  {{ old('cycle_of_invoicing') == $cycle->id ? 'selected' : '' }} >{{$cycle->name}}</option>
-                                                            @endforeach
-                                                        </select>
+                                                        <input type='text' class="form-control" value="Monthly" placeholder="Invoicing Cycle*" readonly>
                                                     </div>
                                                 </div>
                                                 </div>
                                                 <div class="col-md-6">
 
-                                                <div class="form-group d-none" id="generation_div">
+                                                <div class="form-group" id="generation_div">
 
                                                     <label for="generation_date">Generation Date:
                                                         <span class="danger">*</span>
                                                     </label>
                                                     <div>
-                                                        <select name="generation_date" id="generation_date" class="select2 form-control d-none"></select>
+                                                        <select name="generation_date" id="generation_date" class="select2 form-control required" style="width: 100%"></select>
                                                     </div>
                                                 </div>
                                                 </div>
@@ -820,7 +802,7 @@
 
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select City',
-        
+
        });
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
@@ -830,31 +812,9 @@
             placeholder:'Select Date',
             // dropdownParent:$('#registership')
         });
-        $('#cycle_of_invoicing').prepend('<option value="" selected="selected"></option>').select2({
-           width:'100%',
-           placeholder:'Select Cycle Of Invoicing',
-        
-       }).bind('change', function() {
+        var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
 
-           if (this.value == 1) {
-               $('#generation_div').removeClass('d-none');
-               $('#generation_date').removeClass('d-none');
-               $('#generation_date').addClass('required');
-               $('#generation_date').empty().trigger('change');
-               $('#generation_date').select2({data:weekly,placeholder:'Select Date'});
-           }
-           else if(this.value == 3){
-               $('#generation_div').removeClass('d-none');
-               $('#generation_date').removeClass('d-none');
-               $('#generation_date').addClass('required');
-               $('#generation_date').empty().trigger('change');
-               $('#generation_date').select2({data:monthly,placeholder:'Select Date'});
-           }else if(this.value == 2){
-               $('#generation_div').addClass('d-none');
-               $('#generation_date').addClass('d-none');
-               $('#generation_date').removeClass('required');
-           }
-       });
+        $('#generation_date').select2({data:monthly,placeholder:'Select Date'});
        //multiple banks
        $('select[name="bank_name[]"]').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank',
@@ -888,10 +848,6 @@
        });
        $('select[name="bank_city[]"]').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank City',
-        
-       });
-       $('#cycle_of_payment').prepend('<option value="" selected="selected"></option>').select2({
-           placeholder:'Select Cycle of Payment',
         
        });
 

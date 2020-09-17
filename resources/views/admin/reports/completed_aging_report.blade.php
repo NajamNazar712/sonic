@@ -143,7 +143,9 @@
                         title: 'Completed Aging Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
+
                 ],
+
                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -160,7 +162,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[1, 'asc']],
+                order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'hubs', name: 'c.name', class: 'align-middle text_center hubs'},

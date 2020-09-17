@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BanksList;
@@ -219,28 +220,8 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('return_note_link', function($return_note) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($return_note->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
                 })
-                ->editColumn('image', function ($return_note) {
-                    $now = Carbon::now();
-                    if($return_note->image == null){
-                        return "-";
-                    }else {
-                        $url = 'uploads/return_notes/' . $return_note->image;
-
-                        if(file_exists($url)){
-                            $img = asset('uploads/return_notes/' . $return_note->image);
-                            return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                        }else{
-                            $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note->image);
-                            if($exists){
-                                $img = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note->image, now()->addMinutes(5));
-                                return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
-                            }else{
-                                return "-";
-                            }
-                        }
-
-                    }
-
+                ->addColumn('image', function ($return_note) {
+                    return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
                 })
                 ->editColumn('shipments_count_link', function($return_note) {
                     if ($return_note->shipments_count != 0) {
@@ -1326,7 +1307,7 @@ use Yajra\Datatables\Datatables;
                                 ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                 ->where('cities.id', $hub->id);
                             });
-                        })->whereBetween('shipments.created_at',[$date_from,$date_to])->where('shipments.packaging_material_request', '=', 0)->count();
+                        })->whereBetween('shipments.created_at',[$date_from,$date_to])->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->count();
 
                         $received = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
@@ -1341,7 +1322,7 @@ use Yajra\Datatables\Datatables;
                             ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                             ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                        })->where('shipments.packaging_material_request', '=', 0)->count();
+                        })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->count();
                         $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
                             ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1355,7 +1336,7 @@ use Yajra\Datatables\Datatables;
                             ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                             ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                        })->where('shipments.packaging_material_request', '=', 0)->sum('amount');
+                        })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum('amount');
                         $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
                             ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1369,7 +1350,7 @@ use Yajra\Datatables\Datatables;
                             ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                             ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                        })->where('shipments.packaging_material_request', '=', 0)->sum('actual_weight');
+                        })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum('actual_weight');
                         $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
                             ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1383,7 +1364,7 @@ use Yajra\Datatables\Datatables;
                             ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                             ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                        })->where('shipments.packaging_material_request', '=', 0)->sum('chargeable_weight');
+                        })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum('chargeable_weight');
                         $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
                             ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1397,7 +1378,7 @@ use Yajra\Datatables\Datatables;
                             ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                             ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                        })->where('shipments.packaging_material_request', '=', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                        })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                     }else{
                         if(session('role_id') != 4){
@@ -1409,7 +1390,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->where('shipments.packaging_material_request', '=', 0)->whereBetween('created_at',[$date_from,$date_to])->whereIn('shipments.user_id', session('tagged_shippers'))->count();
+                            })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereBetween('created_at',[$date_from,$date_to])->whereIn('shipments.user_id', session('tagged_shippers'))->count();
                             $received = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
                                 ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1423,7 +1404,7 @@ use Yajra\Datatables\Datatables;
                                 ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereBetween('created_at', [$date_from, $date_to])
                                 ->where('shipper_status_id', 2);
-                            })->where('shipments.packaging_material_request', '=', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->count();
+                            })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('shipments.user_id', session('tagged_shippers'))->count();
                             $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
                                 ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1437,7 +1418,7 @@ use Yajra\Datatables\Datatables;
                                 ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereBetween('created_at', [$date_from, $date_to])
                                 ->where('shipper_status_id', 2);
-                            })->where('shipments.packaging_material_request', '=', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('amount');
+                            })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('amount');
                             $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
                                 ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1451,7 +1432,7 @@ use Yajra\Datatables\Datatables;
                                 ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereBetween('created_at', [$date_from, $date_to])
                                 ->where('shipper_status_id', 2);
-                            })->where('shipments.packaging_material_request', '=', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('actual_weight');
+                            })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('actual_weight');
                             $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
                                 ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1465,7 +1446,7 @@ use Yajra\Datatables\Datatables;
                                 ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereBetween('created_at', [$date_from, $date_to])
                                 ->where('shipper_status_id', 2);
-                            })->where('shipments.packaging_material_request', '=', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('chargeable_weight');
+                            })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('chargeable_weight');
                             $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
                                 ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1479,7 +1460,7 @@ use Yajra\Datatables\Datatables;
                                 ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereBetween('created_at', [$date_from, $date_to])
                                 ->where('shipper_status_id', 2);
-                            })->where('shipments.packaging_material_request', '=', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                            })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('shipments.user_id', session('tagged_shippers'))->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                         }else{
                             if($sales_person != null){
                                 $tagged_shippers = DB::connection('reports')->table('sale_person_tags')->where('admin_id', $sales_person)->select('user_id')->pluck('user_id')->toArray();
@@ -1501,7 +1482,7 @@ use Yajra\Datatables\Datatables;
                                         ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                         ->where('cities.id', $hub->id);
                                     });
-                                })->where('shipments.packaging_material_request', '=', 0)->whereBetween('created_at',[$date_from,$date_to])->whereIn('user_id', $tagged_shippers)->count();
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereBetween('created_at',[$date_from,$date_to])->whereIn('user_id', $tagged_shippers)->count();
 
                                 $received = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
@@ -1516,7 +1497,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->whereIn('user_id', $tagged_shippers)->count();
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('user_id', $tagged_shippers)->count();
                                 $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1530,7 +1511,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->whereIn('user_id', $tagged_shippers)->sum('amount');
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('user_id', $tagged_shippers)->sum('amount');
                                 $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1544,7 +1525,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->whereIn('user_id', $tagged_shippers)->sum('actual_weight');
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('user_id', $tagged_shippers)->sum('actual_weight');
                                 $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1558,7 +1539,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->whereIn('user_id', $tagged_shippers)->sum('chargeable_weight');
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('user_id', $tagged_shippers)->sum('chargeable_weight');
                                 $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1572,7 +1553,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->whereIn('user_id', $tagged_shippers)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereIn('user_id', $tagged_shippers)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                             }else{
 
@@ -1584,7 +1565,7 @@ use Yajra\Datatables\Datatables;
                                         ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                         ->where('cities.id', $hub->id);
                                     });
-                                })->where('shipments.packaging_material_request', '=', 0)->whereBetween('created_at',[$date_from,$date_to])->count();
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereBetween('created_at',[$date_from,$date_to])->count();
                                 $received = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1598,7 +1579,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->count();
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->count();
                                 $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1612,7 +1593,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->sum('amount');
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum('amount');
                                 $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1626,7 +1607,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->sum('actual_weight');
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum('actual_weight');
                                 $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1640,7 +1621,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->sum('chargeable_weight');
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum('chargeable_weight');
                                 $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1654,7 +1635,7 @@ use Yajra\Datatables\Datatables;
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                                })->where('shipments.packaging_material_request', '=', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                             }
                         }
@@ -1670,7 +1651,7 @@ use Yajra\Datatables\Datatables;
                             ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                             ->where('cities.id', $hub->id);
                         });
-                    })->where('shipments.packaging_material_request', '=', 0)->whereBetween('created_at',[$date_from,$date_to])->count();
+                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->whereBetween('created_at',[$date_from,$date_to])->count();
                     $received = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
                         ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1684,7 +1665,7 @@ use Yajra\Datatables\Datatables;
                         ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                         ->whereBetween('created_at', [$date_from, $date_to])
                         ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', '=', 0)->count();
+                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->count();
                     $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
                         ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1698,7 +1679,7 @@ use Yajra\Datatables\Datatables;
                         ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                         ->whereBetween('created_at', [$date_from, $date_to])
                         ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', '=', 0)->sum('amount');
+                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum('amount');
                     $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
                         ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1712,7 +1693,7 @@ use Yajra\Datatables\Datatables;
                         ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                         ->whereBetween('created_at', [$date_from, $date_to])
                         ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', '=', 0)->sum('actual_weight');
+                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum('actual_weight');
                     $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
                         ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1726,7 +1707,7 @@ use Yajra\Datatables\Datatables;
                         ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                         ->whereBetween('created_at', [$date_from, $date_to])
                         ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', '=', 0)->sum('chargeable_weight');
+                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum('chargeable_weight');
                     $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
                         ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1740,7 +1721,7 @@ use Yajra\Datatables\Datatables;
                         ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                         ->whereBetween('created_at', [$date_from, $date_to])
                         ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', '=', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                 }
                 if($booked > 0 || $received > 0){
 
@@ -1833,7 +1814,7 @@ use Yajra\Datatables\Datatables;
                         $query->from('shipments_journey')
                         ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                         ->whereBetween('created_at', [$date_from, $date_to]);
-                    });
+                    })->where('shipments.user_id', '!=', 1690);
 
                     if($pickup_request_shippers->exists()){
                         $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
@@ -1865,7 +1846,7 @@ use Yajra\Datatables\Datatables;
                                 $query->from('shipments_journey')
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to]);
-                            });
+                            })->where('shipments.user_id', '!=', 1690);
 
                        if($pickup_request_shippers->exists()) {
                            $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
@@ -1922,7 +1903,7 @@ use Yajra\Datatables\Datatables;
                         $query->from('shipments_journey')
                             ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                             ->whereBetween('created_at', [$date_from, $date_to]);
-                    });
+                    })->where('shipments.user_id', '!=', 1690);
 
                     if($pickup_request_shippers->exists()) {
                         $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
@@ -3173,7 +3154,7 @@ use Yajra\Datatables\Datatables;
                         ->where('is.id','=',
                             DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id)'));
                 })
-    			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions')
+    			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges')
                 ->whereNotIn('shipments.shipper_status_id',[1,17])
                 ->whereBetween('sj.created_at', [$from,$to]);
     //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
@@ -3218,6 +3199,7 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('return_charges', function($shipment){
                     return number_format($shipment->return_charges, 2);
                 })
+                
                 ->editColumn('replacement_charges', function($shipment){
                     return number_format($shipment->replacement_charges, 2);
                 })
@@ -3248,12 +3230,12 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('packaging_charges', function($shipment){
                     return number_format($shipment->packaging_charges, 2);
                 })
+				->editColumn('intercept_charges', function($shipment){
+                    return number_format($shipment->intercept_charges, 2);
+                })
                 ->editColumn('tracking_number_link', function ($shipments) {
                     $route = route('admin.tracking.index');
                     return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-                })
-                ->editColumn('s_collection_amount', function($shipment){
-                    return number_format($shipment->s_collection_amount);
                 })
                 ->editColumn('d_collection_amount', function($shipment){
                     return number_format($shipment->d_collection_amount);
@@ -3306,7 +3288,7 @@ use Yajra\Datatables\Datatables;
                 })
                 ->addColumn('estimated_charges',function($sale){
                     $estimated = '';
-                    $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0);
+                    $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0) + (($sale->intercept_charges != null)? $sale->intercept_charges:0);
                     return number_format((float)$estimated, 2);
                 })
                 ->editColumn('p_net_payable',function($sale){
@@ -4860,14 +4842,14 @@ use Yajra\Datatables\Datatables;
                         ->where('dr.id','=',
                             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37))'));
                 })
-                ->select('shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges')
+                ->select('shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges','shipments.intercept_charges')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
     //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
     //            $now = Carbon::now();
     //            $yesterday = Carbon::now()->subDays(3);
     //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
     //        }
-
+            
             if (session('role_id') != 1) {
                 if (session('department_id') == 7 && session('role_id') != 4) {
                     $sales = $sales->whereIn('u.id', session('tagged_shippers'));
@@ -4899,6 +4881,9 @@ use Yajra\Datatables\Datatables;
                 })
                 ->editColumn('return_charges', function($shipment){
                     return number_format($shipment->return_charges, 2);
+                })
+                ->editColumn('intercept_charges', function($shipment){
+                    return number_format($shipment->intercept_charges, 2);
                 })
                 ->editColumn('weight_charges', function($shipment){
                     return number_format($shipment->weight_charges, 2);
@@ -4994,7 +4979,7 @@ use Yajra\Datatables\Datatables;
                 })
                 ->addColumn('estimated_charges',function($sale){
                     $estimated = '';
-                    $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0);
+                    $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0) + (($sale->intercept_charges != null)? $sale->intercept_charges:0);
                     return number_format((float)$estimated, 2);
                 })
                 ->editColumn('p_net_payable',function($sale){
@@ -5320,6 +5305,28 @@ use Yajra\Datatables\Datatables;
                 ->editColumn('closed_date', function($requests){
                     if($requests->current_status_id == 4) {
                         return $requests->closed_date;
+                    }
+                    else{
+                        return '-';
+                    }
+                })
+                ->addColumn('launched_to_today', function($requests){
+
+                    if($requests->launched_date){
+                        Carbon::setWeekendDays([
+                            Carbon::SUNDAY,
+                        ]);
+
+                        $launched_date = Carbon::parse($requests->launched_date);
+                        $today = Carbon::now();
+                        $days = $launched_date->diffInDays($today);
+                        if($days <= 0){
+                            return '-';
+                        }
+                        else{
+                            return $days . 'days';
+                        }
+
                     }
                     else{
                         return '-';
@@ -6628,5 +6635,59 @@ use Yajra\Datatables\Datatables;
             }
         }
 
+        public function daily_monthly_adjustment_index(){
+            return view('admin.reports.daily_monthly_adjustment');
+        }
+
+        public function daily_monthly_adjustment_list(Request $request){
+            $adjustments = DB::connection('reports')->table('adjustment_logs')
+                ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+                ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+                ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+                ->join('cities AS h', 'dc.hub_id', '=', 'h.id')
+                ->select('s.id as shipment_id', 's.tracking_number as tracking_number', 'h.name as hub')
+                ->whereIn('adjustment_logs.type', [1,2]);
+            $datatable = Datatables::of($adjustments)
+                ->addColumn('tracking_number_link', function ($shipments) {
+                    $route = route('admin.tracking.index');
+                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                });
+                if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                    $from = $request->get('search_date_from');
+                    $to = $request->get('search_date_to');
+                    $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from,$to]);
+                }
+            return $datatable->make(true);
+        }
+
+        public function daily_monthly_adjustment_summary_list(Request $request){
+            $adjustments_count = DB::connection('reports')->table('adjustment_logs')
+                ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+                ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+                ->whereIn('adjustment_logs.type', [1,2]);
+
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $adjustments_count = $adjustments_count->whereBetween('adjustment_logs.created_at', [$from,$to]);
+            }
+            $adjustments_count = $adjustments_count->count();
+
+            $adjustments = DB::connection('reports')->table('adjustment_logs')
+                ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+                ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+                ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+                ->join('cities AS h', 'dc.hub_id', '=', 'h.id')
+                ->select('h.name as hub', DB::raw('(select count(s.id)) as shipment_count'), DB::raw('(ROUND((count(s.id)/'. $adjustments_count .')*100, 0)) as ratio'))
+                ->whereIn('adjustment_logs.type', [1,2])
+                ->groupBy('h.id');
+            $datatable = Datatables::of($adjustments);
+                if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                    $from = $request->get('search_date_from');
+                    $to = $request->get('search_date_to');
+                    $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from,$to]);
+                }
+            return $datatable->make(true);
+        }
     }
 

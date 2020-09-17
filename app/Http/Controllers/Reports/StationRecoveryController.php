@@ -40,8 +40,17 @@ class StationRecoveryController extends Controller
                 $zone_id = $zone->zone_id;
                 $delivered_shipments_ids = ShipmentsJourney::whereIn('shipper_status_id', [14, 30, 36, 37])->whereIn('city_id', $city_ids)->where('verification', 1)->whereBetween(DB::raw('DATE(created_at)'), array($from_date, $to_date))->pluck('shipment_id')->toArray();
                 $no_of_delivered_shipments = count($delivered_shipments_ids);
-                $last_day_shipments = ShipmentsJourney::whereIn('shipper_status_id', [14, 30, 36, 37])->whereIn('city_id', $city_ids)->where('verification', 1)->whereDate('created_at', '<=', $yesterday)->whereTime('created_at', '<=', $cut_off_time)->pluck('shipment_id')->toArray();
-                $last_day_balance = Shipment::whereIn('id', $last_day_shipments)->sum('amount');
+//                $last_day_shipments = ShipmentsJourney::whereIn('shipper_status_id', [14, 30, 36, 37])->whereIn('city_id', $city_ids)->where('verification', 1)->whereDate('created_at', '<=', $yesterday)->whereTime('created_at', '<=', $cut_off_time)->pluck('shipment_id')->toArray();
+//                $last_day_balance = Shipment::whereIn('id', $last_day_shipments)->sum('amount');
+                //for first day
+                $last_day_balance = 0;
+                $station_recovery_rep = StationRecoveryReport::where('city_id', $hub_id);
+                if($station_recovery_rep->exists()){
+                    $station_recovery_rep = $station_recovery_rep->first();
+                    $last_day_balance = $station_recovery_rep->last_day_balance;
+                }
+                //for first day
+
                 $amount = Shipment::whereIn('id', $delivered_shipments_ids)->sum('amount');
                 $total_amount = $last_day_balance + $amount;
 
