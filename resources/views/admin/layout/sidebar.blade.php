@@ -279,8 +279,8 @@
                         @endif
                     </ul>
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || in_array(25, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.supply_chain.supply_chain_index') }}">Supply Chain/All</a></li>
+                        @if (session('role_id') == 1 || in_array(376, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.cargo.supply_chain.supply_chain_index') }}">Order Management</a></li>
                         @endif
                     </ul>
                 </li>

@@ -958,10 +958,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
     });
-    Route::prefix('supply_chain')->name('supply_chain.')->group(function () {
-        Route::get('','Admins\OrderManagementController@supply_chain_index')->name('supply_chain_index');
-        Route::get('list','Admins\OrderManagementController@supply_chain_list')->name('supply_chain_list');
-    });
+
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@pending_index')->name('index');
@@ -1027,6 +1024,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('update', 'Admins\AdminCargoController@draft_update')->name('update');
             });
 
+        });
+
+        Route::prefix('supply_chain')->name('supply_chain.')->group(function () {
+            Route::get('','Admins\OrderManagementController@supply_chain_index')->name('supply_chain_index');
+            Route::get('list','Admins\OrderManagementController@supply_chain_list')->name('supply_chain_list');
         });
 
         Route::prefix('mapping')->name('mapping.')->group(function () {
