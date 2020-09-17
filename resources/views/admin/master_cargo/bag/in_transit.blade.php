@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'In-Transit Bags')
+@section('title', 'Pending Bags for Receiving')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    In-Transit Bags
+                    Pending Bags for Receiving
                 </h1>
 
                 <div class="card">
@@ -74,6 +74,7 @@
                                     <th class="border-primary border-darken-1">Builty No.</th>
                                     <th class="border-primary border-darken-1">Shipments Weight</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Transit Datetime</th>
                                     <th class="border-primary border-darken-1">Transitted By</th>
                                     <th class="border-primary border-darken-1">Received Datetime</th>
@@ -160,6 +161,7 @@
                             head.push('Builty No.');
                             head.push('Shipments Weight');
                             head.push('Actual Weight');
+                            head.push('Status');
                             head.push('Transit Datetime');
                             head.push('Transitted By');
                             head.push('Received Datetime');
@@ -187,6 +189,7 @@
                                 row.push(values.builty_number);
                                 row.push(values.shipments_weight);
                                 row.push(values.actual_weight);
+                                row.push(values.status);
                                 row.push(values.transit_at);
                                 row.push(values.transitted_by);
                                 row.push(values.cargo_received_at);
@@ -207,7 +210,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'In-Transit Bags',
+                        title: 'Pending Bags for Receiving',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],
@@ -248,6 +251,7 @@
                     {data: 'builty_number', name: 'bags.builty_number', class: 'align-middle builty_number'},
                     {data: 'shipments_weight', name: 'bags.shipments_weight', class: 'align-middle shipments_weight'},
                     {data: 'actual_weight', name: 'bags.actual_weight', class: 'align-middle actual_weight'},
+                    {data: 'status', name: 'bs.id', class: 'align-middle status'},
                     {data: 'transit_at', name: 'bags.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'cargo_received_at', name: 'mc.created_at', class: 'align-middle cargo_received_at'},
@@ -268,6 +272,7 @@
                     var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
                     var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
                     var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
+                    var bag_statuses_select = '<select name="bag_statuses_select" id="bag_statuses_select" class="select2 form-control"></select>';
                     var bag_type_select = '<select name="bag_type_select" id="bag_type_select" class="select2 form-control">' +
                         '<option value="1">Normal</option>' +
                         '<option value="2">Return</option>' +
@@ -307,6 +312,12 @@
                         }
                         else if($(header).is('.cargo_type')){
                             $(cargo_type_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.status')){
+                            $(bag_statuses_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -369,6 +380,20 @@
                     $("#vendor_select").prepend('<option value="" selected></option>').select2({
                         data:data4,
                         placeholder: "Select Transport",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data5 = $.map({!! $bag_statuses !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+
+                    $("#bag_statuses_select").prepend('<option value="" selected></option>').select2({
+                        data:data5,
+                        placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
