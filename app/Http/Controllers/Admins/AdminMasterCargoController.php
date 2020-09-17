@@ -1698,20 +1698,23 @@ class AdminMasterCargoController extends Controller
             $cargo_consignment_junction_receival->save();
 
             $cargo_consignment = MasterCargo::find($cargo_consignment_id);
-            $bags = $cargo_consignment->bag;
+            $master_bags = $cargo_consignment->master_bags;
 
             if ($cargo_consignment->junction_hub_1_id == $request->junction) {
-                foreach ($bags as $bag){
+                foreach ($master_bags as $master_bag){
+                    $bag = $master_bag->bag;
                     $bag->status_id = 5;
                 }
             }
             else if ($cargo_consignment->junction_hub_2_id == $request->junction) {
-                foreach ($bags as $bag){
+                foreach ($master_bags as $master_bag){
+                    $bag = $master_bag->bag;
                     $bag->status_id = 6;
                 }
             }
             else {
-                foreach ($bags as $bag){
+                foreach ($master_bags as $master_bag){
+                    $bag = $master_bag->bag;
                     $bag->status_id = 3;
                 }
             }

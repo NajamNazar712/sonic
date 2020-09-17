@@ -944,7 +944,7 @@
                                 $('#receive_at_link #scan_master_cargo_number .master_cargo_number').val('');
 
                                 if (data.status == 0) {
-                                    receive_at_link_table.row.add([0, data.details.master_cargo_number, data.details.origin, data.details.destination, data.details.no_of_bags, data.details.no_of_shipments]).node().id = data.details.master_cargo_number;
+                                    receive_at_link_table.row.add([0, data.details.master_cargo_number, data.details.origin, data.details.destination, data.details.no_of_bags, data.details.no_of_shipments]).node().id = data.details.id;
                                     receive_at_link_table.draw(false);
 
                                     master_cargo_consignment_ids.push(data.details.id);
