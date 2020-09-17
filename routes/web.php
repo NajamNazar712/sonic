@@ -1055,6 +1055,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminMasterCargoController@history_index')->name('index');
                 Route::get('list', 'Admins\AdminMasterCargoController@history_list')->name('list');
             });
+
+            Route::prefix('in_transit')->name('in_transit.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_index')->name('index');
+                Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_list')->name('list');
+                Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_receive')->name('receive');
+            });
+
+            Route::prefix('receive')->name('receive.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_shipment_details')->name('shipment_details');
+                Route::post('', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_store')->name('store');
+            });
         });
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\AdminMasterCargoController@master_cargo_pending_index')->name('index');

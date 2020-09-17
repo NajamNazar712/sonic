@@ -321,18 +321,10 @@
                     @endif,
                         @if (session('role_id') == 1 || in_array(305, session('permissions')))
                     {
-                        text: 'Send from Junction',
+                        text: 'Onward forwarding',
                         className: 'btn btn-primary onward_junction',
                         action: function (e, dt, node, config) {
-                            $('#send_from_junction_modal #scan_master_cargo_number .send_seal_number').val('');
-
-                            send_from_junction_datatable.clear().draw();
-
-                            master_cargo_consignment_ids = [];
-
-                            $('#send_from_junction_modal #send_from_junction_form button.confirm').prop('disabled', true);
-
-                            $('#send_from_junction_modal').modal('show');
+                            window.location = '{{ route('admin.master_cargo.create.index') }}';
                         }
                     }
                     @endif,
