@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Pending for Master Cargo')
+@section('title', 'In-Transit Bags')
 
 @section('content')
     <div class="app-content content">
@@ -9,14 +9,26 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Pending for Master Cargo
+                    In-Transit Bags
                 </h1>
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+                            @if (session('role_id') == 1 || in_array(31, session('permissions')))
+                                <form id="receive_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.master_cargo.bag.in_transit.receive') }}">
+                                    {{ csrf_field() }}
 
+                                    <div class="form-group">
+                                        <input type="text" name="bag_number" class="form-control bag_number" placeholder="Bag Number*" data-rule-required="true" data-msg-required="Bag Number is required">
+                                    </div>
+
+                                    <div class="form-group ml-1">
+                                        <button type="submit" name="receive" class="btn btn-primary" value="Receive">Receive</button>
+                                    </div>
+                                </form>
+                            @endif
                             <div class="text-center">
                                 <form id="bag_type_search_form" class="d-inline-block form-inline mb-1 justify-content-center text-left" novalidate="novalidate">
                                     <div class="form-group">
@@ -48,6 +60,8 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Bag No.</th>
                                     <th class="border-primary border-darken-1">Bag Type</th>
+                                    <th class="border-primary border-darken-1">Master Cargo No.</th>
+                                    <th class="border-primary border-darken-1">Master Cargo Type</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipment(s)</th>
@@ -62,6 +76,8 @@
                                     <th class="border-primary border-darken-1">Actual Weight</th>
                                     <th class="border-primary border-darken-1">Transit Datetime</th>
                                     <th class="border-primary border-darken-1">Transitted By</th>
+                                    <th class="border-primary border-darken-1">Received Datetime</th>
+                                    <th class="border-primary border-darken-1">Received By</th>
                                     <th class="border-primary border-darken-1">Aging</th>
                                 </tr>
                                 </thead>
@@ -111,6 +127,11 @@
 
     <script>
         $(document).ready(function() {
+            $('#receive_form input.bag_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -125,6 +146,8 @@
                             head.push('S.No');
                             head.push('Bag No.');
                             head.push('Bag Type');
+                            head.push('Master Cargo No.');
+                            head.push('Master Cargo Type');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Shipment(s)');
@@ -139,6 +162,8 @@
                             head.push('Actual Weight');
                             head.push('Transit Datetime');
                             head.push('Transitted By');
+                            head.push('Received Datetime');
+                            head.push('Received By');
                             head.push('Aging');
 
 
@@ -148,6 +173,8 @@
                                 row.push(index + 1);
                                 row.push(values.seal_number);
                                 row.push(values.bag_type);
+                                row.push(values.id_padded);
+                                row.push(values.cargo_type);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.shipments_count);
@@ -162,6 +189,8 @@
                                 row.push(values.actual_weight);
                                 row.push(values.transit_at);
                                 row.push(values.transitted_by);
+                                row.push(values.cargo_received_at);
+                                row.push(values.received_by);
                                 row.push(values.aging);
 
                                 body.push(row);
@@ -178,7 +207,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Pending for Master Cargo',
+                        title: 'In-Transit Bags',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],
@@ -192,7 +221,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.master_cargo.pending.list') }}',
+                    url: '{{ route('admin.master_cargo.bag.in_transit.list') }}',
                     data: function (d) {
                         d.bag_type = $('#bag_type_search_form #bag_type').val();
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
@@ -205,6 +234,8 @@
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'seal_number', name: 'bags.seal_number', class: 'align-middle seal_number'},
                     {data: 'bag_type', name: 'bags.type', class: 'align-middle bag_type'},
+                    {data: 'id_padded_link', name: 'master_cargoes.id', class: 'align-middle master_cargo_number'},
+                    {data: 'cargo_type', name: 'master_cargoes.type', class: 'align-middle cargo_type'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'shipments', name: 'bags.shipments', class: 'align-middle text-center shipments'},
@@ -219,6 +250,8 @@
                     {data: 'actual_weight', name: 'bags.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transit_at', name: 'bags.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
+                    {data: 'cargo_received_at', name: 'mc.created_at', class: 'align-middle cargo_received_at'},
+                    {data: 'received_by', name: 'ra.name', class: 'align-middle received_by'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging', searchable: false, orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -236,6 +269,10 @@
                     var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
                     var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
                     var bag_type_select = '<select name="bag_type_select" id="bag_type_select" class="select2 form-control">' +
+                        '<option value="1">Normal</option>' +
+                        '<option value="2">Return</option>' +
+                        '</select>';
+                    var cargo_type_select = '<select name="cargo_type_select" id="cargo_type_select" class="select2 form-control">' +
                         '<option value="1">Normal</option>' +
                         '<option value="2">Return</option>' +
                         '</select>';
@@ -268,6 +305,12 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
+                        else if($(header).is('.cargo_type')){
+                            $(cargo_type_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -292,6 +335,12 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     $("#bag_type_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#cargo_type_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Type",
                         width:'100%',
                         containerCssClass: 'select-xs',
@@ -403,6 +452,22 @@
                 'allowPlus': false
             }).bind('input', function() {
                 table.draw();
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var bag_id = parseInt($(this).parents('tr').data('seal_number'));
+                var cargo_id = parseInt($(this).parents('tr').data('master_cargo_id'));
+
+                if ($(this).hasClass('print')) {
+                    print(cargo_id);
+                }
+                @if (session('role_id') == 1 || in_array(31, session('permissions')))
+                    else if ($(this).hasClass('receive')) {
+                        $('#receive_form .bag_number').val(bag_id);
+
+                        $('#receive_form').submit();
+                    }
+                @endif
             });
         });
     </script>

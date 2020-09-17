@@ -1059,6 +1059,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminMasterCargoController@history_index')->name('index');
                 Route::get('list', 'Admins\AdminMasterCargoController@history_list')->name('list');
             });
+
+            Route::prefix('in_transit')->name('in_transit.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_index')->name('index');
+                Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_list')->name('list');
+                Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_receive')->name('receive');
+            });
+
+            Route::prefix('receive')->name('receive.')->group(function () {
+                Route::get('', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_shipment_details')->name('shipment_details');
+                Route::post('short_received', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_short_received')->name('short_received');
+                Route::post('', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_store')->name('store');
+            });
         });
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\AdminMasterCargoController@master_cargo_pending_index')->name('index');
@@ -1081,6 +1094,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('short_received_bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_short_received_bags')->name('short_received_bags');
             Route::post('shipments', 'Admins\AdminMasterCargoController@master_cargo_in_transit_shipments')->name('shipments');
             Route::post('print', 'Admins\AdminMasterCargoController@master_cargo_in_transit_print')->name('print');
+            Route::post('junctions', 'Admins\AdminMasterCargoController@master_cargo_in_transit_junctions')->name('junctions');
+            Route::post('details', 'Admins\AdminMasterCargoController@master_cargo_in_transit_details')->name('details');
+            Route::post('receive_at_link', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive_at_link')->name('receive_at_link');
             Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive')->name('receive');
         });
 

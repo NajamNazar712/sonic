@@ -501,7 +501,12 @@ class DisputeController extends Controller
     }
     public static function add_cargo_short_received($cargo_id,$shipments, $master = NULL){
         if($master != NULL){
-            $description = "Short received shipments dispute for Master Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
+            if($master == 2){
+                $description = "Short received shipments dispute for Bag Number # " . $cargo_id;
+            }
+            else{
+                $description = "Short received shipments dispute for Master Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
+            }
             $admin = Auth::id();
             $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
             $count = count($shipments);

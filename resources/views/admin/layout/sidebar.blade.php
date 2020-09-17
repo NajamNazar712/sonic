@@ -244,6 +244,10 @@
                                             @if (session('role_id') == 1 || in_array(124, session('permissions')))
                                                 <li><a class="menu-item" href="{{ route('admin.master_cargo.bag.history.index') }}">History</a></li>
                                             @endif
+
+                                            @if (session('role_id') == 1 || in_array(27, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.master_cargo.bag.in_transit.index') }}">In Transit</a></li>
+                                            @endif
                                         </ul>
                                     </li>
                                     @if (session('role_id') == 1 || in_array(25, session('permissions')))
