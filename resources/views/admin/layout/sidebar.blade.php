@@ -192,6 +192,11 @@
             @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-truck"></i>Supply Chain</span></a>
                     <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(376, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.cargo.supply_chain.supply_chain_index') }}">Order Management</a></li>
+                        @endif
+                    </ul>
+                    <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Cargo</span></a>
                                 <ul class="menu-content">
@@ -276,11 +281,6 @@
 
                                 </ul>
                             </li>
-                        @endif
-                    </ul>
-                    <ul class="menu-content">
-                        @if (session('role_id') == 1 || in_array(376, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.cargo.supply_chain.supply_chain_index') }}">Order Management</a></li>
                         @endif
                     </ul>
                 </li>
