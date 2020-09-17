@@ -1065,6 +1065,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('receive')->name('receive.')->group(function () {
                 Route::get('', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_index')->name('index');
                 Route::post('shipment_details', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_shipment_details')->name('shipment_details');
+                Route::post('short_received', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_short_received')->name('short_received');
                 Route::post('', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_store')->name('store');
             });
         });
