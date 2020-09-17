@@ -15,6 +15,7 @@ use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBagExcel;
 use App\Http\Models\Admin\MasterCargo\MasterCargoExcel;
 use App\Http\Models\Admin\MasterCargo\MasterCargoJunctionReceival;
+use App\Http\Models\Admin\MasterCargo\MasterCargoStatus;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentStatus;
 use App\Http\Models\City;
@@ -802,7 +803,8 @@ class AdminMasterCargoController extends Controller
         $shipping_mode = ShippingMode::all();
         $transport_vendor = TransportModeVendor::all();
         $transport_mode = TransportMode::all();
-        return view('admin.master_cargo.pending')->with(['shipping_mode'=>$shipping_mode,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor]);
+        $bag_status = BagStatus::all();
+        return view('admin.master_cargo.pending')->with(['shipping_mode'=>$shipping_mode,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor,'bag_status'=>$bag_status]);
     }
 
     public function master_cargo_pending_list(Request $request) {
@@ -814,7 +816,8 @@ class AdminMasterCargoController extends Controller
             ->leftjoin('cities as jh2', 'bags.junction_hub_2_id', '=', 'jh2.id')
             ->join('transport_modes as tm', 'bags.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'bags.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('bags.id', 'bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'bags.shipments', 'bags.quantity', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'bags.builty_number', 'bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`bag_id` = `bags`.`id`) AS `chargeable_weight`'), 'bags.actual_weight', 'bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'bags.type as bag_type','bags.seal_number')
+            ->join('bag_statuses as bs', 'bags.status_id', '=', 'bs.id')
+            ->select('bags.id', 'bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'bags.shipments', 'bags.quantity', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'bags.builty_number', 'bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`bag_id` = `bags`.`id`) AS `chargeable_weight`'), 'bags.actual_weight', 'bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'bags.type as bag_type','bags.seal_number', 'bs.name as status')
             ->whereIn('bags.status_id', [1, 3, 5, 6]);
 
         if (session('role_id') != 1) {
@@ -1155,7 +1158,7 @@ class AdminMasterCargoController extends Controller
 
     public function master_cargo_in_transit_index(){
         $shipping_mode = ShippingMode::all();
-        $cargo_status = CargoConsignmentStatus::all();
+        $cargo_status = MasterCargoStatus::all();
         $transport_vendor = TransportModeVendor::all();
         $transport_mode = TransportMode::all();
         return view('admin.master_cargo.in_transit')->with(['shipping_mode'=>$shipping_mode,'cargo_status'=>$cargo_status,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor]);
@@ -1325,6 +1328,7 @@ class AdminMasterCargoController extends Controller
 
         return $bag_numbers;
     }
+
     public function master_cargo_in_transit_short_received_bags(Request $request) {
         $bag_numbers = array();
         $tracking_numbers = array();
@@ -1402,7 +1406,6 @@ class AdminMasterCargoController extends Controller
             return ['status' => 1, 'error' => 'Master Cargo Number #' . $master_cargo_id . ' could not be Updated as Lost'];
         }
     }
-
 
     public function master_cargo_in_transit_print(Request $request) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
@@ -1630,7 +1633,6 @@ class AdminMasterCargoController extends Controller
         return $html;
     }
 
-
     public function master_cargo_in_transit_junctions(Request $request) {
         $city_ids = array();
 
@@ -1704,21 +1706,23 @@ class AdminMasterCargoController extends Controller
                 foreach ($master_bags as $master_bag){
                     $bag = $master_bag->bag;
                     $bag->status_id = 5;
+                    $bag->save();
                 }
             }
             else if ($cargo_consignment->junction_hub_2_id == $request->junction) {
                 foreach ($master_bags as $master_bag){
                     $bag = $master_bag->bag;
                     $bag->status_id = 6;
+                    $bag->save();
                 }
             }
             else {
                 foreach ($master_bags as $master_bag){
                     $bag = $master_bag->bag;
                     $bag->status_id = 3;
+                    $bag->save();
                 }
             }
-            $bag->save();
 
             $cargo_consignment->status_id = 2;
             $cargo_consignment->save();
@@ -1726,6 +1730,7 @@ class AdminMasterCargoController extends Controller
 
         return ['status' => 0, 'success' => 'Master Cargo(s) has been received at Junction'];
     }
+
     public function master_cargo_in_transit_receive(Request $request) {
         if ($request->has('master_cargo_number')) {
             $cargo_consignment = MasterCargo::find($request->get('master_cargo_number'));
@@ -1751,6 +1756,7 @@ class AdminMasterCargoController extends Controller
             return back()->withErrors('Missing Master Cargo Number!');
         }
     }
+
     public function master_cargo_receive_index() {
         if (session('cargo_consignment_id')) {
             $total = MasterCargoBag::where('master_cargo_id', session('cargo_consignment_id'))->where('status', 0)->count();
@@ -2164,7 +2170,7 @@ class AdminMasterCargoController extends Controller
 
     public function master_cargo_history_index(){
         $shipping_mode = ShippingMode::all();
-        $cargo_status = CargoConsignmentStatus::all();
+        $cargo_status = MasterCargoStatus::all();
         $transport_vendor = TransportModeVendor::all();
         $transport_mode = TransportMode::all();
         return view('admin.master_cargo.history')->with(['shipping_mode'=>$shipping_mode,'cargo_status'=>$cargo_status,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor]);
@@ -2293,7 +2299,8 @@ class AdminMasterCargoController extends Controller
             ->leftjoin('cities as jh2', 'bags.junction_hub_2_id', '=', 'jh2.id')
             ->join('transport_modes as tm', 'bags.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'bags.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('bags.id', 'bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'bags.shipments', 'bags.quantity', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'bags.builty_number', 'bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`bag_id` = `bags`.`id`) AS `chargeable_weight`'), 'bags.actual_weight', 'bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'bags.type as bag_type','bags.seal_number', 'mc.id as master_cargo_id', 'mc.received_at as cargo_received_at', 'ra.name as received_by', 'mc.type as master_cargo_type')
+            ->join('bag_statuses as bs', 'bags.status_id', '=', 'bs.id')
+            ->select('bags.id', 'bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'bags.shipments', 'bags.quantity', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'bags.builty_number', 'bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`bag_id` = `bags`.`id`) AS `chargeable_weight`'), 'bags.actual_weight', 'bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'bags.type as bag_type','bags.seal_number', 'mc.id as master_cargo_id', 'mc.received_at as cargo_received_at', 'ra.name as received_by', 'mc.type as master_cargo_type', 'bs.name as status')
             ->whereIn('bags.status_id', [3, 4, 5, 6]);
 
         if (session('role_id') != 1) {

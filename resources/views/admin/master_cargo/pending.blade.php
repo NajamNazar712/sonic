@@ -60,6 +60,7 @@
                                     <th class="border-primary border-darken-1">Builty No.</th>
                                     <th class="border-primary border-darken-1">Shipments Weight</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Transit Datetime</th>
                                     <th class="border-primary border-darken-1">Transitted By</th>
                                     <th class="border-primary border-darken-1">Aging</th>
@@ -137,6 +138,7 @@
                             head.push('Builty No.');
                             head.push('Shipments Weight');
                             head.push('Actual Weight');
+                            head.push('Status');
                             head.push('Transit Datetime');
                             head.push('Transitted By');
                             head.push('Aging');
@@ -160,6 +162,7 @@
                                 row.push(values.builty_number);
                                 row.push(values.shipments_weight);
                                 row.push(values.actual_weight);
+                                row.push(values.status);
                                 row.push(values.transit_at);
                                 row.push(values.transitted_by);
                                 row.push(values.aging);
@@ -217,6 +220,7 @@
                     {data: 'builty_number', name: 'bags.builty_number', class: 'align-middle builty_number'},
                     {data: 'shipments_weight', name: 'bags.shipments_weight', class: 'align-middle shipments_weight'},
                     {data: 'actual_weight', name: 'bags.actual_weight', class: 'align-middle actual_weight'},
+                    {data: 'status', name: 'bs.id', class: 'align-middle status'},
                     {data: 'transit_at', name: 'bags.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging', searchable: false, orderable: false},
