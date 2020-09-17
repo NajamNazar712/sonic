@@ -5008,7 +5008,7 @@ class NotificationsController extends Controller
                   self::email($subject, $body, $to);
               }
           else if($id == 72){
-                  $pending_cash_collection_agings = PendingCashCollectionAgingReport::get();
+                  $pending_cash_collection_agings = PendingCashCollectionAgingReport::orderBy('count','desc')->get();
 
                   $subject = $notification->subject;
                   $body = $notification->body;
