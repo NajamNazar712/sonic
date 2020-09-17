@@ -21,7 +21,8 @@ class BagStatusTableSeeder extends Seeder
             array('id' => 5, 'name' => 'Received at Junction 1', 'created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 6, 'name' => 'Received at Junction 2', 'created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 7, 'name' => 'Short Received','created_at'=>$timestamp,'updated_at'=>$timestamp),
-            array('id' => 8, 'name' => 'Lost','created_at'=>$timestamp,'updated_at'=>$timestamp)
+            array('id' => 8, 'name' => 'Lost','created_at'=>$timestamp,'updated_at'=>$timestamp),
+            array('id' => 9, 'name' => 'Shipment Received','created_at'=>$timestamp,'updated_at'=>$timestamp)
         ));
     }
 }
