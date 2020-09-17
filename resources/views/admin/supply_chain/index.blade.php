@@ -160,7 +160,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.supply_chain.supply_chain_list') }}',
+                        url: '{{ route('admin.cargo.supply_chain.supply_chain_list') }}',
                         data: params,
                         success: function (result)
                         {
@@ -268,7 +268,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.supply_chain.supply_chain_list') }}',
+                    url: '{{ route('admin.cargo.supply_chain.supply_chain_list') }}',
                     data: function (d) {
                         d.shipment_status_select = $('#shipment_status').val();
                         d.shipper = $('#shipper').val();

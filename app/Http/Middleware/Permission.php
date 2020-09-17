@@ -129,6 +129,7 @@ class Permission
             'cargo.receive.quick.list.index' => 31,
             'cargo.receive.quick.list.details' => 31,
             'cargo.receive.quick.list.ajax' => 31,
+            'cargo.supply_chain.supply_chain_list' => 376,
 
             'master_cargo.bag.pending.index' => 25,
             'master_cargo.bag.pending.list' => 25,
