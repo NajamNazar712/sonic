@@ -1070,7 +1070,7 @@ class AdminMasterCargoController extends Controller
         foreach ($bag_ids as $key => $bag_id) {
             $bag = Bag::find($bag_id);
 
-            if ($bag->status_id == 1) {
+            if (in_array($bag->status_id, [1, 3, 5, 6])) {
                 $bags++;
                 $bags_weight += $bag->actual_weight;
                 $shipments += $bag->shipments;
@@ -2630,7 +2630,7 @@ class AdminMasterCargoController extends Controller
             $bag->status_id = 7;
         }
         else {
-            $bag->status_id = 4;
+            $bag->status_id = 9;
         }
 
         $bag->receiver_id = Auth::id();
