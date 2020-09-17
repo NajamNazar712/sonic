@@ -22,6 +22,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
@@ -568,7 +569,96 @@ class OrderManagementController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
+        return $datatable->make(true);
+    }
 
+    public function supply_chain_index()
+    {
+        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id',[1,2,3,20,21])->get();
+        $service_type = BookingType::all();
+        $shippers = User::select('id','name')->get();
+        $products = Product::select('id','product_name')->get();
+        return view('admin.supply_chain.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products ,'shippers' =>$shippers ]);;
+    }
+    public function supply_chain_list(Request $request){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('shipment_items as si','si.shipment_id','=','shipments.id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.pieces as pieces','si.quantity as quantity','shipments_journey.created_at as status_date','shipments.actual_weight as weight','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.created_at as booking_date','shipments.shipper_status_id','shipments.booking_type_id','shipments_journey.shipper_status_id as status_id']);
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->editColumn('weight',function($shipment){
+                if ($shipment->weight != null ) {
+                    return $shipment->weight ;
+                }
+                else {
+                    return '-';
+                }
+            })
+            ->editColumn('status_date',function($shipment){
+                if ($shipment->status_date != null ) {
+                    return $shipment->status_date ;
+                }
+                else {
+                    return '-';
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('service_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('bt.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            });
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->where('shipments.tracking_number',$tracking_numbers );
+        }
+        if ($shipment_status_select = $request->get('shipment_status_select')) {
+            $datatable->whereIn('ss.id', $shipment_status_select);
+        }
+        if ($shipper = $request->get('shipper')) {
+            $datatable->whereIn('shipments.user_id', $shipper);
+        }
+        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
+            $from = $request->get('booking_from_date');
+            $to = $request->get('booking_to_date');
+            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+        }
         return $datatable->make(true);
     }
 }
