@@ -243,7 +243,7 @@
     <script>
         $(document).ready(function() {
             @if (session('print_shipment_ids'))
-            var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+            var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
 
             $.ajax({
                 url: url,

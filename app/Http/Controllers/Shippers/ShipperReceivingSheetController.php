@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\BookingType;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentPiece;
@@ -935,7 +936,11 @@ class ShipperReceivingSheetController extends Controller
                 $service_type_id = $shipment->booking_type_id;
                 $pickup_city_id = $shipment->pickup_address->city_id;
                 $shipment_info = array();
-                $shipper_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1);
+                if(session('account_type') == 1){
+                    $shipper_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1);
+                }else{
+                    $shipper_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1);
+                }
                 $shipping_modes = null;
                 if ($shipper_shipping_modes->exists()) {
                     $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();

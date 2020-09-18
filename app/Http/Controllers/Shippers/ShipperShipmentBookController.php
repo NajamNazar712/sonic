@@ -172,9 +172,14 @@ class ShipperShipmentBookController extends Controller
             $shipment_coordinates->save();
         }
         //Existing Coordinates
-        $user=User::find($user_id);
-        $user->multipiece_status = 1;
-        $user->save();
+//        if($pieces > 1){
+//            $user = User::where('id', $user_id)->where('multipiece_status', 0);
+//            if($user->exists()){
+//                $user = $user->first();
+//                $user->multipiece_status = 1;
+//                $user->save();
+//            }
+//        }
 
         return $shipment_id;
     }
@@ -2230,9 +2235,14 @@ class ShipperShipmentBookController extends Controller
             $shipment_coordinates->save();
         }
         //Existing Coordinates
-        $user=User::find($user_id);
-        $user->multipiece_status = 1;
-        $user->save();
+        //        if($pieces > 1){
+//            $user = User::where('id', $user_id)->where('multipiece_status', 0);
+//            if($user->exists()){
+//                $user = $user->first();
+//                $user->multipiece_status = 1;
+//                $user->save();
+//            }
+//        }
 
         return $shipment_id;
     }
@@ -3079,7 +3089,7 @@ class ShipperShipmentBookController extends Controller
             })->where('hidden', 0)],
             'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
-                $query->whereIn('id', [2]);
+                $query->whereIn('id', [2,3]);
             })],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'consignee_city_name' => ['required', 'string', 'between:1,100', 'exists:cities,name'],

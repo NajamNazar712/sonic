@@ -10,7 +10,7 @@
             <div class="content-body">
                 <h1 class="mb-1">
                     Book a Shipment (Corporate)
-{{--                    @php(dd($min_chargeable_weight[0]['id']))--}}
+                    {{--                    @php(dd($min_chargeable_weight[0]['id']))--}}
                     <span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
                     <button type="button" class="btn btn-primary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
                 </h1>
@@ -56,32 +56,6 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="modal fade" id="multi_piece" role="dialog" aria-labelledby="multi_piece" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-                                            <div class="modal-dialog modal-lg justify-content-center" >
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h4 class="modal-title" id="add_in_receiving_sheet_title">Multi Piece Tutorial</h4>
-                                                        @if($user->multipiece_status == 1)
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        @endif
-                                                    </div>
-                                                    <div class="modal-body justify-content-center" id="player">
-                                                        <iframe id="existing-iframe-example"
-                                                                width="100%" height="480"
-                                                                src="https://www.youtube.com/embed/Uy0KAIx3xHQ?enablejsapi=1"
-                                                                frameborder="0"
-                                                        ></iframe>
-                                                    </div>
-                                                    <div class="modal-footer justify-content-center" id="multi_piece_footer" >
-                                                        <button id="close_btn" class="btn btn-primary">Close</button>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-
 
                                         <div class="form-group">
                                             <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="pickup_city_name"></p>
@@ -211,7 +185,7 @@
                                                 <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
                                             </div>
                                             <div id="pieces_quantity" class="form-group input-group d-none">
-                                                <input  type="text" name="pieces_quantity" class="form-control text-center pieces" id="pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required">
+                                                <input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required">
                                             </div>
                                             <div class="form-group text-center p-1 border border-light rounded">
                                                 <label class="d-block">Insurance</label>
@@ -454,8 +428,6 @@
 
 
         $(document).ready(function() {
-            $('#close_btn').addClass('d-none');
-            var no_of_pieces;
             $(this).find('.pieces').TouchSpin({
                 min: 1,
                 max: 10,
@@ -652,7 +624,7 @@
             @if (!Session::has('service_type_id'))
             $('#select_service_type').modal('show');
             @else
-            service_type = '{{ Session::get('service_type_id') }}';
+                service_type = '{{ Session::get('service_type_id') }}';
 
             if(service_type == 1){
                 $('#pieces_quantity').removeClass('d-none');
@@ -1161,12 +1133,7 @@
                 $(this).valid();
             });
 
-            var check = 0;
-            var piece_check = false;
-            $('#multi_piece').on('hide.bs.modal', function (e) {
-                $('#existing-iframe-example').attr('src',"");
-            });
-
+            var check = @json($check);
             $('#booking_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -1177,292 +1144,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    var quantity = $('#pieces').val();
-                    var piece_status = @json($multi_piece);
-                    if( (piece_status == 0 || (piece_status == 1 && quantity > 1)) && check == 0) {
-                        if (piece_check == false) {
-                            piece_check = true;
-                            swal({
-                                title: 'Piece(s) Notice!',
-                                text: 'You are going to book multiple pieces shipment, please make sure to pack it in ' + no_of_pieces + ' number of boxes or flyers',
-                                icon: 'info',
-                                buttons: {
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function (confirm) {
-                                if (confirm) {
-                                    if (check == 0) {
-                                        check = 1;
-                                        $('#multi_piece').modal('show');
-                                        $('#book_btn').removeAttr("disabled");
-                                        $('#book_print').removeAttr("disabled");
-                                    } else if (check === 1) {
-
-                                        check = 2;
-                                        $('#close_btn').click(function () {
-                                            $('#multi_piece').modal('hide');
-                                        });
-                                        $('#book_btn').removeAttr("disabled");
-                                        $('#book_print').removeAttr("disabled");
-                                    }
-                                    else{
-                                        var pressed_button = $(this.submitButton);
-
-                                        $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
-
-                                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                                        var consignee_address = $('#consignee_address').val();
-                                        var strArray = consignee_address.split(/[ ,]+/);
-                                        var present = [];
-                                        for(k=0;k<strArray.length;k++) {
-                                            for (i = 0; i < check.length; i++) {
-                                                if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
-                                                    present.push(strArray[k]);
-                                                }
-                                            }
-                                        }
-                                        // console.log(present.length);
-                                        // console.log(present);
-                                        $.ajax({
-                                            url: '{!! route('cod.shipment.book.corporate_min_chargeable_weight') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                '_token': '{{ csrf_token() }}',
-                                                'shipping_mode': $('#shipping_mode').val(),
-                                                'delivery_type': $('#delivery_type').val(),
-                                                'estimated_weight': $('#estimated_weight').val()
-                                            }
-                                        }).done(function(data) {
-                                            if(data.status == 1){
-                                                swal({
-                                                    title: 'Warning',
-                                                    text: 'Dear Customer, this shipment will be charged to a minimum of ' + data.min + ' kg, based on your mode of shipping and delivery type',
-                                                    icon: 'info',
-                                                    buttons:{
-                                                        confirm: {
-                                                            text: 'Ok',
-                                                            value: false,
-                                                            visible: true,
-                                                            closeModal: true
-                                                        }},
-                                                    closeOnClickOutside: false,
-                                                    closeOnEsc: false
-                                                }).then(function() {
-                                                    if(present.length > 0){
-                                                        var html = '<div class="text-left">In case of,<br/>';
-                                                        html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
-                                                        html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
-                                                        html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
-                                                        content = document.createElement('div');
-                                                        content.innerHTML = html;
-                                                        swal({
-                                                            title: 'A Possible Address Anomaly: ' + present + ' Detected!',
-                                                            content: content,
-                                                            icon: 'info',
-                                                            buttons: {
-                                                                cancel: {
-                                                                    text: 'Cancel',
-                                                                    value: null,
-                                                                    visible: true,
-                                                                    closeModal: true,
-                                                                },
-                                                                confirm: {
-                                                                    text: 'Continue to Booking',
-                                                                    value: true,
-                                                                    visible: true,
-                                                                    closeModal: true
-                                                                }
-                                                            },
-                                                            closeOnClickOutside: false,
-                                                            closeOnEsc: false,
-                                                            // dangerMode: true
-                                                        }).then(function(confirm) {
-                                                            if(confirm) {
-                                                                if(blacklist == true){
-                                                                    var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
-                                                                    content = document.createElement('div');
-                                                                    content.innerHTML = html;
-                                                                    swal({
-                                                                        content: content,
-                                                                        buttons: {
-                                                                            cancel: {
-                                                                                text: 'Cancel',
-                                                                                value: null,
-                                                                                visible: true,
-                                                                                closeModal: true,
-                                                                            },
-                                                                            confirm: {
-                                                                                text: 'Book Anyway',
-                                                                                value: true,
-                                                                                visible: true,
-                                                                                closeModal: true
-                                                                            }
-                                                                        },
-                                                                        closeOnClickOutside: false,
-                                                                        closeOnEsc: false,
-                                                                        // dangerMode: true
-                                                                    }).then(function(confirm) {
-                                                                        if (confirm) {
-                                                                            swal({
-                                                                                title: 'Please Wait!',
-                                                                                text: 'Your shipment is being booked!',
-                                                                                icon: 'info',
-                                                                                buttons: false,
-                                                                                closeOnClickOutside: false,
-                                                                                closeOnEsc: false
-                                                                            });
-
-                                                                            form.submit();
-                                                                        }
-                                                                        else{
-                                                                            $(form).find('button[type=submit]').prop('disabled', false);
-                                                                        }
-                                                                    });
-                                                                }else{
-                                                                    swal({
-                                                                        title: 'Please Wait!',
-                                                                        text: 'Your shipment is being booked!',
-                                                                        icon: 'info',
-                                                                        buttons: false,
-                                                                        closeOnClickOutside: false,
-                                                                        closeOnEsc: false
-                                                                    });
-
-                                                                    form.submit();
-                                                                }
-                                                            }
-                                                            else{
-                                                                $(form).find('button[type=submit]').prop('disabled', false);
-                                                            }
-                                                        });
-                                                    }
-                                                    else {
-                                                        if(blacklist == true) {
-                                                            var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
-                                                            content = document.createElement('div');
-                                                            content.innerHTML = html;
-                                                            swal({
-                                                                content: content,
-                                                                buttons: {
-                                                                    cancel: {
-                                                                        text: 'Cancel',
-                                                                        value: null,
-                                                                        visible: true,
-                                                                        closeModal: true,
-                                                                    },
-                                                                    confirm: {
-                                                                        text: 'Book Anyway',
-                                                                        value: true,
-                                                                        visible: true,
-                                                                        closeModal: true
-                                                                    }
-                                                                },
-                                                                closeOnClickOutside: false,
-                                                                closeOnEsc: false,
-                                                                // dangerMode: true
-                                                            }).then(function (confirm) {
-                                                                if (confirm) {
-                                                                    swal({
-                                                                        title: 'Please Wait!',
-                                                                        text: 'Your shipment is being booked!',
-                                                                        icon: 'info',
-                                                                        buttons: false,
-                                                                        closeOnClickOutside: false,
-                                                                        closeOnEsc: false
-                                                                    });
-
-                                                                    form.submit();
-                                                                }
-                                                                else{
-                                                                    $(form).find('button[type=submit]').prop('disabled', false);
-                                                                }
-                                                            });
-                                                        }else{
-                                                            swal({
-                                                                title: 'Please Wait!',
-                                                                text: 'Your shipment is being booked!',
-                                                                icon: 'info',
-                                                                buttons: false,
-                                                                closeOnClickOutside: false,
-                                                                closeOnEsc: false
-                                                            });
-
-                                                            form.submit();
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                            else {
-                                                if(present.length > 0){
-                                                    var html = '<div class="text-left">In case of,<br/>';
-                                                    html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
-                                                    html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
-                                                    html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
-                                                    content = document.createElement('div');
-                                                    content.innerHTML = html;
-                                                    swal({
-                                                        title: present + ' Detected!',
-                                                        content: content,
-                                                        icon: 'info',
-                                                        buttons: {
-                                                            cancel: {
-                                                                text: 'No',
-                                                                value: null,
-                                                                visible: true,
-                                                                closeModal: true,
-                                                            },
-                                                            confirm: {
-                                                                text: 'Yes',
-                                                                value: true,
-                                                                visible: true,
-                                                                closeModal: true
-                                                            }
-                                                        },
-                                                        closeOnClickOutside: false,
-                                                        closeOnEsc: false,
-                                                        // dangerMode: true
-                                                    }).then(function() {
-                                                        swal({
-                                                            title: 'Please Wait!',
-                                                            text: 'Your shipment is being booked!',
-                                                            icon: 'info',
-                                                            buttons: false,
-                                                            closeOnClickOutside: false,
-                                                            closeOnEsc: false
-                                                        });
-                                                        form.submit();
-                                                    });
-                                                }
-                                                else {
-                                                    swal({
-                                                        title: 'Please Wait!',
-                                                        text: 'Your shipment is being booked!',
-                                                        icon: 'info',
-                                                        buttons: false,
-                                                        closeOnClickOutside: false,
-                                                        closeOnEsc: false
-                                                    });
-
-                                                    form.submit();
-                                                }
-                                            }
-                                        });
-
-                                    }
-                                }
-                            });
-                        }
-                    }
-                   else{
+                    check_consignee_return_ratio();
                     var pressed_button = $(this.submitButton);
 
                     $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
@@ -1678,7 +1360,105 @@
                                     closeOnClickOutside: false,
                                     closeOnEsc: false,
                                     // dangerMode: true
-                                }).then(function() {
+                                }).then(function(confirm) {
+                                    if(confirm){
+                                        if(blacklist == true){
+                                            var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+                                            content = document.createElement('div');
+                                            content.innerHTML = html;
+                                            swal({
+                                                content: content,
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Cancel',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                    confirm: {
+                                                        text: 'Book Anyway',
+                                                        value: true,
+                                                        visible: true,
+                                                        closeModal: true
+                                                    }
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                // dangerMode: true
+                                            }).then(function(confirm) {
+                                                if (confirm) {
+                                                    swal({
+                                                        title: 'Please Wait!',
+                                                        text: 'Your shipment is being booked!',
+                                                        icon: 'info',
+                                                        buttons: false,
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false
+                                                    });
+
+                                                    form.submit();
+                                                }
+                                                else{
+                                                    $(form).find('button[type=submit]').prop('disabled', false);
+                                                }
+                                            });
+                                        }else{
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Your shipment is being booked!',
+                                                icon: 'info',
+                                                buttons: false,
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+
+                                            form.submit();
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                if(blacklist == true){
+                                    var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+                                    swal({
+                                        content: content,
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Cancel',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Book Anyway',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        // dangerMode: true
+                                    }).then(function(confirm) {
+                                        if (confirm) {
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Your shipment is being booked!',
+                                                icon: 'info',
+                                                buttons: false,
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+
+                                            form.submit();
+                                        }
+                                        else{
+                                            $(form).find('button[type=submit]').prop('disabled', false);
+                                        }
+                                    });
+                                }else{
                                     swal({
                                         title: 'Please Wait!',
                                         text: 'Your shipment is being booked!',
@@ -1687,25 +1467,13 @@
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
                                     });
-                                    form.submit();
-                                });
-                            }
-                            else {
-                                swal({
-                                    title: 'Please Wait!',
-                                    text: 'Your shipment is being booked!',
-                                    icon: 'info',
-                                    buttons: false,
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
-                                });
 
-                                form.submit();
+                                    form.submit();
+                                }
                             }
                         }
                     });
 
-                }
                 }
             });
 
@@ -1762,42 +1530,5 @@
                 'allowPlus': false
             });
         });
-    </script>
-    <script type="text/javascript">
-        var tag = document.createElement('script');
-        tag.id = 'iframe-demo';
-        tag.src = 'https://www.youtube.com/iframe_api';
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        var player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('existing-iframe-example', {
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-
-        }
-
-        // autoplay video
-        function onPlayerReady(event) {
-            event.target.playVideo();
-        }
-
-        // when video ends
-        var done = false;
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PLAYING && !done) {
-                setTimeout(stopVideo, 59000);
-                done = true;
-            }
-        }
-        function stopVideo() {
-            player.stopVideo();
-            $('#close_btn').removeClass('d-none');
-        }
-
     </script>
 @endsection
