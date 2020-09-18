@@ -16,7 +16,7 @@ class CreateWalkinShipmentWeightChargesTable extends Migration
         Schema::create('walkin_shipment_weight_charges', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shipment_id');
-            $table->decimal('weight_per_kg');
+            $table->decimal('charges_per_kg');
             $table->timestamps();
         });
     }
