@@ -1114,6 +1114,7 @@ class AdminMasterCargoController extends Controller
 
             $master_cargo->bags = $bags;
             $master_cargo->shipments = $shipments;
+            $master_cargo->quantity = $quantity;
             $master_cargo->bags_weight = $bags_weight;
 
             $master_cargo->actual_weight = $request->input('actual_weight');
