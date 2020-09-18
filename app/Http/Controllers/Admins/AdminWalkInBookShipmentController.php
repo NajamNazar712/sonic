@@ -4,6 +4,7 @@ namespace App\Http\controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\DeliveryType;
@@ -284,6 +285,7 @@ class AdminWalkInBookShipmentController extends Controller
                         $gst = 0;
                         $amount = 0;
                         $r_amount = 0;
+
                     }else{
                         $actual_weight = $request->actual_weight;
                         $charges_per_kg = $request->charges_per_kg;
@@ -316,59 +318,66 @@ class AdminWalkInBookShipmentController extends Controller
 
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-                        $product_type_id = $request->input('product_type');
+                    $product_type_id = $request->input('product_type');
 
-                        if ($request->filled('item_description')) {
-                            $item_description = $request->input('item_description');
-                        }
-                        else {
-                            $item_description = NULL;
-                        }
+                    if ($request->filled('item_description')) {
+                        $item_description = $request->input('item_description');
+                    }
+                    else {
+                        $item_description = NULL;
+                    }
 
-                        $item_quantity = $request->input('item_quantity');
+                    $item_quantity = $request->input('item_quantity');
 
-                        $type = 0;
+                    $type = 0;
 
-                        $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $type);
+                    $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $type);
 
-                        if($request->has('pack_type')){
-                            
-                            $pickup_address_details = UserShippingInfo::find($pickup_address_id);
-                            $hub_id = $pickup_address_details->city->hub_id;
+                    if($request->filled('pickup')){
+                        $walkin_weight = new WalkinShipmentWeightCharges();
+                        $walkin_weight->shipment_id = $shipment_id;
+                        $walkin_weight->charges_per_kg = $request->charges_per_kg;
+                        $walkin_weight->save();
+                    }
 
-                            $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id',$hub_id);
+                    if($request->has('pack_type')){
 
-                            $fulfilment_hub = $fulfilment_hub->first();
+                        $pickup_address_details = UserShippingInfo::find($pickup_address_id);
+                        $hub_id = $pickup_address_details->city->hub_id;
 
-                            $warehouse_id = $fulfilment_hub->warehouse_id;
-                            
+                        $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id',$hub_id);
 
-                            $packaging_types = PackagingMaterialTypes::all();
-                            $packaging_sizes = PackagingMaterialTypeSizes::all();
-                            foreach ($packaging_types as $ptype) {
-                                foreach ($packaging_sizes as $psize) {
-                                    $index = (int)($ptype->id . $psize->id);
-                                    
-                                    if (array_key_exists($index, $request->pack_type)) {
-                                        $test += 1;
-                                        $packaging_history = new WalkInShipmentPackagingMaterialHistory();
-                                        $packaging_history->shipment_id = $shipment_id;
-                                        $packaging_history->type_id = $request->pack_type[$index];
-                                        $packaging_history->size_id = $request->pack_size[$index];
-                                        $packaging_history->quantity = $request->pack_quantity[$index];
-                                        $packaging_history->save();
-                                        
-                                        $type_id = $request->pack_type[$index];
-                                        $type_size_id = $request->pack_size[$index];
-                                        $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id])->first();
+                        $fulfilment_hub = $fulfilment_hub->first();
 
-                                        $stock->stock = $stock['stock'] - $request->pack_quantity[$index];
-                                        $stock->save();
-        
-                                    }
+                        $warehouse_id = $fulfilment_hub->warehouse_id;
+
+
+                        $packaging_types = PackagingMaterialTypes::all();
+                        $packaging_sizes = PackagingMaterialTypeSizes::all();
+                        foreach ($packaging_types as $ptype) {
+                            foreach ($packaging_sizes as $psize) {
+                                $index = (int)($ptype->id . $psize->id);
+
+                                if (array_key_exists($index, $request->pack_type)) {
+                                    $test += 1;
+                                    $packaging_history = new WalkInShipmentPackagingMaterialHistory();
+                                    $packaging_history->shipment_id = $shipment_id;
+                                    $packaging_history->type_id = $request->pack_type[$index];
+                                    $packaging_history->size_id = $request->pack_size[$index];
+                                    $packaging_history->quantity = $request->pack_quantity[$index];
+                                    $packaging_history->save();
+
+                                    $type_id = $request->pack_type[$index];
+                                    $type_size_id = $request->pack_size[$index];
+                                    $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id])->first();
+
+                                    $stock->stock = $stock['stock'] - $request->pack_quantity[$index];
+                                    $stock->save();
+
                                 }
                             }
                         }
+                    }
                     NotificationsController::send(2, $shipment_id);
 
                     if ($request->filled('book_and_print')) {
