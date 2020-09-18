@@ -1492,7 +1492,7 @@ class ShipmentChargesController extends Controller
                 $zone = Zone::where('id',$city['zone_id'])->first();
                 $gst = ROUND(($zone['gst']*($weight_charges + $fuel_surcharge)), 0, PHP_ROUND_HALF_DOWN);
 
-                if($shipment->charges_mode == 1) {
+                if($shipment->charges_mode_id == 1) {
                     $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
 
                     $amount = 0;

@@ -313,7 +313,6 @@ class AdminWalkInBookShipmentController extends Controller
 
                     }
 
-
                     $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup);
 
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
