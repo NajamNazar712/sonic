@@ -748,7 +748,7 @@ class ShipperDashboardController extends Controller
             ->leftjoin('user_bank_infos as ubi', 'ubi.id', '=', 'dp.user_bank_info_id')
             ->leftjoin('banks_lists as bl', 'bl.id', '=', 'ubi.bank_name')
             ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking_id', 'shipments.order_id as order_number', 'dps.done_payment_id as payment_id', 'bl.name as bank_name', 'dps.created_at as payment_date', 'dps.payable as cod', 'dps.type as type','ubi.iban as account_detail')
-            ->where('shipments.user_id', session('user_id'));
+            ->where('shipments.user_id', session('user_id'))->orderBy('dps.created_at','desc');
 
         $datatable=Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
