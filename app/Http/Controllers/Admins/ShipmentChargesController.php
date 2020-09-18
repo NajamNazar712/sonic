@@ -1508,7 +1508,7 @@ class ShipmentChargesController extends Controller
                 }
                 $shipment->chargeable_weight = $actual_weight;
                 $shipment->weight_charges = $weight_charges;
-                $shipment->fuel_surcharges = $fuel_surcharge;
+                $shipment->fuel_surcharge = $fuel_surcharge;
                 $shipment->gst = $gst;
                 $shipment->amount = $amount;
                 $shipment->received_amount = $r_amount;
