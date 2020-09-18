@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Controller;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Shipment;
 
 use App\Http\Models\RateStatus;
@@ -29,6 +31,7 @@ use App\Http\Models\CorporateDiscountCharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
 use App\Http\Models\City;
+use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 
 use Carbon\Carbon;
@@ -1471,5 +1474,48 @@ class ShipmentChargesController extends Controller
 
             $shipment->save();
         }
+    }
+
+    static public  function walkin_weight($shipment_id){
+        $shipment = Shipment::find($shipment_id);
+        if($shipment){
+            $charges_per_kg = 0;
+            $actual_weight = $shipment->actual_weight;
+            $walkin_charges = WalkinShipmentWeightCharges::where('shipment_id', $shipment_id);
+            if($walkin_charges->exists()){
+                $walkin_charges = $walkin_charges->first();
+                $charges_per_kg = $walkin_charges->charges_per_kg;
+                $weight_charges = ROUND(($actual_weight * $charges_per_kg), 0, PHP_ROUND_HALF_DOWN);
+                $fuel = StandardFuelSurcharge::where('shipping_mode_id',$shipment->shipping_mode_id)->first();
+                $fuel_surcharge = ROUND(($fuel['fuel_surcharge']/100)*($weight_charges), 0, PHP_ROUND_HALF_DOWN);
+                $city = City::where('id',$shipment->pickup_city_id)->first();
+                $zone = Zone::where('id',$city['zone_id'])->first();
+                $gst = ROUND(($zone['gst']*($weight_charges + $fuel_surcharge)), 0, PHP_ROUND_HALF_DOWN);
+
+                if($shipment->charges_mode_id == 1) {
+                    $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                    $amount = 0;
+
+                    $r_amount = $receivable;
+                }
+                else{
+                    $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                    $amount = $receivable;
+
+                    $r_amount = NULL;
+                }
+                $shipment->chargeable_weight = $actual_weight;
+                $shipment->weight_charges = $weight_charges;
+                $shipment->fuel_surcharge = $fuel_surcharge;
+                $shipment->gst = $gst;
+                $shipment->amount = $amount;
+                $shipment->received_amount = $r_amount;
+                $shipment->save();
+            }
+
+        }
+
     }
 }

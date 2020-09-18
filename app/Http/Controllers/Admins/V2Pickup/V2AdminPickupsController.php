@@ -800,13 +800,17 @@ class V2AdminPickupsController extends Controller
                     //Consolidated Shipments
 
                     NotificationsController::send(3, $shipment_id);
+                    if($shipment->booking_type_id == 4){
+                        ShipmentChargesController::walkin_weight($shipment_id);
+                    }else{
+                        ShipmentChargesController::weight($shipment_id);
+                        ShipmentChargesController::cash_handling($shipment_id);
+                        ShipmentChargesController::insurance($shipment_id);
+                        ShipmentChargesController::fuel_surcharge($shipment_id);
+                    }
 
-                    ShipmentChargesController::weight($shipment_id);
-                    ShipmentChargesController::cash_handling($shipment_id);
-                    ShipmentChargesController::insurance($shipment_id);
-                    ShipmentChargesController::fuel_surcharge($shipment_id);
 
-                    if ($shipment->charges_mode_id == 2) {
+                    if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id !== 4) {
                         $shipment = Shipment::find($shipment_id);
 
                         $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
@@ -1340,11 +1344,14 @@ class V2AdminPickupsController extends Controller
                     //Consolidated Shipments
 
                     NotificationsController::send(3, $shipment_id);
-
-                    ShipmentChargesController::weight($shipment_id);
-                    ShipmentChargesController::cash_handling($shipment_id);
-                    ShipmentChargesController::insurance($shipment_id);
-                    ShipmentChargesController::fuel_surcharge($shipment_id);
+                    if($shipment->booking_type_id == 4){
+                        ShipmentChargesController::walkin_weight($shipment_id);
+                    }else{
+                        ShipmentChargesController::weight($shipment_id);
+                        ShipmentChargesController::cash_handling($shipment_id);
+                        ShipmentChargesController::insurance($shipment_id);
+                        ShipmentChargesController::fuel_surcharge($shipment_id);
+                    }
 
                     if ($shipment->charges_mode_id == 2) {
                         $shipment = Shipment::find($shipment_id);

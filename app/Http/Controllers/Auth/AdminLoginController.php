@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\MultipleSaleLead;
 use Illuminate\Http\Request;
@@ -88,6 +90,4 @@ class AdminLoginController extends Controller
         return redirect()->route('admin.login');
 
     }
-
-
 }

@@ -1144,6 +1144,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+                    check_consignee_return_ratio();
                     var pressed_button = $(this.submitButton);
 
                     $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
@@ -1359,7 +1360,105 @@
                                     closeOnClickOutside: false,
                                     closeOnEsc: false,
                                     // dangerMode: true
-                                }).then(function() {
+                                }).then(function(confirm) {
+                                    if(confirm){
+                                        if(blacklist == true){
+                                            var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+                                            content = document.createElement('div');
+                                            content.innerHTML = html;
+                                            swal({
+                                                content: content,
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Cancel',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                    confirm: {
+                                                        text: 'Book Anyway',
+                                                        value: true,
+                                                        visible: true,
+                                                        closeModal: true
+                                                    }
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                // dangerMode: true
+                                            }).then(function(confirm) {
+                                                if (confirm) {
+                                                    swal({
+                                                        title: 'Please Wait!',
+                                                        text: 'Your shipment is being booked!',
+                                                        icon: 'info',
+                                                        buttons: false,
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false
+                                                    });
+
+                                                    form.submit();
+                                                }
+                                                else{
+                                                    $(form).find('button[type=submit]').prop('disabled', false);
+                                                }
+                                            });
+                                        }else{
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Your shipment is being booked!',
+                                                icon: 'info',
+                                                buttons: false,
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+
+                                            form.submit();
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                if(blacklist == true){
+                                    var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+                                    swal({
+                                        content: content,
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Cancel',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Book Anyway',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        // dangerMode: true
+                                    }).then(function(confirm) {
+                                        if (confirm) {
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Your shipment is being booked!',
+                                                icon: 'info',
+                                                buttons: false,
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+
+                                            form.submit();
+                                        }
+                                        else{
+                                            $(form).find('button[type=submit]').prop('disabled', false);
+                                        }
+                                    });
+                                }else{
                                     swal({
                                         title: 'Please Wait!',
                                         text: 'Your shipment is being booked!',
@@ -1368,20 +1467,9 @@
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
                                     });
-                                    form.submit();
-                                });
-                            }
-                            else {
-                                swal({
-                                    title: 'Please Wait!',
-                                    text: 'Your shipment is being booked!',
-                                    icon: 'info',
-                                    buttons: false,
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
-                                });
 
-                                form.submit();
+                                    form.submit();
+                                }
                             }
                         }
                     });
