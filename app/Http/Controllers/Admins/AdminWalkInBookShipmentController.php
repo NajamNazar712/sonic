@@ -376,9 +376,12 @@ class AdminWalkInBookShipmentController extends Controller
                             }
                         }
                     }
-                    
                     NotificationsController::send(2, $shipment_id);
-                    NotificationsController::send(85, $shipment_id);
+                    $id = Auth::user();
+                    $shipment_ids = array($shipment_id);
+                    if($pickup == 0){
+                         NotificationsController::send(85, $shipment_ids , $id);
+                     }
 
                     if ($request->filled('book_and_print')) {
                         $print = $shipment_id;
