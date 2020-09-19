@@ -254,6 +254,19 @@
 														<input type="text" name="total_gst" class="form-control text-center total_gst" placeholder="Total GST" readonly="readonly">
 													</div>
 												</div>
+												<div class="col-2">
+													<div class="form-group">
+														<label class="mx-auto">Company Bank</label>
+														<fieldset class="form-group">
+															<select name="company_bank_id" id="company_bank" class="form-control select2">
+																@foreach($company_banks as $bank)
+																	<option value="{{$bank->id}}">{{$bank->name}}</option>
+																@endforeach
+															</select>
+														</fieldset>
+
+													</div>
+												</div>
 
 												<div class="w-100 mt-2"></div>
 

@@ -2591,11 +2591,12 @@ class AdminFinanceController extends Controller
 
     public function make_payments_index() {
         $banks = BanksList::all();
+        $company_banks = BanksList::where('affiliate', 1)->get();
         $shipper_status = [1 => 'Active', 2 => 'Inactive'];
         $total_amount = PendingPaymentShipment::sum('amount');
         $total_charges = PendingPaymentShipment::sum('charges');
         $total_payable = PendingPaymentShipment::sum('payable');
-        return view('admin.finance.make_payments')->with(['banks'=>$banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'total_charges' => $total_charges, 'total_payable' => $total_payable]);
+        return view('admin.finance.make_payments')->with(['banks'=>$banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount,'company_banks'=>$company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable]);
     }
 
     public function make_payments_list(Request $request) {
@@ -3268,6 +3269,7 @@ class AdminFinanceController extends Controller
         $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
             return [$item['pending_payment_id'] => $item['id']];
         })->toArray();
+        $company_bank = $request->get('company_bank_id');
 
         $done_payment_ids = array();
 //        $present_consolidation_shipments = array();
@@ -3309,6 +3311,8 @@ class AdminFinanceController extends Controller
                     $done_payment->returned_shipments = $pending_payment->returned_shipments;
                     $done_payment->adjusted_shipments = $pending_payment->adjusted_shipments;
                     $done_payment->user_bank_info_id = $user_bank_id;
+                    $done_payment->company_bank_id = $company_bank;
+
 
                     $settings = GlobalSettings::where('type', 'ibft_charges');
 
@@ -3336,6 +3340,7 @@ class AdminFinanceController extends Controller
                             $done_payment_shipment->charges = $pending_payment_shipment->charges;
                             $done_payment_shipment->gst = $pending_payment_shipment->gst;
                             $done_payment_shipment->payable = $pending_payment_shipment->payable;
+                            $done_payment->company_bank_id = $company_bank;
 
                             $done_payment_shipment->save();
 
@@ -3389,6 +3394,7 @@ class AdminFinanceController extends Controller
                     $done_payment->returned_shipments = 0;
                     $done_payment->adjusted_shipments = 0;
                     $done_payment->user_bank_info_id = $user_bank_id;
+                    $done_payment->company_bank_id = $company_bank;
                     $settings = GlobalSettings::where('type', 'ibft_charges');
 
                     if ($settings->exists()) {
@@ -3430,6 +3436,7 @@ class AdminFinanceController extends Controller
                             $done_payment_shipment->charges = $pending_payment_shipment->charges;
                             $done_payment_shipment->gst = $pending_payment_shipment->gst;
                             $done_payment_shipment->payable = $pending_payment_shipment->payable;
+                            $done_payment->company_bank_id = $company_bank;
 
                             $done_payment_shipment->save();
 
@@ -3480,6 +3487,8 @@ class AdminFinanceController extends Controller
                     $done_payment->returned_shipments = $returned_shipments;
                     $done_payment->adjusted_shipments = $adjusted_shipments;
                     $done_payment->user_bank_info_id = $user_bank_id;
+
+
                     $done_payment->save();
 
                     $pending_payment->total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
