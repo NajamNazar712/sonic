@@ -350,7 +350,7 @@ class VisionSoftAPIController extends Controller
                             'pin_kp' => 'A',
                             'pin_loginid' => 'aeiouyh',
                             'pin_password' => 'meaumaur',
-                            'pin_tr_date' => $today,
+                            'pin_tr_date' => $today->format('m/d/Y'),
                             'pin_account_id' => $shipper->account_id,
                             'pin_account_name' => $shipper->account_name,
                             'pin_amount' => $shipper->amount
