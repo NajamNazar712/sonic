@@ -75,7 +75,7 @@ class VisionSoftAPIController extends Controller
         if (count($shippers) > 0) {
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             foreach ($shippers as $shipper) {
-                $sale_person = SalePersonTag::where('status', 0)->first();
+                $sale_person = SalePersonTag::where('status', 0)->where('user_id', $shipper->id)->first();
                 try {
                     $response = $client->post('Customers', [
                         'form_params' => [
