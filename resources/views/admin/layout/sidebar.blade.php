@@ -883,6 +883,9 @@
                                     @if (session('role_id') == 1 || in_array(198, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo.mapping.index') }}">Mapping</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(198, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.short_received_hub_wise_cron.index') }}">Short Received Hub Wise Report Time</a></li>
+                                    @endif
                                 </ul>
 
                             </li>

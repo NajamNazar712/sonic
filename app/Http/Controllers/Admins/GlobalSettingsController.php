@@ -13,6 +13,7 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
@@ -2715,5 +2716,50 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Settings Updated!');
 
+    }
+
+    public function short_received_hub_wise_cron_index() {
+
+        $settings = GlobalSettings::where('type', 'short_received_hub_wise_cron')->first();
+
+        if ($settings) {
+            $default_time = $settings->setting_value;
+        }
+        else {
+            $default_time = 8;
+        }
+        $cities = City::where('status', 1)->select('id','name')->get();
+        $existing_cities = ShortReceiveReportTimeHubWise::get();
+
+        return view('admin.settings.short_received_report_hub_wise_time')->with(['default_time' => $default_time, 'cities' => $cities, 'existing_cities' => $existing_cities]);
+    }
+
+    public function short_received_hub_wise_cron_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'short_received_hub_wise_cron');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'short_received_hub_wise_cron';
+        }
+
+        $settings->setting_value = $request->default_time;
+
+        $settings->save();
+        ShortReceiveReportTimeHubWise::truncate();
+        if($request->has('cities')){
+            $new_cities = $request->cities;
+            foreach ($new_cities as $index => $city){
+                $n_city = new ShortReceiveReportTimeHubWise();
+                $n_city->hub_id = $city;
+                $n_city->time = $request->time[$index];
+                $n_city->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
 }

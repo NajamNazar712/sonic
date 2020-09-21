@@ -1992,6 +1992,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@over_payment_limit_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@over_payment_limit_store')->name('store');
         });
+
+        Route::prefix('short_received_hub_wise_cron')->name('short_received_hub_wise_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@short_received_hub_wise_cron_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@short_received_hub_wise_cron_store')->name('store');
+        });
     });
 
 

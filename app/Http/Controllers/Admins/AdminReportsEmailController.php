@@ -8,6 +8,9 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\BagShipment;
+use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
@@ -1297,4 +1300,67 @@ class AdminReportsEmailController extends Controller
         }
     }
 
+    static public function short_received_report_hub_wise($hub_ids){
+        $today = Carbon::today();
+        foreach ($hub_ids as $hub_id){
+            $hub = City::find($hub_id);
+            $serial = 1;
+            $short_received_array = array();
+            $short_received_array['header'] = ['S No.', 'Shipments', 'Bag No.', 'Master Cargo No.', 'Origin', 'Destination', 'Short Received Date'];
+            $short_received_array[] = ['S No.' => '', 'Shipments' => '', 'Bag No.' => '', 'Master Cargo No.' => '', 'Origin' => '', 'Destination' => '', 'Short Received Date' => ''];
+            $short_received_bags = Bag::where('origin_hub_id', $hub_id)->where('status_id', 7)->where('short_received', '>', 0)->whereDate('received_at', $today);
+            if($short_received_bags->exists()){
+                $short_received_bags = $short_received_bags->get();
+                foreach ($short_received_bags as $bag) {
+                    $bag_shipments = BagShipment::where('bag_id', $bag->id)->where('status', 0);
+                    if($bag_shipments->exists()){
+                        $bag_shipments = $bag_shipments->get();
+                        foreach ($bag_shipments as $bag_shipment){
+                            $master_cargo_bag = MasterCargoBag::where('bag_id', $bag->id)->latest()->first();
+                            $tracking_number = $bag_shipment->shipment->tracking_number;
+                            $seal_number = $bag->seal_number;
+                            $origin_hub = $bag->origin_hub->name;
+                            $destination_hub = $bag->destination_hub->name;
+                            $received_at = $bag->received_at;
+                            $short_received_array[] = ['S No.' => $serial, 'Shipments' => $tracking_number, 'Bag No.' => $seal_number, 'Master Cargo No.' => str_pad($master_cargo_bag->master_cargo_id, 6, '0', STR_PAD_LEFT), 'Origin' => $origin_hub, 'Destination' => $destination_hub, 'Short Received Date' => $received_at];
+                            $serial++;
+                        }
+                    }
+                }
+                if($serial > 1){
+
+                    $cell_st = [
+                        'font' => ['bold' => true],
+                        'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                        'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+                    ];
+                    $spreadsheet = new Spreadsheet();
+                    $sheet = $spreadsheet->getActiveSheet();
+                    $sheet->getDefaultColumnDimension()->setWidth(20);
+                    $sheet->getStyle("B2:B4000")->getNumberFormat()
+                        ->setFormatCode(
+                            \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
+                        );
+                    $sheet->fromArray($short_received_array, NULL, 'A2', true);
+                    $sheet->getStyle("A2:T2")->applyFromArray($cell_st);
+                    $title = 'Short Received Shipments ' . $hub->name;
+                    if(strlen($title) > 31){
+                        $title = substr($title, 0, 28);
+                        $title = $title . '...';
+                    }
+                    $sheet->setTitle($title);
+                    $writer = new Xlsx($spreadsheet);
+                    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                    header('Content-Disposition: attachment;filename="outstanding_shipment_report.xlsx"');
+                    header('Cache-Control: max-age=0');
+                    $date_file_name = Carbon::today()->format('Y_m_d');
+                    $file_name_without_path = "reports/short_received_shipment_report_" . strtolower($hub->name) . "_" . $date_file_name . ".xlsx";
+                    $file_name = public_path() . "/reports/short_received_shipment_report_" . strtolower($hub->name) . "_"  . $date_file_name . ".xlsx";
+                    $writer->save($file_name);
+
+//                    NotificationsController::send(76, $hub->id, url('/') . '/' . $file_name_without_path);
+                }
+            }
+        }
+    }
 }
