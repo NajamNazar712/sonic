@@ -946,7 +946,7 @@ class VisionSoftAPIController extends Controller
                             'pin_password' => 'meaumaur',
                             'pin_tr_date' => $today->format('m/d/Y'),
                             'pin_hub_id' => $city->hub_id,
-                            'pin_hub_name' => $city->amount
+                            'pin_amount' => $city->amount
                         ]
                     ]);
                     $status_code = $response->getStatusCode();
