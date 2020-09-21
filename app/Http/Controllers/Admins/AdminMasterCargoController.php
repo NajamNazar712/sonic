@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
+use SnappyPDF;
 
 class AdminMasterCargoController extends Controller
 {
@@ -1148,7 +1149,7 @@ class AdminMasterCargoController extends Controller
             else {
                 $print = FALSE;
             }
-
+            $path = $this::master_cargo_print($master_cargo_id, 1);
             return redirect()->route('admin.master_cargo.create.index')->with(['success' => 'Master Cargo Created with Master Cargo Number: ' . str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT), 'print' => $print]);
         }
         else {
@@ -1408,9 +1409,13 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_in_transit_print(Request $request) {
+        $html = $this::master_cargo_print($request->id);
+        return $html;
+    }
+    public static function master_cargo_print($master_cargo_id, $type = NULL) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
-        $master_cargo = MasterCargo::find($request->id);
+        $master_cargo = MasterCargo::find($master_cargo_id);
 
         $sender = $master_cargo->sender;
         $receiver = ($master_cargo->received_by) ? $master_cargo->receiver : NULL;
@@ -1469,8 +1474,47 @@ class AdminMasterCargoController extends Controller
                       .cargo_checklist {
                         page-break-before: always;
                       }
+                    </style>';
+
+        if ($type == 'pdf') {
+            $html .= '
+                    <style>
+                      body {
+                        font-size: 0.75rem !important;
+                        font-weight: bold !important;
+                      }
+
+                      td.replacement span {
+                        width: auto !important;
+                      }
+
+                      .border.twice {
+                        border-width: 1px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 1px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 1px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 1px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 1px !important;
+                      }
+
+                      .font-small {
+                        font-size: 0.65rem !important;
+                      }
                     </style>
-                  </head>
+                ';
+        }
+        $html .= '</head>
                   <body>
                     <div>
                       <div class="cargo_slip">
@@ -1629,8 +1673,13 @@ class AdminMasterCargoController extends Controller
                   </body>
                 </html>
       ';
-
-        return $html;
+        if($type == 1){
+            $pdf = SnappyPDF::loadHTML($html);
+            Storage::put('public/reports/master_cargo_'. str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT) .'.pdf',$pdf) ;
+        }
+        else{
+            return $html;
+        }
     }
 
     public function master_cargo_in_transit_junctions(Request $request) {

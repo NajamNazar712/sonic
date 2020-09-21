@@ -1342,7 +1342,7 @@ class AdminReportsEmailController extends Controller
                             \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
                         );
                     $sheet->fromArray($short_received_array, NULL, 'A2', true);
-                    $sheet->getStyle("A2:T2")->applyFromArray($cell_st);
+                    $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
                     $title = 'Short Received Shipments ' . $hub->name;
                     if(strlen($title) > 31){
                         $title = substr($title, 0, 28);
@@ -1358,7 +1358,7 @@ class AdminReportsEmailController extends Controller
                     $file_name = public_path() . "/reports/short_received_shipment_report_" . strtolower($hub->name) . "_"  . $date_file_name . ".xlsx";
                     $writer->save($file_name);
 
-//                    NotificationsController::send(76, $hub->id, url('/') . '/' . $file_name_without_path);
+                    NotificationsController::send(86, $hub->id, url('/') . '/' . $file_name_without_path);
                 }
             }
         }
