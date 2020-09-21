@@ -981,7 +981,7 @@ class VisionSoftAPIController extends Controller
                     'pin_c' => 6,
                     'pin_k' => 'A',
                     'pin_loginid' => 'aeiouyh',
-                    'pin_password' => 'SOFT'
+                    'pin_password' => 'meaumaur'
                 ]
             ]);
             $status_code = $response->getStatusCode();
