@@ -545,6 +545,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/status', 'Admins\AdminDashboardController@riderStatus')->name('status');
             Route::get('/phone_unique', 'Admins\AdminDashboardController@rider_phone_unique')->name('phone_unique');
         });
+        Route::prefix('riders')->name('riders.')->group(function (){
+            Route::get('/add', 'Admins\RiderManagementController@addRiderView')->name('add');
+            Route::get('categoryAjax', 'Admins\RiderManagementController@categoryListAjax')->name('category.ajax');
+            Route::post('/add', 'Admins\RiderManagementController@addRiderDetails')->name('add');
+            Route::get('{id}/edit', 'Admins\RiderManagementController@editRiderView')->name('edit');
+            Route::put('{id}/edit', 'Admins\RiderManagementController@editRiderDetails')->name('edit');
+            Route::put('/status', 'Admins\RiderManagementController@riderStatus')->name('status');
+            Route::get('/phone_unique', 'Admins\RiderManagementController@rider_phone_unique')->name('phone_unique');
+            Route::post('incentive', 'Admins\RiderManagementController@rider_incentive')->name('incentive');
+
+            Route::prefix('permanent')->name('permanent.')->group(function (){
+                Route::get('','Admins\RiderManagementController@permanent_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@permanent_list')->name('list');
+            });
+
+            Route::prefix('incentive')->name('incentive.')->group(function (){
+                Route::get('','Admins\RiderManagementController@permanent_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@permanent_list')->name('list');
+            });
+        });
 
         Route::prefix('zonal')->name('zonal.')->group(function () {
             Route::get('', 'Admins\AdminZonalManagementController@index')->name('index');

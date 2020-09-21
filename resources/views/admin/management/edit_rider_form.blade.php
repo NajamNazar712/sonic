@@ -11,7 +11,7 @@
     }
 </style>
 {{--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMo9kqvMhqVAe_GCXZXOfzfAZ_oeBapkQ&callback=initMap" type="text/javascript"></script>--}}
-<form action="{{route('admin.management.rider.edit',['id'=>$rider_id])}}" method="post" class="mt-2" id="editRiderForm" novalidate="novalidate">
+<form action="{{route('admin.management.riders.edit',['id'=>$rider_id])}}" method="post" class="mt-2" id="editRiderForm" novalidate="novalidate">
     @csrf
     @method('PUT')
     <div class="row justify-content-center">

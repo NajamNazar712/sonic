@@ -913,7 +913,22 @@
                                                 @endif
 
                                                 @if (session('role_id') == 1 || in_array(96, session('permissions')))
-                                                    <li><a class="menu-item" href="{{route('admin.management.rider.index')}}">Rider</a></li>
+                                                    <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Riders</span></a>
+                                                        <ul class="menu-content">
+                                                            @if (session('role_id') == 1 || in_array(377, session('permissions')))
+                                                                <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">Permanent</a></li>
+                                                            @endif
+                                                            @if (session('role_id') == 1 || in_array(378, session('permissions')))
+                                                                <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">Incentive</a></li>
+                                                            @endif
+                                                            @if (session('role_id') == 1 || in_array(379, session('permissions')))
+                                                                <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">Blacklisted</a></li>
+                                                            @endif
+                                                            @if (session('role_id') == 1 || in_array(380, session('permissions')))
+                                                                <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">SMS History</a></li>
+                                                            @endif
+                                                        </ul>
+                                                    </li>
                                                 @endif
 
                                                 @if (session('role_id') == 1 || in_array(205, session('permissions')))

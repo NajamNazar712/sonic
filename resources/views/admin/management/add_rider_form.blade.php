@@ -4,7 +4,7 @@
     }
 </style>
 
-<form action="{{route('admin.management.rider.add')}}" method="post" class="mt-1" id="addRiderForm" novalidate="novalidate">
+<form action="{{route('admin.management.riders.add')}}" method="post" class="mt-1" id="addRiderForm" novalidate="novalidate">
     {{csrf_field()}}
     <div class="row justify-content-center">
         <div class="col-3">
