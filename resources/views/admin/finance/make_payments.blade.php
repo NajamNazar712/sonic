@@ -254,17 +254,15 @@
 														<input type="text" name="total_gst" class="form-control text-center total_gst" placeholder="Total GST" readonly="readonly">
 													</div>
 												</div>
-												<div class="col-2">
+												<div class="col-2 mt-2">
 													<div class="form-group">
-														<label class="mx-auto">Company Bank</label>
 														<fieldset class="form-group">
-															<select name="company_bank_id" id="company_bank" class="form-control select2">
+															<select name="company_bank_id" id="company_bank" class="form-control select2 company_bank" data-rule-required="true" data-msg-required="Bank is required" >
 																@foreach($company_banks as $bank)
 																	<option value="{{$bank->id}}">{{$bank->name}}</option>
 																@endforeach
 															</select>
 														</fieldset>
-
 													</div>
 												</div>
 
@@ -317,6 +315,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
@@ -378,6 +377,13 @@
             }).bind('change', function() {
 				table.draw();
 			});
+			$('#make_payments_form #company_bank').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Company Bank',
+                width:'100%',
+				dropdownParent:$('#make_payments_form')
+            });
+
+
 			// $('#payment_cycle_filter_form select.payment_cycle_filter').val(1).trigger('change');
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -477,6 +483,7 @@
 							$('#make_payments #make_payments_form .total_deductable').val(0);
 							$('#make_payments #make_payments_form .total_payable').val(0);
 							$('#make_payments #make_payments_form .total_hold').val(0);
+
 
 							$('#make_payments #make_payments_form button.make').prop('disabled', true);
 							$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
@@ -933,6 +940,85 @@
 					}
 				});
 			});
+			$('#make_payments_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form){
+					var zero_charges = false;
+					make_payments_table.rows().nodes().each(function(index) {
+						var row = make_payments_table.row(index);
+						if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+
+							// var shipments = parseInt($(row.node()).find('td.shipment').text());
+							// var charges = parseInt($(row.node()).find('td.charges').text());
+							// if(charges == 0){
+							// 	console.log(shipments);
+							// }
+
+
+							var shipments = parseInt($(row.node()).find('td.shipment').text());
+							var account_type = parseInt($(row.node()).attr('account_type'));
+							if(account_type == 1){
+								var type_id = parseInt($(row.node()).attr('type_id'));
+								var row_id = $(row.node()).attr('id');
+								if (type_id != 2) {
+									var amount = parseInt($(row.node()).find('td.deductable').text());
+									if(amount == 0){
+										zero_charges = true;
+										shipments_array.push(shipments);
+									}
+								}
+							}
+
+						}
+					});
+					if(zero_charges){
+						var html = '';
+
+						html += 'Charges are zero for the following Shipments<br/>';
+						$.each(shipments_array, function(index, tracking_number) {
+							html += tracking_number + '<br/>';
+						});
+
+						html += '<br/>Select yes to pay!';
+
+						content = document.createElement('div');
+						content.innerHTML = html;
+
+						swal({
+							title: 'Are You Sure?',
+							content: content,
+							icon: 'warning',
+							buttons: {
+								cancel: {
+									text: 'No',
+									value: null,
+									visible: true,
+									closeModal: true,
+								},
+								confirm: {
+									text: 'Yes',
+									value: true,
+									visible: true,
+									closeModal: true
+								}
+							},
+							closeOnClickOutside: false,
+							closeOnEsc: false,
+							dangerMode: true
+						}).then(function(confirm) {
+							if (confirm) {
+								verify_make_payments(form);
+							}
+						});
+					}else{
+						verify_make_payments(form);
+					}
+				}
+			});
 
 			$('#datatable tbody').on('click', 'tr td.returned_shipments button', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
@@ -1159,83 +1245,6 @@
 			});
 
 			var shipments_array = [];
-			$('#make_payments #make_payments_form').bind('submit', function(e) {
-				e.preventDefault();
-
-				var form = this;
-				var zero_charges = false;
-				make_payments_table.rows().nodes().each(function(index) {
-					var row = make_payments_table.row(index);
-					if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
-												
-						// var shipments = parseInt($(row.node()).find('td.shipment').text());
-						// var charges = parseInt($(row.node()).find('td.charges').text());
-						// if(charges == 0){
-						// 	console.log(shipments);
-						// }
-						
-						
-						var shipments = parseInt($(row.node()).find('td.shipment').text());
-						var account_type = parseInt($(row.node()).attr('account_type'));
-						if(account_type == 1){
-							var type_id = parseInt($(row.node()).attr('type_id'));
-							var row_id = $(row.node()).attr('id');
-							if (type_id != 2) {
-								var amount = parseInt($(row.node()).find('td.deductable').text());
-								if(amount == 0){
-									zero_charges = true;
-									shipments_array.push(shipments);
-								}
-							}
-						}
-
-					}
-				});
-				if(zero_charges){
-					var html = '';
-
-					html += 'Charges are zero for the following Shipments<br/>';
-					$.each(shipments_array, function(index, tracking_number) {
-						html += tracking_number + '<br/>';
-					});
-
-					html += '<br/>Select yes to pay!';
-
-					content = document.createElement('div');
-					content.innerHTML = html;
-
-					swal({
-						title: 'Are You Sure?',
-						content: content,
-						icon: 'warning',
-						buttons: {
-							cancel: {
-								text: 'No',
-								value: null,
-								visible: true,
-								closeModal: true,
-							},
-							confirm: {
-								text: 'Yes',
-								value: true,
-								visible: true,
-								closeModal: true
-							}
-						},
-						closeOnClickOutside: false,
-						closeOnEsc: false,
-						dangerMode: true
-					}).then(function(confirm) {
-						if (confirm) {
-							verify_make_payments(form);
-						}
-					});
-				}else{
-					verify_make_payments(form);
-				}
-
-
-			});
 			function verify_make_payments(form){
 				$.ajax({
 					url: '{!! route('admin.finance.make_payments.verify') !!}',
