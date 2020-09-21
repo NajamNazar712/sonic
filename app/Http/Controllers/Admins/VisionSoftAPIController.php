@@ -353,7 +353,7 @@ class VisionSoftAPIController extends Controller
                             'pin_tr_date' => $today,
                             'pin_account_id' => $shipper->account_id,
                             'pin_account_name' => $shipper->account_name,
-                            'pin_hub_name' => $shipper->amount
+                            'pin_amount' => $shipper->amount
                         ]
                     ]);
                     $status_code = $response->getStatusCode();
