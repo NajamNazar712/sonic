@@ -650,7 +650,7 @@ class OrderManagementController extends Controller
             });
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->where('shipments.tracking_number',$tracking_numbers );
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
         if ($shipment_status_select = $request->get('shipment_status_select')) {
             $datatable->whereIn('ss.id', $shipment_status_select);

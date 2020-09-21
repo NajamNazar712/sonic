@@ -452,7 +452,7 @@
                 var scan = $('#scan_tracking');
                 var tracking = parseInt(scan.val());
                 var hub_id = $('#hub_id').val();
-                if (tracking !== '') {
+                if (tracking !== '' && Number.isNaN(tracking) == false) {
                     scan.attr('disabled', true);
                     //countRows();
 

@@ -13,7 +13,8 @@
                     <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                         <div class="col-4">
                             <div class="form-group">
-                                <input type="text" class="form-control" name="tracking_numbers" id="tracking_numbers" placeholder="Search Tracking Number" style="width: 100%">
+
+                                <input type="text" name="tracking_numbers" class="tracking_numbers ml-4" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required" id="tracking_numbers" style="width: 100%">
                             </div>
                         </div>
                         <div class="col-4">
@@ -77,7 +78,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Weights</th>
+                        <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Quantity</th>
                         <th class="border-primary border-darken-1">Pieces</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -170,7 +171,7 @@
                             head.push('Shipper');
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Weight');
+                            head.push('Actual Weight');
                             head.push('Quantity');
                             head.push('Pieces');
                             head.push('Service Type');
@@ -279,7 +280,7 @@
                 },
                 deferLoading: 0,
                 rowId: 'shipment_id',
-                order: [[1, 'asc']],
+                order: [[9, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
@@ -370,6 +371,35 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
+                }
+            });
+
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
                 }
             });
 

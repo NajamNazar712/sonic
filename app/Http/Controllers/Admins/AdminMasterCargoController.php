@@ -1115,6 +1115,7 @@ class AdminMasterCargoController extends Controller
 
             $master_cargo->bags = $bags;
             $master_cargo->shipments = $shipments;
+            $master_cargo->quantity = $quantity;
             $master_cargo->bags_weight = $bags_weight;
 
             $master_cargo->actual_weight = $request->input('actual_weight');
@@ -1749,10 +1750,13 @@ class AdminMasterCargoController extends Controller
             $cargo_consignment_junction_receival->save();
 
             $cargo_consignment = MasterCargo::find($cargo_consignment_id);
+
             $master_bags = $cargo_consignment->master_bags;
 
             if ($cargo_consignment->junction_hub_1_id == $request->junction) {
                 foreach ($master_bags as $master_bag){
+                    $master_bag->status = 1;
+                    $master_bag->save();
                     $bag = $master_bag->bag;
                     $bag->status_id = 5;
                     $bag->save();
@@ -1760,6 +1764,8 @@ class AdminMasterCargoController extends Controller
             }
             else if ($cargo_consignment->junction_hub_2_id == $request->junction) {
                 foreach ($master_bags as $master_bag){
+                    $master_bag->status = 1;
+                    $master_bag->save();
                     $bag = $master_bag->bag;
                     $bag->status_id = 6;
                     $bag->save();
@@ -1767,6 +1773,8 @@ class AdminMasterCargoController extends Controller
             }
             else {
                 foreach ($master_bags as $master_bag){
+                    $master_bag->status = 1;
+                    $master_bag->save();
                     $bag = $master_bag->bag;
                     $bag->status_id = 3;
                     $bag->save();
@@ -1774,6 +1782,8 @@ class AdminMasterCargoController extends Controller
             }
 
             $cargo_consignment->status_id = 2;
+            $cargo_consignment->received_at = Carbon::now();
+            $cargo_consignment->received_by = Auth::id();
             $cargo_consignment->save();
         }
 

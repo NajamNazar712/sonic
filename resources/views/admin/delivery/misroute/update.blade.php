@@ -162,11 +162,18 @@
                                         $('#misroute_shipment_form button.add').prop('disabled', false);
 
                                         $('#update_misroute_form_submit').prop('disabled', false);
-
-                                        var city_select = $('.consignee_city_select_'+data.details.id).select2({
-                                            data: cities_array,
-                                            placeholder:'Select Destination*',
-                                        });
+                                        if(data.details.shipping_mode_id == 2){
+                                            var city_select = $('.consignee_city_select_'+data.details.id).select2({
+                                                data: data.overland_cities,
+                                                placeholder:'Select Destination*',
+                                            });
+                                        }
+                                        else{
+                                            var city_select = $('.consignee_city_select_'+data.details.id).select2({
+                                                data: cities_array,
+                                                placeholder:'Select Destination*',
+                                            });
+                                        }
 
                                         var route = data.details.consignee_city_id;
                                         city_select.val(route).trigger('change');

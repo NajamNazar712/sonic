@@ -92,33 +92,8 @@
 											</div>
 
 										</div>
-										<div class="modal fade" id="multi_piece" role="dialog" aria-labelledby="multi_piece" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-											<div class="modal-dialog modal-lg justify-content-center" >
-												<div class="modal-content">
-													<div class="modal-header">
-														<h4 class="modal-title" id="add_in_receiving_sheet_title">Multi Piece Tutorial</h4>
-														@if($user->multipiece_status == 1)
-															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																<span aria-hidden="true">&times;</span>
-															</button>
-														@endif
-													</div>
-													<div class="modal-body justify-content-center" id="player">
-														<iframe id="existing-iframe-example"
-																width="100%" height="480"
-																src="https://www.youtube.com/embed/Uy0KAIx3xHQ?enablejsapi=1"
-																frameborder="0"
-														></iframe>
-													</div>
-													<div class="modal-footer justify-content-center" id="multi_piece_footer" >
-														<button id="close_btn" class="btn btn-primary">Close</button>
-													</div>
 
-												</div>
-											</div>
-										</div>
 
-										
 										@if($air_waybill != null)
 											<div id="info_display" class="form-group text-center p-1 border border-light rounded">
 												<label class="d-block">Show Information on Air Waybill</label>
@@ -134,7 +109,7 @@
 												<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
 											</div>
 										@endif
-									
+
 									</div>
 
 									<div id="consignee_header_div" class="col col_custom">
@@ -239,7 +214,7 @@
 												</div>
 
 												<div class="form-group">
-													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" data-toggle="tooltip" data-placement="top" title="" data-original-title="Please enter another flyer with the airway bill"></textarea>													
+													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" data-toggle="tooltip" data-placement="top" title="" data-original-title="Please enter another flyer with the airway bill"></textarea>
 												</div>
 
 												<div class="form-group input-group">
@@ -306,12 +281,12 @@
 												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
 											</div>
 
-{{--											<div class="form-group">--}}
-{{--												<div class="form-group text-center p-1 border border-light rounded">--}}
-{{--													<label class="d-block">Type of Package</label>--}}
-{{--													<input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">--}}
-{{--												</div>--}}
-{{--											</div>--}}
+											{{--											<div class="form-group">--}}
+											{{--												<div class="form-group text-center p-1 border border-light rounded">--}}
+											{{--													<label class="d-block">Type of Package</label>--}}
+											{{--													<input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">--}}
+											{{--												</div>--}}
+											{{--											</div>--}}
 										</div>
 
 										<div class="form-group">
@@ -333,7 +308,7 @@
 										<h6 class="form-text mb-1 text-justify text-muted text-italic">*Charges will be subjected to the Final Weight measured at the time of Shipment Arrival.</h6>
 
 										<div id="pieces_quantity" class="form-group input-group d-none">
-											<input  type="text" name="pieces_quantity" id="pieces" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
+											<input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
 										</div>
 
 										<div class="form-group">
@@ -352,25 +327,25 @@
 										</div>
 
 										<div id="charges_mode_div" class="form-group">
-                                            <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
-                                                @foreach($charges_modes as $charges_mode)
-                                                	@if ($charges_mode->id == 4)
-                                                        <option value="{{ $charges_mode->id }}" selected="selected">{{ $charges_mode->charges_mode }}</option>
-                                                    @else
-                                                        <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
-                                                    @endif
-                                                @endforeach
-                                            </select>
-                                        </div>
+											<select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
+												@foreach($charges_modes as $charges_mode)
+													@if ($charges_mode->id == 4)
+														<option value="{{ $charges_mode->id }}" selected="selected">{{ $charges_mode->charges_mode }}</option>
+													@else
+														<option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
+													@endif
+												@endforeach
+											</select>
+										</div>
 									</div>
 
 									<div id="payment_info" class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Payment Information</h4>
 										@if($user->logo_status)
-										<div id="cod_breakup" class="form-group text-center p-1 border border-light rounded">
-											<label class="d-block">COD Breakup</label>
-											<input type="checkbox" name="cod_breakup_checkbox" class="switch" id="cod_breakup_checkbox">
-										</div>
+											<div id="cod_breakup" class="form-group text-center p-1 border border-light rounded">
+												<label class="d-block">COD Breakup</label>
+												<input type="checkbox" name="cod_breakup_checkbox" class="switch" id="cod_breakup_checkbox">
+											</div>
 										@endif
 										<div class="form-group input-group">
 											<div class="input-group-prepend">
@@ -397,8 +372,8 @@
 								<div class="row mt-2">
 									<div class="col">
 										<div class="form-group text-center">
-											<button type="submit" name="book" class="btn btn-primary submission" id="book_btn" value="Book">Book</button>
-											<button type="submit" name="book_and_print" class="btn btn-primary ml-1 submission" id="book_print_btn" value="Book & Print">Book & Print</button>
+											<button type="submit" name="book" class="btn btn-primary submission" value="Book">Book</button>
+											<button type="submit" name="book_and_print" class="btn btn-primary ml-1 submission" value="Book & Print">Book & Print</button>
 										</div>
 									</div>
 								</div>
@@ -437,62 +412,62 @@
 					</div>
 				</div>
 			@if($user->logo_status)
-			<!--items modal-->
-				<div class="modal fade" id="cod_breakup_modal" role="dialog" aria-labelledby="cod_breakup_modal_title" aria-hidden="true">
-					<div class="modal-dialog modal-xl" role="document">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h4 class="modal-title" id="cod_breakup_modal_title">COD Breakup</h4>
-								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-								</button>
-							</div>
-							<form id="cod_breakup_form" class="form" style="width: 100%;">
-								{{ csrf_field() }}
-								<div class="modal-body">
-									<table class="table table-bordered datatable" id="cod_breakup_table" style="z-index: 3;min-width: 100%;">
-										<thead>
-										<tr role="row" class="bg-primary white">
-											<th class="border-primary border-darken-1">S. No.</th>
-											<th class="border-primary border-darken-1">Item Description</th>
-											<th class="border-primary border-darken-1">Amount</th>
-											<th class="border-primary border-darken-1"></th>
-										</tr>
-										</thead>
-									</table>
-									<div class="row">
-										<div class="col-3">
-											<div class="form-group">
+				<!--items modal-->
+					<div class="modal fade" id="cod_breakup_modal" role="dialog" aria-labelledby="cod_breakup_modal_title" aria-hidden="true">
+						<div class="modal-dialog modal-xl" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h4 class="modal-title" id="cod_breakup_modal_title">COD Breakup</h4>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<form id="cod_breakup_form" class="form" style="width: 100%;">
+									{{ csrf_field() }}
+									<div class="modal-body">
+										<table class="table table-bordered datatable" id="cod_breakup_table" style="z-index: 3;min-width: 100%;">
+											<thead>
+											<tr role="row" class="bg-primary white">
+												<th class="border-primary border-darken-1">S. No.</th>
+												<th class="border-primary border-darken-1">Item Description</th>
+												<th class="border-primary border-darken-1">Amount</th>
+												<th class="border-primary border-darken-1"></th>
+											</tr>
+											</thead>
+										</table>
+										<div class="row">
+											<div class="col-3">
+												<div class="form-group">
 
-												<div class="input-group">
-													<div class="input-group-prepend">
-														<span class="input-group-text">Shipping Charges</span>
+													<div class="input-group">
+														<div class="input-group-prepend">
+															<span class="input-group-text">Shipping Charges</span>
+														</div>
+														<input type="text" name="cod_breakup_shipping_charges" id="cod_breakup_shipping_charges" class="form-control amount" placeholder="Shipping Charges*" data-rule-required="true" data-msg-required="Shipping Charges is required" value="">
 													</div>
-													<input type="text" name="cod_breakup_shipping_charges" id="cod_breakup_shipping_charges" class="form-control amount" placeholder="Shipping Charges*" data-rule-required="true" data-msg-required="Shipping Charges is required" value="">
 												</div>
 											</div>
-										</div>
-										<div class="col-3">
-											<div class="form-group">
+											<div class="col-3">
+												<div class="form-group">
 
-												<div class="input-group">
-													<div class="input-group-prepend">
-														<span class="input-group-text">Total COD</span>
+													<div class="input-group">
+														<div class="input-group-prepend">
+															<span class="input-group-text">Total COD</span>
+														</div>
+														<input type="text" name="cod_breakup_total" id="cod_breakup_total" class="form-control amount" placeholder="Total COD*" data-rule-required="true" data-msg-required="Total COD is required" value="">
 													</div>
-													<input type="text" name="cod_breakup_total" id="cod_breakup_total" class="form-control amount" placeholder="Total COD*" data-rule-required="true" data-msg-required="Total COD is required" value="">
 												</div>
 											</div>
 										</div>
 									</div>
-								</div>
-								<div class="modal-footer">
-									<button type="submit" id="cod_breakup_submit_btn" disabled class="btn btn-primary mx-auto">Update</button>
-								</div>
-							</form>
+									<div class="modal-footer">
+										<button type="submit" id="cod_breakup_submit_btn" disabled class="btn btn-primary mx-auto">Update</button>
+									</div>
+								</form>
+							</div>
 						</div>
 					</div>
-				</div>
-			<!--items modal-->
-			@endif
+					<!--items modal-->
+				@endif
 			</div>
 		</div>
 	</div>
@@ -572,32 +547,27 @@
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
-	{{--<script src="http://www.youtube.com/player_api"></script>--}}
 	<script src="{{asset('app-assets/js/scripts/tooltip/tooltip.js')}}" type="text/javascript"></script>
 
-
 	<script>
-		$(document).ready(function() {
-			$('#multi_piece').on('hide.bs.modal', function (e) {
-				$('#existing-iframe-example').attr('src',"");
-			});
 
-			$('#close_btn').addClass('d-none');
-			var no_of_pieces;
+		$(document).ready(function() {
+
+
 			$(this).find('.pieces').TouchSpin({
-						min: 1,
-						max: 10,
-						buttondown_class: 'btn btn-primary rounded-left',
-						buttonup_class: 'btn btn-primary rounded-right',
-						buttondown_txt: '<i class="ft-minus"></i>',
-						buttonup_txt: '<i class="ft-plus"></i>'
-					}).bind('input change', function() {
-						$(this).tooltip('show');
-						no_of_pieces = $(this).val();
-						if ($(this).hasClass('danger')) {
-							$(this).valid();
-						}
-					});
+				min: 1,
+				max: 10,
+				buttondown_class: 'btn btn-primary rounded-left',
+				buttonup_class: 'btn btn-primary rounded-right',
+				buttondown_txt: '<i class="ft-minus"></i>',
+				buttonup_txt: '<i class="ft-plus"></i>'
+			}).bind('input change', function() {
+				$(this).tooltip('show');
+
+				if ($(this).hasClass('danger')) {
+					$(this).valid();
+				}
+			});
 
 
 			@if (session('print'))
@@ -693,13 +663,13 @@
 			}
 
 			$('#charges_mode').select2({
-                width: '100%',
-                placeholder: 'Charges Mode*'
-            }).bind('change', function() {
-                if ($(this).hasClass('danger')) {
-                    $(this).valid();
-                }
-            });
+				width: '100%',
+				placeholder: 'Charges Mode*'
+			}).bind('change', function() {
+				if ($(this).hasClass('danger')) {
+					$(this).valid();
+				}
+			});
 
 			function shipping_modes() {
 				if ($('#pickup_address').val() == 0) {
@@ -809,7 +779,7 @@
 			@if (!Session::has('service_type_id'))
 			$('#select_service_type').modal('show');
 			@else
-			service_type = '{{ Session::get('service_type_id') }}';
+					service_type = '{{ Session::get('service_type_id') }}';
 
 			if(service_type == 1){
 				$('#pieces_quantity').removeClass('d-none');
@@ -817,7 +787,7 @@
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
 				$('#try_and_buy_charges_div').addClass('d-none');
-			
+
 			}
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
@@ -990,48 +960,48 @@
 				shipping_mode_same_day(pickup_city, consignee_city);
 			});
 
-            $("#consignee_info").select2({
+			$("#consignee_info").select2({
 				width:'100%',
-                placeholder: "Search Here...",
-                minimumInputLength: 5,
-                ajax: {
-                    url: '{{ route('cod.shipment.book.get_consignee_infos') }}',
-                    dataType: 'json',
-                    type: "GET",
-                    quietMillis: 50,
-                    data: function (params) {
-                        return {
-                            q: params.term,
-                            page: params.page,
+				placeholder: "Search Here...",
+				minimumInputLength: 5,
+				ajax: {
+					url: '{{ route('cod.shipment.book.get_consignee_infos') }}',
+					dataType: 'json',
+					type: "GET",
+					quietMillis: 50,
+					data: function (params) {
+						return {
+							q: params.term,
+							page: params.page,
 							'shipper': '{{session('user_id')}}'
-                        };
-                    },
-                    processResults: function (data, params) {
-                        params.page = params.page || 1;
+						};
+					},
+					processResults: function (data, params) {
+						params.page = params.page || 1;
 
-                        return {
-                            results: data.data,
-                            pagination: {
-                                more: (params.page * 30) < data.total_count
-                            }
-                        };
-                    },
-                    cache: true
-                },
-                escapeMarkup: function (markup) { return markup; },
-                templateResult: formatRepo,
-                templateSelection: formatRepoSelection
+						return {
+							results: data.data,
+							pagination: {
+								more: (params.page * 30) < data.total_count
+							}
+						};
+					},
+					cache: true
+				},
+				escapeMarkup: function (markup) { return markup; },
+				templateResult: formatRepo,
+				templateSelection: formatRepoSelection
 
-            });
-            function formatRepo (repo) {
-                if (repo.loading) return repo.text;
-                var markup = "<option value='" + repo.id + "'>"+ repo.full_name +"</option>";
+			});
+			function formatRepo (repo) {
+				if (repo.loading) return repo.text;
+				var markup = "<option value='" + repo.id + "'>"+ repo.full_name +"</option>";
 
-                return markup;
-            }
-            function formatRepoSelection (repo) {
-                return repo.full_name || repo.text;
-            }
+				return markup;
+			}
+			function formatRepoSelection (repo) {
+				return repo.full_name || repo.text;
+			}
 
 			var blacklist = false;
 			var blacklist_message = '';
@@ -1057,26 +1027,26 @@
 				}
 			}
 
-            $('#consignee_info').on('select2:select', function () {
-                var id = parseInt($(this).val());
-                if(id){
-                    $.ajax({
-                        url:'{!! route('cod.shipment.book.get_consignee_info') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': id,
-                        }
-                    }).done(function (data) {
-                        if(data.status){
-                            $('#consignee_city').val(data.details.city_id).trigger('change');
-                            $('input[name="consignee_name"]').val(data.details.name);
-                            $('#consignee_address').val(data.details.address);
-                            $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
-                            $('input[name="consignee_phone_number_2"]').val(data.details.phone_number_2);
-                            $('input[name="consignee_email_address"]').val(data.details.email);
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+			$('#consignee_info').on('select2:select', function () {
+				var id = parseInt($(this).val());
+				if(id){
+					$.ajax({
+						url:'{!! route('cod.shipment.book.get_consignee_info') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'id': id,
+						}
+					}).done(function (data) {
+						if(data.status){
+							$('#consignee_city').val(data.details.city_id).trigger('change');
+							$('input[name="consignee_name"]').val(data.details.name);
+							$('#consignee_address').val(data.details.address);
+							$('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
+							$('input[name="consignee_phone_number_2"]').val(data.details.phone_number_2);
+							$('input[name="consignee_email_address"]').val(data.details.email);
+						}else{
+							toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 						}
 					});
 				}
@@ -1140,7 +1110,7 @@
 
 			var current_date = '{{$date}}';
 
-            $('#replacement_product_type').select2({
+			$('#replacement_product_type').select2({
 				width: '100%',
 				placeholder: 'Product Type*'
 			}).bind('change', function() {
@@ -1364,13 +1334,11 @@
 				}
 				return true;
 			}
+
 			var breakup_rows = {};
 
-			var check = 0;
-			var piece_check = false;
-			$('#multi_piece').on('hide.bs.modal', function (e) {
-				$('#player').attr('src',"");
-			});
+			var check = @json($check);
+
 			$('#booking_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
@@ -1381,271 +1349,132 @@
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
+					check_consignee_return_ratio();
+					var pressed_button = $(this.submitButton);
 
-					var quantity = $('#pieces').val();
-					var piece_status = @json($multi_piece);
-					if( (piece_status == 0 || (piece_status == 1 && quantity > 1)) && check == 0){
-						if(piece_check == false){
-							piece_check = true;
-							swal({
-								title: 'Piece(s) Notice!',
-								text: 'You are going to book multiple pieces shipment, please make sure to pack it in '+no_of_pieces+' number of boxes or flyers',
-								icon: 'info',
-								buttons: {
-									confirm: {
-										text: 'Yes',
-										value: true,
-										visible: true,
-										closeModal: true
-									}
-								},
+					$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
 
-								closeOnClickOutside: false,
-								closeOnEsc: false,
-								dangerMode: true
-							}).then(function(confirm){
-								if(confirm)
-								{
-									if( check === 0){
-
-										check = 1;
-										$('#multi_piece').modal('show');
-										$('#book_btn').removeAttr("disabled");
-										$('#book_print').removeAttr("disabled");
-									}
-									else if(check === 1)
-									{
-
-										check = 2;
-										$('#close_btn').click(function(){
-											$('#multi_piece').modal('hide');
-										});
-										$('#book_btn').removeAttr("disabled");
-										$('#book_print').removeAttr("disabled");
-									}
-									else{
-
-										check_consignee_return_ratio();
-										var pressed_button = $(this.submitButton);
-
-										$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
-										console.log(4);
-										$(form).find('button[type=submit]').attr('disabled', 'disabled');
-										var consignee_address = $('#consignee_address').val();
-										var strArray = consignee_address.split(/[ ,]+/);
-										var present = [];
-										for(k=0;k<strArray.length;k++) {
-											for (i = 0; i < check.length; i++) {
-												if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
-													present.push(strArray[k]);
-												}
-											}
-										}
-										if(!isEmpty(breakup_rows)){
-											$(form).append('<input type="hidden" name="cod_breakup" value="TRUE">');
-											var cod_breakup_shipping_charges = $('#cod_breakup_shipping_charges').val();
-											var cod_breakup_total_cod = $('#cod_breakup_total').val();
-											$(form).append('<input type="hidden" name="cod_breakup_shipping_charges" value="' +cod_breakup_shipping_charges + '">');
-											$(form).append('<input type="hidden" name="cod_breakup_total_cod" value="' + cod_breakup_total_cod + '">');
-
-											$.each(breakup_rows, function (index, value) {
-												$(form).append('<input type="hidden" name="cod_breakup_description[]" value="' + value.description + '">');
-												$(form).append('<input type="hidden" name="cod_breakup_amount[]" value="' + value.amount + '">');
-											});
-										}
-
-										if(present.length > 0){
-											var url = '{{asset('img/nsa_osa.png')}}';
-											var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
-											html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
-											html += '<div class="text-left">In case of,<br/>';
-											html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
-											html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
-											html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
-											content = document.createElement('div');
-											content.innerHTML = html;
-											swal({
-
-												content: content,
-												buttons: {
-													cancel: {
-														text: 'Cancel',
-														value: null,
-														visible: true,
-														closeModal: true,
-													},
-													confirm: {
-														text: 'Continue to Booking',
-														value: true,
-														visible: true,
-														closeModal: true
-													}
-												},
-												closeOnClickOutside: false,
-												closeOnEsc: false,
-												// dangerMode: true
-											}).then(function(confirm) {
-												if(confirm) {
-													if(blacklist == true){
-														var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
-														content = document.createElement('div');
-														content.innerHTML = html;
-														swal({
-															content: content,
-															buttons: {
-																cancel: {
-																	text: 'Cancel',
-																	value: null,
-																	visible: true,
-																	closeModal: true,
-																},
-																confirm: {
-																	text: 'Book Anyway',
-																	value: true,
-																	visible: true,
-																	closeModal: true
-																}
-															},
-															closeOnClickOutside: false,
-															closeOnEsc: false,
-															// dangerMode: true
-														}).then(function(confirm) {
-															if (confirm) {
-																swal({
-																	title: 'Please Wait!',
-																	text: 'Your shipment is being booked!',
-																	icon: 'info',
-																	buttons: false,
-																	closeOnClickOutside: false,
-																	closeOnEsc: false
-																});
-																form.submit();
-															}
-															else{
-																$(form).find('button[type=submit]').prop('disabled', false);
-															}
-														});
-													}else{
-														swal({
-															title: 'Please Wait!',
-															text: 'Your shipment is being booked!',
-															icon: 'info',
-															buttons: false,
-															closeOnClickOutside: false,
-															closeOnEsc: false
-														});
-														form.submit();
-													}
-												}
-												else{
-													$(form).find('button[type=submit]').prop('disabled', false);
-												}
-											});
-										}
-										else {
-											if(blacklist == true) {
-												var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
-												content = document.createElement('div');
-												content.innerHTML = html;
-												swal({
-													content: content,
-													buttons: {
-														cancel: {
-															text: 'Cancel',
-															value: null,
-															visible: true,
-															closeModal: true,
-														},
-														confirm: {
-															text: 'Book Anyway',
-															value: true,
-															visible: true,
-															closeModal: true
-														}
-													},
-													closeOnClickOutside: false,
-													closeOnEsc: false,
-													// dangerMode: true
-												}).then(function (confirm) {
-													if (confirm) {
-														swal({
-															title: 'Please Wait!',
-															text: 'Your shipment is being booked!',
-															icon: 'info',
-															buttons: false,
-															closeOnClickOutside: false,
-															closeOnEsc: false
-														});
-
-														form.submit();
-													}
-													else{
-														$(form).find('button[type=submit]').prop('disabled', false);
-													}
-												});
-											}
-											else{
-												swal({
-													title: 'Please Wait!',
-													text: 'Your shipment is being booked!',
-													icon: 'info',
-													buttons: false,
-													closeOnClickOutside: false,
-													closeOnEsc: false
-												});
-											}
-											form.submit();
-										}
-									}
-								}
-							})
-						}
-
-
-
-					}
-					else{
-						check_consignee_return_ratio();
-						var pressed_button = $(this.submitButton);
-
-						$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
-						console.log(1);
-						$(form).find('button[type=submit]').attr('disabled', 'disabled');
-						var consignee_address = $('#consignee_address').val();
-						var strArray = consignee_address.split(/[ ,]+/);
-						var present = [];
-						for(k=0;k<strArray.length;k++) {
-							for (i = 0; i < check.length; i++) {
-								if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
-									present.push(strArray[k]);
-								}
+					$(form).find('button[type=submit]').attr('disabled', 'disabled');
+					var consignee_address = $('#consignee_address').val();
+					var strArray = consignee_address.split(/[ ,]+/);
+					var present = [];
+					for(k=0;k<strArray.length;k++) {
+						for (i = 0; i < check.length; i++) {
+							if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
+								present.push(strArray[k]);
 							}
 						}
-						if(!isEmpty(breakup_rows)){
-							$(form).append('<input type="hidden" name="cod_breakup" value="TRUE">');
-							var cod_breakup_shipping_charges = $('#cod_breakup_shipping_charges').val();
-							var cod_breakup_total_cod = $('#cod_breakup_total').val();
-							$(form).append('<input type="hidden" name="cod_breakup_shipping_charges" value="' +cod_breakup_shipping_charges + '">');
-							$(form).append('<input type="hidden" name="cod_breakup_total_cod" value="' + cod_breakup_total_cod + '">');
+					}
+					if(!isEmpty(breakup_rows)){
+						$(form).append('<input type="hidden" name="cod_breakup" value="TRUE">');
+						var cod_breakup_shipping_charges = $('#cod_breakup_shipping_charges').val();
+						var cod_breakup_total_cod = $('#cod_breakup_total').val();
+						$(form).append('<input type="hidden" name="cod_breakup_shipping_charges" value="' +cod_breakup_shipping_charges + '">');
+						$(form).append('<input type="hidden" name="cod_breakup_total_cod" value="' + cod_breakup_total_cod + '">');
 
-							$.each(breakup_rows, function (index, value) {
-								$(form).append('<input type="hidden" name="cod_breakup_description[]" value="' + value.description + '">');
-								$(form).append('<input type="hidden" name="cod_breakup_amount[]" value="' + value.amount + '">');
-							});
-						}
+						$.each(breakup_rows, function (index, value) {
+							$(form).append('<input type="hidden" name="cod_breakup_description[]" value="' + value.description + '">');
+							$(form).append('<input type="hidden" name="cod_breakup_amount[]" value="' + value.amount + '">');
+						});
+					}
 
-						if(present.length > 0){
-							var url = '{{asset('img/nsa_osa.png')}}';
-							var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
-							html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
-							html += '<div class="text-left">In case of,<br/>';
-							html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
-							html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
-							html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+					if(present.length > 0){
+						var url = '{{asset('img/nsa_osa.png')}}';
+						var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
+						html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
+						html += '<div class="text-left">In case of,<br/>';
+						html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+						html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+						html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+						content = document.createElement('div');
+						content.innerHTML = html;
+						swal({
+							content: content,
+							buttons: {
+								cancel: {
+									text: 'Cancel',
+									value: null,
+									visible: true,
+									closeModal: true,
+								},
+								confirm: {
+									text: 'Continue to Booking',
+									value: true,
+									visible: true,
+									closeModal: true
+								}
+							},
+							closeOnClickOutside: false,
+							closeOnEsc: false,
+							// dangerMode: true
+						}).then(function(confirm) {
+							if(confirm) {
+
+								if(blacklist == true){
+									var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+									content = document.createElement('div');
+									content.innerHTML = html;
+									swal({
+										content: content,
+										buttons: {
+											cancel: {
+												text: 'Cancel',
+												value: null,
+												visible: true,
+												closeModal: true,
+											},
+											confirm: {
+												text: 'Book Anyway',
+												value: true,
+												visible: true,
+												closeModal: true
+											}
+										},
+										closeOnClickOutside: false,
+										closeOnEsc: false,
+										// dangerMode: true
+									}).then(function(confirm) {
+										if (confirm) {
+											swal({
+												title: 'Please Wait!',
+												text: 'Your shipment is being booked!',
+												icon: 'info',
+												buttons: false,
+												closeOnClickOutside: false,
+												closeOnEsc: false
+											});
+
+											form.submit();
+										}
+										else{
+											$(form).find('button[type=submit]').prop('disabled', false);
+										}
+									});
+								}else{
+									swal({
+										title: 'Please Wait!',
+										text: 'Your shipment is being booked!',
+										icon: 'info',
+										buttons: false,
+										closeOnClickOutside: false,
+										closeOnEsc: false
+									});
+
+									form.submit();
+								}
+
+							}
+							else{
+								$(form).find('button[type=submit]').prop('disabled', false);
+							}
+						});
+					}
+					else {
+						if(blacklist == true) {
+							var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
 							content = document.createElement('div');
 							content.innerHTML = html;
 							swal({
-
 								content: content,
 								buttons: {
 									cancel: {
@@ -1655,7 +1484,7 @@
 										closeModal: true,
 									},
 									confirm: {
-										text: 'Continue to Booking',
+										text: 'Book Anyway',
 										value: true,
 										visible: true,
 										closeModal: true
@@ -1664,122 +1493,41 @@
 								closeOnClickOutside: false,
 								closeOnEsc: false,
 								// dangerMode: true
-							}).then(function(confirm) {
-								if(confirm) {
-									if(blacklist == true){
-										var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
-										content = document.createElement('div');
-										content.innerHTML = html;
-										swal({
-											content: content,
-											buttons: {
-												cancel: {
-													text: 'Cancel',
-													value: null,
-													visible: true,
-													closeModal: true,
-												},
-												confirm: {
-													text: 'Book Anyway',
-													value: true,
-													visible: true,
-													closeModal: true
-												}
-											},
-											closeOnClickOutside: false,
-											closeOnEsc: false,
-											// dangerMode: true
-										}).then(function(confirm) {
-											if (confirm) {
-													swal({
-														title: 'Please Wait!',
-														text: 'Your shipment is being booked!',
-														icon: 'info',
-														buttons: false,
-														closeOnClickOutside: false,
-														closeOnEsc: false
-													});
-												form.submit();
-											}
-											else{
-												$(form).find('button[type=submit]').prop('disabled', false);
-											}
-										});
-									}else{
-										swal({
-                                            title: 'Please Wait!',
-                                            text: 'Your shipment is being booked!',
-                                            icon: 'info',
-                                            buttons: false,
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false
-                                        });
-                                        form.submit();
-									}
+							}).then(function (confirm) {
+								if (confirm) {
+									swal({
+										title: 'Please Wait!',
+										text: 'Your shipment is being booked!',
+										icon: 'info',
+										buttons: false,
+										closeOnClickOutside: false,
+										closeOnEsc: false
+									});
+
+									form.submit();
 								}
 								else{
 									$(form).find('button[type=submit]').prop('disabled', false);
 								}
 							});
-						}
-						else {
-							if(blacklist == true) {
-								var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
-								content = document.createElement('div');
-								content.innerHTML = html;
-								swal({
-									content: content,
-									buttons: {
-										cancel: {
-											text: 'Cancel',
-											value: null,
-											visible: true,
-											closeModal: true,
-										},
-										confirm: {
-											text: 'Book Anyway',
-											value: true,
-											visible: true,
-											closeModal: true
-										}
-									},
-									closeOnClickOutside: false,
-									closeOnEsc: false,
-									// dangerMode: true
-								}).then(function (confirm) {
-									if (confirm) {
-										swal({
-											title: 'Please Wait!',
-											text: 'Your shipment is being booked!',
-											icon: 'info',
-											buttons: false,
-											closeOnClickOutside: false,
-											closeOnEsc: false
-										});
+						}else{
+							swal({
+								title: 'Please Wait!',
+								text: 'Your shipment is being booked!',
+								icon: 'info',
+								buttons: false,
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
 
-										form.submit();
-									}
-									else{
-										$(form).find('button[type=submit]').prop('disabled', false);
-									}
-								});
-							}
-							else{
-								swal({
-									title: 'Please Wait!',
-									text: 'Your shipment is being booked!',
-									icon: 'info',
-									buttons: false,
-									closeOnClickOutside: false,
-									closeOnEsc: false
-								});
-							}
 							form.submit();
 						}
-					}
-					}
 
+					}
+				}
 			});
+
+
 
 			$('.phone_number').inputmask({
 				'mask': '9999-9999999',
@@ -1835,43 +1583,43 @@
 				'allowMinus': false,
 				'allowPlus': false
 			});
-			@if($user->logo_status)
+					@if($user->logo_status)
 			var cb_table = $('#cod_breakup_table').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					title: 'Add Row',
-					className: 'btn btn-primary mb-1',
-					text: '<i class="la la-plus"></i> Add Row',
-					action: function (e) {
-						add_row();
-					}
-				}],
-				ordering: false,
-				paging: false,
-				columns: [
-					{
-						orderable: false,
-						searchable: false,
-						name: 'serial_number',
-						class: 'align-middle serial_number',
-						targets: 0,
-						render: function (data, type, row) {
-							return '';
-						}
-					},
-					{name: 'item_description', class: 'align-middle item_description form-group', width: '40%'},
-					{name: 'amount', class: 'align-middle amount form-group'},
-					{name: 'action', class: 'align-middle action'},
-				],
-				rowCallback: function (row, data, index) {
-					var info = cb_table.page.info();
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+						dom: '<"d-inline-block"l><"pull-right"B>tipr',
+						buttons: [{
+							title: 'Add Row',
+							className: 'btn btn-primary mb-1',
+							text: '<i class="la la-plus"></i> Add Row',
+							action: function (e) {
+								add_row();
+							}
+						}],
+						ordering: false,
+						paging: false,
+						columns: [
+							{
+								orderable: false,
+								searchable: false,
+								name: 'serial_number',
+								class: 'align-middle serial_number',
+								targets: 0,
+								render: function (data, type, row) {
+									return '';
+								}
+							},
+							{name: 'item_description', class: 'align-middle item_description form-group', width: '40%'},
+							{name: 'amount', class: 'align-middle amount form-group'},
+							{name: 'action', class: 'align-middle action'},
+						],
+						rowCallback: function (row, data, index) {
+							var info = cb_table.page.info();
+							$('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
-				},
-				initComplete: function () {
-					this.api().table().columns.adjust();
-				}
-			});
+						},
+						initComplete: function () {
+							this.api().table().columns.adjust();
+						}
+					});
 			$('#cod_breakup_checkbox').checkboxpicker();
 			$('#cod_breakup_checkbox').on('change', function() {
 				var check = $(this);
@@ -1930,9 +1678,9 @@
 						breakup_rows[id] = {description: description, amount: amount};
 					});
 					$('#cod_breakup_modal').modal('hide');
-                    var total_cod_breakup = $('#cod_breakup_total').val();
+					var total_cod_breakup = $('#cod_breakup_total').val();
 
-                    $('#amount').val(total_cod_breakup);
+					$('#amount').val(total_cod_breakup);
 
 				}
 			});
@@ -1942,42 +1690,5 @@
 			});
 			@endif
 		});
-	</script>
-	<script type="text/javascript">
-		var tag = document.createElement('script');
-		tag.id = 'iframe-demo';
-		tag.src = 'https://www.youtube.com/iframe_api';
-		var firstScriptTag = document.getElementsByTagName('script')[0];
-		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-		var player;
-		function onYouTubeIframeAPIReady() {
-			player = new YT.Player('existing-iframe-example', {
-				events: {
-					'onReady': onPlayerReady,
-					'onStateChange': onPlayerStateChange
-				}
-			});
-
-		}
-
-		// autoplay video
-		function onPlayerReady(event) {
-			event.target.playVideo();
-		}
-
-		// when video ends
-		var done = false;
-		function onPlayerStateChange(event) {
-			if (event.data == YT.PlayerState.PLAYING && !done) {
-				setTimeout(stopVideo, 59000);
-				done = true;
-			}
-		}
-		function stopVideo() {
-			player.stopVideo();
-			$('#close_btn').removeClass('d-none');
-		}
-
 	</script>
 @endsection

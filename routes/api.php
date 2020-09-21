@@ -88,6 +88,7 @@ Route::name('api.')->group(function () {
         Route::middleware('AdminAPIToken')->group(function () {
             Route::post('verify', 'AdminAPIController@verify')->name('verify');
             Route::post('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
+            Route::post('history_update_image', 'AdminAPIController@history_update_image')->name('history_update_image');
         });
 
     });

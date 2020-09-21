@@ -40,6 +40,7 @@ use App\Http\Models\Notification;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
+use App\http\Models\RestrictedCityIntercept;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
@@ -4767,97 +4768,109 @@ class DeliveryController extends Controller
         }
     }
     public function misrouted_update_index(){
+
         $cities = City::select(['id', 'name as text'])->get();
+
         return view('admin.delivery.misroute.update')->with('cities',$cities);
     }
     public function get_misroute_shipment_info(Request $request)
     {
+
         $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
         $passing_delivery_status_array = array(6, 7, 8, 9, 10, 11, 13, 15);
         $tracking_number = $request->tracking_number;
-        if ($tracking_number != '') {
-            $shipment = Shipment::where('tracking_number', $tracking_number)->whereIn('shipper_status_id', $passing_status_array);
-            if ($shipment->exists()) {
-                $data = array();
-                $shipment = $shipment->first();
-                if ($shipment->shipper_status_id != 3) {
-                    if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
-                        $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
-                        $delivery_note = DeliveryNote::find($delivery_note_shipments);
-                        if($delivery_note){
-                            if($delivery_note->status == 0){
-                                return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+            if ($tracking_number != '') {
+                $shipment = Shipment::where('tracking_number', $tracking_number)->whereIn('shipper_status_id', $passing_status_array);
+                if ($shipment->exists()) {
+                    $data = array();
+                    $shipment = $shipment->first();
+                    if ($shipment->shipper_status_id != 3) {
+                        if (in_array($shipment->shipper_status_id, $passing_delivery_status_array)) {
+                            $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id', $shipment->id)->max('delivery_note_id');
+                            $delivery_note = DeliveryNote::find($delivery_note_shipments);
+                            if ($delivery_note) {
+                                if ($delivery_note->status == 0) {
+                                    return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                                }
                             }
+
+                        }
+                        $consignee_cities = null;
+                        if($shipment->shipping_mode_id == 2){
+                            $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
+                            $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
+                                ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
+                                ->select(['c.id', 'c.name as text'])
+                                ->where('shipments.id', $shipment->id)
+                                ->where('c.status', 1)
+                                ->whereNotNull('c.zone_id')
+                                ->whereNotIn('c.id', $restricted_cities)->get();
                         }
 
+                        $data['id'] = $shipment->id;
+                        $data['tracking_number'] = $shipment->tracking_number;
+                        $data['shipping_mode_id'] = $shipment->shipping_mode_id;
+                        $data['consignee_city_id'] = $shipment->consignee_city->id;
+//                $data['consignee_city_name'] = $shipment->consignee_city->name;
+                        $data['consignee_name'] = $shipment->consignee_name;
+                        $data['consignee_address'] = $shipment->consignee_address;
+                        $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
+                        $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '') ? $shipment->consignee_phone_number_2 : '';
+                        $data['consignee_email'] = ($shipment->consignee_email != '') ? $shipment->consignee_email : '';
+                        $data['amount'] = number_format($shipment->amount);
+
+
+                        ShipmentScanningJourneyController::add($shipment->id, 10, 1, Auth::id(), null, null);
+
+                        return response()->json(['status' => 1, 'details' => $data, 'overland_cities' => $consignee_cities]);
+                    } else {
+                        return response()->json(['status' => 0, 'error' => 'This shipment is currently in transit, please receive its cargo first to update it as Misroute!']);
                     }
 
 
-                    $data['id'] = $shipment->id;
-                    $data['tracking_number'] = $shipment->tracking_number;
-                    $data['consignee_city_id'] = $shipment->consignee_city->id;
-//                $data['consignee_city_name'] = $shipment->consignee_city->name;
-                    $data['consignee_name'] = $shipment->consignee_name;
-                    $data['consignee_address'] = $shipment->consignee_address;
-                    $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
-                    $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '')? $shipment->consignee_phone_number_2:'';
-                    $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
-                    $data['amount'] = number_format($shipment->amount);
-
-
-                    ShipmentScanningJourneyController::add($shipment->id, 10, 1, Auth::id(), null,null);
-
-                    return response()->json(['status' => 1, 'details' => $data]);
-                }
-                else{
-                    return response()->json(['status' => 0, 'error' => 'This shipment is currently in transit, please receive its cargo first to update it as Misroute!']);
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'Shipment is not ready for misrouted!']);
                 }
 
-
-            } else {
-                return response()->json(['status' => 0, 'error' => 'Shipment is not ready for misrouted!']);
             }
-
-        }
     }
     public function misroute_shipment_update(Request $request)
     {
         $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
         $shipments = explode(',', $request->shipment_ids);
         if ($shipments) {
-            foreach ($shipments as $shipment_id){
+            foreach ($shipments as $shipment_id) {
                 $shipment = Shipment::where('id', $shipment_id)->whereIn('shipper_status_id', $passing_status_array);
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
 
-
-                    if($shipment->shipper_status_id == 3){
+                    if ($shipment->shipper_status_id == 3) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
                         if ($cargo_consignment_shipment->exists()) {
                             $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
 
                             $cargo = CargoConsignment::find($cargo_consignment_shipment);
-                            $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment->id)->delete();
-                            if(in_array($cargo->status_id, [1,2,6,7])){
+                            $cargo->cargo_consignment_shipments()->where('shipment_id', $shipment->id)->delete();
+                            if (in_array($cargo->status_id, [1, 2, 6, 7])) {
                                 $shipments_count = $cargo->shipments;
                                 $shipment_weight = $cargo->shipment_weight;
-                                $shipments_count = $shipments_count-1;
+                                $shipments_count = $shipments_count - 1;
                                 $cargo->shipments = $shipments_count;
                                 $cargo->shipments_weight = $shipment_weight - $shipment->actual_weight;
-                                if($shipments_count == 0){
+                                if ($shipments_count == 0) {
                                     $cargo->status_id = 5;
                                 }
                                 $cargo->save();
-                            }else if($cargo->status_id == 4){
+                            } else if ($cargo->status_id == 4) {
                                 $shipments_count = $cargo->shipments;
                                 $shipments_received_count = $cargo->received_shipments;
                                 $shipment_weight = $cargo->shipment_weight;
-                                $shipments_count = $shipments_count-1;
+                                $shipments_count = $shipments_count - 1;
                                 $cargo->shipments = $shipments_count;
                                 $cargo->shipments_weight = $shipment_weight - $shipment->actual_weight;
-                                if($shipments_count == 0){
+                                if ($shipments_count == 0) {
                                     $cargo->status_id = 5;
-                                }else if($shipments_count == $shipments_received_count){
+                                } else if ($shipments_count == $shipments_received_count) {
                                     $cargo->status_id = 3;
                                 }
                                 $cargo->save();
@@ -4878,8 +4891,8 @@ class DeliveryController extends Controller
                         'new_consignee_name' => $request->consignee_name[$shipment_id],
                         'new_consignee_address' => $request->consignee_address[$shipment_id],
                         'new_consignee_phone_number_1' => $request->consignee_phone1[$shipment_id],
-                        'new_consignee_phone_number_2' => ($request->consignee_phone2[$shipment_id] != '')? $request->consignee_phone2[$shipment_id]:'',
-                        'new_consignee_email' => ($request->consignee_email[$shipment_id] != '')? $request->consignee_email[$shipment_id]:'',
+                        'new_consignee_phone_number_2' => ($request->consignee_phone2[$shipment_id] != '') ? $request->consignee_phone2[$shipment_id] : '',
+                        'new_consignee_email' => ($request->consignee_email[$shipment_id] != '') ? $request->consignee_email[$shipment_id] : '',
                         'admin_id' => Auth::id()
 
                     ]);
@@ -4888,8 +4901,8 @@ class DeliveryController extends Controller
                     $shipment->consignee_name = $request->consignee_name[$shipment_id];
                     $shipment->consignee_address = $request->consignee_address[$shipment_id];
                     $shipment->consignee_phone_number_1 = $request->consignee_phone1[$shipment_id];
-                    $shipment->consignee_phone_number_2 = ($request->consignee_phone2[$shipment_id] != '')? $request->consignee_phone2[$shipment_id]:'';
-                    $shipment->consignee_email = ($request->consignee_email[$shipment_id] != '')? $request->consignee_email[$shipment_id]:'';
+                    $shipment->consignee_phone_number_2 = ($request->consignee_phone2[$shipment_id] != '') ? $request->consignee_phone2[$shipment_id] : '';
+                    $shipment->consignee_email = ($request->consignee_email[$shipment_id] != '') ? $request->consignee_email[$shipment_id] : '';
                     $shipment->shipper_status_id = 49;
                     $shipment->consignee_status_id = 49;
                     $shipment->save();
@@ -4897,7 +4910,8 @@ class DeliveryController extends Controller
 
 
                 }
-            }
+
+        }
 
             return redirect()->back()->with(['success' => 'Misrouted Shipments has been updated successfully','shipments' => $shipments, 'excel' => True]);
         }else {
