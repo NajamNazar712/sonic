@@ -477,21 +477,29 @@ class AdminWalkInBookShipmentController extends Controller
                     } else {
                         $check_zone = $check['chargeable_weight_charges_class_3'];
                     }
-                    if ($request->actual_weight < $check['actual_weight']) {
-                        return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
-                    } elseif ($request->charges_per_kg < $check_zone) {
-                        return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $check_zone]);
-                    } else {
-                        return response()->json(['status' => 2, 'error' => '']);
+                    if($request->pickup == false){
+                        if ($request->actual_weight < $check['actual_weight']) {
+                            return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                        }
                     }
+
+                    if ($request->charges_per_kg < $check_zone) {
+                        return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $check_zone]);
+                    }
+
+                    return response()->json(['status' => 2, 'error' => '']);
+
                 } else {
                     return response()->json(['status' => 0, 'error' => "Zone class does'nt exists"]);
                 }
             }
             else{
-                if ($request->actual_weight < $check['actual_weight']) {
-                    return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
-                } elseif ($request->charges_per_kg < $check['chargeable_weight_local']) {
+                if($request->pickup == false){
+                    if ($request->actual_weight < $check['actual_weight']) {
+                        return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                    }
+                }
+                if ($request->charges_per_kg < $check['chargeable_weight_local']) {
                     return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' .  $check['chargeable_weight_local']]);
                 } else {
                     return response()->json(['status' => 2, 'error' => '']);
