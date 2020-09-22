@@ -17,6 +17,7 @@
                         <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                             <thead>
                             <tr class="bg-primary white">
+                                <th class="border-primary border-darken-1"></th>
                                 <th class="border-primary border-darken-1">S No.</th>
                                 <th class="border-primary border-darken-1">Trax ID.</th>
                                 <th class="border-primary border-darken-1">City</th>
@@ -83,6 +84,7 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            var selected_rows = [];
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -136,34 +138,101 @@
                     return {body: body, header: head};
                 }
             } );
-            var table =  $('.datatable').DataTable({
+            var table =  $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || in_array(97, session('permissions')))
 
-                buttons: [{
-                    text: '<i class="la la-motorcycle"></i> Add Rider',
-                    className: 'btn btn-primary',
-                    enabled: true,
-                    action: function (e, dt, node, config) {
-                        $('#addRider').modal('show');
 
-                    }
-                },
+                buttons: [
+                    @if (session('role_id') == 1 || in_array(97, session('permissions')))
+                    {
+                        text: '<i class="la la-motorcycle"></i> Add Rider',
+                        className: 'btn btn-primary',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#addRider').modal('show');
+
+                        }
+                    },
+                    @endif
+                    @if (session('role_id') == 1 || in_array(381, session('permissions')))
+                    {
+                        text: '<i class="la la-motorcycle"></i> Send SMS',
+                        className: 'btn btn-primary sms',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $('#addRider').modal('show');
+
+                        }
+                    },
+                    @endif
+
                     {
                         extend: 'excel',
-                        title: 'Rider Management',
+                        title: 'Permanent Riders',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'],
-                @else
-                buttons: [{
-                    extend: 'excel',
-                    title: 'Rider Management',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },
+                    },
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.sms').enable();
+                                }
+                            });
+                        }
+                    },
+                    {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.sms').disable();
+                                    }
+                                }
+                            });
+                        }
+                    },
                     'reset'],
-                @endif
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -177,6 +246,7 @@
                 order: [[10, 'desc']],
                 rowId : 'rider_id',
                 columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
@@ -358,6 +428,56 @@
                             method: 'POST',
                             data: {
                                 'rider_id': rider_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status == 0){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            table.draw(false);
+                            UnblockPagePermanently();
+                        });
+                    }
+                });
+
+            });
+
+            $('body').on('click','button.blacklist',function (e) {
+                var rider_id = $(this).parents('tr').attr('id');
+
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Make this Rider as Blacklist',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+
+                        blockPagePermanently();
+                        $.ajax({
+                            url: '{!! route('admin.management.riders.rider_blacklist') !!}',
+                            method: 'POST',
+                            data: {
+                                'rider_id': rider_id,
+                                'action':'block',
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {

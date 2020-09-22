@@ -766,7 +766,8 @@
                                 }
                             });
                         }
-                    }, {
+                    },
+                    {
                         extend: 'selectNone',
                         text: 'Select None',
                         className: 'select_none',

@@ -34,8 +34,9 @@ class RiderManagementController extends Controller
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id')
-        ->where('riders.rider_type_id', 1);
+            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist')
+        ->where('riders.rider_type_id', 1)
+        ->where('riders.blacklist', 0);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -87,8 +88,13 @@ class RiderManagementController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
                         }
                     }
+                    if (session('role_id') == 1 || in_array(381, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Incentive</div></button>';
+                    }
+                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
+                    }
 
-                    $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Incentive</div></button>';
 
                     $dropdown .= '
                         </div>
@@ -286,4 +292,55 @@ class RiderManagementController extends Controller
         }
     }
 
+    public function rider_permanent(Request $request){
+        $rider_id = $request->rider_id;
+        if($rider_id){
+            $rider = Rider::find($rider_id);
+            if($rider){
+                $rider_status = $rider->rider_type_id;
+                if($rider_status == 2){
+                    $rider->rider_type_id = 1;
+                    $rider->save();
+                    return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
+                }
+                return response()->json(['status' => 1, 'error' => 'Rider already Marked as Permanent Rider!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+    }
+
+    public function rider_blacklist(Request $request){
+        $rider_id = $request->rider_id;
+        $action = $request->action;
+        if(!$rider_id){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+
+        $rider = Rider::find($rider_id);
+        if(!$rider){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+
+        if($action == 'block'){
+            $rider->blacklist = 1;
+            $rider->save();
+            return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
+        }
+        if($action == 'unblock'){
+            $rider->blacklist = 1;
+            $rider->save();
+            return response()->json(['status' => 0, 'success' => 'Rider is Unblocked!']);
+        }
+
+
+
+    }
+
+    public function incentive_index(){
+
+    }
+
+    public function incentive_list(){
+
+    }
 }

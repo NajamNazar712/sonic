@@ -554,6 +554,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/status', 'Admins\RiderManagementController@riderStatus')->name('status');
             Route::get('/phone_unique', 'Admins\RiderManagementController@rider_phone_unique')->name('phone_unique');
             Route::post('incentive', 'Admins\RiderManagementController@rider_incentive')->name('incentive');
+            Route::post('permanent', 'Admins\RiderManagementController@rider_permanent')->name('permanent');
+            Route::post('rider_blacklist', 'Admins\RiderManagementController@rider_blacklist')->name('rider_blacklist');
 
             Route::prefix('permanent')->name('permanent.')->group(function (){
                 Route::get('','Admins\RiderManagementController@permanent_index')->name('index');
@@ -561,8 +563,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
             Route::prefix('incentive')->name('incentive.')->group(function (){
-                Route::get('','Admins\RiderManagementController@permanent_index')->name('index');
-                Route::get('list', 'Admins\RiderManagementController@permanent_list')->name('list');
+                Route::get('','Admins\RiderManagementController@incentive_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@incentive_list')->name('list');
             });
         });
 
