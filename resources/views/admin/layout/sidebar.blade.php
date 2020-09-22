@@ -934,6 +934,10 @@
                                     @if (session('role_id') == 1 || in_array(355, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.station_recovery_cron.index') }}">Station Recovery Cron</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(205, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.restrict_parcels_attempt.index')}}">Restrict Shipper Parcels Attempts</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
