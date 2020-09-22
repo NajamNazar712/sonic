@@ -4705,8 +4705,6 @@ class AdminFinanceController extends Controller
 
                         $invoice_shipment->save();
 
-                        $pending_invoice_shipment->delete();
-
                         $total_shipments++;
 
                         if ($pending_invoice_shipment->type == 0) {
@@ -4719,11 +4717,13 @@ class AdminFinanceController extends Controller
                             $total_adjusted_shipments++;
                         }
 
-                        self::adjustment_logs_done(2, $pending_invoice_shipment, $invoice_shipment->id);
+                        self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
 
                         $total_charges = $total_charges + $pending_invoice_shipment->charges;
                         $total_gst = $total_gst + $pending_invoice_shipment->gst;
                         $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
+
+                        $pending_invoice_shipment->delete();
                     }
 
                     $invoice->invoice_number = $invoice_number;
