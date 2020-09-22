@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Restriction of Cities for Overland Intercept
+                    Restriction of Cities for Overland Shipments
                 </h1>
 
                 <div class="card">

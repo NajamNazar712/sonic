@@ -858,7 +858,7 @@
                                         <li><a class="menu-item" href="{{ route('admin.settings.consolidation.max.index') }}">Maximum Consolidation Shipments</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(375, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.settings.restrict_cities_intercept.index')}}">Restrict Cities For Overland Intercept</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.settings.restrict_cities_intercept.index')}}">Restrict Cities For Overland Shipments</a></li>
                                     @endif
                                 </ul>
                             </li>
