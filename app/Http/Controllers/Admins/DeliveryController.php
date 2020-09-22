@@ -4801,6 +4801,7 @@ class DeliveryController extends Controller
                             $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
                                 ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
                                 ->select(['c.id', 'c.name as text'])
+                                ->groupBy('c.id')
                                 ->where('shipments.id', $shipment->id)
                                 ->where('c.status', 1)
                                 ->whereNotNull('c.zone_id')

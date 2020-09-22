@@ -148,8 +148,8 @@
                                         var address = '<input class="form-control" name="consignee_address['+data.details.id+']" data-rule-required="true" data-msg-required="Address is required" value="'+data.details.consignee_address+'">';
                                         var phone1 = '<input class="form-control phone1" name="consignee_phone1['+data.details.id+']" data-rule-required="true" data-msg-required="Phone 1 is required" value="'+data.details.consignee_phone1+'">';
                                         var phone2 = '<input class="form-control phone2" name="consignee_phone2['+data.details.id+']" value="'+data.details.consignee_phone2+'" placeholder="Enter Phone 2">';
-                                        var email = '<input class="form-control" name="consignee_email['+data.details.id+']" value="'+data.details.consignee_email+'" placeholder="Enter email">';
-                                        var city = '<select class="select2 form-control consignee_city_select_'+data.details.id+'" name="consignee_city['+data.details.id+']"></select>';
+                                        var email = '<input type="email" class="form-control" name="consignee_email['+data.details.id+']" value="'+data.details.consignee_email+'" placeholder="Enter email">';
+                                        var city = '<select class="select2 form-control consignee_city_select_'+data.details.id+'" data-rule-required="true" data-msg-required="Destination is required" name="consignee_city['+data.details.id+']"></select>';
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
                                         var rowNo = table.rows().count();
 
