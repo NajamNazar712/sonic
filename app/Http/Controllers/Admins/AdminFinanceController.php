@@ -4657,31 +4657,10 @@ class AdminFinanceController extends Controller
 
             $user_banking_information = UserBankInfo::where('user_id', $user_id)->where('default_bank', 1)->first();
 
-            if ($user_banking_information->invoicing_cycle_id == 1) {
-                if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {
-                    $generate = TRUE;
+            if ($user_banking_information->generation_date == $current_date->day) {
+                $generate = TRUE;
 
-                    $billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
-                }
-            }
-            else if ($user_banking_information->invoicing_cycle_id == 2) {
-                if ($current_date->day == 14 || $current_date->day == 28) {
-                    $generate = TRUE;
-
-                    if ($current_date->day == 14) {
-                        $billing_period_from_date = Carbon::now()->subMonth()->day(28)->startOfDay()->toDateString();
-                    }
-                    else {
-                        $billing_period_from_date = Carbon::now()->day(14)->startOfDay()->toDateString();
-                    }
-                }
-            }
-            else if ($user_banking_information->invoicing_cycle_id == 3) {
-                if ($user_banking_information->generation_date == $current_date->day) {
-                    $generate = TRUE;
-
-                    $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
-                }
+                $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
             }
 
             if ($generate) {
