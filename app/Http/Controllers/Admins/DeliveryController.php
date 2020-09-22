@@ -2783,6 +2783,7 @@ class DeliveryController extends Controller
                             $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $shipment_details->user_id)->where('status', 1);
                             if ($restrict_parcels_attempt->exists() && $request->has($status_drop) && $request->status_drop[$shipment] == 12)
                             {
+                                
                                 $restrict_parcels_attempt = $restrict_parcels_attempt->first();
                                 $attempt_counts = ShipmentsJourney::where(['shipment_id' => $shipment_details->id, 'shipper_status_id' => 5, 'verification' => 1])->count();
                                 if ($attempt_counts >= $restrict_parcels_attempt->attempt_days)
