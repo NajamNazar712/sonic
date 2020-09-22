@@ -140,8 +140,6 @@
             } );
             var table =  $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-
-
                 buttons: [
                     @if (session('role_id') == 1 || in_array(97, session('permissions')))
                     {
@@ -156,11 +154,12 @@
                     @endif
                     @if (session('role_id') == 1 || in_array(381, session('permissions')))
                     {
-                        text: '<i class="la la-motorcycle"></i> Send SMS',
+                        text: '<i class="la la-envelope"></i> Send SMS',
                         className: 'btn btn-primary sms',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            $('#addRider').modal('show');
+                            console.log(selected_rows);
+                            // $('#addRider').modal('show');
 
                         }
                     },
@@ -246,7 +245,7 @@
                 order: [[10, 'desc']],
                 rowId : 'rider_id',
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
@@ -266,8 +265,10 @@
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.rider_id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -285,7 +286,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -336,6 +337,25 @@
                 }
             });
 
+            $('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.sms').enable();
+                }
+                else {
+                    table.button('.sms').disable();
+                }
+            });
 
             $("#addRider").on("show.bs.modal", function(e) {
                 $.get( "/admin/management/riders/add", function( data ) {
