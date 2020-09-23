@@ -650,7 +650,7 @@ class V2AdminPickupsController extends Controller
             $settings = $settings->first();
             $nsa_accounts = array_map('intval', explode(',', $settings->text));
         }
-
+        $walkin_shipment_ids = array();
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if($shipment){
@@ -826,15 +826,13 @@ class V2AdminPickupsController extends Controller
 
                         $print_shipment_ids[] = $shipment_id;
                     }
-                    if($shipment->charges_mode_id == 2 && $shipment->booking_type_id == 4){
-                        $shipment_ids = array($shipment->id);
-                        NotificationsController::send(85, $shipment_ids , Auth::id());
+                    if(($shipment->charges_mode_id == 2 || $shipment->charges_mode_id == 1 ) && $shipment->booking_type_id == 4){
+                        $walkin_shipment_ids[] = $shipment->id;
                     }
                 }
             }else {
                 unset($shipment_ids[$key]);
             }
-
         }
 
 
@@ -892,6 +890,9 @@ class V2AdminPickupsController extends Controller
         }
 
         NotificationsController::send(4, $shipment_ids);
+        if(count($walkin_shipment_ids) > 0){
+            NotificationsController::send(85, $walkin_shipment_ids , Auth::id());
+        }
         if (empty($print_shipment_ids)) {
             return redirect()->back()->with(['success' => 'Arrival Done']);
         }
@@ -1375,7 +1376,7 @@ class V2AdminPickupsController extends Controller
 
                         $print_shipment_ids[] = $shipment_id;
                     }
-                    if($shipment->charges_mode_id == 2 && $shipment->booking_type_id == 4){
+                    if(($shipment->charges_mode_id == 2 || $shipment->charges_mode_id == 1) && $shipment->booking_type_id == 4){
                         $shipment_ids = array($shipment->id);
                         NotificationsController::send(85, $shipment_ids , Auth::id());
                     }

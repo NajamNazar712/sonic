@@ -5803,23 +5803,39 @@ class NotificationsController extends Controller
 
                   foreach ($shipments as $shipment) {
                       $origin = $shipment->pickup_address;
-                      $destination = $shipment->consignee_city;;
+                      $destination = $shipment->consignee_city;
                       $html .= '<tr>';
                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin->pickup_address  . '</td>';
                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $destination->name . '</td>';
                       if ($shipment->packaging_charges == null) {
                           $total_charges = $shipment->amount;
-                          $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          if($shipment->amount == 0){
+                              $total_charges = 0;
+                              $total_charges = $shipment->received_amount;
+                              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          }
+                          else{
+                              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          }
+
                       } else {
-                          $amount = $shipment->amount;
-                          $packaging = $shipment->packaging_charges;
-                          $total_charges = $amount + $packaging;
-                          $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          if($shipment->amount != 0){
+                              $amount = $shipment->amount;
+                              $packaging = $shipment->packaging_charges;
+                              $total_charges = $amount + $packaging;
+                              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          }
+                          else{
+                              $total_charges = 0;
+                              $amount = $shipment->received_amount;
+                              $packaging = $shipment->packaging_charges;
+                              $total_charges = $amount + $packaging;
+                              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          }
                       }
                       $html .= '</tr>';
                   }
-
               $html .= '</tbody></table>';
               if (strpos($body, '[preview]') !== FALSE) {
                   $body = str_replace('[preview]', $html, $body);
