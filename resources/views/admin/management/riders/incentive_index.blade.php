@@ -17,6 +17,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
+                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Trax ID.</th>
                                     <th class="border-primary border-darken-1">City</th>
@@ -54,19 +55,47 @@
         </div>
     </section>
 
-    <div class="modal fade" id="add_rider_modal" role="dialog" aria-labelledby="add_rider_title" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                </div>
-                <div class="modal-body text-center">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+    @if (session('role_id') == 1 || in_array(383, session('permissions')))
+        <div class="modal fade" id="send_sms_modal" role="dialog" aria-labelledby="send_sms_modal_title" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <form class="form-horizontal" method="POST" action="{{ route('admin.management.riders.send_sms') }}" novalidate="novalidate">
+                        {{ csrf_field() }}
+
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="send_custom_sms_title">Send SMS</h4>
+
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="selected_riders" id="selected_riders">
+                            <div class="form-group">
+                                <label>Body</label>
+                                <textarea type="text" id="sms_body" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <div class="d-inline-block">
+                                    <label>No. Of SMS</label>
+                                    <span id="n_sms"></span>
+                                </div>
+                                <div class="d-inline-block pull-right">
+                                    <label>No. of Characters </label>
+                                    <span id="l_sms"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" name="send" class="btn btn-primary">Send</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
+
 @endsection
 
 @section('css')
@@ -80,9 +109,12 @@
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/textarea/autosize.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function() {
+            var selected_rows = [];
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -136,34 +168,104 @@
                     return {body: body, header: head};
                 }
             } );
-            var table =  $('.datatable').DataTable({
+            var table =  $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || in_array(97, session('permissions')))
+                buttons: [
+                        @if (session('role_id') == 1 || in_array(97, session('permissions')))
+                    {
+                        text: '<i class="la la-motorcycle"></i> Add Rider',
+                        className: 'btn btn-primary',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#addRider').modal('show');
 
-                buttons: [{
-                    text: '<i class="la la-motorcycle"></i> Add Rider',
-                    className: 'btn btn-primary',
-                    enabled: true,
-                    action: function (e, dt, node, config) {
-                        $('#addRider').modal('show');
+                        }
+                    },
+                        @endif
+                        @if (session('role_id') == 1 || in_array(383, session('permissions')))
+                    {
+                        text: '<i class="la la-envelope"></i> Send SMS',
+                        className: 'btn btn-primary sms',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                $('#send_sms_modal').modal('show');
+                                $('#selected_riders').val(selected_rows);
+                                $('#n_sms').text(0);
+                                $('#l_sms').text(0);
+                                $('#sms_body').val('');
 
-                    }
-                },
+                            }
+                        }
+                    },
+                        @endif
                     {
                         extend: 'excel',
                         title: 'Incentive Riders',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'],
-                @else
-                buttons: [{
-                    extend: 'excel',
-                    title: 'Incentive Riders',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },
+                    },
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.sms').enable();
+                                }
+                            });
+                        }
+                    },
+                    {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.sms').disable();
+                                    }
+                                }
+                            });
+                        }
+                    },
                     'reset'],
-                @endif
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -177,6 +279,7 @@
                 order: [[10, 'desc']],
                 rowId : 'rider_id',
                 columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
@@ -196,8 +299,10 @@
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.rider_id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -215,7 +320,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -266,6 +371,25 @@
                 }
             });
 
+            $('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.sms').enable();
+                }
+                else {
+                    table.button('.sms').disable();
+                }
+            });
 
             $("#addRider").on("show.bs.modal", function(e) {
                 $.get( "/admin/management/riders/add", function( data ) {
@@ -354,7 +478,7 @@
 
                         blockPagePermanently();
                         $.ajax({
-                            url: '{!! route('admin.management.riders.incentive') !!}',
+                            url: '{!! route('admin.management.riders.permanent') !!}',
                             method: 'POST',
                             data: {
                                 'rider_id': rider_id,
@@ -373,6 +497,84 @@
                 });
 
             });
+
+            $('body').on('click','button.blacklist',function (e) {
+                var rider_id = $(this).parents('tr').attr('id');
+
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Make this Rider as Blacklist',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+
+                        blockPagePermanently();
+                        $.ajax({
+                            url: '{!! route('admin.management.riders.rider_blacklist') !!}',
+                            method: 'POST',
+                            data: {
+                                'rider_id': rider_id,
+                                'action':'block',
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status == 0){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            table.draw(false);
+                            UnblockPagePermanently();
+                        });
+                    }
+                });
+
+            });
+            @if (session('role_id') == 1 || in_array(383, session('permissions')))
+            autosize($('#send_sms_modal .body')[0]);
+            var char_per_sms = 250;
+            $('#sms_body').on('keypress copy paste',function (e) {
+                var sms = $(this).val().length;
+                var no_of_sms = 0;
+                no_of_sms = sms / char_per_sms;
+                no_of_sms = Math.ceil(no_of_sms);
+                $('#n_sms').text(no_of_sms);
+                $('#l_sms').text(sms);
+
+            });
+
+            $('#send_sms_modal form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();
+                }
+            });
+            @endif
+
         });
     </script>
 

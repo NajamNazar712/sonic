@@ -919,10 +919,10 @@
                                                                 <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">Permanent</a></li>
                                                             @endif
                                                             @if (session('role_id') == 1 || in_array(378, session('permissions')))
-                                                                <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">Incentive</a></li>
+                                                                <li><a class="menu-item" href="{{route('admin.management.riders.incentive.index')}}">Incentive</a></li>
                                                             @endif
                                                             @if (session('role_id') == 1 || in_array(379, session('permissions')))
-                                                                <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">Blacklisted</a></li>
+                                                                <li><a class="menu-item" href="{{route('admin.management.riders.blacklist.index')}}">Blacklisted</a></li>
                                                             @endif
                                                             @if (session('role_id') == 1 || in_array(380, session('permissions')))
                                                                 <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">SMS History</a></li>

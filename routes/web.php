@@ -567,6 +567,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('','Admins\RiderManagementController@incentive_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@incentive_list')->name('list');
             });
+
+            Route::prefix('blacklist')->name('blacklist.')->group(function (){
+                Route::get('','Admins\RiderManagementController@blacklist_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@blacklist_list')->name('list');
+            });
+
+
         });
 
         Route::prefix('zonal')->name('zonal.')->group(function () {

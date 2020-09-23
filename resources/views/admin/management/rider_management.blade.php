@@ -43,8 +43,8 @@
                         @method('PUT')
                         <input type="hidden" name="cid" id="cid">
                         <input type="hidden" name="status" id="cstatus">
-                        <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
-                        <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Yes</button>
+                        <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">Cancel</button>
 
 
                     </form>
