@@ -587,9 +587,6 @@ class V2AdminPickupsController extends Controller
                     $details['rider'] = $rider;
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
-                    $id = Auth::user();
-                    $shipment_ids = array($shipment->id);
-                    NotificationsController::send(85, $shipment_ids , $id);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 }
 
@@ -826,6 +823,8 @@ class V2AdminPickupsController extends Controller
                         $shipment->amount = $shipment->amount + $charges + $gst;
 
                         $shipment->save();
+                        $shipment_ids = array($shipment->id);
+                        NotificationsController::send(85, $shipment_ids , Auth::id());
 
                         $print_shipment_ids[] = $shipment_id;
                     }
@@ -1047,8 +1046,6 @@ class V2AdminPickupsController extends Controller
                     $details['weight'] = floatval($shipment->actual_weight);
 
                     $id = Auth::user();
-                    $shipment_ids = array($shipment->id);
-                    NotificationsController::send(85, $shipment_ids , $id);
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
@@ -1373,6 +1370,9 @@ class V2AdminPickupsController extends Controller
                         $shipment->amount = $shipment->amount + $charges + $gst;
 
                         $shipment->save();
+
+                        $shipment_ids = array($shipment->id);
+                        NotificationsController::send(85, $shipment_ids , Auth::id());
 
                         $print_shipment_ids[] = $shipment_id;
                     }
