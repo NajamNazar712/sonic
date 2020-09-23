@@ -53,7 +53,7 @@
                         </div>
                         <div class="row justify-content-center">
                             <div class="col-10 form-group">
-                                <input type="text" name="attempt_days" class="form-control attempt_days" placeholder="Attempt Days*" data-rule-required="true" data-msg-required="Attempt Days is required" value="" data-rule-min="1" data-msg-min="Attempt Days can not be less than 1">
+                                <input type="text" name="attempt_days" id="add_attempt_days" class="form-control attempt_days" placeholder="Attempt Days*" data-rule-required="true" data-msg-required="Attempt Days is required" value="" data-rule-min="1" data-msg-min="Attempt Days can not be less than 1">
                             </div>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
                     <input type="hidden" id="restrict_id" name="id">
                     <div class="modal-body">
                         <div class="form-group">
-                            <input type="text" name="attempt_days" class="form-control attempt_days" placeholder="Attempt Days*" data-rule-required="true" data-msg-required="Attempt Days is required" value="" data-rule-min="1" data-msg-min="Attempt Days can not be less than 1">
+                            <input type="text" name="attempt_days" class="form-control attempt_days" id="edit_attempt_days" placeholder="Attempt Days*" data-rule-required="true" data-msg-required="Attempt Days is required" value="" data-rule-min="1" data-msg-min="Attempt Days can not be less than 1">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -359,7 +359,9 @@
 
             $('body').on('click','button.edit',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                var attempt_days = parseInt($(this).parents('tr').data('attempt_days'));
                 $('#restrict_id').val(id);
+                $('#edit_attempt_days').val(attempt_days);
                 $('#EditShipperModal').modal('show');
             });
 
@@ -385,6 +387,14 @@
                 }
             });
 
+            $('#AddShipperModal').on('hide.bs.modal', function (e) {
+                $('#shipper_id').val('').change();
+                $('#add_attempt_days').val('');
+            });
+
+            $('#AddShipperModal').on('hide.bs.modal', function (e) {
+                $('#edit_attempt_days').val('');
+            });
 
 
         });

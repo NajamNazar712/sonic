@@ -1541,7 +1541,7 @@ class DeliveryController extends Controller
                     }
                 }
                 else{
-                    $where = array(12);
+                    $where = array(12, 14);
                 }
 
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
@@ -1673,7 +1673,7 @@ class DeliveryController extends Controller
                 }
 
                 $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $shipment_details->user_id)->where('status', 1);
-                if($restrict_parcels_attempt->exists() && $selected_status != 12){
+                if($restrict_parcels_attempt->exists() && $selected_status != 12 && $selected_status != 14){
                     $restrict_parcels_attempt = $restrict_parcels_attempt->first();
                     $attempt_counts = ShipmentsJourney::where(['shipment_id' => $shipment_details->id, 'shipper_status_id' => 5, 'verification' => 1])->count();
                     if($attempt_counts >= $restrict_parcels_attempt->attempt_days){
@@ -2278,7 +2278,7 @@ class DeliveryController extends Controller
                     }
                 }
                 else{
-                    $where = array(12);
+                    $where = array(12, 14);
                 }
 
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
@@ -2783,7 +2783,6 @@ class DeliveryController extends Controller
                             $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $shipment_details->user_id)->where('status', 1);
                             if ($restrict_parcels_attempt->exists() && $request->has($status_drop) && $request->status_drop[$shipment] == 12)
                             {
-                                
                                 $restrict_parcels_attempt = $restrict_parcels_attempt->first();
                                 $attempt_counts = ShipmentsJourney::where(['shipment_id' => $shipment_details->id, 'shipper_status_id' => 5, 'verification' => 1])->count();
                                 if ($attempt_counts >= $restrict_parcels_attempt->attempt_days)
