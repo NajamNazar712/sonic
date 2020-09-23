@@ -387,7 +387,8 @@
                         'pickup': pickup,
                         'consignee_city': $('#consignee_city').val(),
                         'delivery_type': $('#delivery_type').val(),
-                        'shipping_mode': $('#shipping_mode').val()
+                        'shipping_mode': $('#shipping_mode').val(),
+                        'pickup' : $('#pickup').prop('checked')
                     }
                 }).done(function (data) {
                         if(data.status === 0 || data.status === 1 || data.status === 3 || data.status === 4 || data.status === 5 || data.status === 6){
