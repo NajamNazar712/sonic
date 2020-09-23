@@ -811,7 +811,7 @@ class V2AdminPickupsController extends Controller
                     }
 
 
-                    if ($shipment->charges_mode_id == 2) {
+                    if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
 
                         $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
@@ -823,10 +823,12 @@ class V2AdminPickupsController extends Controller
                         $shipment->amount = $shipment->amount + $charges + $gst;
 
                         $shipment->save();
-                        $shipment_ids = array($shipment->id);
-                        NotificationsController::send(85, $shipment_ids , Auth::id());
 
                         $print_shipment_ids[] = $shipment_id;
+                    }
+                    if($shipment->charges_mode_id == 2 && $shipment->booking_type_id == 4){
+                        $shipment_ids = array($shipment->id);
+                        NotificationsController::send(85, $shipment_ids , Auth::id());
                     }
                 }
             }else {
@@ -1358,7 +1360,7 @@ class V2AdminPickupsController extends Controller
                         ShipmentChargesController::fuel_surcharge($shipment_id);
                     }
 
-                    if ($shipment->charges_mode_id == 2) {
+                    if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
 
                         $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
@@ -1371,10 +1373,11 @@ class V2AdminPickupsController extends Controller
 
                         $shipment->save();
 
+                        $print_shipment_ids[] = $shipment_id;
+                    }
+                    if($shipment->charges_mode_id == 2 && $shipment->booking_type_id == 4){
                         $shipment_ids = array($shipment->id);
                         NotificationsController::send(85, $shipment_ids , Auth::id());
-
-                        $print_shipment_ids[] = $shipment_id;
                     }
                 }
             }
