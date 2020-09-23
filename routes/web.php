@@ -1992,6 +1992,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@over_payment_limit_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@over_payment_limit_store')->name('store');
         });
+
+        Route::prefix('restrict_parcels_attempt')->name('restrict_parcels_attempt.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@restrict_parcels_attempt_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@restrict_parcels_attempt_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@restrict_parcels_attempt_add')->name('add');
+            Route::post('edit', 'Admins\GlobalSettingsController@restrict_parcels_attempt_edit')->name('edit');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@restrict_parcels_attempt_enable_disable')->name('enable_disable');
+        });
     });
 
 

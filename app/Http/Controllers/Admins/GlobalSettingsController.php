@@ -31,6 +31,7 @@ use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
 use App\Http\Models\Holiday;
 use App\http\Models\RestrictedCityIntercept;
+use App\http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
@@ -2715,5 +2716,114 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Settings Updated!');
 
+    }
+
+    public function restrict_parcels_attempt_index(){
+        $already_restricted_shippers = RestrictParcelsAttempt::pluck('shipper_id')->toArray();
+        $shippers = User::where('status', 3)->whereNotIn('id', $already_restricted_shippers)->get();
+        return view('admin.settings.retrun_parcels_after_attempts')->with('shippers', $shippers);
+    }
+    public function restrict_parcels_attempt_list(Request $request){
+        $restricted_parcels_attempt = RestrictParcelsAttempt::join('users as u', 'u.id', '=', 'restrict_parcels_attempts.shipper_id')
+            ->join('admins as a', 'a.id', '=', 'restrict_parcels_attempts.updated_by')
+        ->select('restrict_parcels_attempts.id', 'u.name as shipper', 'restrict_parcels_attempts.attempt_days', 'restrict_parcels_attempts.status', 'restrict_parcels_attempts.created_at', 'restrict_parcels_attempts.updated_at', 'a.name as updated_by');
+        $datatable = Datatables::of($restricted_parcels_attempt)
+            ->editColumn('status', function ($data){
+                if($data->status == 1){
+                    return 'Enabled';
+                }
+                else{
+                    return 'Disabled';
+                }
+            })
+            ->addColumn('action', function ($data){
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                if($data->status == 1){
+                    $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                }
+                else{
+                    $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                }
+
+                return $dropdown;
+
+            });
+
+        return $datatable->make(true);
+    }
+
+    public function restrict_parcels_attempt_add(Request $request){
+        if($request->has('shipper_id') && $request->has('attempt_days')){
+            $shipper_id = $request->shipper_id;
+            $attempt_days = $request->attempt_days;
+            if($shipper_id != NULL && $attempt_days != NULL){
+                $restrict_shipper = new RestrictParcelsAttempt();
+                $restrict_shipper->shipper_id = $shipper_id;
+                $restrict_shipper->attempt_days = $attempt_days;
+                $restrict_shipper->updated_by = Auth::id();
+                $restrict_shipper->save();
+
+                return redirect()->back()->with('success','Setting updated successfully!');
+            }
+            else{
+                return redirect()->back()->with('error','Data not found!');
+            }
+        }
+        else{
+            return redirect()->back()->with('error','Something went wrong!');
+        }
+    }
+    public function restrict_parcels_attempt_edit(Request $request){
+        if($request->has('id') && $request->has('attempt_days')){
+            $id = $request->id;
+            $attempt_days = $request->attempt_days;
+            if($id != NULL && $attempt_days != NULL){
+                $restrict_shipper = RestrictParcelsAttempt::find($id);
+                $restrict_shipper->attempt_days = $attempt_days;
+                $restrict_shipper->status = 1;
+                $restrict_shipper->updated_by = Auth::id();
+                $restrict_shipper->save();
+
+                return redirect()->back()->with('success','Setting updated successfully!');
+            }
+            else{
+                return redirect()->back()->with('error','Data not found!');
+            }
+        }
+        else{
+            return redirect()->back()->with('error','Something went wrong!');
+        }
+    }
+    public function restrict_parcels_attempt_enable_disable(Request $request){
+        if($request->has('id') && $request->has('status')){
+            $id = $request->id;
+            $status = $request->status;
+            if($id != NULL && $status != NULL){
+                $restrict_shipper = RestrictParcelsAttempt::find($id);
+                $restrict_shipper->status = $status;
+                $restrict_shipper->updated_by = Auth::id();
+                $restrict_shipper->save();
+                if($status == 1){
+                    $text = 'Enabled';
+                }
+                else{
+                    $text = 'Disabled';
+                }
+                return response()->json(['status' => 1, 'success' => 'Setting '. $text .' Successfully!']);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Data not found']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Something went wrong!']);
+        }
     }
 }
