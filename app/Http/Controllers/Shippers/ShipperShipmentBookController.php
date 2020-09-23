@@ -2824,6 +2824,11 @@ class ShipperShipmentBookController extends Controller
                             <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
                     ';
             }
+            elseif ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2){
+                $table_end .= '
+                            <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount + $shipment->packaging_charges) . '</strong></td>
+                    ';
+            }
             else {
                 $table_end .= '
                             <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
