@@ -7,6 +7,8 @@ use App\Http\Models\City;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
+use App\Http\Models\SmsHistory;
+use App\Http\Models\SmsHistoryRider;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -332,8 +334,30 @@ class RiderManagementController extends Controller
             return response()->json(['status' => 0, 'success' => 'Rider is Unblocked!']);
         }
 
+    }
 
-
+    public function send_sms(Request $request){
+        $rider_ids = explode(',', $request->selected_riders);
+        if(count($rider_ids) > 0) {
+           $body = trim($request->get('body'));
+            $sms_history = new SmsHistory();
+            $sms_history->body = $body;
+            $sms_history->sender_id = Auth::id();
+            $sms_history->save();
+            $sms_history_id = $sms_history->id;
+           foreach ($rider_ids as $rider_id){
+               $rider = Rider::find($rider_id);
+               if($rider){
+                   $to = $rider->phone;
+                   $sms_history_rider = new SmsHistoryRider();
+                   $sms_history_rider->sms_history_id = $sms_history_id;
+                   $sms_history_rider->rider_id = $rider_id;
+                   $sms_history_rider->save();
+                   NotificationsController::custom_sms($body, $to);
+               }
+           }
+            return redirect()->back()->with('success' , 'SMS successfully sent!');
+        }
     }
 
     public function incentive_index(){

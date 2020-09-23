@@ -55,19 +55,47 @@
     </div>
 </section>
 
-<div class="modal fade" id="add_rider_modal" role="dialog" aria-labelledby="add_rider_title" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-            </div>
-            <div class="modal-body text-center">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+@if (session('role_id') == 1 || in_array(383, session('permissions')))
+    <div class="modal fade" id="send_sms_modal" role="dialog" aria-labelledby="send_sms_modal_title" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form class="form-horizontal" method="POST" action="{{ route('admin.management.riders.send_sms') }}" novalidate="novalidate">
+                    {{ csrf_field() }}
+
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="send_custom_sms_title">Send SMS</h4>
+
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="selected_riders" id="selected_riders">
+                        <div class="form-group">
+                            <label>Body</label>
+                            <textarea type="text" id="sms_body" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <div class="d-inline-block">
+                                <label>No. Of SMS</label>
+                                <span id="n_sms"></span>
+                            </div>
+                            <div class="d-inline-block pull-right">
+                                <label>No. of Characters </label>
+                                <span id="l_sms"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" name="send" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
+@endif
+
 @endsection
 
 @section('css')
@@ -81,10 +109,15 @@
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/textarea/autosize.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function() {
             var selected_rows = [];
+            @if (session('role_id') == 1 || in_array(383, session('permissions')))
+                autosize($('#send_sms_modal .body')[0]);
+            @endif
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -152,19 +185,23 @@
                         }
                     },
                     @endif
-                    @if (session('role_id') == 1 || in_array(381, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(383, session('permissions')))
                     {
                         text: '<i class="la la-envelope"></i> Send SMS',
                         className: 'btn btn-primary sms',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            console.log(selected_rows);
-                            // $('#addRider').modal('show');
+                            if(selected_rows.length > 0){
+                                $('#send_sms_modal').modal('show');
+                                $('#selected_riders').val(selected_rows);
+                                $('#n_sms').text(0);
+                                $('#l_sms').text(0);
+                                $('#sms_body').val('');
 
+                            }
                         }
                     },
                     @endif
-
                     {
                         extend: 'excel',
                         title: 'Permanent Riders',
@@ -513,6 +550,33 @@
                 });
 
             });
+            @if (session('role_id') == 1 || in_array(383, session('permissions')))
+            var char_per_sms = 250;
+            $('#sms_body').on('keypress copy paste',function (e) {
+                var sms = $(this).val().length;
+                var no_of_sms = 0;
+                no_of_sms = sms / char_per_sms;
+                no_of_sms = Math.ceil(no_of_sms);
+                $('#n_sms').text(no_of_sms);
+                $('#l_sms').text(sms);
+
+            });
+
+            $('#send_sms_modal form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();
+                }
+            });
+            @endif
+
         });
     </script>
 

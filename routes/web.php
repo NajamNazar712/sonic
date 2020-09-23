@@ -556,6 +556,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('incentive', 'Admins\RiderManagementController@rider_incentive')->name('incentive');
             Route::post('permanent', 'Admins\RiderManagementController@rider_permanent')->name('permanent');
             Route::post('rider_blacklist', 'Admins\RiderManagementController@rider_blacklist')->name('rider_blacklist');
+            Route::post('send_sms', 'Admins\RiderManagementController@send_sms')->name('send_sms');
 
             Route::prefix('permanent')->name('permanent.')->group(function (){
                 Route::get('','Admins\RiderManagementController@permanent_index')->name('index');
