@@ -5789,7 +5789,7 @@ class NotificationsController extends Controller
           }
           else if($id == 85){
               $shipments = Shipment::find($reference_1_id);
-              $booking_person = $reference_2_id;
+              $booking_person_id = $reference_2_id;
               $subject = $notification->subject;
               $body = $notification->body;
 
@@ -5828,6 +5828,7 @@ class NotificationsController extends Controller
               $finance = Admin::whereIn('id', [12, 60, 49])->where('status', 1);
 
               $to = array();
+              $booking_person = Admin::find($booking_person_id);
               if($booking_person->email){
                   $to[] = $booking_person->email;
               }
