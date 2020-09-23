@@ -78,7 +78,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Weights</th>
+                        <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Quantity</th>
                         <th class="border-primary border-darken-1">Pieces</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -171,7 +171,7 @@
                             head.push('Shipper');
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Weight');
+                            head.push('Actual Weight');
                             head.push('Quantity');
                             head.push('Pieces');
                             head.push('Service Type');
@@ -280,7 +280,7 @@
                 },
                 deferLoading: 0,
                 rowId: 'shipment_id',
-                order: [[1, 'asc']],
+                order: [[9, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},

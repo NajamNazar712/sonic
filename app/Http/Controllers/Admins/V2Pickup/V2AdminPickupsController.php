@@ -587,9 +587,6 @@ class V2AdminPickupsController extends Controller
                     $details['rider'] = $rider;
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
-                    $id = Auth::user();
-                    $shipment_ids = array($shipment->id);
-                    NotificationsController::send(85, $shipment_ids , $id);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 }
 
@@ -653,7 +650,7 @@ class V2AdminPickupsController extends Controller
             $settings = $settings->first();
             $nsa_accounts = array_map('intval', explode(',', $settings->text));
         }
-
+        $walkin_shipment_ids = array();
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if($shipment){
@@ -814,7 +811,7 @@ class V2AdminPickupsController extends Controller
                     }
 
 
-                    if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id !== 4) {
+                    if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
 
                         $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
@@ -829,11 +826,13 @@ class V2AdminPickupsController extends Controller
 
                         $print_shipment_ids[] = $shipment_id;
                     }
+                    if(($shipment->charges_mode_id == 2 || $shipment->charges_mode_id == 1 ) && $shipment->booking_type_id == 4){
+                        $walkin_shipment_ids[] = $shipment->id;
+                    }
                 }
             }else {
                 unset($shipment_ids[$key]);
             }
-
         }
 
 
@@ -891,6 +890,9 @@ class V2AdminPickupsController extends Controller
         }
 
         NotificationsController::send(4, $shipment_ids);
+        if(count($walkin_shipment_ids) > 0){
+            NotificationsController::send(85, $walkin_shipment_ids , Auth::id());
+        }
         if (empty($print_shipment_ids)) {
             return redirect()->back()->with(['success' => 'Arrival Done']);
         }
@@ -1047,8 +1049,6 @@ class V2AdminPickupsController extends Controller
                     $details['weight'] = floatval($shipment->actual_weight);
 
                     $id = Auth::user();
-                    $shipment_ids = array($shipment->id);
-                    NotificationsController::send(85, $shipment_ids , $id);
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
@@ -1361,7 +1361,7 @@ class V2AdminPickupsController extends Controller
                         ShipmentChargesController::fuel_surcharge($shipment_id);
                     }
 
-                    if ($shipment->charges_mode_id == 2) {
+                    if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
 
                         $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
@@ -1375,6 +1375,10 @@ class V2AdminPickupsController extends Controller
                         $shipment->save();
 
                         $print_shipment_ids[] = $shipment_id;
+                    }
+                    if(($shipment->charges_mode_id == 2 || $shipment->charges_mode_id == 1) && $shipment->booking_type_id == 4){
+                        $shipment_ids = array($shipment->id);
+                        NotificationsController::send(85, $shipment_ids , Auth::id());
                     }
                 }
             }

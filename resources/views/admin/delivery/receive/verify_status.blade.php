@@ -958,7 +958,7 @@
                                     var rowNo = trybuy.rows().count();
                                     $.each(data.data,function (key,value) {
                                         trybuy_ids.push(value.pid);
-                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]' readonly onclick=\"return false;\">";
+                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
                                         trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
                                         trybuy.draw(false);
                                         $('#cod').text(data.total_cod);
