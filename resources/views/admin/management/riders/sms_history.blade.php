@@ -80,7 +80,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.management.riders.blacklist.list') }}',
+                        url: '{{ route('admin.management.riders.sms_history.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -95,10 +95,10 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.trax_id);
-                                row.push(values.city);
-                                row.push(values.hub);
-                                row.push(values.rider);
+                                row.push(values.body);
+                                row.push(values.send_by);
+                                row.push(values.riders);
+                                row.push(values.created_at);
                                 body.push(row);
                             });
                         },
