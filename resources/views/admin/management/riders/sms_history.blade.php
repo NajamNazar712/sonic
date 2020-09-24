@@ -80,7 +80,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.management.riders.blacklist.list') }}',
+                        url: '{{ route('admin.management.riders.sms_history.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -95,10 +95,10 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.trax_id);
-                                row.push(values.city);
-                                row.push(values.hub);
-                                row.push(values.rider);
+                                row.push(values.body);
+                                row.push(values.send_by);
+                                row.push(values.riders);
+                                row.push(values.created_at);
                                 body.push(row);
                             });
                         },
@@ -134,7 +134,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'body', name: 'sms_histories.body', class: 'align-middle msg_body'},
                     {data: 'send_by', name: 'admins.name', class: 'align-middle send_by'},
-                    {data: 'riders_count', name: 'riders_count', class: 'align-middle riders_count'},
+                    {data: 'riders_count', name: 'riders_count', class: 'align-middle riders_count', orderable: false, searchable: false},
                     {data: 'created_at', name: 'sms_histories.created_at', class: 'align-middle created_at'},
                 ],
                 rowCallback: function(row, data, index) {

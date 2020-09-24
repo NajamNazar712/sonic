@@ -529,10 +529,10 @@ class RiderManagementController extends Controller
     }
     public function sms_history_list(Request $request){
         $sms = SmsHistory::join('admins', 'admins.id', '=', 'sms_histories.sender_id')
-            ->select('sms_histories.id', 'sms_histories.body', 'sms_histories.created_at', 'admins.name as send_by', DB::raw('(SELECT COUNT(sr.id) FROM sms_history_riders AS sr  where sr.sms_history_id = sms_histories.id) AS riders_count') );
+            ->select('sms_histories.id', 'sms_histories.body', 'sms_histories.created_at', 'admins.name as send_by', DB::raw('(SELECT COUNT(sr.id) FROM sms_history_riders AS sr  where sr.sms_history_id = sms_histories.id) AS riders') );
         return Datatables::of($sms)
             ->editColumn('riders_count', function ($sms) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $sms->riders_count . '</button>';
+                return '<center><button class="btn btn-sm btn-outline-info align-middle">' . $sms->riders . '</button></center>';
             })
 
             ->make(true);
