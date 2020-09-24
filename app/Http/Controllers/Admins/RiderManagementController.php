@@ -555,7 +555,7 @@ class RiderManagementController extends Controller
             return ['status' => 0, 'success' => 'Rider Name', 'name' => $names];
         }
         else {
-            return ['status' => 1, 'error' => 'No Rider Name Show'];
+            return ['status' => 1, 'error' => 'No Rider found!'];
         }
     }
 }
