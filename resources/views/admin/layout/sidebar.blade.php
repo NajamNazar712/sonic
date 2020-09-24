@@ -896,7 +896,7 @@
                                     @if (session('role_id') == 1 || in_array(231, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.delivery_call_verification_ratio.index') }}">Delivery Call Verification Ratio</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 131, 205], session('permissions'))) !== 0)
+                                    @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 131, 205, 377, 378, 379, 380], session('permissions'))) !== 0)
                                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Network Management</span></a>
                                             <ul class="menu-content">
                                                 @if (session('role_id') == 1 || in_array(131, session('permissions')))
@@ -912,7 +912,7 @@
                                                     <li><a class="menu-item" href="{{route('admin.management.route.index')}}">Route</a></li>
                                                 @endif
 
-                                                @if (session('role_id') == 1 || in_array(96, session('permissions')))
+                                                    @if (session('role_id') == 1 || count(array_intersect([377, 378, 379, 380], session('permissions'))) !== 0)
                                                     <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Riders</span></a>
                                                         <ul class="menu-content">
                                                             @if (session('role_id') == 1 || in_array(377, session('permissions')))
