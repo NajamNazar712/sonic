@@ -573,6 +573,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\RiderManagementController@blacklist_list')->name('list');
             });
 
+            Route::prefix('sms_history')->name('sms_history.')->group(function (){
+                Route::get('','Admins\RiderManagementController@sms_history_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@sms_history_list')->name('list');
+            });
+
 
         });
 

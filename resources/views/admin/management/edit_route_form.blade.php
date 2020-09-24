@@ -81,7 +81,7 @@
             $(form).find('button[type=submit]').attr('disabled', 'disabled');
             swal({
                 title: 'Please Wait!',
-                text: 'Route is being added!',
+                text: 'Route is being updated!',
                 icon: 'info',
                 buttons: false,
                 closeOnClickOutside: false,

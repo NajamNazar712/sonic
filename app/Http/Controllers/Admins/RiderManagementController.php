@@ -136,6 +136,9 @@ class RiderManagementController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
+        if(Rider::where('cnic',$request->cnic)->exists()){
+            return redirect()->back()->with('error', 'Rider with this CNIC already exist!');
+        }
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
@@ -195,19 +198,11 @@ class RiderManagementController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
-        // $rider = Rider::where('id',$id)->update([
-        //     'city_id'=>$request->city_id,
-        //     'name'=>$request->rider_name,
-        //     'phone'=>$request->phone,
-        //     'cnic'=>$request->cnic,
-        //     'address'=>$request->address,
-        //     'route_id'=>$request->route_id,
-        //     'rider_category_id'=>$request->rider_category,
-        //     'special_rider' => ($request->has('special_rider_checkbox')? 1:0)
-        // ]);
 
         $rider = Rider::find($id);
-
+        if(Rider::where('id',  '<>', $id)->where('cnic',$request->cnic)->exists()){
+            return redirect()->back()->with('error', 'Another Rider with this CNIC already exist!');
+        }
         $rider->city_id = $request->city_id;
         $rider->name = $request->rider_name;
         $rider->phone = $request->phone;
@@ -526,6 +521,19 @@ class RiderManagementController extends Controller
                     return '';
                 }
             })
+            ->make(true);
+    }
+    public function sms_history_index(){
+        return view('admin.management.riders.sms_history');
+    }
+    public function sms_history_list(Request $request){
+        $sms = SmsHistory::join('admins', 'admins.id', '=', 'sms_histories.sender_id')
+            ->select('sms_histories.id', 'sms_histories.body', 'sms_histories.created_at', 'admins.name as send_by', '(SELECT COUNT(`id`) from `sms_history_riders` where `sms_history_riders`.`sms_history_id` = `sms_histories`.`id`) as riders_count' );
+        return Datatables::of($sms)
+            ->editColumn('riders_count', function ($sms) {
+                return $sms->riders_count;
+            })
+
             ->make(true);
     }
 }
