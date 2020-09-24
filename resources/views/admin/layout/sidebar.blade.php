@@ -925,7 +925,7 @@
                                                                 <li><a class="menu-item" href="{{route('admin.management.riders.blacklist.index')}}">Blacklisted</a></li>
                                                             @endif
                                                             @if (session('role_id') == 1 || in_array(380, session('permissions')))
-                                                                <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">SMS History</a></li>
+                                                                <li><a class="menu-item" href="{{route('admin.management.riders.sms_history.index')}}">SMS History</a></li>
                                                             @endif
                                                         </ul>
                                                     </li>

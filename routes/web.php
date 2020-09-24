@@ -576,6 +576,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('sms_history')->name('sms_history.')->group(function (){
                 Route::get('','Admins\RiderManagementController@sms_history_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@sms_history_list')->name('list');
+                Route::get('riders_name', 'Admins\RiderManagementController@all_riders')->name('riders_name');
+
             });
 
 
@@ -712,7 +714,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
-            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@v2_pickups_index')->name('index');
+            Route::get('', 'Admins\V2Pickup\v2_pickups@v2_pickups_index')->name('index');
             Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_list_v2')->name('list');
             Route::get('shipments', 'Admins\V2Pickup\V2AdminPickupsController@pickups_shipments')->name('shipments');
         });

@@ -14,6 +14,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
+use DB;
 
 class RiderManagementController extends Controller
 {
@@ -528,12 +529,33 @@ class RiderManagementController extends Controller
     }
     public function sms_history_list(Request $request){
         $sms = SmsHistory::join('admins', 'admins.id', '=', 'sms_histories.sender_id')
-            ->select('sms_histories.id', 'sms_histories.body', 'sms_histories.created_at', 'admins.name as send_by', '(SELECT COUNT(`id`) from `sms_history_riders` where `sms_history_riders`.`sms_history_id` = `sms_histories`.`id`) as riders_count' );
+            ->select('sms_histories.id', 'sms_histories.body', 'sms_histories.created_at', 'admins.name as send_by', DB::raw('(SELECT COUNT(sr.id) FROM sms_history_riders AS sr  where sr.sms_history_id = sms_histories.id) AS riders_count') );
         return Datatables::of($sms)
             ->editColumn('riders_count', function ($sms) {
-                return $sms->riders_count;
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $sms->riders_count . '</button>';
             })
 
             ->make(true);
+    }
+    public function all_riders(Request $request){
+        $sms_history_id = $request->input('sms_history_id');
+        //dd($rider_id);
+        $sms_history_rider = SmsHistoryRider::where('sms_history_id', $sms_history_id);
+        if(!$sms_history_rider->exists()){
+            return ['status' => 1, 'error' => 'No Rider found!'];
+        }
+        $sms_history_rider = $sms_history_rider->pluck('rider_id')->toArray();
+
+        if (count($sms_history_rider) > 0) {
+            $names = array();
+            foreach ($sms_history_rider as $rider_id) {
+                $names[] = Rider::find($rider_id)->name;
+            }
+
+            return ['status' => 0, 'success' => 'Rider Name', 'name' => $names];
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Rider Name Show'];
+        }
     }
 }
