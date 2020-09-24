@@ -14,7 +14,7 @@
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
 
-                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                            <table class="table table-bordered text-center datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S No.</th>
@@ -56,7 +56,11 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+    <style>
+        .msg_body{
+            width:400px !important;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -128,7 +132,7 @@
                 rowId : 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'body', name: 'sms_histories.body', class: 'align-middle body'},
+                    {data: 'body', name: 'sms_histories.body', class: 'align-middle msg_body'},
                     {data: 'send_by', name: 'admins.name', class: 'align-middle send_by'},
                     {data: 'riders_count', name: 'riders_count', class: 'align-middle riders_count'},
                     {data: 'created_at', name: 'sms_histories.created_at', class: 'align-middle created_at'},
