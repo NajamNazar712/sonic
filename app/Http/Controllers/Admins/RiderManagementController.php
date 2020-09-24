@@ -126,7 +126,7 @@ class RiderManagementController extends Controller
             'phone'=>'required|max:255',
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
-            'route_id'=>'required|numeric',
+            'route_id'=>'required',
             'rider_category'=>'required|numeric',
             'pin' => 'required|numeric',
             'trax_id'=>'required|max:255|string',
@@ -140,13 +140,28 @@ class RiderManagementController extends Controller
         if(Rider::where('cnic',$request->cnic)->exists()){
             return redirect()->back()->with('error', 'Rider with this CNIC already exist!');
         }
+        $route_id = null;
+        if($request->route_id == 'other'){
+            $route = new Route();
+            $route->city_id = $request->city_id;
+            $route->code = $request->route_code;
+            $route->start = $request->start;
+            $route->end = $request->end;
+            $route->junction = $request->junction;
+            $route->status = 1;
+            $route->save();
+            $route_id = $route->id;
+        }else{
+            $route_id = $request->route_id;
+        }
+
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
             'phone'=>$request->phone,
             'cnic'=>$request->cnic,
             'address'=>$request->address,
-            'route_id'=>$request->route_id,
+            'route_id'=>$route_id,
             'rider_category_id'=>$request->rider_category,
             'status'=>1,
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
@@ -189,7 +204,7 @@ class RiderManagementController extends Controller
             'phone'=>'required|max:255',
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
-            'route_id'=>'required|numeric',
+            'route_id'=>'required',
             'trax_id'=>'required|string',
             'rider_category'=>'required|numeric'
         ];
@@ -209,7 +224,7 @@ class RiderManagementController extends Controller
         $rider->phone = $request->phone;
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
-        $rider->route_id = $request->route_id;
+
 
         $rider->rider_category_id = $request->rider_category;
         $rider->trax_id = $request->trax_id;
@@ -219,12 +234,30 @@ class RiderManagementController extends Controller
         }else{
             $rider->special_rider = 0;
         }
+
+        $rider->updated_by = Auth::id();
+
+        if($request->route_id == 'other'){
+            $route = new Route();
+            $route->city_id = $request->city_id;
+            $route->code = $request->route_code;
+            $route->start = $request->start;
+            $route->end = $request->end;
+            $route->junction = $request->junction;
+            $route->status = 1;
+            $route->save();
+
+            $rider->route_id = $route->id;
+        }else{
+            $rider->route_id = $request->route_id;
+        }
         if($request->pin != '') {
             $rider->pin = bcrypt($request->pin);
 
             NotificationsController::send(61, $rider->id, $request->pin);
         }
-        $rider->updated_by = Auth::id();
+
+
         $rider->save();
 
         if($rider){

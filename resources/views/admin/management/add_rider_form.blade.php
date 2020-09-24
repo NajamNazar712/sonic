@@ -69,14 +69,6 @@
     <div class="row">
         <div class="col">
             <fieldset class="form-group">
-                <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    <option value="" selected>Select a Route</option>
-
-                </select>
-            </fieldset>
-        </div>
-        <div class="col">
-            <fieldset class="form-group">
                 <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                     <option value="" selected>Select a Rider Category</option>
                     @foreach($categories as $category)
@@ -84,6 +76,42 @@
                     @endforeach
                 </select>
             </fieldset>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    <option value="" selected>Select a Route</option>
+
+                </select>
+            </fieldset>
+        </div>
+
+    </div>
+    <div id="new_route_div" class="d-none">
+        <div class="row mb-2">
+            <div class="col">
+                <fieldset class="form-group">
+                    <input type="text" class="form-control" name="route_code" placeholder="Route Code" required data-rule-required="true" data-msg-required="This field is required">
+                </fieldset>
+
+            </div>
+            <div class="col">
+                <fieldset class="form-group">
+                    <input type="text" class="form-control" name="start"  id="startSearchTextField" placeholder="Start Point" required data-rule-required="true" data-msg-required="This field is required">
+                </fieldset>
+            </div>
+            <div class="col">
+                <fieldset class="form-group">
+                    <input type="text" class="form-control" name="end"  placeholder="End Point" required data-rule-required="true" data-msg-required="This field is required">
+                </fieldset>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <fieldset class="form-group">
+                    <textarea name="junction" class="form-control" placeholder="Add Junctions (comma seperated)" id="junction" cols="30" rows="5" required data-rule-required="true" data-msg-required="This field is required"></textarea>
+                </fieldset>
+            </div>
         </div>
     </div>
 </div>
@@ -146,8 +174,17 @@
                         var option = new Option(data[i].code+' ('+data[i].start+' to '+data[i].end+')', data[i].id, true, true);
                         routelist.append(option).trigger('change');
                     }
+                    routelist.append('<option value="other">Other</option>').trigger('change');
                 }
             });
+        });
+        $('#route_list').on('change', function () {
+            var selection = $(this).val();
+            if(selection == 'other'){
+                $('#new_route_div').removeClass('d-none');
+            }else{
+                $('#new_route_div').addClass('d-none');
+            }
         });
         $("#addRiderForm").validate({
 

@@ -76,22 +76,50 @@
         <div class="row">
             <div class="col">
                 <fieldset class="form-group">
-                    <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                        @foreach($routes as $route)
-                            <option value="{{$route->id}}">{{$rider->route->code}} ({{$route->start}} to {{$route->end}})</option>
+                    <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+
+                        @foreach($categories as $category)
+                            <option value="{{$category->id}}">{{$category->name}}</option>
                         @endforeach
                     </select>
                 </fieldset>
             </div>
             <div class="col">
                 <fieldset class="form-group">
-                    <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                        <option value="{{$rider->rider_category->id}}" selected>{{$rider->rider_category->name}}</option>
-                        @foreach($categories as $category)
-                            <option value="{{$category->id}}">{{$category->name}}</option>
+                    <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                        @foreach($routes as $route)
+                            <option value="{{$route->id}}">{{$rider->route->code}} ({{$route->start}} to {{$route->end}})</option>
                         @endforeach
+                        <option value="other">Other</option>
                     </select>
                 </fieldset>
+            </div>
+        </div>
+        <div id="new_route_div" class="d-none">
+            <div class="row mb-2">
+                <div class="col">
+                    <fieldset class="form-group">
+                        <input type="text" class="form-control" name="route_code" placeholder="Route Code" required data-rule-required="true" data-msg-required="This field is required">
+                    </fieldset>
+
+                </div>
+                <div class="col">
+                    <fieldset class="form-group">
+                        <input type="text" class="form-control" name="start"  id="startSearchTextField" placeholder="Start Point" required data-rule-required="true" data-msg-required="This field is required">
+                    </fieldset>
+                </div>
+                <div class="col">
+                    <fieldset class="form-group">
+                        <input type="text" class="form-control" name="end"  placeholder="End Point" required data-rule-required="true" data-msg-required="This field is required">
+                    </fieldset>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col">
+                    <fieldset class="form-group">
+                        <textarea name="junction" class="form-control" placeholder="Add Junctions (comma seperated)" id="junction" cols="30" rows="5" required data-rule-required="true" data-msg-required="This field is required"></textarea>
+                    </fieldset>
+                </div>
             </div>
         </div>
     </div>
@@ -110,6 +138,8 @@
         $('.select2').select2({
             dropdownParent: $("#editRider")
         });
+        var category_id = {{$rider->rider_category_id}};
+        $('#category_list').val(category_id).trigger('change');
         $("input[name='pin']").inputmask({
             'alias': 'integer',
             'allowMinus': false,
@@ -144,6 +174,14 @@
                     }
                 }
             });
+        });
+        $('#route_list').on('change', function () {
+           var selection = $(this).val();
+           if(selection == 'other'){
+                $('#new_route_div').removeClass('d-none');
+           }else{
+               $('#new_route_div').addClass('d-none');
+           }
         });
         $("#editRiderForm").validate({
 
