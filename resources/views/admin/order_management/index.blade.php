@@ -578,7 +578,6 @@
                     }
                 });
             }
-
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
@@ -873,22 +872,22 @@
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
                                 .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
+                                    column.search($(this).val(), false, false, true);
                                 } ).wrap(td);
                         }else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
                                 .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
+                                    column.search($(this).val(), false, false, true);
                                 } ).wrap(td);
                         }else if($(header).is('.payment_status')){
                             $(payment_select).appendTo($(search))
                                 .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
+                                    column.search($(this).val(), false, false, true);
                                 } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
+                                    column.search($(this).val(), false, false, true);
                             }).wrap(td).after(icon);
 
                             if (column.search()) {
