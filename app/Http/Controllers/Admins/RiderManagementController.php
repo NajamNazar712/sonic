@@ -539,7 +539,7 @@ class RiderManagementController extends Controller
     }
     public function all_riders(Request $request){
         $sms_history_id = $request->input('sms_history_id');
-        //dd($rider_id);
+
         $sms_history_rider = SmsHistoryRider::where('sms_history_id', $sms_history_id);
         if(!$sms_history_rider->exists()){
             return ['status' => 1, 'error' => 'No Rider found!'];
