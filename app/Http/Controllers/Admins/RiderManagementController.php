@@ -152,7 +152,7 @@ class RiderManagementController extends Controller
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
             'trax_id' => $request->trax_id,
-            'rider_type' => $type
+            'rider_type_id' => $type
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
