@@ -394,7 +394,7 @@
             $("#addRider").on("show.bs.modal", function(e) {
                 $.get( "/admin/management/riders/add", function( data ) {
                     $("#addRiderDiv").html(data);
-                    var html = '<input name="rider_type" value="1" type="hidden">';
+                    var html = '<input name="rider_type" value="2" type="hidden">';
                     $('#addRiderForm').append(html);
                 });
             });
@@ -404,7 +404,7 @@
 
                 $.get( "/admin/management/riders/"+id+"/edit", function( data ) {
                     $("#editRiderDiv").html(data);
-                    var html = '<input name="rider_type" value="1" type="hidden">';
+                    var html = '<input name="rider_type" value="2" type="hidden">';
                     $('#editRiderForm').append(html);
                 });
 
