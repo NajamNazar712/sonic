@@ -71,7 +71,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -402,7 +402,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -489,7 +489,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
