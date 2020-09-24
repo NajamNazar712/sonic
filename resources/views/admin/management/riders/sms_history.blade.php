@@ -31,7 +31,25 @@
             </div>
         </div>
     </section>
+    <!--Rider popup -->
+    <div class="modal fade" id="riders_modal" data-backdrop="static" role="dialog" aria-labelledby="riders_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="riders_modal_title">Rider(s)</h4>
 
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -51,7 +69,6 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -97,7 +114,7 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'],
-                scrollX: true, scrollY: '500px',
+                scrollX: false, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -108,7 +125,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.riders.sms_history.list') }}',
                 order: [[4, 'desc']],
-                rowId : 'sms_histories.id',
+                rowId : 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'body', name: 'sms_histories.body', class: 'align-middle body'},
@@ -148,7 +165,33 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('body').on('click','#datatable tbody tr td.riders_count button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#riders_modal .modal-body').html('');
+                $('#riders_modal').modal('show');
 
+                $.ajax({
+                    url: '{!! route('admin.management.riders.sms_history.riders_name') !!}',
+                    method: 'GET',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'sms_history_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status == 0) {
+                            var rider = '';
+
+                            $.each(data.name, function(index, riders) {
+                                rider += '<u>'+riders+'</a></u><br>';
+                            });
+
+                            $('#riders_modal .modal-body').html(rider);
+                        }else{
+
+                        }
+                    });
+            });
         });
     </script>
 
