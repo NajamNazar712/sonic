@@ -2917,7 +2917,7 @@ public function short_received_hub_wise_cron_index() {
         $junctions = array($request->origin, $request->destination);
         foreach ($request->junction as $junction_id){
             if(!in_array($junction_id, $junctions)){
-                $junction[] = $junction_id;
+                $junctions[] = $junction_id;
                 $junction = new RunnerJunction();
                 $junction->runner_id = $runner->id;
                 $junction->junction_id = $junction_id;
