@@ -232,7 +232,7 @@ class AdminRunnerController extends Controller
             }
         }
         if($request->status == 0){
-            return redirect()->back()->with('success', 'Runner On Route updated successfully!');
+            return redirect()->route('admin.runner.index')->with('success', 'Runner On Route updated successfully!');
         }
         else{
             $runner_detail->status = 1;
@@ -306,7 +306,7 @@ class AdminRunnerController extends Controller
             }
         }
         if($request->status == 0){
-            return redirect()->back()->with('success', 'Runner On Route updated successfully!');
+            return redirect()->route('admin.runner.index')->with('success', 'Runner On Route updated successfully!');
         }
         else{
             $runner_detail->status = 1;
