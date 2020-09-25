@@ -300,12 +300,14 @@
                                                 <div class="col-md-2">
                                                     <h3 class="card-title">Hub-Hub Delivery</h3>
                                                 </div>
-
+                                                <div class="col-2">
+                                                    <a href="javascript:void(0);" class="pull-right" id="on_hub_to_hub_switch"><input name="on_hub_to_hub_switch" type="checkbox"  class="switchery on_hub_to_hub_switch" data-size="sm" @if(isset($hub_delivery_type_status[1])) checked @endif/></a>
+                                                </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <fieldset class="form-group">
-                                                        @if(isset($min_weight[1]))
+                                                        @if(isset($min_weight[1]) && isset($hub_delivery_type_status[1]))
                                                         @foreach($min_weight[1] as $index => $mweight)
                                                             @if($mweight->delivery_type_id == 2)
                                                                     <input type="hidden" name="overnight_hub_min_chargeable_weight" value="{{$mweight->id}}">
@@ -348,7 +350,7 @@
                                                 </div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            @if(isset($weight[1]))
+                                            @if(isset($weight[1]) && isset($hub_delivery_type_status[1]))
                                                 @php
                                                     $index_row = 1;
                                                 @endphp
@@ -1195,12 +1197,14 @@
                                                 <div class="col-md-2">
                                                     <h3 class="card-title">Hub-Hub Delivery</h3>
                                                 </div>
-
+                                                <div class="col-2">
+                                                    <a href="javascript:void(0);" class="pull-right" id="ol_hub_to_hub_switch"><input name="ol_hub_to_hub_switch" type="checkbox"  class="switchery ol_hub_to_hub_switch" data-size="sm" @if(isset($hub_delivery_type_status[2])) checked @endif/></a>
+                                                </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <fieldset class="form-group">
-                                                        @if(isset($min_weight[2]))
+                                                        @if(isset($min_weight[2]) && isset($hub_delivery_type_status[2]))
                                                         @foreach($min_weight[2] as $index => $mweight)
                                                             @if($mweight->delivery_type_id == 2)
                                                                     <input type="hidden" name="overland_hub_min_chargeable_weight" value="{{$mweight->id}}">
@@ -1243,7 +1247,7 @@
                                                 </div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            @if(isset($weight[2]))
+                                            @if(isset($weight[2]) && isset($hub_delivery_type_status[2]))
                                                 @php
                                                     $index_row = 1;
                                                 @endphp
@@ -2094,12 +2098,14 @@
                                                 <div class="col-md-2">
                                                     <h3 class="card-title">Hub-Hub Delivery</h3>
                                                 </div>
-
+                                                <div class="col-2">
+                                                    <a href="javascript:void(0);" class="pull-right" id="detain_hub_to_hub_switch"><input name="detain_hub_to_hub_switch" type="checkbox"  class="switchery detain_hub_to_hub_switch" data-size="sm" @if(isset($hub_delivery_type_status[3])) checked @endif/></a>
+                                                </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <fieldset class="form-group">
-                                                        @if(isset($min_weight[3]))
+                                                        @if(isset($min_weight[3]) && isset($hub_delivery_type_status[3]))
                                                         @foreach($min_weight[3] as $index => $mweight)
                                                             @if($mweight->delivery_type_id == 2)
                                                                     <input type="hidden" name="detain_hub_min_chargeable_weight" value="{{$mweight->id}}">
@@ -2142,7 +2148,7 @@
                                                 </div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            @if(isset($weight[3]))
+                                            @if(isset($weight[3]) && isset($hub_delivery_type_status[3]))
                                                 @php
                                                     $index_row = 1;
                                                 @endphp
@@ -2963,12 +2969,14 @@
                                                 <div class="col-md-2">
                                                     <h3 class="card-title">Hub-Hub Delivery</h3>
                                                 </div>
-
+                                                <div class="col-2">
+                                                    <a href="javascript:void(0);" class="pull-right" id="detain_hub_to_hub_switch"><input name="detain_hub_to_hub_switch" type="checkbox"  class="switchery detain_hub_to_hub_switch" data-size="sm" @if(isset($hub_delivery_type_status[4])) checked @endif/></a>
+                                                </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <fieldset class="form-group">
-                                                        @if(isset($min_weight[4]))
+                                                        @if(isset($min_weight[4]) && isset($hub_delivery_type_status[4]))
                                                         @foreach($min_weight[4] as $index => $mweight)
                                                             @if($mweight->delivery_type_id == 2)
                                                                     <input type="hidden" name="sameday_hub_min_chargeable_weight" value="{{$mweight->id}}">
@@ -3002,7 +3010,7 @@
                                                 <div class="col-1"></div>
 
                                             </div>
-                                            @if(isset($weight[4]))
+                                            @if(isset($weight[4]) && isset($hub_delivery_type_status[4]))
                                                 @php
                                                     $index_row = 1;
                                                 @endphp
@@ -4280,6 +4288,69 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            //Hub to Hub Switches
+            $('#on_hub_to_hub_switch').on('change',function(){
+                var onhub_to_hub_switch = document.querySelector('.switchery.on_hub_to_hub_switch');
+                if (onhub_to_hub_switch.checked === true) {
+                    $('input[name="on_hub_mcw_charges"]').attr('disabled', false);
+                    $('.on_hub_weight_row input').attr('disabled', false);
+                    $('#on_hub_range_up1').attr('disabled', true);
+                    $('#hub_waddition_btn').attr('disabled', false);
+                } else if (onhub_to_hub_switch.checked === false) {
+                    $('.on_hub_weight_row input').attr('disabled', true);
+                    $('#hub_waddition_btn').attr('disabled', true);
+                    $('input[name="on_hub_mcw_charges"]').attr('disabled', true);
+                }
+            });
+
+            $('#ol_hub_to_hub_switch').on('change',function(){
+                var ol_hub_to_hub_switch = document.querySelector('.switchery.ol_hub_to_hub_switch');
+                if (ol_hub_to_hub_switch.checked === true) {
+                    $('input[name="ol_hub_mcw_charges"]').attr('disabled', false);
+                    $('.ol_hub_weight_row input').attr('disabled', false);
+                    $('#ol_hub_range_up1').attr('disabled', true);
+                    $('#overland_hub_weightadd').attr('disabled', false);
+                } else if (ol_hub_to_hub_switch.checked === false) {
+                    $('.ol_hub_weight_row input').attr('disabled', true);
+                    $('#overland_hub_weightadd').attr('disabled', true);
+                    $('input[name="ol_hub_mcw_charges"]').attr('disabled', true);
+
+                }
+            });
+
+            $('#detain_hub_to_hub_switch').on('change',function(){
+                var detain_hub_to_hub_switch = document.querySelector('.switchery.detain_hub_to_hub_switch');
+                if (detain_hub_to_hub_switch.checked === true) {
+                    $('input[name="detain_hub_mcw_charges"]').attr('disabled', false);
+                    $('.detain_hub_weight_row input').attr('disabled', false);
+                    $('#detain_hub_range_up1').attr('disabled', true);
+                    $('#detain_hub_weightadd').attr('disabled', false);
+                } else if (detain_hub_to_hub_switch.checked === false) {
+                    $('.detain_hub_weight_row input').attr('disabled', true);
+                    $('#detain_hub_weightadd').attr('disabled', true);
+                    $('input[name="detain_hub_mcw_charges"]').attr('disabled', true);
+
+                }
+            });
+
+            $('#sameday_hub_to_hub_switch').on('change',function(){
+                var sameday_hub_to_hub_switch = document.querySelector('.switchery.sameday_hub_to_hub_switch');
+                if (sameday_hub_to_hub_switch.checked === true) {
+                    $('input[name="sameday_hub_mcw_charges"]').attr('disabled', false);
+                    $('.sameday_hub_weight_row input').attr('disabled', false);
+                    $('#sameday_hub_range_up1').attr('disabled', true);
+                    $('#sameday_hub_weightadd').attr('disabled', false);
+                } else if (sameday_hub_to_hub_switch.checked === false) {
+                    $('.sameday_hub_weight_row input').attr('disabled', true);
+                    $('#sameday_hub_weightadd').attr('disabled', true);
+                    $('input[name="sameday_hub_mcw_charges"]').attr('disabled', true);
+
+                }
+            });
+
+            //hub to hub end
+
             $("#on_default").on('change', function(){
                 if($("#ol_default").is(":checked")){
                     $("#ol_default").trigger('click');

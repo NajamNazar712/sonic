@@ -639,7 +639,7 @@
 
             $('#select_service_type form #service_type').val(service_type).trigger('change');
             @endif
-
+            var open_delivery_status = @json($user_delivery_types);
             $('#select_service_type form').bind('submit', function(e) {
                 e.preventDefault();
 
@@ -743,6 +743,7 @@
                     $('#select_service_type').modal('hide');
 
                     shipping_modes();
+
                 }
                 else {
                     $('#select_service_type form #service_type-error').removeClass('d-none');
@@ -752,6 +753,23 @@
             $('#delivery_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Delivery Type*'
+            }).bind('select2:select', function(){
+                var selected_value = parseInt($(this).val());
+                console.log(selected_value)
+                var index = $.inArray(selected_value, open_delivery_status);
+                console.log(index)
+                if (index === -1) {
+                    // $("#delivery_type option[value='2']").attr('disabled', true);
+                    $(this).find('option[value="2"]').attr('disabled', true);
+                    $(this).val('').trigger('change');
+                    var error = 'Selected option is disabled!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                }else{
+                    // $(this).find('option[value="2"]').attr('disabled', false);
+                    // $("#delivery_type option[value='2']").removeAttr('disabled').trigger('change');
+                    $("#delivery_type option[value='2']").attr('disabled', false);
+                }
             });
 
             @if (!$default_pickup_address)

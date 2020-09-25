@@ -8,7 +8,9 @@ use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\Commission\SalesTier;
+use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\PackagingCharge;
+use App\Http\Models\PendingCorporateDeliveryTypeStatus;
 use App\Http\Models\Rates\HistoryPackagingCharge;
 use App\Http\Models\Rates\PendingPackagingCharge;
 use Carbon\Carbon;
@@ -377,7 +379,7 @@ class AdminCorporateAccountsController extends Controller
             $on_validations = [
 
                 'on_door_mcw_charges' => 'required|numeric|between:0,10000',
-                'on_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                'on_hub_mcw_charges' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
                 'on_door_range_up.*' => 'required|numeric|between:0,10000',
                 'on_door_range_down.*' => 'required|numeric|between:0,10000',
                 'on_door_local_charges.*' => 'required|numeric',
@@ -385,13 +387,13 @@ class AdminCorporateAccountsController extends Controller
                 'on_door_class_1_charges.*' => 'required',
                 'on_door_class_2_charges.*' => 'required',
                 'on_door_class_3_charges.*' => 'required',
-                'on_hub_range_up.*' => 'required|numeric|between:0,10000',
-                'on_hub_range_down.*' => 'required|numeric|between:0,10000',
-                'on_hub_local_charges.*' => 'required|numeric',
-                'on_hub_class_0_charges.*' => 'required|numeric',
-                'on_hub_class_1_charges.*' => 'required',
-                'on_hub_class_2_charges.*' => 'required',
-                'on_hub_class_3_charges.*' => 'required',
+                'on_hub_range_up.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'on_hub_range_down.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'on_hub_local_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
+                'on_hub_class_0_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
+                'on_hub_class_1_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                'on_hub_class_2_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                'on_hub_class_3_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
                 'on_replacement_charges' => 'required|numeric',
                 'on_tnb_charges' => 'required|numeric',
                 'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
@@ -418,7 +420,7 @@ class AdminCorporateAccountsController extends Controller
         if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
             $ol_validations = [
                 'ol_door_mcw_charges' => 'required|numeric|between:0,10000',
-                'ol_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                'ol_hub_mcw_charges' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
                 'ol_door_range_up.*' => 'required|numeric|between:0,10000',
                 'ol_door_range_down.*' => 'required|numeric|between:0,10000',
                 'ol_door_local_charges.*' => 'required|numeric',
@@ -426,13 +428,13 @@ class AdminCorporateAccountsController extends Controller
                 'ol_door_class_1_charges.*' => 'required',
                 'ol_door_class_2_charges.*' => 'required',
                 'ol_door_class_3_charges.*' => 'required',
-                'ol_hub_range_up.*' => 'required|numeric|between:0,10000',
-                'ol_hub_range_down.*' => 'required|numeric|between:0,10000',
-                'ol_hub_local_charges.*' => 'required|numeric',
-                'ol_hub_class_0_charges.*' => 'required|numeric',
-                'ol_hub_class_1_charges.*' => 'required',
-                'ol_hub_class_2_charges.*' => 'required',
-                'ol_hub_class_3_charges.*' => 'required',
+                'ol_hub_range_up.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'ol_hub_range_down.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'ol_hub_local_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
+                'ol_hub_class_0_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
+                'ol_hub_class_1_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                'ol_hub_class_2_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                'ol_hub_class_3_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
                 'ol_replacement_charges' => 'required|numeric',
                 'ol_tnb_charges' => 'required|numeric',
                 'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
@@ -459,7 +461,7 @@ class AdminCorporateAccountsController extends Controller
         if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
             $detain_validations = [
                 'detain_door_mcw_charges' => 'required|numeric|between:0,10000',
-                'detain_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                'detain_hub_mcw_charges' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
                 'detain_door_range_up.*' => 'required|numeric|between:0,10000',
                 'detain_door_range_down.*' => 'required|numeric|between:0,10000',
                 'detain_door_local_charges.*' => 'required|numeric',
@@ -467,13 +469,13 @@ class AdminCorporateAccountsController extends Controller
                 'detain_door_class_1_charges.*' => 'required',
                 'detain_door_class_2_charges.*' => 'required',
                 'detain_door_class_3_charges.*' => 'required',
-                'detain_hub_range_up.*' => 'required|numeric|between:0,10000',
-                'detain_hub_range_down.*' => 'required|numeric|between:0,10000',
-                'detain_hub_local_charges.*' => 'required|numeric',
-                'detain_hub_class_0_charges.*' => 'required|numeric',
-                'detain_hub_class_1_charges.*' => 'required',
-                'detain_hub_class_2_charges.*' => 'required',
-                'detain_hub_class_3_charges.*' => 'required',
+                'detain_hub_range_up.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'detain_hub_range_down.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'detain_hub_local_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
+                'detain_hub_class_0_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
+                'detain_hub_class_1_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                'detain_hub_class_2_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                'detain_hub_class_3_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
                 'detain_replacement_charges' => 'required|numeric',
                 'detain_tnb_charges' => 'required|numeric',
                 'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
@@ -500,7 +502,7 @@ class AdminCorporateAccountsController extends Controller
         if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
             $sameday_validations = [
                 'sameday_door_mcw_charges' => 'required|numeric|between:0,10000',
-                'sameday_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                'sameday_hub_mcw_charges' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
                 'sameday_door_range_up.*' => 'required|numeric|between:0,10000',
                 'sameday_door_range_down.*' => 'required|numeric|between:0,10000',
                 'sameday_door_local_charges.*' => 'required|numeric',
@@ -508,13 +510,13 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_door_class_1_charges.*' => 'required',
                 'sameday_door_class_2_charges.*' => 'required',
                 'sameday_door_class_3_charges.*' => 'required',
-                'sameday_hub_range_up.*' => 'required|numeric|between:0,10000',
-                'sameday_hub_range_down.*' => 'required|numeric|between:0,10000',
-                'sameday_hub_local_charges.*' => 'required|numeric',
-                'sameday_hub_class_0_charges.*' => 'required|numeric',
-                'sameday_hub_class_1_charges.*' => 'required',
-                'sameday_hub_class_2_charges.*' => 'required',
-                'sameday_hub_class_3_charges.*' => 'required',
+                'sameday_hub_range_up.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'sameday_hub_range_down.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'sameday_hub_local_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
+                'sameday_hub_class_0_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
+                'sameday_hub_class_1_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                'sameday_hub_class_2_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                'sameday_hub_class_3_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
                 'sameday_replacement_charges' => 'required|numeric',
                 'sameday_tnb_charges' => 'required|numeric',
                 'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
@@ -598,12 +600,15 @@ class AdminCorporateAccountsController extends Controller
                     'delivery_type_id' => 1,
                     'min_chargeable_weight' => $request->on_door_mcw_charges
                 ]);
-                CorporateMinChargeableWeight::create([
-                    'user_id' => $id,
-                    'shipping_mode_id' => 1,
-                    'delivery_type_id' => 2,
-                    'min_chargeable_weight' => $request->on_hub_mcw_charges
-                ]);
+                if ($request->has('on_hub_to_hub_switch') && $request->on_hub_to_hub_switch == 'on') {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $request->on_hub_mcw_charges
+                    ]);
+                }
+
                 CorporateRateStatus::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 1,
@@ -639,32 +644,43 @@ class AdminCorporateAccountsController extends Controller
                     ]);
 
                 }
-                $wa_switch = array();
-                foreach ($request->on_hub_range_up as $index => $on_hub_range_up) {
-                    if ($request->has('on_hub_wa_switch')) {
-                        if (array_key_exists($index, $request->on_hub_wa_switch)) {
-                            $wa_switch[$index] = 1;
+                if ($request->has('on_hub_to_hub_switch') && $request->on_hub_to_hub_switch == 'on') {
+                    $wa_switch = array();
+                    foreach ($request->on_hub_range_up as $index => $on_hub_range_up) {
+                        if ($request->has('on_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->on_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
                         } else {
                             $wa_switch[$index] = 0;
-                        };
-                    } else {
-                        $wa_switch[$index] = 0;
+                        }
+                        CorporateWeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'delivery_type_id' => 2,
+                            'range_up' => $request->on_hub_range_up[$index],
+                            'range_down' => $request->on_hub_range_down[$index],
+                            'base' => $wa_switch[$index],
+                            'local_or_6hr' => $request->on_hub_local_charges[$index],
+                            'national_charges_class_0' => $request->on_hub_class_0_charges[$index],
+                            'national_charges_class_1' => $request->on_hub_class_1_charges[$index],
+                            'national_charges_class_2' => $request->on_hub_class_2_charges[$index],
+                            'national_charges_class_3' => $request->on_hub_class_3_charges[$index]
+                        ]);
+
                     }
-                    CorporateWeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'delivery_type_id' => 2,
-                        'range_up' => $request->on_hub_range_up[$index],
-                        'range_down' => $request->on_hub_range_down[$index],
-                        'base' => $wa_switch[$index],
-                        'local_or_6hr' => $request->on_hub_local_charges[$index],
-                        'national_charges_class_0' => $request->on_hub_class_0_charges[$index],
-                        'national_charges_class_1' => $request->on_hub_class_1_charges[$index],
-                        'national_charges_class_2' => $request->on_hub_class_2_charges[$index],
-                        'national_charges_class_3' => $request->on_hub_class_3_charges[$index]
-                    ]);
+
+                    $delivery_type_status = new CorporateDeliveryTypeStatus();
+                    $delivery_type_status->user_id = $id;
+                    $delivery_type_status->delivery_type_id = 2;
+                    $delivery_type_status->shipping_mode_id = 1;
+                    $delivery_type_status->status = 1;
+                    $delivery_type_status->save();
 
                 }
+
 
                 //Replacement and Try and Buy charges
                 CorporateBookingTypeCharge::create([
@@ -782,12 +798,15 @@ class AdminCorporateAccountsController extends Controller
                     'delivery_type_id' => 1,
                     'min_chargeable_weight' => $request->ol_door_mcw_charges
                 ]);
-                CorporateMinChargeableWeight::create([
-                    'user_id' => $id,
-                    'shipping_mode_id' => 2,
-                    'delivery_type_id' => 2,
-                    'min_chargeable_weight' => $request->ol_hub_mcw_charges
-                ]);
+                if ($request->has('ol_hub_to_hub_switch') && $request->ol_hub_to_hub_switch == 'on') {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $request->ol_hub_mcw_charges
+                    ]);
+                }
+
                 CorporateRateStatus::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 2,
@@ -823,32 +842,42 @@ class AdminCorporateAccountsController extends Controller
                     ]);
 
                 }
-                $wa_switch = array();
-                foreach ($request->ol_hub_range_up as $index => $ol_hub_range_up) {
-                    if ($request->has('ol_hub_wa_switch')) {
-                        if (array_key_exists($index, $request->ol_hub_wa_switch)) {
-                            $wa_switch[$index] = 1;
+                if ($request->has('ol_hub_to_hub_switch') && $request->ol_hub_to_hub_switch == 'on') {
+                    $wa_switch = array();
+                    foreach ($request->ol_hub_range_up as $index => $ol_hub_range_up) {
+                        if ($request->has('ol_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->ol_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
                         } else {
                             $wa_switch[$index] = 0;
-                        };
-                    } else {
-                        $wa_switch[$index] = 0;
-                    }
-                    CorporateWeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'delivery_type_id' => 2,
-                        'range_up' => $request->ol_hub_range_up[$index],
-                        'range_down' => $request->ol_hub_range_down[$index],
-                        'base' => $wa_switch[$index],
-                        'local_or_6hr' => $request->ol_hub_local_charges[$index],
-                        'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
-                        'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
-                        'national_charges_class_2' => $request->ol_hub_class_2_charges[$index],
-                        'national_charges_class_3' => $request->ol_hub_class_3_charges[$index]
-                    ]);
+                        }
+                        CorporateWeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'delivery_type_id' => 2,
+                            'range_up' => $request->ol_hub_range_up[$index],
+                            'range_down' => $request->ol_hub_range_down[$index],
+                            'base' => $wa_switch[$index],
+                            'local_or_6hr' => $request->ol_hub_local_charges[$index],
+                            'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
+                            'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
+                            'national_charges_class_2' => $request->ol_hub_class_2_charges[$index],
+                            'national_charges_class_3' => $request->ol_hub_class_3_charges[$index]
+                        ]);
 
+                    }
+                    $delivery_type_status = new CorporateDeliveryTypeStatus();
+                    $delivery_type_status->user_id = $id;
+                    $delivery_type_status->delivery_type_id = 2;
+                    $delivery_type_status->shipping_mode_id = 2;
+                    $delivery_type_status->status = 1;
+                    $delivery_type_status->save();
                 }
+
+
                 CorporateBookingTypeCharge::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 2,
@@ -963,12 +992,16 @@ class AdminCorporateAccountsController extends Controller
                     'delivery_type_id' => 1,
                     'min_chargeable_weight' => $request->detain_door_mcw_charges
                 ]);
-                CorporateMinChargeableWeight::create([
-                    'user_id' => $id,
-                    'shipping_mode_id' => 3,
-                    'delivery_type_id' => 2,
-                    'min_chargeable_weight' => $request->detain_hub_mcw_charges
-                ]);
+                if ($request->has('detain_hub_to_hub_switch') && $request->detain_hub_to_hub_switch == 'on') {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $request->detain_hub_mcw_charges
+                    ]);
+                }
+
+
                 CorporateRateStatus::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 3,
@@ -1004,32 +1037,42 @@ class AdminCorporateAccountsController extends Controller
                     ]);
 
                 }
-                $wa_switch = array();
-                foreach ($request->detain_hub_range_up as $index => $detain_hub_range_up) {
-                    if ($request->has('detain_hub_wa_switch')) {
-                        if (array_key_exists($index, $request->detain_hub_wa_switch)) {
-                            $wa_switch[$index] = 1;
+                if ($request->has('detain_hub_to_hub_switch') && $request->detain_hub_to_hub_switch == 'on') {
+                    $wa_switch = array();
+                    foreach ($request->detain_hub_range_up as $index => $detain_hub_range_up) {
+                        if ($request->has('detain_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->detain_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
                         } else {
                             $wa_switch[$index] = 0;
-                        };
-                    } else {
-                        $wa_switch[$index] = 0;
+                        }
+                        CorporateWeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'delivery_type_id' => 2,
+                            'range_up' => $request->detain_hub_range_up[$index],
+                            'range_down' => $request->detain_hub_range_down[$index],
+                            'base' => $wa_switch[$index],
+                            'local_or_6hr' => $request->detain_hub_local_charges[$index],
+                            'national_charges_class_0' => $request->detain_hub_class_0_charges[$index],
+                            'national_charges_class_1' => $request->detain_hub_class_1_charges[$index],
+                            'national_charges_class_2' => $request->detain_hub_class_2_charges[$index],
+                            'national_charges_class_3' => $request->detain_hub_class_3_charges[$index]
+                        ]);
+
                     }
-                    CorporateWeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'delivery_type_id' => 2,
-                        'range_up' => $request->detain_hub_range_up[$index],
-                        'range_down' => $request->detain_hub_range_down[$index],
-                        'base' => $wa_switch[$index],
-                        'local_or_6hr' => $request->detain_hub_local_charges[$index],
-                        'national_charges_class_0' => $request->detain_hub_class_0_charges[$index],
-                        'national_charges_class_1' => $request->detain_hub_class_1_charges[$index],
-                        'national_charges_class_2' => $request->detain_hub_class_2_charges[$index],
-                        'national_charges_class_3' => $request->detain_hub_class_3_charges[$index]
-                    ]);
+                    $delivery_type_status = new CorporateDeliveryTypeStatus();
+                    $delivery_type_status->user_id = $id;
+                    $delivery_type_status->delivery_type_id = 2;
+                    $delivery_type_status->shipping_mode_id = 3;
+                    $delivery_type_status->status = 1;
+                    $delivery_type_status->save();
 
                 }
+
                 //Replacement and Try and Buy charges
                 CorporateBookingTypeCharge::create([
                     'user_id' => $id,
@@ -1146,12 +1189,15 @@ class AdminCorporateAccountsController extends Controller
                     'delivery_type_id' => 1,
                     'min_chargeable_weight' => $request->sameday_door_mcw_charges
                 ]);
-                CorporateMinChargeableWeight::create([
-                    'user_id' => $id,
-                    'shipping_mode_id' => 4,
-                    'delivery_type_id' => 2,
-                    'min_chargeable_weight' => $request->sameday_hub_mcw_charges
-                ]);
+                if ($request->has('sameday_hub_to_hub_switch') && $request->sameday_hub_to_hub_switch == 'on') {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $request->sameday_hub_mcw_charges
+                    ]);
+                }
+
                 CorporateRateStatus::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 4,
@@ -1162,6 +1208,7 @@ class AdminCorporateAccountsController extends Controller
                     'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
                 ]);
                 $wa_switch = array();
+
                 foreach ($request->sameday_door_range_up as $index => $sameday_door_range_up) {
                     if ($request->has('sameday_door_wa_switch')) {
                         if (array_key_exists($index, $request->sameday_door_wa_switch)) {
@@ -1187,31 +1234,42 @@ class AdminCorporateAccountsController extends Controller
                     ]);
 
                 }
-                foreach ($request->sameday_hub_range_up as $index => $sameday_hub_range_up) {
-                    if ($request->has('sameday_hub_wa_switch')) {
-                        if (array_key_exists($index, $request->sameday_hub_wa_switch)) {
-                            $wa_switch[$index] = 1;
+                if ($request->has('sameday_hub_to_hub_switch') && $request->sameday_hub_to_hub_switch == 'on') {
+                    $wa_switch = array();
+                    foreach ($request->sameday_hub_range_up as $index => $sameday_hub_range_up) {
+                        if ($request->has('sameday_hub_wa_switch')) {
+                            if (array_key_exists($index, $request->sameday_hub_wa_switch)) {
+                                $wa_switch[$index] = 1;
+                            } else {
+                                $wa_switch[$index] = 0;
+                            };
                         } else {
                             $wa_switch[$index] = 0;
-                        };
-                    } else {
-                        $wa_switch[$index] = 0;
-                    }
-                    CorporateWeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'delivery_type_id' => 2,
-                        'range_up' => $request->sameday_hub_range_up[$index],
-                        'range_down' => $request->sameday_hub_range_down[$index],
-                        'base' => $wa_switch[$index],
-                        'local_or_6hr' => $request->sameday_hub_local_charges[$index],
-                        'national_charges_class_0' => $request->sameday_hub_class_0_charges[$index],
-                        'national_charges_class_1' => 0,
-                        'national_charges_class_2' => 0,
-                        'national_charges_class_3' => 0
-                    ]);
+                        }
+                        CorporateWeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'delivery_type_id' => 2,
+                            'range_up' => $request->sameday_hub_range_up[$index],
+                            'range_down' => $request->sameday_hub_range_down[$index],
+                            'base' => $wa_switch[$index],
+                            'local_or_6hr' => $request->sameday_hub_local_charges[$index],
+                            'national_charges_class_0' => $request->sameday_hub_class_0_charges[$index],
+                            'national_charges_class_1' => 0,
+                            'national_charges_class_2' => 0,
+                            'national_charges_class_3' => 0
+                        ]);
 
+                    }
+
+                    $delivery_type_status = new CorporateDeliveryTypeStatus();
+                    $delivery_type_status->user_id = $id;
+                    $delivery_type_status->delivery_type_id = 2;
+                    $delivery_type_status->shipping_mode_id = 4;
+                    $delivery_type_status->status = 1;
+                    $delivery_type_status->save();
                 }
+
                 //Replacement and Try and Buy charges
                 CorporateBookingTypeCharge::create([
                     'user_id' => $id,
@@ -1473,15 +1531,16 @@ class AdminCorporateAccountsController extends Controller
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
+            $hub_delivery_type_status = CorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $existing = 0;
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4) {
-                   return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
+                   return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
                 } else {
                     return view('admin.access_denied');
                 }
             } else {
-                return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
+                return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
             }
 
         } elseif (($user['rate_status'] >= 1) && $user['status'] == 3) {
@@ -1541,16 +1600,17 @@ class AdminCorporateAccountsController extends Controller
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
+            $hub_delivery_type_status = CorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $existing = 1;
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
-                    return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids]);                }
+                    return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);                }
                 else{
                     return view('admin.access_denied');
                 }
             }
             else{
-                return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids]);            }
+                return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);            }
         }
     }
 
@@ -1814,7 +1874,7 @@ class AdminCorporateAccountsController extends Controller
                 $on_validations = [
 
                     'on_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'on_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                    'on_hub_mcw_charges' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
                     'on_door_range_up.*' => 'required|numeric|between:0,10000',
                     'on_door_range_down.*' => 'required|numeric|between:0,10000',
                     'on_door_local_charges.*' => 'required|numeric',
@@ -1822,13 +1882,13 @@ class AdminCorporateAccountsController extends Controller
                     'on_door_class_1_charges.*' => 'required',
                     'on_door_class_2_charges.*' => 'required',
                     'on_door_class_3_charges.*' => 'required',
-                    'on_hub_range_up.*' => 'required|numeric|between:0,10000',
-                    'on_hub_range_down.*' => 'required|numeric|between:0,10000',
-                    'on_hub_local_charges.*' => 'required|numeric',
-                    'on_hub_class_0_charges.*' => 'required|numeric',
-                    'on_hub_class_1_charges.*' => 'required',
-                    'on_hub_class_2_charges.*' => 'required',
-                    'on_hub_class_3_charges.*' => 'required',
+                    'on_hub_range_up.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'on_hub_range_down.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'on_hub_local_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
+                    'on_hub_class_0_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
+                    'on_hub_class_1_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                    'on_hub_class_2_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                    'on_hub_class_3_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
                     'on_replacement_charges' => 'required|numeric',
                     'on_tnb_charges' => 'required|numeric',
                     'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
@@ -1855,7 +1915,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
                     'ol_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'ol_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                    'ol_hub_mcw_charges' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
                     'ol_door_range_up.*' => 'required|numeric|between:0,10000',
                     'ol_door_range_down.*' => 'required|numeric|between:0,10000',
                     'ol_door_local_charges.*' => 'required|numeric',
@@ -1863,13 +1923,13 @@ class AdminCorporateAccountsController extends Controller
                     'ol_door_class_1_charges.*' => 'required',
                     'ol_door_class_2_charges.*' => 'required',
                     'ol_door_class_3_charges.*' => 'required',
-                    'ol_hub_range_up.*' => 'required|numeric|between:0,10000',
-                    'ol_hub_range_down.*' => 'required|numeric|between:0,10000',
-                    'ol_hub_local_charges.*' => 'required|numeric',
-                    'ol_hub_class_0_charges.*' => 'required|numeric',
-                    'ol_hub_class_1_charges.*' => 'required',
-                    'ol_hub_class_2_charges.*' => 'required',
-                    'ol_hub_class_3_charges.*' => 'required',
+                    'ol_hub_range_up.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'ol_hub_range_down.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'ol_hub_local_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
+                    'ol_hub_class_0_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
+                    'ol_hub_class_1_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                    'ol_hub_class_2_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                    'ol_hub_class_3_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
                     'ol_replacement_charges' => 'required|numeric',
                     'ol_tnb_charges' => 'required|numeric',
                     'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
@@ -1896,7 +1956,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
                     'detain_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'detain_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                    'detain_hub_mcw_charges' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
                     'detain_door_range_up.*' => 'required|numeric|between:0,10000',
                     'detain_door_range_down.*' => 'required|numeric|between:0,10000',
                     'detain_door_local_charges.*' => 'required|numeric',
@@ -1904,13 +1964,13 @@ class AdminCorporateAccountsController extends Controller
                     'detain_door_class_1_charges.*' => 'required',
                     'detain_door_class_2_charges.*' => 'required',
                     'detain_door_class_3_charges.*' => 'required',
-                    'detain_hub_range_up.*' => 'required|numeric|between:0,10000',
-                    'detain_hub_range_down.*' => 'required|numeric|between:0,10000',
-                    'detain_hub_local_charges.*' => 'required|numeric',
-                    'detain_hub_class_0_charges.*' => 'required|numeric',
-                    'detain_hub_class_1_charges.*' => 'required',
-                    'detain_hub_class_2_charges.*' => 'required',
-                    'detain_hub_class_3_charges.*' => 'required',
+                    'detain_hub_range_up.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'detain_hub_range_down.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'detain_hub_local_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
+                    'detain_hub_class_0_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
+                    'detain_hub_class_1_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                    'detain_hub_class_2_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                    'detain_hub_class_3_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
                     'detain_replacement_charges' => 'required|numeric',
                     'detain_tnb_charges' => 'required|numeric',
                     'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
@@ -1937,7 +1997,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
                     'sameday_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'sameday_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                    'sameday_hub_mcw_charges' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
                     'sameday_door_range_up.*' => 'required|numeric|between:0,10000',
                     'sameday_door_range_down.*' => 'required|numeric|between:0,10000',
                     'sameday_door_local_charges.*' => 'required|numeric',
@@ -1945,13 +2005,13 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_door_class_1_charges.*' => 'required',
                     'sameday_door_class_2_charges.*' => 'required',
                     'sameday_door_class_3_charges.*' => 'required',
-                    'sameday_hub_range_up.*' => 'required|numeric|between:0,10000',
-                    'sameday_hub_range_down.*' => 'required|numeric|between:0,10000',
-                    'sameday_hub_local_charges.*' => 'required|numeric',
-                    'sameday_hub_class_0_charges.*' => 'required|numeric',
-                    'sameday_hub_class_1_charges.*' => 'required',
-                    'sameday_hub_class_2_charges.*' => 'required',
-                    'sameday_hub_class_3_charges.*' => 'required',
+                    'sameday_hub_range_up.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'sameday_hub_range_down.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'sameday_hub_local_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
+                    'sameday_hub_class_0_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
+                    'sameday_hub_class_1_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                    'sameday_hub_class_2_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                    'sameday_hub_class_3_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
                     'sameday_replacement_charges' => 'required|numeric',
                     'sameday_tnb_charges' => 'required|numeric',
                     'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
@@ -2134,22 +2194,27 @@ class AdminCorporateAccountsController extends Controller
                             'min_chargeable_weight' => $request->on_door_mcw_charges
                         ]);
                     }
-                    if ($request->overnight_hub_min_chargeable_weight != null) {
-                        CorporateMinChargeableWeight::where('id', $request->overnight_hub_min_chargeable_weight)
-                            ->update([
+                    if ($request->has('on_hub_to_hub_switch') && $request->on_hub_to_hub_switch == 'on') {
+                        if ($request->overnight_hub_min_chargeable_weight != null) {
+                            CorporateMinChargeableWeight::where('id', $request->overnight_hub_min_chargeable_weight)
+                                ->update([
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 1,
+                                    'delivery_type_id' => 2,
+                                    'min_chargeable_weight' => $request->on_hub_mcw_charges
+                                ]);
+                        } else {
+                            CorporateMinChargeableWeight::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'delivery_type_id' => 2,
                                 'min_chargeable_weight' => $request->on_hub_mcw_charges
                             ]);
-                    } else {
-                        CorporateMinChargeableWeight::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'delivery_type_id' => 2,
-                            'min_chargeable_weight' => $request->on_hub_mcw_charges
-                        ]);
+                        }
+                    }else{
+                        CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', 1)->where('delivery_type_id', 2)->delete();
                     }
+
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->whereNotIn('id', $request->on_door_weight_record)->delete();
                     $wa_switch = array();
 
@@ -2200,23 +2265,39 @@ class AdminCorporateAccountsController extends Controller
 
                     }
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->whereNotIn('id', $request->on_hub_weight_record)->delete();
-                    $wa_switch = array();
+                    if ($request->has('on_hub_to_hub_switch') && $request->on_hub_to_hub_switch == 'on') {
+                        $wa_switch = array();
 
-                    foreach ($request->on_hub_weight_record as $index => $on_hub_weight_record) {
-                        if ($request->has('on_hub_wa_switch')) {
-                            if (array_key_exists($index, $request->on_hub_wa_switch)) {
-                                $wa_switch[$index] = 1;
+                        foreach ($request->on_hub_weight_record as $index => $on_hub_weight_record) {
+                            if ($request->has('on_hub_wa_switch')) {
+                                if (array_key_exists($index, $request->on_hub_wa_switch)) {
+                                    $wa_switch[$index] = 1;
+                                } else {
+                                    $wa_switch[$index] = 0;
+                                };
                             } else {
                                 $wa_switch[$index] = 0;
-                            };
-                        } else {
-                            $wa_switch[$index] = 0;
-                        }
+                            }
 
-                        if ($request->on_hub_weight_record[$index] != null) {
+                            if ($request->on_hub_weight_record[$index] != null) {
 
-                            CorporateWeightCharge::where('id', $request->on_hub_weight_record[$index])
-                                ->update([
+                                CorporateWeightCharge::where('id', $request->on_hub_weight_record[$index])
+                                    ->update([
+                                        'user_id' => $id,
+                                        'shipping_mode_id' => 1,
+                                        'delivery_type_id' => 2,
+                                        'range_up' => $request->on_hub_range_up[$index],
+                                        'range_down' => $request->on_hub_range_down[$index],
+                                        'base' => $wa_switch[$index],
+                                        'local_or_6hr' => $request->on_hub_local_charges[$index],
+                                        'national_charges_class_0' => $request->on_hub_class_0_charges[$index],
+                                        'national_charges_class_1' => $request->on_hub_class_1_charges[$index],
+                                        'national_charges_class_2' => $request->on_hub_class_2_charges[$index],
+                                        'national_charges_class_3' => $request->on_hub_class_3_charges[$index]
+                                    ]);
+                            }
+                            if ($request->on_hub_weight_record[$index] == null) {
+                                CorporateWeightCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
                                     'delivery_type_id' => 2,
@@ -2229,25 +2310,12 @@ class AdminCorporateAccountsController extends Controller
                                     'national_charges_class_2' => $request->on_hub_class_2_charges[$index],
                                     'national_charges_class_3' => $request->on_hub_class_3_charges[$index]
                                 ]);
-                        }
-                        if ($request->on_hub_weight_record[$index] == null) {
-                            CorporateWeightCharge::create([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 1,
-                                'delivery_type_id' => 2,
-                                'range_up' => $request->on_hub_range_up[$index],
-                                'range_down' => $request->on_hub_range_down[$index],
-                                'base' => $wa_switch[$index],
-                                'local_or_6hr' => $request->on_hub_local_charges[$index],
-                                'national_charges_class_0' => $request->on_hub_class_0_charges[$index],
-                                'national_charges_class_1' => $request->on_hub_class_1_charges[$index],
-                                'national_charges_class_2' => $request->on_hub_class_2_charges[$index],
-                                'national_charges_class_3' => $request->on_hub_class_3_charges[$index]
-                            ]);
-                        }
+                            }
 
 
+                        }
                     }
+
                     //Replacement and Try and Buy charges
                     if ($request->on_booking_record != null) {
                         CorporateBookingTypeCharge::where(['id' => $request->on_booking_record])->update([
@@ -2441,25 +2509,30 @@ class AdminCorporateAccountsController extends Controller
                             'min_chargeable_weight' => $request->ol_door_mcw_charges
                         ]);
                     }
-                    if ($request->overland_hub_min_chargeable_weight != null) {
-                        CorporateMinChargeableWeight::where('id', $request->overland_hub_min_chargeable_weight)
-                            ->update([
+                    if ($request->has('ol_hub_to_hub_switch') && $request->ol_hub_to_hub_switch == 'on') {
+                        if ($request->overland_hub_min_chargeable_weight != null) {
+                            CorporateMinChargeableWeight::where('id', $request->overland_hub_min_chargeable_weight)
+                                ->update([
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 2,
+                                    'delivery_type_id' => 2,
+                                    'min_chargeable_weight' => $request->ol_hub_mcw_charges
+                                ]);
+                        } else {
+                            CorporateMinChargeableWeight::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'delivery_type_id' => 2,
                                 'min_chargeable_weight' => $request->ol_hub_mcw_charges
                             ]);
-                    } else {
-                        CorporateMinChargeableWeight::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'delivery_type_id' => 2,
-                            'min_chargeable_weight' => $request->ol_hub_mcw_charges
-                        ]);
+                        }
+                    }else{
+                        CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', 2)->where('delivery_type_id', 2)->delete();
                     }
-                    $wa_switch = array();
+
 
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 1])->whereNotIn('id', $request->ol_door_weight_record)->delete();
+                    $wa_switch = array();
                     foreach ($request->ol_door_weight_record as $index => $ol_door_weight_record) {
                         if ($request->has('ol_door_wa_switch')) {
                             if (array_key_exists($index, $request->ol_door_wa_switch)) {
@@ -2509,20 +2582,36 @@ class AdminCorporateAccountsController extends Controller
                     $wa_switch = array();
 
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->whereNotIn('id', $request->ol_hub_weight_record)->delete();
-                    foreach ($request->ol_hub_weight_record as $index => $ol_hub_weight_record) {
-                        if ($request->has('ol_hub_wa_switch')) {
-                            if (array_key_exists($index, $request->ol_hub_wa_switch)) {
-                                $wa_switch[$index] = 1;
+                    if ($request->has('ol_hub_to_hub_switch') && $request->ol_hub_to_hub_switch == 'on') {
+                        foreach ($request->ol_hub_weight_record as $index => $ol_hub_weight_record) {
+                            if ($request->has('ol_hub_wa_switch')) {
+                                if (array_key_exists($index, $request->ol_hub_wa_switch)) {
+                                    $wa_switch[$index] = 1;
+                                } else {
+                                    $wa_switch[$index] = 0;
+                                };
                             } else {
                                 $wa_switch[$index] = 0;
-                            };
-                        } else {
-                            $wa_switch[$index] = 0;
-                        }
-                        if ($request->ol_hub_weight_record[$index] != null) {
+                            }
+                            if ($request->ol_hub_weight_record[$index] != null) {
 
-                            CorporateWeightCharge::where('id', $request->ol_hub_weight_record[$index])
-                                ->update([
+                                CorporateWeightCharge::where('id', $request->ol_hub_weight_record[$index])
+                                    ->update([
+                                        'user_id' => $id,
+                                        'shipping_mode_id' => 2,
+                                        'delivery_type_id' => 2,
+                                        'range_up' => $request->ol_hub_range_up[$index],
+                                        'range_down' => $request->ol_hub_range_down[$index],
+                                        'base' => $wa_switch[$index],
+                                        'local_or_6hr' => $request->ol_hub_local_charges[$index],
+                                        'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
+                                        'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
+                                        'national_charges_class_2' => $request->ol_hub_class_2_charges[$index],
+                                        'national_charges_class_3' => $request->ol_hub_class_3_charges[$index]
+                                    ]);
+                            }
+                            if ($request->ol_hub_weight_record[$index] == null) {
+                                CorporateWeightCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
                                     'delivery_type_id' => 2,
@@ -2535,25 +2624,12 @@ class AdminCorporateAccountsController extends Controller
                                     'national_charges_class_2' => $request->ol_hub_class_2_charges[$index],
                                     'national_charges_class_3' => $request->ol_hub_class_3_charges[$index]
                                 ]);
-                        }
-                        if ($request->ol_hub_weight_record[$index] == null) {
-                            CorporateWeightCharge::create([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 2,
-                                'delivery_type_id' => 2,
-                                'range_up' => $request->ol_hub_range_up[$index],
-                                'range_down' => $request->ol_hub_range_down[$index],
-                                'base' => $wa_switch[$index],
-                                'local_or_6hr' => $request->ol_hub_local_charges[$index],
-                                'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
-                                'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
-                                'national_charges_class_2' => $request->ol_hub_class_2_charges[$index],
-                                'national_charges_class_3' => $request->ol_hub_class_3_charges[$index]
-                            ]);
-                        }
+                            }
 
-
+                        }
                     }
+
+
                     //Replacement and Try and Buy charges
                     if ($request->ol_booking_record != null) {
                         CorporateBookingTypeCharge::where(['id' => $request->ol_booking_record])->update([
@@ -2751,22 +2827,26 @@ class AdminCorporateAccountsController extends Controller
                             'min_chargeable_weight' => $request->detain_door_mcw_charges
                         ]);
                     }
-                    if ($request->detain_hub_min_chargeable_weight != null) {
-                        CorporateMinChargeableWeight::where('id', $request->detain_hub_min_chargeable_weight)
-                            ->update([
+                    if ($request->has('detain_hub_to_hub_switch') && $request->detain_hub_to_hub_switch == 'on') {
+                        if ($request->detain_hub_min_chargeable_weight != null) {
+                            CorporateMinChargeableWeight::where('id', $request->detain_hub_min_chargeable_weight)
+                                ->update([
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 3,
+                                    'delivery_type_id' => 2,
+                                    'min_chargeable_weight' => $request->detain_hub_mcw_charges
+                                ]);
+                        } else {
+                            CorporateMinChargeableWeight::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'delivery_type_id' => 2,
                                 'min_chargeable_weight' => $request->detain_hub_mcw_charges
                             ]);
-                    } else {
-                        CorporateMinChargeableWeight::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'delivery_type_id' => 2,
-                            'min_chargeable_weight' => $request->detain_hub_mcw_charges
-                        ]);
+                        }
                     }
+
+
                     $wa_switch = array();
 
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 1])->whereNotIn('id', $request->detain_door_weight_record)->delete();
@@ -2819,21 +2899,37 @@ class AdminCorporateAccountsController extends Controller
                     $wa_switch = array();
 
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->whereNotIn('id', $request->detain_hub_weight_record)->delete();
-                    foreach ($request->detain_hub_weight_record as $index => $detain_hub_weight_record) {
-                        if ($request->has('detain_hub_wa_switch')) {
-                            if (array_key_exists($index, $request->detain_hub_wa_switch)) {
-                                $wa_switch[$index] = 1;
+                    if ($request->has('detain_hub_to_hub_switch') && $request->detain_hub_to_hub_switch == 'on') {
+                        foreach ($request->detain_hub_weight_record as $index => $detain_hub_weight_record) {
+                            if ($request->has('detain_hub_wa_switch')) {
+                                if (array_key_exists($index, $request->detain_hub_wa_switch)) {
+                                    $wa_switch[$index] = 1;
+                                } else {
+                                    $wa_switch[$index] = 0;
+                                };
                             } else {
                                 $wa_switch[$index] = 0;
-                            };
-                        } else {
-                            $wa_switch[$index] = 0;
-                        }
+                            }
 
-                        if ($request->detain_hub_weight_record[$index] != null) {
+                            if ($request->detain_hub_weight_record[$index] != null) {
 
-                            CorporateWeightCharge::where('id', $request->detain_hub_weight_record[$index])
-                                ->update([
+                                CorporateWeightCharge::where('id', $request->detain_hub_weight_record[$index])
+                                    ->update([
+                                        'user_id' => $id,
+                                        'shipping_mode_id' => 3,
+                                        'delivery_type_id' => 2,
+                                        'range_up' => $request->detain_hub_range_up[$index],
+                                        'range_down' => $request->detain_hub_range_down[$index],
+                                        'base' => $wa_switch[$index],
+                                        'local_or_6hr' => $request->detain_hub_local_charges[$index],
+                                        'national_charges_class_0' => $request->detain_hub_class_0_charges[$index],
+                                        'national_charges_class_1' => $request->detain_hub_class_1_charges[$index],
+                                        'national_charges_class_2' => $request->detain_hub_class_2_charges[$index],
+                                        'national_charges_class_3' => $request->detain_hub_class_3_charges[$index]
+                                    ]);
+                            }
+                            if ($request->detain_hub_weight_record[$index] == null) {
+                                CorporateWeightCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
                                     'delivery_type_id' => 2,
@@ -2846,25 +2942,12 @@ class AdminCorporateAccountsController extends Controller
                                     'national_charges_class_2' => $request->detain_hub_class_2_charges[$index],
                                     'national_charges_class_3' => $request->detain_hub_class_3_charges[$index]
                                 ]);
-                        }
-                        if ($request->detain_hub_weight_record[$index] == null) {
-                            CorporateWeightCharge::create([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 3,
-                                'delivery_type_id' => 2,
-                                'range_up' => $request->detain_hub_range_up[$index],
-                                'range_down' => $request->detain_hub_range_down[$index],
-                                'base' => $wa_switch[$index],
-                                'local_or_6hr' => $request->detain_hub_local_charges[$index],
-                                'national_charges_class_0' => $request->detain_hub_class_0_charges[$index],
-                                'national_charges_class_1' => $request->detain_hub_class_1_charges[$index],
-                                'national_charges_class_2' => $request->detain_hub_class_2_charges[$index],
-                                'national_charges_class_3' => $request->detain_hub_class_3_charges[$index]
-                            ]);
-                        }
+                            }
 
-
+                        }
                     }
+
+
 
                     //Replacement and Try and Buy charges
                     if ($request->detain_booking_record != null) {
@@ -3064,22 +3147,26 @@ class AdminCorporateAccountsController extends Controller
                             'min_chargeable_weight' => $request->sameday_door_mcw_charges
                         ]);
                     }
-                    if ($request->sameday_hub_min_chargeable_weight != null) {
-                        CorporateMinChargeableWeight::where('id', $request->sameday_hub_min_chargeable_weight)
-                            ->update([
+                    if ($request->has('sameday_hub_to_hub_switch') && $request->sameday_hub_to_hub_switch == 'on') {
+                        if ($request->sameday_hub_min_chargeable_weight != null) {
+                            CorporateMinChargeableWeight::where('id', $request->sameday_hub_min_chargeable_weight)
+                                ->update([
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 4,
+                                    'delivery_type_id' => 2,
+                                    'min_chargeable_weight' => $request->sameday_hub_mcw_charges
+                                ]);
+                        } else {
+                            CorporateMinChargeableWeight::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'delivery_type_id' => 2,
                                 'min_chargeable_weight' => $request->sameday_hub_mcw_charges
                             ]);
-                    } else {
-                        CorporateMinChargeableWeight::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'delivery_type_id' => 2,
-                            'min_chargeable_weight' => $request->sameday_hub_mcw_charges
-                        ]);
+                        }
                     }
+
+
 
                     $wa_switch = array();
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 1])->whereNotIn('id', $request->sameday_door_weight_record)->delete();
@@ -3132,21 +3219,37 @@ class AdminCorporateAccountsController extends Controller
                     $wa_switch = array();
 
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->whereNotIn('id', $request->sameday_hub_weight_record)->delete();
-                    foreach ($request->sameday_hub_weight_record as $index => $sameday_hub_weight_record) {
-                        if ($request->has('sameday_hub_wa_switch')) {
-                            if (array_key_exists($index, $request->sameday_hub_wa_switch)) {
-                                $wa_switch[$index] = 1;
+                    if ($request->has('sameday_hub_to_hub_switch') && $request->sameday_hub_to_hub_switch == 'on') {
+                        foreach ($request->sameday_hub_weight_record as $index => $sameday_hub_weight_record) {
+                            if ($request->has('sameday_hub_wa_switch')) {
+                                if (array_key_exists($index, $request->sameday_hub_wa_switch)) {
+                                    $wa_switch[$index] = 1;
+                                } else {
+                                    $wa_switch[$index] = 0;
+                                };
                             } else {
                                 $wa_switch[$index] = 0;
-                            };
-                        } else {
-                            $wa_switch[$index] = 0;
-                        }
+                            }
 
-                        if ($request->sameday_hub_weight_record[$index] != null) {
+                            if ($request->sameday_hub_weight_record[$index] != null) {
 
-                            CorporateWeightCharge::where('id', $request->sameday_hub_weight_record[$index])
-                                ->update([
+                                CorporateWeightCharge::where('id', $request->sameday_hub_weight_record[$index])
+                                    ->update([
+                                        'user_id' => $id,
+                                        'shipping_mode_id' => 4,
+                                        'delivery_type_id' => 2,
+                                        'range_up' => $request->sameday_hub_range_up[$index],
+                                        'range_down' => $request->sameday_hub_range_down[$index],
+                                        'base' => $wa_switch[$index],
+                                        'local_or_6hr' => $request->sameday_hub_local_charges[$index],
+                                        'national_charges_class_0' => $request->sameday_hub_class_0_charges[$index],
+                                        'national_charges_class_1' => 0,
+                                        'national_charges_class_2' => 0,
+                                        'national_charges_class_3' => 0
+                                    ]);
+                            }
+                            if ($request->sameday_hub_weight_record[$index] == null) {
+                                CorporateWeightCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 4,
                                     'delivery_type_id' => 2,
@@ -3159,25 +3262,13 @@ class AdminCorporateAccountsController extends Controller
                                     'national_charges_class_2' => 0,
                                     'national_charges_class_3' => 0
                                 ]);
-                        }
-                        if ($request->sameday_hub_weight_record[$index] == null) {
-                            CorporateWeightCharge::create([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 4,
-                                'delivery_type_id' => 2,
-                                'range_up' => $request->sameday_hub_range_up[$index],
-                                'range_down' => $request->sameday_hub_range_down[$index],
-                                'base' => $wa_switch[$index],
-                                'local_or_6hr' => $request->sameday_hub_local_charges[$index],
-                                'national_charges_class_0' => $request->sameday_hub_class_0_charges[$index],
-                                'national_charges_class_1' => 0,
-                                'national_charges_class_2' => 0,
-                                'national_charges_class_3' => 0
-                            ]);
-                        }
+                            }
 
 
+                        }
                     }
+
+
 
                     //Replacement and Try and Buy charges
                     if ($request->sameday_booking_record != null) {
@@ -3799,7 +3890,7 @@ class AdminCorporateAccountsController extends Controller
                 $on_validations = [
 
                     'on_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'on_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                    'on_hub_mcw_charges' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
                     'on_door_range_up.*' => 'required|numeric|between:0,10000',
                     'on_door_range_down.*' => 'required|numeric|between:0,10000',
                     'on_door_local_charges.*' => 'required|numeric',
@@ -3807,13 +3898,13 @@ class AdminCorporateAccountsController extends Controller
                     'on_door_class_1_charges.*' => 'required',
                     'on_door_class_2_charges.*' => 'required',
                     'on_door_class_3_charges.*' => 'required',
-                    'on_hub_range_up.*' => 'required|numeric|between:0,10000',
-                    'on_hub_range_down.*' => 'required|numeric|between:0,10000',
-                    'on_hub_local_charges.*' => 'required|numeric',
-                    'on_hub_class_0_charges.*' => 'required|numeric',
-                    'on_hub_class_1_charges.*' => 'required',
-                    'on_hub_class_2_charges.*' => 'required',
-                    'on_hub_class_3_charges.*' => 'required',
+                    'on_hub_range_up.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'on_hub_range_down.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'on_hub_local_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
+                    'on_hub_class_0_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
+                    'on_hub_class_1_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                    'on_hub_class_2_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                    'on_hub_class_3_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
                     'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                     'on_cash_range_down.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                     'on_cash_charges.*' => 'required_if:on_cash_handling_switch,==,on',
@@ -3838,7 +3929,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
                     'ol_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'ol_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                    'ol_hub_mcw_charges' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
                     'ol_door_range_up.*' => 'required|numeric|between:0,10000',
                     'ol_door_range_down.*' => 'required|numeric|between:0,10000',
                     'ol_door_local_charges.*' => 'required|numeric',
@@ -3846,13 +3937,13 @@ class AdminCorporateAccountsController extends Controller
                     'ol_door_class_1_charges.*' => 'required',
                     'ol_door_class_2_charges.*' => 'required',
                     'ol_door_class_3_charges.*' => 'required',
-                    'ol_hub_range_up.*' => 'required|numeric|between:0,10000',
-                    'ol_hub_range_down.*' => 'required|numeric|between:0,10000',
-                    'ol_hub_local_charges.*' => 'required|numeric',
-                    'ol_hub_class_0_charges.*' => 'required|numeric',
-                    'ol_hub_class_1_charges.*' => 'required',
-                    'ol_hub_class_2_charges.*' => 'required',
-                    'ol_hub_class_3_charges.*' => 'required',
+                    'ol_hub_range_up.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'ol_hub_range_down.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'ol_hub_local_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
+                    'ol_hub_class_0_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
+                    'ol_hub_class_1_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                    'ol_hub_class_2_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                    'ol_hub_class_3_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
                     'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                     'ol_cash_range_down.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                     'ol_cash_charges.*' => 'required_if:ol_cash_handling_switch,==,on',
@@ -3877,7 +3968,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
                     'detain_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'detain_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                    'detain_hub_mcw_charges' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
                     'detain_door_range_up.*' => 'required|numeric|between:0,10000',
                     'detain_door_range_down.*' => 'required|numeric|between:0,10000',
                     'detain_door_local_charges.*' => 'required|numeric',
@@ -3885,13 +3976,13 @@ class AdminCorporateAccountsController extends Controller
                     'detain_door_class_1_charges.*' => 'required',
                     'detain_door_class_2_charges.*' => 'required',
                     'detain_door_class_3_charges.*' => 'required',
-                    'detain_hub_range_up.*' => 'required|numeric|between:0,10000',
-                    'detain_hub_range_down.*' => 'required|numeric|between:0,10000',
-                    'detain_hub_local_charges.*' => 'required|numeric',
-                    'detain_hub_class_0_charges.*' => 'required|numeric',
-                    'detain_hub_class_1_charges.*' => 'required',
-                    'detain_hub_class_2_charges.*' => 'required',
-                    'detain_hub_class_3_charges.*' => 'required',
+                    'detain_hub_range_up.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'detain_hub_range_down.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'detain_hub_local_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
+                    'detain_hub_class_0_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
+                    'detain_hub_class_1_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                    'detain_hub_class_2_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                    'detain_hub_class_3_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
                     'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                     'detain_cash_range_down.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                     'detain_cash_charges.*' => 'required_if:detain_cash_handling_switch,==,on',
@@ -3916,7 +4007,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
                     'sameday_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'sameday_hub_mcw_charges' => 'required|numeric|between:0,10000',
+                    'sameday_hub_mcw_charges' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
                     'sameday_door_range_up.*' => 'required|numeric|between:0,10000',
                     'sameday_door_range_down.*' => 'required|numeric|between:0,10000',
                     'sameday_door_local_charges.*' => 'required|numeric',
@@ -3924,13 +4015,13 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_door_class_1_charges.*' => 'required',
                     'sameday_door_class_2_charges.*' => 'required',
                     'sameday_door_class_3_charges.*' => 'required',
-                    'sameday_hub_range_up.*' => 'required|numeric|between:0,10000',
-                    'sameday_hub_range_down.*' => 'required|numeric|between:0,10000',
-                    'sameday_hub_local_charges.*' => 'required|numeric',
-                    'sameday_hub_class_0_charges.*' => 'required|numeric',
-                    'sameday_hub_class_1_charges.*' => 'required',
-                    'sameday_hub_class_2_charges.*' => 'required',
-                    'sameday_hub_class_3_charges.*' => 'required',
+                    'sameday_hub_range_up.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'sameday_hub_range_down.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                    'sameday_hub_local_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
+                    'sameday_hub_class_0_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
+                    'sameday_hub_class_1_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                    'sameday_hub_class_2_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                    'sameday_hub_class_3_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
                     'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                     'sameday_cash_range_down.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                     'sameday_cash_charges.*' => 'required_if:sameday_cash_handling_switch,==,on',
@@ -3985,7 +4076,7 @@ class AdminCorporateAccountsController extends Controller
             PendingCorporateDiscountCharge::where('user_id', $id)->delete();
             PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
             PendingPackagingCharge::where('user_id', $id)->delete();
-
+            PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
             if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
                 $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
@@ -4024,13 +4115,16 @@ class AdminCorporateAccountsController extends Controller
                         'delivery_type_id' => 1,
                         'min_chargeable_weight' => $request->on_door_mcw_charges
                     ]);
+                    if ($request->has('on_hub_to_hub_switch') && $request->on_hub_to_hub_switch == 'on') {
+                        PendingCorporateMinChargeableWeight::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'delivery_type_id' => 2,
+                            'min_chargeable_weight' => $request->on_hub_mcw_charges
+                        ]);
+                    }
 
-                    PendingCorporateMinChargeableWeight::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'delivery_type_id' => 2,
-                        'min_chargeable_weight' => $request->on_hub_mcw_charges
-                    ]);
+
                     $wa_switch = array();
 
                     foreach ($request->on_door_weight_record as $index => $on_door_weight_record) {
@@ -4059,34 +4153,37 @@ class AdminCorporateAccountsController extends Controller
                         ]);
 
                     }
-                    $wa_switch = array();
+                    if ($request->has('on_hub_to_hub_switch') && $request->on_hub_to_hub_switch == 'on') {
+                        $wa_switch = array();
 
-                    foreach ($request->on_hub_weight_record as $index => $on_hub_weight_record) {
-                        if ($request->has('on_hub_wa_switch')) {
-                            if (array_key_exists($index, $request->on_hub_wa_switch)) {
-                                $wa_switch[$index] = 1;
+                        foreach ($request->on_hub_weight_record as $index => $on_hub_weight_record) {
+                            if ($request->has('on_hub_wa_switch')) {
+                                if (array_key_exists($index, $request->on_hub_wa_switch)) {
+                                    $wa_switch[$index] = 1;
+                                } else {
+                                    $wa_switch[$index] = 0;
+                                };
                             } else {
                                 $wa_switch[$index] = 0;
-                            };
-                        } else {
-                            $wa_switch[$index] = 0;
+                            }
+
+                            PendingCorporateWeightCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'delivery_type_id' => 2,
+                                'range_up' => $request->on_hub_range_up[$index],
+                                'range_down' => $request->on_hub_range_down[$index],
+                                'base' => $wa_switch[$index],
+                                'local_or_6hr' => $request->on_hub_local_charges[$index],
+                                'national_charges_class_0' => $request->on_hub_class_0_charges[$index],
+                                'national_charges_class_1' => $request->on_hub_class_1_charges[$index],
+                                'national_charges_class_2' => $request->on_hub_class_2_charges[$index],
+                                'national_charges_class_3' => $request->on_hub_class_3_charges[$index]
+                            ]);
+
                         }
-
-                        PendingCorporateWeightCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'delivery_type_id' => 2,
-                            'range_up' => $request->on_hub_range_up[$index],
-                            'range_down' => $request->on_hub_range_down[$index],
-                            'base' => $wa_switch[$index],
-                            'local_or_6hr' => $request->on_hub_local_charges[$index],
-                            'national_charges_class_0' => $request->on_hub_class_0_charges[$index],
-                            'national_charges_class_1' => $request->on_hub_class_1_charges[$index],
-                            'national_charges_class_2' => $request->on_hub_class_2_charges[$index],
-                            'national_charges_class_3' => $request->on_hub_class_3_charges[$index]
-                        ]);
-
                     }
+
                     PendingCorporateBookingTypeCharges::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -4205,13 +4302,16 @@ class AdminCorporateAccountsController extends Controller
                         'delivery_type_id' => 1,
                         'min_chargeable_weight' => $request->ol_door_mcw_charges
                     ]);
+                    if ($request->has('ol_hub_to_hub_switch') && $request->ol_hub_to_hub_switch == 'on') {
+                        PendingCorporateMinChargeableWeight::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'delivery_type_id' => 2,
+                            'min_chargeable_weight' => $request->ol_hub_mcw_charges
+                        ]);
+                    }
 
-                    PendingCorporateMinChargeableWeight::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'delivery_type_id' => 2,
-                        'min_chargeable_weight' => $request->ol_hub_mcw_charges
-                    ]);
+
                     $wa_switch = array();
 
                     foreach ($request->ol_door_weight_record as $index => $ol_door_weight_record) {
@@ -4239,33 +4339,37 @@ class AdminCorporateAccountsController extends Controller
                             'national_charges_class_3' => $request->ol_door_class_3_charges[$index]
                         ]);
                     }
-                    $wa_switch = array();
+                    if ($request->has('ol_hub_to_hub_switch') && $request->ol_hub_to_hub_switch == 'on') {
+                        $wa_switch = array();
 
-                    foreach ($request->ol_hub_weight_record as $index => $ol_hub_weight_record) {
-                        if ($request->has('ol_hub_wa_switch')) {
-                            if (array_key_exists($index, $request->ol_hub_wa_switch)) {
-                                $wa_switch[$index] = 1;
+                        foreach ($request->ol_hub_weight_record as $index => $ol_hub_weight_record) {
+                            if ($request->has('ol_hub_wa_switch')) {
+                                if (array_key_exists($index, $request->ol_hub_wa_switch)) {
+                                    $wa_switch[$index] = 1;
+                                } else {
+                                    $wa_switch[$index] = 0;
+                                };
                             } else {
                                 $wa_switch[$index] = 0;
-                            };
-                        } else {
-                            $wa_switch[$index] = 0;
-                        }
-                        PendingCorporateWeightCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'delivery_type_id' => 2,
-                            'range_up' => $request->ol_hub_range_up[$index],
-                            'range_down' => $request->ol_hub_range_down[$index],
-                            'base' => $wa_switch[$index],
-                            'local_or_6hr' => $request->ol_hub_local_charges[$index],
-                            'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
-                            'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
-                            'national_charges_class_2' => $request->ol_hub_class_2_charges[$index],
-                            'national_charges_class_3' => $request->ol_hub_class_3_charges[$index]
-                        ]);
+                            }
+                            PendingCorporateWeightCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 2,
+                                'delivery_type_id' => 2,
+                                'range_up' => $request->ol_hub_range_up[$index],
+                                'range_down' => $request->ol_hub_range_down[$index],
+                                'base' => $wa_switch[$index],
+                                'local_or_6hr' => $request->ol_hub_local_charges[$index],
+                                'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
+                                'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
+                                'national_charges_class_2' => $request->ol_hub_class_2_charges[$index],
+                                'national_charges_class_3' => $request->ol_hub_class_3_charges[$index]
+                            ]);
 
+                        }
                     }
+
+
 
                     PendingCorporateBookingTypeCharges::create([
                         'user_id' => $id,
@@ -4386,13 +4490,16 @@ class AdminCorporateAccountsController extends Controller
                         'delivery_type_id' => 1,
                         'min_chargeable_weight' => $request->detain_door_mcw_charges
                     ]);
+                    if ($request->has('detain_hub_to_hub_switch') && $request->detain_hub_to_hub_switch == 'on') {
+                        PendingCorporateMinChargeableWeight::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'delivery_type_id' => 2,
+                            'min_chargeable_weight' => $request->detain_hub_mcw_charges
+                        ]);
+                    }
 
-                    PendingCorporateMinChargeableWeight::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'delivery_type_id' => 2,
-                        'min_chargeable_weight' => $request->detain_hub_mcw_charges
-                    ]);
+
                     $wa_switch = array();
 
                     foreach ($request->detain_door_weight_record as $index => $detain_door_weight_record) {
@@ -4421,34 +4528,38 @@ class AdminCorporateAccountsController extends Controller
                         ]);
 
                     }
-                    $wa_switch = array();
+                    if ($request->has('detain_hub_to_hub_switch') && $request->detain_hub_to_hub_switch == 'on') {
+                        $wa_switch = array();
 
-                    foreach ($request->detain_hub_weight_record as $index => $detain_hub_weight_record) {
-                        if ($request->has('detain_hub_wa_switch')) {
-                            if (array_key_exists($index, $request->detain_hub_wa_switch)) {
-                                $wa_switch[$index] = 1;
+                        foreach ($request->detain_hub_weight_record as $index => $detain_hub_weight_record) {
+                            if ($request->has('detain_hub_wa_switch')) {
+                                if (array_key_exists($index, $request->detain_hub_wa_switch)) {
+                                    $wa_switch[$index] = 1;
+                                } else {
+                                    $wa_switch[$index] = 0;
+                                };
                             } else {
                                 $wa_switch[$index] = 0;
-                            };
-                        } else {
-                            $wa_switch[$index] = 0;
+                            }
+
+                            PendingCorporateWeightCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 3,
+                                'delivery_type_id' => 2,
+                                'range_up' => $request->detain_hub_range_up[$index],
+                                'range_down' => $request->detain_hub_range_down[$index],
+                                'base' => $wa_switch[$index],
+                                'local_or_6hr' => $request->detain_hub_local_charges[$index],
+                                'national_charges_class_0' => $request->detain_hub_class_0_charges[$index],
+                                'national_charges_class_1' => $request->detain_hub_class_1_charges[$index],
+                                'national_charges_class_2' => $request->detain_hub_class_2_charges[$index],
+                                'national_charges_class_3' => $request->detain_hub_class_3_charges[$index]
+                            ]);
+
                         }
-
-                        PendingCorporateWeightCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'delivery_type_id' => 2,
-                            'range_up' => $request->detain_hub_range_up[$index],
-                            'range_down' => $request->detain_hub_range_down[$index],
-                            'base' => $wa_switch[$index],
-                            'local_or_6hr' => $request->detain_hub_local_charges[$index],
-                            'national_charges_class_0' => $request->detain_hub_class_0_charges[$index],
-                            'national_charges_class_1' => $request->detain_hub_class_1_charges[$index],
-                            'national_charges_class_2' => $request->detain_hub_class_2_charges[$index],
-                            'national_charges_class_3' => $request->detain_hub_class_3_charges[$index]
-                        ]);
-
                     }
+
+
 
                     PendingCorporateBookingTypeCharges::create([
                         'user_id' => $id,
@@ -4566,13 +4677,14 @@ class AdminCorporateAccountsController extends Controller
                         'delivery_type_id' => 1,
                         'min_chargeable_weight' => $request->sameday_door_mcw_charges
                     ]);
-
-                    PendingCorporateMinChargeableWeight::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'delivery_type_id' => 2,
-                        'min_chargeable_weight' => $request->sameday_hub_mcw_charges
-                    ]);
+                    if ($request->has('sameday_hub_to_hub_switch') && $request->sameday_hub_to_hub_switch == 'on') {
+                        PendingCorporateMinChargeableWeight::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'delivery_type_id' => 2,
+                            'min_chargeable_weight' => $request->sameday_hub_mcw_charges
+                        ]);
+                    }
 
                     $wa_switch = array();
                     foreach ($request->sameday_door_weight_record as $index => $sameday_door_weight_record) {
@@ -4601,34 +4713,38 @@ class AdminCorporateAccountsController extends Controller
                         ]);
 
                     }
-                    $wa_switch = array();
+                    if ($request->has('sameday_hub_to_hub_switch') && $request->sameday_hub_to_hub_switch == 'on') {
+                        $wa_switch = array();
 
-                    foreach ($request->sameday_hub_weight_record as $index => $sameday_hub_weight_record) {
-                        if ($request->has('sameday_hub_wa_switch')) {
-                            if (array_key_exists($index, $request->sameday_hub_wa_switch)) {
-                                $wa_switch[$index] = 1;
+                        foreach ($request->sameday_hub_weight_record as $index => $sameday_hub_weight_record) {
+                            if ($request->has('sameday_hub_wa_switch')) {
+                                if (array_key_exists($index, $request->sameday_hub_wa_switch)) {
+                                    $wa_switch[$index] = 1;
+                                } else {
+                                    $wa_switch[$index] = 0;
+                                };
                             } else {
                                 $wa_switch[$index] = 0;
-                            };
-                        } else {
-                            $wa_switch[$index] = 0;
+                            }
+
+                            PendingCorporateWeightCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 4,
+                                'delivery_type_id' => 2,
+                                'range_up' => $request->sameday_hub_range_up[$index],
+                                'range_down' => $request->sameday_hub_range_down[$index],
+                                'base' => $wa_switch[$index],
+                                'local_or_6hr' => $request->sameday_hub_local_charges[$index],
+                                'national_charges_class_0' => $request->sameday_hub_class_0_charges[$index],
+                                'national_charges_class_1' => 0,
+                                'national_charges_class_2' => 0,
+                                'national_charges_class_3' => 0
+                            ]);
+
                         }
-
-                        PendingCorporateWeightCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'delivery_type_id' => 2,
-                            'range_up' => $request->sameday_hub_range_up[$index],
-                            'range_down' => $request->sameday_hub_range_down[$index],
-                            'base' => $wa_switch[$index],
-                            'local_or_6hr' => $request->sameday_hub_local_charges[$index],
-                            'national_charges_class_0' => $request->sameday_hub_class_0_charges[$index],
-                            'national_charges_class_1' => 0,
-                            'national_charges_class_2' => 0,
-                            'national_charges_class_3' => 0
-                        ]);
-
                     }
+
+
 
                     PendingCorporateBookingTypeCharges::create([
                         'user_id' => $id,
@@ -5413,7 +5529,7 @@ class AdminCorporateAccountsController extends Controller
                 CorporateDiscountCharge::where('user_id', $id)->delete();
                 CorporateMinChargeableWeight::where('user_id', $id)->delete();
                 PackagingCharge::where('user_id', $id)->delete();
-
+                CorporateDeliveryTypeStatus::where('user_id', $id)->delete();
                 if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
                         $packaging_charges = new PackagingCharge();
@@ -5423,6 +5539,38 @@ class AdminCorporateAccountsController extends Controller
                         $packaging_charges->charges = $pendingpackaging->charges;
                         $packaging_charges->save();
                     }
+                }
+                if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()){
+                    $delivery_type_status = new CorporateDeliveryTypeStatus();
+                    $delivery_type_status->user_id = $id;
+                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status['delivery_type_id'];
+                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status['shipping_mode_id'];
+                    $delivery_type_status->status = $pending_delivery_type_status['status'];
+                    $delivery_type_status->save();
+                }
+                if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->first()){
+                    $delivery_type_status = new CorporateDeliveryTypeStatus();
+                    $delivery_type_status->user_id = $id;
+                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status['delivery_type_id'];
+                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status['shipping_mode_id'];
+                    $delivery_type_status->status = $pending_delivery_type_status['status'];
+                    $delivery_type_status->save();
+                }
+                if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->first()){
+                    $delivery_type_status = new CorporateDeliveryTypeStatus();
+                    $delivery_type_status->user_id = $id;
+                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status['delivery_type_id'];
+                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status['shipping_mode_id'];
+                    $delivery_type_status->status = $pending_delivery_type_status['status'];
+                    $delivery_type_status->save();
+                }
+                if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->first()){
+                    $delivery_type_status = new CorporateDeliveryTypeStatus();
+                    $delivery_type_status->user_id = $id;
+                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status['delivery_type_id'];
+                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status['shipping_mode_id'];
+                    $delivery_type_status->status = $pending_delivery_type_status['status'];
+                    $delivery_type_status->save();
                 }
                 if ($pendingswitchs = PendingCorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
                     CorporateRateStatus::create([
@@ -6021,6 +6169,7 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
                 PendingCorporateDiscountCharge::where('user_id', $id)->delete();
                 PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
+                PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
                 User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
