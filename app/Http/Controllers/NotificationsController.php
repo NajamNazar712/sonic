@@ -5868,27 +5868,22 @@ class NotificationsController extends Controller
               }
 
               $to = array();
-              $cc = array();
 
-              $to_admins = Admin::whereIn('role_id', [10, 17, 25, 30])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+              $to_admins = Admin::whereIn('role_id', [23, 30, 10, 8, 3, 9])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                   $query->where('hub_id', $hub_id);
               });
               if ($to_admins->exists()) {
                   $to = array_merge($to, $to_admins->pluck('email')->toArray());
               }
-              $cc_admins = Admin::whereIn('role_id', [8, 9, 3, 2])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
-                  $query->where('hub_id', $hub_id);
-              });
-              if ($cc_admins->exists()) {
-                  $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
-              }
+
+              self::email($subject, $body, $to);
 
               self::email($subject, $body, $to, $cc);
           }
 
           else if($id == 87){
               $hub = City::find($reference_1_id);
-              $date = Carbon::today()->format('Y m d');
+              $date = Carbon::now()->toDateString();
               $subject = $notification->subject;
               $body = $notification->body;
 
@@ -5913,22 +5908,15 @@ class NotificationsController extends Controller
               }
 
               $to = array();
-              $cc = array();
 
-              $to_admins = Admin::whereIn('role_id', [10, 17, 25, 30])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+              $to_admins = Admin::whereIn('role_id', [23, 30, 10, 8, 3, 9])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                   $query->where('hub_id', $hub_id);
               });
               if ($to_admins->exists()) {
                   $to = array_merge($to, $to_admins->pluck('email')->toArray());
               }
-              $cc_admins = Admin::whereIn('role_id', [8, 9, 3, 2])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
-                  $query->where('hub_id', $hub_id);
-              });
-              if ($cc_admins->exists()) {
-                  $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
-              }
 
-              self::email($subject, $body, $to, $cc);
+              self::email($subject, $body, $to);
           }
 
           else if($id == 88){
