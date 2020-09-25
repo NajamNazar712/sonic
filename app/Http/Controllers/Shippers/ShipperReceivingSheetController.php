@@ -536,12 +536,12 @@ class ShipperReceivingSheetController extends Controller
 
             if ($user_type != 4) {
                 $main_details .= '
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
                 ';
             }
             else {
                 $main_details .= '
-                            <td class="text-center align-middle"><img src="' . public_path('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . public_path('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
                 ';
             }
 

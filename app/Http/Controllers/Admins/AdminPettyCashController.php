@@ -1004,7 +1004,7 @@ class AdminPettyCashController extends Controller
                       <table class="table table-sm table-bordered border">
                         <tbody>
                           <tr>
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Petty Cash Statement</strong></td>
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>

@@ -675,7 +675,7 @@ class AdminWalkInBookShipmentController extends Controller
                       <table class="table table-sm table-bordered border twice">
                         <tbody>
                           <tr>
-                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto">' . $print_details . '</td>
+                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                             <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
@@ -795,7 +795,7 @@ class AdminWalkInBookShipmentController extends Controller
                       <tbody>
                         <tr>
                           <td class="text-left align-middle">
-                            <img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1">
+                            <img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mb-1">
                             <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
                             <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
                             <div><strong>NTN:</strong> 7930679-5</div>
