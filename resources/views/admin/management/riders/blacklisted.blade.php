@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
 
-@section('title', 'Rider Management')
+@section('title', 'Blacklisted Riders')
 
 @section('content')
-    <h1>Rider Management</h1>
+    <h1>Blacklisted Riders</h1>
 
     <section>
         <div class="row">
@@ -25,6 +25,7 @@
                                     <th class="border-primary border-darken-1">Phone No</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Type</th>
                                     <th class="border-primary border-darken-1">Route</th>
                                     <th class="border-primary border-darken-1">Category</th>
                                     <th class="border-primary border-darken-1">Added On</th>
@@ -37,35 +38,43 @@
                             </table>
                         </div>
                     </div>
-                <div style="display: none;">
-                    <form id="rider_active_form" action="{{route('admin.management.rider.status')}}" method="post" class="mt-2">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="cid" id="cid">
-                        <input type="hidden" name="status" id="cstatus">
-                        <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Yes</button>
-                        <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">Cancel</button>
+                    <div style="display: none;">
+                        <form id="rider_active_form" action="{{route('admin.management.rider.status')}}" method="post" class="mt-2">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="cid" id="cid">
+                            <input type="hidden" name="status" id="cstatus">
+                            <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
+                            <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
 
 
-                    </form>
-                </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
+
+
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/textarea/autosize.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function() {
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -73,7 +82,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.management.rider.ajax') }}',
+                        url: '{{ route('admin.management.riders.blacklist.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -85,6 +94,7 @@
                             head.push('Phone No.');
                             head.push('CNIC');
                             head.push('Address');
+                            head.push('Type');
                             head.push('Route');
                             head.push('Category');
                             head.push('Added On');
@@ -104,6 +114,7 @@
                                 row.push(values.phone);
                                 row.push(values.cnic);
                                 row.push(values.address);
+                                row.push(values.rider_type);
                                 row.push(values.route);
                                 row.push(values.category);
                                 row.push(values.created_at);
@@ -119,35 +130,16 @@
                     return {body: body, header: head};
                 }
             } );
-            var table =  $('.datatable').DataTable({
+            var table =  $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || in_array(97, session('permissions')))
-
-                    buttons: [{
-                        text: '<i class="la la-motorcycle"></i> Add Rider',
-                        className: 'btn btn-primary',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#addRider').modal('show');
-
-                        }
-
-                    },
+                buttons: [
                     {
                         extend: 'excel',
-                        title: 'Rider Management',
+                        title: 'Blacklisted Riders',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'],
-                @else
-                buttons: [{
-                    extend: 'excel',
-                    title: 'Rider Management',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },
-                'reset'],
-                @endif
+                    },
+                    'reset'],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -157,8 +149,9 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.management.rider.ajax') }}',
-                order: [[10, 'desc']],
+                ajax: '{{ route('admin.management.riders.blacklist.list') }}',
+                order: [[11, 'desc']],
+                rowId : 'rider_id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},
@@ -168,6 +161,7 @@
                     {data: 'phone', name: 'riders.phone', class: 'align-middle phone'},
                     {data: 'cnic', name: 'riders.cnic', class: 'align-middle cnic'},
                     {data: 'address', name: 'riders.address', class: 'align-middle address'},
+                    {data: 'rider_type', name: 'riders.rider_type_id', class: 'align-middle rider_type'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
                     {data: 'category', name: 'rider_categories.id', class: 'align-middle category'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
@@ -180,7 +174,6 @@
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -192,13 +185,17 @@
                         '<option value="0">Inactive</option>' +
                         '<option value="1">Active</option>' +
                         '</select>';
+                    var type_select = '<select name="type_select" id="type_select" class="select2 form-control">' +
+                        '<option value="1">Permanent</option>' +
+                        '<option value="2">Incentive</option>' +
+                        '</select>';
                     var category_select = '<select name="category_select" id="category_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -207,6 +204,11 @@
                                 } ).wrap(td);
                         }else if($(header).is('.category')){
                             $(category_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.rider_type')){
+                            $(type_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -220,6 +222,12 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    $("#type_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Rider Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
@@ -249,20 +257,32 @@
                 }
             });
 
+            $('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.sms').enable();
+                }
+                else {
+                    table.button('.sms').disable();
+                }
+            });
 
             $("#addRider").on("show.bs.modal", function(e) {
-                $.get( "/admin/management/rider/add", function( data ) {
+                $.get( "/admin/management/riders/add", function( data ) {
                     $("#addRiderDiv").html(data);
+                    var html = '<input name="rider_type" value="1" type="hidden">';
+                    $('#addRiderForm').append(html);
                 });
-            });
-            $("#editRider").on("show.bs.modal", function(e) {
-
-                var id = $(e.relatedTarget).data('target-id');
-
-                $.get( "/admin/management/rider/"+id+"/edit", function( data ) {
-                    $("#editRiderDiv").html(data);
-                });
-
             });
 
             $('body').on('click','.deactivate',function (e) {
@@ -304,6 +324,57 @@
                 });
 
             });
+
+            $('body').on('click','button.blacklist',function (e) {
+                var rider_id = $(this).parents('tr').attr('id');
+
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to UnBlock this Rider!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+
+                        blockPagePermanently();
+                        $.ajax({
+                            url: '{!! route('admin.management.riders.rider_blacklist') !!}',
+                            method: 'POST',
+                            data: {
+                                'rider_id': rider_id,
+                                'action':'unblock',
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status == 0){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            table.draw(false);
+                            UnblockPagePermanently();
+                        });
+                    }
+                });
+
+            });
+
         });
     </script>
 

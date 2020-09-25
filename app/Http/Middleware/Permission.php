@@ -520,6 +520,16 @@ class Permission
             'management.rider.edit' => 98,
             'management.rider.status' => 99,
 
+            'management.riders.permanent.index' => 377,
+            'management.riders.permanent.list' => 377,
+            'management.riders.incentive.index' => 378,
+            'management.riders.incentive.list' => 378,
+            'management.riders.blacklisted.index' => 379,
+            'management.riders.blacklisted.list' => 379,
+            'management.riders.sms.index' => 380,
+            'management.riders.sms.list' => 380,
+
+
             'management.city_list' => 205,
 
             'notifications.index' => 100,

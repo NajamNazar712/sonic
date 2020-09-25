@@ -58,8 +58,8 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="">Update Route</button>
-        <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="">Update Route</button>
+        <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">Cancel</button>
 
     </div>
 </form>
@@ -81,7 +81,7 @@
             $(form).find('button[type=submit]').attr('disabled', 'disabled');
             swal({
                 title: 'Please Wait!',
-                text: 'Route is being added!',
+                text: 'Route is being updated!',
                 icon: 'info',
                 buttons: false,
                 closeOnClickOutside: false,

@@ -5791,7 +5791,7 @@ class NotificationsController extends Controller
           }
           else if($id == 85){
               $shipments = Shipment::find($reference_1_id);
-              $booking_person = $reference_2_id;
+              $booking_person_id = $reference_2_id;
               $subject = $notification->subject;
               $body = $notification->body;
 
@@ -5805,23 +5805,39 @@ class NotificationsController extends Controller
 
                   foreach ($shipments as $shipment) {
                       $origin = $shipment->pickup_address;
-                      $destination = $shipment->consignee_city;;
+                      $destination = $shipment->consignee_city;
                       $html .= '<tr>';
                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin->pickup_address  . '</td>';
                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $destination->name . '</td>';
                       if ($shipment->packaging_charges == null) {
                           $total_charges = $shipment->amount;
-                          $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          if($shipment->amount == 0){
+                              $total_charges = 0;
+                              $total_charges = $shipment->received_amount;
+                              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          }
+                          else{
+                              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          }
+
                       } else {
-                          $amount = $shipment->amount;
-                          $packaging = $shipment->packaging_charges;
-                          $total_charges = $amount + $packaging;
-                          $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          if($shipment->amount != 0){
+                              $amount = $shipment->amount;
+                              $packaging = $shipment->packaging_charges;
+                              $total_charges = $amount + $packaging;
+                              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          }
+                          else{
+                              $total_charges = 0;
+                              $amount = $shipment->received_amount;
+                              $packaging = $shipment->packaging_charges;
+                              $total_charges = $amount + $packaging;
+                              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                          }
                       }
                       $html .= '</tr>';
                   }
-
               $html .= '</tbody></table>';
               if (strpos($body, '[preview]') !== FALSE) {
                   $body = str_replace('[preview]', $html, $body);
@@ -5830,6 +5846,7 @@ class NotificationsController extends Controller
               $finance = Admin::whereIn('id', [12, 60, 49])->where('status', 1);
 
               $to = array();
+              $booking_person = Admin::find($booking_person_id);
               if($booking_person->email){
                   $to[] = $booking_person->email;
               }
@@ -5891,5 +5908,8 @@ class NotificationsController extends Controller
       if ($type == 1) {
         self::email($subject, $body, $to);
       }
+    }
+    static public function custom_sms($body, $to){
+        self::sms($body, $to);
     }
 }
