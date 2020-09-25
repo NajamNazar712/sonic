@@ -75,7 +75,7 @@ class VisionSoftAPIController extends Controller
         if (count($shippers) > 0) {
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             foreach ($shippers as $shipper) {
-                $sale_person = SalePersonTag::where('status', 0)->first();
+                $sale_person = SalePersonTag::where('status', 0)->where('user_id', $shipper->id)->first();
                 try {
                     $response = $client->post('Customers', [
                         'form_params' => [
@@ -280,7 +280,7 @@ class VisionSoftAPIController extends Controller
                                                 'pin_kp' => 'A',
                                                 'pin_loginid' => 'aeiouyh',
                                                 'pin_password' => 'meaumaur',
-                                                'pin_tr_date' => $today,
+                                                'pin_tr_date' => $today->format('m/d/Y'),
                                                 'pin_account_id' => $shipment_charges['account_id'],
                                                 'pin_origin_city' => $shipment_charges['origin_city_id'],
                                                 'pin_service_type' => $shipment_charges['service_type_id'],
@@ -350,10 +350,10 @@ class VisionSoftAPIController extends Controller
                             'pin_kp' => 'A',
                             'pin_loginid' => 'aeiouyh',
                             'pin_password' => 'meaumaur',
-                            'pin_tr_date' => $today,
+                            'pin_tr_date' => $today->format('m/d/Y'),
                             'pin_account_id' => $shipper->account_id,
                             'pin_account_name' => $shipper->account_name,
-                            'pin_hub_name' => $shipper->amount
+                            'pin_amount' => $shipper->amount
                         ]
                     ]);
                     $status_code = $response->getStatusCode();
@@ -503,7 +503,7 @@ class VisionSoftAPIController extends Controller
                                                 'pin_kp' => 'A',
                                                 'pin_loginid' => 'aeiouyh',
                                                 'pin_password' => 'meaumaur',
-                                                'pin_tr_date' => $today,
+                                                'pin_tr_date' => $today->format('m/d/Y'),
                                                 'pin_account_id' => $shipment_charges['account_id'],
                                                 'pin_origin_city' => $shipment_charges['origin_city_id'],
                                                 'pin_service_type' => $shipment_charges['service_type_id'],
@@ -586,7 +586,7 @@ class VisionSoftAPIController extends Controller
                             'pin_kp' => 'A',
                             'pin_loginid' => 'aeiouyh',
                             'pin_password' => 'meaumaur',
-                            'pin_tr_date' => $today,
+                            'pin_tr_date' => $today->format('m/d/Y'),
                             'pin_payment_id' => $payment->payment_id,
                             'pin_account_id' => $payment->account_id,
                             'pin_cityname' => $payment->city_name,
@@ -653,7 +653,7 @@ class VisionSoftAPIController extends Controller
                             'pin_kp' => 'A',
                             'pin_loginid' => 'aeiouyh',
                             'pin_password' => 'meaumaur',
-                            'pin_tr_date' => $today,
+                            'pin_tr_date' => $today->format('m/d/Y'),
                             'pin_payment_id' => $payment_clear->payment_id,
                             'pin_status' => $status,
                         ]
@@ -739,7 +739,7 @@ class VisionSoftAPIController extends Controller
                                 'pin_kp' => 'A',
                                 'pin_loginid' => 'aeiouyh',
                                 'pin_password' => 'meaumaur',
-                                'pin_tr_date' => $today,
+                                'pin_tr_date' => $today->format('m/d/Y'),
                                 'pin_hub_id' => $station_deposit_note->hub_id,
                                 'pin_sdn_number' => $station_deposit_note->id,
                                 'pin_bank' => $station_deposit_note->banks_list_id,
@@ -779,7 +779,7 @@ class VisionSoftAPIController extends Controller
                                     'pin_kp' => 'A',
                                     'pin_loginid' => 'aeiouyh',
                                     'pin_password' => 'meaumaur',
-                                    'pin_tr_date' => $today,
+                                    'pin_tr_date' => $today->format('m/d/Y'),
                                     'pin_hub_id' => $station_deposit_note->hub_id,
                                     'pin_sdn_number' => $station_deposit_note->id,
                                     'pin_bank' => $slip->bank_id,
@@ -818,7 +818,7 @@ class VisionSoftAPIController extends Controller
                                 'pin_kp' => 'A',
                                 'pin_loginid' => 'aeiouyh',
                                 'pin_password' => 'meaumaur',
-                                'pin_tr_date' => $today,
+                                'pin_tr_date' => $today->format('m/d/Y'),
                                 'pin_hub_id' => $station_deposit_note->hub_id,
                                 'pin_sdn_number' => $station_deposit_note->id,
                                 'pin_bank' => 0,
@@ -875,7 +875,7 @@ class VisionSoftAPIController extends Controller
                                         'pin_kp' => 'A',
                                         'pin_loginid' => 'aeiouyh',
                                         'pin_password' => 'meaumaur',
-                                        'pin_tr_date' => $today,
+                                        'pin_tr_date' => $today->format('m/d/Y'),
                                         'pin_ref_stmt_no' => $petty_cash_statement->reference_no,
                                         'pin_amount' => $petty_cash_statement_detail->amount,
                                         'pin_hub_id' => $petty_cash_statement_detail->hub_id,
@@ -944,9 +944,9 @@ class VisionSoftAPIController extends Controller
                             'pin_kp' => 'A',
                             'pin_loginid' => 'aeiouyh',
                             'pin_password' => 'meaumaur',
-                            'pin_tr_date' => $today,
+                            'pin_tr_date' => $today->format('m/d/Y'),
                             'pin_hub_id' => $city->hub_id,
-                            'pin_hub_name' => $city->amount
+                            'pin_amount' => $city->amount
                         ]
                     ]);
                     $status_code = $response->getStatusCode();
@@ -981,7 +981,7 @@ class VisionSoftAPIController extends Controller
                     'pin_c' => 6,
                     'pin_k' => 'A',
                     'pin_loginid' => 'aeiouyh',
-                    'pin_password' => 'SOFT'
+                    'pin_password' => 'meaumaur'
                 ]
             ]);
             $status_code = $response->getStatusCode();

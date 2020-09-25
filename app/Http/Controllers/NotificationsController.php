@@ -22,6 +22,8 @@ use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
+use App\http\Models\Runner;
+use App\http\Models\RunnerDetail;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -5928,6 +5930,48 @@ class NotificationsController extends Controller
 
               self::email($subject, $body, $to, $cc);
           }
+
+          else if($id == 88){
+              $subject = $notification->subject;
+              $body = $notification->body;
+              $date = Carbon::now()->toDateString();
+              $runner_detail = RunnerDetail::find($reference_1_id);
+              $runner = Runner::find($runner_detail->runner_id);
+              $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+              if (strpos($subject, '[runner]') !== FALSE) {
+                  $subject = str_replace('[runner]', $runner->name, $subject);
+              }
+
+              if (strpos($body, '[runner]') !== FALSE) {
+                  $body = str_replace('[runner]', $runner->name, $body);
+              }
+              if (strpos($subject, '[date]') !== FALSE) {
+                  $subject = str_replace('[date]', $date, $subject);
+              }
+
+              if (strpos($body, '[date]') !== FALSE) {
+                  $body = str_replace('[date]', $date, $body);
+              }
+              if (strpos($subject, '[link]') !== FALSE) {
+                  $subject = str_replace('[link]', $link, $subject);
+              }
+
+              if (strpos($body, '[link]') !== FALSE) {
+                  $body = str_replace('[link]', $link, $body);
+              }
+
+              $finance = Admin::whereIn('id', [12, 60, 49])->where('status', 1);
+
+              $to = array();
+
+              if ($finance->exists()) {
+                  $to = array_merge($to, $finance->pluck('email')->toArray());
+              }
+
+              self::email($subject, $body, $to);
+
+              }
         }
       }
     }

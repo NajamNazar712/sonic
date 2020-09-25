@@ -1,0 +1,594 @@
+<?php
+
+namespace App\Http\Controllers\Admins;
+
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\City;
+use App\Http\Models\Rider;
+use App\Http\Models\RiderCategory;
+use App\Http\Models\Route;
+use App\Http\Models\SmsHistory;
+use App\Http\Models\SmsHistoryRider;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Yajra\Datatables\Datatables;
+use DB;
+
+class RiderManagementController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
+    }
+
+    public function permanent_index(){
+        $category = RiderCategory::all();
+        return view('admin.management.riders.permanent_index')->with(['categories'=>$category]);
+    }
+
+    public function permanent_list(Request $request){
+        $rider = Rider::join('cities','riders.city_id','=','cities.id')
+            ->join('cities as c','cities.hub_id','=','c.id')
+            ->leftjoin('routes','routes.id','=','riders.route_id')
+            ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
+            ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
+            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist')
+        ->where('riders.rider_type_id', 1)
+        ->where('riders.blacklist', 0);
+
+        if (session('role_id') != 1) {
+            $rider = $rider->whereIn('cities.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($rider)
+            ->editColumn('status', function ($rider) {
+                return ($rider->status == 0)? 'Inactive': 'Active';
+            })
+            ->editColumn('trax_id', function ($rider) {
+                if($rider->trax_id != null){
+                    return $rider->trax_id;
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->editColumn('route', function ($rider) {
+                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn("action", function ($rider) {
+                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382], session('permissions'))) !== 0) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    if (session('role_id') == 1 || in_array(98, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $rider->id . ' rel="editRider" data-toggle="modal" data-target="#editRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
+                    }
+
+                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                        if ($rider->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+                        }
+                        else {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                        }
+                    }
+                    if (session('role_id') == 1 || in_array(381, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Incentive</div></button>';
+                    }
+                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
+                    }
+
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+    public function addRiderView(){
+        $city = City::select(['id','name'])->get();
+        $category = RiderCategory::all();
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
+    }
+    public function addRiderDetails(Request $request){
+        $type = $request->rider_type;
+        $validations = [
+            'city_id'=>'required|numeric',
+            'rider_name'=>'required|max:255',
+            'phone'=>'required|max:255',
+            'cnic'=>'required|max:255',
+            'address'=>'required|max:255',
+            'route_id'=>'required',
+            'rider_category'=>'required|numeric',
+            'pin' => 'required|numeric',
+            'trax_id'=>'required|max:255|string',
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
+        if(Rider::where('cnic',$request->cnic)->exists()){
+            return redirect()->back()->with('error', 'Rider with this CNIC already exist!');
+        }
+        $route_id = null;
+        if($request->route_id == 'other'){
+            $route = new Route();
+            $route->city_id = $request->city_id;
+            $route->code = $request->route_code;
+            $route->start = $request->start;
+            $route->end = $request->end;
+            $route->junction = $request->junction;
+            $route->status = 1;
+            $route->save();
+            $route_id = $route->id;
+        }else{
+            $route_id = $request->route_id;
+        }
+
+        $rider = Rider::create([
+            'city_id'=>$request->city_id,
+            'name'=>$request->rider_name,
+            'phone'=>$request->phone,
+            'cnic'=>$request->cnic,
+            'address'=>$request->address,
+            'route_id'=>$route_id,
+            'rider_category_id'=>$request->rider_category,
+            'status'=>1,
+            'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
+            'pin'=> bcrypt($request->pin),
+            'created_by' => Auth::id(),
+            'trax_id' => $request->trax_id,
+            'rider_type_id' => $type
+        ]);
+        if($rider){
+            NotificationsController::send(61, $rider->id, $request->pin);
+            return redirect()->back()->with('success','Rider added successfully');
+        }
+
+    }
+    public function categoryListAjax(Request $request){
+        $city_id = $request->id;
+        $route = Route::select(['id','code','start','end'])->where('city_id',$city_id)->where('status',1);
+
+        if (session('role_id') != 1) {
+            $route = $route->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $route = $route->get();
+
+        return response()->json($route);
+    }
+    public function editRiderView($id){
+        $city = City::select(['id','name'])->get();
+        $category = RiderCategory::all();
+        $rider = Rider::find($id);
+        $route = Route::where('city_id',$rider->city_id)->get();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route]);
+    }
+    public function editRiderDetails(Request $request,$id){
+        $validations = [
+            'city_id'=>'required|numeric',
+            'rider_name'=>'required|max:255',
+            'phone'=>'required|max:255',
+            'cnic'=>'required|max:255',
+            'address'=>'required|max:255',
+            'route_id'=>'required',
+            'trax_id'=>'required|string',
+            'rider_category'=>'required|numeric'
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
+
+        $rider = Rider::find($id);
+        if(Rider::where('id',  '<>', $id)->where('cnic',$request->cnic)->exists()){
+            return redirect()->back()->with('error', 'Another Rider with this CNIC already exist!');
+        }
+        $rider->city_id = $request->city_id;
+        $rider->name = $request->rider_name;
+        $rider->phone = $request->phone;
+        $rider->cnic = $request->cnic;
+        $rider->address = $request->address;
+
+
+        $rider->rider_category_id = $request->rider_category;
+        $rider->trax_id = $request->trax_id;
+
+        if($request->has('special_rider_checkbox')){
+            $rider->special_rider = 1;
+        }else{
+            $rider->special_rider = 0;
+        }
+
+        $rider->updated_by = Auth::id();
+
+        if($request->route_id == 'other'){
+            $route = new Route();
+            $route->city_id = $request->city_id;
+            $route->code = $request->route_code;
+            $route->start = $request->start;
+            $route->end = $request->end;
+            $route->junction = $request->junction;
+            $route->status = 1;
+            $route->save();
+
+            $rider->route_id = $route->id;
+        }else{
+            $rider->route_id = $request->route_id;
+        }
+        if($request->pin != '') {
+            $rider->pin = bcrypt($request->pin);
+
+            NotificationsController::send(61, $rider->id, $request->pin);
+        }
+
+
+        $rider->save();
+
+        if($rider){
+            return redirect()->back()->with('success','Rider updated successfully');
+        }
+    }
+    public function riderStatus(Request $request){
+        $id = $request->cid;
+        $status = $request->status;
+        if($status == 'riderActive'){
+            $rider = Rider::where('id',$id)->update(['status'=>1]);
+            if($rider){
+                return redirect()->back()->with('success','Rider is activated successfully');
+            }
+        }else if($status == 'riderInactive'){
+            $rider =Rider::where('id',$id)->update(['status'=>0]);
+            if($rider){
+                return redirect()->back()->with('success','Route is now inactive');
+            }
+
+        }
+
+    }
+    public function rider_phone_unique(Request $request) {
+        if ($request->filled('phone')) {
+            if ($request->input('phone') == '0213-8772222') {
+                return 'true';
+            }
+            else {
+                $rider = Rider::where('phone', $request->input('phone'));
+
+                if ($request->has('id')) {
+                    $rider = $rider->where('id', '!=', $request->input('id'));
+                }
+
+                if (!$rider->exists()) {
+                    return 'true';
+                }
+                else {
+                    return 'false';
+                }
+            }
+        }
+        else {
+            return 'true';
+        }
+    }
+
+    public function rider_incentive(Request $request){
+        $rider_id = $request->rider_id;
+        if($rider_id){
+            $rider = Rider::find($rider_id);
+            if($rider){
+                $rider_status = $rider->rider_type_id;
+                if($rider_status == 1){
+                    $rider->rider_type_id = 2;
+                    $rider->save();
+                    return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
+                }
+                return response()->json(['status' => 1, 'error' => 'Rider already Marked as Incentive Rider!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+    }
+
+    public function rider_permanent(Request $request){
+        $rider_id = $request->rider_id;
+        if($rider_id){
+            $rider = Rider::find($rider_id);
+            if($rider){
+                $rider_status = $rider->rider_type_id;
+                if($rider_status == 2){
+                    $rider->rider_type_id = 1;
+                    $rider->save();
+                    return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
+                }
+                return response()->json(['status' => 1, 'error' => 'Rider already Marked as Permanent Rider!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+    }
+
+    public function rider_blacklist(Request $request){
+        $rider_id = $request->rider_id;
+        $action = $request->action;
+        if(!$rider_id){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+
+        $rider = Rider::find($rider_id);
+        if(!$rider){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+
+        if($action == 'block'){
+            $rider->blacklist = 1;
+            $rider->save();
+            return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
+        }
+        if($action == 'unblock'){
+            $rider->blacklist = 0;
+            $rider->save();
+            return response()->json(['status' => 0, 'success' => 'Rider is Unblocked!']);
+        }
+
+    }
+
+    public function send_sms(Request $request){
+        $rider_ids = explode(',', $request->selected_riders);
+        if(count($rider_ids) > 0) {
+           $body = trim($request->get('body'));
+            $sms_history = new SmsHistory();
+            $sms_history->body = $body;
+            $sms_history->sender_id = Auth::id();
+            $sms_history->save();
+            $sms_history_id = $sms_history->id;
+           foreach ($rider_ids as $rider_id){
+               $rider = Rider::find($rider_id);
+               if($rider){
+                   $to = $rider->phone;
+                   $sms_history_rider = new SmsHistoryRider();
+                   $sms_history_rider->sms_history_id = $sms_history_id;
+                   $sms_history_rider->rider_id = $rider_id;
+                   $sms_history_rider->save();
+                   NotificationsController::custom_sms($body, $to);
+               }
+           }
+            return redirect()->back()->with('success' , 'SMS successfully sent!');
+        }
+    }
+
+    public function incentive_index(){
+        $category = RiderCategory::all();
+        return view('admin.management.riders.incentive_index')->with(['categories'=>$category]);
+    }
+
+    public function incentive_list(){
+        $rider = Rider::join('cities','riders.city_id','=','cities.id')
+            ->join('cities as c','cities.hub_id','=','c.id')
+            ->leftjoin('routes','routes.id','=','riders.route_id')
+            ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
+            ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
+            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist')
+            ->where('riders.rider_type_id', 2)
+            ->where('riders.blacklist', 0);
+
+        if (session('role_id') != 1) {
+            $rider = $rider->whereIn('cities.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($rider)
+            ->editColumn('status', function ($rider) {
+                return ($rider->status == 0)? 'Inactive': 'Active';
+            })
+            ->editColumn('trax_id', function ($rider) {
+                if($rider->trax_id != null){
+                    return $rider->trax_id;
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->editColumn('route', function ($rider) {
+                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn("action", function ($rider) {
+                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382], session('permissions'))) !== 0) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    if (session('role_id') == 1 || in_array(98, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $rider->id . ' rel="editRider" data-toggle="modal" data-target="#editRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
+                    }
+
+                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                        if ($rider->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+                        }
+                        else {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                        }
+                    }
+                    if (session('role_id') == 1 || in_array(381, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Permanent</div></button>';
+                    }
+                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
+                    }
+
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+    public function blacklist_index(){
+        $category = RiderCategory::all();
+        return view('admin.management.riders.blacklisted')->with(['categories'=>$category]);
+    }
+    public function blacklist_list(Request $request){
+        $rider = Rider::join('cities','riders.city_id','=','cities.id')
+            ->join('cities as c','cities.hub_id','=','c.id')
+            ->leftjoin('routes','routes.id','=','riders.route_id')
+            ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
+            ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
+            ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
+            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist', 'rt.name as rider_type')
+            ->where('riders.blacklist', 1);
+
+        if (session('role_id') != 1) {
+            $rider = $rider->whereIn('cities.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($rider)
+            ->editColumn('status', function ($rider) {
+                return ($rider->status == 0)? 'Inactive': 'Active';
+            })
+            ->editColumn('trax_id', function ($rider) {
+                if($rider->trax_id != null){
+                    return $rider->trax_id;
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->editColumn('route', function ($rider) {
+                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn("action", function ($rider) {
+                if (session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                        if ($rider->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+                        }
+                        else {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                        }
+                    }
+
+                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Unblock</div></button>';
+                    }
+
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+    public function sms_history_index(){
+        return view('admin.management.riders.sms_history');
+    }
+    public function sms_history_list(Request $request){
+        $sms = SmsHistory::join('admins', 'admins.id', '=', 'sms_histories.sender_id')
+            ->select('sms_histories.id', 'sms_histories.body', 'sms_histories.created_at', 'admins.name as send_by', DB::raw('(SELECT COUNT(sr.id) FROM sms_history_riders AS sr  where sr.sms_history_id = sms_histories.id) AS riders') );
+        return Datatables::of($sms)
+            ->editColumn('riders_count', function ($sms) {
+                return '<center><button class="btn btn-sm btn-outline-info align-middle">' . $sms->riders . '</button></center>';
+            })
+
+            ->make(true);
+    }
+    public function all_riders(Request $request){
+        $sms_history_id = $request->input('sms_history_id');
+
+        $sms_history_rider = SmsHistoryRider::where('sms_history_id', $sms_history_id);
+        if(!$sms_history_rider->exists()){
+            return ['status' => 1, 'error' => 'No Rider found!'];
+        }
+        $sms_history_rider = $sms_history_rider->pluck('rider_id')->toArray();
+
+        if (count($sms_history_rider) > 0) {
+            $names = array();
+            foreach ($sms_history_rider as $rider_id) {
+                $names[] = Rider::find($rider_id)->name;
+            }
+
+            return ['status' => 0, 'success' => 'Rider Name', 'name' => $names];
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Rider found!'];
+        }
+    }
+}

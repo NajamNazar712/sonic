@@ -545,6 +545,43 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/status', 'Admins\AdminDashboardController@riderStatus')->name('status');
             Route::get('/phone_unique', 'Admins\AdminDashboardController@rider_phone_unique')->name('phone_unique');
         });
+        Route::prefix('riders')->name('riders.')->group(function (){
+            Route::get('/add', 'Admins\RiderManagementController@addRiderView')->name('add');
+            Route::get('categoryAjax', 'Admins\RiderManagementController@categoryListAjax')->name('category.ajax');
+            Route::post('/add', 'Admins\RiderManagementController@addRiderDetails')->name('add');
+            Route::get('{id}/edit', 'Admins\RiderManagementController@editRiderView')->name('edit');
+            Route::put('{id}/edit', 'Admins\RiderManagementController@editRiderDetails')->name('edit');
+            Route::put('/status', 'Admins\RiderManagementController@riderStatus')->name('status');
+            Route::get('/phone_unique', 'Admins\RiderManagementController@rider_phone_unique')->name('phone_unique');
+            Route::post('incentive', 'Admins\RiderManagementController@rider_incentive')->name('incentive');
+            Route::post('permanent', 'Admins\RiderManagementController@rider_permanent')->name('permanent');
+            Route::post('rider_blacklist', 'Admins\RiderManagementController@rider_blacklist')->name('rider_blacklist');
+            Route::post('send_sms', 'Admins\RiderManagementController@send_sms')->name('send_sms');
+
+            Route::prefix('permanent')->name('permanent.')->group(function (){
+                Route::get('','Admins\RiderManagementController@permanent_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@permanent_list')->name('list');
+            });
+
+            Route::prefix('incentive')->name('incentive.')->group(function (){
+                Route::get('','Admins\RiderManagementController@incentive_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@incentive_list')->name('list');
+            });
+
+            Route::prefix('blacklist')->name('blacklist.')->group(function (){
+                Route::get('','Admins\RiderManagementController@blacklist_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@blacklist_list')->name('list');
+            });
+
+            Route::prefix('sms_history')->name('sms_history.')->group(function (){
+                Route::get('','Admins\RiderManagementController@sms_history_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@sms_history_list')->name('list');
+                Route::get('riders_name', 'Admins\RiderManagementController@all_riders')->name('riders_name');
+
+            });
+
+
+        });
 
         Route::prefix('zonal')->name('zonal.')->group(function () {
             Route::get('', 'Admins\AdminZonalManagementController@index')->name('index');
@@ -677,7 +714,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     Route::prefix('v2_pickups')->name('v2_pickups.')->group(function () {
         Route::prefix('rider')->name('rider.')->group(function () {
-            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@v2_pickups_index')->name('index');
+            Route::get('', 'Admins\V2Pickup\v2_pickups@v2_pickups_index')->name('index');
             Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_list_v2')->name('list');
             Route::get('shipments', 'Admins\V2Pickup\V2AdminPickupsController@pickups_shipments')->name('shipments');
         });
@@ -1992,10 +2029,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@over_payment_limit_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@over_payment_limit_store')->name('store');
         });
-
-        Route::prefix('short_received_hub_wise_cron')->name('short_received_hub_wise_cron.')->group(function () {
+		Route::prefix('short_received_hub_wise_cron')->name('short_received_hub_wise_cron.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@short_received_hub_wise_cron_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@short_received_hub_wise_cron_store')->name('store');
+        });
+
+        Route::prefix('restrict_parcels_attempt')->name('restrict_parcels_attempt.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@restrict_parcels_attempt_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@restrict_parcels_attempt_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@restrict_parcels_attempt_add')->name('add');
+            Route::post('edit', 'Admins\GlobalSettingsController@restrict_parcels_attempt_edit')->name('edit');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@restrict_parcels_attempt_enable_disable')->name('enable_disable');
+        });
+
+        Route::prefix('runner')->name('runner.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@runner_report_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@runner_report_list')->name('list');
+            Route::get('unique', 'Admins\GlobalSettingsController@runner_report_unique')->name('unique');
+            Route::post('add', 'Admins\GlobalSettingsController@runner_report_add')->name('add');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@runner_report_enable_disable')->name('enable_disable');
         });
     });
 
@@ -2159,6 +2211,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
             Route::post('shipment_details', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_try_and_buy_shipment_details')->name('shipment_details');
         });
+    });
+
+    Route::prefix('runner')->name('runner.')->group(function () {
+        Route::get('', 'Admins\AdminRunnerController@index')->name('index');
+        Route::get('list', 'Admins\AdminRunnerController@list')->name('list');
+        Route::get('add', 'Admins\AdminRunnerController@runner_details_add_index')->name('add');
+        Route::post('add/submit', 'Admins\AdminRunnerController@runner_details_add_submit')->name('add.submit');
+        Route::get('edit/{id?}', 'Admins\AdminRunnerController@runner_details_edit_index')->name('edit');
+        Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
     });
 
 });
