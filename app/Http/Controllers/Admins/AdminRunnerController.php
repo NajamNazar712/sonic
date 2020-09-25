@@ -1,0 +1,320 @@
+<?php
+
+namespace App\Http\Controllers\Admins;
+
+use App\Http\Controllers\NotificationsController;
+use App\http\Models\Runner;
+use App\http\Models\RunnerDetail;
+use App\http\Models\RunnerDetailTime;
+use App\http\Models\RunnerJunction;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Yajra\Datatables\Datatables;
+
+class AdminRunnerController extends Controller
+{
+    public function __construct() {
+        $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
+    }
+
+    public function index(){
+        $existing_runners = RunnerDetail::where('status', 0)->pluck('runner_id')->toArray();
+        $runners = Runner::where('status', 1)->whereNotIn('id', $existing_runners)->get();
+        return view('admin.runner.index')->with(['runners' => $runners]);
+    }
+    public function list(Request $request){
+        $runner_details = RunnerDetail::join('runners as r', 'r.id', '=', 'runner_details.runner_id')
+            ->join('admins as a', 'a.id', '=', 'runner_details.created_by')
+            ->select('runner_details.id', 'r.name as runner', 'runner_details.driver_name', 'runner_details.vehicle_no', 'runner_details.contact_no', 'runner_details.created_at', 'a.name as created_by')
+            ->where('runner_details.status', 0);
+        $datatable = Datatables::of($runner_details)
+            ->addColumn('action', function ($data){
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">update</div></button>';
+
+
+                return $dropdown;
+
+            });
+        return $datatable->make(true);
+    }
+    static public function runner_report($runner_detail_id, $text){
+        $runner_detail = RunnerDetail::find($runner_detail_id);
+        $runner_detail_time = RunnerDetailTime::where('runner_detail_id', $runner_detail->id)->get();
+        $current_day = Carbon::now()->dayOfWeek;
+        $week_days = [
+            0 => 'Sunday',
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday'
+        ];
+        $today = $week_days[$current_day];
+        $runner_detail_array = array();
+        $runner_detail_array[] = ['list' => 'Driver Name:', 'data' => $runner_detail->driver_name, 'info' => Carbon::now()->format('d F Y')];
+        $runner_detail_array[] = ['list' => 'Vehicle:', 'data' => $runner_detail->vehicle_no, 'info' => ''];
+        $runner_detail_array[] = ['list' => 'Contact:', 'data' => $runner_detail->contact_no, 'info' => $runner_detail->runner->name];
+        $runner_detail_array[] = ['list' => 'Day:', 'data' => $today, 'info' => $text];
+        $runner_detail_array[] = ['list' => '', 'data' => '', 'info' => ''];
+        $runner_detail_array[] = ['list' => '', 'data' => '', 'info' => ''];
+        $runner_detail_array['header'] = ['Origin', 'TO', 'Destination', 'Departure Date Time', 'Arrival Date Time', 'Duration', 'Stay Time'];
+        $runner_detail_array[] = ['Origin' => '', 'TO' => '', 'Destination' => '', 'Departure Date Time' => '', 'Arrival Date Time' => '', 'Duration' => '', 'Stay Time' => ''];
+        $hours = 0;
+        $minutes = 0;
+        $seconds = 0;
+        $total_dur_hours = 0;
+        $total_minutes = 0;
+        $total_second = 0;
+        $count = 10;
+        foreach ($runner_detail_time as $detail_time){
+            $finish_date = $detail_time->arrival_date . ' ' . $detail_time->arrival_time;
+            $start_date = $detail_time->departure_date . ' ' . $detail_time->departure_time;
+            $finish_date = Carbon::parse($finish_date);
+            $start_date = Carbon::parse($start_date);
+            $difference = $finish_date->diffInSeconds($start_date);
+            $dur_hours = floor($difference / 3600);
+            $dur_minutes = floor($difference / 60 % 60);
+            $dur_sec = floor($difference % 60);
+            if($dur_hours == 0){
+                $dur_hours = '00';
+            }
+            if($dur_minutes == 0){
+                $dur_minutes = '00';
+            }
+            if($dur_sec == 0){
+                $dur_sec = '00';
+            }
+            $duration_time = $dur_hours . ':' . $dur_minutes . ':' . $dur_sec;
+            if($detail_time->stay_time != null){
+                $time = explode(':', $detail_time->stay_time);
+                $hours = $hours + (int)$time[0];
+                $minutes = $minutes + (int)$time[1];
+                $seconds = $seconds + (int)$time[2];
+            }
+            $total_dur_hours = $total_dur_hours + (int)$dur_hours;
+            $total_minutes = $total_minutes + (int)$dur_minutes;
+            $total_second = $total_second + (int)$dur_sec;
+
+            $runner_detail_array[] = ['Origin' => $detail_time->origin_hub->name, 'TO' => '-> -> ->', 'Destination' => $detail_time->destination_hub->name, 'Departure Date Time' => $detail_time->departure_date . ' ' .  $detail_time->departure_time, 'Arrival Date Time' => $detail_time->arrival_date . ' ' .  $detail_time->arrival_time, 'Duration' => $duration_time, 'Stay Time' => $detail_time->stay_time];
+            $count++;
+        }
+        $stay_second = ($seconds % 60);
+        $stay_minutes = ($minutes + ($seconds / 60));
+        $stay_hour = ($hours + ($stay_minutes / 60));
+        $stay_minutes = ($stay_minutes % 60);
+        $stay_hour = floor($stay_hour);
+        $total_seconds = $stay_hour . ' Hrs ' . $stay_minutes . ' Min ' . $stay_second . ' Sec';
+        $dur_second = ($total_second % 60);
+        $dur_minutes = ($total_minutes + ($total_second / 60));
+        $dur_hour = ($total_dur_hours + ($dur_minutes / 60));
+        $dur_minutes = ($dur_minutes % 60);
+        $dur_hour = floor($dur_hour);
+        $total_duration = $dur_hour . ' Hrs ' . $dur_minutes . ' Min ' . $dur_second . ' Sec';
+
+
+        $runner_detail_array[] = ['Origin' => '', 'TO' => '', 'Destination' => '', 'Departure Time' => '', 'Arrival Time' => '', 'Duration' => $total_duration, 'Stay Time' => $total_seconds];
+        $cell_s = [
+            'font' => ['bold' => true],
+            'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => array(
+                'outline' => array(
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
+                    'color' => array('argb' => '000000'),
+                ),
+            )
+        ];
+
+        $cell_st = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getDefaultColumnDimension()->setWidth(20);
+        $sheet->fromArray($runner_detail_array, NULL, 'A2', true);
+        $sheet->getStyle("A2:G5")->applyFromArray($cell_s);
+        $sheet->getStyle("A2:G5")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
+        $sheet->mergeCells('C2:G2');
+        $sheet->mergeCells('C3:G3');
+        $sheet->mergeCells('C4:G4');
+        $sheet->mergeCells('C5:G5');
+        $sheet->getStyle("F".$count.":G".$count)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
+        $sheet->getStyle("A8:G8")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
+        $sheet->getStyle("A8:G8")->applyFromArray($cell_st);
+        $date_file_name = Carbon::today()->format('Y_m_d');
+        $sheet->setTitle('Runner Report ' . $date_file_name);
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="runner_report.xlsx"');
+        header('Cache-Control: max-age=0');
+        $file_name_without_path = "reports/runner_detail_report_". $runner_detail->id . '_' . $date_file_name . ".xlsx";
+        $file_name = public_path() . "/reports/runner_detail_report_". $runner_detail->id . '_' . $date_file_name . ".xlsx";
+        $writer->save($file_name);
+        return $file_name_without_path;
+    }
+    public function runner_details_add_index(Request $request){
+        $runner = Runner::find($request->runner);
+        $junctions = RunnerJunction::join('cities as c', 'c.id', '=', 'runner_junctions.junction_id')
+            ->select('c.id as city_id', 'c.name as city_name', 'runner_junctions.order as order')
+            ->where('runner_junctions.runner_id', $runner->id)
+            ->orderBy('runner_junctions.order', 'asc')
+            ->get();
+        $last_junction = RunnerJunction::select('runner_junctions.junction_id')->where('runner_junctions.runner_id', $runner->id)
+            ->orderBy('runner_junctions.order', 'desc')->first();
+        $last_junction = $last_junction->junction_id;
+        return view('admin.runner.add')->with(['runner' => $runner, 'junctions' => $junctions, 'last_junction' => $last_junction]);
+    }
+    public function runner_details_add_submit(Request $request){
+        $runner_detail = new RunnerDetail();
+        $runner_detail->runner_id = $request->id;
+        $runner_detail->driver_name = $request->driver_name;
+        $runner_detail->vehicle_no = $request->vehicle_number;
+        $runner_detail->contact_no = $request->contact_number;
+        $runner_detail->status = 0;
+        $runner_detail->created_by = Auth::id();
+        $runner_detail->save();
+        $text = '';
+        $seconds = 0;
+        foreach ($request->origin as $index => $origin) {
+            $stay_time = null;
+            $forward_index = $index + 1;
+            if(array_key_exists($forward_index, $request->origin)){
+                $start_date = str_replace("00:00:00", $request->arrival_time[$index], $request->arrival_date[$index]);
+                $finish_date = str_replace("00:00:00", $request->departure_time[$forward_index], $request->departure_date[$forward_index]);
+                $finish_date = Carbon::parse($finish_date);
+                $start_date = Carbon::parse($start_date);
+                $difference = $finish_date->diffInSeconds($start_date);
+                $seconds = $seconds + $difference;
+
+                $sec_hours = floor($difference / 3600);
+                $sec_minutes = floor($difference / 60 % 60);
+                $sec_sec = floor($difference % 60);
+                $stay_time = $sec_hours . ':' . $sec_minutes . ':' . $sec_sec;
+            }
+            else{
+                $seconds = 0;
+            }
+            $runner_detail_time = new RunnerDetailTime();
+            $runner_detail_time->runner_detail_id = $runner_detail->id;
+            $runner_detail_time->origin = $origin;
+            $runner_detail_time->destination = $request->destination[$index];
+            $runner_detail_time->departure_time = $request->departure_time[$index];
+            $runner_detail_time->departure_date = $request->departure_date[$index];
+            $runner_detail_time->arrival_date = $request->arrival_date[$index];
+            $runner_detail_time->arrival_time = $request->arrival_time[$index];
+            $runner_detail_time->stay_time = $stay_time;
+            $runner_detail_time->save();
+
+
+            if($index == 1){
+                $text = $runner_detail_time->origin_hub->name . ' TO ';
+            }
+            if(array_key_exists($forward_index, $request->origin)){
+                $text .= $runner_detail_time->destination_hub->name . ' & ';
+            }
+            else{
+                $text .= $runner_detail_time->destination_hub->name;
+            }
+        }
+        if($request->status == 0){
+            return redirect()->back()->with('success', 'Runner On Route updated successfully!');
+        }
+        else{
+            $runner_detail->status = 1;
+            $runner_detail->completed_by = Auth::id();
+            $runner_detail->save();
+            $path = $this->runner_report($runner_detail->id, $text);
+            NotificationsController::send(88, $runner_detail->id, url('/') . '/' . $path);
+            return redirect()->route('admin.runner.index')->with('success', 'Runner On Route completed successfully!');
+        }
+    }
+    public function runner_details_edit_index(Request $request){
+        $runner_detail = RunnerDetail::find($request->id);
+        $runner_detail_time = RunnerDetailTime::join('cities as oc', 'oc.id', '=', 'runner_detail_times.origin')
+        ->join('cities as dc', 'dc.id', '=', 'runner_detail_times.destination')
+        ->select('runner_detail_times.id', 'runner_detail_times.origin', 'runner_detail_times.destination', 'runner_detail_times.departure_time', 'runner_detail_times.arrival_time', 'oc.name as origin_name', 'dc.name as destination_name')->where('runner_detail_id', $request->id)->get();
+        $runner = Runner::find($runner_detail->runner_id);
+        $junctions = RunnerJunction::join('cities as c', 'c.id', '=', 'runner_junctions.junction_id')
+            ->select('c.id as city_id', 'c.name as city_name', 'runner_junctions.order as order')
+            ->where('runner_junctions.runner_id', $runner->id)
+            ->orderBy('runner_junctions.order', 'asc')
+            ->get();
+        $last_junction = RunnerJunction::select('runner_junctions.junction_id')->where('runner_junctions.runner_id', $runner->id)
+            ->orderBy('runner_junctions.order', 'desc')->first();
+        $last_junction = $last_junction->junction_id;
+        return view('admin.runner.edit')->with(['runner' => $runner, 'junctions' => $junctions, 'last_junction' => $last_junction, 'runner_detail' => $runner_detail, 'runner_detail_time' => $runner_detail_time]);
+    }
+    public function runner_details_edit_submit(Request $request){
+        $runner_detail = RunnerDetail::find($request->id);
+        $text = '';
+        $seconds = 0;
+        RunnerDetailTime::where('runner_detail_id', $runner_detail->id)->delete();
+        foreach ($request->origin as $index => $origin) {
+            $stay_time = null;
+            $forward_index = $index + 1;
+            if(array_key_exists($forward_index, $request->origin)){
+                $start_date = str_replace("00:00:00", $request->arrival_time[$index], $request->arrival_date[$index]);
+                $finish_date = str_replace("00:00:00", $request->departure_time[$forward_index], $request->departure_date[$forward_index]);
+                $finish_date = Carbon::parse($finish_date);
+                $start_date = Carbon::parse($start_date);
+                $difference = $finish_date->diffInSeconds($start_date);
+                $seconds = $seconds + $difference;
+
+                $sec_hours = floor($difference / 3600);
+                $sec_minutes = floor($difference / 60 % 60);
+                $sec_sec = floor($difference % 60);
+                $stay_time = $sec_hours . ':' . $sec_minutes . ':' . $sec_sec;
+            }
+            else{
+                $seconds = 0;
+            }
+            $runner_detail_time = new RunnerDetailTime();
+            $runner_detail_time->runner_detail_id = $runner_detail->id;
+            $runner_detail_time->origin = $origin;
+            $runner_detail_time->destination = $request->destination[$index];
+            $runner_detail_time->departure_time = $request->departure_time[$index];
+            $runner_detail_time->departure_date = $request->departure_date[$index];
+            $runner_detail_time->arrival_date = $request->arrival_date[$index];
+            $runner_detail_time->arrival_time = $request->arrival_time[$index];
+            $runner_detail_time->stay_time = $stay_time;
+            $runner_detail_time->save();
+
+
+            if($index == 1){
+                $text = $runner_detail_time->origin_hub->name . ' TO ';
+            }
+            if(array_key_exists($forward_index, $request->origin)){
+                $text .= $runner_detail_time->destination_hub->name . ' & ';
+            }
+            else{
+                $text .= $runner_detail_time->destination_hub->name;
+            }
+        }
+        if($request->status == 0){
+            return redirect()->back()->with('success', 'Runner On Route updated successfully!');
+        }
+        else{
+            $runner_detail->status = 1;
+            $runner_detail->completed_by = Auth::id();
+            $runner_detail->save();
+            $path = $this->runner_report($runner_detail->id, $text);
+            NotificationsController::send(88, $runner_detail->id, url('/') . '/' . $path);
+            return redirect()->route('admin.runner.index')->with('success', 'Runner On Route completed successfully!');
+        }
+    }
+}

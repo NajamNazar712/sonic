@@ -33,6 +33,8 @@ use App\Http\Models\Holiday;
 use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
+use App\http\Models\Runner;
+use App\http\Models\RunnerJunction;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
@@ -2825,5 +2827,64 @@ class GlobalSettingsController extends Controller
         else{
             return response()->json(['status' => 0, 'error' => 'Something went wrong!']);
         }
+    }
+
+    public function runner_report_index(){
+        $cities = City::where('status', 1)->where('hub', 1)->get();
+        return view('admin.settings.runner.index')->with('cities', $cities);
+    }
+    public function runner_report_list(Request $request){
+        $runner_report = Runner::join('admins as a', 'a.id', '=', 'runners.created_by')
+            ->select('runners.name as runner', 'runners.created_at', 'a.name as created_by');
+        $datatable = Datatables::of($runner_report);
+        return $datatable->make(true);
+    }
+
+    public function runner_report_unique(Request $request){
+        if ($request->filled('runner_name')) {
+            $runner = Runner::where('name', $request->input('runner_name'));
+
+            if (!$runner->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+            return 'true';
+        }
+    }
+
+    public function runner_report_add(Request $request){
+        $runner = new Runner();
+        $runner->name = $request->runner_name;
+        $runner->created_by = Auth::id();
+        $runner->save();
+
+        $origin = new RunnerJunction();
+        $origin->runner_id = $runner->id;
+        $origin->junction_id = $request->origin;
+        $origin->order = 1;
+        $origin->save();
+
+        $serial = 2;
+        foreach ($request->junction as $junction_id){
+            $junction = new RunnerJunction();
+            $junction->runner_id = $runner->id;
+            $junction->junction_id = $junction_id;
+            $junction->order = $serial;
+            $junction->save();
+
+            $serial++;
+        }
+
+        $destination = new RunnerJunction();
+        $destination->runner_id = $runner->id;
+        $destination->junction_id = $request->destination;
+        $destination->order = $serial;
+        $destination->save();
+
+        return redirect()->back()->with('success','Runner updated successfully!');
     }
 }

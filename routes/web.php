@@ -2000,6 +2000,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\GlobalSettingsController@restrict_parcels_attempt_edit')->name('edit');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@restrict_parcels_attempt_enable_disable')->name('enable_disable');
         });
+
+        Route::prefix('runner')->name('runner.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@runner_report_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@runner_report_list')->name('list');
+            Route::get('unique', 'Admins\GlobalSettingsController@runner_report_unique')->name('unique');
+            Route::post('add', 'Admins\GlobalSettingsController@runner_report_add')->name('add');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@runner_report_enable_disable')->name('enable_disable');
+        });
     });
 
 
@@ -2162,6 +2170,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
             Route::post('shipment_details', 'Admins\V2Pickup\V2AdminArrivalServiceController@arrival_try_and_buy_shipment_details')->name('shipment_details');
         });
+    });
+
+    Route::prefix('runner')->name('runner.')->group(function () {
+        Route::get('', 'Admins\AdminRunnerController@index')->name('index');
+        Route::get('list', 'Admins\AdminRunnerController@list')->name('list');
+        Route::get('add', 'Admins\AdminRunnerController@runner_details_add_index')->name('add');
+        Route::post('add/submit', 'Admins\AdminRunnerController@runner_details_add_submit')->name('add.submit');
+        Route::get('edit/{id?}', 'Admins\AdminRunnerController@runner_details_edit_index')->name('edit');
+        Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
     });
 
 });

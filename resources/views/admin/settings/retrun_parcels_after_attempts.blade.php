@@ -231,7 +231,6 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(219, session('permissions')))
                     {
                         text: '<i class="la la-plus"></i> Add Shipper',
                         className: 'btn btn-primary add_warehouse',
@@ -240,7 +239,7 @@
                             $('#AddShipperModal').modal('show');
                         }
                     },
-                        @endif{
+                    {
                         extend: 'excel',
                         title: 'Return Parcels After Attempt',
                         text: '<i class="la la-file-excel-o"></i> Excel',
@@ -267,7 +266,7 @@
                     {data: 'created_at', name: 'restrict_parcels_attempts.created_at', class: 'align-middle text-center created_at'},
                     {data: 'updated_at', name: 'restrict_parcels_attempts.updated_at', class: 'align-middle text-center updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle text-center updated_by'},
-                    {data: 'action', name: 'action', class: 'align-middle text-center action',orderable: false, searchable: false}
+                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
