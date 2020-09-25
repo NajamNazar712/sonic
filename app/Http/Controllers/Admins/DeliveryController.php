@@ -2779,38 +2779,38 @@ class DeliveryController extends Controller
 
                             }
                         }
-                        if ($verification == 1) {
-                            $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $shipment_details->user_id)->where('status', 1);
-                            if ($restrict_parcels_attempt->exists() && $request->has($status_drop) && $request->status_drop[$shipment] == 12)
-                            {
-                                $restrict_parcels_attempt = $restrict_parcels_attempt->first();
-                                $attempt_counts = ShipmentsJourney::where(['shipment_id' => $shipment_details->id, 'shipper_status_id' => 5, 'verification' => 1])->count();
-                                if ($attempt_counts >= $restrict_parcels_attempt->attempt_days)
-                                {
-                                    $parcel = Shipment::find($shipment);
-                                    if (!$parcel->packaging_material_request) {
-                                        ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), 'after ' . $attempt_counts . ' attempts return', NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                                        NotificationsController::send(15, 0, $shipment);
-                                        NotificationsController::send(16, 0, $shipment);
-
-                                        if ($parcel->booking_type_id != 4) {
-                                            ShipmentChargesController::return($shipment);
-
-                                            AdminFinanceController::add_payment($shipment, 1);
-                                        } else {
-                                            ShipmentChargesController::walk_in_return($shipment);
-
-                                            $parcel->walk_in_status = 2;
-
-                                            $parcel->save();
-
-                                            AdminFinanceController::done_payment($shipment, 1);
-                                        }
-                                    }
-                                }
-                            }
-                        }
+//                        if ($verification == 1) {
+//                            $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $shipment_details->user_id)->where('status', 1);
+//                            if ($restrict_parcels_attempt->exists() && $request->has($status_drop) && $request->status_drop[$shipment] == 12)
+//                            {
+//                                $restrict_parcels_attempt = $restrict_parcels_attempt->first();
+//                                $attempt_counts = ShipmentsJourney::where(['shipment_id' => $shipment_details->id, 'shipper_status_id' => 5, 'verification' => 1])->count();
+//                                if ($attempt_counts >= $restrict_parcels_attempt->attempt_days)
+//                                {
+//                                    $parcel = Shipment::find($shipment);
+//                                    if (!$parcel->packaging_material_request) {
+//                                        ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), 'after ' . $attempt_counts . ' attempts return', NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+//                                        NotificationsController::send(15, 0, $shipment);
+//                                        NotificationsController::send(16, 0, $shipment);
+//
+//                                        if ($parcel->booking_type_id != 4) {
+//                                            ShipmentChargesController::return($shipment);
+//
+//                                            AdminFinanceController::add_payment($shipment, 1);
+//                                        } else {
+//                                            ShipmentChargesController::walk_in_return($shipment);
+//
+//                                            $parcel->walk_in_status = 2;
+//
+//                                            $parcel->save();
+//
+//                                            AdminFinanceController::done_payment($shipment, 1);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
                     } else {
                         if ($request->has($status_drop) && $request->status_drop[$shipment] != null) {
                             if ($shipper_status_details->shipper_status_id != $request->status_drop[$shipment]) {
