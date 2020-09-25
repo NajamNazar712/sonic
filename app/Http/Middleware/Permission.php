@@ -682,6 +682,21 @@ class Permission
             'settings.restrict_cities_intercept.index' => 375,
             'settings.restrict_cities_intercept.store' => 375,
 
+            'settings.short_received_hub_wise_cron.index' => 383,
+            'settings.short_received_hub_wise_cron.store' => 383,
+
+            'settings.restrict_parcels_attempt.index' => 384,
+            'settings.restrict_parcels_attempt.list' => 384,
+            'settings.restrict_parcels_attempt.add' => 384,
+            'settings.restrict_parcels_attempt.edit' => 384,
+            'settings.restrict_parcels_attempt.enable_disable' => 384,
+
+            'settings.runner.index' => 385,
+            'settings.runner.list' => 385,
+            'settings.runner.add' => 385,
+            'settings.runner.unique' => 385,
+            'settings.runner.enable_disable' => 385,
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -743,6 +758,13 @@ class Permission
             'multiple_pieces.add.index' => 368,
             'multiple_pieces.hold.index' => 369,
             'multiple_pieces.resolved.index' => 370,
+
+            'runner.index' => 386,
+            'runner.list' => 386,
+            'runner.add' => 386,
+            'runner.add.submit' => 386,
+            'runner.edit' => 386,
+            'runner.edit.submit' => 386,
         ],
 
         'shipper' => [
