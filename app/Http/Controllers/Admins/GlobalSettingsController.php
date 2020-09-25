@@ -2914,14 +2914,17 @@ public function short_received_hub_wise_cron_index() {
         $origin->save();
 
         $serial = 2;
+        $junctions = array($request->origin, $request->destination);
         foreach ($request->junction as $junction_id){
-            $junction = new RunnerJunction();
-            $junction->runner_id = $runner->id;
-            $junction->junction_id = $junction_id;
-            $junction->order = $serial;
-            $junction->save();
+            if(!in_array($junction_id, $junctions)){
+                $junction = new RunnerJunction();
+                $junction->runner_id = $runner->id;
+                $junction->junction_id = $junction_id;
+                $junction->order = $serial;
+                $junction->save();
 
-            $serial++;
+                $serial++;
+            }
         }
 
         $destination = new RunnerJunction();
