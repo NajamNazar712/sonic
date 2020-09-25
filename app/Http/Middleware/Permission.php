@@ -682,8 +682,8 @@ class Permission
             'settings.restrict_cities_intercept.index' => 375,
             'settings.restrict_cities_intercept.store' => 375,
 
-            'settings.short_received_hub_wise_cron.index' => 383,
-            'settings.short_received_hub_wise_cron.store' => 383,
+            'settings.short_received_hub_wise_cron.index' => 387,
+            'settings.short_received_hub_wise_cron.store' => 387,
 
             'settings.restrict_parcels_attempt.index' => 384,
             'settings.restrict_parcels_attempt.list' => 384,
