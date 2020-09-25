@@ -146,6 +146,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
             $(".phone").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -190,15 +191,16 @@
                     '<option value="'+ value.origin +'" selected>'+ value.origin_name +'</option></select></div>';
                 var new_destination = '<div class="form-group input-group"><select name="destination[' + row + ']" id="destination_' + row + '" class="select2 form-control" data-rule-required="true" data-msg-required="Destination is required">' +
                     '<option value="'+ value.destination +'" selected>'+ value.destination_name +'</option></select></div>';
-                var departure_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="departure_date[' + row + ']" id="departure_date_' + row + '" class="form-control rounded-right pickadate date" value="" placeholder="Departure Date*" data-rule-required="true" data-msg-required="Departure Date is required"></div>' +
-                    '<div class="col form-group input-group"><input type="text" name="departure_time[' + row + ']" id="departure_time_' + row + '" class="form-control rounded-right time" value="" placeholder="Departure Time*" data-rule-required="true" data-msg-required="Departure Time is required"></div></div>';
-                var arrival_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="arrival_date[' + row + ']" id="arrival_date_' + row + '" class="form-control rounded-right pickadate date" value="" placeholder="Arrival Date*" data-rule-required="true" data-msg-required="Arrival Date is required"></div>' +
-                    '<div class="col form-group input-group"><input type="text" name="arrival_time[' + row + ']" id="arrival_time_' + row + '" class="form-control rounded-right time" value="" placeholder="Arrival Time*" data-rule-required="true" data-msg-required="Arrival Time is required"></div></div>';
+                var departure_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="departure_date[' + row + ']" id="departure_date_' + row + '" class="form-control rounded-right pickadate date" data-value="'+ value.departure_date +'" placeholder="Departure Date*" data-rule-required="true" data-msg-required="Departure Date is required" readonly></div>' +
+                    '<div class="col form-group input-group"><input type="text" name="departure_time[' + row + ']" id="departure_time_' + row + '" class="form-control rounded-right time" value="'+ value.departure_time +'" placeholder="Departure Time*" data-rule-required="true" data-msg-required="Departure Time is required" readonly></div></div>';
+                var arrival_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="arrival_date[' + row + ']" id="arrival_date_' + row + '" class="form-control rounded-right pickadate date" data-value="'+ value.arrival_date +'" placeholder="Arrival Date*" data-rule-required="true" data-msg-required="Arrival Date is required" readonly></div>' +
+                    '<div class="col form-group input-group"><input type="text" name="arrival_time[' + row + ']" id="arrival_time_' + row + '" class="form-control rounded-right time" value="'+ value.arrival_time +'" placeholder="Arrival Time*" data-rule-required="true" data-msg-required="Arrival Time is required" readonly></div></div>';
                 if(key == 0){
                     cities.push(value.origin);
                 }
                 cities.push(value.destination);
                 table.row.add([1, new_origin, new_destination, departure_time, arrival_time]);
+                table.draw();
 
                 $('#origin_' + row).select2({
                     width: '100%',
@@ -230,7 +232,6 @@
                 }
                 row++;
             });
-            table.draw();
             var old_row = row;
             $('#add_row').on('click', function(){
                 old_row = row - 1;

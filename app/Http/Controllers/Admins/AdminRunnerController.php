@@ -247,7 +247,7 @@ class AdminRunnerController extends Controller
         $runner_detail = RunnerDetail::find($request->id);
         $runner_detail_time = RunnerDetailTime::join('cities as oc', 'oc.id', '=', 'runner_detail_times.origin')
         ->join('cities as dc', 'dc.id', '=', 'runner_detail_times.destination')
-        ->select('runner_detail_times.id', 'runner_detail_times.origin', 'runner_detail_times.destination', 'runner_detail_times.departure_time', 'runner_detail_times.arrival_time', 'oc.name as origin_name', 'dc.name as destination_name')->where('runner_detail_id', $request->id)->get();
+        ->select('runner_detail_times.id', 'runner_detail_times.origin', 'runner_detail_times.destination', 'runner_detail_times.departure_date', 'runner_detail_times.arrival_date', 'runner_detail_times.departure_time', 'runner_detail_times.arrival_time', 'oc.name as origin_name', 'dc.name as destination_name')->where('runner_detail_id', $request->id)->get();
         $runner = Runner::find($runner_detail->runner_id);
         $junctions = RunnerJunction::join('cities as c', 'c.id', '=', 'runner_junctions.junction_id')
             ->select('c.id as city_id', 'c.name as city_name', 'runner_junctions.order as order')
