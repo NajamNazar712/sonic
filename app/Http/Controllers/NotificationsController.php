@@ -5961,12 +5961,12 @@ class NotificationsController extends Controller
                   $body = str_replace('[link]', $link, $body);
               }
 
-              $finance = Admin::whereIn('id', [12, 60, 49])->where('status', 1);
+              $admin = Admin::whereIn('role_id', [23, 46, 3])->where('status', 1);
 
               $to = array();
-
-              if ($finance->exists()) {
-                  $to = array_merge($to, $finance->pluck('email')->toArray());
+              $to[] = 'hassan@trax.pk';
+              if ($admin->exists()) {
+                  $to = array_merge($to, $admin->pluck('email')->toArray());
               }
 
               self::email($subject, $body, $to);

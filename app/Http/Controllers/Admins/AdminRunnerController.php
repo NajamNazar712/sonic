@@ -91,11 +91,20 @@ class AdminRunnerController extends Controller
             if($dur_hours == 0){
                 $dur_hours = '00';
             }
+            elseif ($dur_hours < 10 && $dur_hours > 0){
+                $dur_hours = '0' . $dur_hours;
+            }
             if($dur_minutes == 0){
                 $dur_minutes = '00';
             }
+            elseif ($dur_minutes < 10 && $dur_minutes > 0){
+                $dur_minutes = '0' . $dur_minutes;
+            }
             if($dur_sec == 0){
                 $dur_sec = '00';
+            }
+            elseif ($dur_sec < 10 && $dur_sec > 0){
+                $dur_sec = '0' . $dur_sec;
             }
             $duration_time = $dur_hours . ':' . $dur_minutes . ':' . $dur_sec;
             if($detail_time->stay_time != null){

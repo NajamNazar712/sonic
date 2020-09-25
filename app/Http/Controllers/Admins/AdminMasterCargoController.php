@@ -1677,6 +1677,7 @@ class AdminMasterCargoController extends Controller
         if($type == 1){
             $pdf = SnappyPDF::loadHTML($html);
             Storage::put('public/reports/master_cargo_'. str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT) .'.pdf',$pdf) ;
+//            NotificationsController::send(87, );
         }
         else{
             return $html;
