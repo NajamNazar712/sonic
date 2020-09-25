@@ -1831,14 +1831,7 @@ class AdminFinanceController extends Controller
             }
             $replacement_weight = $request->input('replacement_weight');
         }
-
-        $change_shipment_weight = new ChangeShipmentWeightLog();
-
-        $change_shipment_weight->shipment_id = $shipment->id;
-        $change_shipment_weight->old_weight = $shipment->actual_weight;
-        $change_shipment_weight->new_weight = $weight;
-        $change_shipment_weight->admin_id = Auth::id();
-        $change_shipment_weight->save();
+        $old_shipment_weight = $shipment->actual_weight;
 
         if($request->has('replacement_checkbox')){
             $shipment->actual_weight = $weight;
@@ -1854,6 +1847,17 @@ class AdminFinanceController extends Controller
 
         $shipment = Shipment::find($shipment_id);
         $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+
+        $change_shipment_weight = new ChangeShipmentWeightLog();
+
+        $change_shipment_weight->shipment_id = $shipment->id;
+        $change_shipment_weight->old_weight = $old_shipment_weight;
+        $change_shipment_weight->new_weight = $weight;
+        $change_shipment_weight->admin_id = Auth::id();
+        $change_shipment_weight->old_charges = $previous_weight_charges;
+        $change_shipment_weight->new_charges = $new_weight_charges;
+        $change_shipment_weight->save();
+
 
         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
@@ -3572,6 +3576,7 @@ class AdminFinanceController extends Controller
 
         $done_payment->save();
         $charges = ($shipment->amount - $shipment->gst);
+
         $done_payment_shipment = new DonePaymentShipment();
 
         $done_payment_shipment->done_payment_id = $done_payment->id;
@@ -4239,6 +4244,7 @@ class AdminFinanceController extends Controller
                 if($change_shipment_weight_log->exists()){
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
                     $shipment_weight = $change_shipment_weight_log->old_weight;
+                    $total_weight_charges = $change_shipment_weight_log->old_charges;
                 }
             }
 
