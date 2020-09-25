@@ -1947,7 +1947,9 @@ class AdminMasterCargoController extends Controller
                 $bag_short_received_shipments = array();
                 $short_received_bag = Bag::find($cargo_short_received_bag->bag_id);
                 $short_received_bag->status_id = 7;
-                $short_received_bag->short_received = $short_received_bag->shipment;
+                $short_received_bag->short_received = $short_received;
+                $short_received_bag->received_at = Carbon::now();
+                $short_received_bag->receiver_id = Auth::id();
                 $short_received_bag->save();
                 $short_received_bag_shipments = $short_received_bag->shipment;
                 foreach ($short_received_bag_shipments as $short_received_bag_shipment){
