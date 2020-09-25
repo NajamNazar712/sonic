@@ -508,19 +508,14 @@
             });
 
             $('#datatable tbody').on('click','tr td.master_cargo_number button.print',function () {
-                var cargo_id = parseInt($(this).parents('tr').data('master_cargo_id'));
+                var cargo_id = parseInt(table.row($(this).parents('tr')).data().master_cargo_id);
                 print(cargo_id);
             });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var bag_id = parseInt($(this).parents('tr').data('seal_number'));
-                var cargo_id = parseInt($(this).parents('tr').data('master_cargo_id'));
-
-                if ($(this).hasClass('print')) {
-                    print(cargo_id);
-                }
                 @if (session('role_id') == 1 || in_array(31, session('permissions')))
-                    else if ($(this).hasClass('receive')) {
+                    if ($(this).hasClass('receive')) {
                         $('#receive_form .bag_number').val(bag_id);
 
                         $('#receive_form').submit();
