@@ -1569,7 +1569,7 @@ class AdminMasterCargoController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Name</strong></td>
-                              <td>' . $sender['name'] . '</td>
+                              <td>' . $sender->name . '</td>
                               <td class="color secondary"><strong>Name</strong></td>
                               <td>' . (($receiver) ? $receiver['name'] : '') . '</td>
                             </tr>
@@ -2716,7 +2716,7 @@ class AdminMasterCargoController extends Controller
 //        dispute start for junction
 
         //dispute end for junction
-        return redirect()->route('admin.cargo.in_transit.index')->with('success', 'Bag Number# ' . $bag->seal_number . ' has been Received');
+        return redirect()->route('admin.master_cargo.bag.in_transit.index')->with('success', 'Bag Number# ' . $bag->seal_number . ' has been Received');
     }
 
 }

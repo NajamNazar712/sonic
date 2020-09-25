@@ -128,6 +128,34 @@
 
     <script>
         $(document).ready(function() {
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.master_cargo.in_transit.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
             $('#receive_form input.bag_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -140,7 +168,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.master_cargo.pending.list') }}',
+                        url: '{{ route('admin.master_cargo.bag.in_transit.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -477,6 +505,11 @@
                 'allowPlus': false
             }).bind('input', function() {
                 table.draw();
+            });
+
+            $('#datatable tbody').on('click','tr td.master_cargo_number button.print',function () {
+                var cargo_id = parseInt($(this).parents('tr').data('master_cargo_id'));
+                print(cargo_id);
             });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
