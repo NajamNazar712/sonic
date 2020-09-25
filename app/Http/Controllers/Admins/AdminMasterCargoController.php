@@ -1151,6 +1151,7 @@ class AdminMasterCargoController extends Controller
                 $print = FALSE;
             }
             $path = $this::master_cargo_print($master_cargo_id, 1);
+            NotificationsController::send(87, $master_cargo->destination_hub_id, url('/') . '/' . 'reports/master_cargo_'. str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT) .'.pdf');
             return redirect()->route('admin.master_cargo.create.index')->with(['success' => 'Master Cargo Created with Master Cargo Number: ' . str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT), 'print' => $print]);
         }
         else {
@@ -1569,7 +1570,7 @@ class AdminMasterCargoController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Name</strong></td>
-                              <td>' . $sender['name'] . '</td>
+                              <td>' . $sender->name . '</td>
                               <td class="color secondary"><strong>Name</strong></td>
                               <td>' . (($receiver) ? $receiver['name'] : '') . '</td>
                             </tr>
@@ -1660,12 +1661,24 @@ class AdminMasterCargoController extends Controller
             $serial_number++;
         }
 
-        $html .= '
+        if($type == 1){
+            $html .= '
                           </tbody>
                         </table>
                       </div>
                     </div>
-
+                  </body>
+                </html>
+      ';
+            $pdf = SnappyPDF::loadHTML($html)->save('reports/master_cargo_'. str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT) .'.pdf');
+            return $pdf;
+        }
+        else{
+            $html .= '
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                     <script>
                       window.onload = function() {
                         window.print();
@@ -1674,11 +1687,6 @@ class AdminMasterCargoController extends Controller
                   </body>
                 </html>
       ';
-        if($type == 1){
-            $pdf = SnappyPDF::loadHTML($html);
-            Storage::put('public/reports/master_cargo_'. str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT) .'.pdf',$pdf) ;
-        }
-        else{
             return $html;
         }
     }
@@ -2716,7 +2724,7 @@ class AdminMasterCargoController extends Controller
 //        dispute start for junction
 
         //dispute end for junction
-        return redirect()->route('admin.cargo.in_transit.index')->with('success', 'Bag Number# ' . $bag->seal_number . ' has been Received');
+        return redirect()->route('admin.master_cargo.bag.in_transit.index')->with('success', 'Bag Number# ' . $bag->seal_number . ' has been Received');
     }
 
 }

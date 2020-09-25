@@ -146,7 +146,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
+            var old_date_limit = '{{ Carbon\Carbon::now()->toDateString() }}';
             $(".phone").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',

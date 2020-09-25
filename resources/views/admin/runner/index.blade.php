@@ -145,7 +145,7 @@
                             head.push('Driver Name');
                             head.push('Vehicle No.');
                             head.push('Contact No.');
-                            head.push('First Departure Date');
+                            head.push('Created At');
                             head.push('Created By');
 
                             $.each(result.data, function(index, values) {
@@ -157,7 +157,7 @@
                                 row.push(values.driver_name);
                                 row.push(values.vehicle_no);
                                 row.push(values.contact_no);
-                                row.push(values.departure_date);
+                                row.push(values.created_at);
                                 row.push(values.created_by);
 
                                 body.push(row);
@@ -174,18 +174,16 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(219, session('permissions')))
                     {
                         text: '<i class="la la-plus"></i> Add Runner',
-                        className: 'btn btn-primary add_warehouse',
+                        className: 'btn btn-primary add_runner',
                         enabled: true,
                         action: function (e, dt, node, config) {
                             $('#SelectRunnerModal').modal('show');
                         }
-                    },
-                        @endif{
+                    },{
                         extend: 'excel',
-                        title: 'Runner Report',
+                        title: 'Runner On Route Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                         className: 'btn btn-primary',
                     },

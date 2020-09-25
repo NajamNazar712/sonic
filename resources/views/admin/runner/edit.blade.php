@@ -146,7 +146,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
+            var old_date_limit = '{{ Carbon\Carbon::now()->toDateString() }}';
             $(".phone").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -163,10 +163,11 @@
                         targets: 1,
                         render: function (data, type, row) {
                             return '';
-                        }
+                        },
+                        width: '10px'
                     },
-                    { name: 'origin', class: 'align-middle user_name'},
-                    { name: 'hub', class: 'align-middle hub'},
+                    { name: 'origin', class: 'align-middle user_name', width: '40px'},
+                    { name: 'hub', class: 'align-middle hub', width: '40px'},
                     { name: 'departure_time', class: 'align-middle departure_time'},
                     { name: 'arrival_time', class: 'align-middle arrival_time'}
 
@@ -191,9 +192,9 @@
                     '<option value="'+ value.origin +'" selected>'+ value.origin_name +'</option></select></div>';
                 var new_destination = '<div class="form-group input-group"><select name="destination[' + row + ']" id="destination_' + row + '" class="select2 form-control" data-rule-required="true" data-msg-required="Destination is required">' +
                     '<option value="'+ value.destination +'" selected>'+ value.destination_name +'</option></select></div>';
-                var departure_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="departure_date[' + row + ']" id="departure_date_' + row + '" class="form-control rounded-right pickadate date" data-value="'+ value.departure_date +'" placeholder="Departure Date*" data-rule-required="true" data-msg-required="Departure Date is required" readonly></div>' +
+                var departure_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="departure_date[' + row + ']" id="departure_date_' + row + '" class="form-control rounded-right pickadate date" data-value="'+ value.departure_date +'" placeholder="Departure Date*" data-rule-required="true" data-msg-required="Departure Date is required" disabled></div>' +
                     '<div class="col form-group input-group"><input type="text" name="departure_time[' + row + ']" id="departure_time_' + row + '" class="form-control rounded-right time" value="'+ value.departure_time +'" placeholder="Departure Time*" data-rule-required="true" data-msg-required="Departure Time is required" readonly></div></div>';
-                var arrival_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="arrival_date[' + row + ']" id="arrival_date_' + row + '" class="form-control rounded-right pickadate date" data-value="'+ value.arrival_date +'" placeholder="Arrival Date*" data-rule-required="true" data-msg-required="Arrival Date is required" readonly></div>' +
+                var arrival_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="arrival_date[' + row + ']" id="arrival_date_' + row + '" class="form-control rounded-right pickadate date" data-value="'+ value.arrival_date +'" placeholder="Arrival Date*" data-rule-required="true" data-msg-required="Arrival Date is required" disabled></div>' +
                     '<div class="col form-group input-group"><input type="text" name="arrival_time[' + row + ']" id="arrival_time_' + row + '" class="form-control rounded-right time" value="'+ value.arrival_time +'" placeholder="Arrival Time*" data-rule-required="true" data-msg-required="Arrival Time is required" readonly></div></div>';
                 if(key == 0){
                     cities.push(value.origin);
@@ -340,11 +341,12 @@
                         closeOnEsc: false
                     });
                     for(var i=1; i<old_row; i++){
-                        console.log(i);
                         $('#origin_' + i).prop('disabled', false);
                         $('#destination_' + i).prop('disabled', false);
                         $('departure_time_' + i).attr('readonly', false);
-                        $('arrival_time_' + i).attr('disabled', false);
+                        $('arrival_time_' + i).attr('readonly', false);
+                        $('departure_date_' + i).attr('disabled', false);
+                        $('arrival_date_' + i).attr('disabled', false);
                     }
 
                     form.submit();

@@ -236,7 +236,6 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(219, session('permissions')))
                     {
                         text: '<i class="la la-plus"></i> Add Runner',
                         className: 'btn btn-primary add_warehouse',
@@ -244,8 +243,7 @@
                         action: function (e, dt, node, config) {
                             $('#AddRunnerModal').modal('show');
                         }
-                    },
-                        @endif{
+                    },{
                         extend: 'excel',
                         title: 'Runner Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',

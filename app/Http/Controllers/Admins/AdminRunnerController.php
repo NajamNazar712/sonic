@@ -91,11 +91,20 @@ class AdminRunnerController extends Controller
             if($dur_hours == 0){
                 $dur_hours = '00';
             }
+            elseif ($dur_hours < 10 && $dur_hours > 0){
+                $dur_hours = '0' . $dur_hours;
+            }
             if($dur_minutes == 0){
                 $dur_minutes = '00';
             }
+            elseif ($dur_minutes < 10 && $dur_minutes > 0){
+                $dur_minutes = '0' . $dur_minutes;
+            }
             if($dur_sec == 0){
                 $dur_sec = '00';
+            }
+            elseif ($dur_sec < 10 && $dur_sec > 0){
+                $dur_sec = '0' . $dur_sec;
             }
             $duration_time = $dur_hours . ':' . $dur_minutes . ':' . $dur_sec;
             if($detail_time->stay_time != null){
@@ -123,9 +132,20 @@ class AdminRunnerController extends Controller
         $dur_minutes = ($dur_minutes % 60);
         $dur_hour = floor($dur_hour);
         $total_duration = $dur_hour . ' Hrs ' . $dur_minutes . ' Min ' . $dur_second . ' Sec';
+        $total_run_hours = $hours + $total_dur_hours;
+        $total_run_minutes = $dur_minutes + $minutes;
+        $total_run_seconds = $total_second + $seconds;
+        $tot_second = ($total_run_seconds % 60);
+        $tot_minutes = ($total_run_minutes + ($total_run_seconds / 60));
+        $tot_hour = ($total_run_hours + ($tot_minutes / 60));
+        $tot_minutes = ($tot_minutes % 60);
+        $tot_hour = floor($tot_hour);
+        $total_run = $tot_hour . ' Hrs ' . $tot_minutes . ' Min ' . $tot_second . ' Sec';
 
 
         $runner_detail_array[] = ['Origin' => '', 'TO' => '', 'Destination' => '', 'Departure Time' => '', 'Arrival Time' => '', 'Duration' => $total_duration, 'Stay Time' => $total_seconds];
+        $runner_detail_array[] = ['Origin' => '', 'TO' => '', 'Destination' => '', 'Departure Time' => '', 'Arrival Time' => '', 'Duration' => '', 'Stay Time' => ''];
+        $runner_detail_array[] = ['Origin' => '', 'TO' => '', 'Destination' => '', 'Departure Time' => '', 'Arrival Time' => '', 'Duration' => 'Total Run:', 'Stay Time' => $total_run];
         $cell_s = [
             'font' => ['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -153,7 +173,9 @@ class AdminRunnerController extends Controller
         $sheet->mergeCells('C3:G3');
         $sheet->mergeCells('C4:G4');
         $sheet->mergeCells('C5:G5');
+        $new_count = $count + 2;
         $sheet->getStyle("F".$count.":G".$count)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
+        $sheet->getStyle("F".$new_count.":G".$new_count)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
         $sheet->getStyle("A8:G8")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
         $sheet->getStyle("A8:G8")->applyFromArray($cell_st);
         $date_file_name = Carbon::today()->format('Y_m_d');
@@ -232,7 +254,7 @@ class AdminRunnerController extends Controller
             }
         }
         if($request->status == 0){
-            return redirect()->back()->with('success', 'Runner On Route updated successfully!');
+            return redirect()->route('admin.runner.index')->with('success', 'Runner On Route updated successfully!');
         }
         else{
             $runner_detail->status = 1;
@@ -306,7 +328,7 @@ class AdminRunnerController extends Controller
             }
         }
         if($request->status == 0){
-            return redirect()->back()->with('success', 'Runner On Route updated successfully!');
+            return redirect()->route('admin.runner.index')->with('success', 'Runner On Route updated successfully!');
         }
         else{
             $runner_detail->status = 1;

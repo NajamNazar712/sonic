@@ -160,6 +160,11 @@
     <script type="text/javascript">
         var index_count = 0;
         $(document).ready(function () {
+            $('.attempt_days').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             $("#shipper_id").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Shipper",
                 width:'300px',
@@ -358,7 +363,8 @@
 
             $('body').on('click','button.edit',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                var attempt_days = parseInt($(this).parents('tr').data('attempt_days'));
+                var attempt_days = parseInt(table.row($(this).parents('tr')).data().attempt_days);
+                console.log(attempt_days);
                 $('#restrict_id').val(id);
                 $('#edit_attempt_days').val(attempt_days);
                 $('#EditShipperModal').modal('show');
