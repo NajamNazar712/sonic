@@ -1858,7 +1858,6 @@ class AdminFinanceController extends Controller
         $change_shipment_weight->new_charges = $new_weight_charges;
         $change_shipment_weight->save();
 
-
         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
         $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
@@ -1872,7 +1871,7 @@ class AdminFinanceController extends Controller
 
             $adjustment_amount += $previous_gst - $new_gst;
 
-            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
+            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4, $new_weight_charges);
         }else{
             $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
             if($done_payment->exists()){
@@ -1884,18 +1883,20 @@ class AdminFinanceController extends Controller
 
                 $adjustment_amount += $previous_gst - $new_gst;
 
-                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4);
+                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4, $new_weight_charges);
             }
         }
 
         return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
     }
 
-    static public function add_adjustment($shipment_id, $payable, $payable_remarks = '', $adjustment_type = NULL) {
+    static public function add_adjustment($shipment_id, $payable, $payable_remarks = '', $adjustment_type = NULL, $charges = NULL) {
         $shipment = Shipment::find($shipment_id);
 
         $amount = 0;
-        $charges = 0;
+        if($charges == NULL){
+            $charges = 0;
+        }
         $gst = 0;
 
 //        if ($payable > 0) {
