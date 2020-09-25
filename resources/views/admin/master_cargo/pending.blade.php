@@ -153,7 +153,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.shipments_count);
-                                row.push(values.quantiy);
+                                row.push(values.quantity);
                                 row.push(values.shipping_mode);
                                 row.push(values.junction_1);
                                 row.push(values.junction_2);
