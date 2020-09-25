@@ -208,7 +208,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.shipments_count);
-                                row.push(values.quantiy);
+                                row.push(values.quantity);
                                 row.push(values.shipping_mode);
                                 row.push(values.junction_1);
                                 row.push(values.junction_2);
@@ -265,8 +265,8 @@
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'seal_number', name: 'bags.seal_number', class: 'align-middle seal_number'},
                     {data: 'bag_type', name: 'bags.type', class: 'align-middle bag_type'},
-                    {data: 'id_padded_link', name: 'master_cargoes.id', class: 'align-middle master_cargo_number'},
-                    {data: 'cargo_type', name: 'master_cargoes.type', class: 'align-middle cargo_type'},
+                    {data: 'id_padded_link', name: 'mc.id', class: 'align-middle master_cargo_number'},
+                    {data: 'cargo_type', name: 'mc.type', class: 'align-middle cargo_type'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'shipments', name: 'bags.shipments', class: 'align-middle text-center shipments'},
@@ -508,19 +508,14 @@
             });
 
             $('#datatable tbody').on('click','tr td.master_cargo_number button.print',function () {
-                var cargo_id = parseInt($(this).parents('tr').data('master_cargo_id'));
+                var cargo_id = parseInt(table.row($(this).parents('tr')).data().master_cargo_id);
                 print(cargo_id);
             });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var bag_id = parseInt($(this).parents('tr').data('seal_number'));
-                var cargo_id = parseInt($(this).parents('tr').data('master_cargo_id'));
-
-                if ($(this).hasClass('print')) {
-                    print(cargo_id);
-                }
                 @if (session('role_id') == 1 || in_array(31, session('permissions')))
-                    else if ($(this).hasClass('receive')) {
+                    if ($(this).hasClass('receive')) {
                         $('#receive_form .bag_number').val(bag_id);
 
                         $('#receive_form').submit();

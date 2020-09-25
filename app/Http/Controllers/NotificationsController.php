@@ -5877,8 +5877,6 @@ class NotificationsController extends Controller
               }
 
               self::email($subject, $body, $to);
-
-              self::email($subject, $body, $to, $cc);
           }
 
           else if($id == 87){
