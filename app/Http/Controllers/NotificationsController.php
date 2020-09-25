@@ -5562,13 +5562,12 @@ class NotificationsController extends Controller
 
                       $to = array();
                       $bcc = array();
-//                      $to[] = 'hassan@trax.pk';
+                      $to[] = 'hassan@trax.pk';
                       $to[] = 'fawad.ahmed@trax.pk';
                       $to[] = 'talha.motiwala@trax.pk';
                       $to[] = 'shafay.tariq@trax.pk';
                       $to[] = 'wajiha.majeed@trax.pk';
                       $bcc[] = 'muhammad.yousuf@trax.pk';
-                      $bcc[] = 'anas.anwer@trax.pk';
 
                       self::email($subject, $body, $to, NULL, $bcc);
                   }

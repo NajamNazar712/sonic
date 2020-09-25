@@ -34,8 +34,8 @@
                         <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
-                        <th class="border-primary border-darken-1">Consolidation</th>
-                        <th class="border-primary border-darken-1">Consolidated IDs</th>
+{{--                        <th class="border-primary border-darken-1">Consolidation</th>--}}
+{{--                        <th class="border-primary border-darken-1">Consolidated IDs</th>--}}
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -184,8 +184,8 @@
                             head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
-                            head.push('Consolidation');
-                            head.push('Consolidation ID');
+                            // head.push('Consolidation');
+                            // head.push('Consolidation ID');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -209,8 +209,8 @@
                                 row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
-                                row.push(values.consolidation);
-                                row.push(values.consolidation_id);
+                                // row.push(values.consolidation);
+                                // row.push(values.consolidation_id);
 
                                 body.push(row);
                             });
@@ -571,8 +571,8 @@
                     {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation'},
-                    {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},
+                    // {data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation'},
+                    // {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],

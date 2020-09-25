@@ -44,7 +44,7 @@
         </div>
         <div class="content-body">
             <section class="flexbox-container" style="overflow: auto;">
-                <div class="col-12 d-flex align-items-center justify-content-center">
+                <div class="col-12 d-flex align-items-center justify-content-end">
                     <div class="col-md-4 col-10 box-shadow-2 p-0">
                         <div class="card border-grey border-lighten-3 px-1 py-1 m-0">
                             <div class="card-header border-0">
