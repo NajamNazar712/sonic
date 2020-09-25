@@ -145,6 +145,7 @@
                             head.push('Driver Name');
                             head.push('Vehicle No.');
                             head.push('Contact No.');
+                            head.push('Created At');
                             head.push('Created By');
 
                             $.each(result.data, function(index, values) {
@@ -156,6 +157,7 @@
                                 row.push(values.driver_name);
                                 row.push(values.vehicle_no);
                                 row.push(values.contact_no);
+                                row.push(values.created_at);
                                 row.push(values.created_by);
 
                                 body.push(row);
