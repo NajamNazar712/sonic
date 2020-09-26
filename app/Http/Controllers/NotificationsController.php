@@ -2897,7 +2897,7 @@ class NotificationsController extends Controller
                 $account_b = User::where('id', $reference_2_id)->first();
 //                $account_id_a = str_pad($account_a->id, 6, '0', STR_PAD_LEFT);
                 $account_id_b = str_pad($account_b->id, 6, '0', STR_PAD_LEFT);
-                $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
                 if (strpos($subject, '[account_id]') !== FALSE) {
                     $subject = str_replace('[account_id]', $account_id_b, $subject);
                 }
@@ -2926,7 +2926,7 @@ class NotificationsController extends Controller
                 if($shipper){
                     $terms = CRFTermsConditions::where('user_id', $shipper->id)->first();
                     if($terms){
-                        $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                        $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
                         $button = '<div class="row"><button onclick="window.open(' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="width: 100px; height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 25px; font-weight: bold;">Yes</button>';
                         $link = '<div class="row"><button onclick="window.open(' . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">CRF Download</button>';
                         if (strpos($subject, '[shipper_name]') !== FALSE) {
@@ -4609,7 +4609,7 @@ class NotificationsController extends Controller
                     $pickup_request_id = $pickup_request->id;
                     $pickup_date = $pickup_request->updated_at;
 
-                    $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                    $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
 
                     if (strpos($subject, '[pickup_request_ID]') !== FALSE) {
                       $subject = str_replace('[pickup_request_ID]', $pickup_request_id, $subject);
@@ -4647,7 +4647,7 @@ class NotificationsController extends Controller
                     $account_id = $user->id;
                     $shipper_name = $user->name;
 
-                    $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                    $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
 
                     if (strpos($subject, '[account_id]') !== FALSE) {
                       $subject = str_replace('[account_id]', $account_id, $subject);

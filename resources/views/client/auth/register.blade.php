@@ -69,7 +69,7 @@
                                         </div>
 
                                         <div class="col trax_logo align-middle text-right">
-                                            <img src="{{asset('img/trax_logo.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
+                                            <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
                                         </div>
                                     </div>
                                 </div>

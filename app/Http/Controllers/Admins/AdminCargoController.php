@@ -968,7 +968,7 @@ class AdminCargoController extends Controller
                         <table class="table table-sm table-bordered border">
                           <tbody>
                             <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Slip</strong></td>
                               <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                               </tr>
@@ -1058,7 +1058,7 @@ class AdminCargoController extends Controller
                         <table class="table table-sm table-bordered border">
                           <tbody>
                             <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Checklist</strong></td>
                               <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
                             </tr>
@@ -1211,7 +1211,7 @@ class AdminCargoController extends Controller
                         <table class="table table-sm table-bordered border">
                           <tbody>
                             <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Slip</strong></td>
                               <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(\Illuminate\Support\Facades\Auth::user()->name) . '</td>
                               </tr>
@@ -1293,7 +1293,7 @@ class AdminCargoController extends Controller
                         <table class="table table-sm table-bordered border">
                           <tbody>
                             <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Checklist</strong></td>
                               <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
                             </tr>
@@ -2467,7 +2467,7 @@ class AdminCargoController extends Controller
                         <table class="table table-sm table-bordered border">
                           <tbody>
                             <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Slip</strong></td>
                               <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                               </tr>
@@ -2553,7 +2553,7 @@ class AdminCargoController extends Controller
                         <table class="table table-sm table-bordered border">
                           <tbody>
                             <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Checklist</strong></td>
                               <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
                             </tr>
