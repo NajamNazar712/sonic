@@ -744,6 +744,25 @@
 
                     shipping_modes();
 
+                    var index = $.inArray(parseInt(service_type), open_delivery_status);
+
+                    if(index == -1){
+                        $("#delivery_type").select2('destroy');
+                        $("#delivery_type").find('option[value="2"]').attr('disabled', true);
+                        $("#delivery_type").prepend('<option value="" selected="selected"></option>').select2({
+                            width: '100%',
+                            placeholder: 'Delivery Type*'
+                        });
+                    }else{
+                        if ($('#delivery_type').hasClass("select2-hidden-accessible")) {
+                            $("#delivery_type").select2('destroy');
+                            $("#delivery_type").find('option[value="2"]').attr('disabled', false);
+                            $("#delivery_type").prepend('<option value="" selected="selected"></option>').select2({
+                                width: '100%',
+                                placeholder: 'Delivery Type*'
+                            });
+                        }
+                    }
                 }
                 else {
                     $('#select_service_type form #service_type-error').removeClass('d-none');
@@ -753,23 +772,6 @@
             $('#delivery_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Delivery Type*'
-            }).bind('select2:select', function(){
-                var selected_value = parseInt($(this).val());
-                console.log(selected_value)
-                var index = $.inArray(selected_value, open_delivery_status);
-                console.log(index)
-                if (index === -1) {
-                    // $("#delivery_type option[value='2']").attr('disabled', true);
-                    $(this).find('option[value="2"]').attr('disabled', true);
-                    $(this).val('').trigger('change');
-                    var error = 'Selected option is disabled!';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                }else{
-                    // $(this).find('option[value="2"]').attr('disabled', false);
-                    // $("#delivery_type option[value='2']").removeAttr('disabled').trigger('change');
-                    $("#delivery_type option[value='2']").attr('disabled', false);
-                }
             });
 
             @if (!$default_pickup_address)

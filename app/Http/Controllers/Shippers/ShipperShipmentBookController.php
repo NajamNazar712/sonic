@@ -3220,7 +3220,10 @@ class ShipperShipmentBookController extends Controller
                         $query->whereNotIn('id', [4]);
                     })];
                 }
-
+                $shipping_mode_id = $row['shipping_mode_id'];
+                $rules['delivery_type_id'] = ['required', 'integer','digits_between:1,10', Rule::exists('corporate_delivery_type_statuses', 'delivery_type_id')->where(function($query) use($shipping_mode_id) {
+                    $query->where('shipping_mode_id', $shipping_mode_id);
+                })];
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
                     $row['pieces_quantity'] = 1;
                 }
