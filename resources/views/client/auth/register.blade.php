@@ -43,7 +43,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
 
-    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.0">
     <style type="text/css">
         #generation_date_root .picker__holder { bottom: 0; margin-bottom: 42px;}
     </style>
