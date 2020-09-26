@@ -13,6 +13,7 @@ use App\Http\Models\ChargesModes;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
+use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
@@ -2262,6 +2263,7 @@ class ShipperShipmentBookController extends Controller
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::whereIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
@@ -2273,7 +2275,7 @@ class ShipperShipmentBookController extends Controller
             $air_waybill = null;
         }
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types]);
     }
 
     public function corporate_store(Request $request) {
@@ -3218,7 +3220,10 @@ class ShipperShipmentBookController extends Controller
                         $query->whereNotIn('id', [4]);
                     })];
                 }
-
+                $shipping_mode_id = $row['shipping_mode_id'];
+                $rules['delivery_type_id'] = ['required', 'integer','digits_between:1,10', Rule::exists('corporate_delivery_type_statuses', 'delivery_type_id')->where(function($query) use($shipping_mode_id) {
+                    $query->where('shipping_mode_id', $shipping_mode_id);
+                })];
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
                     $row['pieces_quantity'] = 1;
                 }
