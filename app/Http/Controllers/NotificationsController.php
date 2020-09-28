@@ -5433,12 +5433,16 @@ class NotificationsController extends Controller
           $subject = $notification->subject;
           $body = $notification->body;
           $sales_person = $reference_1_id;
-
+          $admin_id = $reference_2_id;
+          $user = Admin::find($admin_id);
+          $tagged_by = $user->name;
           $html = '<table style="width:100%;">';
           $html .= '<thead><tr>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Sales Person</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>';
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tagged By</th>';
+
           $html .= '</tr></thead><tbody>';
 
           $to = array();
@@ -5455,6 +5459,7 @@ class NotificationsController extends Controller
                   $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
               }
               $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['new_sale_person']->name . '</td>';
+              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$tagged_by.'</td>';
               $html .= '</tr>';
 
               $concern=SalesCommission::join('sales_commission_users as sc','sc.sales_commission_id','=','sales_commissions.id')->join('admins as a','a.id', '=' ,'sc.user_id')->where('sales_commissions.shipper_id', $shipper->id)->whereIn('sc.tier_id', [1,2,3,4]);
