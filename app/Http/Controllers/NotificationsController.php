@@ -5965,4 +5965,7 @@ class NotificationsController extends Controller
         self::email($subject, $body, $to);
       }
     }
+    static public function custom_sms($body, $to){
+        self::sms($body, $to);
+    }
 }
