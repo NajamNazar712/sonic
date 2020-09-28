@@ -730,7 +730,7 @@ class AdminMasterCargoController extends Controller
             ->leftjoin('cities as jh2', 'bags.junction_hub_2_id', '=', 'jh2.id')
             ->join('transport_modes as tm', 'bags.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'bags.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('bags.id', 'bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'bags.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'bags.builty_number', 'bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`bag_id` = `bags`.`id`) AS `chargeable_weight`'), 'bags.actual_weight', 'bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'bags.type as bag_type','bags.seal_number', 'bs.name as status');
+            ->select('bags.id', 'bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'bags.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'bags.builty_number', 'bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`bag_id` = `bags`.`id`) AS `chargeable_weight`'), 'bags.actual_weight', 'bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'bags.type as bag_type','bags.seal_number', 'bs.name as status', 'bags.short_received');
 
         if (session('role_id') != 1) {
             $bags = $bags->where(function ($query) {
@@ -750,6 +750,14 @@ class AdminMasterCargoController extends Controller
             })
             ->addColumn('shipments_count', function ($bag) {
                 return $bag->shipments;
+            })
+            ->addColumn('short_received_shipments', function ($master_cargo) {
+                if($master_cargo->short_received > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->short_received . '</button>';
+                }
+                else{
+                    return '-';
+                }
             })
             ->editColumn('bag_type',function ($bag){
                 if($bag->bag_type == 1){
