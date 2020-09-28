@@ -490,6 +490,7 @@ class AdminTrackingController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('crm_requests as crm', 'shipments.id', '=', 'crm.shipment_id')
             ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no', 'shipments.shipper_status_id as status_id', 'shipments.special_instructions as special_instructions', 'oc.id as origin_id', 'dc.id as destination_id');
         $datatable = Datatables::of($quick_tracking)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -534,6 +535,9 @@ class AdminTrackingController extends Controller
             if($order_id = $request->get('search_order_id')){
                 $datatable->where('shipments.order_id', 'LIKE', '%'. $order_id . '%');
             }
+            if($crm_request_id =$request->get('crm_request_id')){
+                $datatable->where('crm_requests.id', 'LIKE', '%'. $crm_request_id . '%');
+            }
         }
         else{
                 $datatable->where('shipments.tracking_number', null);
@@ -542,6 +546,7 @@ class AdminTrackingController extends Controller
                 $datatable->where('shipments.order_id', null);
                 $datatable->where('shipments.consignee_name', null);
                 $datatable->where('shipments.consignee_address', null);
+            $datatable->where('crm_requests.id', null);
         }
             return $datatable->make(true);
     }

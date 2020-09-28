@@ -40,6 +40,11 @@
                                         </fieldset>
                                     </div>
                                     <div class="col-2">
+                                        <fieldset>
+                                            <input type="text" class="form-control" placeholder="Request ID" id="crm_request_id">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-2">
                                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                     </div>
                                 </div>
@@ -522,6 +527,7 @@
                             d.search_shipper = $('#search_shipper').val();
                             d.search_phone_no = $('#search_consignee_phone_number').val();
                             d.search_order_id = $('#search_order_id').val();
+                            d.request_id = $('#crm_request_id').val();
                         }
                     },
                     rowId: 'shipment_id',
