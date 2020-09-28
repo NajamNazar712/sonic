@@ -3221,9 +3221,9 @@ class ShipperShipmentBookController extends Controller
                     })];
                 }
                 $shipping_mode_id = $row['shipping_mode_id'];
-                $rules['delivery_type_id'] = ['required', 'integer','digits_between:1,10', Rule::exists('corporate_delivery_type_statuses', 'delivery_type_id')->where(function($query) use($shipping_mode_id) {
-                    $query->where('shipping_mode_id', $shipping_mode_id);
-                })];
+//                $rules['delivery_type_id'] = ['required', 'integer','digits_between:1,10', Rule::exists('corporate_delivery_type_statuses', 'delivery_type_id')->where(function($query) use($shipping_mode_id) {
+//                    $query->where('shipping_mode_id', $shipping_mode_id);
+//                })];
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
                     $row['pieces_quantity'] = 1;
                 }
@@ -3264,9 +3264,17 @@ class ShipperShipmentBookController extends Controller
 
 //                        dd($errors[$row_id]['amount']);
                     if($row['service_type_id'] != 5){
-                        $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id)->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
-                        if(!$allowed_delivery_type->exists()){
-                            $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
+                        if($row['delivery_type_id'] == 2){
+                            $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
+                            if($allowed_delivery_type->exists()){
+                                $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
+                                if(!$allowed_delivery_type->exists()){
+                                    $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
+                                }
+                            }
+                            else{
+                                $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
+                            }
                         }
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
@@ -3401,6 +3409,18 @@ class ShipperShipmentBookController extends Controller
                     }
                     else{
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();
+                        if($row['delivery_type_id'] == 2){
+                            $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
+                            if($allowed_delivery_type->exists()){
+                                $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
+                                if(!$allowed_delivery_type->exists()){
+                                    $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
+                                }
+                            }
+                            else{
+                                $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
+                            }
+                        }
 
                         if (!$pickup_consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
