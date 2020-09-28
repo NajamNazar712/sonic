@@ -1102,6 +1102,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('in_transit')->name('in_transit.')->group(function () {
                 Route::get('', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_index')->name('index');
                 Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_list')->name('list');
+                Route::post('short_received', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_short_received')->name('short_received');
                 Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bag_receive')->name('receive');
             });
 
