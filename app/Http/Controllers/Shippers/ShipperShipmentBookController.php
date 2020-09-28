@@ -3623,7 +3623,7 @@ class ShipperShipmentBookController extends Controller
             $barcodes .= '
                 <div class="text-center pwrapper p-1">
                     <div class="logo">
-                        <img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">
+                        <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">
                         <div class="row no-gutters locations">
                             <span class="col-6 text-left">'. $shipment->pickup_address->city->name .'</span>
                             <span class="col-6 text-right">'. $shipment->consignee_city->hub_city->name . ' (' . $shipment->consignee_city->name . ')' . '</span>
