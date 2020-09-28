@@ -2184,8 +2184,8 @@ class AdminMasterCargoController extends Controller
         $file_name_without_path = "/reports/master_cargo_excel_" . $cargo_consignment_excel->id . ".xlsx";
         $file_name = public_path() . "/reports/master_cargo_excel_" . $cargo_consignment_excel->id . ".xlsx";
         $writer->save($file_name);
-//        Storage::disk('s3')->put( 'cargo_consignment_excels/'.'master_cargo_excel_'. $cargo_consignment_excel->id .'.xlsx', file_get_contents($file_name));
-//        Storage::disk('public')->delete('reports/master_cargo_excel_'. $cargo_consignment_excel->id .'.xlsx');
+        Storage::disk('s3')->put( 'cargo_consignment_excels/'.'master_cargo_excel_'. $cargo_consignment_excel->id .'.xlsx', file_get_contents($file_name));
+        Storage::disk('public')->delete('reports/master_cargo_excel_'. $cargo_consignment_excel->id .'.xlsx');
 
 
         $cargo_consignment_excel->cargoes = count($cargo_consignment_ids);

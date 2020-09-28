@@ -242,7 +242,7 @@
                                             @endforeach
                                                 @else
                                                 <div class="row on_door_weight_row" id="on_door_weight_row0">
-                                                    <input type="hidden" name="on_door_weight_record[0]" value="">
+                                                    <input type="hidden" name="on_door_weight_record[1]" value="">
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -1162,12 +1162,12 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_local_charges[1]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_class_0_charges[1]">
                                                         </fieldset>
                                                     </div> <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -1331,12 +1331,12 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_local_charges[0]" disabled>
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_local_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_0_charges[0]" disabled>
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_0_charges[1]" disabled>
                                                         </fieldset>
                                                     </div> <div class="col text-center">
                                                         <fieldset class="form-group">
@@ -2061,12 +2061,12 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_local_charges[1]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_class_0_charges[1]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -2237,12 +2237,12 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_local_charges[0]" disabled>
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_local_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_0_charges[0]" disabled>
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_0_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -2948,12 +2948,12 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_local_charges[1]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_class_0_charges[1]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -3083,12 +3083,12 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_local_charges[0]" disabled>
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_local_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_class_0_charges[0]" disabled>
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_class_0_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
