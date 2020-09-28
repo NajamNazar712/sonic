@@ -125,7 +125,7 @@ class AdminCorporateAccountsController extends Controller
         $messages = [
             'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
             'on_door_mcw_charges.numeric' => 'The overnight doorstep minimum chargeable weight field must be numeric or decimal.',
-            'on_hub_mcw_charges.required' => 'The overnight hub minimum chargeable weight field is required.',
+            'on_hub_mcw_charges.required_if' => 'The overnight hub minimum chargeable weight field is required.',
             'on_hub_mcw_charges.numeric' => 'The overnight hub minimum chargeable weight field must be numeric or decimal.',
             'on_door_range_up.*.required' => 'The overnight doorstep range up field is required.',
             'on_door_range_up.*.numeric' => 'The overnight doorstep range up field must be numeric or decimal.',
@@ -138,17 +138,17 @@ class AdminCorporateAccountsController extends Controller
             'on_door_class_1_charges.*.required' => 'The overnight class B charges field is required.',
             'on_door_class_2_charges.*.required' => 'The overnight class C charges field is required.',
             'on_door_class_3_charges.*.required' => 'The overnight class D charges field is required.',
-            'on_hub_range_up.*.required' => 'The overnight hub range up field is required.',
+            'on_hub_range_up.*.required_if' => 'The overnight hub range up field is required.',
             'on_hub_range_up.*.numeric' => 'The overnight hub range up field must be numeric or decimal.',
-            'on_hub_range_down.*.required' => 'The overnight hub range down field is required.',
+            'on_hub_range_down.*.required_if' => 'The overnight hub range down field is required.',
             'on_hub_range_down.*.numeric' => 'The overnight hub range down field must be numeric or decimal.',
-            'on_hub_local_charges.*.required' => 'The overnight hub local charges field is required.',
+            'on_hub_local_charges.*.required_if' => 'The overnight hub local charges field is required.',
             'on_hub_local_charges.*.numeric' => 'The overnight hub local charges field must be numeric.',
             'on_hub_class_0_charges.*.numeric' => 'The overnight hub class A charges field must be numeric.',
-            'on_hub_class_0_charges.*.required' => 'The overnight hub class A charges field is required.',
-            'on_hub_class_1_charges.*.required' => 'The overnight hub class B charges field is required.',
-            'on_hub_class_2_charges.*.required' => 'The overnight hub class C charges field is required.',
-            'on_hub_class_3_charges.*.required' => 'The overnight hub class D charges field is required.',
+            'on_hub_class_0_charges.*.required_if' => 'The overnight hub class A charges field is required.',
+            'on_hub_class_1_charges.*.required_if' => 'The overnight hub class B charges field is required.',
+            'on_hub_class_2_charges.*.required_if' => 'The overnight hub class C charges field is required.',
+            'on_hub_class_3_charges.*.required_if' => 'The overnight hub class D charges field is required.',
             'on_replacement_charges.numeric' => 'The overnight replacement charges field must be numeric.',
             'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
             'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
@@ -183,7 +183,7 @@ class AdminCorporateAccountsController extends Controller
             //overland starts
             'ol_door_mcw_charges.required' => 'The overland doorstep minimum chargeable weight field is required.',
             'ol_door_mcw_charges.numeric' => 'The overland doorstep minimum chargeable weight field must be numeric or decimal.',
-            'ol_hub_mcw_charges.required' => 'The overland hub minimum chargeable weight field is required.',
+            'ol_hub_mcw_charges.required_if' => 'The overland hub minimum chargeable weight field is required.',
             'ol_hub_mcw_charges.numeric' => 'The overland hub minimum chargeable weight field must be numeric or decimal.',
             'ol_door_range_up.*.required' => 'The overland range up field is required.',
             'ol_door_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
@@ -196,17 +196,17 @@ class AdminCorporateAccountsController extends Controller
             'ol_door_class_1_charges.*.required' => 'The overland class B charges field is required.',
             'ol_door_class_2_charges.*.required' => 'The overland class C charges field is required.',
             'ol_door_class_3_charges.*.required' => 'The overland class D charges field is required.',
-            'ol_hub_range_up.*.required' => 'The overland range up field is required.',
+            'ol_hub_range_up.*.required_if' => 'The overland range up field is required.',
             'ol_hub_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
-            'ol_hub_range_down.*.required' => 'The overland range down field is required.',
+            'ol_hub_range_down.*.required_if' => 'The overland range down field is required.',
             'ol_hub_range_down.*.numeric' => 'The overland range down field must be numeric or decimal.',
-            'ol_hub_local_charges.*.required' => 'The overland local charges field is required.',
+            'ol_hub_local_charges.*.required_if' => 'The overland local charges field is required.',
             'ol_hub_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
             'ol_hub_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
-            'ol_hub_class_0_charges.*.required' => 'The overland class A charges field is required.',
-            'ol_hub_class_1_charges.*.required' => 'The overland class B charges field is required.',
-            'ol_hub_class_2_charges.*.required' => 'The overland class C charges field is required.',
-            'ol_hub_class_3_charges.*.required' => 'The overland class D charges field is required.',
+            'ol_hub_class_0_charges.*.required_if' => 'The overland class A charges field is required.',
+            'ol_hub_class_1_charges.*.required_if' => 'The overland class B charges field is required.',
+            'ol_hub_class_2_charges.*.required_if' => 'The overland class C charges field is required.',
+            'ol_hub_class_3_charges.*.required_if' => 'The overland class D charges field is required.',
             'ol_replacement_charges.numeric' => 'The overland replacement charges field must be numeric.',
             'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
             'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
@@ -240,7 +240,7 @@ class AdminCorporateAccountsController extends Controller
             //overland end and detain starts
             'detain_door_mcw_charges.required' => 'The detain doorstep minimum chargeable weight field is required.',
             'detain_door_mcw_charges.numeric' => 'The detain doorstep minimum chargeable weight field must be numeric or decimal.',
-            'detain_hub_mcw_charges.required' => 'The detain hub minimum chargeable weight field is required.',
+            'detain_hub_mcw_charges.required_if' => 'The detain hub minimum chargeable weight field is required.',
             'detain_hub_mcw_charges.numeric' => 'The detain hub minimum chargeable weight field must be numeric or decimal.',
             'detain_door_range_up.*.required' => 'The detain range up field is required.',
             'detain_door_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
@@ -253,17 +253,17 @@ class AdminCorporateAccountsController extends Controller
             'detain_door_class_1_charges.*.required' => 'The detain class B charges field is required.',
             'detain_door_class_2_charges.*.required' => 'The detain class C charges field is required.',
             'detain_door_class_3_charges.*.required' => 'The detain class D charges field is required.',
-            'detain_hub_range_up.*.required' => 'The detain range up field is required.',
+            'detain_hub_range_up.*.required_if' => 'The detain range up field is required.',
             'detain_hub_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
-            'detain_hub_range_down.*.required' => 'The detain range down field is required.',
+            'detain_hub_range_down.*.required_if' => 'The detain range down field is required.',
             'detain_hub_range_down.*.numeric' => 'The detain range down field must be numeric or decimal.',
-            'detain_hub_local_charges.*.required' => 'The detain local charges field is required.',
+            'detain_hub_local_charges.*.required_if' => 'The detain local charges field is required.',
             'detain_hub_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
             'detain_hub_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
-            'detain_hub_class_0_charges.*.required' => 'The detain class A charges field is required.',
-            'detain_hub_class_1_charges.*.required' => 'The detain class B charges field is required.',
-            'detain_hub_class_2_charges.*.required' => 'The detain class C charges field is required.',
-            'detain_hub_class_3_charges.*.required' => 'The detain class D charges field is required.',
+            'detain_hub_class_0_charges.*.required_if' => 'The detain class A charges field is required.',
+            'detain_hub_class_1_charges.*.required_if' => 'The detain class B charges field is required.',
+            'detain_hub_class_2_charges.*.required_if' => 'The detain class C charges field is required.',
+            'detain_hub_class_3_charges.*.required_if' => 'The detain class D charges field is required.',
             'detain_replacement_charges.numeric' => 'The detain replacement charges field must be numeric.',
             'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
             'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
@@ -297,7 +297,7 @@ class AdminCorporateAccountsController extends Controller
             //detain ends and sameday starts
             'sameday_door_mcw_charges.required' => 'The sameday doorstep minimum chargeable weight field is required.',
             'sameday_door_mcw_charges.numeric' => 'The sameday doorstep minimum chargeable weight field must be numeric or decimal.',
-            'sameday_hub_mcw_charges.required' => 'The sameday hub minimum chargeable weight field is required.',
+            'sameday_hub_mcw_charges.required_if' => 'The sameday hub minimum chargeable weight field is required.',
             'sameday_hub_mcw_charges.numeric' => 'The sameday hub minimum chargeable weight field must be numeric or decimal.',
             'sameday_door_range_up.*.required' => 'The sameday doorstep range up field is required.',
             'sameday_door_range_up.*.numeric' => 'The sameday doorstep range up field must be numeric or decimal.',
@@ -307,13 +307,13 @@ class AdminCorporateAccountsController extends Controller
             'sameday_door_local_charges.*.numeric' => 'The sameday doorstep local charges field must be numeric.',
             'sameday_door_class_0_charges.*.required' => 'The sameday doorstep class A charges field is required.',
             'sameday_door_class_0_charges.*.numeric' => 'The sameday doorstep class A charges field must be numeric.',
-            'sameday_hub_range_up.*.required' => 'The sameday hub range up field is required.',
+            'sameday_hub_range_up.*.required_if' => 'The sameday hub range up field is required.',
             'sameday_hub_range_up.*.numeric' => 'The sameday hub range up field must be numeric or decimal.',
-            'sameday_hub_range_down.*.required' => 'The sameday hub range down field is required.',
+            'sameday_hub_range_down.*.required_if' => 'The sameday hub range down field is required.',
             'sameday_hub_range_down.*.numeric' => 'The sameday hub range down field must be numeric or decimal.',
-            'sameday_hub_local_charges.*.required' => 'The sameday hub local charges field is required.',
+            'sameday_hub_local_charges.*.required_if' => 'The sameday hub local charges field is required.',
             'sameday_hub_local_charges.*.numeric' => 'The sameday hub local charges field must be numeric.',
-            'sameday_hub_class_0_charges.*.required' => 'The sameday hub class A charges field is required.',
+            'sameday_hub_class_0_charges.*.required_if' => 'The sameday hub class A charges field is required.',
             'sameday_hub_class_0_charges.*.numeric' => 'The sameday hub class A charges field must be numeric.',
             'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
             'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
@@ -1622,7 +1622,7 @@ class AdminCorporateAccountsController extends Controller
             $messages = [
                 'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
                 'on_door_mcw_charges.numeric' => 'The overnight doorstep minimum chargeable weight field must be numeric or decimal.',
-                'on_hub_mcw_charges.required' => 'The overnight hub minimum chargeable weight field is required.',
+                'on_hub_mcw_charges.required_if' => 'The overnight hub minimum chargeable weight field is required.',
                 'on_hub_mcw_charges.numeric' => 'The overnight hub minimum chargeable weight field must be numeric or decimal.',
                 'on_door_range_up.*.required' => 'The overnight range up field is required.',
                 'on_door_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -1635,17 +1635,17 @@ class AdminCorporateAccountsController extends Controller
                 'on_door_class_1_charges.*.required' => 'The overnight class B charges field is required.',
                 'on_door_class_2_charges.*.required' => 'The overnight class C charges field is required.',
                 'on_door_class_3_charges.*.required' => 'The overnight class D charges field is required.',
-                'on_hub_range_up.*.required' => 'The overnight range up field is required.',
+                'on_hub_range_up.*.required_if' => 'The overnight range up field is required.',
                 'on_hub_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
-                'on_hub_range_down.*.required' => 'The overnight range down field is required.',
+                'on_hub_range_down.*.required_if' => 'The overnight range down field is required.',
                 'on_hub_range_down.*.numeric' => 'The overnight range down field must be numeric or decimal.',
-                'on_hub_local_charges.*.required' => 'The overnight local charges field is required.',
+                'on_hub_local_charges.*.required_if' => 'The overnight local charges field is required.',
                 'on_hub_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
                 'on_hub_class_0_charges.*.numeric' => 'The overnight class A charges field must be numeric.',
-                'on_hub_class_0_charges.*.required' => 'The overnight class A charges field is required.',
-                'on_hub_class_1_charges.*.required' => 'The overnight class B charges field is required.',
-                'on_hub_class_2_charges.*.required' => 'The overnight class C charges field is required.',
-                'on_hub_class_3_charges.*.required' => 'The overnight class D charges field is required.',
+                'on_hub_class_0_charges.*.required_if' => 'The overnight class A charges field is required.',
+                'on_hub_class_1_charges.*.required_if' => 'The overnight class B charges field is required.',
+                'on_hub_class_2_charges.*.required_if' => 'The overnight class C charges field is required.',
+                'on_hub_class_3_charges.*.required_if' => 'The overnight class D charges field is required.',
                 'on_replacement_charges.numeric' => 'The overnight replacement charges field must be numeric.',
                 'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
                 'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
@@ -1679,19 +1679,19 @@ class AdminCorporateAccountsController extends Controller
                 //overland starts
                 'ol_door_mcw_charges.required' => 'The overland doorstep minimum chargeable weight field is required.',
                 'ol_door_mcw_charges.numeric' => 'The overland doorstep minimum chargeable weight field must be numeric or decimal.',
-                'ol_hub_mcw_charges.required' => 'The overland hub minimum chargeable weight field is required.',
+                'ol_hub_mcw_charges.required_if' => 'The overland hub minimum chargeable weight field is required.',
                 'ol_hub_mcw_charges.numeric' => 'The overland hub minimum chargeable weight field must be numeric or decimal.',
                 'ol_door_range_up.*.required' => 'The overland range up field is required.',
                 'ol_door_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
-                'ol_door_range_down.*.required' => 'The overland range down field is required.',
+                'ol_door_range_down.*.required_if' => 'The overland range down field is required.',
                 'ol_door_range_down.*.numeric' => 'The overland range down field must be numeric or decimal.',
-                'ol_door_local_charges.*.required' => 'The overland local charges field is required.',
+                'ol_door_local_charges.*.required_if' => 'The overland local charges field is required.',
                 'ol_door_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
                 'ol_door_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
-                'ol_door_class_0_charges.*.required' => 'The overland class A charges field is required.',
-                'ol_door_class_1_charges.*.required' => 'The overland class B charges field is required.',
-                'ol_door_class_2_charges.*.required' => 'The overland class C charges field is required.',
-                'ol_door_class_3_charges.*.required' => 'The overland class D charges field is required.',
+                'ol_door_class_0_charges.*.required_if' => 'The overland class A charges field is required.',
+                'ol_door_class_1_charges.*.required_if' => 'The overland class B charges field is required.',
+                'ol_door_class_2_charges.*.required_if' => 'The overland class C charges field is required.',
+                'ol_door_class_3_charges.*.required_if' => 'The overland class D charges field is required.',
                 'ol_hub_range_up.*.required' => 'The overland range up field is required.',
                 'ol_hub_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
                 'ol_hub_range_down.*.required' => 'The overland range down field is required.',
@@ -1736,7 +1736,7 @@ class AdminCorporateAccountsController extends Controller
                 //overland end and detain starts
                 'detain_door_mcw_charges.required' => 'The detain doorstep minimum chargeable weight field is required.',
                 'detain_door_mcw_charges.numeric' => 'The detain doorstep minimum chargeable weight field must be numeric or decimal.',
-                'detain_hub_mcw_charges.required' => 'The detain hub minimum chargeable weight field is required.',
+                'detain_hub_mcw_charges.required_if' => 'The detain hub minimum chargeable weight field is required.',
                 'detain_hub_mcw_charges.numeric' => 'The detain hub minimum chargeable weight field must be numeric or decimal.',
                 'detain_door_range_up.*.required' => 'The detain range up field is required.',
                 'detain_door_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
@@ -1749,17 +1749,17 @@ class AdminCorporateAccountsController extends Controller
                 'detain_door_class_1_charges.*.required' => 'The detain class B charges field is required.',
                 'detain_door_class_2_charges.*.required' => 'The detain class C charges field is required.',
                 'detain_door_class_3_charges.*.required' => 'The detain class D charges field is required.',
-                'detain_hub_range_up.*.required' => 'The detain range up field is required.',
+                'detain_hub_range_up.*.required_if' => 'The detain range up field is required.',
                 'detain_hub_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
-                'detain_hub_range_down.*.required' => 'The detain range down field is required.',
+                'detain_hub_range_down.*.required_if' => 'The detain range down field is required.',
                 'detain_hub_range_down.*.numeric' => 'The detain range down field must be numeric or decimal.',
-                'detain_hub_local_charges.*.required' => 'The detain local charges field is required.',
+                'detain_hub_local_charges.*.required_if' => 'The detain local charges field is required.',
                 'detain_hub_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
                 'detain_hub_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
-                'detain_hub_class_0_charges.*.required' => 'The detain class A charges field is required.',
-                'detain_hub_class_1_charges.*.required' => 'The detain class B charges field is required.',
-                'detain_hub_class_2_charges.*.required' => 'The detain class C charges field is required.',
-                'detain_hub_class_3_charges.*.required' => 'The detain class D charges field is required.',
+                'detain_hub_class_0_charges.*.required_if' => 'The detain class A charges field is required.',
+                'detain_hub_class_1_charges.*.required_if' => 'The detain class B charges field is required.',
+                'detain_hub_class_2_charges.*.required_if' => 'The detain class C charges field is required.',
+                'detain_hub_class_3_charges.*.required_if' => 'The detain class D charges field is required.',
                 'detain_replacement_charges.numeric' => 'The detain replacement charges field must be numeric.',
                 'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
                 'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
@@ -1793,7 +1793,7 @@ class AdminCorporateAccountsController extends Controller
                 //detain ends and sameday starts
                 'sameday_door_mcw_charges.required' => 'The sameday doorstep minimum chargeable weight field is required.',
                 'sameday_door_mcw_charges.numeric' => 'The sameday doorstep minimum chargeable weight field must be numeric or decimal.',
-                'sameday_hub_mcw_charges.required' => 'The sameday hub minimum chargeable weight field is required.',
+                'sameday_hub_mcw_charges.required_if' => 'The sameday hub minimum chargeable weight field is required.',
                 'sameday_hub_mcw_charges.numeric' => 'The sameday hub minimum chargeable weight field must be numeric or decimal.',
                 'sameday_door_range_up.*.required' => 'The sameday doorstep range up field is required.',
                 'sameday_door_range_up.*.numeric' => 'The sameday doorstep range up field must be numeric or decimal.',
@@ -1803,13 +1803,13 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_door_local_charges.*.numeric' => 'The sameday doorstep local charges field must be numeric.',
                 'sameday_door_class_0_charges.*.required' => 'The sameday doorstep class A charges field is required.',
                 'sameday_door_class_0_charges.*.numeric' => 'The sameday doorstep class A charges field must be numeric.',
-                'sameday_hub_range_up.*.required' => 'The sameday hub range up field is required.',
+                'sameday_hub_range_up.*.required_if' => 'The sameday hub range up field is required.',
                 'sameday_hub_range_up.*.numeric' => 'The sameday hub range up field must be numeric or decimal.',
-                'sameday_hub_range_down.*.required' => 'The sameday hub range down field is required.',
+                'sameday_hub_range_down.*.required_if' => 'The sameday hub range down field is required.',
                 'sameday_hub_range_down.*.numeric' => 'The sameday hub range down field must be numeric or decimal.',
-                'sameday_hub_local_charges.*.required' => 'The sameday hub local charges field is required.',
+                'sameday_hub_local_charges.*.required_if' => 'The sameday hub local charges field is required.',
                 'sameday_hub_local_charges.*.numeric' => 'The sameday hub local charges field must be numeric.',
-                'sameday_hub_class_0_charges.*.required' => 'The sameday hub class A charges field is required.',
+                'sameday_hub_class_0_charges.*.required_if' => 'The sameday hub class A charges field is required.',
                 'sameday_hub_class_0_charges.*.numeric' => 'The sameday hub class A charges field must be numeric.',
                 'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
                 'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
@@ -4188,7 +4188,7 @@ class AdminCorporateAccountsController extends Controller
                             ]);
 
                         }
-                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status = new PendingCorporateDeliveryTypeStatus();
                         $delivery_type_status->user_id = $id;
                         $delivery_type_status->delivery_type_id = 2;
                         $delivery_type_status->shipping_mode_id = 1;
@@ -4379,7 +4379,7 @@ class AdminCorporateAccountsController extends Controller
                             ]);
 
                         }
-                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status = new PendingCorporateDeliveryTypeStatus();
                         $delivery_type_status->user_id = $id;
                         $delivery_type_status->delivery_type_id = 2;
                         $delivery_type_status->shipping_mode_id = 2;
@@ -4575,7 +4575,7 @@ class AdminCorporateAccountsController extends Controller
                             ]);
 
                         }
-                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status = new PendingCorporateDeliveryTypeStatus();
                         $delivery_type_status->user_id = $id;
                         $delivery_type_status->delivery_type_id = 2;
                         $delivery_type_status->shipping_mode_id = 3;
@@ -4766,7 +4766,7 @@ class AdminCorporateAccountsController extends Controller
                             ]);
 
                         }
-                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status = new PendingCorporateDeliveryTypeStatus();
                         $delivery_type_status->user_id = $id;
                         $delivery_type_status->delivery_type_id = 2;
                         $delivery_type_status->shipping_mode_id = 4;
@@ -5573,33 +5573,33 @@ class AdminCorporateAccountsController extends Controller
                 if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()){
                     $delivery_type_status = new CorporateDeliveryTypeStatus();
                     $delivery_type_status->user_id = $id;
-                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status['delivery_type_id'];
-                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status['shipping_mode_id'];
-                    $delivery_type_status->status = $pending_delivery_type_status['status'];
+                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status->delivery_type_id;
+                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status->shipping_mode_id;
+                    $delivery_type_status->status = $pending_delivery_type_status->status;
                     $delivery_type_status->save();
                 }
                 if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->first()){
                     $delivery_type_status = new CorporateDeliveryTypeStatus();
                     $delivery_type_status->user_id = $id;
-                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status['delivery_type_id'];
-                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status['shipping_mode_id'];
-                    $delivery_type_status->status = $pending_delivery_type_status['status'];
+                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status->delivery_type_id;
+                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status->shipping_mode_id;
+                    $delivery_type_status->status = $pending_delivery_type_status->status;
                     $delivery_type_status->save();
                 }
                 if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->first()){
                     $delivery_type_status = new CorporateDeliveryTypeStatus();
                     $delivery_type_status->user_id = $id;
-                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status['delivery_type_id'];
-                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status['shipping_mode_id'];
-                    $delivery_type_status->status = $pending_delivery_type_status['status'];
+                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status->delivery_type_id;
+                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status->shipping_mode_id;
+                    $delivery_type_status->status = $pending_delivery_type_status->status;
                     $delivery_type_status->save();
                 }
                 if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->first()){
                     $delivery_type_status = new CorporateDeliveryTypeStatus();
                     $delivery_type_status->user_id = $id;
-                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status['delivery_type_id'];
-                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status['shipping_mode_id'];
-                    $delivery_type_status->status = $pending_delivery_type_status['status'];
+                    $delivery_type_status->delivery_type_id = $pending_delivery_type_status->delivery_type_id;
+                    $delivery_type_status->shipping_mode_id = $pending_delivery_type_status->shipping_mode_id;
+                    $delivery_type_status->status = $pending_delivery_type_status->status;
                     $delivery_type_status->save();
                 }
                 if ($pendingswitchs = PendingCorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
