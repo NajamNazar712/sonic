@@ -2013,7 +2013,7 @@ class AdminMasterCargoController extends Controller
                             return ['status' => 1, 'error' => 'Cargo Bag doesn\'t belong to your assigned hub(s)!'];
                         }
                     }
-                    if (!in_array($cargo_consignment->status_id, [2, 3])) {
+                    if (!in_array($cargo_consignment->status_id, [3])) {
                         return ['status' => 1, 'error' => 'Given Bag\'s has already been modified!'];
                     }
                     $details = array();
