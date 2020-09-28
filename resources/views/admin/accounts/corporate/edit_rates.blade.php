@@ -316,7 +316,7 @@
                                                         @endforeach
                                                             @else
                                                             <input type="hidden" name="overnight_hub_min_chargeable_weight" value="">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="Minimum Chargeable Weight is required" value="" name="on_hub_mcw_charges" placeholder="Minimum Chargeable Weight">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="Minimum Chargeable Weight is required" value="" name="on_hub_mcw_charges" placeholder="Minimum Chargeable Weight" disabled>
 
                                                         @endif
                                                     </fieldset>
@@ -439,27 +439,27 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_local_charges[1]">
+                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_local_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_0_charges[1]">
+                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_0_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_1_charges[1]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_1_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_2_charges[1]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_2_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_3_charges[1]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_3_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -1213,7 +1213,7 @@
                                                         @endforeach
                                                             @else
                                                             <input type="hidden" name="overland_hub_min_chargeable_weight" value="">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="Minimum Chargeable Weight is required" value="" name="ol_hub_mcw_charges" placeholder="Minimum Chargeable Weight">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="Minimum Chargeable Weight is required" value="" name="ol_hub_mcw_charges" placeholder="Minimum Chargeable Weight" disabled>
 
                                                         @endif
                                                     </fieldset>
@@ -1331,26 +1331,26 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_local_charges[0]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_0_charges[0]" disabled>
                                                         </fieldset>
                                                     </div> <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_1_charges[1]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_1_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_2_charges[1]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_2_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_3_charges[1]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_3_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -2115,7 +2115,7 @@
                                                         @endforeach
                                                             @else
                                                             <input type="hidden" name="detain_hub_min_chargeable_weight" value="">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="Minimum Chargeable Weight is required" value="" name="detain_hub_mcw_charges" placeholder="Minimum Chargeable Weight">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="Minimum Chargeable Weight is required" value="" name="detain_hub_mcw_charges" placeholder="Minimum Chargeable Weight" disabled>
                                                         @endif
                                                     </fieldset>
                                                 </div>
@@ -2237,27 +2237,27 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_local_charges[0]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_0_charges[0]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_1_charges[1]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_1_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_2_charges[1]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_2_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_3_charges[1]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_3_charges[1]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -2985,7 +2985,7 @@
                                                         @endforeach
                                                             @else
                                                             <input type="hidden" name="sameday_hub_min_chargeable_weight" value="">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="Minimum Chargeable Weight is required" value="" name="sameday_hub_mcw_charges" placeholder="Minimum Chargeable Weight">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="Minimum Chargeable Weight is required" value="" name="sameday_hub_mcw_charges" placeholder="Minimum Chargeable Weight" disabled>
                                                             @endif
                                                     </fieldset>
                                                 </div>
@@ -3083,12 +3083,12 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_local_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_local_charges[0]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_class_0_charges[0]">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_class_0_charges[0]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -4295,7 +4295,7 @@
                 if (onhub_to_hub_switch.checked === true) {
                     $('input[name="on_hub_mcw_charges"]').attr('disabled', false);
                     $('.on_hub_weight_row input').attr('disabled', false);
-                    $('#on_hub_range_up1').attr('disabled', true);
+                    $('input[name="on_hub_range_up[1]"]').attr('disabled', true);
                     $('#hub_waddition_btn').attr('disabled', false);
                 } else if (onhub_to_hub_switch.checked === false) {
                     $('.on_hub_weight_row input').attr('disabled', true);
@@ -4309,7 +4309,7 @@
                 if (ol_hub_to_hub_switch.checked === true) {
                     $('input[name="ol_hub_mcw_charges"]').attr('disabled', false);
                     $('.ol_hub_weight_row input').attr('disabled', false);
-                    $('#ol_hub_range_up1').attr('disabled', true);
+                    $('input[name="ol_hub_range_up[1]"]').attr('disabled', true);
                     $('#overland_hub_weightadd').attr('disabled', false);
                 } else if (ol_hub_to_hub_switch.checked === false) {
                     $('.ol_hub_weight_row input').attr('disabled', true);
@@ -4324,7 +4324,7 @@
                 if (detain_hub_to_hub_switch.checked === true) {
                     $('input[name="detain_hub_mcw_charges"]').attr('disabled', false);
                     $('.detain_hub_weight_row input').attr('disabled', false);
-                    $('#detain_hub_range_up1').attr('disabled', true);
+                    $('input[name="detain_hub_range_up[1]"]').attr('disabled', true);
                     $('#detain_hub_weightadd').attr('disabled', false);
                 } else if (detain_hub_to_hub_switch.checked === false) {
                     $('.detain_hub_weight_row input').attr('disabled', true);
@@ -4339,7 +4339,7 @@
                 if (sameday_hub_to_hub_switch.checked === true) {
                     $('input[name="sameday_hub_mcw_charges"]').attr('disabled', false);
                     $('.sameday_hub_weight_row input').attr('disabled', false);
-                    $('#sameday_hub_range_up1').attr('disabled', true);
+                    $('input[name="sameday_hub_range_up[1]"]').attr('disabled', true);
                     $('#sameday_hub_weightadd').attr('disabled', false);
                 } else if (sameday_hub_to_hub_switch.checked === false) {
                     $('.sameday_hub_weight_row input').attr('disabled', true);

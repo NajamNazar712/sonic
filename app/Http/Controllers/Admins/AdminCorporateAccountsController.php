@@ -2261,11 +2261,11 @@ class AdminCorporateAccountsController extends Controller
                                 'national_charges_class_3' => $request->on_door_class_3_charges[$index]
                             ]);
                         }
-
-
                     }
+
                     CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->whereNotIn('id', $request->on_hub_weight_record)->delete();
                     if ($request->has('on_hub_to_hub_switch') && $request->on_hub_to_hub_switch == 'on') {
+
                         $wa_switch = array();
 
                         foreach ($request->on_hub_weight_record as $index => $on_hub_weight_record) {
@@ -2314,6 +2314,12 @@ class AdminCorporateAccountsController extends Controller
 
 
                         }
+                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status->user_id = $id;
+                        $delivery_type_status->delivery_type_id = 2;
+                        $delivery_type_status->shipping_mode_id = 1;
+                        $delivery_type_status->status = 1;
+                        $delivery_type_status->save();
                     }
 
                     //Replacement and Try and Buy charges
@@ -4182,6 +4188,12 @@ class AdminCorporateAccountsController extends Controller
                             ]);
 
                         }
+                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status->user_id = $id;
+                        $delivery_type_status->delivery_type_id = 2;
+                        $delivery_type_status->shipping_mode_id = 1;
+                        $delivery_type_status->status = 1;
+                        $delivery_type_status->save();
                     }
 
                     PendingCorporateBookingTypeCharges::create([
@@ -4367,6 +4379,12 @@ class AdminCorporateAccountsController extends Controller
                             ]);
 
                         }
+                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status->user_id = $id;
+                        $delivery_type_status->delivery_type_id = 2;
+                        $delivery_type_status->shipping_mode_id = 2;
+                        $delivery_type_status->status = 1;
+                        $delivery_type_status->save();
                     }
 
 
@@ -4557,6 +4575,12 @@ class AdminCorporateAccountsController extends Controller
                             ]);
 
                         }
+                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status->user_id = $id;
+                        $delivery_type_status->delivery_type_id = 2;
+                        $delivery_type_status->shipping_mode_id = 3;
+                        $delivery_type_status->status = 1;
+                        $delivery_type_status->save();
                     }
 
 
@@ -4742,6 +4766,12 @@ class AdminCorporateAccountsController extends Controller
                             ]);
 
                         }
+                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status->user_id = $id;
+                        $delivery_type_status->delivery_type_id = 2;
+                        $delivery_type_status->shipping_mode_id = 4;
+                        $delivery_type_status->status = 1;
+                        $delivery_type_status->save();
                     }
 
 
