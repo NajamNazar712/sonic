@@ -1543,6 +1543,7 @@ class AdminCorporateAccountsController extends Controller
             }
 
         } elseif (($user['rate_status'] >= 1) && $user['status'] == 3) {
+
             $e_switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1600,7 +1601,6 @@ class AdminCorporateAccountsController extends Controller
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
-
             $hub_delivery_type_status = PendingCorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $existing = 1;
             if(session('department_id') == 7){
