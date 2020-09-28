@@ -1441,7 +1441,6 @@ class AdminCorporateAccountsController extends Controller
     {
         $user = User::find($id);
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
-
         $commission_percentage = '';
         $settings = GlobalSettings::where('type', 'commission_percentage');
         if($settings->exists()){
@@ -1553,6 +1552,7 @@ class AdminCorporateAccountsController extends Controller
             $e_return = CorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_fuel = CorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_discount = CorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_hub_delivery_type_status = CorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_rate_status = $user['rate_status'];
             $e_packaging = PackagingCharge::all()->where('user_id', $id);
             $e_packaging_type_ids = array_unique($e_packaging->pluck('type_id')->toArray());
@@ -1600,7 +1600,8 @@ class AdminCorporateAccountsController extends Controller
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
-            $hub_delivery_type_status = CorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
+            $hub_delivery_type_status = PendingCorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $existing = 1;
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
