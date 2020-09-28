@@ -2000,6 +2000,9 @@ class AdminMasterCargoController extends Controller
         if ($bag->exists()) {
             $bag = $bag->first();
 
+            if ($bag->status_id != 2) {
+                return ['status' => 1, 'error' => 'Given Bag\'s has already been modified!'];
+            }
             $cargo_consignment_bag = MasterCargoBag::where('bag_id', $bag->id);
 
             if ($cargo_consignment_bag->exists()) {
@@ -2012,9 +2015,6 @@ class AdminMasterCargoController extends Controller
                         if (!in_array($cargo_consignment->destination_hub->hub_id, session('hubs'))) {
                             return ['status' => 1, 'error' => 'Cargo Bag doesn\'t belong to your assigned hub(s)!'];
                         }
-                    }
-                    if (!in_array($cargo_consignment->status_id, [3])) {
-                        return ['status' => 1, 'error' => 'Given Bag\'s has already been modified!'];
                     }
                     $details = array();
 
