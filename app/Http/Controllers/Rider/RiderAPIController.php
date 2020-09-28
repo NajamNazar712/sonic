@@ -18,6 +18,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
+use App\RiderDeliveryNoteStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -1100,12 +1101,25 @@ class RiderAPIController extends Controller {
                     }
                     $shipment->save();
                 }
-
-                $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
-                if($updated_shipments_count == 0){
-                    DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
-
+                $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
+                if(!$rider_delivery_note_status->exists()){
+                    $new_status = new RiderDeliveryNoteStatus();
+                    $new_status->delivery_note_id = $request->delivery_note_id;
+                    $new_status->status = 1;
+                    $new_status->save();
                 }
+                $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+                if($updated_shipments_count == 0)
+                {
+                    DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+                    $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
+                    if($rider_delivery_note_status->exists()){
+                        $rider_delivery_note_status = $rider_delivery_note_status->first();
+                        $rider_delivery_note_status->status = 2;
+                        $rider_delivery_note_status->save();
+                    }
+                }
+
             }
 
             return response()->json(['status' => 0, 'message' => 'Shipment marked as Delivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -1219,13 +1233,25 @@ class RiderAPIController extends Controller {
 
                 ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
 //                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1]);
+                $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
+                if(!$rider_delivery_note_status->exists()){
+                    $new_status = new RiderDeliveryNoteStatus();
+                    $new_status->delivery_note_id = $request->delivery_note_id;
+                    $new_status->status = 2;
+                    $new_status->save();
+                }
+                else{
+                    $rider_delivery_note_status = $rider_delivery_note_status->first();
+                    $rider_delivery_note_status->status = 2;
+                    $rider_delivery_note_status->save();
+                }
             }
-            
 
-//            $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
-//            if($updated_shipments_count == 0){
-//                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
-//            }
+
+            $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+            if($updated_shipments_count == 0){
+                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+            }
 
             return response()->json(['status' => 0, 'message' => 'Shipment is marked as Undelivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
         }
