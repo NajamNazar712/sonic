@@ -515,7 +515,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                     if(Session::has('prefix')){
-                        $tracking_number = session('prefix') . '-' . $request->order_id;
+                        $tracking_number = session('prefix') . $request->order_id;
                         $tracking_number = (int)$tracking_number;
                     }
                     else{
@@ -2130,7 +2130,7 @@ class ShipperShipmentBookController extends Controller
                                 }
 
                                 if(Session::has('prefix')){
-                                    $row['tracking_number'] = session('prefix') . '-' . $row['order_id'];
+                                    $row['tracking_number'] = session('prefix') . $row['order_id'];
                                 }
                                 else{
                                     $row['tracking_number'] = NULL;
@@ -2454,7 +2454,7 @@ class ShipperShipmentBookController extends Controller
                     $substitute_user_shipment->save();
                 }
                 if(Session::has('prefix')){
-                    $tracking_number = session('prefix') . '-' . $request->order_id;
+                    $tracking_number = session('prefix') . $request->order_id;
                     $tracking_number = (int)$tracking_number;
                 }
                 else{
@@ -3473,7 +3473,7 @@ class ShipperShipmentBookController extends Controller
                             $row['nsas'] = $check;
                             $row['nsa'] = $request->excel_nsa;
                             if(Session::has('prefix')){
-                                $tracking_number = session('prefix') . '-' . $request->order_id;
+                                $tracking_number = session('prefix') . $request->order_id;
                                 $row['tracking_number'] = (int)$tracking_number;
                             }
                             else{

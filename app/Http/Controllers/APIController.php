@@ -656,7 +656,7 @@ class APIController extends Controller
 
             if($shipment_pre_book->exists()){
                 $shipment_pre_book = $shipment_pre_book->first();
-                $tracking_number = $shipment_pre_book->prefix . '-' . $order_id;
+                $tracking_number = $shipment_pre_book->prefix . $order_id;
                 $tracking_number = (int)$tracking_number;
             }
             else{
