@@ -743,26 +743,6 @@
                     $('#select_service_type').modal('hide');
 
                     shipping_modes();
-
-                    var index = $.inArray(parseInt(service_type), open_delivery_status);
-
-                    if(index == -1){
-                        $("#delivery_type").select2('destroy');
-                        $("#delivery_type").find('option[value="2"]').attr('disabled', true);
-                        $("#delivery_type").prepend('<option value="" selected="selected"></option>').select2({
-                            width: '100%',
-                            placeholder: 'Delivery Type*'
-                        });
-                    }else{
-                        if ($('#delivery_type').hasClass("select2-hidden-accessible")) {
-                            $("#delivery_type").select2('destroy');
-                            $("#delivery_type").find('option[value="2"]').attr('disabled', false);
-                            $("#delivery_type").prepend('<option value="" selected="selected"></option>').select2({
-                                width: '100%',
-                                placeholder: 'Delivery Type*'
-                            });
-                        }
-                    }
                 }
                 else {
                     $('#select_service_type form #service_type-error').removeClass('d-none');
@@ -1136,6 +1116,25 @@
                 }
                 else {
                     $('#shipping_same-day').addClass('d-none');
+                }
+                var index = $.inArray(parseInt(this.value), open_delivery_status);
+
+                if(index == -1){
+                    $("#delivery_type").select2('destroy');
+                    $("#delivery_type").find('option[value="2"]').attr('disabled', true);
+                    $("#delivery_type").prepend('<option value="" selected="selected"></option>').select2({
+                        width: '100%',
+                        placeholder: 'Delivery Type*'
+                    });
+                }else{
+                    if ($('#delivery_type').hasClass("select2-hidden-accessible")) {
+                        $("#delivery_type").select2('destroy');
+                        $("#delivery_type").find('option[value="2"]').attr('disabled', false);
+                        $("#delivery_type").prepend('<option value="" selected="selected"></option>').select2({
+                            width: '100%',
+                            placeholder: 'Delivery Type*'
+                        });
+                    }
                 }
             });
 
