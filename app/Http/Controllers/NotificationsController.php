@@ -5439,10 +5439,9 @@ class NotificationsController extends Controller
           $html = '<table style="width:100%;">';
           $html .= '<thead><tr>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tagged By</th>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Sales Person</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tagged By</th>';
-
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>';
           $html .= '</tr></thead><tbody>';
 
           $to = array();
