@@ -891,7 +891,12 @@
             });
 
             $('input[name="consignee_phone_number_1"]').bind('change paste keyup', function () {
-                var length = $(this).val().match(/\d/g).length;
+                if($(this).val().match(/\d/g) != null){
+                    var length = $(this).val().match(/\d/g).length;
+                }
+                else{
+                    var length = 0;
+                }
                 if(length == 11){
                     check_consignee_return_ratio();
                 }
