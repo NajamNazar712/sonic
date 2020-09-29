@@ -238,7 +238,7 @@
 					}
 				},
 				create: function(input) {
-					if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+					if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
 						return {
 							value: input,
 							text: input
@@ -537,28 +537,28 @@
                                 $('#tracking').append(shipment);
                             });
 
-                            $('#tracking table.datatable.tracking_history').DataTable({
-                                dom: 't',
-                                paging: false,
-                                order: [[0, 'desc']],
-                                columns: [
-                                    {name: 'date_time', class: 'align-middle date_time'},
-                                    {name: 'status', class: 'align-middle status'},
-                                    {name: 'reason', class: 'align-middle reason'},
-                                    {name: 'city', class: 'align-middle city'}
-                                ]
-                            });
+                            // $('#tracking table.datatable.tracking_history').DataTable({
+                            //     dom: 't',
+                            //     paging: false,
+                            //     order: [[0, 'desc']],
+                            //     columns: [
+                            //         {name: 'date_time', class: 'align-middle date_time'},
+                            //         {name: 'status', class: 'align-middle status'},
+                            //         {name: 'reason', class: 'align-middle reason'},
+                            //         {name: 'city', class: 'align-middle city'}
+                            //     ]
+                            // });
 
-                            $('#tracking table.datatable.payment_history').DataTable({
-                                dom: 't',
-                                paging: false,
-                                order: [[0, 'desc']],
-                                columns: [
-                                    {name: 'date_time', class: 'align-middle date_time'},
-                                    {name: 'status', class: 'align-middle status'},
-                                    {name: 'user', class: 'align-middle user'}
-                                ]
-                            });
+                            // $('#tracking table.datatable.payment_history').DataTable({
+                            //     dom: 't',
+                            //     paging: false,
+                            //     order: [[0, 'desc']],
+                            //     columns: [
+                            //         {name: 'date_time', class: 'align-middle date_time'},
+                            //         {name: 'status', class: 'align-middle status'},
+                            //         {name: 'user', class: 'align-middle user'}
+                            //     ]
+                            // });
                         }
                     });
 			}

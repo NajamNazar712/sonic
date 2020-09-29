@@ -263,6 +263,7 @@
     <script src="https://kit.fontawesome.com/e7bc565afe.js" crossorigin="anonymous"></script>
 	<script>
 		$(document).ready(function() {
+		    console.log(1);
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
