@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\CorporateDeliveryTypeStatus;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\Admin;
@@ -493,6 +494,20 @@ class APIController extends Controller
 
                 if (!CityDelivery::where('city_id', $delivery_city->id)->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
                     return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $delivery_city->id . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
+                }
+            }
+
+            if($user_type['account_type_id'] == 2) {
+                if ($request->input('delivery_type_id') == 2) {
+                    $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
+                    if ($allowed_delivery_type->exists()) {
+                        $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('delivery_type_id', $request->input('delivery_type_id'));
+                        if (!$allowed_delivery_type->exists()) {
+                            return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
+                    }
                 }
             }
             if($service_type_id == 5){
