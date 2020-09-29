@@ -5451,7 +5451,7 @@ class NotificationsController extends Controller
               $shipper =  User::find($index);
               $html .= '<tr>';
               $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .$shipper->name . '</td>';
-
+              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$tagged_by.'</td>';
               if($person['old_sale_person'] != null){
                   $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name . '</td>';
               }
@@ -5459,7 +5459,6 @@ class NotificationsController extends Controller
                   $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
               }
               $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['new_sale_person']->name . '</td>';
-              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$tagged_by.'</td>';
               $html .= '</tr>';
 
               $concern=SalesCommission::join('sales_commission_users as sc','sc.sales_commission_id','=','sales_commissions.id')->join('admins as a','a.id', '=' ,'sc.user_id')->where('sales_commissions.shipper_id', $shipper->id)->whereIn('sc.tier_id', [1,2,3,4]);
