@@ -161,7 +161,7 @@
                                         <h4 id="order_header_info" class="form-section mb-2 text-center">Order Information</h4>
                                         @if (Session::has('prefix'))
                                             <div class="form-group">
-                                                <input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-rule-required="true" data-msg-required="Order ID is required" data-msg-maxlength="Order ID can be maximum 100 characters" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
+                                                <input name="order_id" class="form-control order_id" placeholder="Order ID" data-rule-maxlength="100" data-rule-required="true" data-msg-required="Order ID is required" data-msg-maxlength="Order ID can be maximum 100 characters" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
                                             </div>
                                         @else
                                             <div class="form-group">
@@ -1530,6 +1530,11 @@
             });
 
             $('.amount').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+            $('.order_id').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false

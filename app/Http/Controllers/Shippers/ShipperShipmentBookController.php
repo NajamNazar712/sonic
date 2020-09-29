@@ -516,6 +516,7 @@ class ShipperShipmentBookController extends Controller
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                     if(Session::has('prefix')){
                         $tracking_number = session('prefix') . '-' . $request->order_id;
+                        $tracking_number = (int)$tracking_number;
                     }
                     else{
                         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
@@ -1744,7 +1745,6 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description' => ['required_if:service_type_id,1,2,5', 'nullable', 'between:0,1000'],
@@ -1878,6 +1878,12 @@ class ShipperShipmentBookController extends Controller
             $blacklist_errors = array();
             $blacklist_found_categories = array();
 
+            if(Session::has('prefix')){
+                $rules['order_id'] = ['required', 'between:0,100'];
+            }
+            else{
+                $rules['order_id'] = ['nullable', 'between:0,100'];
+            }
 
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
@@ -1894,6 +1900,7 @@ class ShipperShipmentBookController extends Controller
                         $query->whereNotIn('id', [4]);
                     })];
                 }
+
 
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
                     $row['pieces_quantity'] = 1;
@@ -1929,12 +1936,6 @@ class ShipperShipmentBookController extends Controller
                         } else {
                             $order_ids[] = $row['order_id'];
                             $order_id_row[$row['order_id']] = $row_id;
-                        }
-                    }
-
-                    if(Session::has('prefix')){
-                        if(empty($row['order_id'])){
-                            $errors[$row_id]['order_id'] = 'Order ID# is required';
                         }
                     }
 
@@ -2452,6 +2453,7 @@ class ShipperShipmentBookController extends Controller
                 }
                 if(Session::has('prefix')){
                     $tracking_number = session('prefix') . '-' . $request->order_id;
+                    $tracking_number = (int)$tracking_number;
                 }
                 else{
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
@@ -3123,7 +3125,6 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
@@ -3222,6 +3223,14 @@ class ShipperShipmentBookController extends Controller
             $check = NonServiceArea::pluck('name')->toArray();
             $blacklist_errors = array();
             $blacklist_found_categories = array();
+
+            if(Session::has('prefix')){
+                $rules['order_id'] = ['required', 'between:0,100'];
+            }
+            else{
+                $rules['order_id'] = ['nullable', 'between:0,100'];
+            }
+
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
 
@@ -3273,11 +3282,6 @@ class ShipperShipmentBookController extends Controller
                         else {
                                 $order_ids[] = $row['order_id'];
                                 $order_id_row[$row['order_id']] = $row_id;
-                        }
-                    }
-                    if(Session::has('prefix')){
-                        if(empty($row['order_id'])){
-                            $errors[$row_id]['order_id'] = 'Order ID# is required';
                         }
                     }
 
@@ -3467,7 +3471,8 @@ class ShipperShipmentBookController extends Controller
                             $row['nsas'] = $check;
                             $row['nsa'] = $request->excel_nsa;
                             if(Session::has('prefix')){
-                                $row['tracking_number'] = session('prefix') . '-' . $row['order_id'];
+                                $tracking_number = session('prefix') . '-' . $request->order_id;
+                                $row['tracking_number'] = (int)$tracking_number;
                             }
                             else{
                                 $row['tracking_number'] = NULL;

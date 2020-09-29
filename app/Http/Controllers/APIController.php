@@ -295,7 +295,6 @@ class APIController extends Controller
                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'self_collection' => ['nullable', 'boolean'],
-                'order_id' => ['nullable', 'filled'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -348,7 +347,6 @@ class APIController extends Controller
                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
-                'order_id' => ['nullable', 'filled'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -384,6 +382,14 @@ class APIController extends Controller
             ];
         }
 
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
+        if($shipment_pre_book->exists()){
+            $rules['order_id'] = ['required', 'between:0,100'];
+        }
+        else{
+            $rules['order_id'] = ['nullable', 'between:0,100'];
+        }
+
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -394,17 +400,6 @@ class APIController extends Controller
         else {
             $service_type_id = $request->input('service_type_id');
 
-            $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
-            if($shipment_pre_book->exists()){
-                if($request->has('order_id')){
-                    if(!$request->filled('order_id')){
-                        return response()->json(['status' => 1, 'message' => 'Order ID # is required']);
-                    }
-                }
-                else{
-                    return response()->json(['status' => 1, 'message' => 'Order ID # is required']);
-                }
-            }
             if($service_type_id != 5){
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
@@ -660,6 +655,7 @@ class APIController extends Controller
             if($shipment_pre_book->exists()){
                 $shipment_pre_book = $shipment_pre_book->first();
                 $tracking_number = $shipment_pre_book->prefix . '-' . $order_id;
+                $tracking_number = (int)$tracking_number;
             }
             else{
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
