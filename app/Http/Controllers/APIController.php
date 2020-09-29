@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\ShipmentPrebook;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\Admin;
@@ -393,6 +394,17 @@ class APIController extends Controller
         else {
             $service_type_id = $request->input('service_type_id');
 
+            $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
+            if($shipment_pre_book->exists()){
+                if($request->has('order_id')){
+                    if(!$request->filled('order_id')){
+                        return response()->json(['status' => 1, 'message' => 'Order ID # is required']);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'message' => 'Order ID # is required']);
+                }
+            }
             if($service_type_id != 5){
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
@@ -644,7 +656,14 @@ class APIController extends Controller
             else {
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection);
             }
-            $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+            if($shipment_pre_book->exists()){
+                $shipment_pre_book = $shipment_pre_book->first();
+                $tracking_number = $shipment_pre_book->prefix . '-' . $order_id;
+            }
+            else{
+                $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+            }
 
             if ($service_type_id == 1 || $service_type_id == 5) {
                 $item_product_type_id = $request->input('item_product_type_id');

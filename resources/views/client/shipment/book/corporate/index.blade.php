@@ -159,10 +159,15 @@
 
                                     <div id="order_information_header_div" class="col col_custom_middle">
                                         <h4 id="order_header_info" class="form-section mb-2 text-center">Order Information</h4>
-
-                                        <div class="form-group">
-                                            <input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
-                                        </div>
+                                        @if (Session::has('prefix'))
+                                            <div class="form-group">
+                                                <input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-rule-required="true" data-msg-required="Order ID is required" data-msg-maxlength="Order ID can be maximum 100 characters" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
+                                            </div>
+                                        @else
+                                            <div class="form-group">
+                                                <input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
+                                            </div>
+                                        @endif
 
                                         <div id="regular">
                                             <div class="form-group">

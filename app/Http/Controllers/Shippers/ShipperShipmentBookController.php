@@ -65,9 +65,9 @@ use SnappyPDF;
 
 class ShipperShipmentBookController extends Controller
 {
-//    private function unique_order_id($order_id) {
-//        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
-//    }
+    private function unique_order_id($order_id) {
+        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+    }
 
     private function set_service_type($service_type_id) {
         $service_type = BookingType::find($service_type_id);
@@ -514,7 +514,12 @@ class ShipperShipmentBookController extends Controller
                         $substitute_user_shipment->save();
                     }
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
-                    $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+                    if(Session::has('prefix')){
+                        $tracking_number = session('prefix') . '-' . $request->order_id;
+                    }
+                    else{
+                        $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+                    }
 
                     if ($service_type_id == 1 || $service_type_id == 5) {
                         $product_type_id = $request->input('product_type');
@@ -1926,6 +1931,13 @@ class ShipperShipmentBookController extends Controller
                             $order_id_row[$row['order_id']] = $row_id;
                         }
                     }
+
+                    if(Session::has('prefix')){
+                        if(empty($row['order_id'])){
+                            $errors[$row_id]['order_id'] = 'Order ID# is required';
+                        }
+                    }
+
                     if($row['service_type_id'] != 5){
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
@@ -2112,6 +2124,13 @@ class ShipperShipmentBookController extends Controller
                                 }
                                 else{
                                     $row['substitute_user_id'] = null;
+                                }
+
+                                if(Session::has('prefix')){
+                                    $row['tracking_number'] = session('prefix') . '-' . $row['order_id'];
+                                }
+                                else{
+                                    $row['tracking_number'] = NULL;
                                 }
 
                                 if ($user_id != 3324) {
@@ -2431,7 +2450,12 @@ class ShipperShipmentBookController extends Controller
                     $substitute_user_shipment->shipment_id = $shipment_id;
                     $substitute_user_shipment->save();
                 }
-                $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+                if(Session::has('prefix')){
+                    $tracking_number = session('prefix') . '-' . $request->order_id;
+                }
+                else{
+                    $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+                }
                 $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                 if ($service_type_id == 1 || $service_type_id == 5) {
                     $product_type_id = $request->input('product_type');
@@ -3251,6 +3275,11 @@ class ShipperShipmentBookController extends Controller
                                 $order_id_row[$row['order_id']] = $row_id;
                         }
                     }
+                    if(Session::has('prefix')){
+                        if(empty($row['order_id'])){
+                            $errors[$row_id]['order_id'] = 'Order ID# is required';
+                        }
+                    }
 
 //                        dd($errors[$row_id]['amount']);
                     if($row['service_type_id'] != 5){
@@ -3437,6 +3466,12 @@ class ShipperShipmentBookController extends Controller
                             $row['account_type_id'] = 2;
                             $row['nsas'] = $check;
                             $row['nsa'] = $request->excel_nsa;
+                            if(Session::has('prefix')){
+                                $row['tracking_number'] = session('prefix') . '-' . $row['order_id'];
+                            }
+                            else{
+                                $row['tracking_number'] = NULL;
+                            }
                             if(session('user_type') == 2){
                                 $row['substitute_user_id'] = Auth::id();
                             }
