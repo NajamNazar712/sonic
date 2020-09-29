@@ -263,7 +263,6 @@
     <script src="https://kit.fontawesome.com/e7bc565afe.js" crossorigin="anonymous"></script>
 	<script>
 		$(document).ready(function() {
-		    console.log(1);
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -1018,7 +1017,7 @@
                         }
                     },
                     create: function (input) {
-                        if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
                             return {
                                 value: input,
                                 text: input
