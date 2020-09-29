@@ -384,10 +384,12 @@ class APIController extends Controller
 
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
         if($shipment_pre_book->exists()){
-            $rules['order_id'] = ['required', 'between:0,100'];
+            $rules['order_id'] = ['required', 'between:0,100', Rule::unique('shipments')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })];
         }
         else{
-            $rules['order_id'] = ['nullable', 'between:0,100'];
+            $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
         }
 
         $validate = Validator::make($request->all(), $rules, $this->messages);

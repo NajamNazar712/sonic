@@ -674,14 +674,14 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-//    public function order_id(Request $request) {
-//        if ($request->filled('order_id')) {
-//            return json_encode($this->unique_order_id($request->input('order_id')));
-//        }
-//        else {
-//            return 'false';
-//        }
-//    }
+    public function order_id(Request $request) {
+        if ($request->filled('order_id')) {
+            return json_encode($this->unique_order_id($request->input('order_id')));
+        }
+        else {
+            return 'false';
+        }
+    }
     public function shipment_check(Request $request){
         $shipment_ids = array();
         if($request->ids){
@@ -1879,7 +1879,9 @@ class ShipperShipmentBookController extends Controller
             $blacklist_found_categories = array();
 
             if(Session::has('prefix')){
-                $rules['order_id'] = ['required', 'between:0,100'];
+                $rules['order_id'] = ['required', 'between:0,100', Rule::unique('shipments')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id);
+                })];
             }
             else{
                 $rules['order_id'] = ['nullable', 'between:0,100'];
