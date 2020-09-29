@@ -5957,6 +5957,25 @@ class NotificationsController extends Controller
               self::email($subject, $body, $to);
 
               }
+          else if($id == 89){
+
+              $finance = Admin::whereIn('id', [60 , 12])->where('status', 1);
+
+              $to = array();
+
+              if ($finance->exists()) {
+                  $to = array_merge($to, $finance->pluck('email')->toArray());
+              }
+
+
+              $file = $reference_2_id;
+              $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+              if (strpos($body, '[link]') !== FALSE) {
+                  $body = str_replace('[link]', $link, $body);
+              }
+              self::email($subject, $body, $to);
+          }
         }
       }
     }
