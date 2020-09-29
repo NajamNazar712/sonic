@@ -1542,7 +1542,9 @@
             $('.order_id').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
-                'allowPlus': false
+                'allowPlus': false,
+                'min': 0,
+                'max': 1000000000000
             });
         });
     </script>
