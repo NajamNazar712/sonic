@@ -656,8 +656,7 @@ class APIController extends Controller
 
             if($shipment_pre_book->exists()){
                 $shipment_pre_book = $shipment_pre_book->first();
-                $tracking_number = $shipment_pre_book->prefix . $order_id;
-                $tracking_number = (int)$tracking_number;
+                $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $shipment_pre_book->prefix, $order_id);
             }
             else{
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);

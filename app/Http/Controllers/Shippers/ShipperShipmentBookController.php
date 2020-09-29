@@ -194,6 +194,18 @@ class ShipperShipmentBookController extends Controller
 
         return $tracking_number;
     }
+
+    static public function generate_prefix_tracking_number($shipment_id, $prefix, $order_id) {
+        $shipment = Shipment::find($shipment_id);
+
+        $tracking_number = $prefix . $order_id;
+
+        $shipment->tracking_number = $tracking_number;
+
+        $shipment->save();
+
+        return $tracking_number;
+    }
     static public function create_shipment_pieces($shipment_id, $pieces){
         $total_pieces= 0;
         if($pieces > 1){
@@ -515,8 +527,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                     if(Session::has('prefix')){
-                        $tracking_number = session('prefix') . $request->order_id;
-                        $tracking_number = (int)$tracking_number;
+                        $tracking_number = $this->generate_prefix_tracking_number($shipment_id, session('prefix'), $request->order_id);
                     }
                     else{
                         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
@@ -2130,10 +2141,10 @@ class ShipperShipmentBookController extends Controller
                                 }
 
                                 if(Session::has('prefix')){
-                                    $row['tracking_number'] = session('prefix') . $row['order_id'];
+                                    $row['prefix'] = session('prefix');
                                 }
                                 else{
-                                    $row['tracking_number'] = NULL;
+                                    $row['prefix'] = NULL;
                                 }
 
                                 if ($user_id != 3324) {
@@ -2454,8 +2465,7 @@ class ShipperShipmentBookController extends Controller
                     $substitute_user_shipment->save();
                 }
                 if(Session::has('prefix')){
-                    $tracking_number = session('prefix') . $request->order_id;
-                    $tracking_number = (int)$tracking_number;
+                    $tracking_number = $this->generate_prefix_tracking_number($shipment_id, session('prefix'), $request->order_id);
                 }
                 else{
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
@@ -3227,7 +3237,9 @@ class ShipperShipmentBookController extends Controller
             $blacklist_found_categories = array();
 
             if(Session::has('prefix')){
-                $rules['order_id'] = ['required', 'between:0,100'];
+                $rules['order_id'] = ['required', 'between:0,100', Rule::unique('shipments')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id);
+                })];
             }
             else{
                 $rules['order_id'] = ['nullable', 'between:0,100'];
@@ -3473,11 +3485,10 @@ class ShipperShipmentBookController extends Controller
                             $row['nsas'] = $check;
                             $row['nsa'] = $request->excel_nsa;
                             if(Session::has('prefix')){
-                                $tracking_number = session('prefix') . $request->order_id;
-                                $row['tracking_number'] = (int)$tracking_number;
+                                $row['prefix'] =  session('prefix');
                             }
                             else{
-                                $row['tracking_number'] = NULL;
+                                $row['prefix'] = NULL;
                             }
                             if(session('user_type') == 2){
                                 $row['substitute_user_id'] = Auth::id();
