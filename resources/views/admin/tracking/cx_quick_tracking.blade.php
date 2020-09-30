@@ -45,6 +45,15 @@
                                         </fieldset>
                                     </div>
                                     <div class="col-3">
+                                        <fieldset class="form-group">
+                                            <select name="search_shipment_status" id="search_shipment_status" class="form-control select2">
+                                                @foreach($shipment_status as $shipment_statuses)
+                                                    <option value="{{$shipment_statuses->id}}">{{$shipment_statuses->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-6">
                                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                     </div>
                                 </div>
@@ -401,6 +410,11 @@
                     $("#search_filter_btn").click();
                 }
             });
+            $('#search_shipment_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Shipment Status',
+                width: '100%',
+                allowClear: true
+            });
 
             var table;
             function init(){
@@ -527,7 +541,8 @@
                             d.search_shipper = $('#search_shipper').val();
                             d.search_phone_no = $('#search_consignee_phone_number').val();
                             d.search_order_id = $('#search_order_id').val();
-                            d.request_id = $('#crm_request_id').val();
+                            d.crm_request_id = $('#crm_request_id').val();
+                            d.search_shipment_status = $('#search_shipment_status').val();
                         }
                     },
                     rowId: 'shipment_id',
@@ -551,38 +566,7 @@
                         $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     },
                     initComplete: function () {
-                        var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-                        var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                        var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                            '</select>';
-                        this.api().columns().every(function(column_id) {
-                            var column = this;
-                            var header = column.header();
 
-                             if($(header).is('.status')){
-                                $(drop_select).appendTo($(search))
-                                    .on( 'change', function () {
-                                        column.search($(this).val(), false, false, true).draw();
-                                    } ).wrap(td);
-                            }
-                        });
-                        var data = $.map({!! $shipment_status !!}, function (obj) {
-                            obj.id = obj.id // replace pk with your identifier
-
-                            return obj;
-                        });
-                        var data = $.map({!! $shipment_status !!}, function (obj) {
-                            obj.text = obj.text || obj.name; // replace name with the property used for the text
-
-                            return obj;
-                        });
-                        $("#status_select").prepend('<option value="" selected></option>').select2({
-                            data:data,
-                            placeholder: "Status",
-                            width:'100%',
-                            containerCssClass: 'select-xs',
-                            dropdownCssClass: 'form-control-sm p-0'
-                        });
                         this.api().table().columns.adjust();
                     }
                 });

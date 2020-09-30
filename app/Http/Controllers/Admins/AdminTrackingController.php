@@ -483,7 +483,7 @@ class AdminTrackingController extends Controller
         }
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
         $shipment_status = ShipmentStatus::select('id','name')->get();
-        return view('admin.tracking.cx_quick_tracking')->with(['shipment_status'=>$shipment_status,'shippers' => $shippers, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
+        return view('admin.tracking.cx_quick_tracking')->with(['shipment_status'=>$shipment_status, 'shippers' => $shippers, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
     public function cx_quick_tracking_list(Request $request){
         $quick_tracking = Shipment::join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
@@ -539,6 +539,9 @@ class AdminTrackingController extends Controller
             if($crm_request_id =$request->get('crm_request_id')){
                 $datatable->where('crm_requests.id', 'LIKE', '%'. $crm_request_id . '%');
             }
+            if($search_shipment_status =$request->get('search_shipment_status')){
+                $datatable->where('shipment_status.shipment_id', 'LIKE', '%'. $search_shipment_status . '%');
+            }
         }
         else{
                 $datatable->where('shipments.tracking_number', null);
@@ -547,7 +550,8 @@ class AdminTrackingController extends Controller
                 $datatable->where('shipments.order_id', null);
                 $datatable->where('shipments.consignee_name', null);
                 $datatable->where('shipments.consignee_address', null);
-            $datatable->where('crm_requests.id', null);
+                $datatable->where('crm_requests.shipment_id', null);
+                $datatable->where('shipment_status.id', null);
         }
             return $datatable->make(true);
     }
