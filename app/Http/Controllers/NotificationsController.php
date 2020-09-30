@@ -5433,10 +5433,13 @@ class NotificationsController extends Controller
           $subject = $notification->subject;
           $body = $notification->body;
           $sales_person = $reference_1_id;
-
+          $admin_id = $reference_2_id;
+          $user = Admin::find($admin_id);
+          $tagged_by = $user->name;
           $html = '<table style="width:100%;">';
           $html .= '<thead><tr>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tagged By</th>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Sales Person</th>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>';
           $html .= '</tr></thead><tbody>';
@@ -5447,7 +5450,7 @@ class NotificationsController extends Controller
               $shipper =  User::find($index);
               $html .= '<tr>';
               $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .$shipper->name . '</td>';
-
+              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$tagged_by.'</td>';
               if($person['old_sale_person'] != null){
                   $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name . '</td>';
               }
