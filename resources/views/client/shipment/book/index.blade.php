@@ -132,7 +132,7 @@
 										</div>
 
 										<div class="form-group">
-											<textarea id="consignee_address" name="consignee_address" class="form-control" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+											<textarea id="consignee_address" name="consignee_address" class="form-control" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters"></textarea>
 										</div>
 
 										<div class="form-group">
