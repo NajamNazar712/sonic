@@ -14,6 +14,7 @@ use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
@@ -1193,6 +1194,7 @@ class AdminReportsEmailController extends Controller
                 $writer->save($file_name);
 
                 NotificationsController::send(76, $hub->id, url('/') . '/' . $file_name_without_path);
+
             }
         }
     }
@@ -1363,4 +1365,67 @@ class AdminReportsEmailController extends Controller
             }
         }
     }
+
+    static public function outstanding_sdn($date)
+    {
+        $outstanding_sdn_report_array[] = ['Trax Online Private Limited'];
+        $outstanding_sdn_report_array[] = ['Outstanding SDN Report'];
+        $outstanding_sdn_report_array['header'] = ['S. No.', 'Hub Name', 'Completed >2days'];
+        $outstanding_sdn_report_array[] = ['S. No.' => '', 'Hub Name' => '', 'Completed >2days' => ''];
+
+        $now = Carbon::now();
+        $total = 0;
+        $serial = 0;
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        if (count($hubs) > 0) {
+            foreach ($hubs as $hub) {
+                $total_count = 0;
+                $sdn_data[$hub->id]['name'] = $hub->name;
+                $sdn_data[$hub->id]['count'] = 0;
+                $outstanding_sdn = StationDepositNote::where('hub_id', $hub->id)->whereIn('status', [0,1])->get();
+                foreach ($outstanding_sdn as $sdn) {
+                    $start = Carbon::parse($sdn->created_at);
+                    $difference = $start->diffInDays($now);
+                    if ($difference > 2) {
+                        $total_count++;
+                    }
+                }
+                $sdn_data[$hub->id]['count'] += $total_count;
+            }
+
+            foreach ($sdn_data as $index => $sdn){
+                if($sdn['count'] != 0){
+                    $serial++;
+                    $outstanding_sdn_report_array[] = ['S. No.' => $serial, 'Hub Name' =>  $sdn['name'], 'Completed >2days' =>  $sdn['count']];
+                }
+            }
+
+            $cell_st = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+            $sheet->fromArray($outstanding_sdn_report_array, NULL, 'A2', true);
+            $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
+            $sheet->getStyle("A3:C3")->applyFromArray($cell_st);
+            $sheet->setTitle('Outstanding SDN Report');
+            $sheet->mergeCells('A2:C2');
+            $sheet->mergeCells('A3:C3');
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="outstanding_sdn_report.xlsx"');
+            header('Cache-Control: max-age=0');
+            $date_file_name = Carbon::today()->format('Y_m_d');
+            $file_name_without_path = "reports/outstanding_sdn_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/outstanding_sdn_report_" . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+            return url('/') . '/' . $file_name_without_path;
+
+        }
+    }
+
+
 }
