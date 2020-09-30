@@ -145,7 +145,7 @@
 
                                     if (index === -1) {
                                         var name = '<input class="form-control" name="consignee_name['+data.details.id+']" data-rule-required="true" data-msg-required="Name is required" value="'+data.details.consignee_name+'">';
-                                        var address = '<input class="form-control" name="consignee_address['+data.details.id+']" data-rule-required="true" data-msg-required="Address is required" value="'+data.details.consignee_address+'">';
+                                        var address = '<input class="form-control" name="consignee_address['+data.details.id+']" data-rule-required="true" data-msg-required="Address is required" value="'+data.details.consignee_address+'" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters">';
                                         var phone1 = '<input class="form-control phone1" name="consignee_phone1['+data.details.id+']" data-rule-required="true" data-msg-required="Phone 1 is required" value="'+data.details.consignee_phone1+'">';
                                         var phone2 = '<input class="form-control phone2" name="consignee_phone2['+data.details.id+']" value="'+data.details.consignee_phone2+'" placeholder="Enter Phone 2">';
                                         var email = '<input class="form-control" name="consignee_email['+data.details.id+']" value="'+data.details.consignee_email+'" placeholder="Enter email">';
