@@ -2723,7 +2723,7 @@ class GlobalSettingsController extends Controller
 
         $existing_shippers = BookingSmsForShippers::pluck('user_id')->toArray();
 
-        return view('admin.settings.booking_sms_for_shipper')->with(['shippers' => $shippers, 'existing_shippers' => $existing_shippers]);
+        return view('admin.settings.arrived_at_origin_sms_for_shipper')->with(['shippers' => $shippers, 'existing_shippers' => $existing_shippers]);
     }
 
     public function booking_sms_for_shipper_update(Request $request){

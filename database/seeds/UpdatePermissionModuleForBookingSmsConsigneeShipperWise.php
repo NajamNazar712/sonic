@@ -12,7 +12,7 @@ class UpdatePermissionModuleForBookingSmsConsigneeShipperWise extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 388, 'name' => 'Booking Sms For Consignee Shipper Wise', 'module_id' => 14)
+            array('id' => 388, 'name' => 'Arrived At Origin Sms For Consignee Shipper Wise', 'module_id' => 14)
         ));
     }
 }

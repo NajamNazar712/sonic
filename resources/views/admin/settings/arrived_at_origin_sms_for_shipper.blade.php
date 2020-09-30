@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Booking Sms For Consignee')
+@section('title', 'Arrived At Origin Sms For Consignee')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Booking Sms For Consignee
+                    Arrived At Origin Sms For Consignee
                 </h1>
 
                 <div class="card">

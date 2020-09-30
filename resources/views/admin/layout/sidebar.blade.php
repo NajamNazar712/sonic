@@ -827,7 +827,7 @@
                                         </li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(388, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.settings.booking_sms_shipper_wise.index')}}">Booking Sms For Consignee</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.settings.booking_sms_shipper_wise.index')}}">Arrived At Origin Sms For Consignee</a></li>
                                     @endif
                                 </ul>
 
