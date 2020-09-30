@@ -1430,7 +1430,7 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->user_id=$shipper_id;
                 $sale_person_tag->save();
                 $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
-                NotificationsController::send(81, $sale_persons);
+                NotificationsController::send(81, $sale_persons, Auth::id());
 
 
             }
@@ -1473,7 +1473,7 @@ class AdminDashboardController extends Controller
                         $sale_person_tag->user_id=$shipper_id;
                         $sale_person_tag->save();
                         $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
-                        /*NotificationsController::send(81, $shipper->id, $sale_persons);*/
+
                     }
                     // else{
                     //     $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->first();
@@ -1486,7 +1486,7 @@ class AdminDashboardController extends Controller
             // return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
                  }
             }
-            NotificationsController::send(81,$sale_persons);
+            NotificationsController::send(81,$sale_persons ,Auth::id());
             return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
         }
         else{

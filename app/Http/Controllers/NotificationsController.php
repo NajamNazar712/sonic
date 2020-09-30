@@ -5433,10 +5433,13 @@ class NotificationsController extends Controller
           $subject = $notification->subject;
           $body = $notification->body;
           $sales_person = $reference_1_id;
-
+          $admin_id = $reference_2_id;
+          $user = Admin::find($admin_id);
+          $tagged_by = $user->name;
           $html = '<table style="width:100%;">';
           $html .= '<thead><tr>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tagged By</th>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Sales Person</th>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>';
           $html .= '</tr></thead><tbody>';
@@ -5447,7 +5450,7 @@ class NotificationsController extends Controller
               $shipper =  User::find($index);
               $html .= '<tr>';
               $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .$shipper->name . '</td>';
-
+              $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$tagged_by.'</td>';
               if($person['old_sale_person'] != null){
                   $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name . '</td>';
               }
@@ -5957,6 +5960,24 @@ class NotificationsController extends Controller
               self::email($subject, $body, $to);
 
               }
+          else if($id == 90){
+
+              $to = array();
+              $finance = Admin::whereIn('id', [12, 60,13])->where('status', 1);
+
+              if ($finance->exists()) {
+                  $to = array_merge($to, $finance->pluck('email')->toArray());
+              }
+
+              $file = $reference_2_id;
+              $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+              if (strpos($body, '[link]') !== FALSE) {
+                  $body = str_replace('[link]', $link, $body);
+              }
+
+              self::email($subject, $body, $to);
+
+          }
         }
       }
     }
@@ -5964,5 +5985,8 @@ class NotificationsController extends Controller
       if ($type == 1) {
         self::email($subject, $body, $to);
       }
+    }
+    static public function custom_sms($body, $to){
+        self::sms($body, $to);
     }
 }
