@@ -14,7 +14,7 @@ class UpdateNotificationForOutstandingSDNReport extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('notifications')->insert(array(
-            array('id' => 90, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Outstanding SDN Report', 'type_id' => 1, 'subject' => 'Outstanding SDN Report', 'body' => 'Outstanding SDN Report'. PHP_EOL . '[link]', 'updated_by' => 3, 'status' => 0)
+            array('id' => 90, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Outstanding SDN Report', 'type_id' => 1, 'subject' => 'Outstanding SDN Report', 'body' => 'Please find below the link to download Outstanding SDN Report.'. PHP_EOL . '[link]', 'updated_by' => 3, 'status' => 0)
         ));
     }
 }
