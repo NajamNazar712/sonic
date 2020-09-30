@@ -1971,9 +1971,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@over_payment_limit_store')->name('store');
         });
 
-        Route::prefix('booking_sms_shipper_wise')->name('booking_sms_shipper_wise.')->group(function () {
-            Route::get('', 'Admins\GlobalSettingsController@booking_sms_for_shipper_index')->name('index');
-            Route::post('', 'Admins\GlobalSettingsController@booking_sms_for_shipper_update')->name('update');
+        Route::prefix('sms_shipper_wise')->name('sms_shipper_wise.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@arrived_at_origin_sms_for_shipper_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@arrived_at_origin_sms_for_shipper_update')->name('update');
         });
     });
 

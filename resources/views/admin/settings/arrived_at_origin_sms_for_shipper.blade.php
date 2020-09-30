@@ -19,7 +19,7 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-5">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.booking_sms_shipper_wise.update') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sms_shipper_wise.update') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
 
                                         <div class="form-group">

@@ -2718,7 +2718,7 @@ class GlobalSettingsController extends Controller
 
     }
 
-    public function booking_sms_for_shipper_index(){
+    public function arrived_at_origin_sms_for_shipper_index(){
         $shippers = User::where('status', 3)->select('id','name')->get();
 
         $existing_shippers = BookingSmsForShippers::pluck('user_id')->toArray();
@@ -2726,7 +2726,7 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.arrived_at_origin_sms_for_shipper')->with(['shippers' => $shippers, 'existing_shippers' => $existing_shippers]);
     }
 
-    public function booking_sms_for_shipper_update(Request $request){
+    public function arrived_at_origin_sms_for_shipper_update(Request $request){
         $shippers = $request->shippers;
         BookingSmsForShippers::truncate();
         if($shippers != NULL){
