@@ -211,7 +211,7 @@ class VisionSoftAPIController extends Controller
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipments_journey as sj', function($join) use($date){
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.shipper_status_id', DB::raw(14))
+                    ->where('sj.shipper_status_id', DB::raw(2))
                     ->whereDate('sj.created_at', $date)
                     ->where('sj.verification', DB::raw(1));
             })
@@ -332,7 +332,7 @@ class VisionSoftAPIController extends Controller
         $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
             ->join('shipments_journey as sj', function($join) use($date){
                 $join->on('sj.shipment_id', '=', 's.id')
-                    ->where('sj.shipper_status_id', DB::raw(14))
+                    ->whereIn('sj.shipper_status_id', [DB::raw(14), DB::raw(30), DB::raw(36), DB::raw(37)])
                     ->whereDate('sj.created_at', $date)
                     ->where('sj.verification', DB::raw(1));
             })
@@ -427,14 +427,11 @@ class VisionSoftAPIController extends Controller
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipments_journey as sj', function($join) use($date){
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where(function ($sub_query) {
-                        $sub_query->where('sj.shipper_status_id', DB::raw(14))
-                            ->orWhere('sj.shipper_status_id', DB::raw(31));
-                    })
+                    ->whereIn('sj.shipper_status_id', [DB::raw(14), DB::raw(30), DB::raw(36), DB::raw(37), DB::raw(20)])
                     ->whereDate('sj.created_at', $date)
                     ->where('sj.verification', DB::raw(1));
             })
-            ->select('u.id as account_id', 'u.name as account_name', 'shipments.booking_type_id as service_type_id', 'usi.city_id as origin_city_id', 'shipments.try_and_buy_charges as try_and_buy_charges', 'shipments.nsa_osa_charges as nsa_osa_charges', 'shipments.replacement_charges as replacement_charges', 'shipments.cash_handling_charges as cash_handling_charges', 'shipments.gst as gst', 'shipments.return_charges as return_charges')
+            ->select('u.id as account_id', 'u.name as account_name', 'shipments.booking_type_id as service_type_id', 'usi.city_id as origin_city_id', 'shipments.try_and_buy_charges as try_and_buy_charges', 'shipments.nsa_osa_charges as nsa_osa_charges', 'shipments.replacement_charges as replacement_charges', 'shipments.cash_handling_charges as cash_handling_charges', 'shipments.gst as gst', 'shipments.return_charges as return_charges', 'shipments.intercept_charges as intercept_charges')
             ->get();
         VisionSoftDellRetRevenue::truncate();
         if(count($shipments) > 0){
@@ -449,6 +446,7 @@ class VisionSoftAPIController extends Controller
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] += $shipment->cash_handling_charges;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] += $shipment->gst;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] += $shipment->return_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['intercept_charges'] += $shipment->intercept_charges;
                         }
                         else{
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_id'] = $shipment->account_id;
@@ -461,6 +459,7 @@ class VisionSoftAPIController extends Controller
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] = $shipment->gst;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['intercept_charges'] = $shipment->intercept_charges;
                         }
                     }
                     else{
@@ -474,6 +473,7 @@ class VisionSoftAPIController extends Controller
                         $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
                         $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] = $shipment->gst;
                         $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['intercept_charges'] = $shipment->intercept_charges;
                     }
                 }
                 else{
@@ -487,6 +487,7 @@ class VisionSoftAPIController extends Controller
                     $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
                     $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] = $shipment->gst;
                     $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['intercept_charges'] = $shipment->intercept_charges;
                 }
             }
             if(count($user_shipments) > 0){
@@ -926,7 +927,7 @@ class VisionSoftAPIController extends Controller
             ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
             ->join('shipments_journey as sj', function($join) use($date){
                 $join->on('sj.shipment_id', '=', 's.id')
-                    ->where('sj.shipper_status_id', DB::raw(14))
+                    ->whereIn('sj.shipper_status_id', [DB::raw(14), DB::raw(30), DB::raw(36), DB::raw(37)])
                     ->whereDate('sj.created_at', $date)
                     ->where('sj.verification', DB::raw(1));
             })
