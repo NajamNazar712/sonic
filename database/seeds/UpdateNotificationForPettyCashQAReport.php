@@ -15,7 +15,7 @@ class UpdateNotificationForPettyCashQAReport extends Seeder
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('notifications')->insert(array(
-            array('id' => 89, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Petty Cash QA Report', 'type_id' => 1, 'subject' => 'Petty Cash QA Report', 'body' => '[link]', 'updated_by' => 3, 'status' => 0)
+            array('id' => 89, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Petty Cash QA Report', 'type_id' => 1, 'subject' => 'Petty Cash QA Report', 'body' =>'QA Petty Cash Report' . PHP_EOL .'[link]', 'updated_by' => 3, 'status' => 0)
         ));
     }
 }
