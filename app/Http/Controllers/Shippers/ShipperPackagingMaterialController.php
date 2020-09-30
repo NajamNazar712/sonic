@@ -337,4 +337,10 @@ class ShipperPackagingMaterialController extends Controller
         }
 
     }
+
+    public function packaging_request_cart_index(){
+        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+
+        return view('client.packaging.cart.index')->with(['packaging_types' => $packaging_types]);
+    }
 }

@@ -369,6 +369,7 @@
                     return {body: body, header: head};
                 }
             });
+            var route = '{!! route('cod.packaging.requests.cart.index') !!}';
 
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
@@ -379,8 +380,7 @@
                         className: 'btn btn-primary',
                         text: '<i class="la la-plus"></i> Add Request',
                         action:function (e) {
-                            $('#AddRequestModal').modal('show');
-
+                            window.location = route;
                         }
                     },
                     {
