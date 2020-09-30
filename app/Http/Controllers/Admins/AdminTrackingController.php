@@ -8,6 +8,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -481,8 +482,8 @@ class AdminTrackingController extends Controller
             $shippers = User::select('id', 'name')->get();
         }
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-
-        return view('admin.tracking.cx_quick_tracking')->with(['shippers' => $shippers, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        return view('admin.tracking.cx_quick_tracking')->with(['shipment_status'=>$shipment_status,'shippers' => $shippers, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
     public function cx_quick_tracking_list(Request $request){
         $quick_tracking = Shipment::join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')

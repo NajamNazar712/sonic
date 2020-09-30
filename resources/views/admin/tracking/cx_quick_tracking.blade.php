@@ -545,9 +545,42 @@
                         $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     },
                     initComplete: function () {
+                        var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                        var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                        var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                            '</select>';
+                        this.api().columns().every(function(column_id) {
+                            var column = this;
+                            var header = column.header();
+
+                             if($(header).is('.status')){
+                                $(drop_select).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    } ).wrap(td);
+                            }
+                        });
+                        var data = $.map({!! $shipment_status !!}, function (obj) {
+                            obj.id = obj.id // replace pk with your identifier
+
+                            return obj;
+                        });
+                        var data = $.map({!! $shipment_status !!}, function (obj) {
+                            obj.text = obj.text || obj.name; // replace name with the property used for the text
+
+                            return obj;
+                        });
+                        $("#status_select").prepend('<option value="" selected></option>').select2({
+                            data:data,
+                            placeholder: "Status",
+                            width:'100%',
+                            containerCssClass: 'select-xs',
+                            dropdownCssClass: 'form-control-sm p-0'
+                        });
                         this.api().table().columns.adjust();
                     }
                 });
+
                 var shipment_id = null;
                 var update_shipment_id = null;
                 $('body').on('click','.request_add',function () {
