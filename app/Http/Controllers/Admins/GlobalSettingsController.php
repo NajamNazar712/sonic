@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
+use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\FuelFactorHistory;
@@ -2715,5 +2716,28 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Settings Updated!');
 
+    }
+
+    public function booking_sms_for_shipper_index(){
+        $shippers = User::where('status', 3)->select('id','name')->get();
+
+        $existing_shippers = BookingSmsForShippers::pluck('user_id')->toArray();
+
+        return view('admin.settings.booking_sms_for_shipper')->with(['shippers' => $shippers, 'existing_shippers' => $existing_shippers]);
+    }
+
+    public function booking_sms_for_shipper_update(Request $request){
+        $shippers = $request->shippers;
+        BookingSmsForShippers::truncate();
+        if($shippers != NULL){
+            if(count($shippers) > 0){
+                foreach ($shippers as $shipper) {;
+                    $business_shipment = new BookingSmsForShippers();
+                    $business_shipment->user_id = $shipper;
+                    $business_shipment->save();
+                }
+            }
+        }
+        return redirect()->back()->with('success', 'Settings successfully updated');
     }
 }

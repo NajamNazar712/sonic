@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\ConsigneeInformationController;
+use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
@@ -633,7 +634,10 @@ class ShipperShipmentBookController extends Controller
                         $shipment_try_and_buy->save();
                     }
 
-                    NotificationsController::send(2, $shipment_id);
+                    $booking_sms = BookingSmsForShippers::where('user_id', $user_id)->where('status', 1);
+                    if($booking_sms->exists()){
+                        NotificationsController::send(2, $shipment_id);
+                    }
 
                     if ($request->filled('book_and_print')) {
                         $print = $shipment_id;
@@ -2566,8 +2570,10 @@ class ShipperShipmentBookController extends Controller
                         $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
                     }
                 }
-
-                NotificationsController::send(2, $shipment_id);
+                $booking_sms = BookingSmsForShippers::where('user_id', $user_id)->where('status', 1);
+                if($booking_sms->exists()){
+                    NotificationsController::send(2, $shipment_id);
+                }
 
                 if ($request->filled('book_and_print')) {
                     $print = $shipment_id;
