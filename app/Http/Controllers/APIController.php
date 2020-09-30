@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\ShipmentPrebook;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
@@ -814,11 +813,7 @@ class APIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.', 'blacklisted_consignee' => $blacklist_message]);
             }
 
-            $booking_sms = BookingSmsForShippers::where('user_id', $user_id)->where('status', 1);
-            if($booking_sms->exists()){
-                NotificationsController::send(2, $shipment_id);
-            }
-
+          NotificationsController::send(2, $shipment_id);
           if($request->has('pieces_quantity')){
               if($request->input('pieces_quantity') > 1){
                   $video = array("https://www.youtube.com/watch?v=Uy0KAIx3xHQ","Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment ملٹیپل پیسز شپمینٹ بک یا پیک کرنے کا طریقہ اس وڈیو میں ضرور دیکھیں اگر شپمینٹ بتاۓ ہؤۓ طریقہ  کے تہت  ہینڈاؤرنہیں ہوئ تو ہم اس شپمینٹ کو پروسیس نہیں کریں گے  ");

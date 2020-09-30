@@ -29,14 +29,6 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="form-group text-left">
-                                            <fieldset>
-                                                <div class="custom-control custom-checkbox">
-                                                    <input type="checkbox" class="custom-control-input" name="customCheck" id="customCheck1">
-                                                    <label class="custom-control-label" for="customCheck1">Select All</label>
-                                                </div>
-                                            </fieldset>
-                                        </div>
 
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
@@ -64,15 +56,6 @@
             $('#shipper_select').select2({
                 placeholder:'Shipper Select',
                 width:'100%'
-            });
-            $("#customCheck1").click(function(){
-                if($("#customCheck1").is(':checked') ){
-                    $("#shipper_select > option").prop("selected","selected");
-                    $("#shipper_select").trigger("change");
-                }else{
-                    $("#shipper_select > option").removeAttr("selected");
-                    $("#shipper_select").val(null).trigger("change");
-                }
             });
 
             @if(count($existing_shippers) > 0)

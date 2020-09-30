@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use App\http\Models\SubstituteUserShipment;
@@ -389,9 +388,6 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             }
         }
 
-        $booking_sms = BookingSmsForShippers::where('user_id', $user_id)->where('status', 1);
-        if($booking_sms->exists()){
-            NotificationsController::send(2, $shipment_id);
-        }
+        NotificationsController::send(2, $shipment_id);
     }
 }
