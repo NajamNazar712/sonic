@@ -326,17 +326,14 @@ class AdminNotificationsController extends Controller
 		else if ($id == 84){
             $details['fields'] = ['date','tracking_number','shipper_name','product_description','cod_amount','origin', 'destination', 'status','preview'];
         }
-<<<<<<< HEAD
+        else if ($id == 89) {
+            $details['fields'] = ['link'];
+        }
 		else if ($id == 90)
 		{
             $details['fields'] = ['link'];
         }
 
-=======
-        else if ($id == 89) {
-            $details['fields'] = ['link'];
-        }
->>>>>>> TO-2796-petty-cash-qa-report
 		return $details;
     }
 

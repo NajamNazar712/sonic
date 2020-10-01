@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Console\Commands\DonePaymentReport;
-use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
@@ -1365,7 +1364,6 @@ class AdminReportsEmailController extends Controller
             }
         }
     }
-<<<<<<< HEAD
 
     static public function outstanding_sdn($date)
     {
@@ -1435,8 +1433,6 @@ class AdminReportsEmailController extends Controller
         }
     }
 
-
-=======
     static public function petty_cash_qa_report()
     {
         $hubs = City::where('hub', 1)->where('status', 1)->get();
@@ -1499,5 +1495,4 @@ class AdminReportsEmailController extends Controller
 
         return url('/') . '/' . $file_name_without_path;
     }
->>>>>>> TO-2796-petty-cash-qa-report
 }
