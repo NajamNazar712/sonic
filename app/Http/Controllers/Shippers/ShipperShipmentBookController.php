@@ -1254,7 +1254,7 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                                 <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
                                 <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>';
-                        if($shipment->shipping_mode_id == 2 ) {
+                        if($shipment->shipping_mode_id == 2 && $shipment->estimated_weight != null ) {
                             $table_end .= ' <td class="color primary border twice-top twice-bottom twice-left"><strong>Weight</strong></td>
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . '</strong></td>
                               </tr>
