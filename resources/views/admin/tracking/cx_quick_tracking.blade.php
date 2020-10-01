@@ -39,6 +39,7 @@
                                             <input type="text" class="form-control" placeholder="Order ID" id="search_order_id">
                                         </fieldset>
                                     </div>
+
                                     <div class="col-3">
                                         <fieldset>
                                             <input type="text" class="form-control" placeholder="Request ID" id="crm_request_id">
@@ -53,7 +54,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-6">
+                                    <div>
                                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                     </div>
                                 </div>
