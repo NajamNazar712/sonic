@@ -671,8 +671,8 @@ class Permission
             'settings.restrict_cities_intercept.index' => 375,
             'settings.restrict_cities_intercept.store' => 375,
 
-            'settings.restrict_cities_intercept.index' => 375,
-            'settings.restrict_cities_intercept.store' => 375,
+            'settings.sms_shipper_wise.index' => 388,
+            'settings.sms_shipper_wise.update' => 388,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
