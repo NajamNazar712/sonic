@@ -1262,7 +1262,7 @@ class ShipperShipmentBookController extends Controller
                     ';
                         }
                         else{
-                            $table_end .= ' <td class="color primary border twice-top twice-bottom twice-left style="height: 20px;"></td>
+                            $table_end .= ' <td colspan="2" class="border twice-top twice-bottom twice-left" style="height: 20px;"></td>
                               </tr>
                               <tr>';
                         }
