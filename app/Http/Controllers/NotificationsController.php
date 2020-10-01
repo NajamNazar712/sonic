@@ -5978,6 +5978,10 @@ class NotificationsController extends Controller
               self::email($subject, $body, $to);
 
           }
+          else if ($id == 91) {
+
+              self::sms($body, $to);
+          }
         }
       }
     }

@@ -13,7 +13,7 @@ class UpdateNotificationForShipperAddIBANNumber extends Seeder
     {
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
         DB::table('notifications')->insert(array(
-            array('id' => 91, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Add IBN Number', 'type_id' => 2, 'subject' => NULL, 'body' => 'Dear Concern,' . PHP_EOL . 'Your account [IBN] changed.', 'updated_by' => 3, 'status' => 0)
+            array('id' => 91, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Add IBN Number', 'type_id' => 2, 'subject' => NULL, 'body' => 'Dear Concern,' . PHP_EOL . 'Your account [PIN] has been changed .', 'updated_by' => 3, 'status' => 0)
         ));
     }
 }
