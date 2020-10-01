@@ -47,8 +47,8 @@
                                     <div class="col-3">
                                         <fieldset class="form-group">
                                             <select name="search_shipment_status" id="search_shipment_status" class="form-control select2">
-                                                @foreach($shipment_status as $shipment_statuses)
-                                                    <option value="{{$shipment_statuses->id}}">{{$shipment_statuses->name}}</option>
+                                                @foreach($shipment_statuses as $shipment_status)
+                                                    <option value="{{$shipment_status->id}}">{{$shipment_status->name}}</option>
                                                 @endforeach
                                             </select>
                                         </fieldset>
