@@ -1261,6 +1261,11 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                     ';
                         }
+                        else{
+                            $table_end .= ' <td class="color primary border twice-top twice-bottom twice-left style="height: 20px;"></td>
+                              </tr>
+                              <tr>';
+                        }
 
                         if ($shipment->booking_type_id == 5) {
                             $table_end .= '
