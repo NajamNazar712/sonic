@@ -14,7 +14,7 @@ class OutstandingSDNReport extends Command
      *
      * @var string
      */
-    protected $signature = 'email:outstanding';
+    protected $signature = 'email:outstandingsdnreport';
 
     /**
      * The console command description.
