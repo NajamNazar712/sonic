@@ -1372,8 +1372,11 @@ class AdminReportsEmailController extends Controller
         $outstanding_sdn_report_array[] = ['Outstanding SDN Report'];
         $outstanding_sdn_report_array['header'] = ['S. No.', 'Hub Name', 'Completed >2days'];
         $outstanding_sdn_report_array[] = ['S. No.' => '', 'Hub Name' => '', 'Completed >2days' => ''];
+        $outstanding_sdn_report_array[] = ['Total Number'];
+        $outstanding_sdn_report_array[] = [ 'Total Number' => ''];
 
         $now = Carbon::now();
+        $total_number = 0;
         $total = 0;
         $serial = 0;
         $hubs = City::where('hub', 1)->where('status', 1)->get();
@@ -1396,9 +1399,11 @@ class AdminReportsEmailController extends Controller
             foreach ($sdn_data as $index => $sdn){
                 if($sdn['count'] != 0){
                     $serial++;
-                    $outstanding_sdn_report_array[] = ['S. No.' => $serial, 'Hub Name' =>  $sdn['name'], 'Completed >2days' =>  $sdn['count']];
+                    $total_number += $sdn['count'];
+                    $outstanding_sdn_report_array[] = ['S. No.' => $serial, 'Hub Name' =>  $sdn['name'], 'Completed >2days' =>  $sdn['count']] ;
                 }
             }
+            $outstanding_sdn_report_array[] = [ 'Total Number' => $total_number];
 
             $cell_st = [
                 'font' => ['bold' => true],
@@ -1411,9 +1416,11 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($outstanding_sdn_report_array, NULL, 'A2', true);
             $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
             $sheet->getStyle("A3:C3")->applyFromArray($cell_st);
+            $sheet->getStyle("A11:C11")->applyFromArray($cell_st);
             $sheet->setTitle('Outstanding SDN Report');
             $sheet->mergeCells('A2:C2');
             $sheet->mergeCells('A3:C3');
+            $sheet->mergeCells('A11:B11');
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="outstanding_sdn_report.xlsx"');
