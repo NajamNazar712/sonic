@@ -2868,7 +2868,7 @@ class NotificationsController extends Controller
                             }
 
                             if($department_head_email) {
-                                $cc = $department_head_email;
+                                $cc[] = $department_head_email;
                             }
 
                             $to = $shipper->email;
