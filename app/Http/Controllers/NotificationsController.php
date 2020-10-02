@@ -26,6 +26,7 @@ use App\http\Models\Runner;
 use App\http\Models\RunnerDetail;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -5809,6 +5810,45 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
                     self::email($subject, $body, $to);
+                }
+                else if($id == 92){
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $done_payment = DonePayment::find($reference_1_id);
+
+                    $user = $done_payment->shipper;
+                    $payment_id = $done_payment->id;
+
+                    $finance_team = Admin::join('admin_roles','admins.role_id','=','admin_roles.id')->where('admin_roles.department_id', 4)->where('admins.status', 1);
+                    $sale_person_id = SalePersonTag::where('user_id', $user->id)->where('status', 0)->select('admin_id')->first();
+                    if ($sale_person_id) {
+                        $sale_person_email = Admin::find($sale_person_id->admin_id)->email;
+                    }
+
+                    $to = array();
+                    $cc = array();
+
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $user->name, $body);
+                    }
+                    if (strpos($body, '[payment_id]') !== FALSE) {
+                        $body = str_replace('[payment_id]', $payment_id, $body);
+                    }
+
+                    if($user){
+                        $to[] = $user->email;
+                    }
+
+                    if ($finance_team->exists()) {
+                        $cc = array_merge($cc, $finance_team->pluck('admins.email')->toArray());
+                    }
+                    if($sale_person_email){
+                        $cc[] = $sale_person_email;
+                    }
+
+
+                    self::email($subject, $body, $to,$cc);
+
                 }
             }
         }

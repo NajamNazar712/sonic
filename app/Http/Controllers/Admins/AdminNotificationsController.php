@@ -333,6 +333,10 @@ class AdminNotificationsController extends Controller
 		{
             $details['fields'] = ['link'];
         }
+        else if ($id == 92)
+        {
+            $details['fields'] = ['shipper_name','payment_id'];
+        }
 
 		return $details;
     }

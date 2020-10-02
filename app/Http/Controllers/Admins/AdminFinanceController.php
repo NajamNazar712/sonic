@@ -3898,9 +3898,12 @@ class AdminFinanceController extends Controller
                         $shipment->save();
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                        //NotificationsController::send(92,$done_payment->id ,$shipment->id);
                     }
                 }
+
             }
+            NotificationsController::send(92,$done_payment->id);
         }
 
         return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
