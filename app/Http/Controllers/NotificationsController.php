@@ -2857,7 +2857,8 @@ class NotificationsController extends Controller
                             }
                             $sale_person_hub = Admin::find($sale_person_id->admin_id)->default_hub;
 
-                            $regional_manager = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->where('role_id', 8)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $sale_person_hub);
+                            $regional_manager = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
+                                ->where('admins.role_id', 8)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $sale_person_hub)->select('email')->first();
 
                             $cc = array();
 
@@ -2865,8 +2866,7 @@ class NotificationsController extends Controller
                                 $cc[] = $sale_person_email;
                             }
                             if($regional_manager){
-                               /* $cc[] = $regional_manager->email;*/
-                                $cc[] = $regional_manager->pluck('admins.email')->toArray();
+                                $cc[] = $regional_manager->email;
                             }
 
                             $to = $shipper->email;
