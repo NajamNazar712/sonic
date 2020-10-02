@@ -537,28 +537,30 @@
                                 $('#tracking').append(shipment);
                             });
 
-                            // $('#tracking table.datatable.tracking_history').DataTable({
-                            //     dom: 't',
-                            //     paging: false,
-                            //     order: [[0, 'desc']],
-                            //     columns: [
-                            //         {name: 'date_time', class: 'align-middle date_time'},
-                            //         {name: 'status', class: 'align-middle status'},
-                            //         {name: 'reason', class: 'align-middle reason'},
-                            //         {name: 'city', class: 'align-middle city'}
-                            //     ]
-                            // });
+                            $('#tracking table.datatable.tracking_history').DataTable({
+                                dom: 't',
+                                paging: false,
+                                order: [[0, 'desc']],
+                                columns: [
+                                    {name: 'date_time', class: 'align-middle date_time'},
+                                    {name: 'status', class: 'align-middle status'},
+                                    {name: 'reason', class: 'align-middle reason'},
+                                    {name: 'status_remarks', class: 'align-middle status_remarks'},
+                                    {name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'}
+                                ]
+                            });
 
-                            // $('#tracking table.datatable.payment_history').DataTable({
-                            //     dom: 't',
-                            //     paging: false,
-                            //     order: [[0, 'desc']],
-                            //     columns: [
-                            //         {name: 'date_time', class: 'align-middle date_time'},
-                            //         {name: 'status', class: 'align-middle status'},
-                            //         {name: 'user', class: 'align-middle user'}
-                            //     ]
-                            // });
+                            $('#tracking table.datatable.payment_history').DataTable({
+                                dom: 't',
+                                paging: false,
+                                order: [[0, 'desc']],
+                                columns: [
+                                    {name: 'date_time', class: 'align-middle date_time'},
+                                    {name: 'status', class: 'align-middle status'},
+                                    {name: 'user', class: 'align-middle user'},
+                                    {name: 'payable_remarks', class: 'align-middle payable_remarks'}
+                                ]
+                            });
                         }
                     });
 			}
