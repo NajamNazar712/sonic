@@ -303,7 +303,7 @@ class AdminReportsEmailController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($hub_wise_split_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
+        $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
         $sheet->setTitle('Sale Person Numbers');
         $writer = new Xlsx($spreadsheet);
 
