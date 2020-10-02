@@ -1368,10 +1368,6 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
     }
     public function activeAccountsList(){
-        $sale_person_hub = 202;
-        $regional_manager = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
-            ->where('admins.role_id', 8)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $sale_person_hub)->select('email')->first();
-        dd($regional_manager);
         $shippers = User::where('status', 3)->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
