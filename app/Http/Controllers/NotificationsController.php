@@ -2851,9 +2851,27 @@ class NotificationsController extends Controller
                             if (strpos($body, '[link]') !== FALSE) {
                                 $body = str_replace('[link]', $link, $body);
                             }
+                            $sale_person_id = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->select('admin_id')->first();
+                            if ($sale_person_id) {
+                                $sale_person_email = Admin::find($sale_person_id->admin_id)->email;
+                            }
+                            $sale_person_hub = Admin::find($sale_person_id->admin_id)->default_hub;
+
+                            $regional_manager = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->where('role_id', 8)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $sale_person_hub);
+
+                            $cc = array();
+
+                            if($sale_person_email){
+                                $cc[] = $sale_person_email;
+                            }
+                            if($regional_manager){
+                               /* $cc[] = $regional_manager->email;*/
+                                $cc[] = $regional_manager->pluck('admins.email')->toArray();
+                            }
 
                             $to = $shipper->email;
-                            self::email($subject, $body, $to);
+                            self::email($subject, $body, $to, $cc);
+
                         }
                     }
                 } else if ($id == 39) {
