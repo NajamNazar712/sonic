@@ -66,7 +66,20 @@ use SnappyPDF;
 class ShipperShipmentBookController extends Controller
 {
     private function unique_order_id($order_id) {
-        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+        $length = strlen(session('prefix'));
+        $check_order_id = str_split($order_id, $length);
+        if(session('prefix') == $check_order_id[0]){
+            if(array_key_exists(1, $check_order_id)){
+                return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+            }
+            else{
+                return false;
+            }
+        }
+        else{
+            return false;
+        }
+
     }
 
     private function set_service_type($service_type_id) {
