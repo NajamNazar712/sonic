@@ -161,7 +161,7 @@ class ShipperPackagingMaterialController extends Controller
     }
 
     public function packaging_request_submit(Request $request){
-
+        dd($request);
         $packaging_type_ids = explode(",",$request->packaging_type_ids);
         $packaging_size_ids = explode(",",$request->packaging_size_ids);
         $packaging_quantities = explode(",",$request->packaging_quantities);
@@ -340,7 +340,27 @@ class ShipperPackagingMaterialController extends Controller
 
     public function packaging_request_cart_index(){
         $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
-
-        return view('client.packaging.cart.index')->with(['packaging_types' => $packaging_types]);
+        $user_charges = array();
+        $standard_charges = array();
+        $size_charges = PackagingCharge::where('user_id', session('user_id'));
+        if($size_charges->exists()){
+            $size_charges = $size_charges->get();
+            foreach ($size_charges as $size_charge){
+                $user_charges[$size_charge->size_id] = $size_charge->charges;
+            }
+        }
+        $size_charges = PackagingMaterialTypeSizes::get();
+        foreach ($size_charges as $size_charge){
+            $standard_charges[$size_charge->id] = $size_charge->standard_charges;
+        }
+        return view('client.packaging.cart.index')->with(['packaging_types' => $packaging_types, 'user_charges' => $user_charges, 'standard_charges' => $standard_charges]);
+    }
+    public function packaging_request_cart_details(Request $request){
+        $size_ids = explode(',', $request->size_ids);
+        $sizes = PackagingMaterialTypeSizes::whereIn('id', $size_ids)->get();
+        $cities = City::where('status',1)->orderBy('name')->get();
+        $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
+        $payment_mode = PackagingPaymentMode::all();
+        return view('client.packaging.cart.details')->with(['sizes' => $sizes, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode,'size_ids'=>$size_ids]);
     }
 }

@@ -155,6 +155,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
             Route::prefix('cart')->name('cart.')->group(function (){
                 Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request_cart_index')->name('index');
+                Route::post('details','Shippers\ShipperPackagingMaterialController@packaging_request_cart_details')->name('details');
             });
         });
     });

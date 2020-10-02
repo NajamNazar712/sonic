@@ -28,13 +28,20 @@
                                                     <img class="" alt="flyer" src="{{ asset('img/logo.png') }}">
                                                 </div>
                                                 <div class="col mb-1 text-center">
-                                                    <p><b>{{$size->size}}</b></p>
+                                                    <p><b>Size: </b>{{$size->size}}</p>
                                                 </div>
-                                                <div class="col mb-1">
-                                                    <p><b>Flyer</b> {{$row}}<p>
+                                                <div class="col mb-1 text-center">
+                                                    @if(array_key_exists($size->id, $user_charges))
+                                                        <p><b>Charges: </b>{{$user_charges[$size->id]}}</p>
+                                                    @else
+                                                        <p><b>Charges: </b>{{$standard_charges[$size->id]}}</p>
+                                                    @endif
                                                 </div>
-                                                <div class="col mb-1">
-                                                    <button class="btn btn-primary">Add to cart</button>
+                                                <div class="col mb-1 text-center">
+                                                    <p><b>Flyer: </b> {{$row}}<p>
+                                                </div>
+                                                <div class="col mb-1 text-center">
+                                                    <button class="btn btn-outline-primary add_to_cart" id="size_{{$size->id}}" value="{{$size->id}}"><i class="la la-cart-plus" style="font-size:24px"></i></button>
                                                 </div>
                                             </div>
                                             @endforeach
@@ -48,6 +55,15 @@
                 </div>
             </div>
         </div>
+        <div id="proceed_cart">
+            <form action="{{route('cod.packaging.requests.cart.details')}}" id="material_request_cart_form" method="post">
+                @csrf
+                <input type="hidden" id="size_ids" name="size_ids" value="">
+                <div class="display-inline-block">
+                    <button type="submit" class="col btn btn-dark width" title="Checkout"><i class="la la-shopping-cart" style="font-size:24px"></i><span class='badge badge-warning' id='cart_count'> 0 </span></button>
+                </div>
+            </form>
+        </div>
     </section>
 @endsection
 
@@ -57,6 +73,39 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
 
+    <style>
+        #proceed_cart {
+            position: fixed;
+            top: 120px;
+            padding-right: 80px;
+            left: 0;
+            width: 100%;
+            text-align: right;
+        }
+        .la {
+            transform: scale(1.5,1.5);
+        }
+        .badge {
+            padding-left: 9px;
+            padding-right: 9px;
+            -webkit-border-radius: 9px;
+            -moz-border-radius: 9px;
+            border-radius: 9px;
+        }
+
+        .label-warning[href],
+        .badge-warning[href] {
+            background-color: #c67605;
+        }
+        #cart_count {
+            font-size: 12px;
+            background: #ff0000;
+            color: #fff;
+            padding: 0 5px;
+            vertical-align: top;
+            margin-left: -10px;
+        }
+    </style>
 
 @endsection
 
@@ -75,7 +124,26 @@
 
     <script type="text/javascript">
         $('document').ready(function(){
+            var sizes = [];
+            $('.add_to_cart').on('click', function(){
+                sizes.push(this.value);
+                var count = sizes.length;
+                $('#cart_count').text(count);
+                $(this).attr('disabled', true);
+            });
 
+            $('#material_request_cart_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('form'));
+                },
+                submitHandler: function(form) {
+                    $('#size_ids').val(sizes);
+                    form.submit();
+                }
+            });
         });
     </script>
 
