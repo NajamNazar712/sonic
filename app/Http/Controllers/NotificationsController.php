@@ -5979,8 +5979,24 @@ class NotificationsController extends Controller
 
           }
           else if ($id == 91) {
+              $user_id = $reference_1_id;
+              $user_bank_info_id = $reference_2_id;
+              $user = User::find($user_id);
+              if($user) {
 
-              self::sms($body, $to);
+                  if (strpos($body, '[user_name]') !== FALSE) {
+                      $body = str_replace('[user_name]', $user->name, $body);
+                  }
+                  $pin = rand();
+                  $pin = rand(1000,9999);
+                  if (strpos($body, '[user_phone]') !== FALSE) {
+                      $body = str_replace('[user_phone]',$pin, $user->phone, $body);
+                  }
+                  $user_bank = UserBankInfo::find($user_id);
+
+                  $to = $user_bank->user_id->iban;
+                  self::sms($body, $to);
+              }
           }
         }
       }
