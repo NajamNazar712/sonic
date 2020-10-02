@@ -383,6 +383,7 @@ class APIController extends Controller
         }
 
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
+        $shipment_pre_book_check = $shipment_pre_book;
         if($shipment_pre_book->exists()){
             $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
@@ -666,7 +667,7 @@ class APIController extends Controller
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection);
             }
 
-            if($shipment_pre_book){
+            if($shipment_pre_book_check->exists()){
                 $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
             }
             else{
