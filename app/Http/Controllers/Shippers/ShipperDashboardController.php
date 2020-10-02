@@ -76,6 +76,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use App\Http\Controllers\NotificationsController;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -509,6 +510,8 @@ class ShipperDashboardController extends Controller
     public function addBank(Request $request){
         
         $user_id = session('user_id');
+        $pin = rand(1000,9999);
+        NotificationsController::send(91,$user_id,$pin);
         if($user_id){
             $user_bank = new UserBankInfo();
             $user_bank->user_id = $user_id;
@@ -519,8 +522,9 @@ class ShipperDashboardController extends Controller
             $user_bank->iban = strtoupper($request->iban_no);
             $user_bank->city_id = $request->bank_city;
             $user_bank->save();
+            
+               return redirect()->back()->with(['success' => 'Bank successfully added!']);
 
-            return redirect()->back()->with(['success' => 'Bank successfully added!']);
         }
         return redirect()->back()->with(['error' => 'Session Expired!']);
     }
