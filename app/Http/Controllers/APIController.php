@@ -401,7 +401,19 @@ class APIController extends Controller
         }
         else {
             $service_type_id = $request->input('service_type_id');
-
+            if($shipment_pre_book->exists()){
+                $shipment_pre_book = $shipment_pre_book->first();
+                $length = strlen($shipment_pre_book->prefix);
+                $check_order_id = str_split($request->input('order_id'), $length);
+                if($shipment_pre_book->prefix != $check_order_id[0]){
+                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                }
+                else{
+                    if(!array_key_exists(1, $check_order_id)){
+                        return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                    }
+                }
+            }
             if($service_type_id != 5){
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
@@ -654,9 +666,8 @@ class APIController extends Controller
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection);
             }
 
-            if($shipment_pre_book->exists()){
-                $shipment_pre_book = $shipment_pre_book->first();
-                $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $shipment_pre_book->prefix, $order_id);
+            if($shipment_pre_book){
+                $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
             }
             else{
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);

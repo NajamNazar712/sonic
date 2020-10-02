@@ -66,11 +66,16 @@ use SnappyPDF;
 class ShipperShipmentBookController extends Controller
 {
     private function unique_order_id($order_id) {
-        $length = strlen(session('prefix'));
-        $check_order_id = str_split($order_id, $length);
-        if(session('prefix') == $check_order_id[0]){
-            if(array_key_exists(1, $check_order_id)){
-                return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+        if(is_numeric($order_id)){
+            $length = strlen(session('prefix'));
+            $check_order_id = str_split($order_id, $length);
+            if(session('prefix') == $check_order_id[0]){
+                if(array_key_exists(1, $check_order_id)){
+                    return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+                }
+                else{
+                    return false;
+                }
             }
             else{
                 return false;
@@ -79,7 +84,6 @@ class ShipperShipmentBookController extends Controller
         else{
             return false;
         }
-
     }
 
     private function set_service_type($service_type_id) {
@@ -208,10 +212,10 @@ class ShipperShipmentBookController extends Controller
         return $tracking_number;
     }
 
-    static public function generate_prefix_tracking_number($shipment_id, $prefix, $order_id) {
+    static public function generate_prefix_tracking_number($shipment_id, $order_id) {
         $shipment = Shipment::find($shipment_id);
 
-        $tracking_number = $prefix . $order_id;
+        $tracking_number = $order_id;
 
         $shipment->tracking_number = $tracking_number;
 
@@ -540,7 +544,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                     if(Session::has('prefix')){
-                        $tracking_number = $this->generate_prefix_tracking_number($shipment_id, session('prefix'), $request->order_id);
+                        $tracking_number = $this->generate_prefix_tracking_number($shipment_id, $request->order_id);
                     }
                     else{
                         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
@@ -1955,6 +1959,19 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+                    if(Session::has('prefix')){
+                        $length = strlen(session('prefix'));
+                        $check_order_id = str_split($row['order_id'], $length);
+                        if(session('prefix') != $check_order_id[0]){
+                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        }
+                        else{
+                            if(!array_key_exists(1, $check_order_id)){
+                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                            }
+                        }
+                    }
+
                     if (!empty(trim($row['order_id']))) {
                         if (empty($order_ids)) {
                             $order_ids[] = $row['order_id'];
@@ -2478,7 +2495,7 @@ class ShipperShipmentBookController extends Controller
                     $substitute_user_shipment->save();
                 }
                 if(Session::has('prefix')){
-                    $tracking_number = $this->generate_prefix_tracking_number($shipment_id, session('prefix'), $request->order_id);
+                    $tracking_number = $this->generate_prefix_tracking_number($shipment_id, $request->order_id);
                 }
                 else{
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
@@ -3301,6 +3318,18 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+                    if(Session::has('prefix')){
+                        $length = strlen(session('prefix'));
+                        $check_order_id = str_split($row['order_id'], $length);
+                        if(session('prefix') != $check_order_id[0]){
+                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        }
+                        else{
+                            if(!array_key_exists(1, $check_order_id)){
+                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                            }
+                        }
+                    }
                     if (!empty(trim($row['order_id']))) {
                         if (empty($order_ids)) {
                             $order_ids[] = $row['order_id'];
