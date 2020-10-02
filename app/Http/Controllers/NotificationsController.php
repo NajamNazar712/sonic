@@ -3713,7 +3713,7 @@ class NotificationsController extends Controller
                 $date = Carbon::today()->startOfDay()->toDateTimeString();
                 $date_end = Carbon::today()->endOfDay()->toDateTimeString();
                 $hub_wise_split_data = HubWiseSplit::whereBetween('created_at', [$date, $date_end])->orderBy('shipments', 'desc')->get();
-                $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Hub</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Count of Parcels</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Ratio</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Actual Weight</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Actual Weight/Shipment</strong></th></tr></thead><tbody>';
+                $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Hub</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Count of Parcels</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Ratio</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Actual Weight</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Actual Weight/Shipment</strong></th></tr></thead><tbody>';
                 $serial = 1;
                 $shipments_count = 0;
                 $ratio_count = 0;
@@ -3722,6 +3722,7 @@ class NotificationsController extends Controller
                 foreach ($hub_wise_split_data as $hub_wise_split) {
                     $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->origin_city->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->city->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($hub_wise_split->shipments) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->ratio . '%</td>';
@@ -3741,6 +3742,7 @@ class NotificationsController extends Controller
                 }
                 $html .= '<tr>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($ratio_count) . '%</td>';
