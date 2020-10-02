@@ -218,7 +218,7 @@ class ShipperShipmentBookController extends Controller
                 $shipment_piece->tracking_number= $shipment_id . $total_pieces;
                 $shipment_piece->save();
             }
-            
+
         }
     }
     static public function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {

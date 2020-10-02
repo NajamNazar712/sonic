@@ -382,7 +382,7 @@
                 rowId: 'delivery_note_id',
                 order: [[11, 'desc']],
                 columns: [
-                    {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
@@ -400,9 +400,9 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    if(data.status == 1){
-                        $('td:eq(0)', row).addClass('select-checkbox');
-                    }
+                    // if(data.status == 1){
+                    //     $('td:eq(0)', row).addClass('select-checkbox');
+                    // }
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     if ($.inArray(data.delivery_note_id, selected_rows) !== -1) {
                         table.row(row).select();

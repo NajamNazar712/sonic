@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
@@ -799,7 +800,10 @@ class V2AdminPickupsController extends Controller
                     }
                     //Consolidated Shipments
 
-                    NotificationsController::send(3, $shipment_id);
+                    $booking_sms = BookingSmsForShippers::where('user_id', $shipment->user_id)->where('status', 1);
+                    if($booking_sms->exists()){
+                        NotificationsController::send(3, $shipment_id);
+                    }
                     if($shipment->booking_type_id == 4){
                         ShipmentChargesController::walkin_weight($shipment_id);
                     }else{
@@ -1343,7 +1347,10 @@ class V2AdminPickupsController extends Controller
                     }
                     //Consolidated Shipments
 
-                    NotificationsController::send(3, $shipment_id);
+                    $booking_sms = BookingSmsForShippers::where('user_id', $shipment->user_id)->where('status', 1);
+                    if($booking_sms->exists()){
+                        NotificationsController::send(3, $shipment_id);
+                    }
                     if($shipment->booking_type_id == 4){
                         ShipmentChargesController::walkin_weight($shipment_id);
                     }else{
