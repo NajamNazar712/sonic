@@ -1977,8 +1977,13 @@ class ShipperShipmentBookController extends Controller
                             $order_ids[] = $row['order_id'];
                             $order_id_row[$row['order_id']] = $row_id;
                         } else {
-                            $order_ids[] = $row['order_id'];
-                            $order_id_row[$row['order_id']] = $row_id;
+                            if (in_array($row['order_id'], $order_ids)) {
+                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                            }
+                            else {
+                                $order_ids[] = $row['order_id'];
+                                $order_id_row[$row['order_id']] = $row_id;
+                            }
                         }
                     }
 
@@ -3267,7 +3272,7 @@ class ShipperShipmentBookController extends Controller
             $blacklist_found_categories = array();
 
             if(Session::has('prefix')){
-                $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments')->where(function($query) use($user_id) {
+                $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id);
                 })];
             }
@@ -3336,8 +3341,13 @@ class ShipperShipmentBookController extends Controller
                             $order_id_row[$row['order_id']] = $row_id;
                         }
                         else {
+                            if (in_array($row['order_id'], $order_ids)) {
+                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                            }
+                            else {
                                 $order_ids[] = $row['order_id'];
                                 $order_id_row[$row['order_id']] = $row_id;
+                            }
                         }
                     }
 

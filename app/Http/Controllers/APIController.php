@@ -384,7 +384,7 @@ class APIController extends Controller
 
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
         if($shipment_pre_book->exists()){
-            $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments')->where(function($query) use($user_id) {
+            $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
             })];
         }
