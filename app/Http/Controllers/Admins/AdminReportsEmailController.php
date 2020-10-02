@@ -269,7 +269,7 @@ class AdminReportsEmailController extends Controller
             } else {
                 $actual_weight = 0;
             }
-            $hub_wise_split_array[] = ['serial' => $serial, 'Origin' => $hub_wise_split->origin, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => round($ratio[$hub_wise_split->hub_id] * 100, 2), 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight/Shipment' => round($avg_actual_weight[$hub_wise_split->hub_id], 2)];
+            $hub_wise_split_array[] = ['serial' => $serial, 'Origin' => $hub_wise_split->origin, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => round($ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id] * 100, 2), 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight/Shipment' => round($avg_actual_weight[$hub_wise_split->origin_id][$hub_wise_split->hub_id], 2)];
             $hub_wise_split_entry = new HubWiseSplit();
             $hub_wise_split_entry->origin = $hub_wise_split->origin_id;
             $hub_wise_split_entry->hub_id = $hub_wise_split->hub_id;
