@@ -1907,7 +1907,7 @@ class ShipperShipmentBookController extends Controller
             $blacklist_found_categories = array();
 
             if(Session::has('prefix')){
-                $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments')->where(function($query) use($user_id) {
+                $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id);
                 })];
             }
