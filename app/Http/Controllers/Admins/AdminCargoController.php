@@ -635,8 +635,8 @@ class AdminCargoController extends Controller
             if ($request->input('transport_mode_vendor') == 0) {
                 $transport_mode_vendor = new TransportModeVendor();
 
-                $transport_mode_vendor->transport_mode_id = $request->input('transport_mode');
-                $transport_mode_vendor->name = $request->input('vendor_name');
+                $transport_mode_vendor->transport_mode_id = ($request->has('transport_mode')) ? $request->input('transport_mode') : 2;
+                $transport_mode_vendor->name = ($request->has('vendor_name')) ? $request->input('vendor_name') : 'New Transport Vendor';
 
                 $transport_mode_vendor->save();
 
