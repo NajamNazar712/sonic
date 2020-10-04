@@ -515,6 +515,26 @@
             </div>
         </div>
     </div>
+    <!-- Add Pin modal -->
+    <div class="modal fade" id="demoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Enter Verification Pin</h4>
+                </div>
+
+                <div class="modal-body">
+                    <input type="number" name="pincode" id="pincode" class="form-control" maxlength="4" placeholder="Enter Pin Code"/>
+                    <input type="hidden" id="code" name="code"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="verify_pincode">Verify</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
     <!-- default modal -->
     <!-- ADD Bank Modal -->
     <div class="modal fade text-left" id="AddBankModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddBankModal"
@@ -524,6 +544,7 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Add Bank</h4>
                 </div>
+
                 <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
                 <div class="modal-body">
                         @method('POST')
@@ -564,18 +585,18 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        
+
                                         <select name="bank_city" id="bank_city" class="select2 form-control" data-rule-required="true" data-msg-required="Bank City is required">
                                             @foreach($cities_list as $bank_city)
                                                <option value="{{$bank_city->id}}">{{$bank_city->name}}</option>
                                             @endforeach
                                         </select>
-                                        
+
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Add</button>
@@ -1120,15 +1141,48 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     @if(session('account_type') == 1)
-                {
-                    text: '<i class="la la-cancel"></i> Add Bank',
-                    className: 'btn btn-primary add_bank',
-                    enabled: true,
-                    action: function (e, dt, node, config) {
-                        $('#AddBankModal').modal('show');
+                    {
+                        text: '<i class="la la-cancel"></i> Add Bank',
+                        className: 'btn btn-primary add_bank',
+                        id: 'addBank',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#demoModal').modal('show');
+                            $.ajax({
+                                url: "{{ route('cod.verify.pin.code') }}",
+                                type:'post',
+                                data:{action:'verify_pincode', '_token':"{{ csrf_token() }}"},
+                                success:function(data){
+                                    $('#code').val(JSON.parse(data).code);
+                                },
+                                error: function(data){
+
+                                }
+                            });
+                            //  $('#AddBankModal').modal('show');
+
+                            $(document).on('click', '#verify_pincode', function(){
+                                var pincode = $('#pincode').val();
+                                console.log(pincode);
+                                if(!pincode)
+                                {
+                                    toastr.info('Please input Pin code', 'Info!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                                else{
+                                    var code    = $('#code').val();
+                                    if(pincode == code)
+                                    {
+                                        $('#AddBankModal').modal('show');
+                                    }
+                                    else if(verify_pincode != pincode){
+                                        toastr.error('Verify Code Does not Matched!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                }
+                            });
+
+                        }
                     }
-                }
-                @endif
+                    @endif
                 ],
                 scrollX: true, scrollY: '500px',
                 processing: true,
@@ -1261,7 +1315,9 @@
                 $('#bank_select').val('').trigger('change');
                 $('#bank_city').val('').trigger('change');
             });
-
+            $('#showBankModel').click(function () {
+                $('#AddBankModal').modal('show')
+            });
 
         });
     </script>

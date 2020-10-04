@@ -507,11 +507,21 @@ class ShipperDashboardController extends Controller
         return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list]);
     }
 
+    public function verifyPincode(Request $request)
+    {
+        if(isset($request->action) && $request->action == 'verify_pincode')
+        {
+            $user_id    = session('user_id');
+            $pin        = rand(1000,9999);
+            NotificationsController::send(91,$user_id,$pin);
+            $data['code'] = $pin;
+            return json_encode($data);
+        }
+    }
+
     public function addBank(Request $request){
-        
-        $user_id = session('user_id');
-        $pin = rand(1000,9999);
-        NotificationsController::send(91,$user_id,$pin);
+
+        $user_id    = session('user_id');
         if($user_id){
             $user_bank = new UserBankInfo();
             $user_bank->user_id = $user_id;
@@ -523,7 +533,7 @@ class ShipperDashboardController extends Controller
             $user_bank->city_id = $request->bank_city;
             $user_bank->save();
             
-               return redirect()->back()->with(['success' => 'Bank successfully added!']);
+            return redirect()->back()->with(['success' => 'Bank successfully added!']);
 
         }
         return redirect()->back()->with(['error' => 'Session Expired!']);
