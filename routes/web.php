@@ -1684,6 +1684,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('petty_cash_expense_summary')->name('petty_cash_expense_summary.')->group(function (){
             Route::get('', 'Admins\PettyCashExpenseSummaryReport@index')->name('index');
+            Route::get('petty_cash_summary_report', 'Admins\PettyCashExpenseSummaryReport@pettyCashSummaryReportProcess')->name('petty_cash_summary_report');
         });
     });
 
