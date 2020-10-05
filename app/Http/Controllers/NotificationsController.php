@@ -5813,10 +5813,20 @@ class NotificationsController extends Controller
                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin->pickup_address  . '</td>';
                       $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $destination->name . '</td>';
                       if ($shipment->packaging_charges == null) {
-                          $total_charges = $shipment->amount;
+                          if($shipment->charges_mode_id == 1){
+                              $amount = $shipment->received_amount;
+                          }
+                          else{
+                              $amount = $shipment->amount;
+                          }
                           $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
                       } else {
-                          $amount = $shipment->amount;
+                          if($shipment->charges_mode_id == 1){
+                              $amount = $shipment->received_amount;
+                          }
+                          else{
+                              $amount = $shipment->amount;
+                          }
                           $packaging = $shipment->packaging_charges;
                           $total_charges = $amount + $packaging;
                           $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';

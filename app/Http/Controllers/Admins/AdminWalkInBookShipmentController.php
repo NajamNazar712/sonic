@@ -6,6 +6,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\ShipmentStatus;
