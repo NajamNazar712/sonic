@@ -2903,39 +2903,44 @@ public function short_received_hub_wise_cron_index() {
     }
 
     public function runner_report_add(Request $request){
-        $runner = new Runner();
-        $runner->name = $request->runner_name;
-        $runner->created_by = Auth::id();
-        $runner->save();
+        if(count($request->junction)){
+            $runner = new Runner();
+            $runner->name = $request->runner_name;
+            $runner->created_by = Auth::id();
+            $runner->save();
 
-        $origin = new RunnerJunction();
-        $origin->runner_id = $runner->id;
-        $origin->junction_id = $request->origin;
-        $origin->order = 1;
-        $origin->save();
+            $origin = new RunnerJunction();
+            $origin->runner_id = $runner->id;
+            $origin->junction_id = $request->origin;
+            $origin->order = 1;
+            $origin->save();
 
-        $serial = 2;
-        $junctions = array($request->origin, $request->destination);
-        foreach ($request->junction as $junction_id){
-            if(!in_array($junction_id, $junctions)){
-                $junctions[] = $junction_id;
-                $junction = new RunnerJunction();
-                $junction->runner_id = $runner->id;
-                $junction->junction_id = $junction_id;
-                $junction->order = $serial;
-                $junction->save();
+            $serial = 2;
+            $junctions = array($request->origin, $request->destination);
+            foreach ($request->junction as $junction_id){
+                if(!in_array($junction_id, $junctions)){
+                    $junctions[] = $junction_id;
+                    $junction = new RunnerJunction();
+                    $junction->runner_id = $runner->id;
+                    $junction->junction_id = $junction_id;
+                    $junction->order = $serial;
+                    $junction->save();
 
-                $serial++;
+                    $serial++;
+                }
             }
+
+            $destination = new RunnerJunction();
+            $destination->runner_id = $runner->id;
+            $destination->junction_id = $request->destination;
+            $destination->order = $serial;
+            $destination->save();
+
+            return redirect()->back()->with('success','Runner updated successfully!');
         }
-
-        $destination = new RunnerJunction();
-        $destination->runner_id = $runner->id;
-        $destination->junction_id = $request->destination;
-        $destination->order = $serial;
-        $destination->save();
-
-        return redirect()->back()->with('success','Runner updated successfully!');
+        else{
+            return redirect()->back()->with('error','Please add junctions!');
+        }
     }
 
 public function arrived_at_origin_sms_for_shipper_index(){
