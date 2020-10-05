@@ -440,7 +440,7 @@
                 'allowMinus': false,
                 'allowPlus': false
             }).bind('input', function() {
-                if (this.value.length == 0 || this.value.length >= 12) {
+                if (this.value.length == 0 || this.value.length >= 6) {
                     table.draw();
                 }
             });

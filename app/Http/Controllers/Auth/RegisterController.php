@@ -456,7 +456,7 @@ class RegisterController extends Controller
         $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
                     <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
                         <img src="' . asset('img/sonic_logo.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
-                        <img src="' . asset('img/trax_logo.png') . '" alt="Trax" style="display: inline-block; width: 15%">
+                        <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
                     </div>';
         $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
                     <h3 style="margin-top: 0px; margin-bottom: 0px;">Thank you for choosing Trax Logistics</h3>

@@ -132,7 +132,7 @@
 										</div>
 
 										<div class="form-group">
-											<textarea id="consignee_address" name="consignee_address" class="form-control" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+											<textarea id="consignee_address" name="consignee_address" class="form-control" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters"></textarea>
 										</div>
 
 										<div class="form-group">
@@ -158,9 +158,15 @@
 									<div id="order_information_header_div" class="col col_custom_middle">
 										<h4 id="order_header_info" class="form-section mb-2 text-center">Order Information</h4>
 
-										<div class="form-group">
-											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
-										</div>
+										@if (Session::has('prefix'))
+											<div class="form-group">
+												<input name="order_id" class="form-control order_id" placeholder="Order ID" data-rule-maxlength="100" data-rule-required="true" data-msg-required="Order ID is required" data-msg-maxlength="Order ID can be maximum 100 characters" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
+											</div>
+										@else
+											<div class="form-group">
+												<input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
+											</div>
+										@endif
 
 										<div id="regular">
 											<div class="form-group">
@@ -1053,7 +1059,12 @@
 			});
 
 			$('input[name="consignee_phone_number_1"]').bind('change paste keyup', function () {
-				var length = $(this).val().match(/\d/g).length;
+				if($(this).val().match(/\d/g) != null){
+					var length = $(this).val().match(/\d/g).length;
+				}
+				else{
+					var length = 0;
+				}
 				if(length == 11){
 					check_consignee_return_ratio();
 				}
@@ -1689,6 +1700,13 @@
 				cb_table.row( $(this).parents('tr') ).remove().draw();
 			});
 			@endif
+			$('.order_id').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false,
+				'min': 0,
+				'max': 1000000000000
+			});
 		});
 	</script>
 @endsection

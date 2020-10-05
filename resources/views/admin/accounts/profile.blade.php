@@ -327,7 +327,7 @@
                                     <div class="form-group col-md-9">
                                         <label>Address:</label>
                                         <span class="danger">*</span>
-                                        <textarea type="text" id="address" class="form-control border-primary" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" data-rule-required="true" data-msg-required="Address is required" value="{{$user->address}}" name="address" required>{{$user->address}}</textarea>
+                                        <textarea type="text" id="address" class="form-control border-primary" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" data-rule-required="true" data-msg-required="Address is required" value="{{$user->address}}" name="address" required>{{$user->address}}</textarea>
                                     </div>
                                 </div>
                             </div>

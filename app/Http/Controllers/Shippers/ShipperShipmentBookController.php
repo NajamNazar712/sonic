@@ -66,9 +66,26 @@ use SnappyPDF;
 
 class ShipperShipmentBookController extends Controller
 {
-//    private function unique_order_id($order_id) {
-//        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
-//    }
+    private function unique_order_id($order_id) {
+        if(is_numeric($order_id)){
+            $length = strlen(session('prefix'));
+            $check_order_id = str_split($order_id, $length);
+            if(session('prefix') == $check_order_id[0]){
+                if(array_key_exists(1, $check_order_id)){
+                    return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+                }
+                else{
+                    return false;
+                }
+            }
+            else{
+                return false;
+            }
+        }
+        else{
+            return false;
+        }
+    }
 
     private function set_service_type($service_type_id) {
         $service_type = BookingType::find($service_type_id);
@@ -195,6 +212,18 @@ class ShipperShipmentBookController extends Controller
 
         return $tracking_number;
     }
+
+    static public function generate_prefix_tracking_number($shipment_id, $order_id) {
+        $shipment = Shipment::find($shipment_id);
+
+        $tracking_number = $order_id;
+
+        $shipment->tracking_number = $tracking_number;
+
+        $shipment->save();
+
+        return $tracking_number;
+    }
     static public function create_shipment_pieces($shipment_id, $pieces){
         $total_pieces= 0;
         if($pieces > 1){
@@ -207,7 +236,7 @@ class ShipperShipmentBookController extends Controller
                 $shipment_piece->tracking_number= $shipment_id . $total_pieces;
                 $shipment_piece->save();
             }
-            
+
         }
     }
     static public function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
@@ -515,7 +544,12 @@ class ShipperShipmentBookController extends Controller
                         $substitute_user_shipment->save();
                     }
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
-                    $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+                    if(Session::has('prefix')){
+                        $tracking_number = $this->generate_prefix_tracking_number($shipment_id, $request->order_id);
+                    }
+                    else{
+                        $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+                    }
 
                     if ($service_type_id == 1 || $service_type_id == 5) {
                         $product_type_id = $request->input('product_type');
@@ -669,14 +703,14 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-//    public function order_id(Request $request) {
-//        if ($request->filled('order_id')) {
-//            return json_encode($this->unique_order_id($request->input('order_id')));
-//        }
-//        else {
-//            return 'false';
-//        }
-//    }
+    public function order_id(Request $request) {
+        if ($request->filled('order_id')) {
+            return json_encode($this->unique_order_id($request->input('order_id')));
+        }
+        else {
+            return 'false';
+        }
+    }
     public function shipment_check(Request $request){
         $shipment_ids = array();
         if($request->ids){
@@ -962,16 +996,16 @@ class ShipperShipmentBookController extends Controller
 
                         if ($user_type != 4 && $type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                     ';
                         } else {
                             if ($type != 'pdf') {
                                 $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                         ';
                             } else {
                                 $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
                         ';
                             }
                         }
@@ -1051,16 +1085,16 @@ class ShipperShipmentBookController extends Controller
 
                     if ($user_type != 4 && $type != 'pdf') {
                         $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                     ';
                     } else {
                         if ($type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                         ';
                         } else {
                             $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
                         ';
                         }
                     }
@@ -1445,7 +1479,7 @@ class ShipperShipmentBookController extends Controller
                         foreach ($shipment->shipment_pieces as $piece){
                             $shipment_pieces .= '<table class="table table-sm table-bordered border twice">
                         <tbody><tr>';
-                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>';
+                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>';
                             $shipment_pieces .= '<td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $piece->tracking_number . '</strong></span>
@@ -1487,7 +1521,7 @@ class ShipperShipmentBookController extends Controller
                         <div class="row"><div class="col-3"><h2>Invoice ' . $invoice_id . '</h2></div></div>
                         <div class="row"><div class="col-6 text-center">
                         <img src="' . Storage::url('shippers_logo/' . $logo) . '" width="100" class="d-block mb-1">
-    </div><div class="col-6 text-right"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mb-1" style="margin: 0 auto;"></div></div>
+    </div><div class="col-6 text-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1" style="margin: 0 auto;"></div></div>
                         
                         <div class="row align-items-start justify-content-between p-2">
                             <div class="col-12">
@@ -1735,12 +1769,11 @@ class ShipperShipmentBookController extends Controller
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'consignee_city_name' => ['required', 'string', 'between:1,100', 'exists:cities,name'],
             'consignee_name' => ['required', 'between:1,100'],
-            'consignee_address' => ['required', 'between:1,190'],
+            'consignee_address' => ['required', 'between:1,255'],
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description' => ['required_if:service_type_id,1,2,5', 'nullable', 'between:0,1000'],
@@ -1874,6 +1907,14 @@ class ShipperShipmentBookController extends Controller
             $blacklist_errors = array();
             $blacklist_found_categories = array();
 
+            if(Session::has('prefix')){
+                $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id);
+                })];
+            }
+            else{
+                $rules['order_id'] = ['nullable', 'between:0,100'];
+            }
 
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
@@ -1890,6 +1931,7 @@ class ShipperShipmentBookController extends Controller
                         $query->whereNotIn('id', [4]);
                     })];
                 }
+
 
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
                     $row['pieces_quantity'] = 1;
@@ -1918,15 +1960,34 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+                    if(Session::has('prefix')){
+                        $length = strlen(session('prefix'));
+                        $check_order_id = str_split($row['order_id'], $length);
+                        if(session('prefix') != $check_order_id[0]){
+                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        }
+                        else{
+                            if(!array_key_exists(1, $check_order_id)){
+                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                            }
+                        }
+                    }
+
                     if (!empty(trim($row['order_id']))) {
                         if (empty($order_ids)) {
                             $order_ids[] = $row['order_id'];
                             $order_id_row[$row['order_id']] = $row_id;
                         } else {
-                            $order_ids[] = $row['order_id'];
-                            $order_id_row[$row['order_id']] = $row_id;
+                            if (in_array($row['order_id'], $order_ids)) {
+                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                            }
+                            else {
+                                $order_ids[] = $row['order_id'];
+                                $order_id_row[$row['order_id']] = $row_id;
+                            }
                         }
                     }
+
                     if($row['service_type_id'] != 5){
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
@@ -2113,6 +2174,13 @@ class ShipperShipmentBookController extends Controller
                                 }
                                 else{
                                     $row['substitute_user_id'] = null;
+                                }
+
+                                if(Session::has('prefix')){
+                                    $row['prefix'] = session('prefix');
+                                }
+                                else{
+                                    $row['prefix'] = NULL;
                                 }
 
                                 if ($user_id != 3324) {
@@ -2433,7 +2501,12 @@ class ShipperShipmentBookController extends Controller
                     $substitute_user_shipment->shipment_id = $shipment_id;
                     $substitute_user_shipment->save();
                 }
-                $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+                if(Session::has('prefix')){
+                    $tracking_number = $this->generate_prefix_tracking_number($shipment_id, $request->order_id);
+                }
+                else{
+                    $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+                }
                 $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                 if ($service_type_id == 1 || $service_type_id == 5) {
                     $product_type_id = $request->input('product_type');
@@ -2666,7 +2739,7 @@ class ShipperShipmentBookController extends Controller
                       <table class="table table-sm table-bordered border twice">
                         <tbody>
                           <tr>
-                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                             <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
@@ -3101,12 +3174,11 @@ class ShipperShipmentBookController extends Controller
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'consignee_city_name' => ['required', 'string', 'between:1,100', 'exists:cities,name'],
             'consignee_name' => ['required', 'between:1,100'],
-            'consignee_address' => ['required', 'between:1,190'],
+            'consignee_address' => ['required', 'between:1,255'],
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
@@ -3205,6 +3277,16 @@ class ShipperShipmentBookController extends Controller
             $check = NonServiceArea::pluck('name')->toArray();
             $blacklist_errors = array();
             $blacklist_found_categories = array();
+
+            if(Session::has('prefix')){
+                $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id);
+                })];
+            }
+            else{
+                $rules['order_id'] = ['nullable', 'between:0,100'];
+            }
+
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
 
@@ -3251,14 +3333,31 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+                    if(Session::has('prefix')){
+                        $length = strlen(session('prefix'));
+                        $check_order_id = str_split($row['order_id'], $length);
+                        if(session('prefix') != $check_order_id[0]){
+                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        }
+                        else{
+                            if(!array_key_exists(1, $check_order_id)){
+                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                            }
+                        }
+                    }
                     if (!empty(trim($row['order_id']))) {
                         if (empty($order_ids)) {
                             $order_ids[] = $row['order_id'];
                             $order_id_row[$row['order_id']] = $row_id;
                         }
                         else {
+                            if (in_array($row['order_id'], $order_ids)) {
+                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                            }
+                            else {
                                 $order_ids[] = $row['order_id'];
                                 $order_id_row[$row['order_id']] = $row_id;
+                            }
                         }
                     }
 
@@ -3460,6 +3559,12 @@ class ShipperShipmentBookController extends Controller
                             $row['account_type_id'] = 2;
                             $row['nsas'] = $check;
                             $row['nsa'] = $request->excel_nsa;
+                            if(Session::has('prefix')){
+                                $row['prefix'] =  session('prefix');
+                            }
+                            else{
+                                $row['prefix'] = NULL;
+                            }
                             if(session('user_type') == 2){
                                 $row['substitute_user_id'] = Auth::id();
                             }
@@ -3646,7 +3751,7 @@ class ShipperShipmentBookController extends Controller
             $barcodes .= '
                 <div class="text-center pwrapper p-1">
                     <div class="logo">
-                        <img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto">
+                        <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">
                         <div class="row no-gutters locations">
                             <span class="col-6 text-left">'. $shipment->pickup_address->city->name .'</span>
                             <span class="col-6 text-right">'. $shipment->consignee_city->hub_city->name . ' (' . $shipment->consignee_city->name . ')' . '</span>

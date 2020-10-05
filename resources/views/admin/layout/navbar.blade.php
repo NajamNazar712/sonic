@@ -6,7 +6,7 @@
                 <li class="nav-item">
                     <a class="navbar-brand" href="{{route('admin.dashboard.index')}}">
                         <img class="brand-logo sonic" alt="Sonic" src="{{ asset('img/sonic_logo_white.png') }}">
-                        <img class="brand-logo trax" alt="Trax" src="{{ asset('img/trax_logo_white.png') }}">
+                        <img class="brand-logo trax" alt="Trax" src="{{ asset('img/trax_logo_white_new.png') }}">
                     </a>
                 </li>
                 <li class="nav-item d-md-none">

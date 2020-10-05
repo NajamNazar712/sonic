@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
@@ -800,7 +801,10 @@ class V2AdminPickupsController extends Controller
                     }
                     //Consolidated Shipments
 
-                    NotificationsController::send(3, $shipment_id);
+                    $booking_sms = BookingSmsForShippers::where('user_id', $shipment->user_id)->where('status', 1);
+                    if($booking_sms->exists()){
+                        NotificationsController::send(3, $shipment_id);
+                    }
                     if($shipment->booking_type_id == 4){
                         ShipmentChargesController::walkin_weight($shipment_id);
                     }else{
@@ -1351,7 +1355,10 @@ class V2AdminPickupsController extends Controller
                     }
                     //Consolidated Shipments
 
-                    NotificationsController::send(3, $shipment_id);
+                    $booking_sms = BookingSmsForShippers::where('user_id', $shipment->user_id)->where('status', 1);
+                    if($booking_sms->exists()){
+                        NotificationsController::send(3, $shipment_id);
+                    }
                     if($shipment->booking_type_id == 4){
                         ShipmentChargesController::walkin_weight($shipment_id);
                     }else{
@@ -1529,7 +1536,7 @@ class V2AdminPickupsController extends Controller
                       <table class="table table-sm table-bordered border">
                         <tbody>
                           <tr>
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Pickup Note</strong></td>
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
@@ -1954,7 +1961,7 @@ class V2AdminPickupsController extends Controller
                       <table class="table table-sm table-bordered border twice">
                         <tbody>
                           <tr>
-                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                             <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
@@ -2174,7 +2181,7 @@ class V2AdminPickupsController extends Controller
                       <table class="table table-sm table-bordered border">
                         <tbody>
                           <tr>
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Pickup Note</strong></td>
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>

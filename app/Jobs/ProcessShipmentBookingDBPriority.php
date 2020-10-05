@@ -168,7 +168,13 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             $substitute_user_shipment->shipment_id = $shipment_id;
             $substitute_user_shipment->save();
         }
-        $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+        if($this->booking['prefix'] != NULL){
+            $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $this->booking['order_id']);
+        }
+        else{
+            $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+        }
 
         if ($service_type_id == 1 || $service_type_id == 5) {
             $item_product_type_id = $this->booking['item_product_type_id'];

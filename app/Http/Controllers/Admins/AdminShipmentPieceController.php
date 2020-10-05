@@ -779,7 +779,7 @@ class AdminShipmentPieceController extends Controller
                       <table class="table table-sm table-bordered border">
                         <tbody>
                           <tr>
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Return Note (Multiple Piece Return)</strong></td>
                             <td class="text-center align-middle color secondary">Created at ' . $return_note_details->created_at . '</br> by ' . ucfirst($return_note_details->admin->name) . '</td>
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>

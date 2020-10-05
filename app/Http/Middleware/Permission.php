@@ -697,6 +697,10 @@ class Permission
             'settings.runner.unique' => 385,
             'settings.runner.enable_disable' => 385,
 
+			'settings.sms_shipper_wise.index' => 388,
+            'settings.sms_shipper_wise.update' => 388,
+
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 

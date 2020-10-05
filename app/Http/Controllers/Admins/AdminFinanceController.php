@@ -402,7 +402,7 @@ class AdminFinanceController extends Controller
                       <table class="table table-sm table-bordered border">
                         <tbody>
                           <tr>
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>';
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
             if ($request->has('temporary') && ($request->temporary != null)) {
                 $main_details .= '<td class="text-center align-middle color primary"><strong>Temporary Cash Collection</strong></td>';
             } else {
@@ -1899,72 +1899,42 @@ class AdminFinanceController extends Controller
         }
         $gst = 0;
 
-//        if ($payable > 0) {
-//            $payment_type = 0;
-//        }
-//        else {
-            $account_type_id = $shipment->user->account_type_id;
+        $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
-            if ($account_type_id == 1) {
-                $payment_type = 0;
-            }
-            else {
-                $payment_type = 1;
-            }
-//        }
+        if ($pending_payment->exists()) {
+            $pending_payment = $pending_payment->first();
 
-        if ($payment_type == 0) {
-            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+            $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+            $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
 
-            if ($pending_payment->exists()) {
-                $pending_payment = $pending_payment->first();
-
-                $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
-                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
-
-                $pending_payment->save();
-            }
-            else {
-                $pending_payment = new PendingPayment();
-
-                $pending_payment->user_id = $shipment->user_id;
-                $pending_payment->total_shipments = 1;
-                $pending_payment->delivered_shipments = 0;
-                $pending_payment->returned_shipments = 0;
-                $pending_payment->adjusted_shipments = 1;
-
-                $pending_payment->save();
-            }
-
-            $pending_payment_shipment = new PendingPaymentShipment();
-
-            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-            $pending_payment_shipment->shipment_id = $shipment_id;
-            $pending_payment_shipment->type = 2;
-            $pending_payment_shipment->amount = $amount;
-            $pending_payment_shipment->charges = $charges;
-            $pending_payment_shipment->gst = $gst;
-            $pending_payment_shipment->payable = $payable;
-
-            $pending_payment_shipment->save();
-            self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable);
-            if($adjustment_type){
-                self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks, $pending_payment_shipment->id, 1);
-            }
+            $pending_payment->save();
         }
         else {
-            $pending_invoice_shipment = new PendingInvoiceShipment();
+            $pending_payment = new PendingPayment();
 
-            $pending_invoice_shipment->shipment_id = $shipment_id;
-            $pending_invoice_shipment->type = 2;
-            $pending_invoice_shipment->charges = $charges;
-            $pending_invoice_shipment->gst = $gst;
-            $pending_invoice_shipment->invoice_amount = 0 - $payable;
+            $pending_payment->user_id = $shipment->user_id;
+            $pending_payment->total_shipments = 1;
+            $pending_payment->delivered_shipments = 0;
+            $pending_payment->returned_shipments = 0;
+            $pending_payment->adjusted_shipments = 1;
 
-            $pending_invoice_shipment->save();
-            if($adjustment_type) {
-                self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks, $pending_invoice_shipment->id, 2);
-            }
+            $pending_payment->save();
+        }
+
+        $pending_payment_shipment = new PendingPaymentShipment();
+
+        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+        $pending_payment_shipment->shipment_id = $shipment_id;
+        $pending_payment_shipment->type = 2;
+        $pending_payment_shipment->amount = $amount;
+        $pending_payment_shipment->charges = $charges;
+        $pending_payment_shipment->gst = $gst;
+        $pending_payment_shipment->payable = $payable;
+
+        $pending_payment_shipment->save();
+        self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable);
+        if($adjustment_type){
+            self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks, $pending_payment_shipment->id, 1);
         }
 
         ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks);
@@ -2519,19 +2489,49 @@ class AdminFinanceController extends Controller
                 $payment_shipment = DonePaymentShipment::find($payment_shipment_id);
 
                 if ($payment_shipment) {
-                    $pending_invoice_shipment = new PendingInvoiceShipment();
+                    $shipment = Shipment::find($shipment_id);
 
-                    $pending_invoice_shipment->shipment_id = $shipment_id;
-                    $pending_invoice_shipment->type = 2;
-                    $pending_invoice_shipment->charges = 0;
-                    $pending_invoice_shipment->gst = 0;
-                    $pending_invoice_shipment->invoice_amount = $payment_shipment->payable;
+                    $amount = 0;
+                    $charges = 0;
+                    $gst = 0;
+                    $payable = 0 - $payment_shipment->payable;
 
-                    $pending_invoice_shipment->save();
-                    if($adjustment_type){
-                        self::adjustment_logs_add($shipment_id,$adjustment_type, $payment_shipment->payable, NULL, $pending_invoice_shipment->id, 2);
+                    $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+
+                    if ($pending_payment->exists()) {
+                        $pending_payment = $pending_payment->first();
+
+                        $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+                        $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
+
+                        $pending_payment->save();
+                    }
+                    else {
+                        $pending_payment = new PendingPayment();
+
+                        $pending_payment->user_id = $shipment->user_id;
+                        $pending_payment->total_shipments = 1;
+                        $pending_payment->delivered_shipments = 0;
+                        $pending_payment->returned_shipments = 0;
+                        $pending_payment->adjusted_shipments = 1;
+
+                        $pending_payment->save();
                     }
 
+                    $pending_payment_shipment = new PendingPaymentShipment();
+
+                    $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                    $pending_payment_shipment->shipment_id = $shipment_id;
+                    $pending_payment_shipment->type = 2;
+                    $pending_payment_shipment->amount = $amount;
+                    $pending_payment_shipment->charges = $charges;
+                    $pending_payment_shipment->gst = $gst;
+                    $pending_payment_shipment->payable = $payable;
+
+                    $pending_payment_shipment->save();
+                    if($adjustment_type) {
+                        self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1);
+                    }
                 }
             }
         }
@@ -4179,7 +4179,7 @@ class AdminFinanceController extends Controller
                         <table class="table table-sm table-bordered border">
                           <tbody>
                             <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Payment Details</strong></td>
                               <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                             </tr>

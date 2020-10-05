@@ -400,7 +400,9 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
+                    // if(data.status == 1){
+                    //     $('td:eq(0)', row).addClass('select-checkbox');
+                    // }
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     if ($.inArray(data.delivery_note_id, selected_rows) !== -1) {
                         table.row(row).select();

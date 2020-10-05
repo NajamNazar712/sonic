@@ -3881,8 +3881,8 @@ use Yajra\Datatables\Datatables;
         }
 
         public function debriefing_index() {
-            $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id','name')->get();
-            $zones = DB::connection('reports')->table('zones')->get();
+            $hubs = DB::table('cities')->where('hub', 1)->select('id','name')->get();
+            $zones = DB::table('zones')->get();
             $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
 
             return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones, 'shipping_modes' => $shipping_modes]);
@@ -3890,7 +3890,7 @@ use Yajra\Datatables\Datatables;
 
         static function debriefing_data($date, $hub, $zone, $export = FALSE, $mode) {
 
-            $settings = DB::connection('reports')->table('global_settings')->where('type', 'debriefing_report_arrival_cut_off_time')->first();
+            $settings = DB::table('global_settings')->where('type', 'debriefing_report_arrival_cut_off_time')->first();
 
             if ($settings) {
                 $arrival_cut_off_time = $settings->setting_value;
@@ -3899,7 +3899,7 @@ use Yajra\Datatables\Datatables;
                 $arrival_cut_off_time = 12;
             }
 
-            $settings = DB::connection('reports')->table('global_settings')->where('type', 'debriefing_report_day_cut_off_time')->first();
+            $settings = DB::table('global_settings')->where('type', 'debriefing_report_day_cut_off_time')->first();
 
             if ($settings) {
                 $day_cut_off_time = $settings->setting_value;
@@ -3908,7 +3908,7 @@ use Yajra\Datatables\Datatables;
                 $day_cut_off_time = 12;
             }
 
-            $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id','name');
+            $hubs = DB::table('cities')->where('hub', 1)->select('id','name');
 
             if ($hub) {
                 $hubs = $hubs->where('hub_id', '=', $hub);
@@ -3932,11 +3932,11 @@ use Yajra\Datatables\Datatables;
                     $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
                 }
 
-                $from_month_id = DB::connection('reports')->table('shipments_journey')->select(DB::connection('reports')->raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from_month)->first()->id;
-                $from_id = DB::connection('reports')->table('shipments_journey')->select(DB::connection('reports')->raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from)->first()->id;
-                $to_id = DB::connection('reports')->table('shipments_journey')->select(DB::connection('reports')->raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to)->first()->id;
+                $from_month_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from_month)->first()->id;
+                $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from)->first()->id;
+                $to_id = DB::table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '<=', $to)->first()->id;
 
-                $dn_ids = DB::connection('reports')->table('delivery_notes')->select('id')->where('status', 1)->whereBetween('status_verified_at', [$from, $to])->get()->pluck('id');
+                $dn_ids = DB::table('delivery_notes')->select('id')->where('status', 1)->whereBetween('status_verified_at', [$from, $to])->get()->pluck('id');
 
                 $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_attempted', 'fake_status', 'confirmation_pending', 'delivery_note_pending', 'delivery_tomorrow'];
 
@@ -3948,14 +3948,14 @@ use Yajra\Datatables\Datatables;
 
                 foreach ($hubs as $hub) {
                     foreach ($types as $type) {
-                        $rows = DB::connection('reports')->table('cities');
+                        $rows = DB::table('cities');
 
                         if ($type == 'status_not_attempted' || $type == 'delivery_tomorrow') {
                             $rows = $rows->join('shipments as s', function($join) {
                                 $join->where(function($query) {
-                                    $query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    $query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
                                     ->orWhere(function ($sub_query) {
-                                        $sub_query->on('cities.id', '=', DB::connection('reports')->raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
+                                        $sub_query->on('cities.id', '=', DB::raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
                                     });
                                 });
                             })
@@ -3974,7 +3974,7 @@ use Yajra\Datatables\Datatables;
                         if ($type == 'status_not_attempted') {
                             $rows = $rows->join('shipments_journey as sj', function($join) use ($from_month_id, $to_id) {
                                 $join->on('s.id', '=', 'sj.shipment_id')
-                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_month_id . '" and shipments_journey.id < "' . $to_id . '")'));
+                                ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_month_id . '" and shipments_journey.id < "' . $to_id . '")'));
                             });
                         }
                         else if ($type == 'fake_status') {
@@ -3986,13 +3986,13 @@ use Yajra\Datatables\Datatables;
                         else if ($type == 'delivery_note_pending') {
                             $rows = $rows->join('shipments_journey as sj', function($join) use ($from_month_id, $to_id) {
                                 $join->on('s.id', '=', 'sj.shipment_id')
-                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_month_id . '" and shipments_journey.id < "' . $to_id . '")'));
+                                ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_month_id . '" and shipments_journey.id < "' . $to_id . '")'));
                             });
                         }
                         else {
                             $rows = $rows->join('shipments_journey as sj', function($join) use ($from_id, $to_id) {
                                 $join->on('s.id', '=', 'sj.shipment_id')
-                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
+                                ->where('sj.id', '=', DB::raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id . '")'));
                             });
                         }
                         if ($type == 'delivered') {
@@ -4010,7 +4010,7 @@ use Yajra\Datatables\Datatables;
                         else if ($type == 'status_not_attempted') {
                             $rows = $rows->where(function ($query) use ($arrival_cut_off_time, $from) {
                                 $query->where(function($sub_query) {
-                                    $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
                                     ->where('sj.shipper_status_id', '=', 7);
                                 })
                                 ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
@@ -4018,12 +4018,12 @@ use Yajra\Datatables\Datatables;
                                         $sub_sub_query->where(function ($sub_sub_sub_query) use ($arrival_cut_off_time) {
                                             $sub_sub_sub_query->where(function ($sub_sub_sub_sub_query) use ($arrival_cut_off_time) {
                                                 $sub_sub_sub_sub_query->where(function ($sub_sub_sub_sub_sub_query) {
-                                                    $sub_sub_sub_sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                                    $sub_sub_sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
                                                     ->orWhereNull('zcc.class')
                                                     ->orWhereIn('zcc.class', [0, 1]);
                                                 })
                                                 ->where(function ($sub_sub_sub_sub_sub_sub_sub_query) {
-                                                    $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::connection('reports')->raw('usi.city_id'))
+                                                    $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::raw('usi.city_id'))
                                                     ->where('sj.shipper_status_id', '=', 2);
                                                 });
                                             });
@@ -4038,18 +4038,18 @@ use Yajra\Datatables\Datatables;
                                     });
                                 })
                                 ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                                    $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
                                     ->whereIn('sj.shipper_status_id', [8, 13])
                                     ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
                                 });
                                 // ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
                                 //     $sub_query->where(function ($sub_sub_query) {
-                                //         $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
+                                //         $sub_sub_query->where('usi.city_id', '=', DB::raw('sch.hub_id'))
                                 //             ->whereIn('sj.shipper_status_id', [2,6,7,8,9,11,12,13,15])
                                 //             ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
                                 //     })
                                 //     ->orWhere(function ($sub_sub_sub_query) {
-                                //         $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
+                                //         $sub_sub_sub_query->where('usi.city_id', '!=', DB::raw('sch.hub_id'))
                                 //             ->whereIn('sj.shipper_status_id', [4,6,7,8,9,11,12,13,15])
                                 //             ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '<', Carbon::today());
                                 //     });
@@ -4070,13 +4070,13 @@ use Yajra\Datatables\Datatables;
                                 $query->where(function ($sub_query) use ($arrival_cut_off_time) {
                                     $sub_query->where(function ($sub_sub_query) {
                                         $sub_sub_query->where(function ($sub_sub_sub_query) {
-                                            $sub_sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
-                                            ->where('cities.id', '=', DB::connection('reports')->raw('usi.city_id'))
+                                            $sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
+                                            ->where('cities.id', '=', DB::raw('usi.city_id'))
                                             ->where('sj.shipper_status_id', 2);
                                         })
                                         ->orWhere(function ($sub_sub_sub_query) {
-                                           $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('s.consignee_city_id'))
-                                           ->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                           $sub_sub_sub_query->where('usi.city_id', '!=', DB::raw('s.consignee_city_id'))
+                                           ->where('cities.id', '=', DB::raw('s.consignee_city_id'))
                                            ->where('sj.shipper_status_id', 4);
                                         });
                                     })
@@ -4089,18 +4089,18 @@ use Yajra\Datatables\Datatables;
                                     });
                                 })
                                 ->orWhere(function ($sub_query) use ($from) {
-                                    $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
                                     ->where('sj.shipper_status_id', '=', 13)
                                     ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
                                 });
                                 // ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
                                 //     $sub_query->where(function ($sub_sub_query) {
-                                //         $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('sch.hub_id'))
+                                //         $sub_sub_query->where('usi.city_id', '=', DB::raw('sch.hub_id'))
                                 //             ->whereIn('sj.shipper_status_id', [2,6,7,8,9,11,12,13,15])
                                 //             ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
                                 //     })
                                 //     ->orWhere(function ($sub_sub_sub_query) {
-                                //         $sub_sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('sch.hub_id'))
+                                //         $sub_sub_sub_query->where('usi.city_id', '!=', DB::raw('sch.hub_id'))
                                 //             ->whereIn('sj.shipper_status_id', [4,6,7,8,9,11,12,13,15])
                                 //             ->whereDate(DB::raw('DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat + IF ((WEEK(sj.created_at) <> WEEK(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY))) OR (WEEKDAY(DATE_ADD(sj.created_at, INTERVAL cities.attempt_tat DAY)) IN (6)), 1 , 0) DAY)'), '>=', Carbon::today());
                                 //     });
@@ -4475,7 +4475,7 @@ use Yajra\Datatables\Datatables;
         }
 
         static public function debriefing_hub_wise_report($date){
-            $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->pluck('id');
+            $hubs = DB::table('cities')->where('hub', 1)->pluck('id');
             if($hubs){
                 $zone = NULL;
                 $mode = NULL;
@@ -4491,7 +4491,7 @@ use Yajra\Datatables\Datatables;
             $hubs = NULL;
             $mode = NULL;
             
-            $zone = DB::connection('reports')->table('zones')->where('status', 1)->pluck('id');
+            $zone = DB::table('zones')->where('status', 1)->pluck('id');
             if($zone){
                 foreach ($zone as $zone_id) {
                     AdminReportsController::debriefing_export_file($date, $hubs, $zone_id, $mode, 2);

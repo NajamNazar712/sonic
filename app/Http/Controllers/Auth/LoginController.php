@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
@@ -167,7 +168,11 @@ class LoginController extends Controller
                 }
             }
         }
-
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $user->id);
+        if($shipment_pre_book->exists()){
+            $shipment_pre_book = $shipment_pre_book->first();
+            session(['prefix' => $shipment_pre_book->prefix]);
+        }
         session(['packaging_charges_check' => $packaging_charges_check]);
         return redirect()->route('cod.welcome');
     }

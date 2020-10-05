@@ -61,7 +61,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
             Route::post('corporate_store', 'Shippers\ShipperShipmentBookController@corporate_store')->name('corporate.store');
-//            Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
+            Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
             Route::post('shipping_modes', 'Shippers\ShipperShipmentBookController@shipping_modes')->name('shipping_modes');
             Route::post('corporate_shipping_modes', 'Shippers\ShipperShipmentBookController@corporate_shipping_modes')->name('corporate_shipping_modes');
             Route::post('corporate_min_chargeable_weight', 'Shippers\ShipperShipmentBookController@corporate_min_chargeable_weight')->name('corporate_min_chargeable_weight');
@@ -2049,6 +2049,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('unique', 'Admins\GlobalSettingsController@runner_report_unique')->name('unique');
             Route::post('add', 'Admins\GlobalSettingsController@runner_report_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@runner_report_enable_disable')->name('enable_disable');
+        });
+
+		Route::prefix('sms_shipper_wise')->name('sms_shipper_wise.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@arrived_at_origin_sms_for_shipper_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@arrived_at_origin_sms_for_shipper_update')->name('update');
         });
     });
 
