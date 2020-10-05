@@ -380,7 +380,7 @@ class AdminWalkInBookShipmentController extends Controller
                     NotificationsController::send(2, $shipment_id);
 
                     $shipment_ids = array($shipment_id);
-                    if($pickup == 0 && $charges_mode_id == 1){
+                    if($pickup == 0){
                          NotificationsController::send(85, $shipment_ids , Auth::id());
                      }
 
