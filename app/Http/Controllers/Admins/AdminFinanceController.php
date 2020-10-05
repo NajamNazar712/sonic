@@ -4061,6 +4061,7 @@ class AdminFinanceController extends Controller
                                 }
                             }
                         }
+                        NotificationsController::send(92,$done_payment->id);
                     }
                 }
                 return redirect()->back()->with(['success' => 'Status of ' . count($rows) . ' Payment(s) has been Updated']);
