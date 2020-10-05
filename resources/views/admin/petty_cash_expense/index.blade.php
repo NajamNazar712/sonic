@@ -288,6 +288,8 @@
                     return {body: body, header:head};
                 }
             } );
+            var selected_rows = [];
+            var rows_count = 0;
             var table;
             function init(){
 
@@ -337,19 +339,9 @@
 
                         this.api().table().columns.adjust();
                     }
+
                 });
             }
-            var total_amount = 0;
-            table.rows().nodes().each(function(index) {
-                var row = table.row(index);
-                if($(row.node()).find('td.expense_amount input').val() != ''){
-
-                    total_amount += parseInt($(row.node()).find('td.expense_amount input').val());
-                }
-
-
-            });
-            $('#statements_total_amount').text(total_amount);
             $('#search_filter_btn').on('click', function () {
                 if($('#petty_cash_summary_report').hasClass('d-none')) {
                     $('#petty_cash_summary_report').removeClass('d-none');
@@ -358,7 +350,44 @@
                 else {
                     table.draw();
                 }
+                var total_amount = 0;
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    if($(row.node()).find('td.amount ').val() != ''){
+                        console.log(parseInt($(row.data()).find('td.amount').val()));
+                        total_amount += parseInt($(row.data()).find('td.amount ').val());
+                    }
+                });
+                console.log(total_amount);
+                $('#statements_total_amount').text(total_amount);
             });
+            $('body').on('change','td.amount input', function () {
+                var total_amount = 0;
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    if($(row.node()).find('td.amount input').val() != ''){
+
+                        total_amount += parseInt($(row.node()).find('td.amount input').val());
+                    }
+
+                });
+                $('#statements_total_amount').text(total_amount);
+            });
+            $('body').on('click', '.remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, selected_rows);
+
+                if (index !== -1) {
+                    selected_rows.splice(index, 1);
+                }
+
+                table.row( $(this).parents('tr') ).remove().draw();
+
+            });
+
+            function calculate_amount() {
+                console.log(1);
+            }
         });
     </script>
 @endsection
