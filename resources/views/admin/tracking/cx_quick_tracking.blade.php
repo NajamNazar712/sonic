@@ -34,7 +34,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-3">
+                                    <div class="col-3" style="height: 60px">
                                         <fieldset>
                                             <input type="text" class="form-control" placeholder="Order ID" id="search_order_id">
                                         </fieldset>
