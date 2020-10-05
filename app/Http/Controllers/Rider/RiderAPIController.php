@@ -1106,6 +1106,25 @@ class RiderAPIController extends Controller {
                     DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
 
                 }
+
+                $delivered_status = array(14, 30, 36, 37);
+                $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
+                $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->where(function ($query) {
+                    $query->where(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '!=', 4);
+                    })
+                        ->orWhere(function ($sub_query) {
+                            $sub_query->where('booking_type_id', '=', 4)
+                                ->where('charges_mode_id', '=', 2);
+                        });
+                })->sum('received_amount');
+                $count = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->count();
+                $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
+                $delivery_note_data->delivered_shipments = $count;
+                $delivery_note_data->received_cod_amount = $dncc_amount;
+                $delivery_note_data->last_updated_at = Carbon::now();
+                $delivery_note_data->status_updated_at = Carbon::now();
+                $delivery_note_data->save();
             }
 
             return response()->json(['status' => 0, 'message' => 'Shipment marked as Delivered Successfully', 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
