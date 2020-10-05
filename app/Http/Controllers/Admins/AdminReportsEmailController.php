@@ -237,7 +237,7 @@ class AdminReportsEmailController extends Controller
             ->select('h.id as hub_id', 'h.name as hub', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'), 'oc.name as origin', 'oc.id as origin_id')
             ->where('sj.shipper_status_id', 2)
             ->whereBetween('sj.created_at', [$date_from, $date_to])
-            ->groupBy('oc.id')
+            ->groupBy('oc.id','h.id')
             ->get();
         foreach ($hub_wise_splits as $hub_wise_split) {
             $total_shipments = $total_shipments + $hub_wise_split->shipment_count;
