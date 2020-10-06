@@ -1140,7 +1140,7 @@
                 // dom:'ltipr',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                    @if(session('account_type') == 1)
+                        @if(session('account_type') == 1)
                     {
                         text: '<i class="la la-cancel"></i> Add Bank',
                         className: 'btn btn-primary add_bank',
@@ -1307,15 +1307,9 @@
                         }
                     });
 
-                    // $(form).find('button[type=submit]').attr('disabled', 'disabled');
                 }
             });
-            $('#AddBankModal').on('hidden.bs.modal',function () {
-                $("#add_bank_form").validate().resetForm();
-                $('#add_bank_form')[0].reset();
-                $('#bank_select').val('').trigger('change');
-                $('#bank_city').val('').trigger('change');
-            });
+
             $('#showBankModel').click(function () {
                 $('#AddBankModal').modal('show')
             });
