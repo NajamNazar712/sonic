@@ -41,6 +41,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use DB;
 class AdminPackagingMaterialController extends Controller
@@ -1006,6 +1007,14 @@ class AdminPackagingMaterialController extends Controller
         $type->description = $request->description;
         $type->status = 1;
         $type->created_by = Auth::id();
+
+        if ($request->hasFile('packaging_picture')) {
+            $filename = 'packaging_picture_' . $type->id . '.png';
+            $file = $request->file('packaging_picture');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture = $filename;
+        }
+
         $type->save();
 
         $type_history = new PackagingMaterialTypesHistory();
@@ -1044,6 +1053,13 @@ class AdminPackagingMaterialController extends Controller
         $type->type = $request->edit_type;
         $type->description = $request->edit_description;
         $type->updated_by = Auth::id();
+
+        if ($request->hasFile('edit_packaging_picture')) {
+            $filename = 'packaging_picture_' . $type->id . '.png';
+            $file = $request->file('edit_packaging_picture');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture = $filename;
+        }
         $type->save();
 
         $type_history = new PackagingMaterialTypesHistory();

@@ -24,8 +24,8 @@
                                                     $row = $index + 1;
                                                 @endphp
                                             <div class="col-2 m-1">
-                                                <div class="col mb-1 text-center">
-                                                    <img class="" alt="flyer" src="{{ asset('img/logo.png') }}">
+                                                <div class="col mb-1 text-center border border-3">
+                                                    <img class="" alt="flyer" src="{{asset($pictures[$size->type_id])}}" width="100" height="100">
                                                 </div>
                                                 <div class="col mb-1 text-center">
                                                     <p><b>Size: </b>{{$size->size}}</p>
@@ -129,7 +129,7 @@
                 sizes.push(this.value);
                 var count = sizes.length;
                 $('#cart_count').text(count);
-                $(this).attr('disabled', true);
+                $(this).addClass('d-none');
             });
 
             $('#material_request_cart_form').validate({

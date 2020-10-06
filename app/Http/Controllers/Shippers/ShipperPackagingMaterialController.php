@@ -25,6 +25,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use phpDocumentor\Reflection\Types\Null_;
 use Yajra\Datatables\Datatables;
 
@@ -160,22 +161,198 @@ class ShipperPackagingMaterialController extends Controller
         }
     }
 
+//    public function packaging_request_submit(Request $request){
+//        $packaging_type_ids = explode(",",$request->packaging_type_ids);
+//        $packaging_size_ids = explode(",",$request->packaging_size_ids);
+//        $packaging_quantities = explode(",",$request->packaging_quantities);
+//
+//        $total_charges = 0;
+//
+//        foreach ($packaging_type_ids as $index => $packaging_type_id){
+//            $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
+//            if($charges != null){
+//                    $total_charges += $packaging_quantities[$index] * $charges->charges;
+//            }else{
+//                $charges = PackagingMaterialTypeSizes::find($packaging_size_ids[$index]);
+//
+//                $total_charges += $packaging_quantities[$index] * $charges->standard_charges;
+//            }
+//        }
+//
+//        $today = Carbon::today();
+//
+//        $discount = DiscountCharge::where('user_id', session('user_id'))->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->whereNotNull('packaging');
+//
+//        if ($discount->exists()) {
+//            $discount = $discount->orderBy('shipping_mode_id', 'ASC')->first();
+//
+//            $discount_packaging = $discount->packaging;
+//
+//            if (strpos($discount_packaging, '%') !== FALSE) {
+//                $discount_packaging = (floatval(str_replace('%', '', $discount_packaging)) / 100) * $total_charges;
+//                $total_charges -= $discount_packaging;
+//            }
+//            else {
+//                $total_charges -= floatval($discount_packaging);
+//            }
+//        }
+//
+//        if ($request->input('address_select') != 0) {
+//            $address_id = $request->input('address_select');
+//            $user_address = UserShippingInfo::find($address_id);
+//        }
+//
+//        $user_id = session('user_id');
+//
+//        if($request->mode_of_payment == 1) {
+//            if ($request->input('address_select') == 0) {
+//                $result = PackagingMaterialRequest::create([
+//                    'user_id' => $user_id,
+//                    'city_id' => $request->new_pickup_city,
+//                    'address' => $request->new_pickup_address,
+//                    'poc' => $request->new_pickup_person_of_contact,
+//                    'phone' => $request->new_pickup_phone_number,
+//                    'amount' => $total_charges,
+//                    'status_id' => 1,
+//                    'packaging_payment_mode_id' => $request->mode_of_payment
+//                ]);
+//            } else {
+//                $result = PackagingMaterialRequest::create([
+//                    'user_id' => $user_id,
+//                    'city_id' => $user_address->city_id,
+//                    'address' => $user_address->pickup_address,
+//                    'poc' => $user_address->poc,
+//                    'phone' => $user_address->phone,
+//                    'amount' => $total_charges,
+//                    'status_id' => 1,
+//                    'packaging_payment_mode_id' => $request->mode_of_payment
+//
+//                ]);
+//            }
+//            if ($result) {
+//                foreach ($packaging_type_ids as $index => $packaging_type_id) {
+//                    PackagingMaterialRequestDetail::create([
+//                        'packaging_material_request_id' => $result->id,
+//                        'type_id' => $packaging_type_id,
+//                        'type_size_id' => $packaging_size_ids[$index],
+//                        'quantity' => $packaging_quantities[$index],
+//                    ]);
+//                }
+//                return redirect()->back()->with('success', 'Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+//            } else {
+//                return redirect()->back()->with('error', 'Request not submitted!');
+//            }
+//        }
+//        else{
+//            if(session('account_type') == 1){
+//                if(PendingPayment::where('user_id', session('user_id'))->exists()){
+//                    $balance = PendingPayment::where('user_id', session('user_id'))->first()->pending_payment_shipments->sum('payable');
+//
+//                }else{
+//                    return redirect()->back()->with('error','Can\'t  Request material!');
+//                }
+//
+//                if($total_charges <= $balance){
+//                    if ($request->input('address_select') == 0) {
+//                        $result = PackagingMaterialRequest::create([
+//                            'user_id'=>$user_id,
+//                            'city_id'=>$request->new_pickup_city,
+//                            'address'=>$request->new_pickup_address,
+//                            'poc'=>$request->new_pickup_person_of_contact,
+//                            'phone'=>$request->new_pickup_phone_number,
+//                            'amount'=>$total_charges,
+//                            'status_id'=>1,
+//                            'packaging_payment_mode_id'=>$request->mode_of_payment
+//                        ]);
+//                    }
+//                    else {
+//                        $result = PackagingMaterialRequest::create([
+//                            'user_id'=>$user_id,
+//                            'city_id'=>$user_address->city_id,
+//                            'address'=>$user_address->pickup_address,
+//                            'poc'=>$user_address->poc,
+//                            'phone'=>$user_address->phone,
+//                            'amount'=>$total_charges,
+//                            'status_id'=>1,
+//                            'packaging_payment_mode_id'=>$request->mode_of_payment
+//                        ]);
+//                    }
+//                    if($result){
+//                        foreach ($packaging_type_ids as $index => $packaging_type_id){
+//                            PackagingMaterialRequestDetail::create([
+//                                'packaging_material_request_id' => $result->id,
+//                                'type_id' => $packaging_type_id,
+//                                'type_size_id' => $packaging_size_ids[$index],
+//                                'quantity' => $packaging_quantities[$index],
+//                            ]);
+//                        }
+//                        return redirect()->back()->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+//                    }else{
+//                        return redirect()->back()->with('error','Request not submitted!');
+//                    }
+//
+//                }else{
+//                    return redirect()->back()->with('error','Not enough balance!');
+//                }
+//            }
+//            else{
+//                if ($request->input('address_select') == 0) {
+//                    $result = PackagingMaterialRequest::create([
+//                        'user_id'=>$user_id,
+//                        'city_id'=>$request->new_pickup_city,
+//                        'address'=>$request->new_pickup_address,
+//                        'poc'=>$request->new_pickup_person_of_contact,
+//                        'phone'=>$request->new_pickup_phone_number,
+//                        'amount'=>$total_charges,
+//                        'status_id'=>1,
+//                        'packaging_payment_mode_id'=>$request->mode_of_payment
+//                    ]);
+//                }
+//                else {
+//                    $result = PackagingMaterialRequest::create([
+//                        'user_id'=>$user_id,
+//                        'city_id'=>$user_address->city_id,
+//                        'address'=>$user_address->pickup_address,
+//                        'poc'=>$user_address->poc,
+//                        'phone'=>$user_address->phone,
+//                        'amount'=>$total_charges,
+//                        'status_id'=>1,
+//                        'packaging_payment_mode_id'=>$request->mode_of_payment
+//                    ]);
+//                }
+//                if($result){
+//                    foreach ($packaging_type_ids as $index => $packaging_type_id){
+//                        PackagingMaterialRequestDetail::create([
+//                            'packaging_material_request_id' => $result->id,
+//                            'type_id' => $packaging_type_id,
+//                            'type_size_id' => $packaging_size_ids[$index],
+//                            'quantity' => $packaging_quantities[$index],
+//                        ]);
+//                    }
+//                    return redirect()->back()->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+//                }else{
+//                    return redirect()->back()->with('error','Request not submitted!');
+//                }
+//            }
+//        }
+//
+//    }
     public function packaging_request_submit(Request $request){
-        dd($request);
-        $packaging_type_ids = explode(",",$request->packaging_type_ids);
-        $packaging_size_ids = explode(",",$request->packaging_size_ids);
-        $packaging_quantities = explode(",",$request->packaging_quantities);
+        $packaging_size_ids = $request->size;
+        $packaging_quantities = $request->quantity;
+        $packaging_type_ids = array();
 
         $total_charges = 0;
 
-        foreach ($packaging_type_ids as $index => $packaging_type_id){
-            $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
+        foreach ($packaging_size_ids as $index => $packaging_size_id){
+            $size = PackagingMaterialTypeSizes::find($packaging_size_id);
+            $packaging_type_id = $size->type->id;
+            $packaging_type_ids[$index] = $packaging_type_id;
+            $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id])->latest()->first();
             if($charges != null){
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
             }else{
-                $charges = PackagingMaterialTypeSizes::find($packaging_size_ids[$index]);
-
-                $total_charges += $packaging_quantities[$index] * $charges->standard_charges;
+                $total_charges += $packaging_quantities[$index] * $size->standard_charges;
             }
         }
 
@@ -196,7 +373,7 @@ class ShipperPackagingMaterialController extends Controller
                 $total_charges -= floatval($discount_packaging);
             }
         }
-        
+
         if ($request->input('address_select') != 0) {
             $address_id = $request->input('address_select');
             $user_address = UserShippingInfo::find($address_id);
@@ -238,9 +415,9 @@ class ShipperPackagingMaterialController extends Controller
                         'quantity' => $packaging_quantities[$index],
                     ]);
                 }
-                return redirect()->back()->with('success', 'Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+                return redirect()->route('cod.packaging.requests.index')->with('success', 'Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
             } else {
-                return redirect()->back()->with('error', 'Request not submitted!');
+                return redirect()->route('cod.packaging.requests.index')->with('error', 'Request not submitted!');
             }
         }
         else{
@@ -286,13 +463,13 @@ class ShipperPackagingMaterialController extends Controller
                                 'quantity' => $packaging_quantities[$index],
                             ]);
                         }
-                        return redirect()->back()->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+                        return redirect()->route('cod.packaging.requests.index')->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
                     }else{
-                        return redirect()->back()->with('error','Request not submitted!');
+                        return redirect()->route('cod.packaging.requests.index')->with('error','Request not submitted!');
                     }
 
                 }else{
-                    return redirect()->back()->with('error','Not enough balance!');
+                    return redirect()->route('cod.packaging.requests.index')->with('error','Not enough balance!');
                 }
             }
             else{
@@ -329,9 +506,9 @@ class ShipperPackagingMaterialController extends Controller
                             'quantity' => $packaging_quantities[$index],
                         ]);
                     }
-                    return redirect()->back()->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+                    return redirect()->route('cod.packaging.requests.index')->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
                 }else{
-                    return redirect()->back()->with('error','Request not submitted!');
+                    return redirect()->route('cod.packaging.requests.index')->with('error','Request not submitted!');
                 }
             }
         }
@@ -353,8 +530,20 @@ class ShipperPackagingMaterialController extends Controller
         foreach ($size_charges as $size_charge){
             $standard_charges[$size_charge->id] = $size_charge->standard_charges;
         }
-        return view('client.packaging.cart.index')->with(['packaging_types' => $packaging_types, 'user_charges' => $user_charges, 'standard_charges' => $standard_charges]);
+
+        $pictures = array();
+
+        foreach($packaging_types as $packaging_type){
+            if($packaging_type->picture != NULL){
+                $pictures[$packaging_type->id] = Storage::url('packaging_pictures/' . $packaging_type->picture);
+            }
+            else{
+                $pictures[$packaging_type->id] = 'img/trax_logo.png';
+            }
+        }
+        return view('client.packaging.cart.index')->with(['packaging_types' => $packaging_types, 'user_charges' => $user_charges, 'standard_charges' => $standard_charges, 'pictures' => $pictures]);
     }
+
     public function packaging_request_cart_details(Request $request){
         $size_ids = explode(',', $request->size_ids);
         $sizes = PackagingMaterialTypeSizes::whereIn('id', $size_ids)->get();

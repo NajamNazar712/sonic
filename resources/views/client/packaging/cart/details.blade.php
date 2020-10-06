@@ -14,17 +14,48 @@
                             <div class="card-body">
                                 @include('client.inc.messages')
                                 <form action="{{route('cod.packaging.requests.submit')}}" id="material_request_form" method="post">
+                                    @csrf
                                     <div class="row">
                                         <div class="col">
+                                            <div class="col">
+                                                <div class="row">
+                                                    <div class="col align-middle text-center">
+                                                        <h4>Packaging Type</h4>
+                                                    </div>
+                                                    <div class="col align-middle text-center">
+                                                        <h4>Size</h4>
+                                                    </div>
+                                                    <div class="col align-middle text-center">
+                                                        <h4>Quantity</h4>
+                                                    </div>
+                                                    <div class="col align-middle text-center">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <hr>
                                             @foreach($sizes as $index => $size)
-                                                <div class="col">
+                                                <div class="col" id="packaging_{{$index}}">
+                                                    <input type="hidden" id="size_{{$index}}" name="size[{{$index}}]" value="{{$size->id}}">
                                                     <div class="row">
-                                                        <div class="col mb-1">
+                                                        <div class="col mb-1 align-middle text-center">
                                                             <img class="" alt="flyer" src="{{ asset('img/logo.png') }}">
+                                                        </div>
+                                                        <div class="col mt-2 mb-1 align-middle text-center">
+                                                            <p>{{$size->size}}</p>
+                                                        </div>
+                                                        <div class="col mt-2 mb-1 align-middle text-center">
+                                                            <div class="row justify-content-center">
+                                                                <div class="form-group">
+                                                                    <input type="number" class="form-control text-center" id="quantity_{{$index}}" name="quantity[{{$index}}]" value="" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col mt-2 mb-1 align-middle text-center">
+                                                            <button type="button" class="btn btn-icon btn-danger remove" value="{{$index}}"><i class="la la-close"></i></button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <hr>
                                             @endforeach
                                         </div>
                                         <div class="col-4">
@@ -130,7 +161,7 @@
     <script type="text/javascript">
         $('document').ready(function(){
             var size_ids = @json($size_ids);
-            console.log(size_ids);
+            var total_sizes = size_ids.length;
             $('#address_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Send To*'
@@ -178,6 +209,24 @@
                     form.submit();
                 }
             });
+
+            $('.remove').on('click', function (){
+                console.log(total_sizes);
+                if(total_sizes > 1){
+                    total_sizes--;
+                    var index = parseInt($(this).val());
+                    $('#packaging_' + index).remove();
+                    var message = 'Packaging Type successfully removed';
+                    toastr.success(message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'
+                    });
+                }
+                else{
+                    var message = 'At least one Packaging type is required';
+
+                    toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                }
+            })
         });
     </script>
 
