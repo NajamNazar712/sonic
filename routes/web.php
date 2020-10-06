@@ -2078,6 +2078,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_list')->name('list');
             Route::post('print', 'Admins\AdminReceivingSheetHistoryController@print')->name('print');
         });
+        Route::prefix('poc_kam_tagged_accounts')->name('poc_kam_tagged_accounts.')->group(function () {
+            Route::get('', 'Admins\AdminTaggedAccountsController@index')->name('index');
+            Route::get('list', 'Admins\AdminTaggedAccountsController@list')->name('list');
+        });
 
     });
 

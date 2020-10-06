@@ -75,8 +75,12 @@
                             </li>
                         @endif
                     </ul>
+                    <ul>
+                        <li><a class="menu-item" href="{{route('admin.shipment.poc_kam_tagged_accounts.index')}}">POC and KAM Tagged Accounts</a></li>
+                    </ul>
                 </li>
             @endif
+
 
             @if (session('role_id') == 1 || count(array_intersect([155, 117, 209, 254], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
