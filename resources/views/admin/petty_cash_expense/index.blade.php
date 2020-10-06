@@ -331,6 +331,48 @@
                         {data: 'city', name: 'petty_cash.city', class: 'align-middle city'},
                         {data: 'amount', name: 'petty_cash.amount', class: 'align-middle amount'},
                     ],
+                    "footerCallback": function ( row, data, start, end, display ) {
+                        var api = this.api();
+                        // Remove the formatting to get integer data for summation
+                        var intVal = function ( i ) {
+
+                            return typeof i === 'string' ?
+                                i.replace(/[\$,]/g, '')*1 :
+                                typeof i === 'number' ?
+                                    i : 0;
+
+                        };
+
+                        // Total over all pages
+
+                        if (api.column(4).data().length){
+                            var total = api
+                                .column( 4 )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                } ) }
+                        else{ total = 0};
+
+
+                        // Total over this page
+
+                        if (api.column(4).data().length){
+                            var pageTotal = api
+                                .column( 4, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                } ) }
+                        else{ pageTotal = 0};
+
+                        // Update footer
+                        $( api.column(4).footer() ).html(
+                            '$'+pageTotal,
+                            $('#statements_total_amount').text(pageTotal),
+                            console.log(pageTotal)
+                        );
+                    },
                     rowCallback: function (row, data, index) {
                         var info = table.page.info();
                         $('td:eq(0)', row).html(index + 1 + info.page * info.length);
@@ -341,6 +383,7 @@
                     }
 
                 });
+
             }
             $('#search_filter_btn').on('click', function () {
                 if($('#petty_cash_summary_report').hasClass('d-none')) {
@@ -358,10 +401,10 @@
                         total_amount += parseInt($(row.data()).find('td.amount ').val());
                     }
                 });
-                console.log(total_amount);
-                $('#statements_total_amount').text(total_amount);
+           /*   console.log(total_amount);*/
+              /*  $('#statements_total_amount').text(total_amount);*/
             });
-            $('body').on('change','td.amount input', function () {
+           /* $('body').on('change','td.amount input', function () {
                 var total_amount = 0;
                 table.rows().nodes().each(function(index) {
                     var row = table.row(index);
@@ -383,11 +426,11 @@
 
                 table.row( $(this).parents('tr') ).remove().draw();
 
-            });
+            });*/
 
-            function calculate_amount() {
+           /* function calculate_amount() {
                 console.log(1);
-            }
+            }*/
         });
     </script>
 @endsection
