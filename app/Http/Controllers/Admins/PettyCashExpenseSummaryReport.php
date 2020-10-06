@@ -29,10 +29,7 @@ class PettyCashExpenseSummaryReport extends Controller
     {
         $from = date('Y-m-d 00:00:00', strtotime($request->date_from));
         $to = date('Y-m-d 00:00:00', strtotime($request->date_to));
-//        dd($from, $to);
-//        dd($request->all());
 
-//        $data['statements'] = PettyCashStatementDetail::where('account_title_id', $request->search_acount_title)->whereBetween('date', [$from, $to])->get();
         $data['statements'] = DB::table('petty_cash_statement_details')
             ->join('petty_cash_account_titles', 'petty_cash_account_titles.id', '=', 'petty_cash_statement_details.account_title_id')
             ->join('petty_cash_account_heads', 'petty_cash_account_heads.id', '=', 'petty_cash_statement_details.account_head_id')

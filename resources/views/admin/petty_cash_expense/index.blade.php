@@ -271,6 +271,7 @@
                             head.push('Account Title');
                             head.push('City');
                             head.push('Amount');
+                            head.push('Total');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -279,6 +280,7 @@
                                 row.push(values.account_title);
                                 row.push(values.city);
                                 row.push(values.amount);
+                                row.push(values.statements_total_amount);
                                 body.push(row);
                             });
                         },
