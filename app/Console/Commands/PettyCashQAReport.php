@@ -2,26 +2,27 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Console\Command;
+use Carbon\Carbon;
 use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
-use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 
-class OutstandingSDNReport extends Command
+
+class PettyCashQAReport extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:outstandingsdnreport';
+    protected $signature = 'email:PettyCash';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Outstanding SDN Report';
+    protected $description = 'Petty Cash QA Report';
 
     /**
      * Create a new command instance.
@@ -41,7 +42,7 @@ class OutstandingSDNReport extends Command
     public function handle()
     {
         $date = Carbon::yesterday()->format('Y-m-d');
-        $response = AdminReportsEmailController::outstanding_sdn($date . ' 00:00:00');
-        NotificationsController::send(90, $date, $response);
+        $response = AdminReportsEmailController::petty_cash_qa_report($date . ' 00:00:00');
+        NotificationsController::send(89, $date, $response);
     }
 }
