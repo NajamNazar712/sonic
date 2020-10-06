@@ -2903,7 +2903,7 @@ public function short_received_hub_wise_cron_index() {
     }
 
     public function runner_report_add(Request $request){
-        if(count($request->junction)){
+        if(count($request->junction) > 0){
             $runner = new Runner();
             $runner->name = $request->runner_name;
             $runner->created_by = Auth::id();
