@@ -2970,7 +2970,7 @@
                                                     <h3 class="card-title">Hub-Hub Delivery</h3>
                                                 </div>
                                                 <div class="col-2">
-                                                    <a href="javascript:void(0);" class="pull-right" id="detain_hub_to_hub_switch"><input name="detain_hub_to_hub_switch" type="checkbox"  class="switchery detain_hub_to_hub_switch" data-size="sm" @if(isset($hub_delivery_type_status[4])) checked @endif/></a>
+                                                    <a href="javascript:void(0);" class="pull-right" id="sameday_hub_to_hub_switch"><input name="sameday_hub_to_hub_switch" type="checkbox"  class="switchery sameday_hub_to_hub_switch" data-size="sm" @if(isset($hub_delivery_type_status[4])) checked @endif/></a>
                                                 </div>
                                             </div>
                                             <div class="row">
