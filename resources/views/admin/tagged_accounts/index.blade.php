@@ -116,7 +116,7 @@
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.shipper_id);
+                                row.push(values.shipper_name);
                                 row.push(values.commission);
                                 body.push(row);
                             });
