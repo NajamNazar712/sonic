@@ -28,7 +28,7 @@ class AdminTaggedAccountsController extends Controller
 
        if(session('role_id') != 1){
            $accounts = $accounts ->where('scu.user_id',Auth::id())
-               ->whereIn('scu.tier_id',[1,2,3]);
+               ->whereIn('scu.tier_id',[1,2,3,4]);
        }
         return Datatables::of($accounts)->make(true);
     }
