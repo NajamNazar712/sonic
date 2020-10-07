@@ -260,6 +260,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('getbanks','Shippers\ShipperDashboardController@getBanks')->name('get.banks');
     Route::post('default_bank','Shippers\ShipperDashboardController@updateDefaultBanks')->name('default.bank');
     Route::post('add_bank','Shippers\ShipperDashboardController@addBank')->name('add.bank');
+    Route::post('verify_pincode','Shippers\ShipperDashboardController@verifyPincode')->name('verify.pin.code');
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
