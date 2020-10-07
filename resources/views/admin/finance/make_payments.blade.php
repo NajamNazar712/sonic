@@ -1144,7 +1144,8 @@
 
 			$('#make_payments').on('hide.bs.modal', function () {
 				selected_rows = [];
-			})
+				table.rows().deselect();
+			});
 
 			function calculation(parent) {
 				var id = parseInt(parent.attr('id'));
