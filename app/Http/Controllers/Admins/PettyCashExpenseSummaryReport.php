@@ -27,6 +27,23 @@ class PettyCashExpenseSummaryReport extends Controller
 
     public function pettyCashSummaryReportProcess(Request $request)
     {
+        $petty_cash_account_detail =PettyCashStatementDetail::join('petty_cash_account_titles', 'petty_cash_account_titles.id', '=', 'petty_cash_statement_details.account_title_id')
+            ->leftjoin('petty_cash_account_heads', 'petty_cash_account_heads.id', '=', 'petty_cash_statement_details.account_head_id')
+            ->join('cities', 'cities.hub_id', '=', 'petty_cash_statement_details.hub_id')
+            ->select('petty_cash_account_titles.name as account_title', 'petty_cash_account_heads.name as account_head','cities.name as city', 'petty_cash_statement_details.amount');
+        $datatable = Datatables::of($petty_cash_account_detail);
+        if($petty_cash_account_titles = $request->get('petty_cash_account_titles')){
+            $petty_cash_account_detail = $petty_cash_account_detail->where('petty_cash_account_titles.id', '=',$petty_cash_account_titles);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('petty_cash_statement_details.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
+    }
+    public function test(Request $request)
+    {
         $from = date('Y-m-d 00:00:00', strtotime($request->date_from));
         $to = date('Y-m-d 00:00:00', strtotime($request->date_to));
 

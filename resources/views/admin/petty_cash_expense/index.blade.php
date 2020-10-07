@@ -1,10 +1,12 @@
-
 @extends('admin.layout.master')
-@section('title','Petty Cash Expense Summary Report')
+
+@section('title', 'Petty Cash Expense Summary Report ')
 
 @section('content')
     <div class="app-content content">
         <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
             <div class="content-body">
                 <h1 class="mb-1">
                     Petty Cash Expense Summary Report
@@ -14,57 +16,57 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <div class="row justify-content-center mb-2" id="search_form">
-                                <div class="col-3">
-                                    <fieldset class="form-group">
-                                        <select name="search_acount_title" id="search_acount_title" class="form-control select2">
-                                            <option value="">Select Account Title</option>
-                                            @forelse($petty_cash_account_title as $account_title)
-                                                <option value="{{ $account_title->id }}">{{ $account_title->name }}</option>
-                                            @empty
-                                                <option value="">Account Titles Not Found!</option>
-                                            @endforelse
-                                        </select>
-                                    </fieldset>
-                                </div>
+                            <form id="track_form" class=" mb-1 justify-content-center" novalidate="novalidate">
 
-                                <div class="col-3">
-                                    <div class="form-group input-group ml-1">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o"></span>
-                                            </span>
+                                <div class="row mb-2 justify-content-center ">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <div class="form-group">
+                                                {{-- <input type="text" class="form-control" placeholder="Search Shipper Name" name="shipper_name" id="shipper_name">--}}
+                                                <select name="search_acount_title" id="search_acount_title" class="form-control select2">
+                                                    <option value="">Select Account Title</option>
+                                                    @forelse($petty_cash_account_title as $account_title)
+                                                        <option value="{{ $account_title->id }}">{{ $account_title->name }}</option>
+                                                    @empty
+                                                        <option value="">Account Titles Not Found!</option>
+                                                    @endforelse
+                                                </select>
+                                            </div>
                                         </div>
-
-                                        <input type="date" name="select_date_from" class="form-control bg-primary border-primary white rounded-right" id="select_date_from" placeholder="Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                                     </div>
-                                </div>
-                                <div class="col-3 ">
-                                    <div class="form-group input-group ml-1">
-                                        <div class="input-group-prepend">
+                                    <div class="col-3">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o"></span>
+                                                <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
+                                            </div>
+                                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Expanse From">
                                         </div>
-
-                                        <input type="date" name="select_date_to" class="form-control bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                            </div>
+                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Expanse To">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <button type="submit" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
+                                        </div>
                                     </div>
 
                                 </div>
-
-
-
-                                <div class="col-3">
-                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                                </div>
-                            </div>
+                            </form>
                             <div class="row text-center">
                                 <div class="col">
                                     <b class="total_amount_span"> Total Amount : <span id="statements_total_amount">0</span></b>
                                 </div>
                             </div>
-                        </div>
-                        <div id="petty_cash_summary_report" class="d-none mb-3 ml-1 mr-1">
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -73,7 +75,6 @@
                                     <th class="border-primary border-darken-1">Account Title</th>
                                     <th class="border-primary border-darken-1">City / Location</th>
                                     <th class="border-primary border-darken-1"> Amount </th>
-
                                 </tr>
                                 </thead>
                             </table>
@@ -83,111 +84,15 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Request</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="add_request_form" method="post">
-                        @csrf
-                        <div class="container">
-                            <div class="row">
-                                <h2 class="heading">Tracking Number(s)</h2>
-                            </div>
-
-                            <input type="hidden" id="requested_shipment_ids">
-                            <div class="row old_scroll" id="requested_shipments">
-
-                            </div>
-                            <hr>
-
-                            <div class="row justify-content-center">
-                                <div class="col-3">
-                                    <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div><div class="modal fade text-left" id="UpdateConsigneeInfoModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UpdateConsigneeInfoModal"
-               aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Update Consignee Info</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="update_consignee_info_form" method="post" action="{{route('admin.cx_quick_tracking.update')}}">
-                        @csrf
-                        <div class="container">
-                            <div class="row">
-                                <h2 class="heading">Tracking Number</h2>
-                            </div>
-
-                            <input type="hidden" name="update_consignee_info_shipment_id" id="update_consignee_info_shipment_id">
-                            <div class="row old_scroll" id="update_consignee_info_shipment">
-
-                            </div>
-                            <hr>
-                            <div class="row justify-content-center">
-                                <div class="col-8">
-                                    <fieldset class="form-group">
-                                        <input type="text" name="update_consignee_name" class="form-control" placeholder="Consignee Name*" id="update_consignee_name" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Name is required">
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-8">
-                                    <fieldset class="form-group">
-                                        <input type="text" name="update_consignee_address" class="form-control" placeholder="Consignee Address*" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Address is required">
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-8">
-                                    <fieldset class="form-group">
-                                        <input type="text" name="update_consignee_phone" class="form-control phone_number" id="update_consignee_phone" placeholder="Consignee Phone Number*" data-rule-required="true" data-msg-required="Consignee Phone Number is required">
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-8">
-                                    <fieldset class="form-group">
-                                        <textarea class="form-control" name="update_special_instructions" id="update_special_instructions" rows="5" placeholder="Enter Special Instructions Here..."></textarea>
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-3">
-                                    <button id="Update_consignee_info_button" type="submit" class="btn btn-primary btn-block">Update</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
 
     <style>
         table.dataTable {
@@ -222,39 +127,61 @@
             text-shadow: none;
         }
 
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
+        .selectize-control {
+            width: 100%;
         }
 
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
+        /* .selectize-control .selectize-input {
+             vertical-align: middle;
+         }
 
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
+         .selectize-control .selectize-input .item {
+             word-break: break-all;
+         }*/
     </style>
 @endsection
-
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
         $(document).ready(function () {
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.shipment.receiving_sheet.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
 
-            $('#search_acount_title').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select Account Title',
-                width: '100%',
-                allowClear: true
-            });
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -271,7 +198,7 @@
                             head.push('Account Title');
                             head.push('City');
                             head.push('Amount');
-                            head.push('Total');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -283,6 +210,7 @@
                                 row.push(values.statements_total_amount);
                                 body.push(row);
                             });
+                            body.push()
                         },
                         async: false
                     });
@@ -290,149 +218,144 @@
                     return {body: body, header:head};
                 }
             } );
-            var selected_rows = [];
-            var rows_count = 0;
-            var table;
-            function init(){
+            var search_date_from = $('#track_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #search_date_to').pickadate('picker').set('min', $('#track_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
 
-                table = $('#datatable').DataTable({
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                    scrollX: false, scrollY: '500px',
-                    buttons: [
-                        {
-                            extend: 'excelHtml5',
-                            title: 'Petty Cash Expense Summary Report',
-                            className: 'btn btn-primary',
-                            text:'<i class="la la-file-excel-o"></i> Excel',
-                        },
-                    ],
-                    lengthMenu: [[10, 50, 100], [10, 50, 100]],
-                    pageLength: 10,
-                    pagingType: 'full_numbers',
-                    processing: true,
-                    language: {
-                        processing: data_table_loader
+            var search_date_to = $('#track_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var table = $('#datatable').DataTable({
+                scrollX: false, scrollY: '500px',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        title: 'Petty Cash Expense Summary Report',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o "></i> Excel',
                     },
-                    serverSide: true,
-                    ajax: {
-                        url: "{{ route('admin.reports.petty_cash_expense_summary.petty_cash_summary_report') }}",
-                        type: 'GET',
-                        data: function (d) {
-                            d.search_acount_title = $('#search_acount_title').val();
-                            d.date_from           = $('#select_date_from').val();
-                            d.date_to             = $('#select_date_to').val();
-                            d._token              = "{{ csrf_token() }}";
+                ],
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: true,
+                ajax: {
+                    url: '{{ route('admin.reports.petty_cash_expense_summary.petty_cash_summary_report') }}',
+                    data: function (d) {
+                        d.petty_cash_account_titles = $('select[name="search_acount_title"]').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+
+                    }
+                },
+                rowId: 'title_id',
+                order: [1, 'desc'],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'account_head', name: 'petty_cash_account_heads.name', class: 'align-middle account_head'},
+                    {data: 'account_title', name: 'petty_cash.account_title', class: 'align-middle account_title'},
+                    {data: 'city', name: 'petty_cash.city', class: 'align-middle city'},
+                    {data: 'amount', name: 'petty_cash.amount', class: 'align-middle amount'},
+                ],
+
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    var api = this.api();
+                    var intVal = function ( i ) {
+
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+
+                    };
+
+                    if (api.column(4).data().length){
+                        var totalAmount = api
+                            .column( 4, { page: 'current'} )
+                            .data()
+                            .reduce( function (startValue, endValue) {
+                                return intVal(startValue) + intVal(endValue);
+                            } ) }
+                    else{totalAmount = 0};
+
+                    $( api.column(4).footer() ).html(
+                        '$'+totalAmount,
+                        $('#statements_total_amount').text(totalAmount),
+
+                    );
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
+                        '</select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                            $(td).appendTo($(search));
                         }
-                    },
-                    rowId: 'title_id',
-                    order: [1, 'desc'],
-                    columns: [
-                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                        {data: 'account_head', name: 'petty_cash.account_head', class: 'align-middle account_head'},
-                        {data: 'account_title', name: 'petty_cash.account_title', class: 'align-middle account_title'},
-                        {data: 'city', name: 'petty_cash.city', class: 'align-middle city'},
-                        {data: 'amount', name: 'petty_cash.amount', class: 'align-middle amount'},
-                    ],
-                    "footerCallback": function ( row, data, start, end, display ) {
-                        var api = this.api();
-                        // Remove the formatting to get integer data for summation
-                        var intVal = function ( i ) {
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
 
-                            return typeof i === 'string' ?
-                                i.replace(/[\$,]/g, '')*1 :
-                                typeof i === 'number' ?
-                                    i : 0;
-
-                        };
-
-                        // Total over all pages
-
-                        if (api.column(4).data().length){
-                            var total = api
-                                .column( 4 )
-                                .data()
-                                .reduce( function (a, b) {
-                                    return intVal(a) + intVal(b);
-                                } ) }
-                        else{ total = 0};
-
-
-                        // Total over this page
-
-                        if (api.column(4).data().length){
-                            var pageTotal = api
-                                .column( 4, { page: 'current'} )
-                                .data()
-                                .reduce( function (a, b) {
-                                    return intVal(a) + intVal(b);
-                                } ) }
-                        else{ pageTotal = 0};
-
-                        // Update footer
-                        $( api.column(4).footer() ).html(
-                            '$'+pageTotal,
-                            $('#statements_total_amount').text(pageTotal),
-                            console.log(pageTotal)
-                        );
-                    },
-                    rowCallback: function (row, data, index) {
-                        var info = table.page.info();
-                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    },
-                    initComplete: function () {
-
-                        this.api().table().columns.adjust();
-                    }
-
-                });
-
-            }
-            $('#search_filter_btn').on('click', function () {
-                if($('#petty_cash_summary_report').hasClass('d-none')) {
-                    $('#petty_cash_summary_report').removeClass('d-none');
-                    init();
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                    this.api().table().columns.adjust();
                 }
-                else {
-                    table.draw();
-                }
-                var total_amount = 0;
-                table.rows().nodes().each(function(index) {
-                    var row = table.row(index);
-                    if($(row.node()).find('td.amount ').val() != ''){
-                        console.log(parseInt($(row.data()).find('td.amount').val()));
-                        total_amount += parseInt($(row.data()).find('td.amount ').val());
-                    }
-                });
-           /*   console.log(total_amount);*/
-              /*  $('#statements_total_amount').text(total_amount);*/
+
             });
-           /* $('body').on('change','td.amount input', function () {
-                var total_amount = 0;
-                table.rows().nodes().each(function(index) {
-                    var row = table.row(index);
-                    if($(row.node()).find('td.amount input').val() != ''){
 
-                        total_amount += parseInt($(row.node()).find('td.amount input').val());
-                    }
-
-                });
-                $('#statements_total_amount').text(total_amount);
+            $('#track_form #search_acount_title').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Account Title Name',
+                allowClear:true
             });
-            $('body').on('click', '.remove_row',function () {
-                var rid = parseInt($(this).parents('tr').attr('id'));
-                var index = $.inArray(rid, selected_rows);
 
-                if (index !== -1) {
-                    selected_rows.splice(index, 1);
-                }
 
-                table.row( $(this).parents('tr') ).remove().draw();
+            $('#track_form').bind('submit', function (e) {
+                e.preventDefault();
 
-            });*/
+                table.draw();
+            });
 
-           /* function calculate_amount() {
-                console.log(1);
-            }*/
         });
     </script>
 @endsection
