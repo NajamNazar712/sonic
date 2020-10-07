@@ -1145,7 +1145,7 @@
 			$('#make_payments').on('hide.bs.modal', function () {
 				selected_rows = [];
 				table.rows().deselect();
-				table.button('.make_payment').enable();
+				table.button('.make_payment').disable();
 			});
 
 			function calculation(parent) {
