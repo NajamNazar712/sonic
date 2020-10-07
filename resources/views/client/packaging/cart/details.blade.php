@@ -39,7 +39,7 @@
                                                     <input type="hidden" id="size_{{$index}}" name="size[{{$index}}]" value="{{$size->id}}">
                                                     <div class="row">
                                                         <div class="col mb-1 align-middle text-center">
-                                                            <img class="" alt="flyer" src="{{ asset('img/logo.png') }}">
+                                                            <img class="" alt="flyer" src="{{asset($pictures[$size->type_id])}}" width="100" height="100">
                                                         </div>
                                                         <div class="col mt-2 mb-1 align-middle text-center">
                                                             <p>{{$size->size}}</p>

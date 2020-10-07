@@ -547,9 +547,19 @@ class ShipperPackagingMaterialController extends Controller
     public function packaging_request_cart_details(Request $request){
         $size_ids = explode(',', $request->size_ids);
         $sizes = PackagingMaterialTypeSizes::whereIn('id', $size_ids)->get();
+
+        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+        foreach($packaging_types as $packaging_type){
+            if($packaging_type->picture != NULL){
+                $pictures[$packaging_type->id] = Storage::url('packaging_pictures/' . $packaging_type->picture);
+            }
+            else{
+                $pictures[$packaging_type->id] = 'img/trax_logo.png';
+            }
+        }
         $cities = City::where('status',1)->orderBy('name')->get();
         $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
         $payment_mode = PackagingPaymentMode::all();
-        return view('client.packaging.cart.details')->with(['sizes' => $sizes, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode,'size_ids'=>$size_ids]);
+        return view('client.packaging.cart.details')->with(['sizes' => $sizes, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode,'size_ids'=>$size_ids, 'pictures' => $pictures]);
     }
 }
