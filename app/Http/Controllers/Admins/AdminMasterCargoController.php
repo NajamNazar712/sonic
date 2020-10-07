@@ -1255,7 +1255,7 @@ class AdminMasterCargoController extends Controller
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {
-                    $query->where('ccs.id',$keyword);
+                    $query->where('mcs.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
