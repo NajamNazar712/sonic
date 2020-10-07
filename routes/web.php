@@ -1324,6 +1324,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('export_to_excel', 'Admins\AdminFinanceController@invoices_export_to_excel')->name('export_to_excel');
             Route::put('email_reminder', 'Admins\AdminFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('mark_as_received', 'Admins\AdminFinanceController@invoices_mark_as_received')->name('mark_as_received');
+            Route::get('received', 'Admins\AdminFinanceController@received_invoices_index')->name('received_index');
+            Route::get('received_list', 'Admins\AdminFinanceController@received_invoices_list')->name('received_list');
         });
 
         Route::prefix('invoice_for_reimbursement')->name('invoice_for_reimbursement.')->group(function () {
