@@ -9032,7 +9032,7 @@ if(session('department_id') == 7){
         if ($validate->fails()) {
             return redirect()->back()->with(['errors' => $validate->errors()]);
         }
-        $date = Carbon::now();
+        $date = Carbon::now()->format('Y_m_d');
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
         if($user_attachment){
             if ($request->hasFile('filled_and_signed_pdf')) {

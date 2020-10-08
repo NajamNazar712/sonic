@@ -183,7 +183,7 @@ class RegisterController extends Controller
         
         $user_attachment = new UserDocumentAttachment();
         $user_attachment->user_id = $user->id;
-        $date = Carbon::now();
+        $date = Carbon::now()->format('Y_m_d');
         if ($request->hasFile('filled_and_signed_pdf')) {
             if($user_attachment->filled_and_signed_pdf != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
