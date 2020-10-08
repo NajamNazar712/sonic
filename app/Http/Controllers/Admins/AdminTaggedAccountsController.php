@@ -27,7 +27,7 @@ class AdminTaggedAccountsController extends Controller
            ->join('cities as c', 'u.city_id', '=', 'c.id')
            ->leftjoin('products as p','p.id','=','u.product_id')
             ->select('sc.shipper_id as shipper_id','sales_commission_users.commission as commission','u.name as shipper_name','c.name as city','u.poc as poc','u.phone as phone','u.address as address', 'u.email as email','u.id as account_id','p.product_name as product_type','u.status as status')/*->whereIn('u.status',[0,1,2,5])*/->where('blacklist',0)->where('u.email_verified',1)
-           ->whereIn('sales_commission_users.tier_id',[2,3]);
+           ->whereIn('sales_commission_users.tier_id',[2,3])->where('sc.status',2);
 
        if(session('role_id') != 1){
            $accounts = $accounts ->where('sales_commission_users.user_id',Auth::id());
