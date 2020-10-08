@@ -52,7 +52,7 @@
                         </div>
 
                         <div class="form-group col-md-5 mt-2 justify-content-center">
-                            <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width" disabled><i
+                            <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
                                         class="la la-search"></i> Search
                             </button>
                         </div>

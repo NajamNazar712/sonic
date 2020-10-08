@@ -9036,35 +9036,45 @@ if(session('department_id') == 7){
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
         if($user_attachment){
             if ($request->hasFile('filled_and_signed_pdf')) {
-                Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->filled_and_signed_pdf);
+                if($user_attachment->filled_and_signed_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
+                }
                 $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->filled_and_signed_pdf = $filename;
             }
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->signed_acknowledgement_pdf);
+                if($user_attachment->signed_acknowledgement_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
+                }
                 $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->signed_acknowledgement_pdf = $filename;
             }
             if ($request->hasFile('cnic_front_image')) {
-                Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->cnic_front_image);
+                if($user_attachment->cnic_front_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_front_image);
+                }
                 $filename = 'cnic_front_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_front_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->cnic_front_image = $filename;
             }
             if ($request->hasFile('cnic_back_image')) {
-                Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->cnic_back_image);
+                if($user_attachment->cnic_back_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_back_image);
+                }
                 $filename = 'cnic_back_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_back_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->cnic_back_image = $filename;
             }
             if ($request->hasFile('blank_cheque_image')) {
-                Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->blank_cheque_image);
+                if($user_attachment->blank_cheque_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->blank_cheque_image);
+                }
                 $filename = 'blank_cheque_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('blank_cheque_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
@@ -9141,14 +9151,18 @@ if(session('department_id') == 7){
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
         if($user_attachment){
             if ($request->hasFile('filled_and_signed_pdf')) {
-                Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->filled_and_signed_pdf);
+                if($user_attachment->filled_and_signed_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
+                }
                 $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->filled_and_signed_pdf = $filename;
             }
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->signed_acknowledgement_pdf);
+                if($user_attachment->signed_acknowledgement_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
+                }
                 $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
