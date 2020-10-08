@@ -32,7 +32,7 @@
                         <th class="border-primary border-darken-1">Received Amount</th>
                         <th class="border-primary border-darken-1">Tax Amount</th>
                         <th class="border-primary border-darken-1">Deposit Date</th>
-                        <th class="border-primary border-darken-1">Status</th>
+                      {{--  <th class="border-primary border-darken-1">Status</th>--}}
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -177,7 +177,7 @@
                             head.push('Received Amount');
                             head.push('Tax Amount');
                             head.push('Deposit Date');
-                            head.push('Status');
+                           // head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -199,7 +199,7 @@
                                 row.push(values.received_amount);
                                 row.push(values.tax_amount);
                                 row.push(values.deposit_date);
-                                row.push(values.status);
+                                //row.push(values.status);
 
                                 body.push(row);
                             });
@@ -215,7 +215,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     extend: 'excel',
-                    title: 'Invoices',
+                    title: 'Received Invoices',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
@@ -250,7 +250,7 @@
                     {data:'received_amount', name: 'invoices.received_amount', class: 'align-middle text-center received_amount'},
                     {data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
                     {data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},
-                    {data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},
+                 /*   {data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},*/
                     {data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {

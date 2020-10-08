@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Invoices')
+@section('title', 'Pending and Reminded Invoices')
 
 @section('content')
 	<h1 class="mb-1">
-		Invoices
+		Pending and Reminded Invoices
 	</h1>
 
 	<div class="card">
@@ -215,7 +215,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     extend: 'excel',
-                    title: 'Invoices',
+                    title: 'Pending and Reminded Invoices',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
