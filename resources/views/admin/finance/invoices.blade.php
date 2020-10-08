@@ -27,12 +27,12 @@
 							<th class="border-primary border-darken-1">Aging</th>
 							<th class="border-primary border-darken-1">Due Date</th>
 							<th class="border-primary border-darken-1">Overdue By</th>
-							<th class="border-primary border-darken-1">Received Date</th>
+							{{--<th class="border-primary border-darken-1">Received Date</th>--}}
 							{{--<th class="border-primary border-darken-1">Company Bank</th>
 							<th class="border-primary border-darken-1">Received Amount</th>
 							<th class="border-primary border-darken-1">Tax Amount</th>
-							<th class="border-primary border-darken-1">Deposit Date</th>
-							<th class="border-primary border-darken-1">Status</th>--}}
+							<th class="border-primary border-darken-1">Deposit Date</th>--}}
+							<th class="border-primary border-darken-1">Status</th>
 							<th class="border-primary border-darken-1"></th>
 						</tr>
 					</thead>
@@ -172,12 +172,12 @@
                             head.push('Aging');
                             head.push('Due Date');
                             head.push('Overdue By');
-                            head.push('Received Date');
-                           /* head.push('Company Bank');
+                           /* head.push('Received Date');
+                            head.push('Company Bank');
                             head.push('Received Amount');
                             head.push('Tax Amount');
-                            head.push('Deposit Date');
-                            head.push('Status');*/
+                            head.push('Deposit Date');*/
+                            head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -194,12 +194,12 @@
                                 row.push(values.aging);
                                 row.push(values.due_date);
                                 row.push(values.overdue_by);
-                                row.push(values.received_date);
-                               /* row.push(values.company_bank);
+                                /*row.push(values.received_date);
+                                row.push(values.company_bank);
                                 row.push(values.received_amount);
                                 row.push(values.tax_amount);
-                                row.push(values.deposit_date);
-                                row.push(values.status);*/
+                                row.push(values.deposit_date);*/
+                                row.push(values.status);
 
                                 body.push(row);
                             });
@@ -245,12 +245,12 @@
 					{data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
 					{data:'due_date', name: 'invoices.due_date', class: 'align-middle text-center due_date'},
 					{data:'overdue_by', name: 'overdue_by', class: 'align-middle text-center overdue_by', orderable: false, searchable: false},
-					{data:'received_date', name: 'invoices.received_date', class: 'align-middle text-center received_date'},
-					/*{data:'company_bank', name: 'invoices.company_bank_id', class: 'align-middle text-center company_bank'},
+					/*{data:'received_date', name: 'invoices.received_date', class: 'align-middle text-center received_date'},
+					{data:'company_bank', name: 'invoices.company_bank_id', class: 'align-middle text-center company_bank'},
 					{data:'received_amount', name: 'invoices.received_amount', class: 'align-middle text-center received_amount'},
 					{data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
-					{data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},
-					{data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},*/
+					{data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},*/
+					{data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},
 					{data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
