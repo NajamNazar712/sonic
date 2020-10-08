@@ -3619,11 +3619,28 @@ use Yajra\Datatables\Datatables;
         }
         public function negative_balance_customers_list(Request $request)
         {
+            $date = Carbon::now();
+            $from_date = $date->subDays(7)->toDateTimeString();
+            $to_date = Carbon::now()->toDateTimeString();
+
             $negative = DB::connection('reports')->table('pending_payment_shipments')->leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
                 ->leftjoin('users as u','u.id','=','s.user_id')
-                ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges','pending_payment_shipments.payable as payable')
-                ->where('payable','<',0);
+                ->leftjoin('shipments as os', function($join) use($from_date, $to_date){
+                    $join->on('os.user_id','=','s.user_id')
+//                        ->where('shipments.user_id','u.id')
+                        ->whereBetween('os.created_at', [$from_date, $to_date]);
+                })
+                ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges','pending_payment_shipments.payable as payable','os.created_at as duration')
+                ->where('payable','<',0)
+                ->groupBy('pending_payment_shipments.id');
             $datatable = Datatables::of($negative)
+                ->setRowAttr([
+                    'class' => function ($datatable) {
+                        if ($datatable->duration == null) {
+                            return 'bg-warning';
+                        }
+                    }
+                    ])
                 ->editColumn('amount', function($shipment){
                     return number_format($shipment->amount);
                 })
