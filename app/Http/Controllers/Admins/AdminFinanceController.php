@@ -4694,89 +4694,92 @@ class AdminFinanceController extends Controller
 
             $user_id = $user->id;
 
-            $user_banking_information = UserBankInfo::where('user_id', $user_id)->where('default_bank', 1)->first();
+            $user_banking_information = UserBankInfo::where('user_id', $user_id)->where('default_bank', 1);
 
-            if ($user_banking_information->generation_date == $current_date->day) {
-                $generate = TRUE;
+            if($user_banking_information->exists()){
+                $user_banking_information = $user_banking_information->first();
+                if ($user_banking_information->generation_date == $current_date->day) {
+                    $generate = TRUE;
 
-                $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
-            }
+                    $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
+                }
 
-            if ($generate) {
-                $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id);
-                });
+                if ($generate) {
+                    $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    });
 
-                if ($pending_invoice_shipments->exists()) {
-                    $invoice = new Invoice();
+                    if ($pending_invoice_shipments->exists()) {
+                        $invoice = new Invoice();
 
-                    $invoice->user_id = $user_id;
-                    $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
-                    $invoice->billing_period_from_date = $billing_period_from_date;
-                    $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
-                    $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
-                    $invoice->status_id = 1;
+                        $invoice->user_id = $user_id;
+                        $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                        $invoice->billing_period_from_date = $billing_period_from_date;
+                        $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                        $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
+                        $invoice->status_id = 1;
 
-                    $invoice->save();
+                        $invoice->save();
 
-                    $invoice_id = $invoice->id;
+                        $invoice_id = $invoice->id;
 
-                    $invoice_number = $user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
+                        $invoice_number = $user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
 
-                    $total_shipments = 0;
-                    $total_delivered_shipments = 0;
-                    $total_returned_shipments = 0;
-                    $total_adjusted_shipments = 0;
-                    $total_charges = 0;
-                    $total_gst = 0;
-                    $total_invoice_amount = 0;
+                        $total_shipments = 0;
+                        $total_delivered_shipments = 0;
+                        $total_returned_shipments = 0;
+                        $total_adjusted_shipments = 0;
+                        $total_charges = 0;
+                        $total_gst = 0;
+                        $total_invoice_amount = 0;
 
-                    foreach ($pending_invoice_shipments->get() as $pending_invoice_shipment) {
-                        $invoice_shipment = new InvoiceShipment();
+                        foreach ($pending_invoice_shipments->get() as $pending_invoice_shipment) {
+                            $invoice_shipment = new InvoiceShipment();
 
-                        $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
-                        $invoice_shipment->invoice_id = $invoice_id;
-                        $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
-                        $invoice_shipment->type = $pending_invoice_shipment->type;
-                        $invoice_shipment->charges = $pending_invoice_shipment->charges;
-                        $invoice_shipment->gst = $pending_invoice_shipment->gst;
-                        $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+                            $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
+                            $invoice_shipment->invoice_id = $invoice_id;
+                            $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
+                            $invoice_shipment->type = $pending_invoice_shipment->type;
+                            $invoice_shipment->charges = $pending_invoice_shipment->charges;
+                            $invoice_shipment->gst = $pending_invoice_shipment->gst;
+                            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
 
-                        $invoice_shipment->save();
+                            $invoice_shipment->save();
 
-                        $total_shipments++;
+                            $total_shipments++;
 
-                        if ($pending_invoice_shipment->type == 0) {
-                            $total_delivered_shipments++;
+                            if ($pending_invoice_shipment->type == 0) {
+                                $total_delivered_shipments++;
+                            }
+                            else if ($pending_invoice_shipment->type == 1) {
+                                $total_returned_shipments++;
+                            }
+                            else {
+                                $total_adjusted_shipments++;
+                            }
+
+                            self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
+
+                            $total_charges = $total_charges + $pending_invoice_shipment->charges;
+                            $total_gst = $total_gst + $pending_invoice_shipment->gst;
+                            $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
+
+                            $pending_invoice_shipment->delete();
                         }
-                        else if ($pending_invoice_shipment->type == 1) {
-                            $total_returned_shipments++;
-                        }
-                        else {
-                            $total_adjusted_shipments++;
-                        }
 
-                        self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
+                        $invoice->invoice_number = $invoice_number;
+                        $invoice->total_shipments = $total_shipments;
+                        $invoice->total_delivered_shipments = $total_delivered_shipments;
+                        $invoice->total_returned_shipments = $total_returned_shipments;
+                        $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+                        $invoice->total_charges = $total_charges;
+                        $invoice->total_gst = $total_gst;
+                        $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
-                        $total_charges = $total_charges + $pending_invoice_shipment->charges;
-                        $total_gst = $total_gst + $pending_invoice_shipment->gst;
-                        $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
+                        $invoice->save();
 
-                        $pending_invoice_shipment->delete();
+                        NotificationsController::send(27, $invoice_id);
                     }
-
-                    $invoice->invoice_number = $invoice_number;
-                    $invoice->total_shipments = $total_shipments;
-                    $invoice->total_delivered_shipments = $total_delivered_shipments;
-                    $invoice->total_returned_shipments = $total_returned_shipments;
-                    $invoice->total_adjusted_shipments = $total_adjusted_shipments;
-                    $invoice->total_charges = $total_charges;
-                    $invoice->total_gst = $total_gst;
-                    $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
-
-                    $invoice->save();
-
-                    NotificationsController::send(27, $invoice_id);
                 }
             }
         }
