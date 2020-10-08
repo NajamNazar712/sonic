@@ -37,6 +37,8 @@ use App\Http\Models\WarehouseStockLogDetail;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestDetail;
 use App\Http\Models\WarehouseStockRequestHistory;
+use App\Http\Models\WMS\WmsProduct;
+use App\Http\Models\WMS\WmsProductCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -114,7 +116,8 @@ class AdminPackagingMaterialController extends Controller
                         $dropdown .= $cancel_button;
                     }
 
-                }else if($stock->status_id == 2){
+                }
+                else if($stock->status_id == 2){
                     if(session('role_id') == 1 || in_array(224, session('permissions'))){
                         $dropdown .= $dispatch_button;
                     }
@@ -400,12 +403,12 @@ class AdminPackagingMaterialController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
                         }
                     }
-                    if ($packaging->status_id >= 2) {
-                        $dropdown .= '<button type="button" class="dropdown-item grn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Print GRN</div></button>';
-                    }
-                    if ((session('role_id') == 1) || $packaging->status_id == 2 && $packaging->shipper_status_id == 1 && (in_array(80, session('permissions')))) {
-                        $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
-                    }
+//                    if ($packaging->status_id >= 2) {
+//                        $dropdown .= '<button type="button" class="dropdown-item grn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Print GRN</div></button>';
+//                    }
+//                    if ((session('role_id') == 1) || $packaging->status_id == 2 && $packaging->shipper_status_id == 1 && (in_array(80, session('permissions')))) {
+//                        $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
+//                    }
                     if($packaging->confirmed_date != null){
                         $dropdown .= '<button type="button" class="dropdown-item remarks"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add/Update Remarks</div></button>';
                     }
@@ -1038,6 +1041,37 @@ class AdminPackagingMaterialController extends Controller
             $type_size_history->standard_charges = $request->standard_charges[$index];
             $type_size_history->updated_by = Auth::id();
             $type_size_history->save();
+
+
+            $setting = GlobalSettings::where('type', 'Packaging Material');
+            if($setting->exists()) {
+                $setting = $setting->first();
+                $existing_product_category = WmsProductCategory::where('name', 'Packaging Material');
+                if ($existing_product_category->exists()) {
+                    $product_type = $existing_product_category->first();
+                } else {
+                    $product_type = new WmsProductCategory();
+                    $product_type->name = 'Packaging Material';
+                    $product_type->user_id = $setting->setting_value;
+                    $product_type->save();
+                }
+
+                $product = new WmsProduct();
+                $product->name = $packaging_material_type_size->type->type . ' - ' . $packaging_material_type_size->size;
+                $product->sku_id = 'PM-' . $packaging_material_type_size->type->id . '-' . $packaging_material_type_size->id;
+                $product->description = 'Packaging Material Type-Size : ' . $packaging_material_type_size->type->type . '-' . $packaging_material_type_size->size;
+                $product->buffer_quantity = 1;
+                $product->status = 1;
+                $product->user_id = $setting->setting_value;
+                $product->category_id = $product_type->id;
+                $product->save();
+                $barcode = $setting->setting_value . '-' . strtoupper($product->sku_id);
+                $product->barcode_series = $barcode;
+                $product->save();
+
+                $packaging_material_type_size->wms_product_id = $product->id;
+                $packaging_material_type_size->save();
+            }
         }
         return redirect()->back()->with(['status'=>1,'success'=>"Packaging Material Type has been Added successfully!"]);
     }
