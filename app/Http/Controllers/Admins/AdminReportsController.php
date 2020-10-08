@@ -5392,7 +5392,7 @@ use Yajra\Datatables\Datatables;
             $today = Carbon::now()->endOfDay();
             $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
             $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
-            $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
+            $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
             $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
 
             return view('admin.reports.summary')->with(['hubs'=>$hubs,'shippers'=>$shippers,'today' => $today, 'thirtyday' => $thirtyDays, 'shipping_modes' => $shipping_modes]);
