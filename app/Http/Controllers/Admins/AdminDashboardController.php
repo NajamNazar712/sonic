@@ -8980,13 +8980,6 @@ if(session('department_id') == 7){
     }
 
     public function viewUserDocuments($id, $check, $pdf){
-        if($pdf == 1){
-            $pdf_image = 'pdf';
-        }
-        else{
-            $pdf_image = 'png';
-        }
-
         $user_documents = UserDocumentAttachment::where('user_id', $id)->first();
         if($check == 'filled_and_signed_pdf'){
             $file = $user_documents->filled_and_signed_pdf;
