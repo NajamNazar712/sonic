@@ -28,7 +28,7 @@
                                     <th class="border-primary border-darken-1 ">Address</th>
                                     <th class="border-primary border-darken-1 ">Email</th>
                                     <th class="border-primary border-darken-1 ">Product Type</th>
-                                    <th class="border-primary border-darken-1 ">Status</th>
+                                   {{-- <th class="border-primary border-darken-1 ">Status</th>--}}
                                 </tr>
                                 </thead>
                             </table>
@@ -125,7 +125,7 @@
                         head.push('Address');
                         head.push('Email');
                         head.push('Product Type');
-                        head.push('Status');
+                       // head.push('Status');
 
 
 
@@ -140,7 +140,7 @@
                             row.push(values.address);
                             row.push(values.email);
                             row.push(values.product_type);
-                            row.push(values.status);
+                           // row.push(values.status);
                             body.push(row);
                         });
                     },
@@ -188,7 +188,7 @@
                 {data: 'address',name: 'u.address',class: 'align-middle text_center address '},
                 {data: 'email',name: 'u.email',class: 'align-middle text_center email '},
                 {data: 'product_type',name: 'p.product_name',class: 'align-middle text_center product_type '},
-                {data: 'status',name: 'u.status',class: 'align-middle text_center status '},
+               // {data: 'status',name: 'u.status',class: 'align-middle text_center status '},
 
             ],
             rowCallback: function (row, data, index) {
