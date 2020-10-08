@@ -265,6 +265,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('getbanks','Shippers\ShipperDashboardController@getBanks')->name('get.banks');
     Route::post('default_bank','Shippers\ShipperDashboardController@updateDefaultBanks')->name('default.bank');
     Route::post('add_bank','Shippers\ShipperDashboardController@addBank')->name('add.bank');
+    Route::post('verify_pincode','Shippers\ShipperDashboardController@verifyPincode')->name('verify.pin.code');
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
@@ -2082,6 +2083,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_index')->name('index');
             Route::get('list', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_list')->name('list');
             Route::post('print', 'Admins\AdminReceivingSheetHistoryController@print')->name('print');
+        });
+        Route::prefix('poc_kam_tagged_accounts')->name('poc_kam_tagged_accounts.')->group(function () {
+            Route::get('', 'Admins\AdminTaggedAccountsController@index')->name('index');
+            Route::get('list', 'Admins\AdminTaggedAccountsController@list')->name('list');
         });
 
     });
