@@ -9003,7 +9003,7 @@ if(session('department_id') == 7){
         elseif ($check == 'blank_cheque_image'){
             $file = $user_documents->blank_cheque_image;
         }
-        $url = Storage::url('users_attached_documents/' . $id . '/'. $file .'.' . $pdf_image);
+        $url = Storage::url('users_attached_documents/' . $id . '/'. $file);
         return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
     }
     public function approveDocuments($id, $approve, $reason){
