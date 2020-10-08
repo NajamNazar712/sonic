@@ -19,6 +19,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\http\Models\UserDocumentAttachment;
 use App\Mail\Notifications;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Registered;
@@ -182,36 +183,42 @@ class RegisterController extends Controller
         
         $user_attachment = new UserDocumentAttachment();
         $user_attachment->user_id = $user->id;
+        $date = Carbon::now();
         if ($request->hasFile('filled_and_signed_pdf')) {
-            $filename = 'filled_and_signed_pdf_' . $user->id . '.pdf';
+            Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->filled_and_signed_pdf);
+            $filename = 'filled_and_signed_pdf_' . $date . '_' . $user->id . '.pdf';
             $file = $request->file('filled_and_signed_pdf');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->filled_and_signed_pdf = $filename;
         }
         
         if ($request->hasFile('signed_acknowledgement_pdf')) {
-            $filename = 'signed_acknowledgement_pdf_' . $user->id . '.pdf';
+            Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->signed_acknowledgement_pdf);
+            $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $user->id . '.pdf';
             $file = $request->file('signed_acknowledgement_pdf');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->signed_acknowledgement_pdf = $filename;
         }
         
         if ($request->hasFile('cnic_front_image')) {
-            $filename = 'cnic_front_image_' . $user->id . '.png';
+            Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->cnic_front_image);
+            $filename = 'cnic_front_image_' . $date . '_' . $user->id . '.png';
             $file = $request->file('cnic_front_image');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->cnic_front_image = $filename;
         }
         
         if ($request->hasFile('cnic_back_image')) {
-            $filename = 'cnic_back_image_' . $user->id . '.png';
+            Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->cnic_back_image);
+            $filename = 'cnic_back_image_' . $date . '_' . $user->id . '.png';
             $file = $request->file('cnic_back_image');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->cnic_back_image = $filename;
         }
         
         if ($request->hasFile('blank_cheque_image')) {
-            $filename = 'blank_cheque_image_' . $user->id . '.png';
+            Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->blank_cheque_image);
+            $filename = 'blank_cheque_image_' . $date . '_' . $user->id . '.png';
             $file = $request->file('blank_cheque_image');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->blank_cheque_image = $filename;
