@@ -8986,7 +8986,24 @@ if(session('department_id') == 7){
         else{
             $pdf_image = 'png';
         }
-        $url = Storage::url('users_attached_documents/' . $id . '/'. $check . $id .'.' . $pdf_image);
+
+        $user_documents = UserDocumentAttachment::where('user_id', $id)->first();
+        if($check == 'filled_and_signed_pdf'){
+            $file = $user_documents->filled_and_signed_pdf;
+        }
+        elseif ($check == 'signed_acknowledgement_pdf'){
+            $file = $user_documents->signed_acknowledgement_pdf;
+        }
+        elseif ($check == 'cnic_front_image'){
+            $file = $user_documents->cnic_front_image;
+        }
+        elseif ($check == 'cnic_back_image'){
+            $file = $user_documents->cnic_back_image;
+        }
+        elseif ($check == 'blank_cheque_image'){
+            $file = $user_documents->blank_cheque_image;
+        }
+        $url = Storage::url('users_attached_documents/' . $id . '/'. $file . $id .'.' . $pdf_image);
 
         return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
     }
