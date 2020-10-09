@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\AccountBlockageEmailDraftController;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 
@@ -12,14 +13,14 @@ class NonActivityShipmentBookings extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'email:NonActivityShipmentBookings';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'NonActivityShipmentBookings';
 
     /**
      * Create a new command instance.

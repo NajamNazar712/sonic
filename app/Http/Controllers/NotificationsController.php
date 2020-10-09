@@ -5758,7 +5758,8 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                } else if ($id == 88) {
+                }
+                else if ($id == 88) {
                     $subject = $notification->subject;
                     $body = $notification->body;
                     $date = Carbon::now()->toDateString();
@@ -5869,6 +5870,19 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to,$cc);
 
+                }
+                else if($id == 95){
+                    $bookings = $reference_2_id;
+
+                    $booking = User:: find($bookings)->pluck('email')->toArray();
+
+                    $to = array();
+
+                    if ($booking->exists()) {
+                        $to = array_merge($to, $booking);
+                    }
+
+                    self::email($subject, $body, $to);
                 }
             }
         }
