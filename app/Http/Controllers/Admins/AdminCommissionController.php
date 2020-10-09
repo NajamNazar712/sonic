@@ -354,7 +354,7 @@ class AdminCommissionController extends Controller
                 }
             }
 
-            return redirect(route('admin.accounts.active'))->with('success','Commission Approved successfully.');
+            return redirect(route('admin.accounts.active'))->with('success','Commission Updated successfully.');
     }
 
     public function dashboard_userwise_index(){

@@ -8980,14 +8980,23 @@ if(session('department_id') == 7){
     }
 
     public function viewUserDocuments($id, $check, $pdf){
-        if($pdf == 1){
-            $pdf_image = 'pdf';
+        $user_documents = UserDocumentAttachment::where('user_id', $id)->first();
+        if($check == 'filled_and_signed_pdf'){
+            $file = $user_documents->filled_and_signed_pdf;
         }
-        else{
-            $pdf_image = 'png';
+        elseif ($check == 'signed_acknowledgement_pdf'){
+            $file = $user_documents->signed_acknowledgement_pdf;
         }
-        $url = Storage::url('users_attached_documents/' . $id . '/'. $check . $id .'.' . $pdf_image);
-
+        elseif ($check == 'cnic_front_image'){
+            $file = $user_documents->cnic_front_image;
+        }
+        elseif ($check == 'cnic_back_image'){
+            $file = $user_documents->cnic_back_image;
+        }
+        elseif ($check == 'blank_cheque_image'){
+            $file = $user_documents->blank_cheque_image;
+        }
+        $url = Storage::url('users_attached_documents/' . $id . '/'. $file);
         return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
     }
     public function approveDocuments($id, $approve, $reason){
@@ -9032,7 +9041,7 @@ if(session('department_id') == 7){
         if ($validate->fails()) {
             return redirect()->back()->with(['errors' => $validate->errors()]);
         }
-        $date = Carbon::now();
+        $date = Carbon::now()->format('Y_m_d');
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
         if($user_attachment){
             if ($request->hasFile('filled_and_signed_pdf')) {
