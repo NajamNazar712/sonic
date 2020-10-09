@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AccountBlockageEmailDraftController;
+use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 

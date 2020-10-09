@@ -5874,12 +5874,12 @@ class NotificationsController extends Controller
                 else if($id == 95){
                     $bookings = $reference_2_id;
 
-                    $booking = User:: find($bookings)->pluck('email')->toArray();
+                    $booking = User::where('id')->find($bookings);
 
                     $to = array();
 
                     if ($booking->exists()) {
-                        $to = array_merge($to, $booking);
+                        $to = array_merge($to, $booking)->pluck('email')->toArray();
                     }
 
                     self::email($subject, $body, $to);

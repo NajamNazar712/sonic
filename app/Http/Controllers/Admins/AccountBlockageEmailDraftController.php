@@ -11,24 +11,22 @@ use App\Http\Controllers\Controller;
 class AccountBlockageEmailDraftController extends Controller
 {
     static public function shipper_booking_order(){
-        $users = User::pluck('id')->toArray();
-       // dd($users);
 
         //$date_file_name = Carbon::today()->format('Y_m_d');
         $now = Carbon::now();
-        $booking=Shipment::whereRaw('DATEDIFF(DATE (NOW()),DATE (created_at))  > 15')->pluck('id')->toArray();
-        
-//        foreach ($booking as $bookings){
-//                 $total =0;
-//                //$date = Carbon::today()->format('Y_m_d');
-//                $start = Carbon::parse($bookings->created_at);
-//                $difference = $start->diffInDays($now);
-//                if ($difference > 15) {
-//                    $total++;
-//            }
-//        }
-       // WHERE( DATEDIFF(DATE (NOW()),DATE ('created_at')) > 15)->select()->get();
-        dd($booking);
+        $last_15_days = Carbon::today()->subDays(15)->toDateString();
+
+        $booking=Shipment::where('created_at','<=',Carbon::now()->subDays(15)->toDateTimeString());
+        foreach ($booking as $bookings){
+           dd($bookings->pluck('id')->toArray());
+        }
+       // dd($booking);
+        return $booking;
+    }
+    static public function non_compliance(){
+
+    }
+    static public function fake_product(){
 
     }
 }
