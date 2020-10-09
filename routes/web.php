@@ -1685,6 +1685,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@daily_monthly_adjustment_list')->name('list');
             Route::get('summary_list', 'Admins\AdminReportsController@daily_monthly_adjustment_summary_list')->name('summary_list');
         });
+        Route::prefix('petty_cash_expense_summary')->name('petty_cash_expense_summary.')->group(function (){
+            Route::get('', 'Admins\PettyCashExpenseSummaryReport@index')->name('index');
+            Route::get('petty_cash_summary_report', 'Admins\PettyCashExpenseSummaryReport@pettyCashSummaryReportProcess')->name('petty_cash_summary_report');
+        });
     });
 
     //Reports end
