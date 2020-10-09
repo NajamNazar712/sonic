@@ -131,13 +131,6 @@
             width: 100%;
         }
 
-        /* .selectize-control .selectize-input {
-             vertical-align: middle;
-         }
-
-         .selectize-control .selectize-input .item {
-             word-break: break-all;
-         }*/
     </style>
 @endsection
 @section('js')
@@ -207,7 +200,6 @@
                                 row.push(values.account_title);
                                 row.push(values.city);
                                 row.push(values.amount);
-                                row.push(values.statements_total_amount);
                                 body.push(row);
                             });
                             body.push()
