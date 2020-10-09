@@ -271,9 +271,9 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'account_head', name: 'petty_cash_account_heads.name', class: 'align-middle account_head'},
-                    {data: 'account_title', name: 'petty_cash.account_title', class: 'align-middle account_title'},
-                    {data: 'city', name: 'petty_cash.city', class: 'align-middle city'},
-                    {data: 'amount', name: 'petty_cash.amount', class: 'align-middle amount'},
+                    {data: 'account_title', name: 'petty_cash_account_heads.name', class: 'align-middle account_title'},
+                    {data: 'city', name: 'petty_cash_account_heads.name', class: 'align-middle city'},
+                    {data: 'amount', name: 'petty_cash_statement_details.amount', class: 'align-middle amount'},
                 ],
 
                 rowCallback: function(row, data, index) {
@@ -344,8 +344,9 @@
 
             $('#track_form').bind('submit', function (e) {
                 e.preventDefault();
+                $('#statements_total_amount').text('0'),
 
-                table.draw();
+                    table.draw();
             });
 
         });
