@@ -29,7 +29,7 @@ class PettyCashExpenseSummaryReport extends Controller
     {
         $petty_cash_account_detail =PettyCashStatementDetail::join('petty_cash_account_titles', 'petty_cash_account_titles.id', '=', 'petty_cash_statement_details.account_title_id')
             ->leftjoin('petty_cash_account_heads', 'petty_cash_account_heads.id', '=', 'petty_cash_statement_details.account_head_id')
-            ->join('cities', 'cities.hub_id', '=', 'petty_cash_statement_details.hub_id')
+            ->join('cities', 'cities.id', '=', 'petty_cash_statement_details.hub_id')
             ->select('petty_cash_account_titles.name as account_title', 'petty_cash_account_heads.name as account_head','cities.name as city', 'petty_cash_statement_details.amount');
         $datatable = Datatables::of($petty_cash_account_detail);
         if($petty_cash_account_titles = $request->get('petty_cash_account_titles')){

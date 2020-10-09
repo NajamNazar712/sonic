@@ -19,14 +19,14 @@ class AccountBlockageEmailDraftController extends Controller
 //        foreach ($booking as $bookings){
 //           //dd($bookings->pluck('id')->toArray());
 //        }
-        $booking=Shipment::whereBetween('created_at',[$last_15_days,$now])->groupBy('user_id')->pluck('user_id')->toArray();
-
+        $booking=Shipment::groupBy('user_id')->pluck('user_id')->toArray();
+//        dd($booking);
         $users =User::where('status',3)->pluck('id')->toArray();
+       // dd($users);
             if(!$booking==$users){
-                 $emails =[$booking,$users];
+                 $emails =Shipment::whereBetween('created_at',[$last_15_days,$now]);
                 return $emails;
             }
-        //dd($booking);
       //  return $emails;
     }
     static public function non_compliance(){
