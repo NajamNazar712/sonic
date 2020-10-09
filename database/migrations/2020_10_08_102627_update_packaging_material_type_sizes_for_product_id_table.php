@@ -15,6 +15,7 @@ class UpdatePackagingMaterialTypeSizesForProductIdTable extends Migration
     {
         Schema::table('packaging_material_type_sizes', function (Blueprint $table) {
             $table->integer('wms_product_id');
+            $table->bigInteger('wms_product_quantity')->default(0);
         });
     }
 
@@ -27,6 +28,7 @@ class UpdatePackagingMaterialTypeSizesForProductIdTable extends Migration
     {
         Schema::table('packaging_material_type_sizes', function (Blueprint $table) {
             $table->dropColumn('wms_product_id');
+            $table->dropColumn('wms_product_quantity');
         });
     }
 }
