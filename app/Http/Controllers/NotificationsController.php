@@ -2851,9 +2851,29 @@ class NotificationsController extends Controller
                             if (strpos($body, '[link]') !== FALSE) {
                                 $body = str_replace('[link]', $link, $body);
                             }
+                            $sale_person_id = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->select('admin_id')->first();
+                            if ($sale_person_id) {
+                                $sale_person_email = Admin::find($sale_person_id->admin_id)->email;
+                            }
+                            $sale_person_hub = Admin::find($sale_person_id->admin_id)->default_hub;
+
+                            /*$regional_manager = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
+                                ->where('admins.role_id', 4)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $sale_person_hub)->select('email')->first();*/
+                            $department_head_email = Admin::where('role_id', 4)->where('status', 1)->select('email')->first();
+
+                            $cc = array();
+
+                            if($sale_person_email){
+                                $cc[] = $sale_person_email;
+                            }
+
+                            if($department_head_email) {
+                                $cc[] = $department_head_email;
+                            }
 
                             $to = $shipper->email;
-                            self::email($subject, $body, $to);
+                            self::email($subject, $body, $to, $cc);
+
                         }
                     }
                 } else if ($id == 39) {
@@ -5810,6 +5830,21 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
                     self::email($subject, $body, $to);
+                }
+                else if ($id == 91) {
+                    $user = User::find($reference_1_id);
+                    $pin = $reference_2_id;
+                    if($user){
+                        if (strpos($body, '[user_name]') !== FALSE) {
+                            $body = str_replace('[user_name]', $user->name, $body);
+                        }
+                        if (strpos($body, '[pin]') !== FALSE) {
+                            $body = str_replace('[pin]', $pin, $body);
+                        }
+
+                        $to = $user->phone;
+                        self::sms($body, $to);
+                    }
                 }
                 else if($id == 92){
                     $subject = $notification->subject;
