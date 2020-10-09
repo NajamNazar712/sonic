@@ -719,8 +719,65 @@
                 }
 
             });
+        });
+        $('body').on('click','button.reject_rates',function () {
+            var id = $(this).parents('tr').attr('id');
+            swal({
+                // title: 'Are You Sure?',
+                text: 'Write a reason to reject rates!',
+                content: {
+                    element: "input",
+                    attributes: {
+                        class: "form-control rate_rejection",
+                    },
+                },
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: false,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: false
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then((value) => {
+                console.log(value);
+                if (value) {
+                    if (value === '') {
+                        swal("You have not entered any remarks!", {
+                            icon: "warning",
+                        });
+                    } else {
+                        if (id) {
+                            $.ajax({
+                                url: '{!! route('admin.accounts.rejectreason.submit') !!}',
+                                method: 'POST',
+                                data: {
+                                    'rejected_reason': value,
+                                    'shipper_id':id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                            .done(function(data) {
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                                swal.close();
+                            });
+                        }
+                    }
+                }else{
+                    swal.close();
+                }
 
-
+            });
         });
 
         var hub_ids = [];
