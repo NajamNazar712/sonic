@@ -1253,11 +1253,19 @@ class ShipperShipmentBookController extends Controller
                         $table_end = '
                               <tr>
                                 <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
-                                <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
-                                <td colspan="2" class="border twice-top twice-bottom twice-left" style="height: 20px;"></td>
+                                <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>';
+                        if($shipment->shipping_mode_id == 2 && $shipment->estimated_weight != null ) {
+                            $table_end .= ' <td class="color primary border twice-top twice-bottom twice-left"><strong>Weight</strong></td>
+                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . '</strong></td>
                               </tr>
                               <tr>
                     ';
+                        }
+                        else{
+                            $table_end .= ' <td colspan="2" class="border twice-top twice-bottom twice-left" style="height: 20px;"></td>
+                              </tr>
+                              <tr>';
+                        }
 
                         if ($shipment->booking_type_id == 5) {
                             $table_end .= '
@@ -3264,6 +3272,10 @@ class ShipperShipmentBookController extends Controller
 
 //                        dd($errors[$row_id]['amount']);
                     if($row['service_type_id'] != 5){
+                        $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id)->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
+                        if(!$allowed_delivery_type->exists()){
+                            $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
+                        }
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
                         if (!$user_shipping_info->status) {

@@ -3350,7 +3350,10 @@ class AdminFinanceController extends Controller
                             $done_payment_shipment->save();
 
                             $packaging_material_charges = 0;
-
+                            $adjustment_amount = 0;
+                            if($pending_payment_shipment->type == 2){
+                                $adjustment_amount = $pending_payment_shipment->amount;
+                            }
                             $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
                             if ($shipment->packaging_material_request) {
@@ -3360,7 +3363,7 @@ class AdminFinanceController extends Controller
                                 }
                             }
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges);
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount);
                             $pending_payment_shipment->delete();
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
@@ -3458,7 +3461,12 @@ class AdminFinanceController extends Controller
                                 }
                             }
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges);
+                            $adjustment_amount = 0;
+                            if($pending_payment_shipment->type == 2){
+                                $adjustment_amount = $pending_payment_shipment->amount;
+                            }
+
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount);
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
@@ -3594,7 +3602,7 @@ class AdminFinanceController extends Controller
 
         $shipment->save();
         $packaging_material_charges = 0;
-
+        $adjustment_amount = 0;
         $shipment = Shipment::find($shipment_id);
 
         if ($shipment->packaging_material_request) {
@@ -3603,7 +3611,7 @@ class AdminFinanceController extends Controller
                 $packaging_material_charges = 0;
             }
         }
-        self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_material_charges);
+        self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_material_charges, $adjustment_amount);
         ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
         ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
     }
@@ -3646,7 +3654,7 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges');
+            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges');
 
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -3707,6 +3715,9 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('packaging_charges', function($done_payment) {
                 return number_format($done_payment->packaging_charges, 2);
+            })
+            ->editColumn('adjustment_charges', function($done_payment) {
+                return number_format($done_payment->adjustment_charges, 2);
             })
             ->editColumn('total_payable', function($done_payment) {
                 return number_format(ROUND($done_payment->total_payable - $done_payment->ibft_charges, 0, PHP_ROUND_HALF_DOWN));
@@ -3898,9 +3909,12 @@ class AdminFinanceController extends Controller
                         $shipment->save();
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                        //NotificationsController::send(92,$done_payment->id ,$shipment->id);
                     }
                 }
+
             }
+            NotificationsController::send(92,$done_payment->id);
         }
 
         return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
@@ -4047,6 +4061,7 @@ class AdminFinanceController extends Controller
                                 }
                             }
                         }
+                        NotificationsController::send(92,$done_payment->id);
                     }
                 }
                 return redirect()->back()->with(['success' => 'Status of ' . count($rows) . ' Payment(s) has been Updated']);
@@ -4679,89 +4694,92 @@ class AdminFinanceController extends Controller
 
             $user_id = $user->id;
 
-            $user_banking_information = UserBankInfo::where('user_id', $user_id)->where('default_bank', 1)->first();
+            $user_banking_information = UserBankInfo::where('user_id', $user_id)->where('default_bank', 1);
 
-            if ($user_banking_information->generation_date == $current_date->day) {
-                $generate = TRUE;
+            if($user_banking_information->exists()){
+                $user_banking_information = $user_banking_information->first();
+                if ($user_banking_information->generation_date == $current_date->day) {
+                    $generate = TRUE;
 
-                $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
-            }
+                    $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
+                }
 
-            if ($generate) {
-                $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id);
-                });
+                if ($generate) {
+                    $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    });
 
-                if ($pending_invoice_shipments->exists()) {
-                    $invoice = new Invoice();
+                    if ($pending_invoice_shipments->exists()) {
+                        $invoice = new Invoice();
 
-                    $invoice->user_id = $user_id;
-                    $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
-                    $invoice->billing_period_from_date = $billing_period_from_date;
-                    $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
-                    $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
-                    $invoice->status_id = 1;
+                        $invoice->user_id = $user_id;
+                        $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                        $invoice->billing_period_from_date = $billing_period_from_date;
+                        $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                        $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
+                        $invoice->status_id = 1;
 
-                    $invoice->save();
+                        $invoice->save();
 
-                    $invoice_id = $invoice->id;
+                        $invoice_id = $invoice->id;
 
-                    $invoice_number = $user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
+                        $invoice_number = $user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
 
-                    $total_shipments = 0;
-                    $total_delivered_shipments = 0;
-                    $total_returned_shipments = 0;
-                    $total_adjusted_shipments = 0;
-                    $total_charges = 0;
-                    $total_gst = 0;
-                    $total_invoice_amount = 0;
+                        $total_shipments = 0;
+                        $total_delivered_shipments = 0;
+                        $total_returned_shipments = 0;
+                        $total_adjusted_shipments = 0;
+                        $total_charges = 0;
+                        $total_gst = 0;
+                        $total_invoice_amount = 0;
 
-                    foreach ($pending_invoice_shipments->get() as $pending_invoice_shipment) {
-                        $invoice_shipment = new InvoiceShipment();
+                        foreach ($pending_invoice_shipments->get() as $pending_invoice_shipment) {
+                            $invoice_shipment = new InvoiceShipment();
 
-                        $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
-                        $invoice_shipment->invoice_id = $invoice_id;
-                        $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
-                        $invoice_shipment->type = $pending_invoice_shipment->type;
-                        $invoice_shipment->charges = $pending_invoice_shipment->charges;
-                        $invoice_shipment->gst = $pending_invoice_shipment->gst;
-                        $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+                            $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
+                            $invoice_shipment->invoice_id = $invoice_id;
+                            $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
+                            $invoice_shipment->type = $pending_invoice_shipment->type;
+                            $invoice_shipment->charges = $pending_invoice_shipment->charges;
+                            $invoice_shipment->gst = $pending_invoice_shipment->gst;
+                            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
 
-                        $invoice_shipment->save();
+                            $invoice_shipment->save();
 
-                        $total_shipments++;
+                            $total_shipments++;
 
-                        if ($pending_invoice_shipment->type == 0) {
-                            $total_delivered_shipments++;
+                            if ($pending_invoice_shipment->type == 0) {
+                                $total_delivered_shipments++;
+                            }
+                            else if ($pending_invoice_shipment->type == 1) {
+                                $total_returned_shipments++;
+                            }
+                            else {
+                                $total_adjusted_shipments++;
+                            }
+
+                            self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
+
+                            $total_charges = $total_charges + $pending_invoice_shipment->charges;
+                            $total_gst = $total_gst + $pending_invoice_shipment->gst;
+                            $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
+
+                            $pending_invoice_shipment->delete();
                         }
-                        else if ($pending_invoice_shipment->type == 1) {
-                            $total_returned_shipments++;
-                        }
-                        else {
-                            $total_adjusted_shipments++;
-                        }
 
-                        self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
+                        $invoice->invoice_number = $invoice_number;
+                        $invoice->total_shipments = $total_shipments;
+                        $invoice->total_delivered_shipments = $total_delivered_shipments;
+                        $invoice->total_returned_shipments = $total_returned_shipments;
+                        $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+                        $invoice->total_charges = $total_charges;
+                        $invoice->total_gst = $total_gst;
+                        $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
-                        $total_charges = $total_charges + $pending_invoice_shipment->charges;
-                        $total_gst = $total_gst + $pending_invoice_shipment->gst;
-                        $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
+                        $invoice->save();
 
-                        $pending_invoice_shipment->delete();
+                        NotificationsController::send(27, $invoice_id);
                     }
-
-                    $invoice->invoice_number = $invoice_number;
-                    $invoice->total_shipments = $total_shipments;
-                    $invoice->total_delivered_shipments = $total_delivered_shipments;
-                    $invoice->total_returned_shipments = $total_returned_shipments;
-                    $invoice->total_adjusted_shipments = $total_adjusted_shipments;
-                    $invoice->total_charges = $total_charges;
-                    $invoice->total_gst = $total_gst;
-                    $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
-
-                    $invoice->save();
-
-                    NotificationsController::send(27, $invoice_id);
                 }
             }
         }
@@ -5170,9 +5188,15 @@ class AdminFinanceController extends Controller
 
     public function invoices_index() {
         $company_banks = BanksList::where('affiliate', 1)->get();
-        $invoice_statuses = InvoiceStatus::get();
+        $invoice_statuses = InvoiceStatus::whereIn('id',[1,2])->get();
 
         return view('admin.finance.invoices')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses]);
+    }
+    public function received_invoices_index() {
+        $company_banks = BanksList::where('affiliate', 1)->get();
+        $invoice_statuses = InvoiceStatus::where('id',3)->get();
+
+        return view('admin.finance.received_invoice')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses]);
     }
 
     public function invoices_list(Request $request) {
@@ -5180,7 +5204,117 @@ class AdminFinanceController extends Controller
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
-            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date');
+            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date')->whereIn('is.id',[1,2]);
+
+        $datatables = Datatables::of($invoices)
+            ->addColumn('invoice_number_button', function($invoice) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
+            })
+            ->editColumn('total_charges', function($invoice) {
+                return number_format($invoice->total_charges, 2);
+            })
+            ->editColumn('total_gst', function($invoice) {
+                return number_format($invoice->total_gst, 2);
+            })
+            ->editColumn('total_invoice_amount', function($invoice) {
+                return number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN));
+            })
+            ->editColumn('created_at', function($invoice) {
+                return Carbon::parse($invoice->created_at)->format('Y-m-d');
+            })
+            ->editColumn('invoicing_date', function($invoice) {
+                return Carbon::parse($invoice->invoicing_date)->format('Y-m-d');
+            })
+            ->addColumn('aging', function($invoice) {
+                if ($invoice->status_id == 1) {
+                    $days = Carbon::now()->diffInDays($invoice->created_at);
+
+                    if ($days == 0) {
+                        return '-';
+                    }
+                    else {
+                        return $days;
+                    }
+                }
+                else {
+                    return '-';
+                }
+            })
+            ->editColumn('due_date', function($invoice) {
+                return Carbon::parse($invoice->due_date)->format('Y-m-d');
+            })
+            ->editColumn('received_date', function($invoice) {
+                if ($invoice->received_date) {
+                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('deposit_date', function($invoice) {
+                if ($invoice->deposit_date) {
+                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('due_date', function($invoice) {
+                return Carbon::parse($invoice->due_date)->format('Y-m-d');
+            })
+            ->addColumn('overdue_by', function($invoice) {
+                if ($invoice->status_id == 1) {
+                    $days = Carbon::now()->diffInDays($invoice->due_date);
+
+                    if ($days == 0) {
+                        return '-';
+                    }
+                    else {
+                        return $days;
+                    }
+                }
+                else {
+                    return '-';
+                }
+            })
+            ->addColumn('action', function($invoice) {
+                $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
+                $email_reminder_button = '<button type="button" class="dropdown-item email_reminder"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Email Reminder</div></button>';
+                $mark_as_received_button = '<button type="button" class="dropdown-item mark_as_received"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark as Received</div></button>';
+
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= $export_to_excel_button;
+
+                if ((session('role_id') == 1 || in_array(121, session('permissions'))) && $invoice->status_id == 1 && Notification::find(28)->status) {
+                    $dropdown .= $email_reminder_button;
+                }
+
+                if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
+                    $dropdown .= $mark_as_received_button;
+                }
+
+                $dropdown .= '
+                </div>
+              </div>
+            ';
+
+                return $dropdown;
+            });
+
+        return $datatables->make(true);
+    }
+
+    public function received_invoices_list(Request $request) {
+        $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
+            ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
+            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date')->where('is.id',3);
 
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
@@ -5934,7 +6068,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_material_charges){
+    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_material_charges, $adjustment_amount){
         $done_payment_charges = DonePaymentCalculation::where('done_payment_id', $done_payment_id);
         if($done_payment_charges->exists()){
             $done_payment_charges = $done_payment_charges->first();
@@ -5943,6 +6077,7 @@ class AdminFinanceController extends Controller
             $done_payment_charges->gst = $done_payment_charges->gst + $gst;
             $done_payment_charges->payable = $done_payment_charges->payable + $payable;
             $done_payment_charges->packaging_charges = $done_payment_charges->packaging_charges + $packaging_material_charges;
+            $done_payment_charges->adjustment = $done_payment_charges->adjustment + $adjustment_amount;
             $done_payment_charges->save();
         }
         else{
@@ -5953,6 +6088,7 @@ class AdminFinanceController extends Controller
             $done_payment_charges->gst = $gst;
             $done_payment_charges->payable = $payable;
             $done_payment_charges->packaging_charges = $packaging_material_charges;
+            $done_payment_charges->adjustment = $adjustment_amount;
             $done_payment_charges->save();
         }
     }

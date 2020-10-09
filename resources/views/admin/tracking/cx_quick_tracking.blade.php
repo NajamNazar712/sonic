@@ -34,12 +34,27 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-3">
+                                    <div class="col-3" style="height: 60px">
                                         <fieldset>
                                             <input type="text" class="form-control" placeholder="Order ID" id="search_order_id">
                                         </fieldset>
                                     </div>
-                                    <div class="col-2">
+
+                                    <div class="col-3">
+                                        <fieldset>
+                                            <input type="text" class="form-control" placeholder="Request ID" id="crm_request_id">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-3">
+                                        <fieldset class="form-group">
+                                            <select name="search_shipment_status" id="search_shipment_status" class="form-control select2">
+                                                @foreach($shipment_statuses as $shipment_status)
+                                                    <option value="{{$shipment_status->id}}">{{$shipment_status->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div>
                                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                     </div>
                                 </div>
@@ -396,6 +411,11 @@
                     $("#search_filter_btn").click();
                 }
             });
+            $('#search_shipment_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Shipment Status',
+                width: '100%',
+                allowClear: true
+            });
 
             var table;
             function init(){
@@ -522,6 +542,8 @@
                             d.search_shipper = $('#search_shipper').val();
                             d.search_phone_no = $('#search_consignee_phone_number').val();
                             d.search_order_id = $('#search_order_id').val();
+                            d.crm_request_id = $('#crm_request_id').val();
+                            d.search_shipment_status = $('#search_shipment_status').val();
                         }
                     },
                     rowId: 'shipment_id',
@@ -545,9 +567,11 @@
                         $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     },
                     initComplete: function () {
+
                         this.api().table().columns.adjust();
                     }
                 });
+
                 var shipment_id = null;
                 var update_shipment_id = null;
                 $('body').on('click','.request_add',function () {
