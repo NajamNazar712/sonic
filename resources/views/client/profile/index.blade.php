@@ -524,7 +524,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <input type="number" name="pincode" id="pincode" class="form-control" maxlength="4" placeholder="Enter Pin Code"/>
+                    <input name="pincode" id="pincode" class="form-control" maxlength="4" placeholder="Enter Pin Code"/>
                     <input type="hidden" id="code" name="code"/>
                 </div>
                 <div class="modal-footer">
@@ -640,13 +640,22 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/toggle/switchery.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
 
 
 
     <script type="text/javascript">
         $(document).ready(function() {
-
+            $('#pincode').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 4,
+                'min': 0.00,
+                'max': 1000000.00
+            });
             $('#edit-1').click(function () {
                 $("#main-form").show();
                 $("#tabs").hide();
