@@ -15,13 +15,19 @@ class AccountBlockageEmailDraftController extends Controller
         //$date_file_name = Carbon::today()->format('Y_m_d');
         $now = Carbon::now();
         $last_15_days = Carbon::today()->subDays(15)->toDateString();
+//        $booking=Shipment::where('created_at','>=',$last_15_days)->pluck('id')->toArray();
+//        foreach ($booking as $bookings){
+//           //dd($bookings->pluck('id')->toArray());
+//        }
+        $booking=Shipment::whereBetween('created_at',[$last_15_days,$now])->groupBy('user_id')->pluck('user_id')->toArray();
 
-        $booking=Shipment::where('created_at','<=',Carbon::now()->subDays(15)->toDateTimeString());
-        foreach ($booking as $bookings){
-           dd($bookings->pluck('id')->toArray());
-        }
-       // dd($booking);
-        return $booking;
+        $users =User::where('status',3)->pluck('id')->toArray();
+            if(!$booking==$users){
+                 $emails =[$booking,$users];
+                return $emails;
+            }
+        //dd($booking);
+      //  return $emails;
     }
     static public function non_compliance(){
 
