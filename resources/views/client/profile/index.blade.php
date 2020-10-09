@@ -32,7 +32,7 @@
                             </ul>
                             <div class="tab-content px-1 pt-1">
                                 <div role="tabpanel" class="tab-pane active" id="active" aria-labelledby="active-tab" aria-expanded="true">
-                                    
+
                                     <div class="table-responsive">
                                         <br>
 
@@ -107,10 +107,10 @@
                                                 <td>{{$user->average_shipments}}@if($average_shipment_duration != null) / {{$average_shipment_duration->name}}@endif</td>
                                             </tr>
                                             @if($reference)
-                                            <tr>
-                                                <td><b>Reference</b></td>
-                                                <td>{{$reference->name}}</td>
-                                            </tr>
+                                                <tr>
+                                                    <td><b>Reference</b></td>
+                                                    <td>{{$reference->name}}</td>
+                                                </tr>
                                             @endif
                                             <tr>
                                                 <td><b>API Key</b></td>
@@ -181,9 +181,9 @@
                                                         Edit</button>
 
                                                 @else
-                                                <button type="button" class="btn btn-primary round btn-min-width mr-1 mt-2 addEmail">
-                                                    <i class="la la-plus"></i>
-                                                    Add</button>
+                                                    <button type="button" class="btn btn-primary round btn-min-width mr-1 mt-2 addEmail">
+                                                        <i class="la la-plus"></i>
+                                                        Add</button>
 
                                                 @endif
 
@@ -353,9 +353,9 @@
                         @csrf
                         <div class="container">
                             {{--<div class="row justify-content-center">--}}
-                                {{--<div class="col-4 form-group">--}}
-                                    {{--<input type="text" name="invoice_number" id="add_stock_invoice" class="form-control" placeholder="Invoice Number *" data-rule-required="true" data-msg-required="This field is required">--}}
-                                {{--</div>--}}
+                            {{--<div class="col-4 form-group">--}}
+                            {{--<input type="text" name="invoice_number" id="add_stock_invoice" class="form-control" placeholder="Invoice Number *" data-rule-required="true" data-msg-required="This field is required">--}}
+                            {{--</div>--}}
                             {{--</div>--}}
                             <div class="row">
                                 <div class="col-6 form-group">
@@ -496,12 +496,12 @@
                             <div class="row mb-2 d-none" id="day_select_div">
                                 <div class="col-12 form-group">
                                     <select name="day_select" id="day_select" class="select2 form-control required" data-rule-required="true" data-msg-required="Day is required" style="width: 100%" required>
-                                    @for($i = 1; $i < 31; $i++)
-                                        <option value="{{$i}}">{{$i}}</option>
-                                    @endfor
-                                </select>
+                                        @for($i = 1; $i < 31; $i++)
+                                            <option value="{{$i}}">{{$i}}</option>
+                                        @endfor
+                                    </select>
                                 </div>
-                                
+
                             </div>
 
                             <div class="row justify-content-center">
@@ -515,6 +515,26 @@
             </div>
         </div>
     </div>
+    <!-- Add Pin modal -->
+    <div class="modal fade" id="demoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Enter Verification Pin</h4>
+                </div>
+
+                <div class="modal-body">
+                    <input name="pincode" id="pincode" class="form-control" maxlength="4" placeholder="Enter Pin Code"/>
+                    <input type="hidden" id="code" name="code"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="verify_pincode">Verify</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
     <!-- default modal -->
     <!-- ADD Bank Modal -->
     <div class="modal fade text-left" id="AddBankModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddBankModal"
@@ -524,8 +544,9 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Add Bank</h4>
                 </div>
+
                 <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
-                <div class="modal-body">
+                    <div class="modal-body">
                         @method('POST')
                         @csrf
                         <div class="container">
@@ -549,7 +570,7 @@
 
                                 <div class="col-12">
                                     <div class="form-group">
-                                    <input type="text" class="form-control required" name="account_no" placeholder="Account Number*" data-rule-required="true" data-msg-required="Account No. is required">
+                                        <input type="text" class="form-control required" name="account_no" placeholder="Account Number*" data-rule-required="true" data-msg-required="Account No. is required">
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -559,28 +580,28 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="(e.g: PK37MEZN0001220100004069)" name="iban_no" data-rule-required="true" data-msg-required="IBAN is required" data-rule-maxlength="24">
-                                        </div>
+                                        <input type="text" class="form-control" placeholder="(e.g: PK37MEZN0001220100004069)" name="iban_no" data-rule-required="true" data-msg-required="IBAN is required" data-rule-maxlength="24">
+                                    </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        
+
                                         <select name="bank_city" id="bank_city" class="select2 form-control" data-rule-required="true" data-msg-required="Bank City is required">
                                             @foreach($cities_list as $bank_city)
-                                               <option value="{{$bank_city->id}}">{{$bank_city->name}}</option>
+                                                <option value="{{$bank_city->id}}">{{$bank_city->name}}</option>
                                             @endforeach
                                         </select>
-                                        
+
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Add</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="addBank">Add</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -594,7 +615,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/selectize/selectize.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/switchery.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/switchery.min.css')}}">
 
     <style>
         .selectize-control .selectize-input {
@@ -619,13 +640,22 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/toggle/switchery.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
 
 
 
     <script type="text/javascript">
         $(document).ready(function() {
-
+            $('#pincode').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 4,
+                'min': 0.00,
+                'max': 1000000.00
+            });
             $('#edit-1').click(function () {
                 $("#main-form").show();
                 $("#tabs").hide();
@@ -947,7 +977,7 @@
                 },
                 submitHandler: function(form) {
 
-                        form.submit();
+                    form.submit();
 
                 }
             });
@@ -1076,59 +1106,63 @@
             });
 
 
-                $('#addEmails').on('click', function (e) {
-                     e.preventDefault();
-                     var emails = $('#AddEmailsModal #email_address').val();
-                     if(emails != ''){
-                         $('form#add_notification_emails').submit();
-                     }else{
-                         var error = "No Email Address selected, Please select at-least one email address!";
-                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                     }
-                });
+            $('#addEmails').on('click', function (e) {
+                e.preventDefault();
+                var emails = $('#AddEmailsModal #email_address').val();
+                if(emails != ''){
+                    $('form#add_notification_emails').submit();
+                }else{
+                    var error = "No Email Address selected, Please select at-least one email address!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
 
-                $('#editEmails').on('click', function (e) {
-                     e.preventDefault();
-                     var emails = $('#EditEmailsModal #email_address').val();
-                     if(emails != ''){
-                         $('form#edit_notification_emails').submit();
-                     }else{
-                         var error = "No Email Address selected, Please select at-least one email address!";
-                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                     }
-                });
+            $('#editEmails').on('click', function (e) {
+                e.preventDefault();
+                var emails = $('#EditEmailsModal #email_address').val();
+                if(emails != ''){
+                    $('form#edit_notification_emails').submit();
+                }else{
+                    var error = "No Email Address selected, Please select at-least one email address!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
 
-                var default_type_checkbox = document.querySelector('.switchery.default_type_checkbox');
-                var default_type_checkbox_init = new Switchery(default_type_checkbox);
-                $('.default_type_checkbox').on('change',function(){
+            var default_type_checkbox = document.querySelector('.switchery.default_type_checkbox');
+            var default_type_checkbox_init = new Switchery(default_type_checkbox);
+            $('.default_type_checkbox').on('change',function(){
 
-                    var dtc = document.querySelector('.switchery.default_type_checkbox');
-                    if (dtc.checked === true) {
-                        $('#day_select_div').removeClass('d-none');
+                var dtc = document.querySelector('.switchery.default_type_checkbox');
+                if (dtc.checked === true) {
+                    $('#day_select_div').removeClass('d-none');
 
-                    } else if (dtc.checked === false) {
-                        $('#day_select_div').addClass('d-none');
-                    }
-                });
+                } else if (dtc.checked === false) {
+                    $('#day_select_div').addClass('d-none');
+                }
+            });
 
-                $('#day_select').prepend('<option value="" selected></option>').select2({
-                    placeholder: "Select Day",
-                    width:'100%'
-                });
-        var btable = $('#bank_datatable').DataTable({
+            $('#day_select').prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Day",
+                width:'100%'
+            });
+            var btable = $('#bank_datatable').DataTable({
                 // dom:'ltipr',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                    @if(session('account_type') == 1)
-                {
-                    text: '<i class="la la-cancel"></i> Add Bank',
-                    className: 'btn btn-primary add_bank',
-                    enabled: true,
-                    action: function (e, dt, node, config) {
-                        $('#AddBankModal').modal('show');
+                        @if(session('account_type') == 1)
+                    {
+                        text: '<i class="la la-cancel"></i> Add Bank',
+                        className: 'btn btn-primary add_bank',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+
+                            $('#AddBankModal').modal('show');
+
+                            /**/
+
+                        }
                     }
-                }
-                @endif
+                    @endif
                 ],
                 scrollX: true, scrollY: '500px',
                 processing: true,
@@ -1161,7 +1195,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -1179,7 +1213,7 @@
                             }
                         }
                     });
-                    
+
                     this.api().table().columns.adjust();
                 }
             });
@@ -1216,8 +1250,8 @@
                     });
 
                     form.submit();
-                
-                    
+
+
                 }
             });
 
@@ -1239,29 +1273,55 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    $('#AddBankModal').modal('hide');
+                    $('#demoModal').modal('show');
+                    $.ajax({
+                        url: "{{ route('cod.verify.pin.code') }}",
+                        type:'post',
+                        data:{action:'verify_pincode', '_token':"{{ csrf_token() }}"},
+                        success:function(data){
+                            $('#code').val(JSON.parse(data).code);
+                        },
+                        error: function(data){
 
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Your bank is being added!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
+                        }
                     });
 
-                    form.submit();
-                
-                    
+                    $(document).on('click', '#verify_pincode', function(){
+                        var pincode = $('#pincode').val();
+                        console.log(pincode);
+                        if(!pincode)
+                        {
+                            toastr.info('Please input Pin code', 'Info!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        else{
+                            var code    = $('#code').val();
+                            if(pincode == code)
+                            {
+                                $('#AddBankModal').modal('show');
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Your bank is being added!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+
+                                form.submit();
+                            }
+                            else if(verify_pincode != pincode){
+                                toastr.error('Verify Code Does not Matched!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
+                    });
+
                 }
             });
-            $('#AddBankModal').on('hidden.bs.modal',function () {
-                $("#add_bank_form").validate().resetForm();
-                $('#add_bank_form')[0].reset();
-                $('#bank_select').val('').trigger('change');
-                $('#bank_city').val('').trigger('change');
-            });
 
+            $('#showBankModel').click(function () {
+                $('#AddBankModal').modal('show')
+            });
 
         });
     </script>

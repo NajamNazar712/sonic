@@ -5832,6 +5832,21 @@ class NotificationsController extends Controller
                     }
                     self::email($subject, $body, $to);
                 }
+                else if ($id == 91) {
+                    $user = User::find($reference_1_id);
+                    $pin = $reference_2_id;
+                    if($user){
+                        if (strpos($body, '[user_name]') !== FALSE) {
+                            $body = str_replace('[user_name]', $user->name, $body);
+                        }
+                        if (strpos($body, '[pin]') !== FALSE) {
+                            $body = str_replace('[pin]', $pin, $body);
+                        }
+
+                        $to = $user->phone;
+                        self::sms($body, $to);
+                    }
+                }
                 else if($id == 92){
                     $subject = $notification->subject;
                     $body = $notification->body;
