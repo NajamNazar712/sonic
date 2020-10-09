@@ -3717,7 +3717,7 @@ class AdminFinanceController extends Controller
                 return number_format($done_payment->packaging_charges, 2);
             })
             ->editColumn('adjustment_charges', function($done_payment) {
-                return number_format($done_payment->packaging_charges, 2);
+                return number_format($done_payment->adjustment_charges, 2);
             })
             ->editColumn('total_payable', function($done_payment) {
                 return number_format(ROUND($done_payment->total_payable - $done_payment->ibft_charges, 0, PHP_ROUND_HALF_DOWN));
