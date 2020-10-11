@@ -22,7 +22,7 @@ class AccountBlockageEmailDraftController extends Controller
         $booking=Shipment::groupBy('user_id')->pluck('user_id')->toArray();
 //        dd($booking);
         $users =User::where('status',3)->pluck('id')->toArray();
-       // dd($users);
+        //dd($users);
             if(!$booking==$users){
                  $emails =Shipment::whereBetween('created_at',[$last_15_days,$now]);
                 return $emails;
