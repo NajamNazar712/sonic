@@ -58,7 +58,8 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\QAReportPettyCash',
 		'\App\Console\Commands\SelfCollection',
 		'\App\Console\Commands\OutstandingShipmentEmail',
-        'App\Console\Commands\ShipmentPieceOnHold'
+        'App\Console\Commands\ShipmentPieceOnHold',
+        'App\Console\Commands\PendingPaymentShipmentsCount'
 
         ];
 
@@ -196,6 +197,8 @@ class Kernel extends ConsoleKernel
 //            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
 //        }
         $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00');
+
+        $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
     }
 	 /**
      * Register the commands for the application.
