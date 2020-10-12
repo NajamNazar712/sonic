@@ -7173,7 +7173,7 @@ if(session('department_id') == 7){
         }
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 || session('role_id') !== 44){
+            if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -7426,7 +7426,7 @@ if(session('department_id') == 7){
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 || session('role_id') !== 44){
+            if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -7672,7 +7672,7 @@ if(session('department_id') == 7){
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 || session('role_id') !== 44){
+            if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
