@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\AccountBlockageEmailDraftController;
+use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 
 class NonComplianceOfRequirements extends Command
 {
@@ -11,14 +14,14 @@ class NonComplianceOfRequirements extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'email:=NonComplianceOfRequirements';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'NonComplianceOfRequirements';
 
     /**
      * Create a new command instance.
@@ -37,6 +40,8 @@ class NonComplianceOfRequirements extends Command
      */
     public function handle()
     {
-        //
+        $date = Carbon::today()->subDays(7);
+        $response = AccountBlockageEmailDraftController::non_compliance($date);
+        NotificationsController::send(93, $date, $response);
     }
 }

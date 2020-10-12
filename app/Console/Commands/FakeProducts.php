@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\AccountBlockageEmailDraftController;
+use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 
 class FakeProducts extends Command
 {
@@ -11,14 +14,14 @@ class FakeProducts extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'email:FakeProducts';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'FakeProducts';
 
     /**
      * Create a new command instance.
@@ -37,6 +40,8 @@ class FakeProducts extends Command
      */
     public function handle()
     {
-        //
+        $date = Carbon::today();
+        $response = AccountBlockageEmailDraftController::fake_product($date);
+        NotificationsController::send(94, $date, $response);
     }
 }
