@@ -2026,7 +2026,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Same Day Delivery is not available for Different City Shipment';
                         }
 
-                        if (($user_shipping_info->city->id != $consignee_city->id) && ($row['service_type_id'] || $row['service_type_id']== 2)) {
+                        if (($user_shipping_info->city->id != $consignee_city->id) && ($service_type_check_id == 1 || $service_type_check_id == 2)) {
                             $city_zone = City::where('id', $consignee_city->id)->first();
                             $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
                             $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
