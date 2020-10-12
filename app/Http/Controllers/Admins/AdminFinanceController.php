@@ -2597,11 +2597,17 @@ class AdminFinanceController extends Controller
     public function make_payments_index() {
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
+        if (session('department_id') == 7 && session('role_id') != 4) {
+            $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
+        }
+        else {
+            $shippers = User::select('id', 'name')->get();
+        }
         $shipper_status = [1 => 'Active', 2 => 'Inactive'];
         $total_amount = PendingPaymentShipment::sum('amount');
         $total_charges = PendingPaymentShipment::sum('charges');
         $total_payable = PendingPaymentShipment::sum('payable');
-        return view('admin.finance.make_payments')->with(['banks'=>$banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount,'company_banks'=>$company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable]);
+        return view('admin.finance.make_payments')->with(['banks'=>$banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount,'company_banks'=>$company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers]);
     }
 
     public function make_payments_list(Request $request) {
@@ -2818,6 +2824,10 @@ class AdminFinanceController extends Controller
             else if ($positive_negative_filter == 2) {
                 $datatables->having('total_payable', '<', 0);
             }
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $datatables->where('u.id', '=', $shipper);
         }
 
         if ($shipper_status = $request->get('shipper_status')) {
