@@ -37,6 +37,7 @@
                                             <th>Self Collection</th>
                                         @endif
                                         <th>Order ID</th>
+                                        <th>Order Date (YYYY-MM-DD)</th>
                                         <th>Item Product Type ID</th>
                                         <th>Item Description</th>
                                         <th>Item Quantity</th>
@@ -144,6 +145,11 @@
                                                 <td>{!! Form::text('form[' . $no . '][order_id]', $ro['order_id'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['order_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][order_id]', $ro['order_id'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                            @if(isset($errors[$no]['order_date']))
+                                                <td>{!! Form::text('form[' . $no . '][order_date]', $ro['order_date'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['order_date']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][order_date]', $ro['order_date'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['item_product_type_id']))
                                                 <td>{!! Form::select('form[' . $no . '][item_product_type_id]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id']}}</font></td>
