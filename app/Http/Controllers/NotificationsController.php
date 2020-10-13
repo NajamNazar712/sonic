@@ -5222,21 +5222,26 @@ class NotificationsController extends Controller
 
                   $to = array();
                   $cc = array();
+                  $bcc = array();
 
-                  $to_admins = Admin::whereIn('role_id', [10, 17, 25, 30])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
-                      $query->where('hub_id', $hub_id);
-                  });
-                  if ($to_admins->exists()) {
-                      $to = array_merge($to, $to_admins->pluck('email')->toArray());
-                  }
-                  $cc_admins = Admin::whereIn('role_id', [8, 9, 3, 2])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
-                      $query->where('hub_id', $hub_id);
-                  });
-                  if ($cc_admins->exists()) {
-                      $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
-                  }
+                  // $to_admins = Admin::whereIn('role_id', [10, 17, 25, 30])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                  //     $query->where('hub_id', $hub_id);
+                  // });
+                  // if ($to_admins->exists()) {
+                  //     $to = array_merge($to, $to_admins->pluck('email')->toArray());
+                  // }
+                  // $cc_admins = Admin::whereIn('role_id', [8, 9, 3, 2])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                  //     $query->where('hub_id', $hub_id);
+                  // });
+                  // if ($cc_admins->exists()) {
+                  //     $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
+                  // }
 
-                  self::email($subject, $body, $to, $cc);
+                  $to[] = 'faizan.ahmed@trax.pk';
+                  $cc[] = 'fawad.ahmed@trax.pk';
+                  $bcc[] = 'muhammad.yousuf@trax.pk';
+
+                  self::email($subject, $body, $to, $cc, $bcc);
               }
           else if ($id == 77){
                 $rider_id = $reference_1_id;
