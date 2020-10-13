@@ -1056,8 +1056,8 @@ use Yajra\Datatables\Datatables;
 
             if ($request->get('delivery_date_from') || $request->get('delivery_date_to')) {
                 $count = $count->join('shipments_journey as sjd', function($join) {
-                    $join->on('sjd.shipment_id', '=', 's.id')
-                        ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = s.id AND shipments_journey.shipper_status_id IN (14, 16, 30, 36))'));
+                    $join->on('sjd.shipment_id', '=', 'delivery_note_shipments.shipment_id')
+                        ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = delivery_note_shipments.shipment_id AND shipments_journey.shipper_status_id IN (14, 16, 30, 36))'));
                     });
             }
 
