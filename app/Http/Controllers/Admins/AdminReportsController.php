@@ -1024,8 +1024,12 @@ use Yajra\Datatables\Datatables;
         public function outstanding_shipments_list(Request $request){
             $count = DB::connection('reports')->table('delivery_note_shipments');
 
+            if (session('role_id') != 1 || $request->get('search_shipping_mode')) {
+                $count = $count->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id');
+            }
+
             if (session('role_id') != 1) {
-                $count = $count->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')->whereIn('dc.hub_id', session('hubs'));
+                $count = $count->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')->whereIn('dc.hub_id', session('hubs'));
             }
 
             if ($recovery_status = $request->get('search_recovery_status')) {
@@ -1047,7 +1051,14 @@ use Yajra\Datatables\Datatables;
                 $count = $count->where('s.booking_type_id', '=', $mode);
             }
             if ($hub = $request->get('hub')) {
-                $count = $count->where('hc.id', '=', $hub);
+                $count = $count->join('cities as hc', 'dc.hub_id', '=', 'hc.id')->where('hc.id', '=', $hub);
+            }
+
+            if ($request->get('delivery_date_from') || $request->get('delivery_date_to')) {
+                $count = $count->join('shipments_journey as sjd', function($join) {
+                    $join->on('sjd.shipment_id', '=', 's.id')
+                        ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = s.id AND shipments_journey.shipper_status_id IN (14, 16, 30, 36))'));
+                    });
             }
 
             if ($delivery_date_from = $request->get('delivery_date_from')) {
@@ -1083,7 +1094,7 @@ use Yajra\Datatables\Datatables;
                 })
                 ->join('shipments_journey as sjd', function($join) {
                     $join->on('sjd.shipment_id', '=', 's.id')
-                        ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
+                        ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = s.id AND shipments_journey.shipper_status_id IN (14, 16, 30, 36))'));
                 })
                 ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
                 ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
