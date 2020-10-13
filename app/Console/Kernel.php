@@ -59,7 +59,8 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\SelfCollection',
 		'\App\Console\Commands\OutstandingShipmentEmail',
         'App\Console\Commands\ShipmentPieceOnHold',
-        'App\Console\Commands\PendingPaymentShipmentsCount'
+        'App\Console\Commands\PendingPaymentShipmentsCount',
+        'App\Console\Commands\VisionSoftApi'
 
         ];
 
@@ -199,6 +200,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00');
 
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
+
+        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
     }
 	 /**
      * Register the commands for the application.
