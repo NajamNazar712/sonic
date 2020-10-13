@@ -5962,11 +5962,12 @@ class NotificationsController extends Controller
               $admin = Admin::whereIn('role_id', [23, 46, 3])->where('status', 1);
 
               $to = array();
-              $to[] = 'hassan@trax.pk';
-              if ($admin->exists()) {
-                  $to = array_merge($to, $admin->pluck('email')->toArray());
-              }
 
+//              $to[] = 'hassan@trax.pk';
+//              if ($admin->exists()) {
+//                  $to = array_merge($to, $admin->pluck('email')->toArray());
+//              }
+              $to = ['syed.sharique@trax.pk,balaj.khan@trax.pk'];
               self::email($subject, $body, $to);
 
               }
