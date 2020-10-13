@@ -5967,7 +5967,9 @@ class NotificationsController extends Controller
 //              if ($admin->exists()) {
 //                  $to = array_merge($to, $admin->pluck('email')->toArray());
 //              }
-              $to = ['syed.sharique@trax.pk,balaj.khan@trax.pk'];
+              $to[] = 'syed.sharique@trax.pk';
+              $to[] = 'balaj.khan@trax.pk';
+              $to[] = 'bilal.shah@trax.pk';
               self::email($subject, $body, $to);
 
               }
