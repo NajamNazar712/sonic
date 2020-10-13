@@ -27,8 +27,8 @@ class UpdateUsersTableForPackagingMaterial extends Seeder
         DB::table('wms_user_informations')->insert(array(
             array('user_id' => $user->id, 'warehousing' => 1, 'invoicing_cycle' => 1, 'invoicing_date' => 1, 'per_product_charges' => 1, 'per_square_foot_charges' => 1, 'packing_charges' => 1, 'labelling_charges' => 1, 'storage_charges' => 1, 'created_at' => $timestamp, 'updated_at' => $timestamp)
         ));
-        DB::table('user_shipping_infos')->insert(array(
-            array('user_id' => $user->id, 'pickup_address' => 'Plot #105, Sector 7A, Mehran Town, Korangi, Karachi.', 'poc' => 'Trax Warehouse Karachi', 'phone' => '0304-1111232', 'email' => 'packaging_material@trax.pk', 'city_id' => '202', 'hidden' => 0, 'default_address' => 0, 'status' => 1, 'warehouse' => 1,'created_at'=>$timestamp,'updated_at'=>$timestamp)
-        ));
+//        DB::table('user_shipping_infos')->insert(array(
+//            array('user_id' => $user->id, 'pickup_address' => 'Trax Warehouse Karachi', 'poc' => 'Trax Warehouse Karachi', 'phone' => '0304-1111232', 'email' => 'packaging_material@trax.pk', 'city_id' => '202', 'hidden' => 0, 'default_address' => 0, 'status' => 1, 'warehouse' => 1,'created_at'=>$timestamp,'updated_at'=>$timestamp)
+//        ));
     }
 }
