@@ -2232,6 +2232,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('edit/{id?}', 'Admins\AdminRunnerController@runner_details_edit_index')->name('edit');
         Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
     });
+    //Parcel History
+    Route::prefix('parcel_history')->name('parcel_history.')->group(function () {
+        Route::get('', 'Admins\AdminParcelHistoryController@index')->name('index');
+        Route::get('list', 'Admins\AdminParcelHistoryController@open_guilty_parcel_insert')->name('list');
 
+    });
 });
 
