@@ -31,6 +31,7 @@
                                             <th>Consignee Address</th>
                                             <th>Consignee Phone Number 1 (03000000000)</th>
                                             <th>Order ID</th>
+                                            <th>Order Date (YYYY-MM-DD)</th>
                                             <th>Item Product Type ID</th>
                                             <th>Item Description</th>
                                             <th>Item Quantity</th>
@@ -67,6 +68,7 @@
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
                                                     <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
                                                     <td><input type="text" name="form[{{$no}}][order_id]" class="form-control text" value="{{$ro['order_id']}}" readonly="readonly"></td>
+                                                    <td><input type="text" name="form[{{$no}}][order_date]" class="form-control text" value="{{$ro['order_date']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][item_product_type_id]" class="form-control number" value="{{$ro['item_product_type_id']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][item_description]" class="form-control text" value="{{$ro['item_description']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][item_quantity]" class="form-control number" value="{{$ro['item_quantity']}}" readonly="readonly"></td>
@@ -100,6 +102,7 @@
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
                                                     <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
                                                     <input type="hidden" name="form[{{$no}}][order_id]" value="{{$ro['order_id']}}">
+                                                    <input type="hidden" name="form[{{$no}}][order_date]" value="{{$ro['order_date']}}">
                                                     <input type="hidden" name="form[{{$no}}][item_product_type_id]" value="{{$ro['item_product_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][item_description]" value="{{$ro['item_description']}}">
                                                     <input type="hidden" name="form[{{$no}}][item_quantity]" value="{{$ro['item_quantity']}}">

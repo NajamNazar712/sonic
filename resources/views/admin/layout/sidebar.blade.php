@@ -408,8 +408,12 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(120, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Invoices</a>
-                            </li>
+                                <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
+                            <ul class="menu-content">
+                                <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Pending </a></li>
+                                <li><a class="menu-item" href="{{ route('admin.finance.invoices.received_index') }}">Received </a></li>
+                            </ul>
+
                         @endif
 
                         @if (session('role_id') == 1 || count(array_intersect([52, 54, 167], session('permissions'))) !== 0)
@@ -797,6 +801,9 @@
                         @if (session('role_id') == 1 || in_array(345, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.daily_monthly_adjustment.index') }}">Daily/Month Adjustment Report</a></li>
                         @endif
+                            @if (session('role_id') == 1 || in_array(345, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.reports.petty_cash_expense_summary.index') }}">Petty Cash Expense Summary Report</a></li>
+                            @endif
                     </ul>
                 </li>
             @endif

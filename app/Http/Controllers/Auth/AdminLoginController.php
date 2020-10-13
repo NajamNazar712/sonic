@@ -63,7 +63,7 @@ class AdminLoginController extends Controller
             }
             $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
             $department = AdminRole::find($role_id)->department_id;
-            $sales_coordinator = SalesCommissionUser::where('user_id',$id)->exists();
+            $sales_coordinator = SalesCommissionUser::where('user_id',$id)->whereIn('sales_commission_users.tier_id',[2,3])->exists();
             session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator]);
 
             return redirect()->intended(route('admin.dashboard.index'));

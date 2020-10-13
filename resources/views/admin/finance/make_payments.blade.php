@@ -18,6 +18,15 @@
 							@include('admin.inc.messages')
 
 							<div class="row text-center">
+								<div class="col-2">
+									<fieldset class="form-group">
+										<select name="search_shipper" id="search_shipper" class="form-control select2">
+											@foreach($shippers as $shipper)
+												<option value="{{$shipper->id}}">{{$shipper->name}}</option>
+											@endforeach
+										</select>
+									</fieldset>
+								</div>
 								<div class="col-3">
 									<form id="payment_cycle_filter_form" class="mb-1 justify-content-center" novalidate="novalidate">
 										<div class="form-group">
@@ -346,6 +355,13 @@
 
 			var initial_total_hold = 0;
 
+			$('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+				placeholder:'Shipper',
+				width:'100%',
+				allowClear:true
+			}).bind('change', function() {
+				table.draw(false);
+			});;
 			$('#positive_negative_filter_form select.positive_negative_filter').prepend('<option value="" selected></option>').select2({
                 placeholder: 'Select Positive/Negative Filter',
                 width:'100%',

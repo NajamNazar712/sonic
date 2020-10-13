@@ -162,6 +162,17 @@
 											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
 										</div>
 
+										<div class="form-group">
+											<div class="form-group input-group">
+												<div class="input-group-prepend">
+													<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+														<span class="la la-calendar-o"></span>
+													</span>
+												</div>
+												<input type="text" name="order_date" class="form-control bg-primary border-primary white rounded-right" id="order_date" placeholder="Order Date">
+											</div>
+										</div>
+
 										<div id="regular">
 											<div class="form-group">
 												<select name="product_type" class="select2" id="product_type" data-rule-required="true" data-msg-required="Product Type is required">
@@ -553,6 +564,18 @@
 
 		$(document).ready(function() {
 
+			var order_date = $('#order_date').pickadate({
+				firstDay: 1,
+				clear: 'Clear',
+				format:'dd mmmm, yyyy',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd',
+				hiddenSuffix: '_formatted',
+				onOpen: function() {
+					$('#from_date_root').css('top','40px');
+				}
+			});
 
 			$(this).find('.pieces').TouchSpin({
 				min: 1,

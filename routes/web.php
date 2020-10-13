@@ -1329,6 +1329,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('export_to_excel', 'Admins\AdminFinanceController@invoices_export_to_excel')->name('export_to_excel');
             Route::put('email_reminder', 'Admins\AdminFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('mark_as_received', 'Admins\AdminFinanceController@invoices_mark_as_received')->name('mark_as_received');
+            Route::get('received', 'Admins\AdminFinanceController@received_invoices_index')->name('received_index');
+            Route::get('received_list', 'Admins\AdminFinanceController@received_invoices_list')->name('received_list');
         });
 
         Route::prefix('invoice_for_reimbursement')->name('invoice_for_reimbursement.')->group(function () {
@@ -1687,6 +1689,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@daily_monthly_adjustment_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@daily_monthly_adjustment_list')->name('list');
             Route::get('summary_list', 'Admins\AdminReportsController@daily_monthly_adjustment_summary_list')->name('summary_list');
+        });
+        Route::prefix('petty_cash_expense_summary')->name('petty_cash_expense_summary.')->group(function (){
+            Route::get('', 'Admins\PettyCashExpenseSummaryReport@index')->name('index');
+            Route::get('petty_cash_summary_report', 'Admins\PettyCashExpenseSummaryReport@pettyCashSummaryReportProcess')->name('petty_cash_summary_report');
         });
     });
 

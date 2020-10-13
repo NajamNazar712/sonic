@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\http\Models\ShipmentOrderDate;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\Admin;
@@ -60,6 +61,7 @@ class APIController extends Controller
       'consignee_email_address' => 'Consignee Email Address',
       'self_collection' => 'Self Collection',
       'order_id' => 'Order ID',
+      'order_date' => 'Order Date',
       'package_type' => 'Package Type',
       'special_instructions' => 'Special Instructions',
       'estimated_weight' => 'Estimated Weight',
@@ -295,6 +297,7 @@ class APIController extends Controller
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'self_collection' => ['nullable', 'boolean'],
                 'order_id' => ['nullable', 'filled'],
+                'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -348,6 +351,7 @@ class APIController extends Controller
                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'order_id' => ['nullable', 'filled'],
+                'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -646,6 +650,14 @@ class APIController extends Controller
             }
             $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
+            if($request->has('order_date')){
+                if($request->order_date != null){
+                    $order_date = new ShipmentOrderDate();
+                    $order_date->shipment_id = $shipment_id;
+                    $order_date->order_date = $request->order_date;
+                    $order_date->save();
+                }
+            }
             if ($service_type_id == 1 || $service_type_id == 5) {
                 $item_product_type_id = $request->input('item_product_type_id');
 

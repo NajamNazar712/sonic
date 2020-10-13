@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Models\Shipment;
+use App\http\Models\ShipmentOrderDate;
 use App\Http\Models\Shipper\User;
 use App\http\Models\SubstituteUserShipment;
 use Illuminate\Bus\Queueable;
@@ -171,6 +172,12 @@ class ProcessShipmentBookingDB implements ShouldQueue
 
         $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
+        if($this->booking['order_date'] != null){
+            $order_date = new ShipmentOrderDate();
+            $order_date->shipment_id = $shipment_id;
+            $order_date->order_date = $this->booking['order_date'];
+            $order_date->save();
+        }
         if ($service_type_id == 1 || $service_type_id == 5) {
             $item_product_type_id = $this->booking['item_product_type_id'];
 

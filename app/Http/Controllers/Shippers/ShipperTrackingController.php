@@ -114,6 +114,13 @@ class ShipperTrackingController extends Controller
                         }
 
                         $details['order_information']['order_id'] = $shipment->order_id;
+                        if($shipment->order_date){
+                            $details['order_information']['order_date'] = $shipment->order_date->order_date;
+                        }
+                        else{
+                            $details['order_information']['order_date'] = NULL;
+                        }
+
                         $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                         $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
 
