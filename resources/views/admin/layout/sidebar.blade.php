@@ -40,10 +40,10 @@
                                         </li>
                                     @endif
 
-{{--                                    @if (session('role_id') == 1 || in_array(217, session('permissions')))--}}
-{{--                                        <li><a class="menu-item" href="{{ route('admin.packaging.warehouse.index') }}">Warehouses</a>--}}
-{{--                                        </li>--}}
-{{--                                    @endif--}}
+                                    @if (session('role_id') == 1 || in_array(217, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.packaging.warehouse.index') }}">Warehouses</a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
