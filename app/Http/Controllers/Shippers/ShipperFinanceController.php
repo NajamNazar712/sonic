@@ -433,12 +433,16 @@ class ShipperFinanceController extends Controller
 
             $item = $shipment->items->first();
 
+            $pickup_address = $shipment->pickup_address;
+
             $shipment_details .= '
                             <tr>
                               <td>' . $serial_number . '</td>
                               <td>' . $shipment->tracking_number . '</td>
                               <td>' . $type . '</td>
                               <td>' . $shipment->order_id . '</td>
+                              <td>' . (($pickup_address->vendor) ? $pickup_address->vendor : '') . '</td>
+                              <td>' . $pickup_address->city->name . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
                               <td>' . $shipment->consignee_city->name . '</td>
                               <td>' . $shipment->booking_type->booking_type . '</td>
@@ -499,7 +503,7 @@ class ShipperFinanceController extends Controller
 
       $shipment_details .= '
                             <tr>
-                                <td colspan="7"></td>
+                                <td colspan="10"></td>
                                 <td class="color primary"><strong>Total</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_weight_charges, 2) . '</strong></td>
@@ -528,6 +532,8 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Tracking No.</strong></td>
                               <td class="color primary"><strong>Type</strong></td>
                               <td class="color primary"><strong>Order ID</strong></td>
+                              <td class="color primary"><strong>Vendor</strong></td>
+                              <td class="color primary"><strong>Origin</strong></td>
                               <td class="color primary"><strong>Consignee</strong></td>
                               <td class="color primary"><strong>Destination</strong></td>
                               <td class="color primary"><strong>Service Type</strong></td>
@@ -637,7 +643,7 @@ class ShipperFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)'];
 
         if ($done_payment && $done_payment->user_id == session('user_id')) {
           $account_type_id = $done_payment->shipper->account_type_id;
@@ -673,6 +679,8 @@ class ShipperFinanceController extends Controller
                   $type = 'Adjusted';
               }
 
+              $pickup_address = $shipment->pickup_address;
+
               $row = array();
 
               $row[] = $serial_number;
@@ -680,6 +688,8 @@ class ShipperFinanceController extends Controller
               $row[] = $shipment->created_at;
               $row[] = $type;
               $row[] = $shipment->order_id;
+              $row[] = $pickup_address->vendor;
+              $row[] = $pickup_address->city->name;
               $row[] = $shipment->consignee_name;
               $row[] = $shipment->consignee_phone_number_1;
               $row[] = $shipment->consignee_city->name;
@@ -777,11 +787,12 @@ class ShipperFinanceController extends Controller
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0.00');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
