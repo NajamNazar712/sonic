@@ -5889,7 +5889,9 @@ class NotificationsController extends Controller
                     $to = array();
                     $id = 3324;
                     $user = User::find($id);
-                    $to[] = $user->email;
+                    if($user){
+                        $to[] = $user->email;
+                    }
                     $file = $reference_2_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                     if (strpos($body, '[link]') !== FALSE) {
