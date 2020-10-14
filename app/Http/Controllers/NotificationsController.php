@@ -5887,10 +5887,9 @@ class NotificationsController extends Controller
                 }
                 else if($id == 96){
                     $to = array();
-                    $finance = Admin::whereIn('id', [12, 60,13])->where('status', 1);
-                    if ($finance->exists()) {
-                        $to = array_merge($to, $finance->pluck('email')->toArray());
-                    }
+                    $id = 1089;
+                    $user = User::find($id);
+                    $to[] = $user->email;
                     $file = $reference_2_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                     if (strpos($body, '[link]') !== FALSE) {
