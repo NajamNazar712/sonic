@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\ShipmentOrderDate;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
@@ -15,7 +17,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
@@ -36,7 +37,7 @@ use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
 
 use Carbon\Carbon;
-
+use DB;
 use SnappyImage;
 use SnappyPDF;
 
@@ -1771,4 +1772,112 @@ class APIController extends Controller
         }
     }
 
+    public function return_confirmation_pending(Request $request){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
+            ->leftjoin('consolidation_shipments as consolidations', function ($join) {
+                $join->on('consolidations.shipment_id', '=', 'shipments.id')
+                    ->where('consolidations.consolidation_id', '=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
+            })
+            ->select('shipments.tracking_number','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode as shipping_mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','ssr.name as reason','shipments_journey.created_at as status_date','sj.created_at as arrival_date','shipments.nsa_osa_estimated_charges')
+            ->whereIn('shipments.shipper_status_id', [12, 52])
+            ->where('shipments.user_id', $request->user_id)
+            ->groupBy('shipments.id')
+            ->get();
+
+        return response()->json(['status' => 0, 'data' => $shipments]);
+    }
+
+    public function return_confirmation_pending_update(Request $request){
+        $user_id = $request->user_id;
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'status' => ['required','numeric', Rule::in(1,2)],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            //status = 1 -> Return Confirm, Starus = 2 -> Re-attempt requested
+            $tracking_number = $request->tracking_number;
+
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+            if($shipment){
+                $status = $request->status;
+                if($status == 1){
+                    if($shipment->booking_type_id == 5){
+                        return response()->json(['status' => 1, 'message' => 'Reverse pickup Shipment can\'t be marked as Return Confirm!']);
+                    }
+                    if($shipment->shipper_status_id == 20){
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Return Confirm!']);
+                    }
+                    if($shipment->shipper_status_id == 52){
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
+                    }
+                    if (!$shipment->packaging_material_request) {
+                        $shipment->shipper_status_id = 20;
+                        $shipment->consignee_status_id = 20;
+                        $shipment->save();
+                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
+                        ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, NULL);
+                        ShipmentChargesController::return($shipment->id);
+
+                        AdminFinanceController::add_payment($shipment->id, 1);
+                    }else{
+                        $shipment->shipper_status_id = 17;
+                        $shipment->consignee_status_id = 17;
+                        $shipment->save();
+                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
+                        ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, NULL, $user_id,NULL);
+                    }
+                    return response()->json(['status' => 1,'message'=> "Shipment successfully marked as Shipment - Return Confirm"]);
+                }else{
+                    if($shipment->shipper_status_id == 52){
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
+                    }
+                    if($shipment->shipper_status_id != 12){
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already updated for Re-attempt!']);
+                    }
+                    $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
+                    $shipment->shipper_status_id = 52;
+                    $shipment->consignee_status_id = 52;
+                    $shipment->save();
+                    $reference_1_id = $user_id;
+                    ShipmentsJourneyController::add($shipment->id, 52, 52, NULL, 'Marked by shipper - API', $user_id, NULL, $reference_1_id);
+                    if($journey){
+                        NotificationsController::send(33, $shipment->id);
+                    }
+                    return response()->json(['status' => 1, 'message' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+
+                }
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Shipment with this tracking number not found!']);
+            }
+        }
+
+    }
 }
