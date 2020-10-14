@@ -46,10 +46,9 @@
                             <div class="row old_scroll" id="requested_shipments">
 
                             </div>
-                            <hr>
                             <div class="row justify-content-center">
                                 <div class="col-3">
-                                  <select name="search_rider_mode" id="search_rider_mode" class="form-control select2">
+                                  <select name="search_user_mode" id="search_user_mode" class="form-control select2">
                                       <option value="1">
                                           Rider
                                       </option>
@@ -88,7 +87,6 @@
                             <div class="row old_scroll" id="requested_shipments">
 
                             </div>
-                            <hr>
                             <div class="row justify-content-center">
                                 <div class="col-3">
                                     <select name="add_rider_mode" id="search_shipping_mode" class="form-control select2">
@@ -99,9 +97,6 @@
                                 </div>
                             </div>
 
-                            <div class="col-3">
-                                <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
-                            </div>
                         </div>
                     </form>
                 </div>
@@ -152,7 +147,7 @@
         </div>
     </div>
     {{--Parcel Guilty Model--}}
-    <div class="modal fade text-left" id="AddAdminModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddAdminModal"
+    <div class="modal fade text-left" id="AddParcelModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddParcelModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -163,7 +158,7 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_request_form" method="post" action="{{ route('admin.open_parcel_history.list') }}" enctype="multipart/form-data">
+                    <form id="add_request_form" method="post" action="{{ route('admin.parcel_history.list') }}" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" id="requested_shipment_ids">
                         <input type="hidden" id="user_id">
@@ -172,16 +167,6 @@
 
                             <div class="row old_scroll" id="requested_shipments">
 
-                            </div>
-                            <hr>
-                            <div class="row justify-content-center">
-                                <div class="col-3">
-                                    <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                                        @foreach($admin_name as $admins)
-                                            <option value="{{$admins->id}}">{{$admins->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
                             </div>
 
                             <div class="col-3">
@@ -284,7 +269,7 @@
                         if (data != undefined) {
 
                                 $('#AddRequestModal').modal('show');
-                            $('#search_rider_mode').prepend('<option value="" selected="selected"></option>').select2({
+                            $('#search_user_mode').prepend('<option value="" selected="selected"></option>').select2({
                                 width: '100%',
                                 placeholder: 'Select User',
                                 allowClear:true
@@ -300,6 +285,15 @@
                                 }
                                 //
                             });
+                            $('#add_rider_mode').prepend('<option value="" selected="selected"></option>').select2({
+                                width: '100%',
+                                placeholder: 'Select Rider',
+                                allowClear:true
+                            }).bind('change', function() {
+
+                                //
+                            });
+
 
                             $('#tracking table.datatable.tracking_history').DataTable({
                                 dom: 't',

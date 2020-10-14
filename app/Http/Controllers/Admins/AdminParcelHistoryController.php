@@ -14,6 +14,7 @@ use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\OpenParcelHistory;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
@@ -48,7 +49,15 @@ class AdminParcelHistoryController extends Controller
         return view('admin.parcel_history.index')->with(['rider_name' => $rider_name,'admin_name' => $admin_name]);
     }
     public function open_guilty_parcel_insert(Request $request){
+        $open_parcel_complain = new OpenParcelHistory();
+        $open_parcel_complain->shipment_id = $request->shipment_id;
+        $open_parcel_complain = $request->user_id;
+        $open_parcel_complain->remarks = $request->remarks;
+        $open_parcel_complain->amount = $request->amount;
+        $open_parcel_complain->date = $request->date;
+        $open_parcel_complain->save();
 
+        return redirect()->back()->with(['success' => 'Complain successfully added!']);
     }
 
 }
