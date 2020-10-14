@@ -5899,6 +5899,19 @@ class NotificationsController extends Controller
                     }
                     self::email($subject, $body, $to);
                 }
+                else if($id == 94){
+
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $user = User::find($reference_2_id);
+
+                    $to = array();
+
+                    if($user){
+                        $to[] = $user->email;
+                    }
+                    self::email($subject, $body, $to);
+                }
                 else if($id == 95){
 
                     $subject = $notification->subject;

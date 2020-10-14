@@ -9,6 +9,7 @@ use App\http\Models\UserDocumentAttachment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use DB;
 
 class AccountBlockageEmailDraftController extends Controller
 {
@@ -51,7 +52,30 @@ class AccountBlockageEmailDraftController extends Controller
         }
     }
     static public function fake_product(){
-     $fake_product_ratio=ShipmentsJourney::select()->where('shipments_journey.shipment_id','shipments_journey.shipper_status_id')->get()->toArray();
-     dd($fake_product_ratio);
+
+        $fake_product_ratio_arrival = Shipment::leftjoin('shipments_journey', 'shipments_journey.shipment_id', '=', 'shipments.id')
+            ->join('users', 'shipments_journey.user_id', '=' , 'users.id')
+            ->where('shipments.user_id', 'user_id')
+            ->where('shipments_journey.shipper_status_id', 2)
+            ->count();
+        $fake_product_ratio_pending = Shipment::leftjoin('shipments_journey', 'shipments_journey.shipment_id', '=', 'shipments.id')
+            ->join('users', 'shipments_journey.user_id', '=' , 'users.id')
+            ->where('shipments.user_id', 'user_id')
+            ->where('shipments_journey.shipper_status_id', 12)
+            ->count();
+
+     $total = 0;
+
+        if ($total != 0) {
+            $fake_product = $fake_product_ratio_arrival / $fake_product_ratio_pending * 100;
+            if ($fake_product >= 20) {
+                foreach ($fake_product as $user_id) {
+                    $user = User::find($user_id);
+                    return $user->id;
+                }
+            } else {
+                $fake_product = 0;
+            }
+        }
     }
 }
