@@ -5887,7 +5887,7 @@ class NotificationsController extends Controller
                 }
                 else if($id == 96){
                     $to = array();
-                    $id = 1089;
+                    $id = 3324;
                     $user = User::find($id);
                     $to[] = $user->email;
                     $file = $reference_2_id;
@@ -5897,7 +5897,6 @@ class NotificationsController extends Controller
                     }
                     self::email($subject, $body, $to);
                 }
-
             }
         }
     }
