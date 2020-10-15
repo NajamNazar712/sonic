@@ -7,6 +7,7 @@ use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\http\Models\SubstituteUserShipment;
 use Illuminate\Http\Request;
@@ -172,10 +173,20 @@ class ShipperTrackingController extends Controller
                                 if(in_array($journey->shipper_status_id, [52])){
                                     if($journey->reference_1_id != NULL){
                                         $sub_user = SubstituteUser::find($journey->reference_1_id);
-                                        $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
+                                        if($sub_user){
+                                            $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
+                                        }else{
+                                            if($journey->user_id != null){
+                                                $journey_details['status'] .= ' (' . User::find($journey->user_id)->name . ' - Main User)';
+                                            }
+                                        }
                                     }
                                     else{
-                                        $journey_details['status'] .= ' (Substitute User)';
+                                        if($journey->user_id != null){
+                                            $journey_details['status'] .= ' (' . User::find($journey->user_id)->name . ' - Main User)';
+                                        }else{
+                                            $journey_details['status'] .= ' (Substitute User)';
+                                        }
                                     }
                                 }
 

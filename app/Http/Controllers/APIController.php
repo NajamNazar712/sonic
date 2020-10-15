@@ -1872,7 +1872,6 @@ class APIController extends Controller
                     $shipment->shipper_status_id = 52;
                     $shipment->consignee_status_id = 52;
                     $shipment->save();
-                    $reference_1_id = $user_id;
                     ShipmentsJourneyController::add($shipment->id, 52, 52, NULL, 'Marked by shipper - API', $user_id, NULL);
                     if($journey){
                         NotificationsController::send(33, $shipment->id);
