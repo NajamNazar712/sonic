@@ -2233,5 +2233,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
     });
 
+    Route::prefix('trax_directory')->name('trax_directory.')->group(function () {
+        Route::get('', 'Admins\AdminTraxDirectory@index')->name('index');
+        Route::get('list', 'Admins\AdminTraxDirectory@list')->name('list');
+    });
+
 });
 

@@ -636,6 +636,9 @@
                     @if (session('role_id') == 1 || in_array(334, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.dashboard.overall.commission') }}">Overall Commission</a></li>
                     @endif
+                    @if (session('role_id') == 1 || in_array(389, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.trax_directory.index') }}">Trax Directory</a></li>
+                    @endif
                 </ul>
             </li>
 
