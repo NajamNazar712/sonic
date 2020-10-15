@@ -58,7 +58,10 @@ class Kernel extends ConsoleKernel
 		'\App\Console\Commands\QAReportPettyCash',
 		'\App\Console\Commands\SelfCollection',
 		'\App\Console\Commands\OutstandingShipmentEmail',
-        'App\Console\Commands\ShipmentPieceOnHold'
+        'App\Console\Commands\ShipmentPieceOnHold',
+        'App\Console\Commands\OutstandingSDNReport',
+        'App\Console\Commands\TelenorSalesReport',
+
 
         ];
 
@@ -196,6 +199,8 @@ class Kernel extends ConsoleKernel
 //            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
 //        }
         $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00');
+        $schedule->command('email:outstandingsdnreport')->dailyAt('09:00');
+        $schedule->command('email:telenorsalesreport')->dailyAt('09:00');
     }
 	 /**
      * Register the commands for the application.
