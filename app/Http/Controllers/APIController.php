@@ -1838,7 +1838,7 @@ class APIController extends Controller
                     if($shipment->shipper_status_id == 52){
                         return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
                     }
-                    if (!$shipment->packaging_material_request) {
+                    if (!$shipment->packaging_material_request && $shipment->shipper_status_id == 12) {
                         $shipment->shipper_status_id = 20;
                         $shipment->consignee_status_id = 20;
                         $shipment->save();
