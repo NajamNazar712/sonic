@@ -603,6 +603,7 @@
 						d.payment_filter = $('#payment_cycle_filter_form select.payment_cycle_filter').val();
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
 						d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
+						d.search_shipper = $('#search_shipper').val();
 						d.shipper_status = $('#shipper_status_form select.shipper_status').val();
 						d.shipper_document_status = $('#shipper_document_status_form select.shipper_document_status').val();
 					}
