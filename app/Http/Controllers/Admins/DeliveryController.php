@@ -2971,8 +2971,8 @@ class DeliveryController extends Controller
 //        ';
 //
 //
-//            foreach ($filtered_shipments as $shipment) {
-//                $total_shipments++;
+            foreach ($filtered_shipments as $shipment) {
+                $total_shipments++;
 ////                    $shipment = Shipment::find($parcel->shipment_id);
 //                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
 //                if($check_walk_in['setting_value'] == $shipment->user->id){
@@ -2997,7 +2997,7 @@ class DeliveryController extends Controller
 //                            <td>Rs ' . number_format($shipment->received_amount) . '</td>
 //                    ';
 //
-//                    $total_cod_amount += $shipment->received_amount;
+                    $total_cod_amount += $shipment->received_amount;
 //                }
 //                else {
 //                    $shipment_details_row_start .= '
@@ -3010,7 +3010,7 @@ class DeliveryController extends Controller
 //                ';
 //
 //                $shipment_details .= $shipment_details_row_start;
-//            }
+            }
 //            $shipment_details .= '
 //                        </tbody>
 //                      </table>
@@ -3075,20 +3075,20 @@ class DeliveryController extends Controller
                         </tbody>
                       </table>
         ';
+            $main_details .= '
+                      <div class="mt-2 manual_form">
+                      <div class="row  mt-1">
+                         <div class="col">
+                            <div class="text-right">
+                                <span class="d-inline-block w-150 text-left"><strong>DNCC Amount</strong></span>
+                                <strong>Rs. '.number_format($total_cod_amount).'</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <hr>';
             $html .= $main_details;
             $html .= '</br></br></br></br></br></br>';
             $html .= $main_details;
-//            $html .= '
-//                      <div class="mt-2 manual_form">
-//                      <div class="row  mt-1">
-//                         <div class="col">
-//                            <div class="text-right">
-//                                <span class="d-inline-block w-150 text-left"><strong>DNCC Amount</strong></span>
-//                                <strong>Rs. '.number_format($total_cod_amount).'</strong>
-//                            </div>
-//                          </div>
-//                        </div>
-//                        <hr>';
 //            $html .= '<div class="row justify-content-end mt-2">
 //                                    <div class="col-3 ">
 //                                    <table class="table table-sm table-bordered border">
