@@ -27,7 +27,6 @@ class AdminTraxDirectory extends Controller
             ->select('admins.name as name', 'admins.phone_number as phone','ad.name as department', 'admins.email as email', 'ar.name as role', 'admins.created_at as date','h.name as city')->
             where('admins.status',1)->where('ar.id','!=',1);
 
-
         $datatable = Datatables::of($admin)
             ->editColumn('role', function($user) {
                 return $user->role . ' - ' . $user->department;
