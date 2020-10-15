@@ -3386,13 +3386,20 @@ class AdminCRMController extends Controller
                 ';
                 }
 
+                if($shipment->user->brand_name != NULL){
+                    $company_name = $shipment->user->brand_name;
+                }
+                else{
+                    $company_name = $shipment->user->name;
+                }
+
                 if ($shipment->booking_type_id != 4) {
                     $table_start .= '
-                            <td colspan="3" class="border twice-right">' . $shipment->user->name . '</td>
+                            <td colspan="3" class="border twice-right">' . $company_name . '</td>
                 ';
                 } else {
                     $table_start .= '
-                            <td colspan="3" class="border twice-right">' . $shipment->user->name . ' (' . $shipment->pickup_address->poc . ')</td>
+                            <td colspan="3" class="border twice-right">' . $company_name . ' (' . $shipment->pickup_address->poc . ')</td>
                 ';
                 }
 
