@@ -1848,6 +1848,9 @@ class APIController extends Controller
                             ShipmentChargesController::return($shipment->id);
 
                             AdminFinanceController::add_payment($shipment->id, 1);
+                            return response()->json(['status' => 0,'message'=> "Shipment successfully marked as Shipment - Return Confirm"]);
+                        }else{
+                            return response()->json(['status' => 1,'message'=> "Shipment is not ready for Return Confirm"]);
                         }
                     }else{
                         $shipment->shipper_status_id = 17;
@@ -1855,8 +1858,9 @@ class APIController extends Controller
                         $shipment->save();
                         $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
                         ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, NULL, $user_id,NULL);
+                        return response()->json(['status' => 0,'message'=> "Shipment successfully marked as Shipment - Cancelled"]);
                     }
-                    return response()->json(['status' => 1,'message'=> "Shipment successfully marked as Shipment - Return Confirm"]);
+
                 }else{
                     if($shipment->shipper_status_id == 52){
                         return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
@@ -1873,7 +1877,7 @@ class APIController extends Controller
                     if($journey){
                         NotificationsController::send(33, $shipment->id);
                     }
-                    return response()->json(['status' => 1, 'message' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+                    return response()->json(['status' => 0, 'message' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
 
                 }
             }else{
