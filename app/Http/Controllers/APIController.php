@@ -1838,15 +1838,17 @@ class APIController extends Controller
                     if($shipment->shipper_status_id == 52){
                         return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
                     }
-                    if (!$shipment->packaging_material_request && $shipment->shipper_status_id == 12) {
-                        $shipment->shipper_status_id = 20;
-                        $shipment->consignee_status_id = 20;
-                        $shipment->save();
-                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
-                        ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, NULL);
-                        ShipmentChargesController::return($shipment->id);
+                    if (!$shipment->packaging_material_request) {
+                        if($shipment->shipper_status_id == 12){
+                            $shipment->shipper_status_id = 20;
+                            $shipment->consignee_status_id = 20;
+                            $shipment->save();
+                            $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
+                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, NULL);
+                            ShipmentChargesController::return($shipment->id);
 
-                        AdminFinanceController::add_payment($shipment->id, 1);
+                            AdminFinanceController::add_payment($shipment->id, 1);
+                        }
                     }else{
                         $shipment->shipper_status_id = 17;
                         $shipment->consignee_status_id = 17;
