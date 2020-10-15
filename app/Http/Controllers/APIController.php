@@ -1857,7 +1857,7 @@ class APIController extends Controller
                         $shipment->consignee_status_id = 17;
                         $shipment->save();
                         $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
-                        ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, NULL, $user_id,NULL);
+                        ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id,NULL);
                         return response()->json(['status' => 0,'message'=> "Shipment successfully marked as Shipment - Cancelled"]);
                     }
 
@@ -1866,14 +1866,13 @@ class APIController extends Controller
                         return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
                     }
                     if($shipment->shipper_status_id != 12){
-                        return response()->json(['status' => 1, 'message' => 'Shipment is already updated for Re-attempt!']);
+                        return response()->json(['status' => 1, 'message' => 'Shipment is not ready for Re-attempt!']);
                     }
                     $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                     $shipment->shipper_status_id = 52;
                     $shipment->consignee_status_id = 52;
                     $shipment->save();
-                    $reference_1_id = $user_id;
-                    ShipmentsJourneyController::add($shipment->id, 52, 52, NULL, 'Marked by shipper - API', $user_id, NULL, $reference_1_id);
+                    ShipmentsJourneyController::add($shipment->id, 52, 52, NULL, 'Marked by shipper - API', $user_id, NULL);
                     if($journey){
                         NotificationsController::send(33, $shipment->id);
                     }
