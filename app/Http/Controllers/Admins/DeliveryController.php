@@ -2955,66 +2955,66 @@ class DeliveryController extends Controller
             $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
             $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->orderBy('id')->get();
             //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
-            $shipment_details = '
-                      <table class="table table-bordered border" style="margin-bottom: 10rem !important;">
-                        <tbody>
-                          <tr>
-                            <td class="color primary"><strong>S. No.</strong></td>
-                            <td class="color primary"><strong>Tracking No.</strong></td>
-                            <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Consignee Address</strong></td>
-                            <td class="color primary"><strong>Service Type</strong></td>
-                            <td class="color primary"><strong>Client Name & Phone</strong></td>
-                            <td class="color primary"><strong>Weight</strong></td>
-                            <td class="color primary"><strong>Collection Amount</strong></td>
-                          </tr>
-        ';
-
-
+//            $shipment_details = '
+//                      <table class="table table-bordered border" style="margin-bottom: 10rem !important;">
+//                        <tbody>
+//                          <tr>
+//                            <td class="color primary"><strong>S. No.</strong></td>
+//                            <td class="color primary"><strong>Tracking No.</strong></td>
+//                            <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
+//                            <td class="color primary"><strong>Consignee Address</strong></td>
+//                            <td class="color primary"><strong>Service Type</strong></td>
+//                            <td class="color primary"><strong>Client Name & Phone</strong></td>
+//                            <td class="color primary"><strong>Weight</strong></td>
+//                            <td class="color primary"><strong>Collection Amount</strong></td>
+//                          </tr>
+//        ';
+//
+//
             foreach ($filtered_shipments as $shipment) {
                 $total_shipments++;
-//                    $shipment = Shipment::find($parcel->shipment_id);
-                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
-                if($check_walk_in['setting_value'] == $shipment->user->id){
-                    $user_details = 'Walk-In ('.$shipment->pickup_address->poc . ') | ' . $shipment->pickup_address->phone;
-                }
-                else{
-                    $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
-                }
-                $shipment_details_row_start = '
-                          <tr>
-                            <td>' . $total_shipments . '</td>
-                            <td>' . $shipment->tracking_number . '</td>
-                            <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td>' . $shipment->consignee_address . '</td>
-                            <td>' . $shipment->booking_type->booking_type . '</td>
-                            <td>' . $user_details . '</td>
-                            <td>' . (($shipment->booking_type_id == 2) ? $shipment->replacement_weight : $shipment->actual_weight) . '</td>
-                ';
-
-                if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
-                    $shipment_details_row_start .= '
-                            <td>Rs ' . number_format($shipment->received_amount) . '</td>
-                    ';
-
+////                    $shipment = Shipment::find($parcel->shipment_id);
+//                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
+//                if($check_walk_in['setting_value'] == $shipment->user->id){
+//                    $user_details = 'Walk-In ('.$shipment->pickup_address->poc . ') | ' . $shipment->pickup_address->phone;
+//                }
+//                else{
+//                    $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
+//                }
+//                $shipment_details_row_start = '
+//                          <tr>
+//                            <td>' . $total_shipments . '</td>
+//                            <td>' . $shipment->tracking_number . '</td>
+//                            <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+//                            <td>' . $shipment->consignee_address . '</td>
+//                            <td>' . $shipment->booking_type->booking_type . '</td>
+//                            <td>' . $user_details . '</td>
+//                            <td>' . (($shipment->booking_type_id == 2) ? $shipment->replacement_weight : $shipment->actual_weight) . '</td>
+//                ';
+//
+//                if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
+//                    $shipment_details_row_start .= '
+//                            <td>Rs ' . number_format($shipment->received_amount) . '</td>
+//                    ';
+//
                     $total_cod_amount += $shipment->received_amount;
-                }
-                else {
-                    $shipment_details_row_start .= '
-                            <td>Rs 0</td>
-                    ';
-                }
-
-                $shipment_details_row_start .= '
-                          </tr>
-                ';
-
-                $shipment_details .= $shipment_details_row_start;
+//                }
+//                else {
+//                    $shipment_details_row_start .= '
+//                            <td>Rs 0</td>
+//                    ';
+//                }
+//
+//                $shipment_details_row_start .= '
+//                          </tr>
+//                ';
+//
+//                $shipment_details .= $shipment_details_row_start;
             }
-            $shipment_details .= '
-                        </tbody>
-                      </table>
-        ';
+//            $shipment_details .= '
+//                        </tbody>
+//                      </table>
+//        ';
             $delivery_note_details = DeliveryNote::where('id', $request->id)->first();
             $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
             $city_name = $delivery_note_details->hub->name;
@@ -3075,8 +3075,7 @@ class DeliveryController extends Controller
                         </tbody>
                       </table>
         ';
-            $html .= $main_details;
-            $html .= '
+            $main_details .= '
                       <div class="mt-2 manual_form">
                       <div class="row  mt-1">
                          <div class="col">
@@ -3087,78 +3086,81 @@ class DeliveryController extends Controller
                           </div>
                         </div>
                         <hr>';
-            $html .= '<div class="row justify-content-end mt-2">
-                                    <div class="col-3 ">
-                                    <table class="table table-sm table-bordered border">
-                                        <thead>
-                                          <tr>
-                                            <th class="color primary"><strong>Denomination</strong></th>
-                                            <th class="color primary"><strong>Qty</strong></th>
-                                            <th class="color primary"><strong>Amount</strong></th>
-                                            
-                                          </tr>
-                                          </thead>
-                                          <tbody>
-                                          <tr><td>5,000</td><td></td><td></td></tr>
-                                          <tr><td>1,000</td><td></td><td></td></tr>
-                                          <tr><td>500</td><td></td><td></td></tr>
-                                          <tr><td>100</td><td></td><td></td></tr>
-                                          <tr><td>50</td><td></td><td></td></tr>
-                                          <tr><td>20</td><td></td><td></td></tr>
-                                          <tr><td>10</td><td></td><td></td></tr>
-                                          <tr><td><b>Coins</b></td><td></td><td></td></tr>
-                                          <tr><td><b>Total</b></td><td></td><td></td></tr>
-                                          </tbody>
-                                    </table>
-                                    </div>
-                                  </div>';
+            $html .= $main_details;
+            $html .= '</br></br></br></br></br></br>';
+            $html .= $main_details;
+//            $html .= '<div class="row justify-content-end mt-2">
+//                                    <div class="col-3 ">
+//                                    <table class="table table-sm table-bordered border">
+//                                        <thead>
+//                                          <tr>
+//                                            <th class="color primary"><strong>Denomination</strong></th>
+//                                            <th class="color primary"><strong>Qty</strong></th>
+//                                            <th class="color primary"><strong>Amount</strong></th>
+//
+//                                          </tr>
+//                                          </thead>
+//                                          <tbody>
+//                                          <tr><td>5,000</td><td></td><td></td></tr>
+//                                          <tr><td>1,000</td><td></td><td></td></tr>
+//                                          <tr><td>500</td><td></td><td></td></tr>
+//                                          <tr><td>100</td><td></td><td></td></tr>
+//                                          <tr><td>50</td><td></td><td></td></tr>
+//                                          <tr><td>20</td><td></td><td></td></tr>
+//                                          <tr><td>10</td><td></td><td></td></tr>
+//                                          <tr><td><b>Coins</b></td><td></td><td></td></tr>
+//                                          <tr><td><b>Total</b></td><td></td><td></td></tr>
+//                                          </tbody>
+//                                    </table>
+//                                    </div>
+//                                  </div>';
+//
+//            $html .= $shipment_details;
 
-            $html .= $shipment_details;
-
-                      $html .= '<div class="row justify-content-center align-items-end mt-5">
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Rider Name</strong>
-                            </div>
-                          </div>
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Rider Signature</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row justify-content-between align-items-end mt-5">
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Operation Staff Name</strong>
-                            </div>
-                          </div>
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Operation Staff Signature</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row justify-content-between align-items-end mt-5">
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Cashier Name</strong>
-                            </div>
-                          </div>
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Cashier Signature</strong>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-        ';
+//                      $html .= '<div class="row justify-content-center align-items-end mt-5">
+//                          <div class="col justify-content-center ">
+//                            <div class="text-center">
+//                              <span class="d-block w-200 mx-auto line"></span>
+//                              <strong class="d-inline-block w-200">Rider Name</strong>
+//                            </div>
+//                          </div>
+//                          <div class="col justify-content-center ">
+//                            <div class="text-center">
+//                              <span class="d-block w-200 mx-auto line"></span>
+//                              <strong class="d-inline-block w-200">Rider Signature</strong>
+//                            </div>
+//                          </div>
+//                        </div>
+//                        <div class="row justify-content-between align-items-end mt-5">
+//                          <div class="col justify-content-center ">
+//                            <div class="text-center">
+//                              <span class="d-block w-200 mx-auto line"></span>
+//                              <strong class="d-inline-block w-200">Operation Staff Name</strong>
+//                            </div>
+//                          </div>
+//                          <div class="col justify-content-center ">
+//                            <div class="text-center">
+//                              <span class="d-block w-200 mx-auto line"></span>
+//                              <strong class="d-inline-block w-200">Operation Staff Signature</strong>
+//                            </div>
+//                          </div>
+//                        </div>
+//                        <div class="row justify-content-between align-items-end mt-5">
+//                          <div class="col justify-content-center ">
+//                            <div class="text-center">
+//                              <span class="d-block w-200 mx-auto line"></span>
+//                              <strong class="d-inline-block w-200">Cashier Name</strong>
+//                            </div>
+//                          </div>
+//                          <div class="col justify-content-center ">
+//                            <div class="text-center">
+//                              <span class="d-block w-200 mx-auto line"></span>
+//                              <strong class="d-inline-block w-200">Cashier Signature</strong>
+//                            </div>
+//                          </div>
+//                        </div>
+//                      </div>
+//        ';
         }
 
 //        return $shipments;

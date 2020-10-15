@@ -5885,6 +5885,20 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to,$cc);
 
                 }
+                else if($id == 96){
+                    $to = array();
+                    $id = 3324;
+                    $user = User::find($id);
+                    if($user){
+                        $to[] = $user->email;
+                    }
+                    $file = $reference_2_id;
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    self::email($subject, $body, $to);
+                }
             }
         }
     }

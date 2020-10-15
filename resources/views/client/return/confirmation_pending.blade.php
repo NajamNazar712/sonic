@@ -198,7 +198,7 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
+                                row.push(values.consignee_phone_number_1 + '|' + ((values.consignee_phone_number_2) ? values.consignee_phone_number_2:''));
                                 row.push(values.consignee_address);
                                 row.push(values.amount);
                                 row.push(values.mode);

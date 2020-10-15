@@ -1983,7 +1983,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Same Day Delivery is not available for Different City Shipment';
                         }
 
-                        if (($user_shipping_info->city->id != $consignee_city->id) && ($row['service_type_id'] || $row['service_type_id']== 2)) {
+                        if (($user_shipping_info->city->id != $consignee_city->id) && ($service_type_check_id == 1 || $service_type_check_id == 2)) {
                             $city_zone = City::where('id', $consignee_city->id)->first();
                             $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
                             $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
@@ -3170,7 +3170,7 @@ class ShipperShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-            if(count($spreadsheet[0]) == 28){
+            if(count($spreadsheet[0]) == 29){
                 $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'delivery_type_id', 3 => 'information_display', 4 => 'consignee_city_name', 5 => 'consignee_name', 6 => 'consignee_address', 7 => 'consignee_phone_number_1', 8 => 'consignee_phone_number_2', 9 => 'consignee_email_address', 10 => 'self_collection', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'replacement_item_product_type_id', 19 => 'replacement_item_description', 20 => 'replacement_item_quantity', 21 => 'special_instructions', 22 => 'estimated_weight', 23 => 'shipping_mode_id', 24 => 'same_day_timing_id', 25 => 'amount', 26 => 'payment_mode_id', 27 => 'charges_mode_id', 28 => 'pieces_quantity'];
 
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
@@ -3178,15 +3178,15 @@ class ShipperShipmentBookController extends Controller
                 })];
                 $service_type_check_id = null;
             }
-            elseif (count($spreadsheet[0]) == 24){
+            elseif (count($spreadsheet[0]) == 25){
                 $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'special_instructions', 18 => 'estimated_weight', 19 => 'shipping_mode_id', 20 => 'same_day_timing_id', 21 => 'amount', 22 => 'payment_mode_id', 23 => 'charges_mode_id', 24 => 'pieces_quantity'];
                 $service_type_check_id = 1;
             }
-            elseif (count($spreadsheet[0]) == 25){
-                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'replacement_item_product_type_id', 18 => 'replacement_item_description', 19 => 'replacement_item_quantity', 20 => 'special_instructions', 21 => 'estimated_weight', 22 => 'shipping_mode_id', 23 => 'same_day_timing_id', 24 => 'amount', 25 => 'payment_mode_id', 26 => 'charges_mode_id'];
+            elseif (count($spreadsheet[0]) == 26){
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'replacement_item_product_type_id', 17 => 'replacement_item_description', 18 => 'replacement_item_quantity', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id'];
                 $service_type_check_id = 2;
             }
-            elseif (count($spreadsheet[0]) == 18){
+            elseif (count($spreadsheet[0]) == 19){
                 $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'order_id', 9 => 'order_date', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'special_instructions', 16 => 'estimated_weight', 17 => 'shipping_mode_id', 18 => 'same_day_timing_id'];
                 $service_type_check_id = 5;
             }
@@ -3250,9 +3250,12 @@ class ShipperShipmentBookController extends Controller
                     })];
                 }
                 $shipping_mode_id = $row['shipping_mode_id'];
-                $rules['delivery_type_id'] = ['required', 'integer','digits_between:1,10', Rule::exists('corporate_delivery_type_statuses', 'delivery_type_id')->where(function($query) use($shipping_mode_id) {
-                    $query->where('shipping_mode_id', $shipping_mode_id);
-                })];
+                if($row['delivery_type_id'] == 2){
+                    $rules['delivery_type_id'] = ['required', 'integer','digits_between:1,10', Rule::exists('corporate_delivery_type_statuses', 'delivery_type_id')->where(function($query) use($shipping_mode_id) {
+                        $query->where('shipping_mode_id', $shipping_mode_id);
+                    })];
+                }
+
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
                     $row['pieces_quantity'] = 1;
                 }
@@ -3293,10 +3296,13 @@ class ShipperShipmentBookController extends Controller
 
 //                        dd($errors[$row_id]['amount']);
                     if($row['service_type_id'] != 5){
-                        $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id)->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
-                        if(!$allowed_delivery_type->exists()){
-                            $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
+                        if($row['delivery_type_id'] == 2){
+                            $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id)->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
+                            if(!$allowed_delivery_type->exists()){
+                                $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
+                            }
                         }
+
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
                         if (!$user_shipping_info->status) {
