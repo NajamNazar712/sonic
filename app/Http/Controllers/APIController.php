@@ -1866,7 +1866,7 @@ class APIController extends Controller
                         return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
                     }
                     if($shipment->shipper_status_id != 12){
-                        return response()->json(['status' => 1, 'message' => 'Shipment is already updated for Re-attempt!']);
+                        return response()->json(['status' => 1, 'message' => 'Shipment is not ready for Re-attempt!']);
                     }
                     $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                     $shipment->shipper_status_id = 52;
