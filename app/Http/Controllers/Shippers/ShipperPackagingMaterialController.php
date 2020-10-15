@@ -341,6 +341,7 @@ class ShipperPackagingMaterialController extends Controller
         $packaging_size_ids = $request->size;
         $packaging_quantities = $request->quantity;
         $packaging_type_ids = array();
+        $packaging_wms_product_ids = array();
 
         $total_charges = 0;
 
@@ -507,6 +508,7 @@ class ShipperPackagingMaterialController extends Controller
                             'type_id' => $packaging_type_id,
                             'type_size_id' => $packaging_size_ids[$index],
                             'quantity' => $packaging_quantities[$index],
+                            'wms_product_id' => $packaging_wms_product_ids[$index]
                         ]);
                     }
                     return redirect()->route('cod.packaging.requests.index')->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');

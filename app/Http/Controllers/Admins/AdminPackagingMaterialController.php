@@ -500,6 +500,7 @@ class AdminPackagingMaterialController extends Controller
             else{
                 return response()->json(['status' => 0, 'error'=>'Marco Warehouse does\'nt exists for requested hub!']);
             }
+//            return response()->json(['status' => 0, 'error'=>$trax_address->id]);
 
             $product_ids = array();
             $invalid_product_ids = array();
@@ -563,7 +564,7 @@ class AdminPackagingMaterialController extends Controller
                     $details .= ', '.$serial . '.) ' . $product->name . '-' . $item->quantity . '</br>';
                 }
                     $shipment_product = new WmsShipmentProduct();
-                    $shipment_product->shipment_id = $shipment;
+                    $shipment_product->shipment_id = $shipment->id;
                     $shipment_product->product_id = $product->id;
                     $shipment_product->quantity = $item->quantity;
                     $shipment_product->courier_id = 1;
@@ -577,7 +578,7 @@ class AdminPackagingMaterialController extends Controller
 
                         $pending_picking_shipment = new WmsPendingPickingShipments();
                         $pending_picking_shipment->picking_id = $existing_pending_picking->id;
-                        $pending_picking_shipment->shipment_id = $shipment;
+                        $pending_picking_shipment->shipment_id = $shipment->id;
                         $pending_picking_shipment->courier_id = 1;
                         $pending_picking_shipment->save();
                     }
@@ -589,7 +590,7 @@ class AdminPackagingMaterialController extends Controller
 
                         $pending_picking_shipment = new WmsPendingPickingShipments();
                         $pending_picking_shipment->picking_id = $pending_picking->id;
-                        $pending_picking_shipment->shipment_id = $shipment;
+                        $pending_picking_shipment->shipment_id = $shipment->id;
                         $pending_picking_shipment->courier_id = 1;
                         $pending_picking_shipment->save();
                     }
@@ -599,30 +600,32 @@ class AdminPackagingMaterialController extends Controller
                     $current_stock->stock = $new_available_stock;
                     $current_stock->save();
 
-                $shipment_item = new ShipmentItem();
-                $shipment_item->shipment_id = $shipment;
-                $shipment_item->product_type_id = 24;
-                $shipment_item->description = $details;
-                $shipment_item->quantity = 1;
-                $shipment_item->price = null;
-                $shipment_item->insurance = null;
-                $shipment_item->type = 0;
-                $shipment_item->save();
 
-                $labeling_charges = WmsLabellingCharge::where('user_id', $user_id)->first();
-                $order_process = new WmsOrderProcess();
-                $order_process->shipment_id = $shipment;
-                $order_process->courier_id = 1;
-                $order_process->sku_count = count($product_ids);
-                $order_process->courier_id = 1;
-                $order_process->quantity = $total_quantity;
-                $order_process->packing_charges = 0;
-                if($labeling_charges){
-                    $order_process->labelling_charges = $labeling_charges->charges;
-                }
-                $order_process->save();
                 $serial++;
             }
+            
+            $shipment_item = new ShipmentItem();
+            $shipment_item->shipment_id = $shipment->id;
+            $shipment_item->product_type_id = 24;
+            $shipment_item->description = $details;
+            $shipment_item->quantity = 1;
+            $shipment_item->price = null;
+            $shipment_item->insurance = null;
+            $shipment_item->type = 0;
+            $shipment_item->save();
+
+            $labeling_charges = WmsLabellingCharge::where('user_id', $user_id)->first();
+            $order_process = new WmsOrderProcess();
+            $order_process->shipment_id = $shipment->id;
+            $order_process->courier_id = 1;
+            $order_process->sku_count = count($product_ids);
+            $order_process->courier_id = 1;
+            $order_process->quantity = $total_quantity;
+            $order_process->packing_charges = 0;
+            if($labeling_charges){
+                $order_process->labelling_charges = $labeling_charges->charges;
+            }
+            $order_process->save();
 
             PackagingMaterialRequest::where('id', $request_details->id)->update([
                 'tracking_number' => $new_tracking_number
