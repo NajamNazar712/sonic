@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\ShipmentPrebook;
-use App\Http\Models\CorporateDeliveryTypeStatususe App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Models\CorporateDeliveryTypeStatus;
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\ShipmentOrderDate;
 use Illuminate\Support\Facades\Hash;
