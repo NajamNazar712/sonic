@@ -449,8 +449,6 @@
 
                                 if (details.order_information.charges_mode_id) {
                                     shipment += '<td>' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
-                                    shipment += '<td><strong>Charges Mode</strong></td>';
-                                    shipment += '<td>' + details.order_information.charges_mode + '</td>';
                                 }
                                 else {
                                     shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';

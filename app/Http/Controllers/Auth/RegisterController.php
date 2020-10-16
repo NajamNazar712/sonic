@@ -332,6 +332,7 @@ class RegisterController extends Controller
             'average_shipment_duration_id' => $data['average_shipment_duration'],
             'reference_id' => $data['reference'],
             'email_verified' => 0,
+            'brand_name' => $data['brand_name'],
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);

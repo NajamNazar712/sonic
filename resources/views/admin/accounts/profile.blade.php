@@ -49,6 +49,12 @@
                                     <td><b>Company Name</b></td>
                                     <td>{{$user->name}}</td>
                                 </tr>
+                                @if($user->brand_name != null)
+                                    <tr>
+                                        <td><b>Brand Name</b></td>
+                                        <td>{{$user->brand_name}}</td>
+                                    </tr>
+                                @endif
                                 <tr>
                                     <td><b>Email Address</b></td>
                                     <td>{{$user->email}}</td>
@@ -434,6 +440,16 @@
                                     <div class="col-md-9">
                                         <label>STRN Number</label>
                                         <input type="text" id="strn_no" class="form-control border-primary" value="{{$user->strn_no}}" name="strn_no">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <div class="col-md-9">
+                                        <label>Brand Name</label>
+                                        <input type="text" id="brand_name" class="form-control border-primary" value="{{$user->brand_name}}" name="brand_name">
                                     </div>
                                 </div>
                             </div>

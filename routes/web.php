@@ -2232,11 +2232,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('edit/{id?}', 'Admins\AdminRunnerController@runner_details_edit_index')->name('edit');
         Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
     });
-    //Parcel History
+
     Route::prefix('parcel_history')->name('parcel_history.')->group(function () {
         Route::get('{tracking_number?}', 'Admins\AdminParcelHistoryController@index')->name('index');
         Route::post('list', 'Admins\AdminParcelHistoryController@open_guilty_parcel_remarks')->name('list');
-
-    });
-});
+	});
+	Route::prefix('trax_directory')->name('trax_directory.')->group(function () {
+        Route::get('', 'Admins\AdminTraxDirectory@index')->name('index');
+        Route::get('list', 'Admins\AdminTraxDirectory@list')->name('list');
+    });});
 
