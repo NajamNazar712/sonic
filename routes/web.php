@@ -1879,6 +1879,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_history_list')->name('list');
             });
 
+            Route::prefix('key_accounts')->name('key_accounts.')->group(function () {
+                Route::get('', 'Admins\AdminSalesController@key_accounts_dashboard_index')->name('dashboard');
+                Route::get('list', 'Admins\AdminSalesController@key_accounts_dashboard_details')->name('dashboard.list');
+            });
+
 
             Route::prefix('projection')->name('projection.')->group(function () {
                 Route::prefix('percentage')->name('percentage.')->group(function () {

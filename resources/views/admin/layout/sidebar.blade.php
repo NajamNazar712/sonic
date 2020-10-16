@@ -639,6 +639,17 @@
                     @if (session('role_id') == 1 || in_array(389, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.trax_directory.index') }}">Trax Directory</a></li>
                     @endif
+
+                    @if (session('role_id') == 1 || count(array_intersect([76], session('permissions'))) !== 0)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Sales</span></a>
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(217, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.settings.sales.key_accounts.dashboard') }}">Key Accounts Dashboard</a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </li>
+                    @endif
                 </ul>
             </li>
 
