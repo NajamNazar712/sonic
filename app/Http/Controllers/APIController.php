@@ -351,6 +351,7 @@ class APIController extends Controller
                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'order_id' => ['nullable', 'filled'],
+                'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -778,7 +779,11 @@ class APIController extends Controller
                     }
                 }
             }
-
+            if($user_type['logo_status'] == 1){
+                $shipment = Shipment::find($shipment_id);
+                $shipment->shipment_invoice_status = 1;
+                $shipment->save();
+            }
             $blacklist_message = null;
             $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
             if($consignee_information->exists()){
