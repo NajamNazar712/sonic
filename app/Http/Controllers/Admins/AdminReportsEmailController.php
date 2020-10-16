@@ -1500,7 +1500,7 @@ class AdminReportsEmailController extends Controller
 
         $date_from = Carbon::createFromFormat("Y-m-d", $date)->toDateString();
         $date_from = $date_from . ' 09:00:00';
-        $next_day = Carbon::parse($date)->addDay(2);
+        $next_day = Carbon::parse($date)->addDay(1);
         $date_to = $next_day->toDateString();
         $date_to = $date_to . ' 08:59:59';
         $serial = 0;
