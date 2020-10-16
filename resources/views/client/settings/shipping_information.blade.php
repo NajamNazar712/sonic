@@ -31,77 +31,76 @@
         </table>
 </div>
 
-    <div class="modal fade text-left" id="AddIBANModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddIBANModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add IBAN</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+<div class="modal fade text-left" id="AddIBANModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddIBANModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Add IBAN</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="add_iban_form" action="{{route('cod.settings.shipping_information.add_iban')}}" method="post" >
                 <div class="modal-body text-center">
-                    <form id="add_iban_form" action="{{route('cod.settings.shipping_information.add_iban')}}" method="post" >
-                        @method('POST')
-                        @csrf
-                        <div class="container">
-                            <input type="hidden" name="pickup_address_ids" id="pickup_address_id">
-                            <div class="row justify-content-center">
+                    @method('POST')
+                    @csrf
+                    <div class="container">
+                        <input type="hidden" name="pickup_address_ids" id="pickup_address_id">
+                        <div class="row justify-content-center">
 
-                                <div class="col-12">
-                                    <select name="bank_select" id="bank_select" class="form-control select2" data-msg-required="Select Bank" data-rule-require="true">
-                                        @if(count($user_bank_infos) > 0)
-                                            @foreach($user_bank_infos as $user_bank_info)
-                                                <option value="{{$user_bank_info->id}}">{{$user_bank_info->bank_branch}}</option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
-                                <div id="bank_info_div" class="d-none">
-                                    <table class="table table-sm table-bordered mb-1">
-                                        <tbody>
-                                        <tr role="row">
-                                            <th class="border-primary border-darken-1 align-middle text-center">Bank Name</th>
-                                            <td class="align-middle text-center" id="b_name"></td>
-                                        </tr>
-                                        <tr role="row">
-                                            <th class="border-primary border-darken-1 align-middle text-center">Bank Branch</th>
-                                            <td class="align-middle text-center" id="b_branch"></td>
-                                        </tr>
-                                        <tr role="row">
-                                            <th class="border-primary border-darken-1 align-middle text-center">Account Number</th>
-                                            <td class="align-middle text-center" id="b_account_number"></td>
-                                        </tr>
-                                        <tr role="row">
-                                            <th class="border-primary border-darken-1 align-middle text-center">Account Title</th>
-                                            <td class="align-middle text-center" id="b_account_title"></td>
-                                        </tr>
-                                        <tr role="row">
-                                            <th class="border-primary border-darken-1 align-middle text-center">IBAN Number</th>
-                                            <td class="align-middle text-center" id="b_iban"></td>
-                                        </tr>
-                                        <tr role="row">
-                                            <th class="border-primary border-darken-1 align-middle text-center">City Name</th>
-                                            <td class="align-middle text-center" id="b_city"></td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="col-12 form-group">
+                                <select name="bank_info_select" id="bank_select" class="form-control select2" data-rule-required="true" data-msg-required="Select A Bank">
+                                    @if(count($user_bank_infos) > 0)
+                                        @foreach($user_bank_infos as $user_bank_info)
+                                            <option value="{{$user_bank_info->id}}">{{$user_bank_info->bank_branch}}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
                             </div>
-
-
-                            <div class="row justify-content-center">
-                                <div class="col-3">
-                                    <button id="add_iban_btn" type="submit" class="btn btn-primary btn-block">Update</button>
-                                </div>
+                            <div id="bank_info_div" class="d-none">
+                                <table class="table table-sm table-bordered mb-1">
+                                    <tbody>
+                                    <tr role="row">
+                                        <th class="border-primary border-darken-1 align-middle text-center">Bank Name</th>
+                                        <td class="align-middle text-center" id="b_name"></td>
+                                    </tr>
+                                    <tr role="row">
+                                        <th class="border-primary border-darken-1 align-middle text-center">Bank Branch</th>
+                                        <td class="align-middle text-center" id="b_branch"></td>
+                                    </tr>
+                                    <tr role="row">
+                                        <th class="border-primary border-darken-1 align-middle text-center">Account Number</th>
+                                        <td class="align-middle text-center" id="b_account_number"></td>
+                                    </tr>
+                                    <tr role="row">
+                                        <th class="border-primary border-darken-1 align-middle text-center">Account Title</th>
+                                        <td class="align-middle text-center" id="b_account_title"></td>
+                                    </tr>
+                                    <tr role="row">
+                                        <th class="border-primary border-darken-1 align-middle text-center">IBAN Number</th>
+                                        <td class="align-middle text-center" id="b_iban"></td>
+                                    </tr>
+                                    <tr role="row">
+                                        <th class="border-primary border-darken-1 align-middle text-center">City Name</th>
+                                        <td class="align-middle text-center" id="b_city"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+                <div class="modal-footer">
+                    <div class="col-3">
+                        <button id="add_iban_btn" type="submit" class="btn btn-primary btn-block">Update</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
 @endsection
 
@@ -170,13 +169,41 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
             $('#bank_select').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Bank',
                 width:'100%',
                 dropdownParent:$('#AddIBANModal')
             }).bind('change',function () {
                 var id = $(this).val();
-                
+                $(this).valid();
+                if(id){
+                    $.ajax({
+                        url: '{{ route('cod.settings.shipping_information.bank_info') }}',
+                        method: 'GET',
+                        data: {
+                            'bank_info_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status == 0) {
+                            $('#bank_info_div').removeClass('d-none');
+                            $('#b_name').text(data.details.bank_name);
+                            $('#b_branch').text(data.details.bank_branch);
+                            $('#b_account_number').text(data.details.account_no);
+                            $('#b_account_title').text(data.details.title);
+                            $('#b_iban').text(data.details.iban);
+                            $('#b_city').text(data.details.city);
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -236,24 +263,7 @@
                         action: function (e, dt, node, config) {
                             if (selected_rows.length > 0) {
                                 $('#AddIBANModal').modal('show');
-                                /*$.ajax({
-                                    url: '{{ route('cod.settings.shipping_information.bank_info') }}',
-                                    method: 'GET',
-                                    data: {
-                                        'user_id': '{{ session('user_id') }}',
-                                        '_token': '{{ csrf_token() }}'
-                                    }
-                                }).done(function (data) {
-                                    if (data.status) {
 
-                                    }
-                                    else{
-                                        toastr.error(data.error, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-                                    }
-                                });*/
 
                             }else{
                                 var error = 'Please select at-least one shipping address!';
@@ -357,7 +367,7 @@
                     },
                     {orderable: false,searchable: false,data: 'serial_number',  name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
-                    {data: 'iban', name: 'paim.iban'},
+                    {data: 'iban', name: 'ubi.iban'},
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
                     {data: 'vendor', name: 'vendor'},
@@ -440,74 +450,13 @@
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-
-                if ($(this).hasClass('revert')) {
-                    swal({
-                        text: 'Are you sure, you want to revert this Shipment?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            if(id) {
-                                var remark = $.trim($('tr#' + id).find('td.remarks input').val());
-                                $.ajax({
-                                    url: '{!! route('admin.return.confirmed.revert') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        '_token': '{{ csrf_token() }}',
-                                        'id': id,
-                                        'remarks':remark
-                                    }
-                                })
-                                    .done(function (data) {
-                                        table.draw(false);
-
-                                        if (data.status == 0) {
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                        }
-                                        else {
-                                            toastr.error(data.error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                        }
-                                    });
-                            }
-                        }
-                    });
-                }
-            });
-
             $( "#add_iban_form" ).validate({
-                errorClass:"danger",
-                normalizer: function(value) {
-                    return $.trim(value);
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
+                submitHandler: function (form){
                     $('#pickup_address_id').val(selected_rows);
                     form.submit();
 

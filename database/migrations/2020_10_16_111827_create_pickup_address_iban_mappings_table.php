@@ -16,7 +16,7 @@ class CreatePickupAddressIbanMappingsTable extends Migration
         Schema::create('pickup_address_iban_mappings', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('pickup_address_id');
-            $table->string('iban');
+            $table->integer('bank_info_id');
             $table->timestamps();
         });
     }
