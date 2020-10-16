@@ -1894,9 +1894,7 @@ class AdminFinanceController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         $amount = 0;
-        if($charges == NULL){
-            $charges = 0;
-        }
+        $charges = 0;
         $gst = 0;
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
