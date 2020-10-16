@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Shippers;
 
-use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\PickupAddressIbanMapping;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
-use App\Http\Models\Shipper\ShipperGlobalSettings;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use Auth;
 use Illuminate\Support\Facades\Storage;
+use Yajra\Datatables\Datatables;
 
 class ShipperGlobalSettingsController extends Controller
 {
@@ -94,5 +96,47 @@ class ShipperGlobalSettingsController extends Controller
         Storage::disk('public')->delete('shippers_logo/'.$filename);
 
         return redirect()->back()->with('success', 'Logo successfully removed!');
+    }
+    public function shipping_information_bank_info(Request $request){
+        return $request;
+    }
+    public function shipping_information_index(){
+        $user_id = session('user_id');
+        $user_bank_infos = UserBankInfo::where('user_id', $user_id)->get();
+        return view('client.settings.shipping_information')->with(['user_bank_infos' => $user_bank_infos]);
+    }
+    public function shipping_information_list(Request $request){
+        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
+            ->leftjoin('pickup_address_iban_mappings as paim', 'paim.pickup_address_id', '=', 'user_shipping_infos.id')
+            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor','paim.iban'])
+            ->where('user_id', session('user_id'))
+            ->where('hidden', 0);
+
+        return Datatables::of($pickups)
+            ->editColumn('status', function ($pickup) {
+                return ($pickup->status == 1) ? 'Enabled' : 'Disabled';
+            })
+            ->make(true);
+    }
+    public function shipping_information_add_iban(Request $request){
+        $user_id = session('user_id');
+        $pickup_address_ids = explode(',', $request->pickup_address_ids);
+        $iban = $request->iban;
+        if(count($pickup_address_ids) > 0){
+            foreach ($pickup_address_ids as $pickup_address_id){
+                $iban_map = PickupAddressIbanMapping::where('pickup_address_id', $pickup_address_id);
+                if($iban_map->exists()){
+                    $iban_map = $iban_map->first();
+                    $iban_map->iban = $iban;
+                }else{
+                    $iban_map = new PickupAddressIbanMapping();
+                    $iban_map->pickup_address_id = $pickup_address_id;
+                    $iban_map->iban = $iban;
+                }
+                $iban_map->save();
+            }
+            return redirect()->back()->with(['success' => 'IBAN updated successfully!']);
+        }
+        return redirect()->back()->with(['error' => 'No pickup address selected!']);
     }
 }

@@ -2936,4 +2936,40 @@ public function short_received_hub_wise_cron_index() {
 
         return redirect()->back()->with('success','Runner updated successfully!');
     }
+
+    public function pickup_address_wise_payment_accounts_index(){
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        $settings = GlobalSettings::where('type', 'pickup_wise_payment_accounts');
+        $pickup_wise_accounts = array();
+        if($settings->exists()){
+            $settings = $settings->first();
+            $pickup_wise_accounts = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.pickup_address_wise_payment_accounts')->with(['shippers' => $shippers,'pickup_wise_accounts' => $pickup_wise_accounts]);
+    }
+    public function pickup_address_wise_payment_accounts_submit(Request $request){
+        if($request->has('shippers')){
+            if(count($request->shippers) > 0){
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'pickup_wise_payment_accounts');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                }
+                else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'pickup_wise_payment_accounts';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        }else{
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
 }

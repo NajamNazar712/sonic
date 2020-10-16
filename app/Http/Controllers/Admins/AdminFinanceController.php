@@ -6115,4 +6115,7 @@ class AdminFinanceController extends Controller
         }
     }
 
+    public function make_payments_pickup_wise(){
+
+    }
 }

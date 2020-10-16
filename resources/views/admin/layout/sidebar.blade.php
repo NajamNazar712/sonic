@@ -406,12 +406,17 @@
                                                href="{{ route('admin.finance.make_payments.index') }}">Make</a></li>
                                     @endif
 
+
                                     @if (session('role_id') == 1 || in_array(61, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.finance.done_payments.index') }}">Done</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(232, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.finance.invoice_for_reimbursement.index') }}">Invoice for Reimbursement</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(59, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.finance.make_payments_pickup_wise.index') }}">Pickup Wise Make</a></li>
                                     @endif
                                 </ul>
                             </li>
@@ -1016,6 +1021,10 @@
 
                                     @if (session('role_id') == 1 || in_array(362, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.over_payment_limit.index')}}">Over Payment Limit</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(391, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.pickup_address_wise_payment_accounts.index')}}">Pickup Wise Payment Accounts</a></li>
                                     @endif
                                 </ul>
                             </li>

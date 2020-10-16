@@ -737,7 +737,8 @@
                                 }
                             });
                         }
-                    }, {
+                    },
+                    {
                         extend: 'selectNone',
                         text: 'Select None',
                         className: 'select_none',
@@ -852,7 +853,6 @@
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-
 
                     $('td:eq(0)', row).addClass('select-checkbox');
 
