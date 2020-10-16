@@ -1500,7 +1500,7 @@ class AdminReportsEmailController extends Controller
 
         $date_from = Carbon::createFromFormat("Y-m-d", $date)->toDateString();
         $date_from = $date_from . ' 09:00:00';
-        $next_day = Carbon::parse($date)->addDay(1);
+        $next_day = Carbon::parse($date)->addDay(2);
         $date_to = $next_day->toDateString();
         $date_to = $date_to . ' 08:59:59';
         $serial = 0;
@@ -1571,13 +1571,11 @@ class AdminReportsEmailController extends Controller
             ->whereBetween('sj.created_at', [$date_from,$date_to])
             ->where('u.id',3324)->get();
 
-        //dd($sales);
-
 
         $telenor_sales[] = ['Telenor Sales Report'];
-        $telenor_sales['header'] = ['S. No.', 'Tracking Number', 'Account Number','Shipper','Order Id','Status','Paymengt Status','Payment Id','SDN Number','Service Type','Arrival Date','Origin','Destination','Hub','Zone','Class','Shipping Mode','Category','Description','Collection Amount','Actual Weight','Chargeable Weight','Weight Charges','Cash Handling Charges','Insurance Charges','Packaging Charges','Fuel Surcharge','Return Charges','Replacement Charges','Try & Buy Charges','NSA/OSA Charges','GST','Intercept Charges','Total Charges','Packing Charges','Net Payable','Delivered/Returned Date','Received/Refused By','Sales Person','Special Instructions'];
+        $telenor_sales['header'] = ['S. No.', 'Tracking Number', 'Account Number','Shipper','Order Id','Status','Payment Status','Payment Id','SDN Number','Service Type','Arrival Date','Origin','Destination','Hub','Zone','Class','Shipping Mode','Category','Description','Collection Amount','Actual Weight','Chargeable Weight','Weight Charges','Cash Handling Charges','Insurance Charges','Packaging Charges','Fuel Surcharge','Return Charges','Replacement Charges','Try & Buy Charges','NSA/OSA Charges','GST','Intercept Charges','Total Charges','Packing Charges','Net Payable','Delivered/Returned Date','Received/Refused By','Sales Person','Special Instructions'];
 
-        $telenor_sales[] = ['S. No.' => '', 'Tracking Number' => '', 'Account Number' => '','Shipper' => '','Order Id' => '','Status' => '','Paymengt Status' => '','Payment Id' => '','SDN Number' => '','Service Type' => '','Arrival Date' => '','Origin' => '','Destination' => '','Hub' => '','Zone' => '','Class' => '','Shipping Mode' => '','Category' => '','Description' => '','Collection Amount' => '','Actual Weight' => '','Chargeable Weight' => '','Weight Charges' => '','Cash Handling Charges' => '','Insurance Charges' => '','Packaging Charges' => '','Fuel Surcharge' => '','Return Charges' => '','Replacement Charges' => '','Try & Buy Charges' => '','NSA/OSA Charges' => '','GST' => '','Intercept Charges' => '','Total Charges' => '','Packing Charges' => '','Net Payable' => '','Delivered/Returned Date' => '','Received/Refused By' => '','Sales Person' => '','Special Instructions' => ''];
+        $telenor_sales[] = ['S. No.' => '', 'Tracking Number' => '', 'Account Number' => '','Shipper' => '','Order Id' => '','Status' => '','Payment Status' => '','Payment Id' => '','SDN Number' => '','Service Type' => '','Arrival Date' => '','Origin' => '','Destination' => '','Hub' => '','Zone' => '','Class' => '','Shipping Mode' => '','Category' => '','Description' => '','Collection Amount' => '','Actual Weight' => '','Chargeable Weight' => '','Weight Charges' => '','Cash Handling Charges' => '','Insurance Charges' => '','Packaging Charges' => '','Fuel Surcharge' => '','Return Charges' => '','Replacement Charges' => '','Try & Buy Charges' => '','NSA/OSA Charges' => '','GST' => '','Intercept Charges' => '','Total Charges' => '','Packing Charges' => '','Net Payable' => '','Delivered/Returned Date' => '','Received/Refused By' => '','Sales Person' => '','Special Instructions' => ''];
 
         foreach($sales as $sale){
             $serial++;
@@ -1637,10 +1635,9 @@ class AdminReportsEmailController extends Controller
                 $class = 'Local';
             }
 
-            $telenor_sales[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Account Number' => $account_no,'Shipper' => $shipper,'Order Id' => $order_id,'Status' => $current_status,'Paymengt Status' => $payment_status,'Payment Id' => $payment_id,'SDN Number' => $sdn_id,'Service Type' => $service_type,'Arrival Date' => $arrival_date,'Origin' => $origin,'Destination' => $destination,'Hub' => $hub,'Zone' => $zone,'Class' => $class,/*'Attempts' => $attempts,*/'Shipping Mode' => $shipping_mode,'Category' => $category,'Description' => $description,'Collection Amount' => $p_collection_amount,'Actual Weight' => $actual_weight,'Chargeable Weight' => $chargeable_weight,'Weight Charges' => $weight_charges,'Cash Handling Charges' => $cash_handling_charges,'Insurance Charges' => $insurance_charges,'Packaging Charges' => $packaging_material_charges,'Fuel Surcharge' => $fuel_surcharge,'Return Charges' => $return_charges,'Replacement Charges' => $replacement_charges,'Try & Buy Charges' => $try_and_buy_charges,'NSA/OSA Charges' => $nsa_osa_charges,'GST' => $p_gst,'Intercept Charges' => $intercept_charges,'Total Charges' => $p_total_charges,/*'Estimated Charges' => $estimated_charges,*/'Packing Charges' => $packaging_charges,'Net Payable' => $p_net_payable,'Delivered/Returned Date' => $delivered_or_returned,'Received/Refused By' => $received_or_refused_by,'Sales Person' => $sales_person,'Special Instructions' => $special_instructions];
+            $telenor_sales[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Account Number' => $account_no,'Shipper' => $shipper,'Order Id' => $order_id,'Status' => $current_status,'Payment Status' => $payment_status,'Payment Id' => $payment_id,'SDN Number' => $sdn_id,'Service Type' => $service_type,'Arrival Date' => $arrival_date,'Origin' => $origin,'Destination' => $destination,'Hub' => $hub,'Zone' => $zone,'Class' => $class,/*'Attempts' => $attempts,*/'Shipping Mode' => $shipping_mode,'Category' => $category,'Description' => $description,'Collection Amount' => $p_collection_amount,'Actual Weight' => $actual_weight,'Chargeable Weight' => $chargeable_weight,'Weight Charges' => $weight_charges,'Cash Handling Charges' => $cash_handling_charges,'Insurance Charges' => $insurance_charges,'Packaging Charges' => $packaging_material_charges,'Fuel Surcharge' => $fuel_surcharge,'Return Charges' => $return_charges,'Replacement Charges' => $replacement_charges,'Try & Buy Charges' => $try_and_buy_charges,'NSA/OSA Charges' => $nsa_osa_charges,'GST' => $p_gst,'Intercept Charges' => $intercept_charges,'Total Charges' => $p_total_charges,/*'Estimated Charges' => $estimated_charges,*/'Packing Charges' => $packaging_charges,'Net Payable' => $p_net_payable,'Delivered/Returned Date' => $delivered_or_returned,'Received/Refused By' => $received_or_refused_by,'Sales Person' => $sales_person,'Special Instructions' => $special_instructions];
 
         }
-        //dd($telenor_sales);
         $cell_st = [
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
