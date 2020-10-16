@@ -1236,6 +1236,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('', 'Admins\UserManagementController@role_update_store')->name('store');
             });
         });
+
+
     });
 
     Route::prefix('finance')->name('finance.')->group(function () {
@@ -2055,6 +2057,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('unique', 'Admins\GlobalSettingsController@runner_report_unique')->name('unique');
             Route::post('add', 'Admins\GlobalSettingsController@runner_report_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@runner_report_enable_disable')->name('enable_disable');
+        });
+
+        Route::prefix('user_requests')->name('user_requests.')->group(function() {
+            Route::get('', 'Admins\AdminUserRequestController@user_requests_index')->name('index');
+            Route::get('list', 'Admins\AdminUserRequestController@user_requests_list')->name('list');
+
+            Route::prefix('add')->name('add.')->group(function() {
+                Route::get('', 'Admins\AdminUserRequestController@user_request_add_index')->name('index');
+                Route::post('', 'Admins\AdminUserRequestController@user_add_store')->name('store');
+            });
+
         });
     });
 

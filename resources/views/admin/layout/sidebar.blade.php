@@ -1098,6 +1098,7 @@
                                                     @endif
 
 
+
                                                 </ul>
                                             </li>
                                         @endif
@@ -1169,6 +1170,9 @@
 
                             </li>
                         @endif
+
+                            <li><a class="menu-item" href="{{ route('admin.settings.user_requests.index') }}">User Requests</a>
+                            </li>
                         
                     </ul>
                 </li>
