@@ -443,12 +443,12 @@
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Order ID</strong></td>';
                                 shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
+                                shipment += '<td><strong>Order Date</strong></td>';
+                                shipment += '<td>' + ((details.order_information.order_date) ? details.order_information.order_date : '-') + '</td>';
                                 shipment += '<td><strong>Instructions</strong></td>';
 
                                 if (details.order_information.charges_mode_id) {
                                     shipment += '<td>' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
-                                    shipment += '<td><strong>Charges Mode</strong></td>';
-                                    shipment += '<td>' + details.order_information.charges_mode + '</td>';
                                 }
                                 else {
                                     shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
@@ -456,6 +456,11 @@
 
                                 shipment += '</tr>';
                                 shipment += '<tr>';
+
+                                if (details.order_information.charges_mode_id) {
+                                    shipment += '<td><strong>Charges Mode</strong></td>';
+                                    shipment += '<td>' + details.order_information.charges_mode + '</td>';
+                                }
                                 shipment += '<td><strong>Piece(s)</strong></td>';
                                 shipment += '<td>'+ details.order_information.pieces +'</td>';
                                 shipment += '</tr>';

@@ -74,9 +74,13 @@
                                 </ul>
                             </li>
                         @endif
+                            @if (session('role_id') == 1 || session('sales_coordinator'))
+                                <li><a class="menu-item" href="{{route('admin.shipment.poc_kam_tagged_accounts.index')}}">POC and KAM Tagged Accounts</a></li>
+                            @endif
                     </ul>
                 </li>
             @endif
+
 
             @if (session('role_id') == 1 || count(array_intersect([155, 117, 209, 254], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
@@ -414,8 +418,12 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(120, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Invoices</a>
-                            </li>
+                                <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
+                            <ul class="menu-content">
+                                <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Pending </a></li>
+                                <li><a class="menu-item" href="{{ route('admin.finance.invoices.received_index') }}">Received </a></li>
+                            </ul>
+
                         @endif
 
                         @if (session('role_id') == 1 || count(array_intersect([52, 54, 167], session('permissions'))) !== 0)
@@ -628,7 +636,10 @@
                     @if (session('role_id') == 1 || in_array(334, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.dashboard.overall.commission') }}">Overall Commission</a></li>
                     @endif
-                </ul>
+
+					<li><a class="menu-item" href="{{route('admin.parcel_history.index')}}">Open Parcel Remarks</a></li>					@if (session('role_id') == 1 || in_array(389, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.trax_directory.index') }}">Trax Directory</a></li>
+                    @endif                </ul>
             </li>
 
             @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328,337,356], session('permissions'))) !== 0)
@@ -803,6 +814,9 @@
                         @if (session('role_id') == 1 || in_array(345, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.daily_monthly_adjustment.index') }}">Daily/Month Adjustment Report</a></li>
                         @endif
+                            @if (session('role_id') == 1 || in_array(345, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.reports.petty_cash_expense_summary.index') }}">Petty Cash Expense Summary Report</a></li>
+                            @endif
                     </ul>
                 </li>
             @endif

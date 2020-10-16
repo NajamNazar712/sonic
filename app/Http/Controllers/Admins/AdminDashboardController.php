@@ -1430,7 +1430,7 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->user_id=$shipper_id;
                 $sale_person_tag->save();
                 $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
-                NotificationsController::send(81, $sale_persons);
+                NotificationsController::send(81, $sale_persons, Auth::id());
 
 
             }
@@ -1473,7 +1473,7 @@ class AdminDashboardController extends Controller
                         $sale_person_tag->user_id=$shipper_id;
                         $sale_person_tag->save();
                         $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
-                        /*NotificationsController::send(81, $shipper->id, $sale_persons);*/
+
                     }
                     // else{
                     //     $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->first();
@@ -1486,7 +1486,7 @@ class AdminDashboardController extends Controller
             // return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
                  }
             }
-            NotificationsController::send(81,$sale_persons);
+            NotificationsController::send(81,$sale_persons ,Auth::id());
             return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
         }
         else{
@@ -7166,7 +7166,7 @@ if(session('department_id') == 7){
                    ->where('spt.status','=',0);
            })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7420,7 +7420,7 @@ if(session('department_id') == 7){
                     ->where('spt.status','=',0);
             })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7609,6 +7609,13 @@ if(session('department_id') == 7){
 
 
                 }
+
+                if($result->account_type_id == 1){
+                    if(($result->rate_status == 0 && $result->status == 2) && (session('role_id') == 1 || in_array(8, session('permissions')))){
+                        $dropdown .= '<button type="button" class="dropdown-item reject_rates" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject Rates</div></button>';
+                    }
+                }
+
                 if($result->account_type_id == 1){
                     if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
                         if($result->status != 0) {
@@ -7744,7 +7751,6 @@ if(session('department_id') == 7){
 
     public function updateProfile(Request $request)
     {
-        
         $user_id = $request->user_id;
 
         //1 for Admin, 0 for User
@@ -7763,7 +7769,7 @@ if(session('department_id') == 7){
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
                 'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
-                'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null]);
+                'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
             AdminLogs::create([
                 'admin_id'=>Auth::id(),
                 'user_id'=>$user_id
@@ -7774,7 +7780,7 @@ if(session('department_id') == 7){
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
                 'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
-                'url'=>$request->url,'product_id'=>$request->product_id]);
+                'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
         }
 
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);

@@ -1498,4 +1498,175 @@ class AdminReportsEmailController extends Controller
 
         return url('/') . '/' . $file_name_without_path;
     }
+
+    static public function telenor_sales_report($date){
+
+        $date_from = Carbon::createFromFormat("Y-m-d", $date)->toDateString();
+        $date_from = $date_from . ' 09:00:00';
+        $next_day = Carbon::parse($date)->addDay(1);
+        $date_to = $next_day->toDateString();
+        $date_to = $date_to . ' 08:59:59';
+        $serial = 0;
+        $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftjoin('zone_class_cities as zcc', function($join){
+                $join->on('z.id', '=', 'zcc.zone_id')
+                    ->on('dc.id', '=', 'zcc.city_id')
+                    ->on('zone_classification_id', '=', DB::connection('reports')->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
+            })
+            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->leftjoin('delivery_note_shipments as ds',function($join){
+                $join->on('ds.shipment_id','=','shipments.id')
+                    ->where('ds.delivery_note_id','=',
+                        DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id and delivery_note_shipments.status > 3 and  delivery_note_shipments.status != 8)')                        );
+            })
+            ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('pending_payment_shipments as pps', function ($join) {
+                $join->on('pps.shipment_id', '=', 'shipments.id')
+                    ->where('pps.id','=',
+                        DB::connection('reports')->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('done_payment_shipments as dps', function ($join) {
+                $join->on('dps.shipment_id', '=', 'shipments.id')
+                    ->where('dps.id','=',
+                        DB::connection('reports')->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as dr', function ($join) {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->where('dr.id','=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37))'));
+            })
+            ->leftjoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
+            })
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'shipments.user_id')
+                    ->leftjoin('admins as adsp','adsp.id','=','spt.admin_id')
+                    ->where('spt.status','=',0);
+            })
+            ->leftjoin('products as p','p.id','=','si.product_type_id')
+            ->leftJoin('pending_invoice_shipments as pis', function ($join) {
+                $join->on('pis.shipment_id', '=', 'shipments.id')
+                    ->where('pis.id','=',
+                        DB::connection('reports')->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('invoice_shipments as is', function ($join) {
+                $join->on('is.shipment_id', '=', 'shipments.id')
+                    ->where('is.id','=',
+                        DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id)'));
+            })
+            ->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges')
+            ->whereNotIn('shipments.shipper_status_id',[1,17])
+            ->whereBetween('sj.created_at', [$date_from,$date_to])
+            ->where('u.id',3324)->get();
+
+
+        $telenor_sales[] = ['Telenor Sales Report'];
+        $telenor_sales['header'] = ['S. No.', 'Tracking Number', 'Account Number','Shipper','Order Id','Status','Payment Status','Payment Id','SDN Number','Service Type','Arrival Date','Origin','Destination','Hub','Zone','Class','Shipping Mode','Category','Description','Collection Amount','Actual Weight','Chargeable Weight','Weight Charges','Cash Handling Charges','Insurance Charges','Packaging Charges','Fuel Surcharge','Return Charges','Replacement Charges','Try & Buy Charges','NSA/OSA Charges','GST','Intercept Charges','Total Charges','Packing Charges','Net Payable','Delivered/Returned Date','Received/Refused By','Sales Person','Special Instructions'];
+
+        $telenor_sales[] = ['S. No.' => '', 'Tracking Number' => '', 'Account Number' => '','Shipper' => '','Order Id' => '','Status' => '','Payment Status' => '','Payment Id' => '','SDN Number' => '','Service Type' => '','Arrival Date' => '','Origin' => '','Destination' => '','Hub' => '','Zone' => '','Class' => '','Shipping Mode' => '','Category' => '','Description' => '','Collection Amount' => '','Actual Weight' => '','Chargeable Weight' => '','Weight Charges' => '','Cash Handling Charges' => '','Insurance Charges' => '','Packaging Charges' => '','Fuel Surcharge' => '','Return Charges' => '','Replacement Charges' => '','Try & Buy Charges' => '','NSA/OSA Charges' => '','GST' => '','Intercept Charges' => '','Total Charges' => '','Packing Charges' => '','Net Payable' => '','Delivered/Returned Date' => '','Received/Refused By' => '','Sales Person' => '','Special Instructions' => ''];
+
+        foreach($sales as $sale){
+            $serial++;
+            $tracking_number = $sale->tracking_number;
+            $account_no = $sale->account_no;
+            $shipper = $sale->shipper;
+            $order_id = $sale->order_id;
+            $current_status = $sale->current_status;
+            $payment_status = $sale->payment_status;
+            $payment_id = $sale->payment_id;
+            $sdn_id = $sale->sdn_id;
+            $service_type = $sale->service_type;
+            $arrival_date = $sale->arrival_date;
+            $origin = $sale->origin;
+            $destination = $sale->destination;
+            $hub = $sale->hub;
+            $zone = $sale->zone;
+            $class = $sale->class;
+            $shipping_mode = $sale->shipping_mode;
+            $category = $sale->category;
+            $description = $sale->description;
+            $p_collection_amount = $sale->p_collection_amount;
+            $actual_weight = $sale->actual_weight;
+            $chargeable_weight = $sale->chargeable_weight;
+            $weight_charges = $sale->weight_charges;
+            $cash_handling_charges = $sale->cash_handling_charges;
+            $insurance_charges = $sale->insurance_charges;
+            $packaging_material_charges = $sale->packaging_material_charges;
+            $fuel_surcharge = $sale->fuel_surcharge;
+            $return_charges = $sale->return_charges;
+            $replacement_charges = $sale->replacement_charges;
+            $try_and_buy_charges = $sale->try_and_buy_charges;
+            $nsa_osa_charges = $sale->nsa_osa_charges;
+            $p_gst = $sale->p_gst;
+            $intercept_charges = $sale->intercept_charges;
+            $p_total_charges = $sale->p_total_charges;
+            $packaging_charges = $sale->packaging_charges;
+            $p_net_payable = $sale->p_net_payable;
+            $delivered_or_returned = $sale->delivered_or_returned;
+            $received_or_refused_by = $sale->received_or_refused_by;
+            $sales_person = $sale->sales_person;
+            $special_instructions = $sale->special_instructions;
+
+            if($class == 0){
+                $class = 'Class A';
+            }
+            else if($class == 1){
+                $class = 'Class B';
+            }
+            else if($class == 2){
+                $class = 'Class C';
+            }
+            else if($class == 3){
+                $class = 'Class D';
+            }
+            else{
+                $class = 'Local';
+            }
+
+            $telenor_sales[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Account Number' => $account_no,'Shipper' => $shipper,'Order Id' => $order_id,'Status' => $current_status,'Payment Status' => $payment_status,'Payment Id' => $payment_id,'SDN Number' => $sdn_id,'Service Type' => $service_type,'Arrival Date' => $arrival_date,'Origin' => $origin,'Destination' => $destination,'Hub' => $hub,'Zone' => $zone,'Class' => $class,/*'Attempts' => $attempts,*/'Shipping Mode' => $shipping_mode,'Category' => $category,'Description' => $description,'Collection Amount' => $p_collection_amount,'Actual Weight' => $actual_weight,'Chargeable Weight' => $chargeable_weight,'Weight Charges' => $weight_charges,'Cash Handling Charges' => $cash_handling_charges,'Insurance Charges' => $insurance_charges,'Packaging Charges' => $packaging_material_charges,'Fuel Surcharge' => $fuel_surcharge,'Return Charges' => $return_charges,'Replacement Charges' => $replacement_charges,'Try & Buy Charges' => $try_and_buy_charges,'NSA/OSA Charges' => $nsa_osa_charges,'GST' => $p_gst,'Intercept Charges' => $intercept_charges,'Total Charges' => $p_total_charges,/*'Estimated Charges' => $estimated_charges,*/'Packing Charges' => $packaging_charges,'Net Payable' => $p_net_payable,'Delivered/Returned Date' => $delivered_or_returned,'Received/Refused By' => $received_or_refused_by,'Sales Person' => $sales_person,'Special Instructions' => $special_instructions];
+
+        }
+        $cell_st = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getDefaultColumnDimension()->setWidth(20);
+        $sheet->fromArray($telenor_sales, NULL, 'A2', true);
+        $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
+        /*$sheet->getStyle("A3:C3")->applyFromArray($cell_st);
+        $sheet->getStyle("A" . $serial . ":C" . $serial)->applyFromArray($cell_st);*/
+        $sheet->setTitle('Telenor Sales Report');
+        $sheet->mergeCells('A2:AP2');
+        /*$sheet->mergeCells('A3:C3');
+        $sheet->mergeCells('A' . $serial . ':B' . $serial);*/
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="outstanding_sdn_report.xlsx"');
+        header('Cache-Control: max-age=0');
+        $date_file_name = Carbon::today()->format('Y_m_d');
+        $file_name_without_path = "reports/telenor_sales_report_" . $date_file_name . ".xlsx";
+        $file_name = public_path() . "/reports/telenor_sales_report_" . $date_file_name . ".xlsx";
+        $writer->save($file_name);
+        return url('/') . '/' . $file_name_without_path;
+
+    }
 }

@@ -277,6 +277,17 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="brand_name">Brand Name:
+                                                        </label>
+                                                        <div>
+                                                            <input type="text" class="form-control" value="{{ old('brand_name') }}" name="brand_name" placeholder="Brand Name">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </fieldset>
                                         <!-- Step 2 -->
                                         <h6>Shipping Information</h6>

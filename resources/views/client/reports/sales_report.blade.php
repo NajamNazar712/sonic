@@ -114,6 +114,7 @@
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Order ID</th>
+                        <th class="border-primary border-darken-1">Order Date</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone No. 1</th>
                         <th class="border-primary border-darken-1">Consignee Phone No. 2</th>
@@ -364,6 +365,7 @@
                             head.push('Account No.');
                             head.push('Shipper');
                             head.push('Order ID');
+                            head.push('Order Date');
                             head.push('Consignee Name');
                             head.push('Consignee Phone No. 1');
                             head.push('Consignee Phone No. 2');
@@ -392,6 +394,7 @@
                                 row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.order_id);
+                                row.push(values.order_date);
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone_number_1);
                                 row.push(values.consignee_phone_number_2);
@@ -453,13 +456,14 @@
                         d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
                     }
                 },
-                order: [[13, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
+                    { data:'order_date' ,name: 'sod.order_date', class: 'align-middle order_date'},
                     { data:'consignee_name' ,name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'consignee_phone_number_1' ,name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1'},
                     { data:'consignee_phone_number_2' ,name: 'shipments.consignee_phone_number_2', class: 'align-middle consignee_phone_number_2'},

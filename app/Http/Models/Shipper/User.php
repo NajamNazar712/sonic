@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','address','poc','phone','phone2','cnic','ntn_no','strn_no','url','city_id','status','blacklist', 'api_token','rates_added_by','rates_updated_by','rates_authorized_by','account_activated_by','activated_at','product_id','rate_status','account_type_id','default_shipping_mode','average_shipments','reference_id','average_shipment_duration_id','other_product_name'
+        'name', 'email', 'password','address','poc','phone','phone2','cnic','ntn_no','strn_no','url','city_id','status','blacklist', 'api_token','rates_added_by','rates_updated_by','rates_authorized_by','account_activated_by','activated_at','product_id','rate_status','account_type_id','default_shipping_mode','average_shipments','reference_id','average_shipment_duration_id','other_product_name','brand_name'
     ];
 
     /**
@@ -47,5 +47,8 @@ class User extends Authenticatable
     }
     public function payment_cycle(){
         return $this->belongsTo('App\Http\Models\PaymentCycle');
+    }
+    public function open_parcel(){
+        return $this->hasOne('App\Http\Models\Shipper\OpenParcelHistory');
     }
 }

@@ -42,6 +42,11 @@ Route::name('api.')->group(function () {
 
 		Route::post('charges_calculate', 'APIController@charges_calculate')->name('charges_calculate');
 		Route::post('consolidate', 'APIController@shipment_consolidate')->name('consolidate');
+        Route::prefix('return')->name('return.')->group(function (){
+            Route::get('pending', 'APIController@return_confirmation_pending')->name('pending');
+            Route::post('pending', 'APIController@return_confirmation_pending_update')->name('pending');
+
+        });
 	});
 
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
