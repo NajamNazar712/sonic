@@ -381,8 +381,15 @@ class ShipperReturnController extends Controller
                     else{
                         $reference_1_id = null;
                     }
-
-                    ShipmentsJourneyController::add($shipment, 52, 52, NULL, $remarks, session('user_id'), NULL, $reference_1_id);
+                    $last_reason = ShipmentsJourney::where('shipment_id', $shipment)->orderBy('id', 'DESC');
+                    if($last_reason->exists()){
+                        $last_reason = $last_reason->first();
+                        $last_reason_id = $last_reason->status_reason_id;
+                    }
+                    else{
+                        $last_reason_id = NULL;
+                    }
+                    ShipmentsJourneyController::add($shipment, 52, 52, $last_reason_id, $remarks, session('user_id'), NULL, $reference_1_id);
                     if($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12)){
                         NotificationsController::send(33, $shipment);
                     }
