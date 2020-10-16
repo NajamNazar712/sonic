@@ -2234,8 +2234,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     //Parcel History
     Route::prefix('parcel_history')->name('parcel_history.')->group(function () {
-        Route::get('', 'Admins\AdminParcelHistoryController@index')->name('index');
-        Route::get('list', 'Admins\AdminParcelHistoryController@open_guilty_parcel_insert')->name('list');
+        Route::get('{tracking_number?}', 'Admins\AdminParcelHistoryController@index')->name('index');
+        Route::post('list', 'Admins\AdminParcelHistoryController@open_guilty_parcel_remarks')->name('list');
 
     });
 });

@@ -1,11 +1,11 @@
 @extends('admin.layout.master')
 
-@section('title', 'Parcel History')
+@section('title', 'Open Parcel Remarks')
 
 @section('content')
 
     <h1 class="mb-1">
-        Parcel History
+       Open Parcel Remarks
     </h1>
 
     <div class="card">
@@ -13,11 +13,11 @@
             <div class="card-body">
                 <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                     <div class="form-group">
-                        <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        <input type="text" name="tracking_numbers" id="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                     </div>
 
                     <div class="form-group ml-1">
-                        <button type="submit" name="track" class="btn btn-primary" value="Track">Track</button>
+                        <button type="button" name="track" id="track" class="btn btn-primary" value="Track">Track</button>
                     </div>
                 </form>
 
@@ -79,17 +79,14 @@
                     <form id="add_request_form" method="post" enctype="multipart/form-data">
                         @csrf
                         <div class="container">
-                            <div class="row">
-                                <h2 class="heading">Rider</h2>
-                            </div>
 
-                            <input type="hidden" id="requested_shipment_ids">
-                            <div class="row old_scroll" id="requested_shipments">
+                            <input type="hidden" id="requested_rider_ids">
+                            <div class="row old_scroll" id="requested_riders">
 
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-3">
-                                    <select name="add_rider_mode" id="search_shipping_mode" class="form-control select2">
+                                    <select name="search_rider_mode" id="search_rider_mode" class="form-control select2">
                                         @foreach($rider_name as $riders)
                                             <option value="{{$riders->id}}">{{$riders->name}}</option>
                                         @endforeach
@@ -118,28 +115,21 @@
                     <form id="add_request_form" method="post" enctype="multipart/form-data">
                         @csrf
                         <div class="container">
-                            <div class="row">
-                                <h2 class="heading">Admin</h2>
-                            </div>
 
-                            <input type="hidden" id="requested_shipment_ids">
-                            <div class="row old_scroll" id="requested_shipments">
+                            <input type="hidden" name="user_id" id="requested_admin_id">
+                            <div class="row old_scroll" id="requested_riders">
 
                             </div>
-                            <hr>
                             <div class="row justify-content-center">
                                 <div class="col-3">
-                                    <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                                        @foreach($admin_name as $admins)
-                                            <option value="{{$admins->id}}">{{$admins->name}}</option>
+                                    <select name="search_admin_mode" id="search_admin_mode" class="form-control select2">
+                                        @foreach($admin_name as $users)
+                                            <option value="{{$users->id}}">{{$users->name}}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="col-3">
-                                <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
-                            </div>
                         </div>
                     </form>
                 </div>
@@ -147,33 +137,65 @@
         </div>
     </div>
     {{--Parcel Guilty Model--}}
-    <div class="modal fade text-left" id="AddParcelModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddParcelModal"
+    <div class="modal fade text-left" id="AddParcelModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddPacelModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Open Parcel Guilty Person</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h4 class="modal-title" id="">Add Remarks For Guilty Person</h4>
                 </div>
-                <div class="modal-body text-center">
-                    <form id="add_request_form" method="post" action="{{ route('admin.parcel_history.list') }}" enctype="multipart/form-data">
+
+                <form id="add_remarks_form" >
+                    <div class="modal-body">
+                        @method('POST')
                         @csrf
-                        <input type="hidden" id="requested_shipment_ids">
-                        <input type="hidden" id="user_id">
-                        <textarea id="" name=""></textarea>
-                        <input type="text" id="amout" value="amount">
+                        <div class="container">
 
-                            <div class="row old_scroll" id="requested_shipments">
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12">
+                                    <div class="form-group">
+{{--                                        <input type="text" class="form-control" name="shipment_id" placeholder="Shimpent" data-rule-required="true" data-msg-required="Shipment is required">--}}
+                                        <input type="hidden" id="tracking_number_id"  name="tracking_number_id"/>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+{{--                                        <input type="text" class="form-control" name="user_id" placeholder="User" data-rule-required="true" data-msg-required="User is required">--}}
+                                        <input type="hidden" id="selected_user_id" name="selected_user_id" >
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required" required>
+                                    </div>
+                                </div>
 
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control required" name="amount" placeholder="Amount" data-rule-required="true" data-msg-required="Amount is required" required>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                        </div>
+                                        <input type="text" name="date" class="form-control bg-primary border-primary white rounded-right" id="parcel_date" placeholder="Open Parcel Date" data-value="" ata-msg-required="Date is required" required>
+                                    </div>
+
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="col-3">
-                                <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
-                            </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="addRemark">Add</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -215,15 +237,103 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            $(document).on('click', '#track', function(){
+                var tracking_number = $('#tracking_numbers').val();
+
+                $.ajax({
+                    url: "{{route('admin.parcel_history.list')}}",
+                    type:"POST",
+                    data:{tracking_number:tracking_number, '_token':"{{csrf_token()}}"},
+                    success:function(data){
+                        var results = JSON.parse(data);
+                        if(results.result == 'true')
+                        {
+                            var tracking_number_id = results.id;
+                            $('#AddRequestModal').modal('show');
+                            $('#search_user_mode').prepend('<option value="" selected="selected"></option>').select2({
+                                width: '100%',
+                                placeholder: 'Select User',
+                                allowClear:true
+                            }).bind('change', function() {
+                                var selecter = this.value;
+                                if(selecter == 1){
+                                    $('#AddRequestModal').modal('hide');
+                                    $('#AddRiderModal').modal('show');
+                                }
+                                else if(selecter == 2){
+                                    $('#AddRequestModal').modal('hide');
+                                    $('#AddAdminModal').modal('show');
+                                }
+                                //
+                            });
+
+                            $('#search_rider_mode').prepend('<option value="" selected="selected"></option>').select2({
+                                width: '150%',
+                                placeholder: 'Select Rider',
+                                allowClear:true
+                            }).bind('change', function() {
+                                var rider = this.value;
+
+                                if(rider){
+                                    $('#AddRiderModal').modal('hide');
+
+                                    $('#AddParcelModal').modal('show');
+                                    $('#selected_user_id').val($(this).val());
+                                }
+                                //
+                            });
+
+                            $('#search_admin_mode').prepend('<option value="" selected="selected"></option>').select2({
+                                width: '150%',
+                                placeholder: 'Select User',
+                                allowClear:true
+                            }).bind('change', function() {
+                                var rider = this.value;
+
+                                if(rider){
+                                    $('#AddAdminModal').modal('hide');
+
+                                    $('#AddParcelModal').modal('show');
+                                    $('#selected_user_id').val($(this).val());
+                                }
+                                //
+                            });
+                            var date = $('#parcel_date').pickadate({
+                                firstDay: 1,
+                                width: '150%',
+                                clear: 'Clear',
+                                max: '{{ Carbon\Carbon::now() }}',
+                                format:'dd mmmm, yyyy',
+                                selectYears: true,
+                                selectMonths: true,
+                                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                                //hiddenSuffix: '_formatted',
+                            });
+
+                            $('#tracking_number_id').val(tracking_number_id);
+
+                        }
+                        else if(results.result == 'false'){
+                            toastr.error('Tracking No Invalid!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    },
+                    error:function(data){
+
+                    }
+
+                });
+            })
+
+            if($('input[name="tracking_numbers"]').val()!=0){
+                $('#AddRequestModal').modal('show');
+            }
             var select = $('#track_form .tracking_numbers').selectize({
                 placeholder: 'Tracking Number(s)*',
                 delimiter: ',',
                 createOnBlur: true,
                 persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
+
                 onType: function(str) {
                     var regex = /^[0-9,]+$/;
 
@@ -244,69 +354,13 @@
                 }
             });
 
+
+            $.ajax()
             @if (app('request')->has('tracking_number'))
+                url: '{!! route('admin.parcel_history.list') !!}',
             track({{ app('request')->input('tracking_number') }});
             @endif
 
-            function track(tracking_numbers){
-                $.ajax({
-                    url: '{!! route('tracking.track') !!}',
-                    method: 'POST',
-                    data: {
-                        'tracking_numbers': tracking_numbers,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        select[0].selectize.clear();
-
-                        if (data.invalid !== undefined) {
-                            var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
-
-                            toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-
-                        if (data != undefined) {
-
-                                $('#AddRequestModal').modal('show');
-                            $('#search_user_mode').prepend('<option value="" selected="selected"></option>').select2({
-                                width: '100%',
-                                placeholder: 'Select User',
-                                allowClear:true
-                            }).bind('change', function() {
-                                 var selecter = this.value;
-                                if(selecter == 1){
-                                    $('#AddRequestModal').modal('hide');
-                                    $('#AddRiderModal').modal('show');
-                                }
-                                else if(selecter == 2){
-                                    $('#AddRequestModal').modal('hide');
-                                    $('#AddAdminModal').modal('show');
-                                }
-                                //
-                            });
-                            $('#add_rider_mode').prepend('<option value="" selected="selected"></option>').select2({
-                                width: '100%',
-                                placeholder: 'Select Rider',
-                                allowClear:true
-                            }).bind('change', function() {
-
-                                //
-                            });
-
-
-                            $('#tracking table.datatable.tracking_history').DataTable({
-                                dom: 't',
-                                paging: false,
-                                order: [[0, 'desc']],
-                                columns: [
-                                    {name: 'date_time', class: 'align-middle date_time'},
-                                    {name: 'status', class: 'align-middle status'}
-                                ]
-                            });
-                        }
-                    });
-            }
 
             $('#track_form').validate({
                 ignore: [],
@@ -317,10 +371,31 @@
                 },
                 submitHandler: function(form) {
                     track($(form).find('.tracking_numbers').val());
-
                     return false;
                 }
             });
+
+            $(document).on('click', '#addRemark', function () {
+                var formData = $("#add_remarks_form").serialize();
+                $.ajax({
+                    url:"{{route('admin.parcel_history.list')}}",
+                    type:"POST",
+                    data:{formData:formData, 'action':'addRemark', '_token':"{{ csrf_token() }}"},
+                    success:function(data){
+                        var result = JSON.parse(data);
+                        if(result.message =='success'){
+
+                        }
+                        else{
+                            alert('data insert failed');
+                        }
+                    },
+                    error:function(){
+
+                    }
+                });
+            });
+
         });
     </script>
 @endsection

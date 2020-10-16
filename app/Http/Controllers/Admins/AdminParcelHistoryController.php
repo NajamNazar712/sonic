@@ -4,16 +4,21 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\BookingType;
 
 use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\OpenParcelHistory;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
@@ -43,21 +48,50 @@ class AdminParcelHistoryController extends Controller
 
         $this->middleware('Permission');
     }
-    public function index(){
+    public function index(Request $request){
+        $tracking_numbers = explode(',', $request->tracking_numbers);
+        $shipment = Shipment::where('tracking_number', $tracking_numbers);
+
+
         $rider_name = Rider::select('id','name')->get();
         $admin_name = Admin::select('id','name')->get();
         return view('admin.parcel_history.index')->with(['rider_name' => $rider_name,'admin_name' => $admin_name]);
     }
-    public function open_guilty_parcel_insert(Request $request){
-        $open_parcel_complain = new OpenParcelHistory();
-        $open_parcel_complain->shipment_id = $request->shipment_id;
-        $open_parcel_complain = $request->user_id;
-        $open_parcel_complain->remarks = $request->remarks;
-        $open_parcel_complain->amount = $request->amount;
-        $open_parcel_complain->date = $request->date;
-        $open_parcel_complain->save();
+    public function open_guilty_parcel_remarks(Request $request){
 
-        return redirect()->back()->with(['success' => 'Complain successfully added!']);
+        if($request->action == 'addRemark')
+        {
+            parse_str($request->formData, $formData);
+
+            $result = OpenParcelHistory::create([
+                'shipment_id' => $formData['tracking_number_id'],
+                'user_id'   => $formData['selected_user_id'],
+                'remarks'   => $formData['remarks'],
+                'amount'    => $formData['amount'],
+                'date'      => $formData['date_submit']
+            ]);
+
+            if($result->id){
+                $data['message'] = 'success';
+            }
+            else{
+                $data['message'] = 'failed';
+            }
+            //echo json_encode($data);
+            return redirect()->back()->with(['success' => 'Remarks Successfully Added!']);
+        }
+        else{
+            $track = Shipment::where('tracking_number', $request->tracking_number)->get()->toArray();
+            if(count($track)){
+                $data['id'] = $track[0]['id'];
+                $data['result'] = 'true';
+            }
+            else{
+                $data['result'] = 'false';
+            }
+            echo \GuzzleHttp\json_encode($data);
+            //return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Draft Successfully Updated!']);
+        }
     }
 
 }

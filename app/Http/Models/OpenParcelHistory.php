@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class OpenParcelHistory extends Model
 {
     protected $fillable = [
-        'shipment_id','user_id','remarks','amount'
+        'shipment_id','user_id','remarks','amount', 'date'
     ];
     public function rider(){
         return $this->belongsTo('App\Http\Models\Rider');
