@@ -49,13 +49,8 @@ class AdminParcelHistoryController extends Controller
         $this->middleware('Permission');
     }
     public function index(Request $request){
-        $tracking_numbers = explode(',', $request->tracking_numbers);
-        $shipment = Shipment::where('tracking_number', $tracking_numbers);
 
-
-        $rider_name = Rider::select('id','name')->get();
-        $admin_name = Admin::select('id','name')->get();
-        return view('admin.parcel_history.index')->with(['rider_name' => $rider_name,'admin_name' => $admin_name]);
+        return view('admin.parcel_history.index');
     }
     public function open_guilty_parcel_remarks(Request $request){
 

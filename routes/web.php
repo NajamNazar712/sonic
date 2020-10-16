@@ -2233,7 +2233,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
     });
 
-    Route::prefix('parcel_history')->name('parcel_history.')->group(function () {
+    Route::prefix('open_parcel_history')->name('open_parcel_history.')->group(function () {
         Route::get('{tracking_number?}', 'Admins\AdminParcelHistoryController@index')->name('index');
         Route::post('list', 'Admins\AdminParcelHistoryController@open_guilty_parcel_remarks')->name('list');
 	});
