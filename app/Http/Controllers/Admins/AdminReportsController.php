@@ -3630,9 +3630,10 @@ use Yajra\Datatables\Datatables;
 //                        ->where('shipments.user_id','u.id')
                         ->whereBetween('os.created_at', [$from_date, $to_date]);
                 })
-                ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges','pending_payment_shipments.payable as payable','os.created_at as duration')
+                ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'),'os.created_at as duration')
                 ->where('payable','<',0)
-                ->groupBy('pending_payment_shipments.id');
+                ->groupBy('u.id');
+
             $datatable = Datatables::of($negative)
                 ->setRowAttr([
                     'class' => function ($datatable) {
