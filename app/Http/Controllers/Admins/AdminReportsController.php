@@ -1022,6 +1022,55 @@ use Yajra\Datatables\Datatables;
             return view('admin.reports.outstanding_shipments_report')->with(['hubs' => $hubs, 'shipping_modes' => $shipping_modes]);
         }
         public function outstanding_shipments_list(Request $request){
+            $count = DB::connection('reports')->table('delivery_note_shipments');
+
+            if (session('role_id') != 1 || $request->get('search_shipping_mode')) {
+                $count = $count->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id');
+            }
+
+            if (session('role_id') != 1) {
+                $count = $count->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')->whereIn('dc.hub_id', session('hubs'));
+            }
+
+            if ($recovery_status = $request->get('search_recovery_status')) {
+                if($recovery_status == 0){
+                    $count = $count->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
+                }else if($recovery_status == 1){
+                    $count = $count->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+                }else if($recovery_status == 7){
+                    $count = $count->where('delivery_note_shipments.status', '=', 7);
+                }else if($recovery_status == 11){
+                    $count = $count->where('delivery_note_shipments.status', '=', 11);
+                }
+            }
+            else {
+                $count = $count->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
+            }
+
+            if ($mode = $request->get('search_shipping_mode')) {
+                $count = $count->where('s.booking_type_id', '=', $mode);
+            }
+            if ($hub = $request->get('hub')) {
+                $count = $count->join('cities as hc', 'dc.hub_id', '=', 'hc.id')->where('hc.id', '=', $hub);
+            }
+
+            if ($request->get('delivery_date_from') || $request->get('delivery_date_to')) {
+                $count = $count->join('shipments_journey as sjd', function($join) {
+                    $join->on('sjd.shipment_id', '=', 'delivery_note_shipments.shipment_id')
+                        ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = delivery_note_shipments.shipment_id AND shipments_journey.shipper_status_id IN (14, 16, 30, 36))'));
+                    });
+            }
+
+            if ($delivery_date_from = $request->get('delivery_date_from')) {
+                $count = $count->where('sjd.created_at', '>=', $delivery_date_from);
+            }
+
+            if ($delivery_date_to = $request->get('delivery_date_to')) {
+                $count = $count->where('sjd.created_at', '<', Carbon::parse($delivery_date_to)->addDay()->toDateTimeString());
+            }
+
+            $count = $count->count();
+
             $shipments = DB::connection('reports')->table('delivery_note_shipments')->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
                 ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
                 ->join('delivery_notes as delivery_note', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_note.id')
@@ -1043,9 +1092,9 @@ use Yajra\Datatables\Datatables;
                     $join->on('svd.shipment_id', '=', 's.id')
                         ->where('svd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.reference_1_id = delivery_note.id and shipments_journey.shipper_status_id != 5)'));
                 })
-                ->leftjoin('shipments_journey as sjd', function($join) {
+                ->join('shipments_journey as sjd', function($join) {
                     $join->on('sjd.shipment_id', '=', 's.id')
-                        ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
+                        ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = s.id AND shipments_journey.shipper_status_id IN (14, 16, 30, 36))'));
                 })
                 ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
                 ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
@@ -1055,6 +1104,7 @@ use Yajra\Datatables\Datatables;
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
             }
             $datatables = Datatables::of($shipments)
+                ->setTotalRecords($count)
                 ->setRowAttr([
                     'data-dncc' => function ($shipments) {
                         return $shipments->dncc;
@@ -5392,7 +5442,7 @@ use Yajra\Datatables\Datatables;
             $today = Carbon::now()->endOfDay();
             $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
             $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
-            $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
+            $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
             $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
 
             return view('admin.reports.summary')->with(['hubs'=>$hubs,'shippers'=>$shippers,'today' => $today, 'thirtyday' => $thirtyDays, 'shipping_modes' => $shipping_modes]);

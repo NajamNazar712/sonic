@@ -513,7 +513,8 @@ class VisionSoftAPIController extends Controller
                                                 'pin_replacement_charges' => ($shipment_charges['replacement_charges'] != null) ? $shipment_charges['replacement_charges'] : 0,
                                                 'pin_cash_handling_charges' => ($shipment_charges['cash_handling_charges'] != null) ? $shipment_charges['cash_handling_charges'] : 0,
                                                 'pin_srb_pra_bra_kpra' => ($shipment_charges['gst'] != null) ? $shipment_charges['gst'] : 0,
-                                                'pin_return_charges' => ($shipment_charges['return_charges'] != null) ? $shipment_charges['return_charges'] : 0
+                                                'pin_return_charges' => ($shipment_charges['return_charges'] != null) ? $shipment_charges['return_charges'] : 0,
+                                                'pin_rintercept_charges' => ($shipment_charges['intercept_charges'] != null) ? $shipment_charges['intercept_charges'] : 0
                                             ]
                                         ]);
                                         $status_code = $response->getStatusCode();
@@ -535,6 +536,7 @@ class VisionSoftAPIController extends Controller
                                             $new_charges->cash_handling_charges = ($shipment_charges['cash_handling_charges'] != null) ? $shipment_charges['cash_handling_charges'] : 0;
                                             $new_charges->gst = ($shipment_charges['gst'] != null) ? $shipment_charges['gst'] : 0;
                                             $new_charges->return_charges = ($shipment_charges['return_charges'] != null) ? $shipment_charges['return_charges'] : 0;
+                                            $new_charges->intercept_charges = ($shipment_charges['intercept_charges'] != null) ? $shipment_charges['intercept_charges'] : 0;
                                             $new_charges->save();
                                         }
                                     } catch (RequestException $e) {

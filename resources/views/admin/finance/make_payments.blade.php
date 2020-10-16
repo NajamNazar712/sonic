@@ -107,7 +107,6 @@
 										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
-										<th class="border-primary border-darken-1">Total Adjustments</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Bank Branch</th>
 										<th class="border-primary border-darken-1">Account No.</th>
@@ -415,7 +414,6 @@
                             head.push('Packing Charges');
                             head.push('Total Deductable');
                             head.push('Total Payable');
-                            head.push('Total Adjustments');
                             head.push('Bank');
                             head.push('Bank Branch');
                             head.push('Account No.');
@@ -449,7 +447,6 @@
                                 row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
-                                row.push(values.total_adjustments);
                                 row.push(values.bank);
                                 row.push(values.bank_branch);
                                 row.push(values.account_no);
@@ -612,7 +609,6 @@
 					{data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'ppc.payable', class: 'align-middle text-center total_payable', orderable: false},
-					{data:'total_adjustments', name: 'total_adjustments', class: 'align-middle text-center total_adjustments', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
 					{data:'bank_branch', name: 'ubi.bank_branch', class: 'align-middle text-center bank_branch'},
 					{data:'account_no', name: 'ubi.account_no', class: 'align-middle text-center account_no'},
@@ -1144,7 +1140,9 @@
 
 			$('#make_payments').on('hide.bs.modal', function () {
 				selected_rows = [];
-			})
+				table.rows().deselect();
+				table.button('.make_payment').disable();
+			});
 
 			function calculation(parent) {
 				var id = parseInt(parent.attr('id'));
