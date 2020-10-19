@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Make Payments')
+@section('title', 'Make Payments Pickup Wise')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Make Payments
+                    Make Payments Pickup Wise
                 </h1>
 
                 <div class="card">
@@ -98,7 +98,6 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">City</th>
@@ -210,7 +209,7 @@
                                 <div class="modal-dialog modal-lg modal-full-length" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h4 class="modal-title" id="make_payments_title">Make Payments<span></span></h4>
+                                            <h4 class="modal-title" id="make_payments_title">Make Payments Pickup Wise<span></span></h4>
 
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">×</span>
@@ -238,7 +237,7 @@
                                                 </thead>
                                             </table>
 
-                                            <form id="make_payments_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.make_payments.store') }}">
+                                            <form id="make_payments_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.make_payments_pickup_wise.store') }}">
                                                 {{ csrf_field() }}
 
                                                 <input type="hidden" name="pending_payment_shipment_ids" class="pending_payment_shipment_ids">
@@ -409,7 +408,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.finance.make_payments.list') }}',
+                        url: '{{ route('admin.finance.make_payments_pickup_wise.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -488,31 +487,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(60, session('permissions')))
 
-                buttons: [{
-                    text: 'Make Payment(s)',
-                    className: 'btn btn-primary make_payment',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        $('#make_payments #make_payments_form .total_amount').val(0);
-                        $('#make_payments #make_payments_form .total_charges').val(0);
-                        $('#make_payments #make_payments_form .total_gst').val(0);
-                        $('#make_payments #make_payments_form .total_deductable').val(0);
-                        $('#make_payments #make_payments_form .total_payable').val(0);
-                        $('#make_payments #make_payments_form .total_hold').val(0);
-
-
-                        $('#make_payments #make_payments_form button.make').prop('disabled', true);
-                        $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
-
-                        $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
-
-                        selected_rows_shipments = [];
-
-                        make_payments_table.clear().draw();
-
-                        $('#make_payments').modal('show');
-                    }
-                },
+                buttons: [
                     {
                         extend: 'excel',
                         title: 'Make Payments',
@@ -576,19 +551,14 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Make Payments',
+                        title: 'Make Payments pickup Wise',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'],
                 @endif
                 scrollX: true, scrollY: '500px',
-                select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
-                },
+
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -598,7 +568,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.finance.make_payments.list') }}',
+                    url: '{{ route('admin.finance.make_payments_pickup_wise.list') }}',
                     data: function (d) {
                         d.payment_filter = $('#payment_cycle_filter_form select.payment_cycle_filter').val();
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
@@ -611,7 +581,6 @@
                 rowId: 'id',
                 order: [[6, 'desc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
                     {data:'city', name: 'c.name', class: 'align-middle text-center city'},
@@ -641,19 +610,10 @@
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
-                    if (data.documents_status == 2) {
-                        $('td:eq(0)', row).addClass('select-checkbox');
-                    }
-
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
-                    if (selected_rows.length != 0) {
-                        if ($.inArray(data.id, selected_rows) !== -1) {
-                            table.row(row).select();
-                        }
-                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
