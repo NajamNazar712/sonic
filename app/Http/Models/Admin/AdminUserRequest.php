@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AdminUserRequest extends Model
 {
-    public function hubs() {
+    public function hub() {
         return $this->hasMany('App\Http\Models\Admin\AdminHub', 'admin_id', 'id');
     }
 }

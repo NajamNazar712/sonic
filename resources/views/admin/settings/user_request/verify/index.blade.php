@@ -45,13 +45,16 @@
                                         </div>
                                     </div>
 
-
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <div class="form-group">
                                             <select name="department" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
                                                 @foreach($departments as $department)
-                                                    <option value="{{ $department->id }}" selected="selected">{{ $department->name }} </option>
-                                                @endforeach
+                                                    @if ($department->id == $user->department)
+                                                        <option value="{{ $department->id }}" selected="selected">{{ $department->name }}</option>
+                                                    @else
+                                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                                    @endif
+                                                    @endforeach
                                             </select>
                                         </div>
                                     </div>
@@ -97,7 +100,11 @@
 
                                     @foreach($hubs as $hub)
                                         <fieldset class="d-inline-block m-1">
-                                            <input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
+                                            @if (in_array($hub->id, $user_hubs))
+                                                <input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}" checked="checked">
+                                            @else
+                                                <input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
+                                            @endif
                                             <label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
                                         </fieldset>
                                     @endforeach
@@ -131,22 +138,35 @@
 
     <script>
         $(document).ready(function() {
-            $('#user_form #department').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Department*'
-            });
-
+            @if ($user->default_hub_id === null)
             $('#user_form #default_hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Default Hub*'
             });
+            @else
+            $('#user_form #default_hub').select2({
+                width: '100%',
+                placeholder: 'Default Hub*'
+            });
+            @endif
+
+            @if ($user->department === null)
+            $('#user_form #department').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Department*'
+            });
+            @else
+            $('#user_form #department').select2({
+                width: '100%',
+                placeholder: 'Department'
+            });
+            @endif
 
             $('#user_form #phone_number').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
             });
             $('#user_form #trax_id').inputmask({
-                /* 'mask': '9999-9999999',*/
                 'digits' : 10,
                 'min': 6,
                 'max': 10
@@ -196,7 +216,7 @@
                     form.submit();
                 }
             });
-            $('#selectAll .hub').each(function() {
+           /* $('#selectAll .hub').each(function() {
                 var checkbox = $(this);
                 var label = checkbox.next();
                 var text = label.text();
@@ -209,7 +229,7 @@
                     uncheckedClass: 'bg-danger',
                     insert: '<div class="icheck_line-icon"></div>' + text
                 });
-            });
+            });*/
 
             $("#selectAll").click(function() {
 

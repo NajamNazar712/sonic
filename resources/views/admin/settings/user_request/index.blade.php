@@ -58,7 +58,7 @@
                                 </button>
                             </div>
                             <div class="modal-body text-center">
-                                 <form id="assign_hub_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
+                               {{--  <form id="assign_hub_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
                                      @method('POST')
                                      @csrf
                                      {{ csrf_field() }}
@@ -124,7 +124,7 @@
                                              </div>
                                          </div>
                                      </div>
-                                 </form>
+                                 </form>--}}
                             </div>
                         </div>
                     </div>
@@ -139,7 +139,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
+                                   {{-- <th class="border-primary border-darken-1"></th>--}}
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Trax ID</th>
                                     <th class="border-primary border-darken-1">Name</th>
@@ -153,7 +153,7 @@
                                     <th class="border-primary border-darken-1">Request Created At</th>
                                     <th class="border-primary border-darken-1">Verified By HR</th>
                                     <th class="border-primary border-darken-1">Verified By HR At</th>
-                                    <th class="border-primary border-darken-1">Launched To Date (TAT)</th>
+                                    <th class="border-primary border-darken-1">Requested From Days (TAT)</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -225,7 +225,7 @@
                             head.push('Request Created At');
                             head.push('Verified By HR');
                             head.push('Verified By HR At');
-                            head.push('Launched To Date (TAT)');
+                            head.push('Requested From Date (TAT)');
                             head.push('Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -238,7 +238,7 @@
                                 row.push(values.department);
                                 row.push(values.designation);
                                 row.push(values.default_hub);
-                                row.push(values.request_added_by);
+                                row.push(values.request_craeted_by);
                                 row.push(values.request_created_at);
                                 row.push(values.verified_by_hr);
                                 row.push(values.verified_by_hr_at);
@@ -264,7 +264,7 @@
                     action: function (e, dt, node, config) {
                         window.location = '{{ route('admin.settings.user_requests.add.index') }}';
                     }
-                },{
+                }/*,{
                     text: '<i class="la la-cogs"></i> Assign Hub(s)',
                     className: 'btn btn-primary assign',
                     enabled:false,
@@ -327,7 +327,7 @@
                                 }
                             });
                         }
-                    },{
+                    }*/,{
                         extend: 'excel',
                         title: 'Users',
                         className: 'btn btn-primary',
@@ -349,21 +349,21 @@
                 language: {
                     processing: data_table_loader
                 },
-                select: {
+                /*select: {
                     info: false,
                     style: 'multi',
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
-                },
+                },*/
                 serverSide: true,
                 ajax: '{{ route('admin.settings.user_requests.list') }}',
                 rowId: 'id',
                 order: [[1, 'asc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    //{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'trax_id', name: 'admin_user_requests.trax_id ', class: 'align-middle trax_id'},
-                    {data: 'name', name: 'admin_user_requests.name ', class: 'align-middle name'},
+                    {data: 'trax_id', name: 'admin_user_requests.trax_id', class: 'align-middle trax_id'},
+                    {data: 'name', name: 'admin_user_requests.name', class: 'align-middle name'},
                     {data: 'email', name: 'admin_user_requests.email', class: 'align-middle email'},
                     {data: 'phone_number', name: 'admin_user_requests.phone_number', class: 'align-middle phone_number'},
                     {data: 'cnic', name: 'admin_user_requests.cnic', class: 'align-middle cnic'},
@@ -372,23 +372,23 @@
                     {data: 'default_hub', name: 'c.name', class: 'align-middle default_hub'},
                     {data: 'request_craeted_by', name: 'a.name', class: 'align-middle request_craeted_by'},
                     {data: 'request_created_at', name: 'admin_user_requests.request_created_at', class: 'align-middle request_created_at'},
-                    {data: 'verified_by_hr', name: 'a.name', class: 'align-middle verified_by_hr'},
+                    {data: 'verified_by_hr', name: 'as.name', class: 'align-middle verified_by_hr'},
                     {data: 'verified_by_hr_at', name: 'admin_user_requests.verified_by_hr_at', class: 'align-middle verified_by_hr_at'},
-                    {data: 'launched_to_date', name: 'launched_to_date', class: 'align-middle launched_to_date', orderable: false, searchable: false},
-                    {data: 'status', name: 'admin_user_requests.status ', class: 'align-middle status'},
+                    {data: 'requested_from_date', name: 'requested_from_date', class: 'align-middle requested_from_date', orderable: false, searchable: false},
+                    {data: 'status', name: 'admin_user_requests.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
-                    // var info = table.page.info();
+                     var info = table.page.info();
 
-                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                   /* $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
-                    }
+                    }*/
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -492,8 +492,6 @@
                     form.submit();
                 }
             });
-
-
         });
     </script>
 @endsection

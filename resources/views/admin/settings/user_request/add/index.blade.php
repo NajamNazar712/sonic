@@ -83,15 +83,13 @@
                                             <button type="button" id="unselect" class="btn btn-primary">Unselect All Hubs</button>
                                             </di>
                                         </div>
+                                        @foreach($hubs as $hub)
+                                            <fieldset class="d-inline-block m-1">
+                                                    <input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
+                                                <label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
+                                            </fieldset>
+                                        @endforeach
                                     </div>
-
-                                    @foreach($hubs as $hub)
-                                        <fieldset class="d-inline-block m-1">
-                                            <input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
-                                            <label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
-                                        </fieldset>
-                                    @endforeach
-                                </div>
 
                                 <div class="col-12">
                                     <div class="form-group text-center mt-2">
