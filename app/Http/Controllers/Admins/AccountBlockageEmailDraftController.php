@@ -22,7 +22,7 @@ class AccountBlockageEmailDraftController extends Controller
         //$users = User::where('status',3)->pluck('id')->toArray();
         $users = User::join('shipments','user_id','=','users.id')->
         where(DB::raw("(STR_TO_DATE(shipments.created_at,'%Y-%m-%d'))"),$last_15_days)->where('users.status',3)->pluck('users.id')->toArray();
-       // dd($users);
+        //dd($users);
         $defaulter_users = array();
 
         if(count($users) > 0){
