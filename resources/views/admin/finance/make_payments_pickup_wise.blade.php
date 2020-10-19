@@ -237,9 +237,9 @@
                                                 </thead>
                                             </table>
 
-                                            <form id="make_payments_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.make_payments_pickup_wise.store') }}">
+                                            <form id="make_payments_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.make_payments.store') }}">
                                                 {{ csrf_field() }}
-
+                                                <input type="hidden" name="make_payments_pickup_wise" value="1">
                                                 <input type="hidden" name="pending_payment_shipment_ids" class="pending_payment_shipment_ids">
 
                                                 <div class="col-2">

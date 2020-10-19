@@ -15,6 +15,7 @@ use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PendingPaymentCalculation;
+use App\Http\Models\PickupAddressIbanMapping;
 use App\Http\Models\RevertStatusRequestLog;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsPaymentJourney;
@@ -3309,12 +3310,22 @@ class AdminFinanceController extends Controller
             if ($pending_payment) {
                 $user_bank_id = NULL;
 
-                $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
+                if($request->has('make_payments_pickup_wise')){
+                    $pickup_address_map = PickupAddressIbanMapping::where('pickup_address_id', $request->pickup_address_id)->select('bank_info_id as id');
+                    if($pickup_address_map->exists()){
+                        $user_bank_id = $pickup_address_map->first();
+                    }else{
+                        $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
+                    }
+                }else{
+                    $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
 
-                if($user_bank_id){
-                   $user_bank_id = $user_bank_id->id;
                 }
 
+                if($user_bank_id){
+                    $user_bank_id = $user_bank_id->id;
+                }
+                dd($request);
                 if ($total_shipments == $selected_shipments) {
 
 
