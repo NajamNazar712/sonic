@@ -47,7 +47,7 @@ class AccountBlockageEmailDraftController extends Controller
             ->where('users.status',3)->pluck('users.id')->toArray();
            //dd($users);
         $defaulter_users = array();
-        if(count($users) > 0){
+        if(count($users) >= 0){
             foreach ($users as $user_id){
 
                 $user = User::find($user_id);
@@ -57,7 +57,7 @@ class AccountBlockageEmailDraftController extends Controller
                 }
                 $defaulter_users[] = $user->id;
             }
-            if(count($defaulter_users) > 0){
+            if(count($defaulter_users) >= 0){
                 return $defaulter_users;
             }
         }

@@ -5887,18 +5887,20 @@ class NotificationsController extends Controller
 
                 }
                 else if($id == 93){
+                    if($reference_2_id){
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
+                       // dd($user_emails);
+                        if(count($user_emails) >= 0){
+                            foreach($user_emails as $email){
+                                $to = $email;
+                                self::email($subject, $body, $to);
+                            }
+                        }
 
-                    $subject = $notification->subject;
-                    $body = $notification->body;
-                    $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
-                    dd($user_emails);
-                    $to = array();
-
-                    if ($user_emails) {
-                        $to = array_merge($to, $user_emails);
                     }
 
-                    self::email($subject, $body, $to);
                 }
                 else if($id == 94){
 
@@ -5915,18 +5917,19 @@ class NotificationsController extends Controller
                 }
                 else if($id == 95){
 
-                    $subject = $notification->subject;
-                    $body = $notification->body;
+                    if($reference_2_id){
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
+                        // dd($user_emails);
+                        if(count($user_emails) >= 0){
+                            foreach($user_emails as $email){
+                                $to = $email;
+                                self::email($subject, $body, $to);
+                            }
+                        }
 
-                    $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
-                    //dd($user_emails);
-                    $to = array();
-
-                    if ($user_emails) {
-                        $to = array_merge($to, $user_emails);
                     }
-
-                    self::email($subject, $body, $to);
                 }
             }
         }
