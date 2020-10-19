@@ -1311,8 +1311,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('make_payments_pickup_wise')->name('make_payments_pickup_wise.')->group(function () {
-            Route::get('', 'Admins\AdminFinanceController@make_payments_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@make_payments_list')->name('list');
+            Route::get('', 'Admins\AdminFinanceController@make_payments_pickup_wise_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@make_payments_pickup_wise_list')->name('list');
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@make_payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Admins\AdminFinanceController@make_payments_returned_shipments')->name('returned_shipments');
             Route::post('adjusted_shipments', 'Admins\AdminFinanceController@make_payments_adjusted_shipments')->name('adjusted_shipments');
