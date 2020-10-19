@@ -27,16 +27,7 @@
                                         </select>
                                     </fieldset>
                                 </div>
-                                <div class="col-3">
-                                    <form id="payment_cycle_filter_form" class="mb-1 justify-content-center" novalidate="novalidate">
-                                        <div class="form-group">
-                                            <select name="payment_cycle_filter" class="select2 payment_cycle_filter">
-                                                <option value="1" selected>Filtered</option>
-                                                <option value="2">All</option>
-                                            </select>
-                                        </div>
-                                    </form>
-                                </div>
+
                                 <div class="col-3">
                                     <form id="tracking_number_search_form" class="mb-1 justify-content-center" novalidate="novalidate">
                                         <div class="form-group">
@@ -106,9 +97,6 @@
                                     <th class="border-primary border-darken-1">Created Datetime</th>
                                     <th class="border-primary border-darken-1">Total Shipments</th>
                                     <th class="border-primary border-darken-1">Total Pending Shipments</th>
-                                    <th class="border-primary border-darken-1">Delivered Shipments</th>
-                                    <th class="border-primary border-darken-1">Returned Shipments</th>
-                                    <th class="border-primary border-darken-1">Adjusted Shipments</th>
                                     <th class="border-primary border-darken-1">Total Amount</th>
                                     <th class="border-primary border-darken-1">Total Charges</th>
                                     <th class="border-primary border-darken-1">Total GST</th>
@@ -116,13 +104,6 @@
                                     <th class="border-primary border-darken-1">Total Deductable</th>
                                     <th class="border-primary border-darken-1">Total Payable</th>
                                     <th class="border-primary border-darken-1">Total Adjustments</th>
-                                    <th class="border-primary border-darken-1">Bank</th>
-                                    <th class="border-primary border-darken-1">Bank Branch</th>
-                                    <th class="border-primary border-darken-1">Account No.</th>
-                                    <th class="border-primary border-darken-1">Account Title</th>
-                                    <th class="border-primary border-darken-1">IBAN</th>
-                                    <th class="border-primary border-darken-1">Account City</th>
-                                    <th class="border-primary border-darken-1">Payment Cycle</th>
                                     <th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -423,9 +404,6 @@
                             head.push('Created Datetime');
                             head.push('Total Shipments');
                             head.push('Total Pending Shipments');
-                            head.push('Delivered Shipments');
-                            head.push('Returned Shipments');
-                            head.push('Adjusted Shipments');
                             head.push('Total Amount');
                             head.push('Total Charges');
                             head.push('Total GST');
@@ -433,13 +411,6 @@
                             head.push('Total Deductable');
                             head.push('Total Payable');
                             head.push('Total Adjustments');
-                            head.push('Bank');
-                            head.push('Bank Branch');
-                            head.push('Account No.');
-                            head.push('Account Title');
-                            head.push('IBAN');
-                            head.push('Account City');
-                            head.push('Payment Cycle');
                             head.push('Return Shipments Avg. Aging');
 
 
@@ -457,9 +428,6 @@
                                 row.push(values.created_at);
                                 row.push(values.total_shipments);
                                 row.push(values.total_pending_shipments);
-                                row.push(values.delivered_shipments_count);
-                                row.push(values.returned_shipments_count);
-                                row.push(values.adjusted_shipments_count);
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
@@ -467,13 +435,6 @@
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
                                 row.push(values.total_adjustments);
-                                row.push(values.bank);
-                                row.push(values.bank_branch);
-                                row.push(values.account_no);
-                                row.push(values.account_title);
-                                row.push(values.iban);
-                                row.push(values.account_city);
-                                row.push(values.payment_cycle);
                                 row.push(values.return_shipments_average_aging);
 
                                 body.push(row);
@@ -573,7 +534,6 @@
                 ajax: {
                     url: '{{ route('admin.finance.make_payments_pickup_wise.list') }}',
                     data: function (d) {
-                        d.payment_filter = $('#payment_cycle_filter_form select.payment_cycle_filter').val();
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
                         d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
                         d.search_shipper = $('#search_shipper').val();
@@ -590,11 +550,8 @@
                     {data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
                     {data:'address', name: 'u.address', class: 'align-middle text-center address'},
                     {data:'created_at', name: 'pending_payments.created_at', class: 'align-middle text-center created_at'},
-                    {data:'total_shipments', name: 'pending_payments.total_shipments', class: 'align-middle text-center total_shipments'},
+                    {data:'total_shipments', name: 'total_shipments', class: 'align-middle text-center total_shipments',orderable: false, searchable: false},
                     {data:'total_pending_shipments', name: 'total_pending_shipments', class: 'align-middle text-center total_pending_shipments', orderable: false},
-                    {data:'delivered_shipments', name: 'pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
-                    {data:'returned_shipments', name: 'pending_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
-                    {data:'adjusted_shipments', name: 'pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
                     {data:'total_amount', name: 'ppc.amount', class: 'align-middle text-center total_amount', orderable: false},
                     {data:'total_charges', name: 'ppc.charges', class: 'align-middle text-center total_charges', orderable: false},
                     {data:'total_gst', name: 'ppc.gst', class: 'align-middle text-center total_gst', orderable: false},
@@ -602,13 +559,6 @@
                     {data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
                     {data:'total_payable', name: 'ppc.payable', class: 'align-middle text-center total_payable', orderable: false},
                     {data:'total_adjustments', name: 'total_adjustments', class: 'align-middle text-center total_adjustments', orderable: false},
-                    {data:'bank', name: 'bank', class: 'align-middle text-center bank'},
-                    {data:'bank_branch', name: 'ubi.bank_branch', class: 'align-middle text-center bank_branch'},
-                    {data:'account_no', name: 'ubi.account_no', class: 'align-middle text-center account_no'},
-                    {data:'account_title', name: 'ubi.account_title', class: 'align-middle text-center account_title'},
-                    {data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
-                    {data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
-                    {data:'payment_cycle', name: 'pc.id', class: 'align-middle text-center payment_cycle'},
                     {data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -624,39 +574,15 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
-                    // var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control">' +
-                    //     '<option value="ibft">IBFT</option>' +
-                    //     '<option value="invoices">Invoices</option>' +
-                    //     '</select>';
-                    var payment_cycle_select = '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
-                        '<option value="1">Daily</option>' +
-                        '<option value="2">Weekly</option>' +
-                        '<option value="3">Monthly</option>' +
-                        '</select>';
+
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.total_adjustments') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments') || $(header).is('.packaging_charges')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.total_adjustments') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments') || $(header).is('.packaging_charges') || $(header).is('.total_shipments')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.bank')){
-                            $(bank_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                            // }else if($(header).is('.payment_mode')){
-                            //     $(payment_mode_select).appendTo($(search))
-                            //         .on( 'change', function () {
-                            //             column.search($(this).val(), false, false, true).draw();
-                            //         } ).wrap(td);
-                        }else if($(header).is('.payment_cycle')){
-                            $(payment_cycle_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
-
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -667,36 +593,7 @@
                             }
                         }
                     });
-                    var data = $.map({!! $banks !!}, function (obj) {
-                        obj.id = obj.id;
 
-                        return obj;
-                    });
-                    var data = $.map({!! $banks !!}, function (obj) {
-                        obj.text = obj.name;
-
-                        return obj;
-                    });
-
-                    $("#bank_select").prepend('<option value="" selected></option>').select2({
-                        data:data,
-                        placeholder: "Select Bank",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    // $("#payment_mode_select").prepend('<option value="" selected></option>').select2({
-                    //     placeholder: "Select Mode",
-                    //     width:'100%',
-                    //     containerCssClass: 'select-xs',
-                    //     dropdownCssClass: 'form-control-sm p-0'
-                    // });
-                    $("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Cycle",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
                     this.api().table().columns.adjust();
                 }
             });
