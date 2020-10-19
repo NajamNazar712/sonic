@@ -14,7 +14,7 @@ class NonComplianceOfRequirements extends Command
      *
      * @var string
      */
-    protected $signature = 'email:=NonComplianceOfRequirements';
+    protected $signature = 'email:NonComplianceOfRequirements';
 
     /**
      * The console command description.

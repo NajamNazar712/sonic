@@ -5890,13 +5890,14 @@ class NotificationsController extends Controller
 
                     $subject = $notification->subject;
                     $body = $notification->body;
-                    $user = User::find($reference_2_id);
-
+                    $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
+                    dd($user_emails);
                     $to = array();
 
-                    if($user){
-                        $to[] = $user->email;
+                    if ($user_emails) {
+                        $to = array_merge($to, $user_emails);
                     }
+
                     self::email($subject, $body, $to);
                 }
                 else if($id == 94){
@@ -5916,13 +5917,15 @@ class NotificationsController extends Controller
 
                     $subject = $notification->subject;
                     $body = $notification->body;
-                    $user = User::find($reference_2_id);
 
+                    $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
+                    //dd($user_emails);
                     $to = array();
 
-                    if($user){
-                        $to[] = $user->email;
+                    if ($user_emails) {
+                        $to = array_merge($to, $user_emails);
                     }
+
                     self::email($subject, $body, $to);
                 }
             }

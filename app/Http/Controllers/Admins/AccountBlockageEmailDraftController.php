@@ -15,39 +15,49 @@ class AccountBlockageEmailDraftController extends Controller
 {
     static public function shipper_booking_order(){
 
-        $now = Carbon::now();
-        $last_15_days = Carbon::today()->subDays(15)->toDateString();
+        $now = Carbon::now()->format('Y-m-d');
+        //dd($now);
+        $last_15_days = Carbon::today()->subDays(15)->format('Y-m-d');
 
-        $booking=Shipment::whereBetween('created_at',[$last_15_days,$now])->groupBy('user_id')->pluck('user_id')->toArray();
+        //$users = User::where('status',3)->pluck('id')->toArray();
+        $users = User::join('shipments','user_id','=','users.id')->
+        where(DB::raw("(STR_TO_DATE(shipments.created_at,'%Y-%m-%d'))"),$last_15_days)->where('users.status',3)->pluck('users.id')->toArray();
+        $defaulter_users = array();
 
-        $users = User::where('status',3)->pluck('id')->toArray();
-
-        $pending_users = array_diff($users, $booking);
-        if(count($pending_users) > 0){
-            foreach ($pending_users as $user_id){
+        if(count($users) > 0){
+            foreach ($users as $user_id){
                 $user = User::find($user_id);
-                return $user->id;
+                $defaulter_users[] = $user->id;
+                //return $user->id;
+            }
+            if(count($defaulter_users) > 0){
+                return $defaulter_users;
             }
         }
     }
     static public function non_compliance(){
         $now = Carbon::now();
-        $last_7_days = Carbon::today()->subDays(7)->toDateString();
+        $last_7_days = Carbon::today()->subDays(7)->format('Y-m-d');
 
-        $user_documents=UserDocumentAttachment::whereBetween('created_at',[$last_7_days,$now])->groupBy('user_id')->pluck('user_id')->toArray();
-        ($user_documents);
-        $users = User::where('status',3)->pluck('id')->toArray();
-        ($users);
-        $pending_documents = array_diff($users, $user_documents);
-        if(count($pending_documents) > 0){
-            foreach ($pending_documents as $user_id){
+        $users = User::join('user_document_attachments as usd','usd.user_id','=','users.id')->
+          where(DB::raw("(STR_TO_DATE(usd.created_at,'%Y-%m-%d'))"),$last_7_days)
+             ->Where('usd.filled_and_signed_pdf',NULL)
+            ->OrWhere('usd.signed_acknowledgement_pdf', null)
+            ->where('users.status',3)->pluck('users.id')->toArray();
+           //dd($users);
+        $defaulter_users = array();
+        if(count($users) > 0){
+            foreach ($users as $user_id){
 
                 $user = User::find($user_id);
                 if( $user->status == 3){
                     $user->status = 4;
                     $user->save();
                 }
-                return $user->id;
+                $defaulter_users[] = $user->id;
+            }
+            if(count($defaulter_users) > 0){
+                return $defaulter_users;
             }
         }
     }
