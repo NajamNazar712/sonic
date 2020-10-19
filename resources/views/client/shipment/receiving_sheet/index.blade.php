@@ -125,7 +125,7 @@
 								<div class="col-8">
 									<fieldset class="form-group">
 										<label for="update_consignee_address"><b>Consignee Address:</b></label>
-										<input type="text" name="update_consignee_address" class="form-control" placeholder="Consignee Address*" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Address is required">
+										<input type="text" name="update_consignee_address" class="form-control" placeholder="Consignee Address*" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters">
 									</fieldset>
 								</div>
 							</div>

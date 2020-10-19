@@ -418,7 +418,7 @@ class ShipperReturnController extends Controller
                     else{
                         $reference_1_id = null;
                     }
-                    $last_reason = ShipmentsJourney::where('shipment_id', $shipment)->orderBy('id', 'DESC');
+                    $last_reason = ShipmentsJourney::where('shipment_id', $parcel->id)->orderBy('id', 'DESC');
                     if($last_reason->exists()){
                         $last_reason = $last_reason->first();
                         $last_reason_id = $last_reason->status_reason_id;

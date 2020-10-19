@@ -271,7 +271,7 @@ otherwise it will be rejected</li>
         $page = '<table class="table table-sm table-borderless mb-0">
                         <tbody>
                           <tr class="double-border-bottom">
-                            <td colspan="4" class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td colspan="4" class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="150" class="d-block mx-auto"></td>
                           </tr>
                           <tr class="double-border-bottom">
                             <td colspan="4" class="text-center align-middle"><strong><b>Customer Registration Form</b></strong></td>

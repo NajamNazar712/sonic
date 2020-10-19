@@ -43,7 +43,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
 
-    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.0">
     <style type="text/css">
         #generation_date_root .picker__holder { bottom: 0; margin-bottom: 42px;}
     </style>
@@ -69,7 +69,7 @@
                                         </div>
 
                                         <div class="col trax_logo align-middle text-right">
-                                            <img src="{{asset('img/trax_logo.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
+                                            <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
                                         </div>
                                     </div>
                                 </div>
