@@ -61,6 +61,7 @@
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company</th>
+                                        <th class="border-primary border-darken-1">Brand Name</th>
                                         <th class="border-primary border-darken-1">City Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         <th class="border-primary border-darken-1">Phone No.</th>
@@ -205,6 +206,7 @@
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
+                        head.push('Brand Name');
                         head.push('City Name');
                         head.push('Contact Person');
                         head.push('Phone No.');
@@ -228,6 +230,7 @@
                             row.push(values.id_padded);
                             row.push(values.account_type);
                             row.push(values.name);
+                            row.push(values.brand_name);
                             row.push(values.city);
                             row.push(values.poc);
                             row.push(values.shipper_phone);
@@ -499,6 +502,7 @@
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
+                {data: 'brand_name', name: 'users.name', class: 'align-middle brand_name'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
                 {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle phone'},

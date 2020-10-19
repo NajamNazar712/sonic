@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
+use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\FuelFactorHistory;
@@ -2902,39 +2903,67 @@ public function short_received_hub_wise_cron_index() {
     }
 
     public function runner_report_add(Request $request){
-        $runner = new Runner();
-        $runner->name = $request->runner_name;
-        $runner->created_by = Auth::id();
-        $runner->save();
+        if($request->has('junction')){
+            $runner = new Runner();
+            $runner->name = $request->runner_name;
+            $runner->created_by = Auth::id();
+            $runner->save();
 
-        $origin = new RunnerJunction();
-        $origin->runner_id = $runner->id;
-        $origin->junction_id = $request->origin;
-        $origin->order = 1;
-        $origin->save();
+            $origin = new RunnerJunction();
+            $origin->runner_id = $runner->id;
+            $origin->junction_id = $request->origin;
+            $origin->order = 1;
+            $origin->save();
 
-        $serial = 2;
-        $junctions = array($request->origin, $request->destination);
-        foreach ($request->junction as $junction_id){
-            if(!in_array($junction_id, $junctions)){
-                $junctions[] = $junction_id;
-                $junction = new RunnerJunction();
-                $junction->runner_id = $runner->id;
-                $junction->junction_id = $junction_id;
-                $junction->order = $serial;
-                $junction->save();
+            $serial = 2;
+            $junctions = array($request->origin, $request->destination);
+            foreach ($request->junction as $junction_id){
+                if(!in_array($junction_id, $junctions)){
+                    $junctions[] = $junction_id;
+                    $junction = new RunnerJunction();
+                    $junction->runner_id = $runner->id;
+                    $junction->junction_id = $junction_id;
+                    $junction->order = $serial;
+                    $junction->save();
 
-                $serial++;
+                    $serial++;
+                }
+            }
+
+            $destination = new RunnerJunction();
+            $destination->runner_id = $runner->id;
+            $destination->junction_id = $request->destination;
+            $destination->order = $serial;
+            $destination->save();
+
+            return redirect()->back()->with('success','Runner updated successfully!');
+        }
+        else{
+            return redirect()->back()->with('error','Please add junctions!');
+        }
+    }
+
+public function arrived_at_origin_sms_for_shipper_index(){
+        $shippers = User::where('status', 3)->select('id','name')->get();
+
+        $existing_shippers = BookingSmsForShippers::pluck('user_id')->toArray();
+
+        return view('admin.settings.arrived_at_origin_sms_for_shipper')->with(['shippers' => $shippers, 'existing_shippers' => $existing_shippers]);
+    }
+
+    public function arrived_at_origin_sms_for_shipper_update(Request $request){
+        $shippers = $request->shippers;
+        BookingSmsForShippers::truncate();
+        if($shippers != NULL){
+            if(count($shippers) > 0){
+                foreach ($shippers as $shipper) {;
+                    $business_shipment = new BookingSmsForShippers();
+                    $business_shipment->user_id = $shipper;
+                    $business_shipment->save();
+                }
             }
         }
-
-        $destination = new RunnerJunction();
-        $destination->runner_id = $runner->id;
-        $destination->junction_id = $request->destination;
-        $destination->order = $serial;
-        $destination->save();
-
-        return redirect()->back()->with('success','Runner updated successfully!');
+        return redirect()->back()->with('success', 'Settings successfully updated');
     }
 
     public function pickup_address_wise_payment_accounts_index(){

@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Http\Models\PendingPayment;
+use App\Http\Models\PendingShipmentsForPayment;
+use App\Http\Models\Shipment;
+use Illuminate\Console\Command;
+use DB;
+class PendingPaymentShipmentsCount extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'count:pendingpaymentshipments';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'To Calculate Pending Shipments for payment';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+        DB::table('pending_shipments_for_payments')->truncate();
+        $users = PendingPayment::pluck('user_id')->toArray();
+        foreach ($users as $user_id){
+            $shipment_count = Shipment::where('user_id', $user_id)->whereNotIn('shipper_status_id', [1, 14, 17, 20, 21, 22, 23, 24, 25, 30, 31, 51])->count();
+            $pending_payment_shipments = new PendingShipmentsForPayment();
+            $pending_payment_shipments->user_id = $user_id;
+            $pending_payment_shipments->pending_shipments_count = $shipment_count;
+            $pending_payment_shipments->save();
+        }
+    }
+}

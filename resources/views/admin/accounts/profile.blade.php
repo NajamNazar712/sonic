@@ -49,6 +49,12 @@
                                     <td><b>Company Name</b></td>
                                     <td>{{$user->name}}</td>
                                 </tr>
+                                @if($user->brand_name != null)
+                                    <tr>
+                                        <td><b>Brand Name</b></td>
+                                        <td>{{$user->brand_name}}</td>
+                                    </tr>
+                                @endif
                                 <tr>
                                     <td><b>Email Address</b></td>
                                     <td>{{$user->email}}</td>
@@ -327,7 +333,7 @@
                                     <div class="form-group col-md-9">
                                         <label>Address:</label>
                                         <span class="danger">*</span>
-                                        <textarea type="text" id="address" class="form-control border-primary" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" data-rule-required="true" data-msg-required="Address is required" value="{{$user->address}}" name="address" required>{{$user->address}}</textarea>
+                                        <textarea type="text" id="address" class="form-control border-primary" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" data-rule-required="true" data-msg-required="Address is required" value="{{$user->address}}" name="address" required>{{$user->address}}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -434,6 +440,16 @@
                                     <div class="col-md-9">
                                         <label>STRN Number</label>
                                         <input type="text" id="strn_no" class="form-control border-primary" value="{{$user->strn_no}}" name="strn_no">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <div class="col-md-9">
+                                        <label>Brand Name</label>
+                                        <input type="text" id="brand_name" class="form-control border-primary" value="{{$user->brand_name}}" name="brand_name">
                                     </div>
                                 </div>
                             </div>

@@ -641,7 +641,10 @@
                     @if (session('role_id') == 1 || in_array(334, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.dashboard.overall.commission') }}">Overall Commission</a></li>
                     @endif
-                </ul>
+
+					<li><a class="menu-item" href="{{route('admin.parcel_history.index')}}">Open Parcel Remarks</a></li>					@if (session('role_id') == 1 || in_array(389, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.trax_directory.index') }}">Trax Directory</a></li>
+                    @endif                </ul>
             </li>
 
             @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328,337,356], session('permissions'))) !== 0)
@@ -816,7 +819,7 @@
                         @if (session('role_id') == 1 || in_array(345, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.daily_monthly_adjustment.index') }}">Daily/Month Adjustment Report</a></li>
                         @endif
-                            @if (session('role_id') == 1 || in_array(345, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(393, session('permissions')))
                                 <li><a class="menu-item" href="{{ route('admin.reports.petty_cash_expense_summary.index') }}">Petty Cash Expense Summary Report</a></li>
                             @endif
                     </ul>
@@ -824,10 +827,10 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385, 388], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228,302, 313, 314, 318, 367], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228,302, 313, 314, 318, 367, 388], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shippers</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(149, session('permissions')))
@@ -861,6 +864,9 @@
                                     @if (session('role_id') == 1 || in_array(367, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.nsa_account.index') }}">NSA Accounts</a>
                                         </li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(388, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.sms_shipper_wise.index')}}">Arrived At Origin Sms For Consignee</a></li>
                                     @endif
                                 </ul>
 

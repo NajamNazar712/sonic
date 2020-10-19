@@ -132,9 +132,9 @@ class AdminRunnerController extends Controller
         $dur_minutes = ($dur_minutes % 60);
         $dur_hour = floor($dur_hour);
         $total_duration = $dur_hour . ' Hrs ' . $dur_minutes . ' Min ' . $dur_second . ' Sec';
-        $total_run_hours = $hours + $total_dur_hours;
-        $total_run_minutes = $dur_minutes + $minutes;
-        $total_run_seconds = $total_second + $seconds;
+        $total_run_hours = $stay_hour + $dur_hour;
+        $total_run_minutes = $dur_minutes + $stay_minutes;
+        $total_run_seconds = $dur_second + $stay_second;
         $tot_second = ($total_run_seconds % 60);
         $tot_minutes = ($total_run_minutes + ($total_run_seconds / 60));
         $tot_hour = ($total_run_hours + ($tot_minutes / 60));

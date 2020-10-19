@@ -166,7 +166,7 @@ class AdminReportsEmailController extends Controller
         } else {
             $total_avg_revenue_count = 0;
         }
-        
+
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -231,29 +231,31 @@ class AdminReportsEmailController extends Controller
                 $join->on('s.consignee_city_id', '=', 'cities.id')
                     ->where('s.packaging_material_request', 0);
             })
+            ->leftjoin('user_shipping_infos as usi', 'usi.id','=', 's.pickup_address_id')
+            ->leftjoin('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
-            ->select('h.id as hub_id', 'h.name as hub', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'))
+            ->select('h.id as hub_id', 'h.name as hub', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'), 'oc.name as origin', 'oc.id as origin_id')
             ->where('sj.shipper_status_id', 2)
             ->whereBetween('sj.created_at', [$date_from, $date_to])
-            ->groupBy('h.id')
+            ->groupBy('oc.id','h.id')
             ->get();
         foreach ($hub_wise_splits as $hub_wise_split) {
             $total_shipments = $total_shipments + $hub_wise_split->shipment_count;
         }
         foreach ($hub_wise_splits as $hub_wise_split) {
             if ($total_shipments != 0) {
-                $ratio[$hub_wise_split->hub_id] = $hub_wise_split->shipment_count / $total_shipments;
+                $ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id] = $hub_wise_split->shipment_count / $total_shipments;
             } else {
-                $ratio[$hub_wise_split->hub_id] = 0;
+                $ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id] = 0;
             }
             if ($hub_wise_split->shipment_count != 0) {
-                $avg_actual_weight[$hub_wise_split->hub_id] = $hub_wise_split->actual_weight / $hub_wise_split->shipment_count;
+                $avg_actual_weight[$hub_wise_split->origin_id][$hub_wise_split->hub_id] = $hub_wise_split->actual_weight / $hub_wise_split->shipment_count;
             } else {
-                $avg_actual_weight[$hub_wise_split->hub_id] = 0;
+                $avg_actual_weight[$hub_wise_split->origin_id][$hub_wise_split->hub_id] = 0;
             }
         }
 
-        $hub_wise_split_array['header'] = ['S. No.', 'Hub', 'Count of Parcels', 'Ratio', 'Actual Weight', 'Avg Actual Weight/Shipment'];
+        $hub_wise_split_array['header'] = ['S. No.', 'Origin', 'Hub', 'Count of Parcels', 'Ratio', 'Actual Weight', 'Avg Actual Weight/Shipment'];
         $serial = 1;
 
         $total_shipments_count = 0;
@@ -267,19 +269,20 @@ class AdminReportsEmailController extends Controller
             } else {
                 $actual_weight = 0;
             }
-            $hub_wise_split_array[] = ['serial' => $serial, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => round($ratio[$hub_wise_split->hub_id] * 100, 2), 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight/Shipment' => round($avg_actual_weight[$hub_wise_split->hub_id], 2)];
+            $hub_wise_split_array[] = ['serial' => $serial, 'Origin' => $hub_wise_split->origin, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => round($ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id] * 100, 2), 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight/Shipment' => round($avg_actual_weight[$hub_wise_split->origin_id][$hub_wise_split->hub_id], 2)];
             $hub_wise_split_entry = new HubWiseSplit();
+            $hub_wise_split_entry->origin = $hub_wise_split->origin_id;
             $hub_wise_split_entry->hub_id = $hub_wise_split->hub_id;
             $hub_wise_split_entry->shipments = $hub_wise_split->shipment_count;
-            $hub_wise_split_entry->ratio = $ratio[$hub_wise_split->hub_id] * 100;
+            $hub_wise_split_entry->ratio = $ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id] * 100;
             $hub_wise_split_entry->actual_weight = $actual_weight;
-            $hub_wise_split_entry->avg_actual_weight = $avg_actual_weight[$hub_wise_split->hub_id];
+            $hub_wise_split_entry->avg_actual_weight = $avg_actual_weight[$hub_wise_split->origin_id][$hub_wise_split->hub_id];
             $hub_wise_split_entry->save();
             $serial++;
 
 
             $total_shipments_count = $total_shipments_count + $hub_wise_split->shipment_count;
-            $total_avg_ratio_count = $total_avg_ratio_count + $ratio[$hub_wise_split->hub_id];
+            $total_avg_ratio_count = $total_avg_ratio_count + $ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id];
             $total_actual_weight_count = $total_actual_weight_count + $hub_wise_split->actual_weight;
         }
         if($total_shipments_count <= 0){
@@ -288,8 +291,8 @@ class AdminReportsEmailController extends Controller
         else{
             $total_avg_actual_weight_count = $total_actual_weight_count / $total_shipments_count;
         }
-        $hub_wise_split_array[] = ['serial' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight/Shipment' => ''];
-        $hub_wise_split_array[] = ['serial' => 'Total', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count * 100, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight/Shipment' => round($total_avg_actual_weight_count, 2)];
+        $hub_wise_split_array[] = ['serial' => '', 'Origin' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight/Shipment' => ''];
+        $hub_wise_split_array[] = ['serial' => 'Total', 'Origin' => '', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count * 100, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight/Shipment' => round($total_avg_actual_weight_count, 2)];
         $cell_st = [
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -300,7 +303,7 @@ class AdminReportsEmailController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($hub_wise_split_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
+        $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
         $sheet->setTitle('Sale Person Numbers');
         $writer = new Xlsx($spreadsheet);
 
@@ -1106,7 +1109,7 @@ class AdminReportsEmailController extends Controller
                 $join->on('svd.shipment_id', '=', 's.id')
                     ->where('svd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.reference_1_id = delivery_note.id and shipments_journey.shipper_status_id != 5)'));
             })
-            ->leftjoin('shipments_journey as sjd', function($join) {
+            ->join('shipments_journey as sjd', function($join) {
                 $join->on('sjd.shipment_id', '=', 's.id')
                     ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
             })
@@ -1198,7 +1201,7 @@ class AdminReportsEmailController extends Controller
             }
         }
     }
-	
+
 	static public function done_payment($date){
         $done_payments = DonePaymentCalculation::whereDate('created_at', $date);
         DonePaymentsReport::truncate();
@@ -1498,9 +1501,11 @@ class AdminReportsEmailController extends Controller
 
     static public function telenor_sales_report($date){
 
-        $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date)->format('Y-m-d 09:00A');
+        $date_from = Carbon::createFromFormat("Y-m-d", $date)->toDateString();
+        $date_from = $date_from . ' 09:00:00';
         $next_day = Carbon::parse($date)->addDay(1);
-        $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $next_day)->format('Y-m-d 08:59A');
+        $date_to = $next_day->toDateString();
+        $date_to = $date_to . ' 08:59:59';
         $serial = 0;
         $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
@@ -1567,13 +1572,13 @@ class AdminReportsEmailController extends Controller
             ->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereBetween('sj.created_at', [$date_from,$date_to])
-             ->where('u.id',3324)->get();
+            ->where('u.id',3324)->get();
 
 
         $telenor_sales[] = ['Telenor Sales Report'];
-        $telenor_sales['header'] = ['S. No.', 'Tracking Number', 'Account Number','Shipper','Order Id','Status','Paymengt Status','Payment Id','SDN Number','Service Type','Arrival Date','Origin','Destination','Hub','Zone','Class','Shipping Mode','Category','Description','Collection Amount','Actual Weight','Chargeable Weight','Weight Charges','Cash Handling Charges','Insurance Charges','Packaging Charges','Fuel Surcharge','Return Charges','Replacement Charges','Try & Buy Charges','NSA/OSA Charges','GST','Intercept Charges','Total Charges','Packing Charges','Net Payable','Delivered/Returned Date','Received/Refused By','Sales Person','Special Instructions'];
+        $telenor_sales['header'] = ['S. No.', 'Tracking Number', 'Account Number','Shipper','Order Id','Status','Payment Status','Payment Id','SDN Number','Service Type','Arrival Date','Origin','Destination','Hub','Zone','Class','Shipping Mode','Category','Description','Collection Amount','Actual Weight','Chargeable Weight','Weight Charges','Cash Handling Charges','Insurance Charges','Packaging Charges','Fuel Surcharge','Return Charges','Replacement Charges','Try & Buy Charges','NSA/OSA Charges','GST','Intercept Charges','Total Charges','Packing Charges','Net Payable','Delivered/Returned Date','Received/Refused By','Sales Person','Special Instructions'];
 
-        $telenor_sales[] = ['S. No.' => '', 'Tracking Number' => '', 'Account Number' => '','Shipper' => '','Order Id' => '','Status' => '','Paymengt Status' => '','Payment Id' => '','SDN Number' => '','Service Type' => '','Arrival Date' => '','Origin' => '','Destination' => '','Hub' => '','Zone' => '','Class' => '','Shipping Mode' => '','Category' => '','Description' => '','Collection Amount' => '','Actual Weight' => '','Chargeable Weight' => '','Weight Charges' => '','Cash Handling Charges' => '','Insurance Charges' => '','Packaging Charges' => '','Fuel Surcharge' => '','Return Charges' => '','Replacement Charges' => '','Try & Buy Charges' => '','NSA/OSA Charges' => '','GST' => '','Intercept Charges' => '','Total Charges' => '','Packing Charges' => '','Net Payable' => '','Delivered/Returned Date' => '','Received/Refused By' => '','Sales Person' => '','Special Instructions' => ''];
+        $telenor_sales[] = ['S. No.' => '', 'Tracking Number' => '', 'Account Number' => '','Shipper' => '','Order Id' => '','Status' => '','Payment Status' => '','Payment Id' => '','SDN Number' => '','Service Type' => '','Arrival Date' => '','Origin' => '','Destination' => '','Hub' => '','Zone' => '','Class' => '','Shipping Mode' => '','Category' => '','Description' => '','Collection Amount' => '','Actual Weight' => '','Chargeable Weight' => '','Weight Charges' => '','Cash Handling Charges' => '','Insurance Charges' => '','Packaging Charges' => '','Fuel Surcharge' => '','Return Charges' => '','Replacement Charges' => '','Try & Buy Charges' => '','NSA/OSA Charges' => '','GST' => '','Intercept Charges' => '','Total Charges' => '','Packing Charges' => '','Net Payable' => '','Delivered/Returned Date' => '','Received/Refused By' => '','Sales Person' => '','Special Instructions' => ''];
 
         foreach($sales as $sale){
             $serial++;
@@ -1633,7 +1638,7 @@ class AdminReportsEmailController extends Controller
                 $class = 'Local';
             }
 
-            $telenor_sales[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Account Number' => $account_no,'Shipper' => $shipper,'Order Id' => $order_id,'Status' => $current_status,'Paymengt Status' => $payment_status,'Payment Id' => $payment_id,'SDN Number' => $sdn_id,'Service Type' => $service_type,'Arrival Date' => $arrival_date,'Origin' => $origin,'Destination' => $destination,'Hub' => $hub,'Zone' => $zone,'Class' => $class,/*'Attempts' => $attempts,*/'Shipping Mode' => $shipping_mode,'Category' => $category,'Description' => $description,'Collection Amount' => $p_collection_amount,'Actual Weight' => $actual_weight,'Chargeable Weight' => $chargeable_weight,'Weight Charges' => $weight_charges,'Cash Handling Charges' => $cash_handling_charges,'Insurance Charges' => $insurance_charges,'Packaging Charges' => $packaging_material_charges,'Fuel Surcharge' => $fuel_surcharge,'Return Charges' => $return_charges,'Replacement Charges' => $replacement_charges,'Try & Buy Charges' => $try_and_buy_charges,'NSA/OSA Charges' => $nsa_osa_charges,'GST' => $p_gst,'Intercept Charges' => $intercept_charges,'Total Charges' => $p_total_charges,/*'Estimated Charges' => $estimated_charges,*/'Packing Charges' => $packaging_charges,'Net Payable' => $p_net_payable,'Delivered/Returned Date' => $delivered_or_returned,'Received/Refused By' => $received_or_refused_by,'Sales Person' => $sales_person,'Special Instructions' => $special_instructions];
+            $telenor_sales[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Account Number' => $account_no,'Shipper' => $shipper,'Order Id' => $order_id,'Status' => $current_status,'Payment Status' => $payment_status,'Payment Id' => $payment_id,'SDN Number' => $sdn_id,'Service Type' => $service_type,'Arrival Date' => $arrival_date,'Origin' => $origin,'Destination' => $destination,'Hub' => $hub,'Zone' => $zone,'Class' => $class,/*'Attempts' => $attempts,*/'Shipping Mode' => $shipping_mode,'Category' => $category,'Description' => $description,'Collection Amount' => $p_collection_amount,'Actual Weight' => $actual_weight,'Chargeable Weight' => $chargeable_weight,'Weight Charges' => $weight_charges,'Cash Handling Charges' => $cash_handling_charges,'Insurance Charges' => $insurance_charges,'Packaging Charges' => $packaging_material_charges,'Fuel Surcharge' => $fuel_surcharge,'Return Charges' => $return_charges,'Replacement Charges' => $replacement_charges,'Try & Buy Charges' => $try_and_buy_charges,'NSA/OSA Charges' => $nsa_osa_charges,'GST' => $p_gst,'Intercept Charges' => $intercept_charges,'Total Charges' => $p_total_charges,/*'Estimated Charges' => $estimated_charges,*/'Packing Charges' => $packaging_charges,'Net Payable' => $p_net_payable,'Delivered/Returned Date' => $delivered_or_returned,'Received/Refused By' => $received_or_refused_by,'Sales Person' => $sales_person,'Special Instructions' => $special_instructions];
 
         }
         $cell_st = [

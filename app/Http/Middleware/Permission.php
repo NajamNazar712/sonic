@@ -451,6 +451,7 @@ class Permission
             'reports.daily_monthly_adjustment.index' => 373,
             'reports.daily_monthly_adjustment.list' => 373,
             'reports.daily_monthly_adjustment.summary_list' => 373,
+            'reports.petty_cash_expense_summary.index' => 393,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -524,10 +525,10 @@ class Permission
             'management.riders.permanent.list' => 377,
             'management.riders.incentive.index' => 378,
             'management.riders.incentive.list' => 378,
-            'management.riders.blacklisted.index' => 379,
-            'management.riders.blacklisted.list' => 379,
-            'management.riders.sms.index' => 380,
-            'management.riders.sms.list' => 380,
+            'management.riders.blacklist.index' => 379,
+            'management.riders.blacklist.list' => 379,
+            'management.riders.sms_history.index' => 380,
+            'management.riders.sms_history.list' => 380,
 
 
             'management.city_list' => 205,
@@ -696,6 +697,10 @@ class Permission
             'settings.runner.add' => 385,
             'settings.runner.unique' => 385,
             'settings.runner.enable_disable' => 385,
+
+			'settings.sms_shipper_wise.index' => 388,
+            'settings.sms_shipper_wise.update' => 388,
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,

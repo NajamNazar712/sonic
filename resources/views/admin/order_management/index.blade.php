@@ -52,7 +52,7 @@
                         </div>
 
                         <div class="form-group col-md-5 mt-2 justify-content-center">
-                            <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width" disabled><i
+                            <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
                                         class="la la-search"></i> Search
                             </button>
                         </div>
@@ -361,14 +361,12 @@
                 placeholder:'Search Shipment Status',
                 width:'100%',
                 allowClear:true
-            }).bind('select2:select', function () {
-                $('#datatable_filter_btn').attr('disabled', false);
             });
-            $('#shipment_status').on("select2:unselect", function(e) {
-                if($('#shipment_status').val() == '' && $('input[name="tracking_numbers"]').val() == ''){
-                    $('#datatable_filter_btn').attr('disabled', true);
-                }
-            });
+            // $('#shipment_status').on("select2:unselect", function(e) {
+            //     if($('#shipment_status').val() == '' && $('input[name="tracking_numbers"]').val() == ''){
+            //         $('#datatable_filter_btn').attr('disabled', true);
+            //     }
+            // });
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
 
 
@@ -1001,7 +999,7 @@
                     }
                 },
                 create: function(input) {
-                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
                         return {
                             value: input,
                             text: input
@@ -1011,26 +1009,27 @@
                         return false;
                     }
                 },
-                onChange: function (value) {
-                    if(value.length == 0 && $('#shipment_status').val() == ''){
-                        $('#datatable_filter_btn').attr('disabled', true);
-                    }else{
-                        $('#datatable_filter_btn').attr('disabled', false);
-                    }
-
-                },
+                // onChange: function (value) {
+                //     if(value.length == 0 && $('#shipment_status').val() == ''){
+                //         $('#datatable_filter_btn').attr('disabled', true);
+                //     }else{
+                //         $('#datatable_filter_btn').attr('disabled', false);
+                //     }
+                //
+                // },
             });
 
             $('#track_form').bind('submit',function (e) {
                 e.preventDefault();
 
-                var tracking_numbers = $('#track_form .tracking_numbers').val();
-                var booking_from_date = $('#track_form #booking_from_date').val();
-                var booking_to_date = $('#track_form #booking_to_date').val();
-                var shipment_status = $('#track_form #shipment_status').val();
-                if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
-                    table.draw();
-                }
+                table.draw();
+                // var tracking_numbers = $('#track_form .tracking_numbers').val();
+                // var booking_from_date = $('#track_form #booking_from_date').val();
+                // var booking_to_date = $('#track_form #booking_to_date').val();
+                // var shipment_status = $('#track_form #shipment_status').val();
+                // if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
+                //     table.draw();
+                // }
 
             });
 

@@ -41,7 +41,7 @@ class TelenorSalesReport extends Command
     public function handle()
     {
         $date = Carbon::yesterday()->format('Y-m-d');
-        $response = AdminReportsEmailController::telenor_sales_report($date . ' 00:00:00');
+        $response = AdminReportsEmailController::telenor_sales_report($date);
         NotificationsController::send(96, $date, $response);
     }
 }

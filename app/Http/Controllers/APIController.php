@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\ShipmentPrebook;
+use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\ShipmentOrderDate;
@@ -292,12 +294,11 @@ class APIController extends Controller
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'consignee_name' => ['required', 'between:1,100'],
-                'consignee_address' => ['required', 'between:1,190'],
+                'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'self_collection' => ['nullable', 'boolean'],
-                'order_id' => ['nullable', 'filled'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
@@ -347,11 +348,10 @@ class APIController extends Controller
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'consignee_name' => ['required', 'between:1,100'],
-                'consignee_address' => ['required', 'between:1,190'],
+                'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
-                'order_id' => ['nullable', 'filled'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
@@ -388,6 +388,16 @@ class APIController extends Controller
             ];
         }
 
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
+        if($shipment_pre_book->exists()){
+            $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })];
+        }
+        else{
+            $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
+        }
+
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -397,7 +407,22 @@ class APIController extends Controller
         }
         else {
             $service_type_id = $request->input('service_type_id');
-
+            if($shipment_pre_book->exists()){
+                $shipment_pre_book = $shipment_pre_book->first();
+                $length = strlen($shipment_pre_book->prefix);
+                $check_order_id = str_split($request->input('order_id'), $length);
+                if($shipment_pre_book->prefix != $check_order_id[0]){
+                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                }
+                else{
+                    if(!array_key_exists(1, $check_order_id)){
+                        return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                    }
+                }
+            }
+            else {
+              $shipment_pre_book = NULL;
+            }
             if($service_type_id != 5){
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
@@ -498,6 +523,20 @@ class APIController extends Controller
 
                 if (!CityDelivery::where('city_id', $delivery_city->id)->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
                     return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $delivery_city->id . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
+                }
+            }
+
+            if($user_type['account_type_id'] == 2) {
+                if ($request->input('delivery_type_id') == 2) {
+                    $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
+                    if ($allowed_delivery_type->exists()) {
+                        $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('delivery_type_id', $request->input('delivery_type_id'));
+                        if (!$allowed_delivery_type->exists()) {
+                            return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
+                    }
                 }
             }
             if($service_type_id == 5){
@@ -649,17 +688,21 @@ class APIController extends Controller
             else {
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection);
             }
-            $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+           	$tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-            if($request->has('order_date')){
+			if($shipment_pre_book){
+                $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
+            }
+            else{
+                $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+            }			if($request->has('order_date')){
                 if($request->order_date != null){
                     $order_date = new ShipmentOrderDate();
                     $order_date->shipment_id = $shipment_id;
                     $order_date->order_date = $request->order_date;
                     $order_date->save();
                 }
-            }
-            if ($service_type_id == 1 || $service_type_id == 5) {
+            }            if ($service_type_id == 1 || $service_type_id == 5) {
                 $item_product_type_id = $request->input('item_product_type_id');
 
                 if ($request->filled('item_description')) {
