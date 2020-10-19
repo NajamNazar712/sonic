@@ -240,6 +240,8 @@
                                             <form id="make_payments_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.make_payments.store') }}">
                                                 {{ csrf_field() }}
                                                 <input type="hidden" name="make_payments_pickup_wise" value="1">
+                                                <input type="hidden" name="pickup_address_id" id="make_payment_pickup_address">
+
                                                 <input type="hidden" name="pending_payment_shipment_ids" class="pending_payment_shipment_ids">
 
                                                 <div class="col-2">
@@ -483,6 +485,7 @@
                     return {body: body, header: head};
                 }
             } );
+            var pickup_address_id;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(60, session('permissions')))
@@ -786,6 +789,7 @@
                     url: '{{ route('admin.finance.make_payments.shipment_list') }}',
                     data: function (d) {
                         d.ids = selected_rows;
+                        d.pickup_address_id = pickup_address_id;
                     }
                 },
                 rowId: 'id',
@@ -1090,6 +1094,9 @@
                         });
                 }
                 else if ($(this).hasClass('make_payment')) {
+                    var pickup_id = $(this).parents('tr').data('pickup_address_id');
+                    pickup_address_id = pickup_id;
+                    $('#make_payment_pickup_address').val(pickup_address_id);
                     selected_rows = [];
 
                     table.rows().deselect();
