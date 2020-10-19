@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\http\Models\Admin\KeyAccountDailyShipment;
+use App\http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
@@ -363,7 +365,6 @@ class AdminTrackingController extends Controller
 
                     // $details['complain']['id'] = 10;
                     // $details['complain']['tat'] = 3;
-
                     $tracking['shipments'][$shipment->id] = $details;
                 }
                 else {
@@ -980,6 +981,27 @@ class AdminTrackingController extends Controller
 
                     // $details['complain']['id'] = 10;
                     // $details['complain']['tat'] = 3;
+                    if($request->has('key_accounts')){
+                        $date = Carbon::today()->toDateString();
+                        $key_accounts_daily_summary = KeyAccountDailySummary::where('admin_id', Auth::id())->whereDate('created_at', $date);
+                        if($key_accounts_daily_summary->exists()){
+                            $key_accounts_daily_summary = $key_accounts_daily_summary->first();
+                            $count = $key_accounts_daily_summary->count + 1;
+                            $key_accounts_daily_summary->count = $count;
+                            $key_accounts_daily_summary->save();
+                        }
+                        else{
+                            $key_accounts_daily_summary = new KeyAccountDailySummary();
+                            $key_accounts_daily_summary->admin_id = Auth::id();
+                            $key_accounts_daily_summary->count = 1;
+                            $key_accounts_daily_summary->save();
+                        }
+
+                        $key_accounts_daily_shipment = new KeyAccountDailyShipment();
+                        $key_accounts_daily_shipment->admin_id = Auth::id();
+                        $key_accounts_daily_shipment->shipment_id = $shipment->id;
+                        $key_accounts_daily_shipment->save();
+                    }
 
                     $tracking['shipments'][$shipment->id] = $details;
                 }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateKeyAccountShipmentJourneysTable extends Migration
+class CreateKeyAccountDailySummaryCrmsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,12 @@ class CreateKeyAccountShipmentJourneysTable extends Migration
      */
     public function up()
     {
-        Schema::create('key_account_shipment_journeys', function (Blueprint $table) {
+        Schema::create('key_account_daily_summary_crms', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('shipment_id');
             $table->integer('admin_id');
+            $table->integer('case_nature_type_id');
+            $table->integer('channel_id');
+            $table->integer('count');
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ class CreateKeyAccountShipmentJourneysTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('key_account_shipment_journeys');
+        Schema::dropIfExists('key_account_daily_summary_crms');
     }
 }

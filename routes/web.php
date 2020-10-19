@@ -1881,7 +1881,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::prefix('key_accounts')->name('key_accounts.')->group(function () {
                 Route::get('', 'Admins\AdminSalesController@key_accounts_dashboard_index')->name('dashboard');
-                Route::get('list', 'Admins\AdminSalesController@key_accounts_dashboard_details')->name('dashboard.list');
+                Route::post('details', 'Admins\AdminSalesController@key_accounts_dashboard_details')->name('dashboard.details');
             });
 
 

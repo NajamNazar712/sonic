@@ -35,24 +35,68 @@
                                         <h4><b>Daily Complain Dashboard</b></h4>
                                     </div>
                                 </div>
-                                <div class="row justify-content-center">
-                                    <div class="col-4">
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o"></span>
-                                            </span>
+                                <form id="search_form" class="form-horizontal" action="{{route('admin.settings.sales.key_accounts.dashboard.details')}}" method="post">
+                                    @csrf
+                                    <div class="row justify-content-center">
+                                        <div class="col-4">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o"></span>
+                                                </span>
+                                                </div>
+                                                <input type="text" name="search_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date" placeholder="Date*" data-value="{{$date}}" data-rule-required="true" data-msg-required="Date is required">
                                             </div>
-                                            <input type="text" name="search_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date" placeholder="Date*">
+                                        </div>
+                                        @if (session('role_id') == 1 || in_array(393, session('permissions')))
+                                        <div class="col-4">
+                                            <fieldset class="form-group">
+                                                <select name="search_admin" id="search_admin" class="form-control select2" data-rule-required="true" data-msg-required="Admin is required">
+                                                    @foreach($admins as $admin)
+                                                        @if($selected_admin == $admin->id)
+                                                        <option value="{{$admin->id}}" selected>{{$admin->name}}</option>
+                                                        @else
+                                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        @endif
+
+                                        <div class="col-2">
+                                            <button type="submit" id="search_button" class="btn btn-primary">Search</button>
                                         </div>
                                     </div>
-                                </div>
+                                </form>
 
                                 <div class="row justify-content-center mb-1">
                                     <div class="col text-center">
                                         <h5><b>Summary</b></h5>
                                     </div>
                                 </div>
+
+                                <div class="row justify-content-center mb-1 channels" id="channels">
+                                    <div class="col">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                            <tr role="row" class="bg-primary white">
+                                                @foreach($case_nature_channels as $case_nature_channel)
+                                                    <th class="text-center">{{$case_nature_channel->channel}}</th>
+                                                @endforeach
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                @foreach($case_nature_channels as $case_nature_channel)
+                                                    <td class="text-center">{{$channels[$case_nature_channel->id]}}</td>
+                                                @endforeach
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
                                 <div class="row justify-content-center summary" id="summary">
                                     <div class="col">
                                         <table class="table table-bordered">
@@ -60,15 +104,15 @@
                                             <tr role="row" class="bg-primary white">
                                                 <th>Track/Trace</th>
                                                 @foreach($case_nature_types as $case_nature_type)
-                                                    <th>{{$case_nature_type->type}}</th>
+                                                    <th class="text-center">{{$case_nature_type->type}}</th>
                                                 @endforeach
                                             </tr>
                                             </thead>
                                             <tbody>
                                             <tr>
-                                                <td>Track/Trace</td>
+                                                <td class="text-center">{{$summary_trace_count}}</td>
                                                 @foreach($case_nature_types as $case_nature_type)
-                                                    <td>{{$case_nature_type->type}}</td>
+                                                    <td class="text-center">{{$types[$case_nature_type->id]}}</td>
                                                 @endforeach
                                             </tr>
                                             </tbody>
@@ -85,17 +129,23 @@
                                         <table class="table table-bordered">
                                             <thead>
                                             <tr role="row" class="bg-primary white">
-                                                <th>Track/Trace</th>
+                                                <th class="text-center">Track/Trace</th>
                                                 @foreach($case_nature_types as $case_nature_type)
-                                                    <th>{{$case_nature_type->type}}</th>
+                                                    <th class="text-center">{{$case_nature_type->type}}</th>
                                                 @endforeach
                                             </tr>
                                             </thead>
                                             <tbody>
                                             <tr>
-                                                <td>Track/Trace</td>
+                                                <td class="text-center">{{$pending_summary_trace_count}}</td>
                                                 @foreach($case_nature_types as $case_nature_type)
-                                                    <td>{{$case_nature_type->type}}</td>
+                                                    <td class="text-center">{{$pending_types[$case_nature_type->id]['count']}}</td>
+                                                @endforeach
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center">TAT</td>
+                                                @foreach($case_nature_types as $case_nature_type)
+                                                    <td class="text-center">{{$pending_types[$case_nature_type->id]['tat']}}</td>
                                                 @endforeach
                                             </tr>
                                             </tbody>
@@ -148,6 +198,7 @@
                             </div>
 
                             <input type="hidden" id="requested_shipment_id">
+                            <input type="hidden" id="key_accounts" name="key_accounts" value="1">
                             <div class="row old_scroll" id="requested_shipments">
 
                             </div>
@@ -352,6 +403,10 @@
                     }
                 }
             });
+            $('#search_admin').select2({
+                placeholder:'Search Admin',
+                width:'100%',
+            });
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -507,6 +562,7 @@
                     method: 'POST',
                     data: {
                         'tracking_numbers': tracking_numbers,
+                        'key_accounts' : 1,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
@@ -1294,6 +1350,26 @@
                         }
                     });
             });
+
+            $('#search_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'request is being submitted!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+            });
         });
 
 
@@ -1360,7 +1436,8 @@
                             'case_nature_id' : case_nature_id,
                             'complaint_id' : case_nature_complaint_id,
                             'channel_id': case_nature_channel_id,
-                            'description' : complaint_description
+                            'description' : complaint_description,
+                            'key_account' : 1
                         }
                     })
                         .done(function(data) {
@@ -1441,7 +1518,8 @@
                             'case_nature_id' : case_nature_id,
                             'complaint_id' : case_nature_complaint_id,
                             'channel_id': case_nature_channel_id,
-                            'description' : service_description
+                            'description' : service_description,
+                            'key_account' : 1
                         }
                     })
                         .done(function(data) {

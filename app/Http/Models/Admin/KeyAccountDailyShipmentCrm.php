@@ -4,7 +4,7 @@ namespace App\http\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
 
-class KeyAccountShipmentDetail extends Model
+class KeyAccountDailyShipmentCrm extends Model
 {
     //
 }

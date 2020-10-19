@@ -615,7 +615,7 @@
                     @if (session('role_id') == 1 || in_array(306, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.scanning_history.index') }}">Scanning History</a></li>
                     @endif
-                    @if (session('role_id') == 1 || count(array_intersect([307,308], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([307,308,392], session('permissions'))) !== 0)
                         <li class=" nav-item"><a href="#"><span class="menu-title">Sales</span></a>
                             <ul class="menu-content">
                                 @if (session('role_id') == 1 || in_array(307, session('permissions')))
@@ -623,6 +623,10 @@
                                 @endif
                                 @if (session('role_id') == 1 || in_array(308, session('permissions')))
                                     <li><a class="menu-item" href="{{ route('admin.settings.sales.history.index') }}">History</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(392, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.settings.sales.key_accounts.dashboard') }}">Key Accounts Dashboard</a>
+                                    </li>
                                 @endif
                             </ul>
 
@@ -638,17 +642,6 @@
                     @endif
                     @if (session('role_id') == 1 || in_array(389, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.trax_directory.index') }}">Trax Directory</a></li>
-                    @endif
-
-                    @if (session('role_id') == 1 || count(array_intersect([76], session('permissions'))) !== 0)
-                        <li class=" nav-item"><a href="#"><span class="menu-title">Sales</span></a>
-                            <ul class="menu-content">
-                                @if (session('role_id') == 1 || in_array(217, session('permissions')))
-                                    <li><a class="menu-item" href="{{ route('admin.settings.sales.key_accounts.dashboard') }}">Key Accounts Dashboard</a>
-                                    </li>
-                                @endif
-                            </ul>
-                        </li>
                     @endif
                 </ul>
             </li>

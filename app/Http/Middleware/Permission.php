@@ -630,6 +630,9 @@ class Permission
             'settings.sales.projection.reasons.index' => 314,
             'settings.sales.projection.shipment.index' => 318,
 
+            'settings.sales.key_accounts.dashboard' => 392,
+            'settings.sales.key_accounts.dashboard.details' => 392,
+
             'settings.settings.blacklist.index' => 329,
             'settings.blacklist.search.index' => 330,
 

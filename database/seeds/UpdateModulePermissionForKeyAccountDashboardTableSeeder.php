@@ -16,6 +16,7 @@ class UpdateModulePermissionForKeyAccountDashboardTableSeeder extends Seeder
         ));
         DB::table('module_permissions')->insert(array(
             array('id' => 392, 'name' => 'Key Accounts Dashboard - View', 'module_id' => 23),
+            array('id' => 393, 'name' => 'Key Accounts Dashboard - Search Admin', 'module_id' => 23),
         ));
     }
 }
