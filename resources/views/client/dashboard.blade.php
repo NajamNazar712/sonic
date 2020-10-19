@@ -1240,7 +1240,7 @@
                     }
                 },
                 create: function (input) {
-                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
                         return {
                             value: input,
                             text: input

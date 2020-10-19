@@ -21,4 +21,7 @@ class Rider extends Model
     public function deliverynotes(){
         return $this->hasMany('App\Http\Models\Admin\DeliveryNote');
     }
+    public function open_parcel_rider(){
+        return $this->hasOne('App\Http\Models\OpenParcelHistory');
+    }
 }

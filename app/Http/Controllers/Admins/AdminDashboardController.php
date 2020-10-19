@@ -7166,7 +7166,7 @@ if(session('department_id') == 7){
                    ->where('spt.status','=',0);
            })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7420,7 +7420,7 @@ if(session('department_id') == 7){
                     ->where('spt.status','=',0);
             })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7751,7 +7751,6 @@ if(session('department_id') == 7){
 
     public function updateProfile(Request $request)
     {
-        
         $user_id = $request->user_id;
 
         //1 for Admin, 0 for User
@@ -7770,7 +7769,7 @@ if(session('department_id') == 7){
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
                 'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
-                'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null]);
+                'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
             AdminLogs::create([
                 'admin_id'=>Auth::id(),
                 'user_id'=>$user_id
@@ -7781,7 +7780,7 @@ if(session('department_id') == 7){
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
                 'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
-                'url'=>$request->url,'product_id'=>$request->product_id]);
+                'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
         }
 
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
@@ -8987,14 +8986,26 @@ if(session('department_id') == 7){
     }
 
     public function viewUserDocuments($id, $check, $pdf){
-        if($pdf == 1){
-            $pdf_image = 'pdf';
+        $user_documents = UserDocumentAttachment::where('user_id', $id)->first();
+        if($check == 'filled_and_signed_pdf'){
+            $file = $user_documents->filled_and_signed_pdf;
+        }
+        elseif ($check == 'signed_acknowledgement_pdf'){
+            $file = $user_documents->signed_acknowledgement_pdf;
+        }
+        elseif ($check == 'cnic_front_image'){
+            $file = $user_documents->cnic_front_image;
+        }
+        elseif ($check == 'cnic_back_image'){
+            $file = $user_documents->cnic_back_image;
+        }
+        elseif ($check == 'blank_cheque_image'){
+            $file = $user_documents->blank_cheque_image;
         }
         else{
-            $pdf_image = 'png';
+            return redirect()->back()->with('error', 'File not found!');
         }
-        $url = Storage::url('users_attached_documents/' . $id . '/'. $check . $id .'.' . $pdf_image);
-
+        $url = Storage::url('users_attached_documents/' . $id . '/'. $file);
         return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
     }
     public function approveDocuments($id, $approve, $reason){
@@ -9039,34 +9050,50 @@ if(session('department_id') == 7){
         if ($validate->fails()) {
             return redirect()->back()->with(['errors' => $validate->errors()]);
         }
+        $date = Carbon::now()->format('Y_m_d');
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
         if($user_attachment){
             if ($request->hasFile('filled_and_signed_pdf')) {
-                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                if($user_attachment->filled_and_signed_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
+                }
+                $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->filled_and_signed_pdf = $filename;
             }
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                if($user_attachment->signed_acknowledgement_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
+                }
+                $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->signed_acknowledgement_pdf = $filename;
             }
             if ($request->hasFile('cnic_front_image')) {
-                $filename = 'cnic_front_image_' . $request->user_id . '.png';
+                if($user_attachment->cnic_front_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_front_image);
+                }
+                $filename = 'cnic_front_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_front_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->cnic_front_image = $filename;
             }
             if ($request->hasFile('cnic_back_image')) {
-                $filename = 'cnic_back_image_' . $request->user_id . '.png';
+                if($user_attachment->cnic_back_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_back_image);
+                }
+                $filename = 'cnic_back_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_back_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->cnic_back_image = $filename;
             }
             if ($request->hasFile('blank_cheque_image')) {
-                $filename = 'blank_cheque_image_' . $request->user_id . '.png';
+                if($user_attachment->blank_cheque_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->blank_cheque_image);
+                }
+                $filename = 'blank_cheque_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('blank_cheque_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->blank_cheque_image = $filename;
@@ -9077,35 +9104,35 @@ if(session('department_id') == 7){
             
             $new_user_attachment = new UserDocumentAttachment();
             if ($request->hasFile('filled_and_signed_pdf')) {
-                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->filled_and_signed_pdf = $filename;
             }
             
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->signed_acknowledgement_pdf = $filename;
             }
             
             if ($request->hasFile('cnic_front_image')) {
-                $filename = 'cnic_front_image_' . $request->user_id . '.png';
+                $filename = 'cnic_front_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_front_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->cnic_front_image = $filename;
             }
             
             if ($request->hasFile('cnic_back_image')) {
-                $filename = 'cnic_back_image_' . $request->user_id . '.png';
+                $filename = 'cnic_back_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_back_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->cnic_back_image = $filename;
             }
             
             if ($request->hasFile('blank_cheque_image')) {
-                $filename = 'blank_cheque_image_' . $request->user_id . '.png';
+                $filename = 'blank_cheque_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('blank_cheque_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->blank_cheque_image = $filename;
@@ -9138,16 +9165,23 @@ if(session('department_id') == 7){
         return response()->json(['error' => 'User not found!']);
     }
     public function edit_rates_user_documents(Request $request){
+        $date = Carbon::now();
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
         if($user_attachment){
             if ($request->hasFile('filled_and_signed_pdf')) {
-                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                if($user_attachment->filled_and_signed_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
+                }
+                $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->filled_and_signed_pdf = $filename;
             }
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                if($user_attachment->signed_acknowledgement_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
+                }
+                $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->signed_acknowledgement_pdf = $filename;
@@ -9157,14 +9191,14 @@ if(session('department_id') == 7){
         else{
             $new_user_attachment = new UserDocumentAttachment();
             if ($request->hasFile('filled_and_signed_pdf')) {
-                $filename = 'filled_and_signed_pdf_' . $request->user_id . '.pdf';
+                $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->filled_and_signed_pdf = $filename;
             }
 
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                $filename = 'signed_acknowledgement_pdf_' . $request->user_id . '.pdf';
+                $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->signed_acknowledgement_pdf = $filename;

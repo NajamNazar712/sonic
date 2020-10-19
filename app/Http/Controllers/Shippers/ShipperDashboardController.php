@@ -298,12 +298,16 @@ class ShipperDashboardController extends Controller
     }
     public function order_cancel(Request $request){
         $shipment_id = $request->shipment_id;
+
         if($shipment_id){
             $shipment = Shipment::where('id',$shipment_id)->where('user_id', session('user_id'));
             if($shipment->exists()){
                 $shipment = $shipment->first();
 
                 if ($shipment->shipper_status_id == 1) {
+                    if($shipment->warehouse_order_status == 10){
+                        return response()->json(['status' => 0,'error' => 'Shipment is already pending for picklist therefore can\'t cancel!']);
+                    }
                     //Consolidated Shipments
                     $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
                     if($consolidated_shipment){
@@ -392,6 +396,9 @@ class ShipperDashboardController extends Controller
                 $shipment = $shipment->first();
 
                 if ($shipment->shipper_status_id == 1) {
+                    if($shipment->warehouse_order_status == 10){
+                        continue;
+                    }
                     //Consolidated Shipments
                     $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
                     if($consolidated_shipment){

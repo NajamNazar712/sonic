@@ -19,6 +19,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\http\Models\UserDocumentAttachment;
 use App\Mail\Notifications;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Registered;
@@ -182,36 +183,52 @@ class RegisterController extends Controller
         
         $user_attachment = new UserDocumentAttachment();
         $user_attachment->user_id = $user->id;
+        $date = Carbon::now()->format('Y_m_d');
         if ($request->hasFile('filled_and_signed_pdf')) {
-            $filename = 'filled_and_signed_pdf_' . $user->id . '.pdf';
+            if($user_attachment->filled_and_signed_pdf != NULL) {
+                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
+            }
+            $filename = 'filled_and_signed_pdf_' . $date . '_' . $user->id . '.pdf';
             $file = $request->file('filled_and_signed_pdf');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->filled_and_signed_pdf = $filename;
         }
         
         if ($request->hasFile('signed_acknowledgement_pdf')) {
-            $filename = 'signed_acknowledgement_pdf_' . $user->id . '.pdf';
+            if($user_attachment->signed_acknowledgement_pdf != NULL) {
+                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
+            }
+            $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $user->id . '.pdf';
             $file = $request->file('signed_acknowledgement_pdf');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->signed_acknowledgement_pdf = $filename;
         }
         
         if ($request->hasFile('cnic_front_image')) {
-            $filename = 'cnic_front_image_' . $user->id . '.png';
+            if($user_attachment->cnic_front_image != NULL) {
+                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_front_image);
+            }
+            $filename = 'cnic_front_image_' . $date . '_' . $user->id . '.png';
             $file = $request->file('cnic_front_image');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->cnic_front_image = $filename;
         }
         
         if ($request->hasFile('cnic_back_image')) {
-            $filename = 'cnic_back_image_' . $user->id . '.png';
+            if($user_attachment->cnic_back_image != NULL) {
+                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_back_image);
+            }
+            $filename = 'cnic_back_image_' . $date . '_' . $user->id . '.png';
             $file = $request->file('cnic_back_image');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->cnic_back_image = $filename;
         }
         
         if ($request->hasFile('blank_cheque_image')) {
-            $filename = 'blank_cheque_image_' . $user->id . '.png';
+            if($user_attachment->blank_cheque_image != NULL){
+                Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->blank_cheque_image);
+            }
+            $filename = 'blank_cheque_image_' . $date . '_' . $user->id . '.png';
             $file = $request->file('blank_cheque_image');
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->blank_cheque_image = $filename;
@@ -332,6 +349,7 @@ class RegisterController extends Controller
             'average_shipment_duration_id' => $data['average_shipment_duration'],
             'reference_id' => $data['reference'],
             'email_verified' => 0,
+            'brand_name' => $data['brand_name'],
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
@@ -456,7 +474,7 @@ class RegisterController extends Controller
         $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
                     <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
                         <img src="' . asset('img/sonic_logo.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
-                        <img src="' . asset('img/trax_logo.png') . '" alt="Trax" style="display: inline-block; width: 15%">
+                        <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
                     </div>';
         $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
                     <h3 style="margin-top: 0px; margin-bottom: 0px;">Thank you for choosing Trax Logistics</h3>

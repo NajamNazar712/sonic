@@ -48,6 +48,12 @@
                                                 <td><b>Company Name</b></td>
                                                 <td>{{$user->name}}</td>
                                             </tr>
+                                            @if($user->brand_name != NULL)
+                                                <tr>
+                                                    <td><b>Brand Name</b></td>
+                                                    <td>{{$user->brand_name}}</td>
+                                                </tr>
+                                            @endif
                                             <tr>
                                                 <td><b>Email Address</b></td>
                                                 <td>{{$user->email}}</td>

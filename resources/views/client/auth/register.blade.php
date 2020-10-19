@@ -43,7 +43,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
 
-    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.0">
     <style type="text/css">
         #generation_date_root .picker__holder { bottom: 0; margin-bottom: 42px;}
     </style>
@@ -69,7 +69,7 @@
                                         </div>
 
                                         <div class="col trax_logo align-middle text-right">
-                                            <img src="{{asset('img/trax_logo.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
+                                            <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
                                         </div>
                                     </div>
                                 </div>
@@ -273,6 +273,17 @@
                                                                     <option value="{{$sales_person->id}}" {{ old('sale_person') == $sales_person->id ? 'selected' : '' }} >{{$sales_person->name}}</option>
                                                                 @endforeach
                                                             </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="brand_name">Brand Name:
+                                                        </label>
+                                                        <div>
+                                                            <input type="text" class="form-control" value="{{ old('brand_name') }}" name="brand_name" placeholder="Brand Name">
                                                         </div>
                                                     </div>
                                                 </div>
