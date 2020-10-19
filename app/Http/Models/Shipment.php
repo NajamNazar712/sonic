@@ -105,5 +105,7 @@ class Shipment extends Model
     public function order_date(){
         return $this->hasOne('App\Http\Models\ShipmentOrderDate', 'shipment_id', 'id');
     }
-
+    public function open_parcel_shipment(){
+        return $this->hasOne('App\Http\Models\OpenParcelHistory');
+    }
 }
