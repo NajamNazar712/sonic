@@ -47,7 +47,88 @@
                         </div>
                     </div>
                 </div>
+                <div class="modal fade text-left" id="VerifyInfoModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="VerifyInfoModal"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary white">
+                                <h4 class="modal-title white">Verify Account</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body text-center">
+                                 <form id="assign_hub_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
+                                     @method('POST')
+                                     @csrf
+                                     {{ csrf_field() }}
 
+                                     <div class="row">
+                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                             <div class="form-group">
+                                                 <input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required">
+                                             </div>
+                                         </div>
+
+                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                             <div class="form-group">
+                                                 <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                                             </div>
+                                         </div>
+
+                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                             <div class="form-group">
+                                                 <input type="text" name="cnic" id="cnic" class="form-control" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
+                                             </div>
+                                         </div>
+
+                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                             <div class="form-group">
+                                                 <input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.settings.user_requests.email') }}" data-msg-remote="Email must be unique">
+                                             </div>
+                                         </div>
+
+
+                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                             <div class="form-group">
+                                                 <select name="department" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
+                                                     @foreach($departments as $department)
+                                                         <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                                     @endforeach
+                                                 </select>
+                                             </div>
+                                         </div>
+                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                             <div class="form-group">
+                                                 <select name="default_hub" class="select2" id="default_hub" data-rule-required="true" data-msg-required="Default hub is required">
+                                                     @foreach($hubs as $hub)
+                                                         <option value="{{ $hub->id }}">{{ $hub->name }}</option>
+                                                     @endforeach
+                                                 </select>
+                                             </div>
+                                         </div>
+
+                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                             <div class="form-group">
+                                                 <input type="text" name="designation" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required">
+                                             </div>
+                                         </div>
+                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                             <div class="form-group">
+                                                 <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID" data-rule-remote="{{ route('admin.settings.user_requests.trax_id') }}">
+                                             </div>
+                                         </div>
+                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                             <div class="form-group">
+                                                 <input type="password" name="password" id="password" class="form-control" placeholder="Password ">
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
 
                 <div class="card">
@@ -60,16 +141,19 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Trax ID</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Email</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Department</th>
+                                    <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Default Hub</th>
-                                    <th class="border-primary border-darken-1">Request Created At</th>
                                     <th class="border-primary border-darken-1">Request Added By</th>
-                                    <th class="border-primary border-darken-1">Verified By HR At</th>
+                                    <th class="border-primary border-darken-1">Request Created At</th>
                                     <th class="border-primary border-darken-1">Verified By HR</th>
+                                    <th class="border-primary border-darken-1">Verified By HR At</th>
+                                    <th class="border-primary border-darken-1">Launched To Date (TAT)</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -103,6 +187,15 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            $('#user_form #department').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Department*'
+            });
+
+            $('#user_form #default_hub').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Default Hub*'
+            });
             $('#hub_select').select2({
                 placeholder:'Select Hub',
                 width:'100%',
@@ -120,32 +213,36 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Trax Id');
                             head.push('Name');
                             head.push('Email');
                             head.push('Phone Number');
                             head.push('CNIC');
                             head.push('Department');
+                            head.push('Designation');
                             head.push('Default Hub');
+                            head.push('Request Added By');
                             head.push('Request Created At');
-                            head.push('Request Added By');
-                            head.push('Request Added By');
-                            head.push('Verified By HR At');
                             head.push('Verified By HR');
+                            head.push('Verified By HR At');
+                            head.push('Launched To Date (TAT)');
                             head.push('Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
+                                row.push(values.trax_id);
                                 row.push(values.name);
                                 row.push(values.email);
                                 row.push(values.phone_number);
                                 row.push(values.cnic);
                                 row.push(values.department);
+                                row.push(values.designation);
                                 row.push(values.default_hub);
-                                row.push(values.request_created_at);
                                 row.push(values.request_added_by);
-                                row.push(values.verified_by_hr_at);
+                                row.push(values.request_created_at);
                                 row.push(values.verified_by_hr);
-                                row.push(values.updated_by);
+                                row.push(values.verified_by_hr_at);
+                                row.push(values.launched_to_date);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -265,16 +362,19 @@
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'trax_id', name: 'admin_user_requests.trax_id ', class: 'align-middle trax_id'},
                     {data: 'name', name: 'admin_user_requests.name ', class: 'align-middle name'},
                     {data: 'email', name: 'admin_user_requests.email', class: 'align-middle email'},
                     {data: 'phone_number', name: 'admin_user_requests.phone_number', class: 'align-middle phone_number'},
                     {data: 'cnic', name: 'admin_user_requests.cnic', class: 'align-middle cnic'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
+                    {data: 'designation', name: 'admin_user_requests.designation', class: 'align-middle designtaion'},
                     {data: 'default_hub', name: 'c.name', class: 'align-middle default_hub'},
+                    {data: 'request_craeted_by', name: 'a.name', class: 'align-middle request_craeted_by'},
                     {data: 'request_created_at', name: 'admin_user_requests.request_created_at', class: 'align-middle request_created_at'},
-                    {data: 'admin', name: 'a.name', class: 'align-middle admin'},
+                    {data: 'verified_by_hr', name: 'a.name', class: 'align-middle verified_by_hr'},
                     {data: 'verified_by_hr_at', name: 'admin_user_requests.verified_by_hr_at', class: 'align-middle verified_by_hr_at'},
-                    {data: 'verified_by_hr', name: 'admin_user_requests.verified_by_hr', class: 'align-middle verified_by_hr'},
+                    {data: 'launched_to_date', name: 'launched_to_date', class: 'align-middle launched_to_date', orderable: false, searchable: false},
                     {data: 'status', name: 'admin_user_requests.status ', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -297,8 +397,8 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Disable</option>' +
-                        '<option value="1">Enable</option>' +
+                        '<option value="0">Requested</option>' +
+                        '<option value="1">Verified</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -335,62 +435,24 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
 
-                @if (session('role_id') == 1 || in_array(83, session('permissions')))
-                if ($(this).hasClass('edit')) {
-                    var link = '{{ route('admin.user_management.users.update.index', ["id" => 0]) }}';
-
+                if ($(this).hasClass('verify')) {
+                    var link = '{{ route('admin.settings.user_requests.verify.index', ["id" => 0]) }}';
                     window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
                 }
-                @endif
+            });
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
 
-                        @if (session('role_id') == 1 || in_array(84, session('permissions')))
-                if ($(this).hasClass('enable')) {
-                    $.ajax({
-                        url: '{!! route('admin.user_management.users.status') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': id,
-                            'status': 1,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status == 0) {
-                                table.draw(false);
-
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        });
+                if ($(this).hasClass('addrole')) {
+                    var link = '{{ route('admin.settings.user_requests.save.index', ["id" => 0]) }}';
+                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
                 }
-                else if ($(this).hasClass('disable')) {
-                    $.ajax({
-                        url: '{!! route('admin.user_management.users.status') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': id,
-                            'status': 0,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status == 0) {
-                                table.draw(false);
-
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        });
-                }
-                @endif
             });
 
+
+
             //bulk assigning of hub work start
-            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+           /* $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
                 console.log(id);
                 var index = $.inArray(id, selected_rows);
@@ -408,7 +470,7 @@
                 else {
                     table.button('.assign').disable();
                 }
-            });
+            });*/
 
             $( "#assign_hub_form" ).validate({
                 errorClass:"danger",

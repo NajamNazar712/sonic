@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Add User Request')
+@section('title', 'Save User')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Add User Request
+                    Save User
                 </h1>
 
                 <div class="card">
@@ -17,31 +17,31 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="user_form" class="form-horizontal" method="POST" action="{{ route('admin.settings.user_requests.add.store') }}" novalidate="novalidate">
+                            <form id="user_form" class="form-horizontal" method="POST" action="{{ route('admin.settings.user_requests.save.store',['id' => $user->id]) }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <div class="row">
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <div class="form-group">
-                                            <input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required">
+                                            <input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" value="{{ $user->name }}" readonly>
                                         </div>
                                     </div>
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <div class="form-group">
-                                            <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                                            <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" value="{{ $user->phone_number}}" readonly>
                                         </div>
                                     </div>
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <div class="form-group">
-                                            <input type="text" name="cnic" id="cnic" class="form-control" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
+                                            <input type="text" name="cnic" id="cnic" class="form-control" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="{{ $user->cnic}}" readonly>
                                         </div>
                                     </div>
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <div class="form-group">
-                                            <input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.user_management.users.email') }}" data-msg-remote="Email must be unique">
+                                            <input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Email must be unique" value="{{ $user->email }}" readonly>
                                         </div>
                                     </div>
 
@@ -50,7 +50,7 @@
                                         <div class="form-group">
                                             <select name="department" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
                                                 @foreach($departments as $department)
-                                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                                    <option value="{{ $department->id }}" selected="selected">{{ $department->name }} </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -59,7 +59,11 @@
                                         <div class="form-group">
                                             <select name="default_hub" class="select2" id="default_hub" data-rule-required="true" data-msg-required="Default hub is required">
                                                 @foreach($hubs as $hub)
-                                                    <option value="{{ $hub->id }}">{{ $hub->name }}</option>
+                                                    @if ($hub->id == $user->default_hub_id)
+                                                        <option value="{{ $hub->id }}" selected="selected">{{ $hub->name }}</option>
+                                                    @else
+                                                        <option value="{{ $hub->id }}">{{ $hub->name }}</option>
+                                                    @endif
                                                 @endforeach
                                             </select>
                                         </div>
@@ -67,16 +71,30 @@
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <div class="form-group">
-                                            <input type="text" name="designation" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required">
+                                            <input type="text" name="designation" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required" value="{{ $user->designation }}" readonly>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <div class="form-group">
-                                            <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID">
+                                            <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID*" data-rule-required="true" data-msg-required="Designation is required" value="{{ $user->trax_id }}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <div class="form-group">
+                                            <input type="text" name="api_token" id="api_token" class="form-control" placeholder="API Token">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <div class="form-group">
+                                            <select name="role_id" class="select2" id="role_id" data-rule-required="true" data-msg-required="Role is required">
+                                                @foreach($roles as $role)
+                                                    <option value="{{ $role->id }}" selected="selected">{{ $role->name }} - {{ $role->department->name }} </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
 
-                                    <div class="col-12">
+                                   {{-- <div class="col-12">
                                         <h4 class="form-section mb-2">Hubs</h4>
                                         <div class=" text-center mt-2">
                                             <button type="button" id="selectAll"  class="btn btn-primary" >Select All Hubs</button>
@@ -91,11 +109,12 @@
                                             <label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
                                         </fieldset>
                                     @endforeach
+                                    --}}
                                 </div>
 
                                 <div class="col-12">
                                     <div class="form-group text-center mt-2">
-                                        <button type="submit" class="btn btn-primary">Add</button>
+                                        <button type="submit" class="btn btn-primary">Save</button>
                                     </div>
                                 </div>
                             </form>
@@ -125,6 +144,10 @@
                 width: '100%',
                 placeholder: 'Department*'
             });
+            $('#user_form #role_id').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Role*'
+            });
 
             $('#user_form #default_hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -136,7 +159,7 @@
                 'clearIncomplete': true
             });
             $('#user_form #trax_id').inputmask({
-               /* 'mask': '9999-9999999',*/
+                /* 'mask': '9999-9999999',*/
                 'digits' : 10,
                 'min': 6,
                 'max': 10
@@ -147,7 +170,7 @@
                 'clearIncomplete': true
             });
 
-            $('#user_form .hub').each(function() {
+           /* $('#user_form .hub').each(function() {
                 var checkbox = $(this);
                 var label = checkbox.next();
                 var text = label.text();
@@ -160,7 +183,7 @@
                     uncheckedClass: 'bg-danger',
                     insert: '<div class="icheck_line-icon"></div>' + text
                 });
-            });
+            });*/
 
             $('#user_form').validate({
                 errorClass: 'danger',
@@ -186,7 +209,7 @@
                     form.submit();
                 }
             });
-            $('#selectAll .hub').each(function() {
+            /*$('#selectAll .hub').each(function() {
                 var checkbox = $(this);
                 var label = checkbox.next();
                 var text = label.text();
@@ -218,7 +241,7 @@
                         _this.iCheck('uncheck');
                     }
                 });
-            });
+            });*/
         });
 
     </script>

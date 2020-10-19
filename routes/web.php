@@ -2062,10 +2062,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('user_requests')->name('user_requests.')->group(function() {
             Route::get('', 'Admins\AdminUserRequestController@user_requests_index')->name('index');
             Route::get('list', 'Admins\AdminUserRequestController@user_requests_list')->name('list');
+            Route::get('email', 'Admins\AdminUserRequestController@user_email')->name('email');
+            Route::get('trax_id', 'Admins\AdminUserRequestController@user_trax_id')->name('trax_id');
 
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\AdminUserRequestController@user_request_add_index')->name('index');
                 Route::post('', 'Admins\AdminUserRequestController@user_add_store')->name('store');
+            });
+            Route::prefix('verify/{id}')->name('verify.')->group(function() {
+                Route::get('', 'Admins\AdminUserRequestController@verify_index')->name('index');
+                Route::post('', 'Admins\AdminUserRequestController@verify_store')->name('store');
+            });
+            Route::prefix('save/{id}')->name('save.')->group(function() {
+                Route::get('', 'Admins\AdminUserRequestController@user_save_index')->name('index');
+                Route::post('', 'Admins\AdminUserRequestController@user_save')->name('store');
             });
 
         });

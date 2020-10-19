@@ -20,12 +20,15 @@ class CreateAdminUserRequestsTable extends Migration
             $table->string('phone_number');
             $table->string('cnic');
             $table->string('department');
+            $table->string('designation');
+            $table->string('trax_id')->nullable();
             $table->integer('default_hub_id')->nullable();
             $table->timestamp('request_created_at')->nullable();
             $table->integer('request_added_by')->nullable();
             $table->timestamp('verified_by_hr_at')->nullable();
             $table->integer('verified_by_hr')->nullable();
             $table->tinyinteger('status')->default(0);
+            $table->string('password')->nullable();
             $table->timestamps();
 
         });
