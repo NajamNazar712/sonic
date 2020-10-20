@@ -29,6 +29,7 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking Number</th>
+                            <th class="border-primary border-darken-1">User Mode</th>
                             <th class="border-primary border-darken-1">User</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Amount</th>
@@ -61,7 +62,7 @@
                             </div>
                             <div class="row justify-content-center mb-1">
                                 <div class="col-6">
-                                  <select name="select_user_mode" id="select_user_mode" class="form-control select2">
+                                  <select name="select_user_mode" id="select_user_mode" class="form-control select2" data-rule-required="true" data-msg-required="User Mode is required">
                                       <option value="1">
                                           Rider
                                       </option>
@@ -74,7 +75,7 @@
 
                             <div class="row justify-content-center mb-1 d-none" id="rider_div">
                                 <div class="col-6">
-                                    <select name="select_rider" id="select_rider" class="form-control select2">
+                                    <select name="select_rider" id="select_rider" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
                                         @foreach($riders as $rider)
                                             <option value="{{$rider->id}}">{{$rider->name}}</option>
                                         @endforeach
@@ -84,7 +85,7 @@
 
                             <div class="row justify-content-center mb-1 d-none" id="admin_div">
                                 <div class="col-6">
-                                    <select name="select_admin" id="select_admin" class="form-control select2">
+                                    <select name="select_admin" id="select_admin" class="form-control select2" data-rule-required="true" data-msg-required="Admin is required">
                                         @foreach($admins as $admin)
                                             <option value="{{$admin->id}}">{{$admin->name}}</option>
                                         @endforeach
@@ -99,7 +100,7 @@
                                             <div class="row justify-content-center">
                                                 <div class="col-8">
                                                     <div class="form-group">
-                                                        <textarea type="text" class="form-control" name="remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required" required></textarea>
+                                                        <textarea type="text" class="form-control" id="remarks" name="remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required" required></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -232,6 +233,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('Tracking Number');
+                            head.push('User Mode');
                             head.push('User');
                             head.push('Remarks');
                             head.push('Amount');
@@ -243,6 +245,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.user_mode);
                                 row.push(values.user);
                                 row.push(values.remarks);
                                 row.push(values.amount);
@@ -291,6 +294,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number'},
+                    { data:'user_mode' ,name: 'user_mode', class: 'align-middle user'},
                     { data:'user' ,name: 'user', class: 'align-middle user'},
                     { data:'remarks' ,name: 'open_parcel_histories.remarks', class: 'align-middle remarks'},
                     { data:'amount' ,name: 'open_parcel_histories.amount', class: 'align-middle amount'},
@@ -307,12 +311,22 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var user_mode = '<select name="user_mode_select" id="user_mode_select" class="select2 form-control">' +
+                        '<option value="1">Rider</option>' +
+                        '<option value="2">Admin</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number')) {
                             $(td).appendTo($(search));
+                        }
+                        else if($(header).is('.user_mode')){
+                            $(user_mode).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -377,6 +391,18 @@
                     });
                     form.submit();
                 }
+            });
+
+            $('#AddRequestModal').on('hide.bs.modal', function (e) {
+                $('#select_user_mode').val('').trigger('change');
+                $('#select_admin').val('').trigger('change');
+                $('#select_rider').val('').trigger('change');
+                $('#remarks').val('');
+                $('#amount').val('');
+                $('#parcel_date').val('');
+                $('#rider_div').addClass('d-none');
+                $('#admin_div').addClass('d-none');
+                $('#remarks_div').addClass('d-none');
             });
         });
     </script>

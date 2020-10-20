@@ -65,6 +65,9 @@ class AdminParcelHistoryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$open_parcel->tracking_number' class='tracking' target='_blank'>$open_parcel->tracking_number</a></u>";
             })
+            ->editColumn('user_mode', function($open_parcel) {
+            return ($open_parcel->user_mode == 1) ? 'Rider' : 'Admin';
+            })
             ->editColumn('user', function($open_parcel) {
             return ($open_parcel->user_mode == 1) ? $open_parcel->rider_name : $open_parcel->admin_name;
             })
