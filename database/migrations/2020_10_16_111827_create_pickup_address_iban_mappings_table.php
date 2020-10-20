@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class OpenParcelHistories extends Migration
+class CreatePickupAddressIbanMappingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,10 @@ class OpenParcelHistories extends Migration
      */
     public function up()
     {
-        Schema::create('open_parcel_histories', function (Blueprint $table) {
+        Schema::create('pickup_address_iban_mappings', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('shipment_id');
-            $table->integer('user_mode');
-            $table->integer('user_id');
-            $table->text('remarks');
-            $table->integer('amount');
-            $table->timestamp('date');
+            $table->integer('pickup_address_id');
+            $table->integer('bank_info_id');
             $table->timestamps();
         });
     }
@@ -32,6 +28,6 @@ class OpenParcelHistories extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('open_parcel_histories');
+        Schema::dropIfExists('pickup_address_iban_mappings');
     }
 }

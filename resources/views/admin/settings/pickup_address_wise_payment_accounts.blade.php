@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'FOC Account')
+@section('title', 'Pickup Address Wise Payment Accounts')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    FOC Account
+                    Pickup Address Wise Payment Accounts
                 </h1>
 
                 <div class="card">
@@ -19,17 +19,17 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-6">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.foc_account.store') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.pickup_address_wise_payment_accounts.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
-                                                <select name="shippers[]" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-required="true" required="required">
+                                                <select name="shippers[]" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-require="true" required="required">
                                                     @foreach($shippers as $shipper)
                                                         <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            
+
                                         </div>
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
@@ -55,9 +55,9 @@
 
     <script>
         $(document).ready(function() {
-            
 
-            
+
+
             $('#shippers_select').select2({
                 placeholder:'Shippers',
                 width:'100%',
@@ -70,14 +70,14 @@
             });
 
             $('#shippers_select').on('select2:unselect', function () {
-               if($(this).val().length == 0){
-                   $('#settings_form').find('button[type=submit]').prop('disabled', true);
-               }
+                if($(this).val().length == 0){
+                    $('#settings_form').find('button[type=submit]').prop('disabled', true);
+                }
             });
 
-            @if(count($foc_account_tags) > 0)
-                var ids = @json($foc_account_tags);
-                $('#shippers_select').val(ids).trigger('change');
+                    @if(count($pickup_wise_accounts) > 0)
+            var ids = @json($pickup_wise_accounts);
+            $('#shippers_select').val(ids).trigger('change');
             @endif
 
             $('#settings_form').validate({
@@ -90,7 +90,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update FOC Accounts!',
+                        text: 'Select Yes to update Accounts!',
                         icon: 'warning',
                         buttons: {
                             cancel: {

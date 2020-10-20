@@ -332,6 +332,8 @@ class Permission
             'finance.outstanding_shipments.walk_in_list' => 167,
             'finance.outstanding_shipments.walk_in_resolved' => 168,
 
+            'finance.make_payments_pickup_wise.index' => 396,
+
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
             'petty_cash.approved.index' => 147,
@@ -451,6 +453,7 @@ class Permission
             'reports.daily_monthly_adjustment.index' => 373,
             'reports.daily_monthly_adjustment.list' => 373,
             'reports.daily_monthly_adjustment.summary_list' => 373,
+            'reports.petty_cash_expense_summary.index' => 395,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -491,6 +494,8 @@ class Permission
             'user_management.roles.update.store' => 87,
             'user_management.crm.index' => 188,
             'user_management.crm.list' => 188,
+            'user_management.user_requests.index' => 394,
+            'user_management.user_requests.list' => 394,
 
             'management.zonal.index' => 131,
             'management.zonal.list' => 131,
@@ -703,6 +708,8 @@ class Permission
 			'settings.sms_shipper_wise.index' => 388,
             'settings.sms_shipper_wise.update' => 388,
 
+
+            'settings.pickup_address_wise_payment_accounts.index' => 391,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,

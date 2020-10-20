@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionRevenueReportTableSeeder extends Seeder
+class UpdateModulePermissionsForAdminUserRequest extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class UpdateModulePermissionRevenueReportTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 177, 'name' => 'Revenue', 'module_id' => 9),
+            array('id' => 394, 'name' => 'Admin User Request - View', 'module_id' => 11)
         ));
     }
 }

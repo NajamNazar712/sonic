@@ -229,8 +229,9 @@ class V2AdminReportController extends Controller
         $salesperson = DB::connection('reports')->table('admins')->leftjoin('admin_roles as ar', 'ar.id', '=', 'admins.role_id')->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')->select('admins.id','admins.name')->where('ar.department_id',7)->get();
         $origin = DB::connection('reports')->table('cities')->where('pickup',1)->where('status',1)->get();
         $category = DB::connection('reports')->table('v2_pickup_report_categories')->select('id', 'name')->get();
+        $pickup_request_status = DB::connection('reports')->table('v2_pickup_request_statuses')->select('id', 'name')->get();
 
-        return view('admin.reports.pickup_report')->with(['stats'=>$stats,'legends'=>$legends,'departments'=>$department,'salespersons'=>$salesperson,'origins'=>$origin,'categories'=>$category]);
+        return view('admin.reports.pickup_report')->with(['stats'=>$stats,'legends'=>$legends,'departments'=>$department,'salespersons'=>$salesperson,'origins'=>$origin,'categories'=>$category, 'pickup_request_statuses' => $pickup_request_status]);
     }
 
     public function pickup_report_list(Request $request){
@@ -325,6 +326,10 @@ class V2AdminReportController extends Controller
 
         if($category = $request->get('search_category')){
             $datatables->where('v2_pickup_reports.category_id', '=', $category);
+        }
+
+        if($pickup_status = $request->get('search_pickup_status')){
+            $datatables->where('v2_pickup_reports.status_id', '=', $pickup_status);
         }
 
         if($cut_off_time = $request->get('search_cut_off_time')){

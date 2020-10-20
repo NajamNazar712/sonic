@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionRevenueReportTableSeeder extends Seeder
+class UpdateModulePermissionForParcelHistoryTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class UpdateModulePermissionRevenueReportTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 177, 'name' => 'Revenue', 'module_id' => 9),
+            array('id' => 392, 'name' => 'Open Parcel History', 'module_id' => 14),
         ));
     }
 }
