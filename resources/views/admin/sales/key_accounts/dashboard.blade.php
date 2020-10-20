@@ -387,9 +387,11 @@
     <script src="https://kit.fontawesome.com/e7bc565afe.js" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function() {
+            var date_limit = '{{ Carbon\Carbon::now()->toDateString() }}';
             $('#search_date').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: new Date(date_limit),
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
