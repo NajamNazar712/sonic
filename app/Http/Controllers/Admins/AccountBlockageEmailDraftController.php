@@ -50,7 +50,7 @@ class AccountBlockageEmailDraftController extends Controller
 
                 $user = User::find($user_id);
                 if( $user->status == 0){
-                    $user->status = 4;
+                    $user->blacklist = 1;
                     $user->save();
                 }
                 $defaulter_users[] = $user->id;
