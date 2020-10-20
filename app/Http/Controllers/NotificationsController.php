@@ -2803,7 +2803,7 @@ class NotificationsController extends Controller
                     $account_b = User::where('id', $reference_2_id)->first();
 //                $account_id_a = str_pad($account_a->id, 6, '0', STR_PAD_LEFT);
                     $account_id_b = str_pad($account_b->id, 6, '0', STR_PAD_LEFT);
-                    $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                    $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
                     if (strpos($subject, '[account_id]') !== FALSE) {
                         $subject = str_replace('[account_id]', $account_id_b, $subject);
                     }
@@ -2831,7 +2831,7 @@ class NotificationsController extends Controller
                     if ($shipper) {
                         $terms = CRFTermsConditions::where('user_id', $shipper->id)->first();
                         if ($terms) {
-                            $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                            $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
                             $button = '<div class="row"><button onclick="window.open(' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="width: 100px; height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 25px; font-weight: bold;">Yes</button>';
                             $link = '<div class="row"><button onclick="window.open(' . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">CRF Download</button>';
                             if (strpos($subject, '[shipper_name]') !== FALSE) {
@@ -3616,7 +3616,7 @@ class NotificationsController extends Controller
                     $date = Carbon::today()->startOfDay()->toDateTimeString();
                     $date_end = Carbon::today()->endOfDay()->toDateTimeString();
                     $hub_wise_split_data = HubWiseSplit::whereBetween('created_at', [$date, $date_end])->orderBy('shipments', 'desc')->get();
-                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Hub</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Count of Parcels</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Ratio</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Actual Weight</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Actual Weight/Shipment</strong></th></tr></thead><tbody>';
+                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Hub</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Count of Parcels</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Ratio</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Actual Weight</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Actual Weight/Shipment</strong></th></tr></thead><tbody>';
                     $serial = 1;
                     $shipments_count = 0;
                     $ratio_count = 0;
@@ -3625,7 +3625,7 @@ class NotificationsController extends Controller
                     foreach ($hub_wise_split_data as $hub_wise_split) {
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->city->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->origin_city->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($hub_wise_split->shipments) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->ratio . '%</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float)$hub_wise_split->actual_weight, 2, '.', '') . '</td>';
@@ -3644,6 +3644,7 @@ class NotificationsController extends Controller
                     $html .= '<tr>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+					$html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($ratio_count) . '%</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float)$actual_weight_count, 2, '.', '') . '</td>';
@@ -4490,7 +4491,7 @@ class NotificationsController extends Controller
                         $pickup_request_id = $pickup_request->id;
                         $pickup_date = $pickup_request->updated_at;
 
-                        $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                        $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
 
                         if (strpos($subject, '[pickup_request_ID]') !== FALSE) {
                             $subject = str_replace('[pickup_request_ID]', $pickup_request_id, $subject);
@@ -4527,7 +4528,7 @@ class NotificationsController extends Controller
                         $account_id = $user->id;
                         $shipper_name = $user->name;
 
-                        $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                        $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
 
                         if (strpos($subject, '[account_id]') !== FALSE) {
                             $subject = str_replace('[account_id]', $account_id, $subject);
@@ -5086,20 +5087,26 @@ class NotificationsController extends Controller
                     $to = array();
                     $cc = array();
 
-                    $to_admins = Admin::whereIn('role_id', [10, 17, 25, 30])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
-                        $query->where('hub_id', $hub_id);
-                    });
-                    if ($to_admins->exists()) {
-                        $to = array_merge($to, $to_admins->pluck('email')->toArray());
-                    }
-                    $cc_admins = Admin::whereIn('role_id', [8, 9, 3, 2])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
-                        $query->where('hub_id', $hub_id);
-                    });
-                    if ($cc_admins->exists()) {
-                        $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
-                    }
+                    $bcc = array();
 
-                    self::email($subject, $body, $to, $cc);
+                  // $to_admins = Admin::whereIn('role_id', [10, 17, 25, 30])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                  //     $query->where('hub_id', $hub_id);
+                  // });
+                  // if ($to_admins->exists()) {
+                  //     $to = array_merge($to, $to_admins->pluck('email')->toArray());
+                  // }
+                  // $cc_admins = Admin::whereIn('role_id', [8, 9, 3, 2])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                  //     $query->where('hub_id', $hub_id);
+                  // });
+                  // if ($cc_admins->exists()) {
+                  //     $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
+                  // }
+
+                  $to[] = 'faizan.ahmed@trax.pk';
+                  $cc[] = 'fawad.ahmed@trax.pk';
+                  $bcc[] = 'muhammad.yousuf@trax.pk';
+
+                  self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 77) {
                     $rider_id = $reference_1_id;
                     $shipment_id = $reference_2_id;
@@ -5638,6 +5645,7 @@ class NotificationsController extends Controller
                 } else if ($id == 85) {
                     $shipments = Shipment::find($reference_1_id);
                     $booking_person = $reference_2_id;
+					$admin = Admin::find($booking_person);
                     $subject = $notification->subject;
                     $body = $notification->body;
 
@@ -5657,14 +5665,24 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin->pickup_address . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $destination->name . '</td>';
                         if ($shipment->packaging_charges == null) {
-                            $total_charges = $shipment->amount;
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
-                        } else {
-                            $amount = $shipment->amount;
-                            $packaging = $shipment->packaging_charges;
-                            $total_charges = $amount + $packaging;
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
-                        }
+                          if($shipment->charges_mode_id == 1){
+                              $amount = $shipment->received_amount;
+                          }
+                          else{
+                              $amount = $shipment->amount;
+                          }
+                          $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                      } else {
+                          if($shipment->charges_mode_id == 1){
+                              $amount = $shipment->received_amount;
+                          }
+                          else{
+                              $amount = $shipment->amount;
+                          }
+                          $packaging = $shipment->packaging_charges;
+                          $total_charges = $amount + $packaging;
+                          $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
+                      }
                         $html .= '</tr>';
                     }
 
@@ -5789,13 +5807,16 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $admin = Admin::whereIn('role_id', [23, 46, 3])->where('status', 1);
+//                    $admin = Admin::whereIn('role_id', [23, 46, 3])->where('status', 1);
 
-                    $to = array();
-                    $to[] = 'hassan@trax.pk';
-                    if ($admin->exists()) {
-                        $to = array_merge($to, $admin->pluck('email')->toArray());
-                    }
+	//              $to[] = 'hassan@trax.pk';
+	//              if ($admin->exists()) {
+	//                  $to = array_merge($to, $admin->pluck('email')->toArray());
+	//              }
+	              $to[] = 'syed.sharique@trax.pk';
+	              $to[] = 'balaj.khan@trax.pk';
+	              $to[] = 'bilal.shah@trax.pk';
+
 
                     self::email($subject, $body, $to);
 

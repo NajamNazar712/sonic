@@ -102,4 +102,10 @@ class Shipment extends Model
 	    return $this->hasMany('App\Http\Models\Handover\HandoverShipmentsJourney')->orderBy('id', 'DESC');
     }
 
+    public function order_date(){
+        return $this->hasOne('App\Http\Models\ShipmentOrderDate', 'shipment_id', 'id');
+    }
+    public function open_parcel_shipment(){
+        return $this->hasOne('App\Http\Models\OpenParcelHistory');
+    }
 }

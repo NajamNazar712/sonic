@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\ShipmentPrebook;
+use App\Http\Models\CorporateDeliveryTypeStatus;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\http\Models\ShipmentOrderDate;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\Admin;
@@ -14,7 +19,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
@@ -35,7 +39,7 @@ use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
 
 use Carbon\Carbon;
-
+use DB;
 use SnappyImage;
 use SnappyPDF;
 
@@ -60,6 +64,7 @@ class APIController extends Controller
       'consignee_email_address' => 'Consignee Email Address',
       'self_collection' => 'Self Collection',
       'order_id' => 'Order ID',
+      'order_date' => 'Order Date',
       'package_type' => 'Package Type',
       'special_instructions' => 'Special Instructions',
       'estimated_weight' => 'Estimated Weight',
@@ -289,12 +294,12 @@ class APIController extends Controller
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'consignee_name' => ['required', 'between:1,100'],
-                'consignee_address' => ['required', 'between:1,190'],
+                'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'self_collection' => ['nullable', 'boolean'],
-                'order_id' => ['nullable', 'filled'],
+                'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -343,11 +348,11 @@ class APIController extends Controller
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'consignee_name' => ['required', 'between:1,100'],
-                'consignee_address' => ['required', 'between:1,190'],
+                'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
-                'order_id' => ['nullable', 'filled'],
+                'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
@@ -383,6 +388,16 @@ class APIController extends Controller
             ];
         }
 
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
+        if($shipment_pre_book->exists()){
+            $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })];
+        }
+        else{
+            $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
+        }
+
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -392,7 +407,22 @@ class APIController extends Controller
         }
         else {
             $service_type_id = $request->input('service_type_id');
-
+            if($shipment_pre_book->exists()){
+                $shipment_pre_book = $shipment_pre_book->first();
+                $length = strlen($shipment_pre_book->prefix);
+                $check_order_id = str_split($request->input('order_id'), $length);
+                if($shipment_pre_book->prefix != $check_order_id[0]){
+                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                }
+                else{
+                    if(!array_key_exists(1, $check_order_id)){
+                        return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                    }
+                }
+            }
+            else {
+              $shipment_pre_book = NULL;
+            }
             if($service_type_id != 5){
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
@@ -493,6 +523,20 @@ class APIController extends Controller
 
                 if (!CityDelivery::where('city_id', $delivery_city->id)->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
                     return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $delivery_city->id . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
+                }
+            }
+
+            if($user_type['account_type_id'] == 2) {
+                if ($request->input('delivery_type_id') == 2) {
+                    $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
+                    if ($allowed_delivery_type->exists()) {
+                        $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('delivery_type_id', $request->input('delivery_type_id'));
+                        if (!$allowed_delivery_type->exists()) {
+                            return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
+                    }
                 }
             }
             if($service_type_id == 5){
@@ -644,9 +688,21 @@ class APIController extends Controller
             else {
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection);
             }
-            $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+           	$tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-            if ($service_type_id == 1 || $service_type_id == 5) {
+			if($shipment_pre_book){
+                $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
+            }
+            else{
+                $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+            }			if($request->has('order_date')){
+                if($request->order_date != null){
+                    $order_date = new ShipmentOrderDate();
+                    $order_date->shipment_id = $shipment_id;
+                    $order_date->order_date = $request->order_date;
+                    $order_date->save();
+                }
+            }            if ($service_type_id == 1 || $service_type_id == 5) {
                 $item_product_type_id = $request->input('item_product_type_id');
 
                 if ($request->filled('item_description')) {
@@ -767,7 +823,11 @@ class APIController extends Controller
                     }
                 }
             }
-
+            if($user_type['logo_status'] == 1){
+                $shipment = Shipment::find($shipment_id);
+                $shipment->shipment_invoice_status = 1;
+                $shipment->save();
+            }
             $blacklist_message = null;
             $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
             if($consignee_information->exists()){
@@ -1755,4 +1815,117 @@ class APIController extends Controller
         }
     }
 
+    public function return_confirmation_pending(Request $request){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
+            ->leftjoin('consolidation_shipments as consolidations', function ($join) {
+                $join->on('consolidations.shipment_id', '=', 'shipments.id')
+                    ->where('consolidations.consolidation_id', '=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
+            })
+            ->select('shipments.tracking_number','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode as shipping_mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','ssr.name as reason','shipments_journey.created_at as status_date','sj.created_at as arrival_date','shipments.nsa_osa_estimated_charges')
+            ->whereIn('shipments.shipper_status_id', [12, 52])
+            ->where('shipments.user_id', $request->user_id)
+            ->groupBy('shipments.id')
+            ->get();
+
+        return response()->json(['status' => 0, 'data' => $shipments]);
+    }
+
+    public function return_confirmation_pending_update(Request $request){
+        $user_id = $request->user_id;
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'status' => ['required','numeric', Rule::in(1,2)],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            //status = 1 -> Return Confirm, Starus = 2 -> Re-attempt requested
+            $tracking_number = $request->tracking_number;
+
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+            if($shipment){
+                $status = $request->status;
+                if($status == 1){
+                    if($shipment->booking_type_id == 5){
+                        return response()->json(['status' => 1, 'message' => 'Reverse pickup Shipment can\'t be marked as Return Confirm!']);
+                    }
+                    if($shipment->shipper_status_id == 20){
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Return Confirm!']);
+                    }
+                    if($shipment->shipper_status_id == 52){
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
+                    }
+                    if (!$shipment->packaging_material_request) {
+                        if($shipment->shipper_status_id == 12){
+                            $shipment->shipper_status_id = 20;
+                            $shipment->consignee_status_id = 20;
+                            $shipment->save();
+                            $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
+                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, NULL);
+                            ShipmentChargesController::return($shipment->id);
+
+                            AdminFinanceController::add_payment($shipment->id, 1);
+                            return response()->json(['status' => 0,'message'=> "Shipment successfully marked as Shipment - Return Confirm"]);
+                        }else{
+                            return response()->json(['status' => 1,'message'=> "Shipment is not ready for Return Confirm"]);
+                        }
+                    }else{
+                        $shipment->shipper_status_id = 17;
+                        $shipment->consignee_status_id = 17;
+                        $shipment->save();
+                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
+                        ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id,NULL);
+                        return response()->json(['status' => 0,'message'=> "Shipment successfully marked as Shipment - Cancelled"]);
+                    }
+
+                }else{
+                    if($shipment->shipper_status_id == 52){
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
+                    }
+                    if($shipment->shipper_status_id != 12){
+                        return response()->json(['status' => 1, 'message' => 'Shipment is not ready for Re-attempt!']);
+                    }
+                    $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
+                    $shipment->shipper_status_id = 52;
+                    $shipment->consignee_status_id = 52;
+                    $shipment->save();
+                    ShipmentsJourneyController::add($shipment->id, 52, 52, NULL, 'Marked by shipper - API', $user_id, NULL);
+                    if($journey){
+                        NotificationsController::send(33, $shipment->id);
+                    }
+                    return response()->json(['status' => 0, 'message' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+
+                }
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Shipment with this tracking number not found!']);
+            }
+        }
+
+    }
 }

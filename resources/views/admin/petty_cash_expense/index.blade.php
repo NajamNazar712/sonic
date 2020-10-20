@@ -346,7 +346,7 @@
                 e.preventDefault();
                 $('#statements_total_amount').text('0'),
 
-                table.draw();
+                    table.draw();
             });
 
         });

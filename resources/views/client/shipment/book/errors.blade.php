@@ -33,7 +33,8 @@
                                 @if($service_type_check_id == 1 || $service_type_check_id == null)
                                     <th>Self Collection</th>
                                 @endif
-                                <th>Order ID
+                                <th>Order ID</th>
+                                <th>Order Date (YYYY-MM-DD)</th>
                                 @if($service_type_check_id != 3 || $service_type_check_id == null)
                                     <th>Item Product Type ID</th>
                                     <th>Item Description</th>
@@ -166,6 +167,11 @@
                                     <td>{!! Form::text('form[' . $no . '][order_id]', $ro['order_id'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['order_id']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][order_id]', $ro['order_id'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['order_date']))
+                                    <td>{!! Form::text('form[' . $no . '][order_date]', $ro['order_date'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['order_date']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][order_date]', $ro['order_date'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if($service_type_check_id != 3 || $service_type_check_id == null)
                                     @if(isset($errors[$no]['item_product_type_id']))

@@ -198,7 +198,7 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
+                                row.push(values.consignee_phone_number_1 + '|' + ((values.consignee_phone_number_2) ? values.consignee_phone_number_2:''));
                                 row.push(values.consignee_address);
                                 row.push(values.amount);
                                 row.push(values.mode);
@@ -702,6 +702,7 @@
                     selected_rows = [];
                     new_selected_rows = [];
                     shipment_remarks = {};
+                    table.button('.confirm').disable();
                     table.button('.reattempt').disable();
                     table.draw('false');
                     if (data.not_updated_shipments.length > 0) {
@@ -978,9 +979,13 @@
                                                 }else{
                                                     table.draw('false');
                                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
                                                 }
-
+                                                table.rows().deselect();
+                                                selected_rows = [];
+                                                new_selected_rows = [];
+                                                shipment_remarks = {};
+                                                table.button('.confirm').disable();
+                                                table.button('.reattempt').disable();
                                             });
                                         }
                                     })
@@ -1002,9 +1007,13 @@
                                         }else{
                                             table.draw('false');
                                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
                                         }
-
+                                        table.rows().deselect();
+                                        selected_rows = [];
+                                        new_selected_rows = [];
+                                        shipment_remarks = {};
+                                        table.button('.confirm').disable();
+                                        table.button('.reattempt').disable();
                                     });
                                 }
                             });
@@ -1072,6 +1081,7 @@
                                     table.draw(false);
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
+                                
                             });
                         }
                     });

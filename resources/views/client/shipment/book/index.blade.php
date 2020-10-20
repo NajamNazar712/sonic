@@ -132,7 +132,7 @@
 										</div>
 
 										<div class="form-group">
-											<textarea id="consignee_address" name="consignee_address" class="form-control" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+											<textarea id="consignee_address" name="consignee_address" class="form-control" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters"></textarea>
 										</div>
 
 										<div class="form-group">
@@ -158,8 +158,25 @@
 									<div id="order_information_header_div" class="col col_custom_middle">
 										<h4 id="order_header_info" class="form-section mb-2 text-center">Order Information</h4>
 
+										@if (Session::has('prefix'))
+											<div class="form-group">
+												<input name="order_id" class="form-control order_id" placeholder="Order ID" data-rule-maxlength="100" data-rule-required="true" data-msg-required="Order ID is required" data-msg-maxlength="Order ID can be maximum 100 characters" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
+											</div>
+										@else
+											<div class="form-group">
+												<input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
+											</div>
+										@endif
+
 										<div class="form-group">
-											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
+											<div class="form-group input-group">
+												<div class="input-group-prepend">
+													<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+														<span class="la la-calendar-o"></span>
+													</span>
+												</div>
+												<input type="text" name="order_date" class="form-control bg-primary border-primary white rounded-right" id="order_date" placeholder="Order Date">
+											</div>
 										</div>
 
 										<div id="regular">
@@ -553,6 +570,18 @@
 
 		$(document).ready(function() {
 
+			var order_date = $('#order_date').pickadate({
+				firstDay: 1,
+				clear: 'Clear',
+				format:'dd mmmm, yyyy',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd',
+				hiddenSuffix: '_formatted',
+				onOpen: function() {
+					$('#from_date_root').css('top','40px');
+				}
+			});
 
 			$(this).find('.pieces').TouchSpin({
 				min: 1,
@@ -1053,7 +1082,12 @@
 			});
 
 			$('input[name="consignee_phone_number_1"]').bind('change paste keyup', function () {
-				var length = $(this).val().match(/\d/g).length;
+				if($(this).val().match(/\d/g) != null){
+					var length = $(this).val().match(/\d/g).length;
+				}
+				else{
+					var length = 0;
+				}
 				if(length == 11){
 					check_consignee_return_ratio();
 				}
@@ -1689,6 +1723,13 @@
 				cb_table.row( $(this).parents('tr') ).remove().draw();
 			});
 			@endif
+			$('.order_id').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false,
+				'min': 0,
+				'max': 1000000000000
+			});
 		});
 	</script>
 @endsection

@@ -238,7 +238,7 @@
 					}
 				},
 				create: function(input) {
-					if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+					if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
 						return {
 							value: input,
 							text: input
@@ -443,12 +443,12 @@
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Order ID</strong></td>';
                                 shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
+                                shipment += '<td><strong>Order Date</strong></td>';
+                                shipment += '<td>' + ((details.order_information.order_date) ? details.order_information.order_date : '-') + '</td>';
                                 shipment += '<td><strong>Instructions</strong></td>';
 
                                 if (details.order_information.charges_mode_id) {
                                     shipment += '<td>' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
-                                    shipment += '<td><strong>Charges Mode</strong></td>';
-                                    shipment += '<td>' + details.order_information.charges_mode + '</td>';
                                 }
                                 else {
                                     shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
@@ -456,6 +456,11 @@
 
                                 shipment += '</tr>';
                                 shipment += '<tr>';
+
+                                if (details.order_information.charges_mode_id) {
+                                    shipment += '<td><strong>Charges Mode</strong></td>';
+                                    shipment += '<td>' + details.order_information.charges_mode + '</td>';
+                                }
                                 shipment += '<td><strong>Piece(s)</strong></td>';
                                 shipment += '<td>'+ details.order_information.pieces +'</td>';
                                 shipment += '</tr>';
@@ -545,7 +550,8 @@
                                     {name: 'date_time', class: 'align-middle date_time'},
                                     {name: 'status', class: 'align-middle status'},
                                     {name: 'reason', class: 'align-middle reason'},
-                                    {name: 'city', class: 'align-middle city'}
+                                    {name: 'status_remarks', class: 'align-middle status_remarks'},
+                                    {name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'}
                                 ]
                             });
 
@@ -556,7 +562,8 @@
                                 columns: [
                                     {name: 'date_time', class: 'align-middle date_time'},
                                     {name: 'status', class: 'align-middle status'},
-                                    {name: 'user', class: 'align-middle user'}
+                                    {name: 'user', class: 'align-middle user'},
+                                    {name: 'payable_remarks', class: 'align-middle payable_remarks'}
                                 ]
                             });
                         }
