@@ -3990,7 +3990,7 @@ class AdminCRMController extends Controller
 
         $pending_summary_crm = KeyAccountPendingSummaryCrm::where('case_nature_type_id', $case_nature_type_id)->where('admin_id', $admin_id);
         if($pending_summary_crm->exists()){
-            $pending_summary_crm->first();
+            $pending_summary_crm = $pending_summary_crm->first();
             $count = $pending_summary_crm->count;
             $count = $count + 1;
             $tat = ($pending_summary_crm->tat * $pending_summary_crm->count) / ($count);
