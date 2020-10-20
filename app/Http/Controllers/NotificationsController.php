@@ -3106,7 +3106,7 @@ class NotificationsController extends Controller
                                     $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
                                     $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
                                     $shipment_details .= '</tr>';
-                                    
+
                                     $send = TRUE;
                                 }
 
