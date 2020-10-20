@@ -104,7 +104,7 @@
                                             <div class="row justify-content-center">
                                                 <div class="col-8">
                                                     <div class="form-group">
-                                                        <textarea type="text" class="form-control" id="remarks" name="remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required" required></textarea>
+                                                        <textarea type="text" class="form-control" id="remarks" name="remarks" placeholder="Remarks" rows="5" data-rule-required="true" data-msg-required="Remarks is required" required></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -174,7 +174,8 @@
         $(document).ready(function() {
             $('#select_user_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select User'
+                placeholder: 'Select User',
+                dropdownParent: $('#add_request_form')
             }).bind('change', function() {
                 var selected_user = this.value;
                 if(selected_user == 1){
@@ -203,13 +204,15 @@
             $('#select_rider').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Rider',
-                allowClear:true
+                allowClear:true,
+                dropdownParent: $('#add_request_form')
             });
 
             $('#select_admin').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Admin',
-                allowClear:true
+                allowClear:true,
+                dropdownParent: $('#add_request_form')
             });
 
             $('#track_form input.tracking_numbers').inputmask({
@@ -341,6 +344,12 @@
                                 current.val(column.search());
                             }
                         }
+                        $('#user_mode_select').prepend('<option value="" selected="selected"></option>').select2({
+                            width: '100%',
+                            placeholder: 'Select User',
+                            containerCssClass: 'select-xs',
+                            dropdownCssClass: 'form-control-sm p-0'
+                        })
                     });
                     this.api().table().columns.adjust();
                 }
@@ -378,7 +387,7 @@
             });
 
             $('#add_request_form').validate({
-                ignore: [],
+                ignore: ":not(:visible),:disabled",
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function (error, element) {
