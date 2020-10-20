@@ -387,7 +387,7 @@
             });
 
             $('#add_request_form').validate({
-                ignore: [],
+                ignore: ":not(:visible),:disabled",
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function (error, element) {
