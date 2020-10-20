@@ -341,6 +341,12 @@
                                 current.val(column.search());
                             }
                         }
+                        $('#user_mode_select').prepend('<option value="" selected="selected"></option>').select2({
+                            width: '100%',
+                            placeholder: 'Select User',
+                            containerCssClass: 'select-xs',
+                            dropdownCssClass: 'form-control-sm p-0'
+                        })
                     });
                     this.api().table().columns.adjust();
                 }
