@@ -281,7 +281,7 @@
                             <div class="row justify-content-center">
                                 <div class="col-8">
                                     <fieldset class="form-group">
-                                        <input type="text" name="update_consignee_address" class="form-control" placeholder="Consignee Address*" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Address is required">
+                                        <input type="text" name="update_consignee_address" class="form-control" placeholder="Consignee Address*" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters">
                                     </fieldset>
                                 </div>
                             </div>
@@ -528,6 +528,7 @@
                 table = $('#datatable').DataTable({
                     dom: '<"d-inline-block"l>tipr',
                     lengthMenu: [[10, 50, 100], [10, 50, 100]],
+                    scrollX: true,
                     pageLength: 10,
                     pagingType: 'full_numbers',
                     processing: true,

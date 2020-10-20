@@ -25,7 +25,7 @@
                                         <tr style="height: 50px">
                                             <td class="align-middle"><h6><b>Pdf of filled and signed document:</b></h6></td>
                                             @if($documents && $documents->filled_and_signed_pdf != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'filled_and_signed_pdf_', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             @else
                                             <td class="align-middle">-</td>
                                             @endif
@@ -33,7 +33,7 @@
                                         <tr style="height: 50px">
                                             <td class="align-middle"><h6><b>Pdf of signed Acknowledgement form:</b></h6></td>
                                             @if($documents && $documents->signed_acknowledgement_pdf != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'signed_acknowledgement_pdf_', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'signed_acknowledgement_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             @else
                                                 <td class="align-middle">-</td>
                                             @endif
@@ -41,7 +41,7 @@
                                         <tr style="height: 50px">
                                             <td class="align-middle"><h6><b>Picture of CNIC (Front):</b></h6></td>
                                             @if($documents && $documents->cnic_front_image != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'cnic_front_image_', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'cnic_front_image', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             @else
                                                 <td class="align-middle">-</td>
                                             @endif
@@ -49,7 +49,7 @@
                                         <tr style="height: 50px">
                                             <td class="align-middle"><h6><b>Picture of CNIC (Back):</b></h6></td>
                                             @if($documents && $documents->cnic_back_image != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'cnic_back_image_', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'cnic_back_image', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             @else
                                                 <td class="align-middle">-</td>
                                             @endif
@@ -57,7 +57,7 @@
                                         <tr style="height: 50px">
                                             <td class="align-middle"><h6><b>Picture of Blank cheque:</b></h6></td>
                                             @if($documents && $documents->blank_cheque_image != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'blank_cheque_image_', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'blank_cheque_image', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             @else
                                                 <td class="align-middle">-</td>
                                             @endif

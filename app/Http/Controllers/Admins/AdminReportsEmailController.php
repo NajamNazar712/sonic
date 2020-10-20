@@ -166,7 +166,7 @@ class AdminReportsEmailController extends Controller
         } else {
             $total_avg_revenue_count = 0;
         }
-        
+
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -231,29 +231,31 @@ class AdminReportsEmailController extends Controller
                 $join->on('s.consignee_city_id', '=', 'cities.id')
                     ->where('s.packaging_material_request', 0);
             })
+            ->leftjoin('user_shipping_infos as usi', 'usi.id','=', 's.pickup_address_id')
+            ->leftjoin('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
-            ->select('h.id as hub_id', 'h.name as hub', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'))
+            ->select('h.id as hub_id', 'h.name as hub', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'), 'oc.name as origin', 'oc.id as origin_id')
             ->where('sj.shipper_status_id', 2)
             ->whereBetween('sj.created_at', [$date_from, $date_to])
-            ->groupBy('h.id')
+            ->groupBy('oc.id','h.id')
             ->get();
         foreach ($hub_wise_splits as $hub_wise_split) {
             $total_shipments = $total_shipments + $hub_wise_split->shipment_count;
         }
         foreach ($hub_wise_splits as $hub_wise_split) {
             if ($total_shipments != 0) {
-                $ratio[$hub_wise_split->hub_id] = $hub_wise_split->shipment_count / $total_shipments;
+                $ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id] = $hub_wise_split->shipment_count / $total_shipments;
             } else {
-                $ratio[$hub_wise_split->hub_id] = 0;
+                $ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id] = 0;
             }
             if ($hub_wise_split->shipment_count != 0) {
-                $avg_actual_weight[$hub_wise_split->hub_id] = $hub_wise_split->actual_weight / $hub_wise_split->shipment_count;
+                $avg_actual_weight[$hub_wise_split->origin_id][$hub_wise_split->hub_id] = $hub_wise_split->actual_weight / $hub_wise_split->shipment_count;
             } else {
-                $avg_actual_weight[$hub_wise_split->hub_id] = 0;
+                $avg_actual_weight[$hub_wise_split->origin_id][$hub_wise_split->hub_id] = 0;
             }
         }
 
-        $hub_wise_split_array['header'] = ['S. No.', 'Hub', 'Count of Parcels', 'Ratio', 'Actual Weight', 'Avg Actual Weight/Shipment'];
+        $hub_wise_split_array['header'] = ['S. No.', 'Origin', 'Hub', 'Count of Parcels', 'Ratio', 'Actual Weight', 'Avg Actual Weight/Shipment'];
         $serial = 1;
 
         $total_shipments_count = 0;
@@ -267,19 +269,20 @@ class AdminReportsEmailController extends Controller
             } else {
                 $actual_weight = 0;
             }
-            $hub_wise_split_array[] = ['serial' => $serial, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => round($ratio[$hub_wise_split->hub_id] * 100, 2), 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight/Shipment' => round($avg_actual_weight[$hub_wise_split->hub_id], 2)];
+            $hub_wise_split_array[] = ['serial' => $serial, 'Origin' => $hub_wise_split->origin, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => round($ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id] * 100, 2), 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight/Shipment' => round($avg_actual_weight[$hub_wise_split->origin_id][$hub_wise_split->hub_id], 2)];
             $hub_wise_split_entry = new HubWiseSplit();
+            $hub_wise_split_entry->origin = $hub_wise_split->origin_id;
             $hub_wise_split_entry->hub_id = $hub_wise_split->hub_id;
             $hub_wise_split_entry->shipments = $hub_wise_split->shipment_count;
-            $hub_wise_split_entry->ratio = $ratio[$hub_wise_split->hub_id] * 100;
+            $hub_wise_split_entry->ratio = $ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id] * 100;
             $hub_wise_split_entry->actual_weight = $actual_weight;
-            $hub_wise_split_entry->avg_actual_weight = $avg_actual_weight[$hub_wise_split->hub_id];
+            $hub_wise_split_entry->avg_actual_weight = $avg_actual_weight[$hub_wise_split->origin_id][$hub_wise_split->hub_id];
             $hub_wise_split_entry->save();
             $serial++;
 
 
             $total_shipments_count = $total_shipments_count + $hub_wise_split->shipment_count;
-            $total_avg_ratio_count = $total_avg_ratio_count + $ratio[$hub_wise_split->hub_id];
+            $total_avg_ratio_count = $total_avg_ratio_count + $ratio[$hub_wise_split->origin_id][$hub_wise_split->hub_id];
             $total_actual_weight_count = $total_actual_weight_count + $hub_wise_split->actual_weight;
         }
         if($total_shipments_count <= 0){
@@ -288,8 +291,8 @@ class AdminReportsEmailController extends Controller
         else{
             $total_avg_actual_weight_count = $total_actual_weight_count / $total_shipments_count;
         }
-        $hub_wise_split_array[] = ['serial' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight/Shipment' => ''];
-        $hub_wise_split_array[] = ['serial' => 'Total', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count * 100, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight/Shipment' => round($total_avg_actual_weight_count, 2)];
+        $hub_wise_split_array[] = ['serial' => '', 'Origin' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight/Shipment' => ''];
+        $hub_wise_split_array[] = ['serial' => 'Total', 'Origin' => '', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count * 100, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight/Shipment' => round($total_avg_actual_weight_count, 2)];
         $cell_st = [
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -300,7 +303,7 @@ class AdminReportsEmailController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($hub_wise_split_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
+        $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
         $sheet->setTitle('Sale Person Numbers');
         $writer = new Xlsx($spreadsheet);
 
@@ -1106,7 +1109,7 @@ class AdminReportsEmailController extends Controller
                 $join->on('svd.shipment_id', '=', 's.id')
                     ->where('svd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.reference_1_id = delivery_note.id and shipments_journey.shipper_status_id != 5)'));
             })
-            ->leftjoin('shipments_journey as sjd', function($join) {
+            ->join('shipments_journey as sjd', function($join) {
                 $join->on('sjd.shipment_id', '=', 's.id')
                     ->where('sjd.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
             })
@@ -1198,7 +1201,7 @@ class AdminReportsEmailController extends Controller
             }
         }
     }
-	
+
 	static public function done_payment($date){
         $done_payments = DonePaymentCalculation::whereDate('created_at', $date);
         DonePaymentsReport::truncate();

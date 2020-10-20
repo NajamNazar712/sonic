@@ -406,12 +406,17 @@
                                                href="{{ route('admin.finance.make_payments.index') }}">Make</a></li>
                                     @endif
 
+
                                     @if (session('role_id') == 1 || in_array(61, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.finance.done_payments.index') }}">Done</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(232, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.finance.invoice_for_reimbursement.index') }}">Invoice for Reimbursement</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(396, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.finance.make_payments_pickup_wise.index') }}">Pickup Wise Make</a></li>
                                     @endif
                                 </ul>
                             </li>
@@ -814,7 +819,7 @@
                         @if (session('role_id') == 1 || in_array(345, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.daily_monthly_adjustment.index') }}">Daily/Month Adjustment Report</a></li>
                         @endif
-                            @if (session('role_id') == 1 || in_array(345, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(395, session('permissions')))
                                 <li><a class="menu-item" href="{{ route('admin.reports.petty_cash_expense_summary.index') }}">Petty Cash Expense Summary Report</a></li>
                             @endif
                     </ul>
@@ -825,7 +830,7 @@
             @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385,394], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228,302, 313, 314, 318, 367], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228,302, 313, 314, 318, 367, 388], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shippers</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(149, session('permissions')))
@@ -859,6 +864,9 @@
                                     @if (session('role_id') == 1 || in_array(367, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.nsa_account.index') }}">NSA Accounts</a>
                                         </li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(388, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.sms_shipper_wise.index')}}">Arrived At Origin Sms For Consignee</a></li>
                                     @endif
                                 </ul>
 
@@ -1019,6 +1027,10 @@
 
                                     @if (session('role_id') == 1 || in_array(362, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.over_payment_limit.index')}}">Over Payment Limit</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(391, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.pickup_address_wise_payment_accounts.index')}}">Pickup Wise Payment Accounts</a></li>
                                     @endif
                                 </ul>
                             </li>
