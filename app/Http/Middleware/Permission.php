@@ -635,8 +635,8 @@ class Permission
             'settings.sales.projection.reasons.index' => 314,
             'settings.sales.projection.shipment.index' => 318,
 
-            'settings.sales.key_accounts.dashboard' => 396,
-            'settings.sales.key_accounts.dashboard.details' => 396,
+            'settings.sales.key_accounts.dashboard' => 397,
+            'settings.sales.key_accounts.dashboard.details' => 397,
 
             'settings.settings.blacklist.index' => 329,
             'settings.blacklist.search.index' => 330,
