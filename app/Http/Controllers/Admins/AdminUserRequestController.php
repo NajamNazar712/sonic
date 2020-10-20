@@ -307,6 +307,7 @@ class AdminUserRequestController extends Controller
             }
             $admin->status = 1;
             $admin->save();
+            $admin_ids = $admin->id;
 
 
             if ($request->has('hub_ids')) {
@@ -315,7 +316,7 @@ class AdminUserRequestController extends Controller
                 $delete_hub_ids = array_diff($current_hub_ids, $request->input('hub_ids'));
                 $new_hub_ids = array_diff($request->input('hub_ids'), $current_hub_ids);
 
-                AdminUserRequestHub::where('admin_user_requests_id', $id)->whereIn('hub_id', $delete_hub_ids)->delete();
+                AdminUserRequestHub::where('admin_user_requests_id', $id)->whereIn('hubs_id', $delete_hub_ids)->delete();
 
                 foreach ($new_hub_ids as $hub_id) {
                     $admin_hub = new AdminUserRequestHub();
@@ -323,11 +324,14 @@ class AdminUserRequestController extends Controller
                     $admin_hub->hubs_id = $hub_id;
 
                     $admin_hub->save();
+
+                }
+                $new_hub_ids = $request->input('hub_ids');
+                foreach ($new_hub_ids as $hub_id) {
                     $save_hub_id = new AdminHub();
-                    $save_hub_id->admin_id = $admin->id;
+                    $save_hub_id->admin_id = $admin_ids;
                     $save_hub_id->hub_id = $hub_id;
                     $save_hub_id->save();
-
                 }
             } else {
                 AdminUserRequestHub::where('admin_user_requests_id', $id)->delete();
