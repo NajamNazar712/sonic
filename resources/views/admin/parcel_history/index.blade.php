@@ -75,21 +75,25 @@
 
                             <div class="row justify-content-center mb-1 d-none" id="rider_div">
                                 <div class="col-6">
-                                    <select name="select_rider" id="select_rider" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
-                                        @foreach($riders as $rider)
-                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="form-group">
+                                        <select name="select_rider" id="select_rider" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
+                                            @foreach($riders as $rider)
+                                                <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="row justify-content-center mb-1 d-none" id="admin_div">
                                 <div class="col-6">
-                                    <select name="select_admin" id="select_admin" class="form-control select2" data-rule-required="true" data-msg-required="Admin is required">
-                                        @foreach($admins as $admin)
-                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="form-group">
+                                        <select name="select_admin" id="select_admin" class="form-control select2" data-rule-required="true" data-msg-required="Admin is required">
+                                            @foreach($admins as $admin)
+                                                <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
@@ -342,7 +346,7 @@
                 }
             });
             $('#track_form').validate({
-                ignore: [],
+                ignore: ":not(:visible),:disabled",
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function (error, element) {
