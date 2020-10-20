@@ -1577,6 +1577,9 @@ class V2AdminPickupsController extends Controller
                             <td class="color primary"><strong>Contact Person</strong></td>
                             <td class="color primary"><strong>Vendor</strong></td>
                             <td class="color primary"><strong>Contact Number</strong></td>
+                            <td class="color primary"><strong>Sales Person</strong></td>
+                            <td class="color primary"><strong>Person of Contact</strong></td>
+                            <td class="color primary"><strong>Number</strong></td>
                             <td class="color primary"><strong>Pickup Address</strong></td>
                             <td class="color primary"><strong>Bookings</strong></td>
                             <td class="color primary"><strong>Pickup Date</strong></td>
@@ -1604,6 +1607,9 @@ class V2AdminPickupsController extends Controller
                             <td>' . $pickup_address['poc'] . '</td>
                             <td>' . $pickup_address['vendor'] . '</td>
                             <td>' . $pickup_address['phone'] . '</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['booked'] . '</td>
                             <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
@@ -1629,12 +1635,12 @@ class V2AdminPickupsController extends Controller
 
                       <hr>
         ';
-        if(count($reverse_pickup_shipment_ids) > 0){
-            $airway_bill_html = '';
-            $airway_bill_html = $this->print_air_waybill($reverse_pickup_shipment_ids, $rider->name);
-            $html .= $airway_bill_html;
+            if(count($reverse_pickup_shipment_ids) > 0){
+                $airway_bill_html = '';
+                $airway_bill_html = $this->print_air_waybill($reverse_pickup_shipment_ids, $rider->name);
+                $html .= $airway_bill_html;
 //                return response()->json(['status' => 0, 'shipment_ids' => $reverse_pickup_shipment_ids, 'rider_name' => $rider->name]);
-        }
+            }
         }
 
         $html .= '
