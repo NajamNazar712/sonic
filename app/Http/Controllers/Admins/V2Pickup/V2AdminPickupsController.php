@@ -2086,17 +2086,11 @@ class V2AdminPickupsController extends Controller
         $pickup_date = $request->pickup_date;
         $rider_id = $request->rider_id;
         if($pickup_date != null && $rider_id != null){
-            $pickup_attempt = V2PickupRequestAttempt::whereDate('attempt_date', $pickup_date)->where('rider_id', $rider_id);
-            if($pickup_attempt->exists()){
-                $pickup_attempt = $pickup_attempt->latest()->first();
-                if($pickup_attempt){
-                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_attempt->pickup_request_id);
-                    if($pickup_note_request->exists()){
-                        $pickup_note_request = $pickup_note_request->first();
-                        $pickup_note_id = $pickup_note_request->pickup_note_id;
-                        return response()->json(['status' => 0, 'pickup_note_id' => $pickup_note_id]);
-                    }
-                    return response()->json(['status' => 1, 'error' => 'Pickup Note not found!']);
+            $pickup_note = V2PickupNote::whereDate('created_at', $pickup_date)->where('rider_id', $rider_id);
+            if($pickup_note->exists()){
+                $pickup_note = $pickup_note->latest()->first();
+                if($pickup_note){
+                    return response()->json(['status' => 0, 'pickup_note_id' => $pickup_note->id]);
                 }
             }
             return response()->json(['status' => 1, 'error' => 'No Pickups found!']);
