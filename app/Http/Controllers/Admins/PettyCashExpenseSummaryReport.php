@@ -22,7 +22,7 @@ class PettyCashExpenseSummaryReport extends Controller
     public function index(){
         $petty_cash_account_title = PettyCashAccountTitle::select('id','name')->get();
         return view('admin.petty_cash_expense.index')->with(['petty_cash_account_title' => $petty_cash_account_title]);
-//        dd($petty_cash_account_title);
+   //        dd($petty_cash_account_title);
     }
 
     public function pettyCashSummaryReportProcess(Request $request)

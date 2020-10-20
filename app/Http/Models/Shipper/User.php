@@ -48,4 +48,7 @@ class User extends Authenticatable
     public function payment_cycle(){
         return $this->belongsTo('App\Http\Models\PaymentCycle');
     }
+    public function open_parcel(){
+        return $this->hasOne('App\Http\Models\Shipper\OpenParcelHistory');
+    }
 }
