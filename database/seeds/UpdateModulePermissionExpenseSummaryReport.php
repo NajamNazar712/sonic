@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class ExpanceSummaryReport extends Seeder
+class UpdateModulePermissionExpenseSummaryReport extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class ExpanceSummaryReport extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 393, 'name' => 'Expanse Summary Report', 'module_id' => 9),
+            array('id' => 395, 'name' => 'Expense Summary Report', 'module_id' => 9),
         ));
     }
 }
