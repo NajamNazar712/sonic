@@ -23,7 +23,7 @@
                                         {{ csrf_field() }}
 
                                         <div class="form-group">
-                                            <select name="shippers[]" id="shipper_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Shipper is required" data-rule-require="true" required="required">
+                                            <select name="shippers[]" id="shipper_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Shipper is required" data-rule-required="true" required="required">
                                                 @foreach($shippers as $person)
                                                     <option value="{{$person->id}}">{{$person->name}}</option>
                                                 @endforeach

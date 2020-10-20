@@ -136,7 +136,12 @@ class ProcessShipmentBooking implements ShouldQueue
             $substitute_user_shipment->save();
         }
 
-        $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+        if($this->booking['prefix'] != NULL){
+            $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $this->booking['order_id']);
+        }
+        else{
+            $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+        }
 
         if($this->booking['order_date'] != null){
             $order_date = new ShipmentOrderDate();

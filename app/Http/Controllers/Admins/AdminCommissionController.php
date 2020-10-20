@@ -252,10 +252,10 @@ class AdminCommissionController extends Controller
 
         if($status== 3)
         {
-            return redirect(route('admin.accounts.active'))->with('success','All Rates are Updated');
+            return redirect(route('admin.accounts.active'))->with('success','Commissions are Updated');
         }
         else{
-            return redirect(route('admin.accounts.pending'))->with('success','All Rates are Updated');
+            return redirect(route('admin.accounts.pending'))->with('success','Commissions are Updated');
         }
 
         //Sales Commissison End
@@ -265,14 +265,9 @@ class AdminCommissionController extends Controller
 
         $commission_percentage = '';
         $user_ids = explode(',' , $ids);
-        $users = User::whereIn('id', $user_ids)->select('id', 'name')->get();
-        $user_names = '';
-        foreach($users as $user){
-            $user_names = $user_names . $user->name;
-        }
        // dd($users);
         $existing_commission_array = array();
-        foreach($user_ids  as $user_Id){
+        foreach($user_ids as $key => $user_Id){
             $sale_commission = SalesCommission::where('shipper_id', $user_Id)->first();
             if($sale_commission){
                 $sale_commission_users = SalesCommissionUser::where('sales_commission_id', $sale_commission->id)->get();
@@ -298,10 +293,24 @@ class AdminCommissionController extends Controller
                         }
                     }
                 }
+                else{
+                    unset($user_ids[$key]);
+                }
             }
-
+            else{
+                unset($user_ids[$key]);
+            }
         }
 
+        $users = User::whereIn('id', $user_ids)->select('id', 'name')->get();
+        $user_names = '';
+        foreach($users as $user){
+            $user_names = $user_names . $user->name;
+        }
+
+        if(count($user_ids) == 0){
+            return redirect()->back()->with('error', 'Commissions are not set for the selected shippers');
+        }
            // dd($existing_commission_array);
         return view('admin.settings.commission.approve_commission')->with(['user_ids' => $user_ids, 'ids' => $ids,'users'=>$users,'existing_commission_array' => $existing_commission_array]);
     }
@@ -345,7 +354,7 @@ class AdminCommissionController extends Controller
                 }
             }
 
-            return redirect(route('admin.accounts.active'))->with('success','Commission updated successfully.');
+            return redirect(route('admin.accounts.active'))->with('success','Commission Updated successfully.');
     }
 
     public function dashboard_userwise_index(){

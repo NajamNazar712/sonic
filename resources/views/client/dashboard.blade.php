@@ -737,7 +737,8 @@
                                 }
                             });
                         }
-                    }, {
+                    },
+                    {
                         extend: 'selectNone',
                         text: 'Select None',
                         className: 'select_none',
@@ -852,7 +853,6 @@
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-
 
                     $('td:eq(0)', row).addClass('select-checkbox');
 
@@ -1240,7 +1240,7 @@
                     }
                 },
                 create: function (input) {
-                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
                         return {
                             value: input,
                             text: input

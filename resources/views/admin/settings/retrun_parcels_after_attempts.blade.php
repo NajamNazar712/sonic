@@ -43,7 +43,7 @@
                     @csrf
                     <div class="modal-body">
                         <div class="row justify-content-center">
-                            <div class="form-group">
+                            <div class="col-10 form-group">
                                 <select class="form-control" name="shipper_id" id="shipper_id" data-rule-required="true" data-msg-required="Shipper is required">
                                     @foreach($shippers as $shipper)
                                         <option value="{{$shipper->id}}">{{$shipper->name}}</option>

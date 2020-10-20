@@ -63,6 +63,15 @@
                                     </div>
                                 </div>
                                 <div class="col-4">
+                                    <div class="form-group pb-1">
+                                        <select name="pickup_status" class="select2" id="pickup_status" >
+                                            @foreach($pickup_request_statuses as $pickup_request_status)
+                                                <option value="{{ $pickup_request_status->id }}">{{ $pickup_request_status->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-4">
                                     <div class="form-group input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -82,6 +91,7 @@
                                         <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value="">
                                     </div>
                                 </div>
+
                                 <div class="col-2">
                                 <!-- <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button> -->
                                     <button type="submit" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -432,6 +442,11 @@
                 placeholder: 'Select Origin',
                 allowClear:true
             });
+            $('#search_form #pickup_status').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Status',
+                allowClear:true
+            });
             $('#search_form #category').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Category',
@@ -572,6 +587,7 @@
                         d.search_salesperson = $('#salesperson').val();
                         d.search_origin = $('#origin').val();
                         d.search_category = $('#category').val();
+                        d.search_pickup_status = $('#pickup_status').val();
                         d.search_cut_off_time= $('#cut_off_time').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
