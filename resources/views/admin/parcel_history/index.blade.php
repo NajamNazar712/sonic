@@ -294,7 +294,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number'},
-                    { data:'user_mode' ,name: 'user_mode', class: 'align-middle user_mode'},
+                    { data:'user_mode' ,name: 'open_parcel_histories.user_mode', class: 'align-middle user_mode'},
                     { data:'user' ,name: 'user', class: 'align-middle user'},
                     { data:'remarks' ,name: 'open_parcel_histories.remarks', class: 'align-middle remarks'},
                     { data:'amount' ,name: 'open_parcel_histories.amount', class: 'align-middle amount'},
