@@ -42,16 +42,14 @@ class AccountBlockageEmailDraftController extends Controller
 
         $users = User::join('user_document_attachments as usd','usd.user_id','=','users.id')->
           where(DB::raw("(STR_TO_DATE(usd.created_at,'%Y-%m-%d'))"),$last_7_days)
-             ->Where('usd.filled_and_signed_pdf',NULL)
-            ->OrWhere('usd.signed_acknowledgement_pdf', null)
-            ->where('users.status',3)->pluck('users.id')->toArray();
+            ->where('users.status',0)->where('users.documents_status', '!=' , 2)->pluck('users.id')->toArray();
            //dd($users);
         $defaulter_users = array();
         if(count($users) >= 0){
             foreach ($users as $user_id){
 
                 $user = User::find($user_id);
-                if( $user->status == 3){
+                if( $user->status == 0){
                     $user->status = 4;
                     $user->save();
                 }
