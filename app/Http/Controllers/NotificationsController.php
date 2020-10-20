@@ -3090,19 +3090,26 @@ class NotificationsController extends Controller
                                 $body = str_replace('[vendor]', $vendor, $body);
                             }
 
+                            $send = FALSE;
+
                             $assigned_shipments = $pickup_request->pickup_request_shipments;
                             $shipment_details = '<table style="width:100%;">';
                             $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
                             $shipment_details .= '<tbody>';
                             foreach ($assigned_shipments as $assigned_shipment) {
                                 $shipment = $assigned_shipment->shipment;
-                                $items = ShipmentItem::where('shipment_id', $shipment->id)->first();
-                                $shipment_details .= '<tr>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->description . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
-                                $shipment_details .= '</tr>';
+                                if($shipment->shipper_status_id == 1){
+                                    $items = ShipmentItem::where('shipment_id', $shipment->id)->first();
+                                    $shipment_details .= '<tr>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->description . '</td>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
+                                    $shipment_details .= '</tr>';
+                                    
+                                    $send = TRUE;
+                                }
+
                             }
                             $shipment_details .= '</tbody></table>';
 
@@ -3111,7 +3118,10 @@ class NotificationsController extends Controller
                             }
 
                             $to = $pickup_request->pickup_address->email;
-                            self::email($subject, $body, $to);
+
+                            if ($send) {
+                                self::email($subject, $body, $to);
+                            }
                         }
                     }
                 } else if ($id == 44) {
