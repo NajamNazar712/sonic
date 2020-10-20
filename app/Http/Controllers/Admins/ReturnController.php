@@ -358,7 +358,7 @@ class ReturnController extends Controller
                 if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
 
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
-                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
+//                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                     $parcel->shipper_status_id = 20;
                     $parcel->consignee_status_id = 20;
                     $parcel->save();
