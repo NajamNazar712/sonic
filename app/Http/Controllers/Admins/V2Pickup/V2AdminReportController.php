@@ -328,6 +328,10 @@ class V2AdminReportController extends Controller
             $datatables->where('v2_pickup_reports.category_id', '=', $category);
         }
 
+        if($pickup_status = $request->get('search_pickup_status')){
+            $datatables->where('v2_pickup_reports.status_id', '=', $pickup_status);
+        }
+
         if($cut_off_time = $request->get('search_cut_off_time')){
             if($cut_off_time == 0){
                 $datatables->whereNull('v.after_cut_off_time');
