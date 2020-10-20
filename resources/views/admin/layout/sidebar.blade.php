@@ -637,7 +637,7 @@
                         <li><a class="menu-item" href="{{ route('admin.dashboard.overall.commission') }}">Overall Commission</a></li>
                     @endif
                     @if(session('role_id') == 1 || in_array(392, session('permissions')))
-					    <li><a class="menu-item" href="{{route('admin.parcel_history.index')}}">Open Parcel History</a></li>
+					    <li><a class="menu-item" href="{{route('admin.open_parcel_history.index')}}">Open Parcel History</a></li>
                     @endif
                     @if (session('role_id') == 1 || in_array(389, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.trax_directory.index') }}">Trax Directory</a></li>

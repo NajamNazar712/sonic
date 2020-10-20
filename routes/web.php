@@ -2234,8 +2234,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('open_parcel_history')->name('open_parcel_history.')->group(function () {
-        Route::get('{tracking_number?}', 'Admins\AdminParcelHistoryController@index')->name('index');
-        Route::post('list', 'Admins\AdminParcelHistoryController@open_guilty_parcel_remarks')->name('list');
+        Route::get('', 'Admins\AdminParcelHistoryController@index')->name('index');
+        Route::post('info', 'Admins\AdminParcelHistoryController@shipment_get_info')->name('info');
+        Route::post('submit', 'Admins\AdminParcelHistoryController@remarks_submit')->name('submit');
+        Route::get('list', 'Admins\AdminParcelHistoryController@list')->name('list');
 	});
 	Route::prefix('trax_directory')->name('trax_directory.')->group(function () {
         Route::get('', 'Admins\AdminTraxDirectory@index')->name('index');
