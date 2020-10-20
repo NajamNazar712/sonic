@@ -2903,26 +2903,51 @@ class AdminFinanceController extends Controller
             $shipment = $pending_payment_shipment->shipment;
 
             $detail = array();
+            if($request->has('pickup_address_id')){
+                if($request->pickup_address_id == $shipment->pickup_address_id){
+                    $detail['tracking_number'] = $shipment->tracking_number;
 
-            $detail['tracking_number'] = $shipment->tracking_number;
+                    if ($pending_payment_shipment->type == 0) {
+                        $detail['type'] = 'Delivered';
+                    }
+                    else if ($pending_payment_shipment->type == 1) {
+                        $detail['type'] = 'Returned';
+                    }
+                    else {
+                        $detail['type'] = 'Adjusted';
+                    }
 
-            if ($pending_payment_shipment->type == 0) {
-                $detail['type'] = 'Delivered';
+                    $detail['amount'] = number_format($pending_payment_shipment->amount);
+                    $detail['charges'] = number_format($pending_payment_shipment->charges, 2);
+                    $detail['gst'] = number_format($pending_payment_shipment->gst, 2);
+                    $detail['deductable'] = number_format(($pending_payment_shipment->charges + $pending_payment_shipment->gst), 2);
+                    $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
+
+                    $details[] = $detail;
+                }
+
+            }else{
+                $detail['tracking_number'] = $shipment->tracking_number;
+
+                if ($pending_payment_shipment->type == 0) {
+                    $detail['type'] = 'Delivered';
+                }
+                else if ($pending_payment_shipment->type == 1) {
+                    $detail['type'] = 'Returned';
+                }
+                else {
+                    $detail['type'] = 'Adjusted';
+                }
+
+                $detail['amount'] = number_format($pending_payment_shipment->amount);
+                $detail['charges'] = number_format($pending_payment_shipment->charges, 2);
+                $detail['gst'] = number_format($pending_payment_shipment->gst, 2);
+                $detail['deductable'] = number_format(($pending_payment_shipment->charges + $pending_payment_shipment->gst), 2);
+                $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
+
+                $details[] = $detail;
             }
-            else if ($pending_payment_shipment->type == 1) {
-                $detail['type'] = 'Returned';
-            }
-            else {
-                $detail['type'] = 'Adjusted';
-            }
 
-            $detail['amount'] = number_format($pending_payment_shipment->amount);
-            $detail['charges'] = number_format($pending_payment_shipment->charges, 2);
-            $detail['gst'] = number_format($pending_payment_shipment->gst, 2);
-            $detail['deductable'] = number_format(($pending_payment_shipment->charges + $pending_payment_shipment->gst), 2);
-            $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
-
-            $details[] = $detail;
         }
 
         return $details;
@@ -6180,7 +6205,8 @@ class AdminFinanceController extends Controller
             ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
             ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', DB::raw('(select count(ps.id) from shipments as ps INNER JOIN pending_payment_shipments AS ppsc ON ps.id = ppsc.shipment_id where ppsc.pending_payment_id = pending_payments.id and ps.pickup_address_id = s.pickup_address_id) as total_shipments'),DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 's.booking_type_id', 'usi.poc',DB::raw('(select count(id) from shipments where shipments.user_id = u.id and shipments.pickup_address_id = s.pickup_address_id and shipments.shipper_status_id not in (1, 14, 17, 20, 21, 22, 23, 24, 25, 30, 31, 51)) as total_pending_shipments'), DB::raw('SUM(IF(pps.type = 2, pps.payable, 0)) as total_adjustments'), 's.packaging_charges', 'u.documents_status','usi.id as pickup_address_id')
+            ->join('cities as pc', 'pc.id', '=', 'usi.city_id')
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'pc.name as city', 'u.phone', 'u.phone2', 'usi.pickup_address','usi.vendor', DB::raw('(select count(ps.id) from shipments as ps INNER JOIN pending_payment_shipments AS ppsc ON ps.id = ppsc.shipment_id where ppsc.pending_payment_id = pending_payments.id and ps.pickup_address_id = s.pickup_address_id) as total_shipments'),DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 's.booking_type_id', 'usi.poc',DB::raw('(select count(id) from shipments where shipments.user_id = u.id and shipments.pickup_address_id = s.pickup_address_id and shipments.shipper_status_id not in (1, 14, 17, 20, 21, 22, 23, 24, 25, 30, 31, 51)) as total_pending_shipments'), DB::raw('SUM(IF(pps.type = 2, pps.payable, 0)) as total_adjustments'), 's.packaging_charges', 'u.documents_status','usi.id as pickup_address_id')
             ->whereIn('u.id', $shippers)
 //            ->groupBy('pending_payments.id');
             ->groupBy('s.pickup_address_id');

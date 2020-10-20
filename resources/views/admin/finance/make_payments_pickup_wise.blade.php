@@ -91,9 +91,10 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
-                                    <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Pickup City</th>
                                     <th class="border-primary border-darken-1">Phone No(s).</th>
-                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Pickup Address</th>
+                                    <th class="border-primary border-darken-1">Vendor</th>
                                     <th class="border-primary border-darken-1">Created Datetime</th>
                                     <th class="border-primary border-darken-1">Total Shipments</th>
                                     <th class="border-primary border-darken-1">Total Pending Shipments</th>
@@ -398,9 +399,10 @@
 
                             head.push('S.No');
                             head.push('Shipper');
-                            head.push('City');
+                            head.push('Pickup City');
                             head.push('Phone No(s).');
-                            head.push('Address');
+                            head.push('Pickup Address');
+                            head.push('Vendor');
                             head.push('Created Datetime');
                             head.push('Total Shipments');
                             head.push('Total Pending Shipments');
@@ -424,7 +426,8 @@
                                 row.push(values.shipper);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
-                                row.push(values.address);
+                                row.push(values.pickup_address);
+                                row.push(values.vendor);
                                 row.push(values.created_at);
                                 row.push(values.total_shipments);
                                 row.push(values.total_pending_shipments);
@@ -449,69 +452,6 @@
             var pickup_address_id;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || in_array(60, session('permissions')))
-
-                buttons: [
-                    {
-                        extend: 'excel',
-                        title: 'Make Payments',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
-                    }, {
-                        extend: 'selectAll',
-                        text: 'Select All',
-                        className: 'select_all',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.select();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index === -1) {
-                                        selected_rows.push(id);
-                                    }
-
-                                    table.button('.make_payment').enable();
-                                }
-                            });
-                        }
-                    }, {
-                        extend: 'selectNone',
-                        text: 'Select None',
-                        className: 'select_none',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.deselect();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index !== -1) {
-                                        selected_rows.splice(index, 1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.make_payment').disable();
-                                    }
-                                }
-                            });
-                        }
-                    },
-                    'reset'],
-                @else
                 buttons: [
                     {
                         extend: 'excel',
@@ -520,7 +460,7 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'],
-                @endif
+
                 scrollX: true, scrollY: '500px',
 
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -546,9 +486,10 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
-                    {data:'city', name: 'c.name', class: 'align-middle text-center city'},
+                    {data:'city', name: 'pc.name', class: 'align-middle text-center city'},
                     {data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
-                    {data:'address', name: 'u.address', class: 'align-middle text-center address'},
+                    {data:'pickup_address', name: 'usi.pickup_address', class: 'align-middle text-center pickup_address'},
+                    {data:'vendor', name: 'usi.vendor', class: 'align-middle text-center vendor'},
                     {data:'created_at', name: 'pending_payments.created_at', class: 'align-middle text-center created_at'},
                     {data:'total_shipments', name: 'total_shipments', class: 'align-middle text-center total_shipments',orderable: false, searchable: false},
                     {data:'total_pending_shipments', name: 'total_pending_shipments', class: 'align-middle text-center total_pending_shipments', orderable: false},
@@ -958,6 +899,8 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
 
                 if ($(this).hasClass('view_details')) {
+                    var pickup_id = $(this).parents('tr').data('pickup_address_id');
+
                     $('#view_details .modal-body').html('');
 
                     $.ajax({
@@ -965,7 +908,8 @@
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'id': id
+                            'id': id,
+                            'pickup_address_id':pickup_id
                         }
                     })
                         .done(function(data) {
