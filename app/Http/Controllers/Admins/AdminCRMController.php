@@ -3983,11 +3983,6 @@ class AdminCRMController extends Controller
         $daily_shipment_crm->case_nature_type_id = $case_nature_type_id;
         $daily_shipment_crm->save();
 
-        $pending_crm = new KeyAccountPendingCrm();
-        $pending_crm->admin_id = $admin_id;
-        $pending_crm->crm_request_id = $crm_request_id;
-        $pending_crm->save();
-
         $pending_summary_crm = KeyAccountPendingSummaryCrm::where('case_nature_type_id', $case_nature_type_id)->where('admin_id', $admin_id);
         if($pending_summary_crm->exists()){
             $pending_summary_crm = $pending_summary_crm->first();
@@ -4006,5 +4001,10 @@ class AdminCRMController extends Controller
             $pending_summary_crm->tat = 0;
             $pending_summary_crm->save();
         }
+        $pending_crm = new KeyAccountPendingCrm();
+        $pending_crm->admin_id = $admin_id;
+        $pending_crm->crm_request_id = $crm_request_id;
+        $pending_crm->summary_crm_request_id = $pending_summary_crm->id;
+        $pending_crm->save();
     }
 }

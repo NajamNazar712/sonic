@@ -17,6 +17,7 @@ class CreateKeyAccountPendingCrmsTable extends Migration
             $table->increments('id');
             $table->integer('admin_id');
             $table->integer('crm_request_id');
+            $table->integer('summary_crm_request_id');
             $table->timestamps();
         });
     }
