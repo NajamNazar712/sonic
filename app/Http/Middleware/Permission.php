@@ -491,6 +491,8 @@ class Permission
             'user_management.roles.update.store' => 87,
             'user_management.crm.index' => 188,
             'user_management.crm.list' => 188,
+            'user_management.user_requests.index' => 394,
+            'user_management.user_requests.list' => 394,
 
             'management.zonal.index' => 131,
             'management.zonal.list' => 131,

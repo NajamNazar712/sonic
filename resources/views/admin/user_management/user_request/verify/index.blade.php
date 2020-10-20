@@ -17,7 +17,7 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="user_form" class="form-horizontal" method="POST" action="{{ route('admin.settings.user_requests.verify.store',['id' => $user->id]) }}" novalidate="novalidate">
+                            <form id="user_form" class="form-horizontal" method="POST" action="{{ route('admin.user_management.user_requests.verify.store',['id' => $user->id]) }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <div class="row">

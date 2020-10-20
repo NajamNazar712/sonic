@@ -206,7 +206,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.settings.user_requests.list') }}',
+                        url: '{{ route('admin.user_management.user_requests.list') }}',
                         data: {
                             'page': 'all',
                         },
@@ -262,7 +262,7 @@
                     text: '<i class="la la-user-plus"></i> Add',
                     className: 'btn btn-primary add',
                     action: function (e, dt, node, config) {
-                        window.location = '{{ route('admin.settings.user_requests.add.index') }}';
+                        window.location = '{{ route('admin.user_management.user_requests.add.index') }}';
                     }
                 }/*,{
                     text: '<i class="la la-cogs"></i> Assign Hub(s)',
@@ -356,7 +356,7 @@
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },*/
                 serverSide: true,
-                ajax: '{{ route('admin.settings.user_requests.list') }}',
+                ajax: '{{ route('admin.user_management.user_requests.list') }}',
                 rowId: 'id',
                 order: [[1, 'asc']],
                 columns: [
@@ -436,7 +436,7 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
 
                 if ($(this).hasClass('verify')) {
-                    var link = '{{ route('admin.settings.user_requests.verify.index', ["id" => 0]) }}';
+                    var link = '{{ route('admin.user_management.user_requests.verify.index', ["id" => 0]) }}';
                     window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
                 }
             });
@@ -444,7 +444,7 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
 
                 if ($(this).hasClass('addrole')) {
-                    var link = '{{ route('admin.settings.user_requests.save.index', ["id" => 0]) }}';
+                    var link = '{{ route('admin.user_management.user_requests.save.index', ["id" => 0]) }}';
                     window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
                 }
             });

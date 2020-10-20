@@ -28,7 +28,7 @@ class AdminUserRequestController extends Controller
             ->join('admin_departments as ad','ad.id','=','ar.department_id')
             ->where('admins.id',Auth::id())
             ->select('ad.id','ad.name')->get();
-        return view('admin.settings.user_request.index')->with(['hubs'=>$hubs,'departments'=>$departments]);
+        return view('admin.user_management.user_request.index')->with(['hubs'=>$hubs,'departments'=>$departments]);
     }
     public function user_requests_list(Request $request) {
         $users = AdminUserRequest::leftjoin('cities as c','c.id','=','admin_user_requests.default_hub_id')
@@ -114,13 +114,14 @@ class AdminUserRequestController extends Controller
             ->addColumn('action', function($user) {
                 $verify = '<button type="button" class="dropdown-item verify"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Verify Info</div></button>';
                 $add_role = '<button type="button" class="dropdown-item addrole"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-user-plus"></i></div><div class="col-9 offset-1">Add Role</div></button>';
-                if(session('role_id') == 1) {
+                if(session('role_id') == 1 || (session('department_id') == 2 && $user->status == 0)) {
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
-
-                    $dropdown .= $verify;
+                    if($user->status == 0){
+                        $dropdown .= $verify;
+                    }
                     if(session('role_id') == 1 && $user->status == 1) {
                         $dropdown .= $add_role;
                     }
@@ -136,7 +137,7 @@ class AdminUserRequestController extends Controller
             ->where('admins.id',Auth::id())
             ->select('ad.id','ad.name')->get();
         $hubs = City::where('hub', 1)->get();
-        return view('admin.settings.user_request.add.index')->with(['departments' => $departments, 'hubs' => $hubs]);
+        return view('admin.user_management.user_request.add.index')->with(['departments' => $departments, 'hubs' => $hubs]);
     }
     public function user_add_store(Request $request) {
         $admin = new AdminUserRequest();
@@ -166,7 +167,7 @@ class AdminUserRequestController extends Controller
             }
         }
 
-        return redirect()->route('admin.settings.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been added!']);
+        return redirect()->route('admin.user_management.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been added!']);
     }
 
     public function verify_index($id) {
@@ -176,7 +177,7 @@ class AdminUserRequestController extends Controller
         $user = AdminUserRequest::find($id);
         $user_hubs = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
 
-          return view('admin.settings.user_request.verify.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
+          return view('admin.user_management.user_request.verify.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
 
     }
 
@@ -219,7 +220,7 @@ class AdminUserRequestController extends Controller
             AdminUserRequestHub::where('admin_user_request_id', $id)->delete();
         }
 
-            return redirect()->route('admin.settings.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been verified!']);
+            return redirect()->route('admin.user_management.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been verified!']);
 
     }
 
@@ -274,7 +275,7 @@ class AdminUserRequestController extends Controller
         $user = AdminUserRequest::find($id);
         $user_hubs = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
 
-        return view('admin.settings.user_request.save.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user,'roles'=> $roles ,'user_hubs' => $user_hubs]);
+        return view('admin.user_management.user_request.save.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user,'roles'=> $roles ,'user_hubs' => $user_hubs]);
 
     }
     public function user_save(Request $request, $id) {
@@ -322,14 +323,10 @@ class AdminUserRequestController extends Controller
                     $admin_hub->hubs_id = $hub_id;
 
                     $admin_hub->save();
-
-                    /* foreach($hub_id as $hub){
-
-                         $save_hub_id = new AdminHub();
-                         $save_hub_id->admin_id = $admin->id;
-                         $save_hub_id->hub_id = $hub;
-                         $save_hub_id->save();
-                     }*/
+                    $save_hub_id = new AdminHub();
+                    $save_hub_id->admin_id = $admin->id;
+                    $save_hub_id->hub_id = $hub_id;
+                    $save_hub_id->save();
 
                 }
             } else {
