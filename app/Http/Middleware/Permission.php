@@ -332,6 +332,8 @@ class Permission
             'finance.outstanding_shipments.walk_in_list' => 167,
             'finance.outstanding_shipments.walk_in_resolved' => 168,
 
+            'finance.make_payments_pickup_wise.index' => 396,
+
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
             'petty_cash.approved.index' => 147,
@@ -701,6 +703,8 @@ class Permission
 			'settings.sms_shipper_wise.index' => 388,
             'settings.sms_shipper_wise.update' => 388,
 
+
+            'settings.pickup_address_wise_payment_accounts.index' => 391,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
