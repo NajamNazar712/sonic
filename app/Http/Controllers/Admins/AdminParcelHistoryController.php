@@ -95,6 +95,10 @@ class AdminParcelHistoryController extends Controller
         }
     }
     public function remarks_submit(Request $request){
+        $open_parcel_existing = OpenParcelHistory::where('shipment_id', $request->shipment_id);
+        if($open_parcel_existing->exists()){
+            return redirect()->back()->with('error', 'Open Parcel Tracking Number already exists!');
+        }
         if($request->select_user_mode == 1){
             $user_id = $request->select_rider;
         }
