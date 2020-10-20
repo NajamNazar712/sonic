@@ -87,7 +87,7 @@ class AdminSalesController extends Controller
         else{
             $admin_id = Auth::id();
         }
-        $date = $request->search_date;
+        $date = Carbon::parse($request->search_date)->toDateString();
         foreach ($case_nature_channels as $case_nature_channel){
             $channels[$case_nature_channel->id] = 0;
         }

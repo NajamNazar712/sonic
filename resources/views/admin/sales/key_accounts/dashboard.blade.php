@@ -51,7 +51,7 @@
                                         @if (session('role_id') == 1 || in_array(393, session('permissions')))
                                         <div class="col-4">
                                             <fieldset class="form-group">
-                                                <select name="search_admin" id="search_admin" class="form-control select2" data-rule-required="true" data-msg-required="Admin is required">
+                                                <select name="search_admin" id="search_admin" class="form-control select2">
                                                     @foreach($admins as $admin)
                                                         @if($selected_admin == $admin->id)
                                                         <option value="{{$admin->id}}" selected>{{$admin->name}}</option>
@@ -1162,7 +1162,7 @@
                         }
                     },
                     create: function (input) {
-                        if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
                             return {
                                 value: input,
                                 text: input
