@@ -3673,8 +3673,8 @@ use Yajra\Datatables\Datatables;
             $from_date = $date->subDays(7)->toDateTimeString();
             $to_date = Carbon::now()->toDateTimeString();
 
-            $negative = DB::connection('reports')->table('pending_payment_shipments')->leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
-                ->leftjoin('users as u','u.id','=','s.user_id')
+            $negative = DB::connection('reports')->table('pending_payment_shipments')->join('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
+                ->join('users as u','u.id','=','s.user_id')
                 ->leftjoin('shipments as os', function($join) use($from_date, $to_date){
                     $join->on('os.user_id','=','s.user_id')
 //                        ->where('shipments.user_id','u.id')
