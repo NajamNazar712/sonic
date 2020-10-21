@@ -459,8 +459,6 @@ class AdminPickupsController extends Controller
         $defined_pickup_weight = 10;
       }
 
-      $existing_pickup_note = FALSE;
-
       $pickup_note = PickupNote::where('rider_id', $rider_id)->whereIn('status_id', [1, 2]);
 
       if ($pickup_note->exists()) {
