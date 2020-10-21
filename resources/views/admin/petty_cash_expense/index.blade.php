@@ -291,7 +291,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'account_head', name: 'petty_cash_account_heads.name', class: 'align-middle account_head'},
-                    {data: 'account_title', name: 'petty_cash_account_heads.name', class: 'align-middle account_title'},
+                    {data: 'account_title', name: 'petty_cash_account_titles.name', class: 'align-middle account_title'},
                     {data: 'amount', name: 'petty_cash_statement_details.amount', class: 'align-middle amount'},
                 ],
 
