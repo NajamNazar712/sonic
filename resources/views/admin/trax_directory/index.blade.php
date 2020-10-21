@@ -86,7 +86,7 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.city);
-                                row.push(values.role);
+                                row.push(values.designation);
                                 row.push(values.name);
                                 row.push(values.email);
                                 row.push(values.phone);
@@ -129,7 +129,7 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_address_id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'h.name', class: 'text-center align-middle city',},
-                    {data: 'role', name: 'ar.name', class: 'align-middle role'},
+                    {data: 'designation', name: 'admins.designation', class: 'align-middle designation'},
                     {data: 'name', name: 'admins.name', class: 'align-middle name'},
                     {data: 'email', name: 'admins.email', class: 'align-middle email'},
                     {data: 'phone', name: 'admins.phone_number', class: 'align-middle phone'},

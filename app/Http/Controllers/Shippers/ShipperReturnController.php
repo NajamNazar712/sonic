@@ -290,7 +290,8 @@ class ShipperReturnController extends Controller
     public function return_marked_single_status(Request $request){
         $parcel = Shipment::find($request->shipment_id);
         if($parcel){
-            if(($parcel->shipper_status_id != 20) && ($parcel->shipper_status_id != 52)){
+            if(!in_array($parcel->shipper_status_id, [20, 52])){
+
                 if (!$parcel->packaging_material_request) {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
                     $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
@@ -315,7 +316,9 @@ class ShipperReturnController extends Controller
                 }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
+
             }
+
             return ['status'=>0,'error'=>"Something went wrong, try again later!"];
         }
         return ['status'=>0,'error'=>"Something went wrong, try again later!"];
@@ -327,9 +330,7 @@ class ShipperReturnController extends Controller
         if($shipment_ids){
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
-
-                if(($parcel->shipper_status_id != 20)  && ($parcel->shipper_status_id != 52)){
-
+                if(!in_array($parcel->shipper_status_id, [20, 52])){
                     $remark_inp = "remark.$shipment";
 
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
@@ -352,7 +353,9 @@ class ShipperReturnController extends Controller
                         ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
 
                     }
+
                 }
+
             }
             return response()->json(['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"]);
         }

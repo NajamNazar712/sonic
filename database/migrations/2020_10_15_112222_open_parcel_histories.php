@@ -16,8 +16,9 @@ class OpenParcelHistories extends Migration
         Schema::create('open_parcel_histories', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shipment_id');
+            $table->integer('user_mode');
             $table->integer('user_id');
-            $table->text('remarks')->nullable()->default(NULL);
+            $table->text('remarks');
             $table->integer('amount');
             $table->timestamp('date');
             $table->timestamps();
