@@ -56,7 +56,7 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                             </div>
-                                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Expanse From">
+                                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Expense From">
                                         </div>
                                     </div>
                                     <div class="col-3">
@@ -66,7 +66,7 @@
                                             <span class="la la-calendar-o small-calender-icon"></span>
                                         </span>
                                             </div>
-                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Expanse To">
+                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Expense To">
                                         </div>
                                     </div>
                                     <div class="col-3">
