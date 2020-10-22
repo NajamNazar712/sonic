@@ -136,6 +136,11 @@ class AdminUserRequestController extends Controller
              ->join('admin_departments as ad','ad.id','=','ar.department_id')
             ->where('admins.id',Auth::id())
             ->select('ad.id','ad.name')->get();
+
+        if(session('role_id') == 1){
+            $departments = AdminDepartment::all();
+        }
+
         $hubs = City::where('hub', 1)->get();
         return view('admin.user_management.user_request.add.index')->with(['departments' => $departments, 'hubs' => $hubs]);
     }
