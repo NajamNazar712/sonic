@@ -2614,7 +2614,6 @@
         //Cash handling
         // cashChargesOvernight
         cashhandlingswitch.onchange = function () {
-            console.log(cashhandlingswitch);
             if(cashhandlingswitch.checked === true){
                 $('.cash-handling-div-overnight').find('input').prop('disabled',false);
                 $('.cash-handling-btn-overnight').find('button').prop('disabled',false);
