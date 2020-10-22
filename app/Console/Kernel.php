@@ -62,7 +62,8 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\PendingPaymentShipmentsCount',
         'App\Console\Commands\VisionSoftApi',
         'App\Console\Commands\OutstandingSDNReport',
-        'App\Console\Commands\TelenorSalesReport'
+        'App\Console\Commands\TelenorSalesReport',
+        'App\Console\Commands\NotPickedShippersSummary'
 
 
         ];
@@ -82,6 +83,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
 //        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
+        $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
         $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');

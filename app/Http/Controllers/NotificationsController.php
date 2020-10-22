@@ -5909,6 +5909,12 @@ class NotificationsController extends Controller
 
                 }
                 else if($id == 99) {
+                    $date = Carbon::yesterday()->toDateString();
+                    $date_from = $date . ' 08:00:00';
+                    $next_day = Carbon::parse($date)->addDay(1);
+                    $date_to = $next_day->toDateString();
+                    $date_to = $date_to . ' 07:59:59';
+
                     $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
                         ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
                         ->join('v2_pickup_request_attempts as vpra','vpra.pickup_request_id','=','v2_pickup_requests.id')
@@ -5919,6 +5925,7 @@ class NotificationsController extends Controller
                         ->where('v2_pickup_requests.status_id', 3)
                         ->where('st.status',0)
                         ->whereNotNull('vpra.reason_id')
+                        ->wherebetween('v2_pickup_requests.created_at',[$date_from,$date_to])
                         ->groupBy('a.id')
                         ->get();
 
@@ -5953,13 +5960,20 @@ class NotificationsController extends Controller
                     }
                 }
                 else if($id == 100){
+                    $date = Carbon::yesterday()->toDateString();
+                    $date_from = $date . ' 08:00:00';
+                    $next_day = Carbon::parse($date)->addDay(1);
+                    $date_to = $next_day->toDateString();
+                    $date_to = $date_to . ' 07:59:59';
+
                     $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
                         ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
                         ->join('v2_pickup_request_attempts as vpra','vpra.pickup_request_id','=','v2_pickup_requests.id')
                         ->join('v2_pickup_request_not_pick_reasons as npr','npr.id','=','vpra.reason_id')
-                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper_name','npr.name as reason', DB::raw('SUM(v2_pickup_requests.id) AS total'))
+                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date','u.id','u.name as shipper_name','npr.name as reason')
                         ->where('v2_pickup_requests.status_id', 3)
                         ->whereNotNull('vpra.reason_id')
+                        ->wherebetween('v2_pickup_requests.created_at',[$date_from,$date_to])
                         ->groupBy('u.id')
                         ->get();
 
@@ -5975,28 +5989,31 @@ class NotificationsController extends Controller
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Not Picked</th>';
                         $html .= '</tr></thead><tbody>';
 
-                        $admins_sales = Admin::where('role_id', 4)->where('status', 1)->select('email')->get();
-
-                        $to[] = $admins_sales;
-                       /* if ($admins_sales->exists()) {
-                            $to[] = array_merge($to, $admins_sales->pluck('email')->toArray());
-                        }*/
-
                         foreach ($pickup_requests as $pickup) {
                             $to = array();
                             $to[] = $pickup->saleperson_email;
-
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->requested_date . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->shipper_name . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->reason . '</td>';
                             $html .= '</tr>';
-                            $html .= '</tbody></table>';
-
                         }
+                        $html .= '<tr>';
+                        $html .= '<td  style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
+                        $html .= '<td colspan="2" style="padding:5px; border: 1px solid black; font-weight:bold; border-collapse: collapse; text-align: center;">' . count($pickup_requests) . '</td>';
+                        $html .= '</tr>';
+
                         if (strpos($body, '[preview]') !== FALSE) {
                             $body = str_replace('[preview]', $html, $body);
                         }
+
+                        $admins_sales = Admin::where('role_id', 4)->where('status', 1)->select('name','email')->first();
+
+                        if (strpos($body, '[head_of_sales]') !== FALSE) {
+                            $body = str_replace('[head_of_sales]', $admins_sales->name, $body);
+                        }
+
+                        $to = $admins_sales->email;
                         self::email($subject, $body, $to);
                     }
                 }

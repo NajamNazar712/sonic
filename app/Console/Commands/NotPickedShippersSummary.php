@@ -39,8 +39,7 @@ class NotPickedShippersSummary extends Command
      */
     public function handle()
     {
-        $date = Carbon::yesterday()->format('Y-m-d');
-        //NotificationsController::send(99, $date);
-        NotificationsController::send(100, $date);
+        NotificationsController::send(99, null);
+        NotificationsController::send(100, null);
     }
 }
