@@ -1669,4 +1669,127 @@ class AdminReportsEmailController extends Controller
         return url('/') . '/' . $file_name_without_path;
 
     }
+
+    static public function reverse_pickup_summary($start_date, $end_date){
+        $date = Carbon::today()->toDateString();
+        $shipments = DB::connection('reports')->table('shipments')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities as oc', 'oc.id', '=', 'usi.city_id')
+            ->join('cities as h', 'h.id', '=', 'oc.hub_id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id AND verification = 1)'));
+            })
+            ->select('h.id as hub_id', 'h.name as hub_name', 'oc.id as origin_id', 'oc.name as origin_name', 'sj.shipper_status_id as status')
+            ->where('shipments.booking_type_id', '=', DB::raw(5))
+            ->where('sj.created_at', '>=', $start_date)
+            ->where('sj.created_at', '<=', $end_date)
+            ->get();
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $hub_shipments = array();
+        $zone_shipments = array();
+        foreach ($hubs as $hub){
+            if(count($shipments) > 0){
+                foreach ($shipments as $shipment){
+                    if($shipment->status == 1 || $shipment->status == 2){
+                        if($hub->id == $shipment->hub_id){
+                            if (array_key_exists($hub->id, $hub_shipments)) {
+                                if (array_key_exists($shipment->origin_id, $hub_shipments[$hub->id])) {
+                                    if($shipment->status == 1){
+                                        $hub_shipments[$hub->id][$shipment->origin_id]['pending']++;
+                                    }
+                                    else{
+                                        $hub_shipments[$hub->id][$shipment->origin_id]['picked']++;
+                                    }
+                                }
+                                else{
+                                    if($shipment->status == 1){
+                                        $hub_shipments[$hub->id][$shipment->origin_id]['pending'] = 1;
+                                        $hub_shipments[$hub->id][$shipment->origin_id]['picked'] = 0;
+                                    }
+                                    else{
+                                        $hub_shipments[$hub->id][$shipment->origin_id]['pending'] = 0;
+                                        $hub_shipments[$hub->id][$shipment->origin_id]['picked'] = 1;
+                                    }
+                                    $hub_shipments[$hub->id][$shipment->origin_id]['origin_id'] = $shipment->origin_id;
+                                    $hub_shipments[$hub->id][$shipment->origin_id]['origin_name'] = $shipment->origin_name;
+                                    $hub_shipments[$hub->id][$shipment->origin_id]['hub_id'] = $hub->id;
+                                    $hub_shipments[$hub->id][$shipment->origin_id]['hub_name'] = $hub->name;
+                                }
+                            }
+                            else{
+                                if($shipment->status == 1){
+                                    $hub_shipments[$hub->id][$shipment->origin_id]['pending'] = 1;
+                                    $hub_shipments[$hub->id][$shipment->origin_id]['picked'] = 0;
+                                }
+                                else{
+                                    $hub_shipments[$hub->id][$shipment->origin_id]['pending'] = 0;
+                                    $hub_shipments[$hub->id][$shipment->origin_id]['picked'] = 1;
+                                }
+                                $hub_shipments[$hub->id][$shipment->origin_id]['origin_id'] = $shipment->origin_id;
+                                $hub_shipments[$hub->id][$shipment->origin_id]['origin_name'] = $shipment->origin_name;
+                                $hub_shipments[$hub->id][$shipment->origin_id]['hub_id'] = $hub->id;
+                                $hub_shipments[$hub->id][$shipment->origin_id]['hub_name'] = $hub->name;
+                            }
+                            if($shipment->status == 1){
+                                if(array_key_exists($hub->zone_id, $zone_shipments)){
+                                    if(array_key_exists($hub->id, $zone_shipments[$hub->zone_id])){
+                                        if(array_key_exists($shipment->origin_id, $zone_shipments[$hub->zone_id][$hub->id])){
+                                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['pending']++;
+                                        }
+                                        else{
+                                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['pending'] = 1;
+                                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['zone_id'] = $hub->zone_id;
+                                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['zone_name'] = $hub->zone->name;
+                                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['hub_id'] = $hub->id;
+                                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['hub_name'] = $hub->name;
+                                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['origin_id'] = $shipment->origin_id;
+                                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['origin_name'] = $shipment->origin_name;
+                                        }
+                                    }
+                                    else{
+                                        $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['pending'] = 1;
+                                        $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['zone_id'] = $hub->zone_id;
+                                        $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['zone_name'] = $hub->zone->name;
+                                        $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['hub_id'] = $hub->id;
+                                        $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['hub_name'] = $hub->name;
+                                        $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['origin_id'] = $shipment->origin_id;
+                                        $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['origin_name'] = $shipment->origin_name;
+                                    }
+                                }
+                                else{
+                                    $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['pending'] = 1;
+                                    $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['zone_id'] = $hub->zone_id;
+                                    $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['zone_name'] = $hub->zone->name;
+                                    $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['hub_id'] = $hub->id;
+                                    $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['hub_name'] = $hub->name;
+                                    $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['origin_id'] = $shipment->origin_id;
+                                    $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id]['origin_name'] = $shipment->origin_name;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if(count($hub_shipments) > 0){
+            foreach ($hub_shipments as $hub_shipment){
+                foreach ($hub_shipment as $origin_shipment){
+                    $hub_id = $origin_shipment['hub_id'];
+                    break;
+                }
+                NotificationsController::send(78, $hub_id, $hub_shipment);
+            }
+            foreach ($zone_shipments as $zone_shipment){
+                foreach ($zone_shipment as $hub_shipment){
+                    foreach ($hub_shipment as $origin_shipment){
+                        $zone_id = $origin_shipment['zone_id'];
+                        break;
+                    }
+                }
+                NotificationsController::send(79, $zone_id, $zone_shipment);
+            }
+            NotificationsController::send(80, $date, $hub_shipments);
+        }
+    }
 }

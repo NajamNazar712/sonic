@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Admins\GlobalSettingsController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -124,6 +126,16 @@ class LoginController extends Controller
                 }
                 else {
                     session(['air_waybill_type' => 1]);
+                }
+
+                $pickup_wise_account = GlobalSettings::where('type', 'pickup_wise_payment_accounts');
+                if($pickup_wise_account->exists()){
+                    $pickup_wise_accounts_array = array();
+                    $pickup_wise_account = $pickup_wise_account->first();
+                    $pickup_wise_accounts_array = array_map('intval', explode(',', $pickup_wise_account->text));
+                    if(in_array($user->id, $pickup_wise_accounts_array)){
+                        session(['pickup_wise_account' => 1]);
+                    }
                 }
             }
         }
