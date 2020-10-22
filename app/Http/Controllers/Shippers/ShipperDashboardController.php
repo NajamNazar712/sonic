@@ -372,7 +372,7 @@ class ShipperDashboardController extends Controller
                     }
                     $shipment->save();
 
-                    AdminPickupsController::cancel($shipment_id);
+                    V2AdminPickupsController::cancel($shipment_id);
 
                     ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);
 
