@@ -15,6 +15,7 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
 
+                        <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Statement No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -127,6 +128,110 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
+                    text: '<i class="la la-cogs"></i> Adjust',
+                    className: 'btn btn-primary adjust',
+                    enabled:false,
+                    action: function (e, dt, node, config) {
+                        //$('input:hidden[name=statement_id]').val(selected_rows);
+                        if(id){
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to adjust petty cash statement!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    $.ajax({
+                                        url: '{!! route('admin.petty_cash.approved.adjusted') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            'statement_id': id
+                                        }
+                                    }).done(function(data){
+                                        if(data.status){
+                                            table.draw(true);
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                        }
+                                    });
+                                }
+                            });
+
+                        }else{
+                            var error = 'Statement ID Not Found, Please Try again!';
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    }
+                },{
+                    extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'select_all',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.select();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index === -1) {
+                                    selected_rows.push(id);
+                                }
+
+                                table.button('.adjust').enable();
+                            }
+                        });
+                    }
+                }, {
+                    extend: 'selectNone',
+                    text: 'Select None',
+                    className: 'select_none',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.deselect();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index !== -1) {
+                                    selected_rows.splice(index, 1);
+                                }
+
+                                if (selected_rows.length == 0) {
+                                    table.button('.adjust').disable();
+                                }
+                            }
+                        });
+                    }
+                },{
                     extend: 'excel',
                     title: 'Approved Petty Cash Statements',
                     className: 'btn btn-primary',
@@ -140,12 +245,19 @@
                 language: {
                     processing: data_table_loader
                 },
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 serverSide: true,
                 ajax: '{{ route('admin.petty_cash.approved.list') }}',
                 rowId: 'statement_id',
-                order: [1, 'desc'],
+                order: [2, 'desc'],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
                     {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
@@ -165,9 +277,15 @@
 
                 ],
                 rowCallback: function(row, data, index) {
+                   /* var info = table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);*/
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
 
                 },
                 initComplete: function() {

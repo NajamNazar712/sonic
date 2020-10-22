@@ -848,7 +848,9 @@ class AdminPettyCashController extends Controller
     }
 
     public function approved_petty_cash_statements_adjusted(Request $request){
+        dd(request);
         $id = $request->statement_id;
+        dd($id);
         if($id){
             $petty_details = PettyCashStatement::find($id);
             if($petty_details){
