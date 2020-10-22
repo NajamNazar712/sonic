@@ -10,9 +10,12 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
+use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -1595,6 +1598,12 @@ class V2AdminPickupsController extends Controller
 
                 $shipper = $pickup_request->shipper;
                 $pickup_address = $pickup_request->pickup_address;
+                $sales_person = SalePersonTag::join('admins as ad' , 'ad.id' , '=', 'sale_person_tags.admin_id')
+                    ->join('users as us', 'us.id', '=', 'sale_person_tags.user_id')
+                ->select('ad.name','us.phone','us.poc')->first();
+//                $sale_person = SalePersonTag::where('admin_id')->where('status', 0)->first();
+//                $admin = Admin::find($sale_person->user_id);
+               // dd($sales_person);
                 $color = '';
                 if($pickup_address->vendor != null){
                     $color = 'vendor_pickup_row';
@@ -1607,9 +1616,9 @@ class V2AdminPickupsController extends Controller
                             <td>' . $pickup_address['poc'] . '</td>
                             <td>' . $pickup_address['vendor'] . '</td>
                             <td>' . $pickup_address['phone'] . '</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>'.$sales_person['name'].'</td>
+                            <td>'.$sales_person['poc'].'</td>
+                            <td>'.$sales_person['phone'].'</td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['booked'] . '</td>
                             <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
