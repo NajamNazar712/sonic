@@ -1601,8 +1601,6 @@ class V2AdminPickupsController extends Controller
                 $sales_person = SalePersonTag::join('admins as ad' , 'ad.id' , '=', 'sale_person_tags.admin_id')
                     ->join('users as us', 'us.id', '=', 'sale_person_tags.user_id')
                 ->select('ad.name','us.phone','us.poc')->first();
-//                $sale_person = SalePersonTag::where('admin_id')->where('status', 0)->first();
-//                $admin = Admin::find($sale_person->user_id);
                // dd($sales_person);
                 $color = '';
                 if($pickup_address->vendor != null){
