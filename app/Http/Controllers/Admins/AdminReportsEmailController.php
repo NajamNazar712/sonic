@@ -1669,4 +1669,6 @@ class AdminReportsEmailController extends Controller
         return url('/') . '/' . $file_name_without_path;
 
     }
+
+
 }

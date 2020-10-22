@@ -31,9 +31,12 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Zone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -58,7 +61,6 @@ use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 
 use Carbon\Carbon;
-use DB;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\Notifications;
 
@@ -5905,6 +5907,98 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to,$cc);
 
+                }
+                else if($id == 99) {
+                    $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
+                        ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
+                        ->join('v2_pickup_request_attempts as vpra','vpra.pickup_request_id','=','v2_pickup_requests.id')
+                        ->join('v2_pickup_request_not_pick_reasons as npr','npr.id','=','vpra.reason_id')
+                        ->leftjoin('sale_person_tags as st','st.user_id','=','u.id')
+                        ->join('admins as a','a.id','=','st.admin_id')
+                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper_name','npr.name as reason','a.id','a.name as sales_person','a.email as saleperson_email')
+                        ->where('v2_pickup_requests.status_id', 3)
+                        ->where('st.status',0)
+                        ->whereNotNull('vpra.reason_id')
+                        ->groupBy('a.id')
+                        ->get();
+
+                    if (count($pickup_requests) > 0) {
+                        foreach ($pickup_requests as $pickup) {
+                            $to = array();
+                            $to[] = $pickup->saleperson_email;
+                            $subject = $notification->subject;
+                            $body = $notification->body;
+
+                            $html = '<table style="width:100%;">';
+                            $html .= '<thead><tr>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Not Picked Reason</th>';
+                            $html .= '</tr></thead><tbody>';
+
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->requested_date . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->shipper_name . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->reason . '</td>';
+                            $html .= '</tr>';
+                            $html .= '</tbody></table>';
+                            if (strpos($body, '[preview]') !== FALSE) {
+                                $body = str_replace('[preview]', $html, $body);
+                            }
+                            if (strpos($body, '[sales_person]') !== FALSE) {
+                                $body = str_replace('[sales_person]',$pickup->sales_person , $body);
+                            }
+                            self::email($subject, $body, $to);
+                        }
+                    }
+                }
+                else if($id == 100){
+                    $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
+                        ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
+                        ->join('v2_pickup_request_attempts as vpra','vpra.pickup_request_id','=','v2_pickup_requests.id')
+                        ->join('v2_pickup_request_not_pick_reasons as npr','npr.id','=','vpra.reason_id')
+                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper_name','npr.name as reason', DB::raw('SUM(v2_pickup_requests.id) AS total'))
+                        ->where('v2_pickup_requests.status_id', 3)
+                        ->whereNotNull('vpra.reason_id')
+                        ->groupBy('u.id')
+                        ->get();
+
+                    $to = array();
+                    if (count($pickup_requests) > 0) {
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+
+                        $html = '<table style="width:100%;">';
+                        $html .= '<thead><tr>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Not Picked</th>';
+                        $html .= '</tr></thead><tbody>';
+
+                        $admins_sales = Admin::where('role_id', 4)->where('status', 1)->select('email')->get();
+
+                        $to[] = $admins_sales;
+                       /* if ($admins_sales->exists()) {
+                            $to[] = array_merge($to, $admins_sales->pluck('email')->toArray());
+                        }*/
+
+                        foreach ($pickup_requests as $pickup) {
+                            $to = array();
+                            $to[] = $pickup->saleperson_email;
+
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->requested_date . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->shipper_name . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->reason . '</td>';
+                            $html .= '</tr>';
+                            $html .= '</tbody></table>';
+
+                        }
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
+                        }
+                        self::email($subject, $body, $to);
+                    }
                 }
             }
         }
