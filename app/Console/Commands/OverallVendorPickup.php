@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Http\Controllers\Admins\AdminReportsEmailController;
+use App\Http\Models\Admin\GlobalSettings;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+
+class OverallVendorPickup extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'overall:vendorpickup';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Overall Vendors Pickup Shipments';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+        $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $cut_off_time = $settings->setting_value . ':00';
+            $start_date = Carbon::yesterday()->subDay(1)->format('y-m-d');
+            $start_date = $start_date . ' ' . $cut_off_time;
+            $end_date = Carbon::yesterday()->format('y-m-d');
+            $end_date = $end_date . ' ' . $cut_off_time;
+            $response = AdminReportsEmailController::overall_pickup_vendor_wise($start_date, $end_date);
+        }
+    }
+}

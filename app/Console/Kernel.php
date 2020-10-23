@@ -63,7 +63,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\VisionSoftApi',
         'App\Console\Commands\OutstandingSDNReport',
         'App\Console\Commands\TelenorSalesReport',
-        'App\Console\Commands\KeyAccountDashboard'
+        'App\Console\Commands\KeyAccountDashboard',
+        'App\Console\Commands\ReversePickupSummary',
+        'App\Console\Commands\OverallVendorPickup'
 
 
         ];
@@ -207,6 +209,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:telenorsalesreport')->dailyAt('09:00');
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
+        $schedule->command('summary:reversepickup')->dailyAt('08:00')->runInBackground();
+        $schedule->command('overall:vendorpickup')->dailyAt('08:00')->runInBackground();
     }
 	 /**
      * Register the commands for the application.
