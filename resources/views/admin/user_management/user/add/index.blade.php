@@ -50,7 +50,6 @@
 											<input type="password" name="password" class="form-control" placeholder="Password*" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 characters">
 										</div>
 									</div>
-
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
 											<select name="role_id" class="select2" id="role" data-rule-required="true" data-msg-required="Role is required">
@@ -69,6 +68,18 @@
 											</select>
 										</div>
 									</div>
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<input type="text" name="designation" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required" data-rule-required="true">
+										</div>
+									</div>
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id*" data-rule-required="true" data-msg-required="Trax Id is required" data-rule-required="true">
+										</div>
+									</div>
+
+
 
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>

@@ -21,23 +21,27 @@
 
                                 <div class="row">
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="usr" class="font-weight-bold">Name</label>
                                         <div class="form-group">
                                             <input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" value="{{ $user->name }}" >
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="phone" class="font-weight-bold">Phone</label>
                                         <div class="form-group">
                                             <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" value="{{ $user->phone_number}}" >
                                         </div>
                                     </div>
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="cnic" class="font-weight-bold">CNIC</label>
                                         <div class="form-group">
                                             <input type="text" name="cnic" id="cnic" class="form-control" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="{{ $user->cnic}}" >
                                         </div>
                                     </div>
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="email" class="font-weight-bold">Email</label>
                                         <div class="form-group">
                                             <input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Email must be unique" value="{{ $user->email }}" >
                                         </div>
@@ -45,6 +49,7 @@
 
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="department" class="font-weight-bold">Department</label>
                                         <div class="form-group">
                                             <select name="department" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
                                                 @foreach($departments as $department)
@@ -58,6 +63,7 @@
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="hub" class="font-weight-bold">Hub</label>
                                         <div class="form-group">
                                             <select name="default_hub" class="select2" id="default_hub" data-rule-required="true" data-msg-required="Default hub is required">
                                                 @foreach($hubs as $hub)
@@ -72,21 +78,20 @@
                                     </div>
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="designation" class="font-weight-bold">Designation</label>
                                         <div class="form-group">
                                             <input type="text" name="designation" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required" value="{{ $user->designation }}" >
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="tarx_id" class="font-weight-bold">Trax Id</label>
                                         <div class="form-group">
-                                            <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID*" data-rule-required="true" data-msg-required="Designation is required" value="{{ $user->trax_id }}" >
+                                            <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID*" data-rule-required="true" data-msg-required="Trax Id is required" value="{{ $user->trax_id }}" >
                                         </div>
                                     </div>
+
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                        <div class="form-group">
-                                            <input type="text" name="api_token" id="api_token" class="form-control" placeholder="API Token">
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="role" class="font-weight-bold">Role</label>
                                         <div class="form-group">
                                             <select name="role_id" class="select2" id="role_id" data-rule-required="true" data-msg-required="Role is required">
                                                 @foreach($roles as $role)

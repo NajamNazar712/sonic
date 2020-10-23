@@ -4073,6 +4073,7 @@ class AdminFinanceController extends Controller
                                     ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                                 }
                             }
+                            NotificationsController::send(92,$done_payment->id);
                         }
                     }
                     elseif($status == "reverted"){
@@ -4100,8 +4101,9 @@ class AdminFinanceController extends Controller
                                     ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
                                 }
                             }
+                            NotificationsController::send(92,$done_payment->id);
                         }
-                        NotificationsController::send(92,$done_payment->id);
+
                     }
                 }
                 return redirect()->back()->with(['success' => 'Status of ' . count($rows) . ' Payment(s) has been Updated']);
