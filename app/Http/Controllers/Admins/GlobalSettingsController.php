@@ -2475,10 +2475,10 @@ class GlobalSettingsController extends Controller
 
                 $pending_cash_collection_aging_report->date = $now;
 
-                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('cash_collection_status', 1)->where('dncc_status',0)->get();
+                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('pending_status', 1)->where('cash_collection_status', 0)->where('dncc_status',0)->get();
                 foreach($delviery_notes as $delviery_note)
                 {
-                    $start = $delviery_note->cash_collected_at;
+                    $start = $delviery_note->status_updated_at;
                     $difference = $start->diffInDays($now);
                     if($difference > 2)
                     {

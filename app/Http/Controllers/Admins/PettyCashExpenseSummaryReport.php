@@ -24,7 +24,6 @@ class PettyCashExpenseSummaryReport extends Controller
         $petty_cash_account_title = PettyCashAccountTitle::select('id','name')->get();
         $petty_cash_account_head = PettyCashAccountHead::select('id','name')->get();
         return view('admin.petty_cash_expense.index')->with(['petty_cash_account_title' => $petty_cash_account_title,'petty_cash_account_head' => $petty_cash_account_head]);
-   //        dd($petty_cash_account_title);
     }
 
     public function pettyCashSummaryReportProcess(Request $request)
@@ -39,7 +38,8 @@ class PettyCashExpenseSummaryReport extends Controller
         if($request->has('petty_account_switch') && $request->get('petty_account_switch') == 'title'){
             $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_account_titles as pca')
             ->join('petty_cash_statement_details as pcsd', 'pca.id', 'pcsd.account_title_id')
-            ->select('pca.name as name', DB::raw('SUM(pcsd.amount) as amount'))
+//            ->select('pca.name as name', DB::raw('SUM(pcsd.amount) as amount'))
+            ->select('pca.name as name', DB::raw('(SELECT SUM(amount) from petty_cash_statement_details as ptsd where ptsd.account_title_id = pca.id) as amount'))
             ->groupBy('pca.id');
         }
 

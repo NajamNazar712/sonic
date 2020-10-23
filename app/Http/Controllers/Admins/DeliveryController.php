@@ -2852,7 +2852,6 @@ class DeliveryController extends Controller
                 } else {
                     $delivery_note_data = DeliveryNote::find($delivery_note_id);
                     $delivery_note_data->last_updated_at = $current_time;
-                    $delivery_note_data->status_updated_at = $current_time;
                     $delivery_note_data->updated_by = Auth::id();
                     $delivery_note_data->save();
                     return redirect()->back()->with('success', 'Delivery Note updated successfully!');

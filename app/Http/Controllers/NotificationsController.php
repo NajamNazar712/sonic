@@ -2859,9 +2859,15 @@ class NotificationsController extends Controller
 
                             /*$regional_manager = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
                                 ->where('admins.role_id', 4)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $sale_person_hub)->select('email')->first();*/
-                            $department_head_email = Admin::where('role_id', 4)->where('status', 1)->select('email')->first();
-
+//                            $department_head_email = Admin::where('role_id', 44)->where('status', 1)->select('email')->first();
                             $cc = array();
+                            $related_admins = Admin::where('role_id', 44)->where('status', 1)->whereHas('hubs', function ($query) use ($sale_person_hub) {
+                                $query->where('hub_id', $sale_person_hub);
+                            });
+                            if ($related_admins->exists()) {
+                                $cc = array_merge($cc, $related_admins->pluck('email')->toArray());
+                            }
+
 
                             if($sale_person_email){
                                 $cc[] = $sale_person_email;
@@ -5655,7 +5661,7 @@ class NotificationsController extends Controller
                 } else if ($id == 85) {
                     $shipments = Shipment::find($reference_1_id);
                     $booking_person = $reference_2_id;
-					$admin = Admin::find($booking_person);
+                    $admin = Admin::find($booking_person);
                     $subject = $notification->subject;
                     $body = $notification->body;
 
@@ -5704,8 +5710,8 @@ class NotificationsController extends Controller
                     $finance = Admin::whereIn('id', [12, 60, 49])->where('status', 1);
 
                     $to = array();
-                    if ($booking_person->email) {
-                        $to[] = $booking_person->email;
+                    if ($admin) {
+                        $to[] = $admin->email;
                     }
 
                     if ($finance->exists()) {
