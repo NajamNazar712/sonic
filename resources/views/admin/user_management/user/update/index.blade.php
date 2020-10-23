@@ -77,6 +77,16 @@
 											</select>
 										</div>
 									</div>
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<input type="text" name="designation" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required" data-rule-required="true" value="{{ $user->designation }}">
+										</div>
+									</div>
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id*" data-rule-required="true" data-msg-required="Trax Id is required" data-rule-required="true" value="{{ $user->trax_id }}">
+										</div>
+									</div>
 
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>

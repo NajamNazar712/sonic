@@ -35,11 +35,15 @@ class AdminUserRequestController extends Controller
             ->leftjoin('admin_departments as ad','ad.id','=','admin_user_requests.department')
             ->leftjoin('admins as a','a.id','=','admin_user_requests.request_added_by')
             ->leftjoin('admins as as','as.id','=','admin_user_requests.verified_by_hr')
-        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status')
-            ->whereIn('admin_user_requests.status',[0,1])
+        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status');
+
+            if(session('role_id') != 1){
+                $users->whereIn('admin_user_requests.status',[0,1]);
+            }
+
 
            ;
-        if(session('role_id') != 1 ){
+        if((session('role_id') != 1) || (session('role_id') != 2) ){
             $users->where('ad.id',session('department_id'));
         }
 
@@ -110,6 +114,12 @@ class AdminUserRequestController extends Controller
                 else if($user->status == 1){
                     return 'Verified';
                 }
+                else if($user->status == 2){
+                    return 'Id Added';
+                }
+                else if($user->status == 3){
+                    return 'Forwarded';
+                }
             })
             ->addColumn('action', function($user) {
                 $verify = '<button type="button" class="dropdown-item verify"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Verify Info</div></button>';
@@ -148,18 +158,10 @@ class AdminUserRequestController extends Controller
         $admin = new AdminUserRequest();
 
         $admin->name = $request->input('name');
-        $admin->email = $request->input('email');
-        if($request->has('trax_id')){
-            $admin->trax_id = $request->input('trax_id');
-        }
-        $admin->phone_number = $request->input('phone_number');
-        $admin->cnic = $request->input('cnic');
         $admin->department = $request->input('department');
         $admin->designation = $request->input('designation');
-        $admin->default_hub_id = $request->input('default_hub');
         $admin->request_added_by = Auth::id();
         $admin->request_created_at = Carbon::now();
-
         $admin->save();
 
         if ($request->has('hub_ids')) {
