@@ -2234,6 +2234,9 @@ class V2AdminPickupsController extends Controller
 
             $pickup_note_requests = $pickup_note->pickup_note_requests;
             $reverse_pickup_shipment_ids = array();
+            $total_booked = 0;
+            $total_rider_picked = 0;
+            $total_arrived = 0;
             foreach ($pickup_note_requests as $pickup_note_request) {
                 $pickup_request = $pickup_note_request->pickup_request;
 
@@ -2265,12 +2268,22 @@ class V2AdminPickupsController extends Controller
                             <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
                           </tr>
           ';
-
+                $total_booked += $pickup_request['booked'];
+                $total_rider_picked += $rider_pickuped;
+                $total_arrived += $pickup_request_received_shipments;
                 $serial_number++;
             }
 
 
             $html .= '
+                        <tr>
+                          <td colspan="6" style="font-weight: bold; text-align: center;">Total</td>
+                          <td  style="font-weight: bold">' . $total_booked . '</td>
+                          <td  style="font-weight: bold">' .$total_rider_picked . '</td>
+                          <td  style="font-weight: bold">' .$total_arrived. '</td>
+                          <td  style="font-weight: bold">-</td>
+                          
+                        </tr>
                         </tbody>
                       </table>
 
@@ -2280,6 +2293,16 @@ class V2AdminPickupsController extends Controller
 
 
         $html .= '
+                    <div>Operation Staff Receiver</div>
+                     <br>
+                     <br>
+                    <div>
+                        Name : ____________________________
+                    </div> 
+                     <br>
+                    <div>
+                        Signature : ______________________
+                    </div>
                     </div>
 
                     <script>
