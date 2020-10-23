@@ -1265,7 +1265,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminUserRequestController@user_save_index')->name('index');
                 Route::post('', 'Admins\AdminUserRequestController@user_save')->name('store');
             });
-
+            Route::post('forward', 'Admins\AdminUserRequestController@forward')->name('forward');
         });
 
     });
