@@ -211,9 +211,7 @@
                     },
                     'reset'
                 ],
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
+                pagingType: 'full',
                 processing: true,
                 language: {
                     processing: data_table_loader
@@ -243,11 +241,10 @@
                 drawCallback: function (settings) {
                     total_amount = 0;
                     var api = new $.fn.dataTable.Api( settings );
-                    var sum_data = api.rows( {page:'all'} ).data();
+                    var sum_data = api.rows().data();
                     if(sum_data.length > 0){
                         for(var i=0;i<sum_data.length; i++)
                         {
-                            console.log(sum_data[i].amount);
                             total_amount += parseFloat(sum_data[i].amount);
                         }
 
