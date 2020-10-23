@@ -133,7 +133,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     title: 'Add',
-                    className: 'btn btn-primary mb-1',
+                    className: 'btn btn-primary',
                     text: '<i class="la la-plus"></i> Add Title',
                     action:function (e) {
                         $('#AccountTitleModal').modal('show');
@@ -143,7 +143,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: ['reset'],
                 @endif
-                scrollX: true, scrollY:'300px',
+                scrollY:'300px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
