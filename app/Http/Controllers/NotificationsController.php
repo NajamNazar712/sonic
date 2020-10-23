@@ -4922,7 +4922,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[preview]', $html, $body);
                     }
 
-                    $admins = Admin::whereIn('id', [12, 49, 216]);
+                    $admins = Admin::whereIn('id', [12, 60, 79, 216]);
 
                     if ($admins->exists()) {
                         $to = $admins->pluck('email')->toArray();
