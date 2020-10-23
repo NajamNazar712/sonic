@@ -2877,8 +2877,9 @@ class NotificationsController extends Controller
                                 $cc[] = $department_head_email;
                             }
 
+                            $bcc = array('danish.zahid@trax.pk');
                             $to = $shipper->email;
-                            self::email($subject, $body, $to, $cc);
+                            self::email($subject, $body, $to, $cc, $bcc);
 
                         }
                     }
