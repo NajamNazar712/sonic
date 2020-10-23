@@ -151,6 +151,7 @@
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -228,317 +229,320 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
 
-                    {
-                        text: 'Confirm',
-                        className: 'btn btn-primary confirm',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows !== ''){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to change shipment status to Return-Confirm!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
+                    {{--{--}}
+                    {{--    text: 'Confirm',--}}
+                    {{--    className: 'btn btn-primary confirm',--}}
+                    {{--    enabled: false,--}}
+                    {{--    action: function (e, dt, node, config) {--}}
+                    {{--        if(selected_rows !== ''){--}}
+                    {{--            swal({--}}
+                    {{--                title: 'Are You Sure?',--}}
+                    {{--                text: 'Select Yes to change shipment status to Return-Confirm!',--}}
+                    {{--                icon: 'warning',--}}
+                    {{--                buttons: {--}}
+                    {{--                    cancel: {--}}
+                    {{--                        text: 'No',--}}
+                    {{--                        value: null,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true,--}}
+                    {{--                    },--}}
+                    {{--                    confirm: {--}}
+                    {{--                        text: 'Yes',--}}
+                    {{--                        value: true,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true--}}
+                    {{--                    }--}}
+                    {{--                },--}}
+                    {{--                closeOnClickOutside: false,--}}
+                    {{--                closeOnEsc: false,--}}
+                    {{--                dangerMode: true--}}
+                    {{--            }).then(function (confirm) {--}}
+                    {{--                if (confirm) {--}}
 
-                                        table.rows().nodes().each(function(index) {
-                                            var row = table.row(index);
-                                            if ($(row.node()).hasClass('selected')) {
-                                                var id = parseInt(row.id());
-                                                var remarks = $(row.node()).find('td.shipment_remarks textarea').val();
-                                                shipment_remarks[id] = remarks;
-                                            }
-                                        });
+                    {{--                    table.rows().nodes().each(function(index) {--}}
+                    {{--                        var row = table.row(index);--}}
+                    {{--                        if ($(row.node()).hasClass('selected')) {--}}
+                    {{--                            var id = parseInt(row.id());--}}
+                    {{--                            var remarks = $(row.node()).find('td.shipment_remarks textarea').val();--}}
+                    {{--                            shipment_remarks[id] = remarks;--}}
+                    {{--                        }--}}
+                    {{--                    });--}}
 
-                                        $.ajax({
-                                            url:"{{route('cod.return.pending.marked.status')}}",
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids':selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                                'remark': shipment_remarks
+                    {{--                    $.ajax({--}}
+                    {{--                        url:"{{route('cod.return.pending.marked.status')}}",--}}
+                    {{--                        method:'POST',--}}
+                    {{--                        data:{--}}
+                    {{--                            'shipment_ids':selected_rows,--}}
+                    {{--                            '_token':'{{ csrf_token() }}',--}}
+                    {{--                            'remark': shipment_remarks--}}
 
-                                            }
-                                        }).done(function (data) {
-                                            if(data.status){
-                                                table.rows().deselect();
-                                                selected_rows = [];
-                                                shipment_remarks = {};
-                                                table.button('.confirm').disable();
-                                                table.draw('false');
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            }
-                                            
-
-
-                                        });
-                                    }
-                                });
+                    {{--                        }--}}
+                    {{--                    }).done(function (data) {--}}
+                    {{--                        if(data.status){--}}
+                    {{--                            table.rows().deselect();--}}
+                    {{--                            selected_rows = [];--}}
+                    {{--                            shipment_remarks = {};--}}
+                    {{--                            table.button('.confirm').disable();--}}
+                    {{--                            table.draw('false');--}}
+                    {{--                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                    {{--                        }--}}
+                    {{--                        --}}
 
 
-                            }else{
-                                var error = "Not selected any shipments!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        }
-                    },
-                    {
-                        text: 'Re-Attempt Request',
-                        className: 'btn btn-primary reattempt',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows !== ''){
-                                var route = '{!! route('cod.tracking.index') !!}';
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to request shipment for Re-Attempt!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        if(selected_rows.length > 0) {
-
-                                            table.rows().nodes().each(function (index) {
-                                                var row = table.row(index);
-                                                if ($(row.node()).hasClass('selected')) {
-                                                    var id = parseInt(row.id());
-                                                    var remarks = $(row.node()).find('td.shipment_remarks textarea').val();
-                                                    shipment_remarks[id] = remarks;
-                                                }
-                                            });
-                                            $.ajax({
-                                                url: "{{route('cod.return.pending.reattempt.nsa')}}",
-                                                method: 'POST',
-                                                data: {
-                                                    'shipment_ids': selected_rows,
-                                                    '_token': '{{ csrf_token() }}',
-                                                    'single' : 0
-                                                }
-                                            }).done(function (data) {
-                                                if(data.status == 1){
-                                                    $('#nsa_shipments_modal .modal-body').html('');
-                                                    $('#nsa_shipments_modal').modal('show');
-                                                    var html = '';
-                                                    html += '<table  class="table table-bordered datatable" id="datatable" style="z-index: 3;">';
-                                                    html += '<thead><tr><th class="border-primary border-darken-1">Tracking No.</th>\n' +
-                                                        '<th class="border-primary border-darken-1">Estimated Charges</th>\n' +
-                                                        '<th class="border-primary border-darken-1">Action</th></tr>\n' +
-                                                        '</thead>';
-                                                    html += '<tbody>';
-                                                    if (data.nsa_shipments) {
-                                                        selected_rows_nsa = data.nsa_shipments_ids;
-                                                        $.each(data.nsa_shipments, function(index) {
-                                                            // console.log(index);
-                                                            html += '<tr role="row">' +
-                                                                '<td class="text-center"><u><a href='+route+'?tracking_number='+data.nsa_shipments[index]+' target="_blank">'+data.nsa_shipments[index]+'</a></u></td>';
-                                                            html += '<td class="text-center">'+ data.estimated_charges[index] +'</td>';
-                                                            html += '<td class="text-center"><div class="d-inline-block custom-control custom-checkbox mr-1">\n' +
-                                                                '<input type="checkbox" class="custom-control-input" name="confirm['+index+']" id="confirm['+index+']">\n' +
-                                                                '<label class="custom-control-label" for="confirm['+index+']">Re-Attempt</label>\n' +
-                                                                '</div></td></tr>';
-                                                        });
-                                                        html += '</tbody>';
-                                                        html += '</table>';
-                                                    }else{
-                                                        var html = 'No shipments found!';
-
-                                                    }
-                                                    $('#nsa_shipments_modal .modal-body').html(html);
-                                                }
-                                                else{
-                                                    $.ajax({
-                                                        url: "{{route('cod.return.pending.reattempt.status')}}",
-                                                        method: 'POST',
-                                                        data: {
-                                                            'shipment_ids': selected_rows,
-                                                            '_token': '{{ csrf_token() }}',
-                                                            'remark': shipment_remarks
-                                                        }
-                                                    }).done(function (data) {
-                                                        table.rows().deselect();
-                                                        selected_rows = [];
-                                                        shipment_remarks = {};
-                                                        table.button('.reattempt').disable();
-                                                        table.draw('false');
-                                                        if (data.not_updated_shipments.length > 0) {
-                                                            var alert_icon = 'warning';
-                                                            var html = '';
-                                                            if (data.updated_shipments.length > 0) {
-                                                                alert_icon = 'success';
-                                                                $.each(data.updated_shipments, function (index, tracking_number) {
-                                                                    html += tracking_number + '<br/>';
-                                                                });
-                                                                html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
-
-                                                            }
-                                                            $.each(data.not_updated_shipments, function (index, tracking_number) {
-                                                                html += tracking_number + '<br/>';
-                                                            });
-                                                            html += '<br/>Shipment(s) are already updated';
-                                                            content = document.createElement('div');
-                                                            content.innerHTML = html;
-                                                            swal({
-                                                                title: 'Shipments Re-Attempt Requested',
-                                                                content: content,
-                                                                icon: alert_icon,
-                                                                buttons: {
-                                                                    cancel: {
-                                                                        text: 'Close',
-                                                                        value: null,
-                                                                        visible: true,
-                                                                        closeModal: true,
-                                                                    }
-                                                                },
-                                                                closeOnClickOutside: true,
-                                                                closeOnEsc: false,
-                                                                dangerMode: true
-                                                            });
-                                                        } else {
-                                                            toastr.success(data.success, 'Success!', {
-                                                                positionClass: 'toast-bottom-center',
-                                                                containerId: 'toast-bottom-center'
-                                                            });
-
-                                                        }
+                    {{--                    });--}}
+                    {{--                }--}}
+                    {{--            });--}}
 
 
-                                                    });
-                                                }
-                                            });
+                    {{--        }else{--}}
+                    {{--            var error = "Not selected any shipments!";--}}
+                    {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--        }--}}
+                    {{--    }--}}
+                    {{--},--}}
+                    {{--{--}}
+                    {{--    text: 'Re-Attempt Request',--}}
+                    {{--    className: 'btn btn-primary reattempt',--}}
+                    {{--    enabled: false,--}}
+                    {{--    action: function (e, dt, node, config) {--}}
+                    {{--        if(selected_rows !== ''){--}}
+                    {{--            var route = '{!! route('cod.tracking.index') !!}';--}}
+                    {{--            swal({--}}
+                    {{--                title: 'Are You Sure?',--}}
+                    {{--                text: 'Select Yes to request shipment for Re-Attempt!',--}}
+                    {{--                icon: 'warning',--}}
+                    {{--                buttons: {--}}
+                    {{--                    cancel: {--}}
+                    {{--                        text: 'No',--}}
+                    {{--                        value: null,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true,--}}
+                    {{--                    },--}}
+                    {{--                    confirm: {--}}
+                    {{--                        text: 'Yes',--}}
+                    {{--                        value: true,--}}
+                    {{--                        visible: true,--}}
+                    {{--                        closeModal: true--}}
+                    {{--                    }--}}
+                    {{--                },--}}
+                    {{--                closeOnClickOutside: false,--}}
+                    {{--                closeOnEsc: false,--}}
+                    {{--                dangerMode: true--}}
+                    {{--            }).then(function (confirm) {--}}
+                    {{--                if (confirm) {--}}
+                    {{--                    if(selected_rows.length > 0) {--}}
 
-                                        }else{
-                                            var error = "No shipments selected!";
-                                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                        }
-                                    }
-                                });
+                    {{--                        table.rows().nodes().each(function (index) {--}}
+                    {{--                            var row = table.row(index);--}}
+                    {{--                            if ($(row.node()).hasClass('selected')) {--}}
+                    {{--                                var id = parseInt(row.id());--}}
+                    {{--                                var remarks = $(row.node()).find('td.shipment_remarks textarea').val();--}}
+                    {{--                                shipment_remarks[id] = remarks;--}}
+                    {{--                            }--}}
+                    {{--                        });--}}
+                    {{--                        $.ajax({--}}
+                    {{--                            url: "{{route('cod.return.pending.reattempt.nsa')}}",--}}
+                    {{--                            method: 'POST',--}}
+                    {{--                            data: {--}}
+                    {{--                                'shipment_ids': selected_rows,--}}
+                    {{--                                '_token': '{{ csrf_token() }}',--}}
+                    {{--                                'single' : 0--}}
+                    {{--                            }--}}
+                    {{--                        }).done(function (data) {--}}
+                    {{--                            if(data.status == 1){--}}
+                    {{--                                $('#nsa_shipments_modal .modal-body').html('');--}}
+                    {{--                                $('#nsa_shipments_modal').modal('show');--}}
+                    {{--                                var html = '';--}}
+                    {{--                                html += '<table  class="table table-bordered datatable" id="datatable" style="z-index: 3;">';--}}
+                    {{--                                html += '<thead><tr><th class="border-primary border-darken-1">Tracking No.</th>\n' +--}}
+                    {{--                                    '<th class="border-primary border-darken-1">Estimated Charges</th>\n' +--}}
+                    {{--                                    '<th class="border-primary border-darken-1">Action</th></tr>\n' +--}}
+                    {{--                                    '</thead>';--}}
+                    {{--                                html += '<tbody>';--}}
+                    {{--                                if (data.nsa_shipments) {--}}
+                    {{--                                    selected_rows_nsa = data.nsa_shipments_ids;--}}
+                    {{--                                    $.each(data.nsa_shipments, function(index) {--}}
+                    {{--                                        // console.log(index);--}}
+                    {{--                                        html += '<tr role="row">' +--}}
+                    {{--                                            '<td class="text-center"><u><a href='+route+'?tracking_number='+data.nsa_shipments[index]+' target="_blank">'+data.nsa_shipments[index]+'</a></u></td>';--}}
+                    {{--                                        html += '<td class="text-center">'+ data.estimated_charges[index] +'</td>';--}}
+                    {{--                                        html += '<td class="text-center"><div class="d-inline-block custom-control custom-checkbox mr-1">\n' +--}}
+                    {{--                                            '<input type="checkbox" class="custom-control-input" name="confirm['+index+']" id="confirm['+index+']">\n' +--}}
+                    {{--                                            '<label class="custom-control-label" for="confirm['+index+']">Re-Attempt</label>\n' +--}}
+                    {{--                                            '</div></td></tr>';--}}
+                    {{--                                    });--}}
+                    {{--                                    html += '</tbody>';--}}
+                    {{--                                    html += '</table>';--}}
+                    {{--                                }else{--}}
+                    {{--                                    var html = 'No shipments found!';--}}
+
+                    {{--                                }--}}
+                    {{--                                $('#nsa_shipments_modal .modal-body').html(html);--}}
+                    {{--                            }--}}
+                    {{--                            else{--}}
+                    {{--                                $.ajax({--}}
+                    {{--                                    url: "{{route('cod.return.pending.reattempt.status')}}",--}}
+                    {{--                                    method: 'POST',--}}
+                    {{--                                    data: {--}}
+                    {{--                                        'shipment_ids': selected_rows,--}}
+                    {{--                                        '_token': '{{ csrf_token() }}',--}}
+                    {{--                                        'remark': shipment_remarks--}}
+                    {{--                                    }--}}
+                    {{--                                }).done(function (data) {--}}
+                    {{--                                    table.rows().deselect();--}}
+                    {{--                                    selected_rows = [];--}}
+                    {{--                                    shipment_remarks = {};--}}
+                    {{--                                    table.button('.reattempt').disable();--}}
+                    {{--                                    table.draw('false');--}}
+                    {{--                                    if (data.not_updated_shipments.length > 0) {--}}
+                    {{--                                        var alert_icon = 'warning';--}}
+                    {{--                                        var html = '';--}}
+                    {{--                                        if (data.updated_shipments.length > 0) {--}}
+                    {{--                                            alert_icon = 'success';--}}
+                    {{--                                            $.each(data.updated_shipments, function (index, tracking_number) {--}}
+                    {{--                                                html += tracking_number + '<br/>';--}}
+                    {{--                                            });--}}
+                    {{--                                            html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';--}}
+
+                    {{--                                        }--}}
+                    {{--                                        $.each(data.not_updated_shipments, function (index, tracking_number) {--}}
+                    {{--                                            html += tracking_number + '<br/>';--}}
+                    {{--                                        });--}}
+                    {{--                                        html += '<br/>Shipment(s) are already updated';--}}
+                    {{--                                        content = document.createElement('div');--}}
+                    {{--                                        content.innerHTML = html;--}}
+                    {{--                                        swal({--}}
+                    {{--                                            title: 'Shipments Re-Attempt Requested',--}}
+                    {{--                                            content: content,--}}
+                    {{--                                            icon: alert_icon,--}}
+                    {{--                                            buttons: {--}}
+                    {{--                                                cancel: {--}}
+                    {{--                                                    text: 'Close',--}}
+                    {{--                                                    value: null,--}}
+                    {{--                                                    visible: true,--}}
+                    {{--                                                    closeModal: true,--}}
+                    {{--                                                }--}}
+                    {{--                                            },--}}
+                    {{--                                            closeOnClickOutside: true,--}}
+                    {{--                                            closeOnEsc: false,--}}
+                    {{--                                            dangerMode: true--}}
+                    {{--                                        });--}}
+                    {{--                                    } else {--}}
+                    {{--                                        toastr.success(data.success, 'Success!', {--}}
+                    {{--                                            positionClass: 'toast-bottom-center',--}}
+                    {{--                                            containerId: 'toast-bottom-center'--}}
+                    {{--                                        });--}}
+
+                    {{--                                    }--}}
 
 
-                            }else{
-                                var error = "Not selected any shipments!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        }
-                    },
+                    {{--                                });--}}
+                    {{--                            }--}}
+                    {{--                        });--}}
+
+                    {{--                    }else{--}}
+                    {{--                        var error = "No shipments selected!";--}}
+                    {{--                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--                    }--}}
+                    {{--                }--}}
+                    {{--            });--}}
+
+
+                    {{--        }else{--}}
+                    {{--            var error = "Not selected any shipments!";--}}
+                    {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--        }--}}
+                    {{--    }--}}
+                    {{--},--}}
 
                     {
                         extend: 'excel',
                         title: 'Return Confirmation Pending',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }, {
-                        extend: 'selectAll',
-                        text: 'Select All',
-                        className: 'select_all',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
-                                    id = parseInt(row.id());
-
-                                    hub_id = $(row.node()).data('hub');
-
-                                    var allow = false;
-
-                                    if(hub_ids.length == 0) {
-                                        hub_ids.push(hub_id);
-
-                                        allow = true;
-                                    }
-                                    else if(hub_ids[0] == hub_id) {
-                                        allow = true;
-                                    }
-
-                                    if (allow) {
-                                        row.select();
-
-                                        var index = $.inArray(id, selected_rows);
-
-                                        if (index === -1) {
-                                            selected_rows.push(id);
-                                        }
-
-                                        table.button('.confirm').enable();
-                                        table.button('.reattempt').enable();
-                                    }
-                                }
-                            });
-                        }
-                    }, {
-                        extend: 'selectNone',
-                        text: 'Select None',
-                        className: 'select_none',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
-                                    row.deselect();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index !== -1) {
-                                        selected_rows.splice(index, 1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.confirm').disable();
-                                        table.button('.reattempt').disable();
-
-                                        hub_ids.splice(index, 1);
-                                    }
-                                }
-                            });
-                        }
-                    }
+                    },
+                    // {
+                    //     extend: 'selectAll',
+                    //     text: 'Select All',
+                    //     className: 'select_all',
+                    //     action : function(e) {
+                    //         e.preventDefault();
+                    //
+                    //         table.rows().nodes().each(function(index) {
+                    //             var row = table.row(index);
+                    //
+                    //             if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                    //                 id = parseInt(row.id());
+                    //
+                    //                 hub_id = $(row.node()).data('hub');
+                    //
+                    //                 var allow = false;
+                    //
+                    //                 if(hub_ids.length == 0) {
+                    //                     hub_ids.push(hub_id);
+                    //
+                    //                     allow = true;
+                    //                 }
+                    //                 else if(hub_ids[0] == hub_id) {
+                    //                     allow = true;
+                    //                 }
+                    //
+                    //                 if (allow) {
+                    //                     row.select();
+                    //
+                    //                     var index = $.inArray(id, selected_rows);
+                    //
+                    //                     if (index === -1) {
+                    //                         selected_rows.push(id);
+                    //                     }
+                    //
+                    //                     table.button('.confirm').enable();
+                    //                     table.button('.reattempt').enable();
+                    //                 }
+                    //             }
+                    //         });
+                    //     }
+                    // },
+                    // {
+                    //     extend: 'selectNone',
+                    //     text: 'Select None',
+                    //     className: 'select_none',
+                    //     action : function(e) {
+                    //         e.preventDefault();
+                    //
+                    //         table.rows().nodes().each(function(index) {
+                    //             var row = table.row(index);
+                    //
+                    //             if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                    //                 row.deselect();
+                    //
+                    //                 id = parseInt(row.id());
+                    //
+                    //                 var index = $.inArray(id, selected_rows);
+                    //
+                    //                 if (index !== -1) {
+                    //                     selected_rows.splice(index, 1);
+                    //                 }
+                    //
+                    //                 if (selected_rows.length == 0) {
+                    //                     table.button('.confirm').disable();
+                    //                     table.button('.reattempt').disable();
+                    //
+                    //                     hub_ids.splice(index, 1);
+                    //                 }
+                    //             }
+                    //         });
+                    //     }
+                    // }
+                    'reset'
                 ],
 
-                select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
-                },
+                // select: {
+                //     info: false,
+                //     style: 'multi',
+                //     selector: 'td.select-checkbox',
+                //     className: 'selected bg-primary bg-lighten-5 primary'
+                // },
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -577,14 +581,17 @@
 
                 ],
                 rowCallback: function(row, data, index) {
+                    // var info = table.page.info();
+                    // $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    // if (data.shipper_status_id != 52) {
+                    //     $('td:eq(0)', row).addClass('select-checkbox');
+                    //     if ($.inArray(data.shId, selected_rows) !== -1) {
+                    //         table.row(row).select();
+                    //     }
+                    // }
+
                     var info = table.page.info();
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if (data.shipper_status_id != 52) {
-                        $('td:eq(0)', row).addClass('select-checkbox');
-                        if ($.inArray(data.shId, selected_rows) !== -1) {
-                            table.row(row).select();
-                        }
-                    }
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
