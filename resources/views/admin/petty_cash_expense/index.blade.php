@@ -243,11 +243,11 @@
                 drawCallback: function (settings) {
                     total_amount = 0;
                     var api = new $.fn.dataTable.Api( settings );
-                    var sum_data = api.rows( {page:'current'} ).data();
+                    var sum_data = api.rows( {page:'all'} ).data();
                     if(sum_data.length > 0){
                         for(var i=0;i<sum_data.length; i++)
                         {
-
+                            console.log(sum_data[i].amount);
                             total_amount += parseFloat(sum_data[i].amount);
                         }
 
