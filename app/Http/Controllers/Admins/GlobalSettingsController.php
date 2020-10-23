@@ -2438,10 +2438,10 @@ class GlobalSettingsController extends Controller
 
                 $completed_aging_report->date = $now;
 
-                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('cash_collection_status',1)->where('dncc_status',0)->get();
+                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('cash_collection_status',1)->where('dncc_status',0)->where('status', 1)->get();
                 foreach($delviery_notes as $delviery_note)
                 {
-                    $start = $delviery_note->updated_at;
+                    $start = $delviery_note->status_verified_at;
                     $difference = $start->diffInDays($now);
                     if($difference > 2)
                     {
