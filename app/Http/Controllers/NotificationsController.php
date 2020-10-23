@@ -5885,7 +5885,7 @@ class NotificationsController extends Controller
                     $user = $done_payment->shipper;
                     $payment_id = $done_payment->id;
 
-                    $finance_team = Admin::join('admin_roles','admins.role_id','=','admin_roles.id')->where('admin_roles.department_id', 4)->where('admins.status', 1);
+
                     $sale_person_id = SalePersonTag::where('user_id', $user->id)->where('status', 0)->select('admin_id')->first();
                     if ($sale_person_id) {
                         $sale_person_email = Admin::find($sale_person_id->admin_id)->email;
@@ -5905,13 +5905,11 @@ class NotificationsController extends Controller
                         $to[] = $user->email;
                     }
 
-                    if ($finance_team->exists()) {
-                        $cc = array_merge($cc, $finance_team->pluck('admins.email')->toArray());
-                    }
                     if($sale_person_email){
                         $cc[] = $sale_person_email;
                     }
-
+                    $to[] = 'wajiha.majeed@trax.pk';
+                    $to[] = 'shafay.tariq@trax.pk';
 
                     self::email($subject, $body, $to,$cc);
 
