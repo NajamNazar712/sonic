@@ -39,7 +39,7 @@ class PettyCashExpenseSummaryReport extends Controller
             $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_statement_details as pcsd')
             ->join('petty_cash_account_titles as pca', 'pca.id', '=','pcsd.account_title_id')
             ->select('pca.name as name', DB::raw('SUM(pcsd.amount) as amount'))
-            ->groupBy('pca.id');
+            ->groupBy('pcsd.account_title_id');
         }
 
         $datatable = Datatables::of($petty_cash_account_detail);
