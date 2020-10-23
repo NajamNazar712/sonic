@@ -2859,9 +2859,15 @@ class NotificationsController extends Controller
 
                             /*$regional_manager = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
                                 ->where('admins.role_id', 4)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $sale_person_hub)->select('email')->first();*/
-                            $department_head_email = Admin::where('role_id', 4)->where('status', 1)->select('email')->first();
-
+//                            $department_head_email = Admin::where('role_id', 44)->where('status', 1)->select('email')->first();
                             $cc = array();
+                            $related_admins = Admin::where('role_id', 44)->where('status', 1)->whereHas('hubs', function ($query) use ($sale_person_hub) {
+                                $query->where('hub_id', $sale_person_hub);
+                            });
+                            if ($related_admins->exists()) {
+                                $cc = array_merge($cc, $related_admins->pluck('email')->toArray());
+                            }
+
 
                             if($sale_person_email){
                                 $cc[] = $sale_person_email;
