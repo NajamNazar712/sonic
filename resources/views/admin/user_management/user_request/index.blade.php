@@ -22,28 +22,6 @@
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
-                            <div class="modal-body text-center">
-
-                               {{-- <form id="assign_hub_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
-                                    @method('POST')
-                                    @csrf
-                                    <div class="container">
-                                        <input type="hidden" name="id"/>
-                                        <div class="col-12 form-group">
-                                            <select name="hubs[]" id="hub_select" class="form-control select2" multiple="multiple">
-                                                @foreach($hubs as $hub)
-                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="row justify-content-center">
-                                            <div class="col-6">
-                                                <button id="edit" type="submit" class="btn btn-primary btn-block">Assign Hub</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>--}}
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -56,75 +34,6 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                            </div>
-                            <div class="modal-body text-center">
-                               {{--  <form id="assign_hub_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
-                                     @method('POST')
-                                     @csrf
-                                     {{ csrf_field() }}
-
-                                     <div class="row">
-                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                             <div class="form-group">
-                                                 <input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required">
-                                             </div>
-                                         </div>
-
-                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                             <div class="form-group">
-                                                 <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
-                                             </div>
-                                         </div>
-
-                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                             <div class="form-group">
-                                                 <input type="text" name="cnic" id="cnic" class="form-control" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
-                                             </div>
-                                         </div>
-
-                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                             <div class="form-group">
-                                                 <input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.settings.user_requests.email') }}" data-msg-remote="Email must be unique">
-                                             </div>
-                                         </div>
-
-
-                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                             <div class="form-group">
-                                                 <select name="department" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
-                                                     @foreach($departments as $department)
-                                                         <option value="{{ $department->id }}">{{ $department->name }}</option>
-                                                     @endforeach
-                                                 </select>
-                                             </div>
-                                         </div>
-                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                             <div class="form-group">
-                                                 <select name="default_hub" class="select2" id="default_hub" data-rule-required="true" data-msg-required="Default hub is required">
-                                                     @foreach($hubs as $hub)
-                                                         <option value="{{ $hub->id }}">{{ $hub->name }}</option>
-                                                     @endforeach
-                                                 </select>
-                                             </div>
-                                         </div>
-
-                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                             <div class="form-group">
-                                                 <input type="text" name="designation" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required">
-                                             </div>
-                                         </div>
-                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                             <div class="form-group">
-                                                 <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID" data-rule-remote="{{ route('admin.settings.user_requests.trax_id') }}">
-                                             </div>
-                                         </div>
-                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                             <div class="form-group">
-                                                 <input type="password" name="password" id="password" class="form-control" placeholder="Password ">
-                                             </div>
-                                         </div>
-                                     </div>
-                                 </form>--}}
                             </div>
                         </div>
                     </div>
@@ -139,7 +48,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
-                                   {{-- <th class="border-primary border-darken-1"></th>--}}
+
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Trax ID</th>
                                     <th class="border-primary border-darken-1">Name</th>
@@ -154,6 +63,9 @@
                                     <th class="border-primary border-darken-1">Verified By HR</th>
                                     <th class="border-primary border-darken-1">Verified By HR At</th>
                                     <th class="border-primary border-darken-1">Requested From Days (TAT)</th>
+                                    <th class="border-primary border-darken-1">Forwarded By</th>
+                                    <th class="border-primary border-darken-1">Forwarded At</th>
+                                    <th class="border-primary border-darken-1">(TAT)</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -226,6 +138,9 @@
                             head.push('Verified By HR');
                             head.push('Verified By HR At');
                             head.push('Requested From Date (TAT)');
+                            head.push('Forwarded By');
+                            head.push('Forwarded At');
+                            head.push(' Verified From Forwarded (TAT)');
                             head.push('Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -243,6 +158,9 @@
                                 row.push(values.verified_by_hr);
                                 row.push(values.verified_by_hr_at);
                                 row.push(values.launched_to_date);
+                                row.push(values.forwarded_by);
+                                row.push(values.forwarded_at);
+                                row.push(values.forwarded_tat);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -264,83 +182,13 @@
                     action: function (e, dt, node, config) {
                         window.location = '{{ route('admin.user_management.user_requests.add.index') }}';
                     }
-                }/*,{
-                    text: '<i class="la la-cogs"></i> Assign Hub(s)',
-                    className: 'btn btn-primary assign',
-                    enabled:false,
-                    action: function (e, dt, node, config) {
-
-                        $('input:hidden[name=id]').val(selected_rows);
-                        $('#AssignHubModal').modal('show');
-
-                    }
-                },
-                    {
-                        extend: 'selectAll',
-                        text: 'Select All',
-                        className: 'select_all',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.select();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index === -1) {
-                                        selected_rows.push(id);
-                                    }
-
-                                    table.button('.assign').enable();
-                                }
-                            });
-                        }
-                    }, {
-                        extend: 'selectNone',
-                        text: 'Select None',
-                        className: 'select_none',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.deselect();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index !== -1) {
-                                        selected_rows.splice(index, 1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.assign').disable();
-                                    }
-                                }
-                            });
-                        }
-                    }*/,{
+                },{
                         extend: 'excel',
                         title: 'Users',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
 
-               {{-- buttons: [{
-                    extend: 'excel',
-                    title: 'Users',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },'reset'],
-                @endif--}}
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -349,12 +197,7 @@
                 language: {
                     processing: data_table_loader
                 },
-                /*select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
-                },*/
+
                 serverSide: true,
                 ajax: '{{ route('admin.user_management.user_requests.list') }}',
                 rowId: 'id',
@@ -375,6 +218,9 @@
                     {data: 'verified_by_hr', name: 'as.name', class: 'align-middle verified_by_hr'},
                     {data: 'verified_by_hr_at', name: 'admin_user_requests.verified_by_hr_at', class: 'align-middle verified_by_hr_at'},
                     {data: 'requested_from_date', name: 'requested_from_date', class: 'align-middle requested_from_date', orderable: false, searchable: false},
+                    {data: 'forwarded_by', name: 'admin_user_requests.forwarded_by', class: 'align-middle forwarded_by', orderable: false, searchable: false},
+                    {data: 'forwarded_at', name: 'admin_user_requests.forwarded_by', class: 'align-middle forwarded_at', orderable: false, searchable: false},
+                    {data: 'verified_from_date', name: 'verified_from_date', class: 'align-middle verified_from_date', orderable: false, searchable: false},
                     {data: 'status', name: 'admin_user_requests.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -385,10 +231,6 @@
 
                     var info = table.page.info();
 
-                   /* $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }*/
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -399,6 +241,8 @@
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '<option value="0">Requested</option>' +
                         '<option value="1">Verified</option>' +
+                        '<option value="2">Id Added</option>' +
+                        '<option value="3">Forwarded</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -449,28 +293,29 @@
                 }
             });
 
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
 
+                if ($(this).hasClass('forward')) {
+                    $.ajax({
+                        url: '{!! route('admin.user_management.user_requests.forward') !!}',
+                        method: 'POST',
+                        data: {
 
-            //bulk assigning of hub work start
-           /* $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                var id = parseInt($(this).parent('tr').attr('id'));
-                console.log(id);
-                var index = $.inArray(id, selected_rows);
-
-                if (index === -1) {
-                    selected_rows.push(id);
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                        });
                 }
-                else {
-                    selected_rows.splice(index, 1);
-                }
-
-                if (selected_rows.length > 0) {
-                    table.button('.assign').enable();
-                }
-                else {
-                    table.button('.assign').disable();
-                }
-            });*/
+            });
 
             $( "#assign_hub_form" ).validate({
                 errorClass:"danger",
