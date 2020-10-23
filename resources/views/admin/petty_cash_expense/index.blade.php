@@ -17,7 +17,7 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
                             <form id="track_form" class=" mb-1 justify-content-center" novalidate="novalidate">
-                                <input type="hidden" name="petty_account_switch" id="petty_account_switch" value="head">
+                                <input type="hidden" name="petty_account_switch" id="petty_account_input" value="head">
                                 <div class="row mb-2 justify-content-center ">
 
                                         <div class="col-3">
@@ -135,9 +135,9 @@
             var petty_cash_account_switch = document.querySelector('.switchery.petty_account_switch');
             petty_cash_account_switch.onchange = function () {
                 if(petty_cash_account_switch.checked === true){
-                    $('#petty_account_switch').val('title');
+                    $('#petty_account_input').val('title');
                 }else if(petty_cash_account_switch.checked === false){
-                    $('#petty_account_switch').val('head');
+                    $('#petty_account_input').val('head');
                 }
             };
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -198,7 +198,7 @@
                     }
                 }
             });
-
+            var total_amount = 0;
             var table = $('#datatable').DataTable({
                 scrollX: false, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -222,13 +222,12 @@
                 ajax: {
                     url: '{{ route('admin.reports.petty_cash_expense_summary.petty_cash_summary_report') }}',
                     data: function (d) {
-                        d.petty_account_switch = $('#petty_account_switch').val();
+                        d.petty_account_switch = $('#petty_account_input').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
 
                     }
                 },
-                rowId: 'title_id',
                 order: [1, 'desc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -237,33 +236,28 @@
                 ],
 
                 rowCallback: function(row, data, index) {
+
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    var api = this.api();
-                    var intVal = function ( i ) {
-
-                        return typeof i === 'string' ?
-                            i.replace(/[\$,]/g, '')*1 :
-                            typeof i === 'number' ?
-                                i : 0;
-
-                    };
-
-                    if (api.column(2).data().length){
-                        var totalAmount = api
-                            .column( 2, { page: 'current'} )
-                            .data()
-                            .reduce( function (startValue, endValue) {
-                                return intVal(startValue) + intVal(endValue);
-                            } ) }
-                    else{totalAmount = 0};
-
-                    $( api.column(2).footer() ).html(
-                        '$'+totalAmount,
-                        $('#statements_total_amount').text(totalAmount),
-
-                    );
                 },
+                drawCallback: function (settings) {
+                    total_amount = 0;
+                    var api = new $.fn.dataTable.Api( settings );
+                    var sum_data = api.rows( {page:'current'} ).data();
+                    if(sum_data.length > 0){
+                        for(var i=0;i<sum_data.length; i++)
+                        {
+
+                            total_amount += parseFloat(sum_data[i].amount);
+                        }
+
+                    }
+                    else{
+                        total_amount = 0;
+                    }
+                    $('#statements_total_amount').text(total_amount);
+                },
+
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
@@ -291,10 +285,9 @@
                 }
             });
 
-
             $('#track_form').bind('submit', function (e) {
                 e.preventDefault();
-                $('#statements_total_amount').text('0');
+                $('#statements_total_amount').text(0);
                 table.draw();
             });
 

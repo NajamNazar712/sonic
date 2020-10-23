@@ -28,7 +28,7 @@ class PettyCashExpenseSummaryReport extends Controller
 
     public function pettyCashSummaryReportProcess(Request $request)
     {
-        $petty_cash_account_detail = [];
+//        $petty_cash_account_detail = [];
         if($request->has('petty_account_switch') && $request->get('petty_account_switch') == 'head'){
             $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_account_heads as pca')
             ->join('petty_cash_statement_details as pcsd', 'pca.id', '=','pcsd.account_head_id')
@@ -36,11 +36,17 @@ class PettyCashExpenseSummaryReport extends Controller
             ->groupBy('pca.id');
         }
         if($request->has('petty_account_switch') && $request->get('petty_account_switch') == 'title'){
+            $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_account_titles as pca')
+            ->join('petty_cash_statement_details as pcsd', 'pca.id', '=','pcsd.account_title_id')
+            ->select('pca.name as name', DB::raw('SUM(pcsd.amount) as amount'))
+            ->groupBy('pca.id');
+        }
+        /*if($request->has('petty_account_switch') && $request->get('petty_account_switch') == 'title'){
             $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_statement_details as pcsd')
             ->join('petty_cash_account_titles as pca', 'pca.id', '=','pcsd.account_title_id')
             ->select('pca.name as name', DB::raw('SUM(pcsd.amount) as amount'))
             ->groupBy('pcsd.account_title_id');
-        }
+        }*/
 
         $datatable = Datatables::of($petty_cash_account_detail);
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
