@@ -176,6 +176,8 @@ class UserManagementController extends Controller
         $admin->role_id = $request->input('role_id');
         $admin->default_hub_id = $request->input('default_hub');
         $admin->password = bcrypt($request->input('password'));
+        $admin->designation = $request->input('designation');
+        $admin->trax_id = $request->input('trax_id');
 
         $admin->save();
 
@@ -249,6 +251,8 @@ class UserManagementController extends Controller
             $admin->role_id = $request->input('role_id');
             $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
+            $admin->designation = $request->input('designation');
+            $admin->trax_id = $request->input('trax_id');
 
             if ($request->filled('password')) {
                 $admin->password = bcrypt($request->input('password'));

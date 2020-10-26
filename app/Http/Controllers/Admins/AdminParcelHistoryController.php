@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
@@ -50,7 +51,9 @@ class AdminParcelHistoryController extends Controller
     }
     public function index(Request $request){
         $riders = Rider::get();
-        $admins = Admin::get();
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
+            ->select('a.id as id', 'a.name as name')
+            ->whereNotIn('admin_roles.department_id', [1])->get();
         return view('admin.parcel_history.index')->with(['riders' => $riders, 'admins' => $admins]);
     }
 

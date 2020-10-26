@@ -635,8 +635,8 @@ class Permission
             'settings.sales.projection.reasons.index' => 314,
             'settings.sales.projection.shipment.index' => 318,
 
-            'settings.sales.key_accounts.dashboard' => 392,
-            'settings.sales.key_accounts.dashboard.details' => 392,
+            'settings.sales.key_accounts.dashboard' => 397,
+            'settings.sales.key_accounts.dashboard.details' => 397,
 
             'settings.settings.blacklist.index' => 329,
             'settings.blacklist.search.index' => 330,
@@ -779,6 +779,11 @@ class Permission
             'runner.add.submit' => 386,
             'runner.edit' => 386,
             'runner.edit.submit' => 386,
+
+            'open_parcel_history.index' => 392,
+            'open_parcel_history.list' => 392,
+            'open_parcel_history.submit' => 392,
+            'open_parcel_history.info' => 392,
         ],
 
         'shipper' => [

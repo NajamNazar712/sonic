@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashStatementDetail;
 use App\Http\Models\City;
@@ -21,24 +22,37 @@ class PettyCashExpenseSummaryReport extends Controller
     }
     public function index(){
         $petty_cash_account_title = PettyCashAccountTitle::select('id','name')->get();
-        return view('admin.petty_cash_expense.index')->with(['petty_cash_account_title' => $petty_cash_account_title]);
-   //        dd($petty_cash_account_title);
+        $petty_cash_account_head = PettyCashAccountHead::select('id','name')->get();
+        return view('admin.petty_cash_expense.index')->with(['petty_cash_account_title' => $petty_cash_account_title,'petty_cash_account_head' => $petty_cash_account_head]);
     }
 
     public function pettyCashSummaryReportProcess(Request $request)
     {
-        $petty_cash_account_detail =PettyCashStatementDetail::join('petty_cash_account_titles', 'petty_cash_account_titles.id', '=', 'petty_cash_statement_details.account_title_id')
-            ->leftjoin('petty_cash_account_heads', 'petty_cash_account_heads.id', '=', 'petty_cash_statement_details.account_head_id')
-            ->join('cities', 'cities.id', '=', 'petty_cash_statement_details.hub_id')
-            ->select('petty_cash_account_titles.name as account_title', 'petty_cash_account_heads.name as account_head','cities.name as city', 'petty_cash_statement_details.amount');
-        $datatable = Datatables::of($petty_cash_account_detail);
-        if($petty_cash_account_titles = $request->get('petty_cash_account_titles')){
-            $petty_cash_account_detail = $petty_cash_account_detail->where('petty_cash_account_titles.id', '=',$petty_cash_account_titles);
+//        $petty_cash_account_detail = [];
+        if($request->has('petty_account_switch') && $request->get('petty_account_switch') == 'head'){
+            $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_account_heads as pca')
+            ->join('petty_cash_statement_details as pcsd', 'pca.id', '=','pcsd.account_head_id')
+            ->select('pca.name as name', DB::raw('SUM(pcsd.amount) as amount'))
+            ->groupBy('pca.id');
         }
+        if($request->has('petty_account_switch') && $request->get('petty_account_switch') == 'title'){
+            $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_account_titles as pca')
+            ->join('petty_cash_statement_details as pcsd', 'pca.id', '=','pcsd.account_title_id')
+            ->select('pca.name as name', DB::raw('SUM(pcsd.amount) as amount'))
+            ->groupBy('pca.id');
+        }
+        /*if($request->has('petty_account_switch') && $request->get('petty_account_switch') == 'title'){
+            $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_statement_details as pcsd')
+            ->join('petty_cash_account_titles as pca', 'pca.id', '=','pcsd.account_title_id')
+            ->select('pca.name as name', DB::raw('SUM(pcsd.amount) as amount'))
+            ->groupBy('pcsd.account_title_id');
+        }*/
+
+        $datatable = Datatables::of($petty_cash_account_detail);
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('petty_cash_statement_details.created_at', [$from,$to]);
+            $datatable->whereBetween('pcsd.created_at', [$from,$to]);
         }
         return $datatable->make(true);
     }
