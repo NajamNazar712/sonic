@@ -1934,7 +1934,7 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $user_type = User::where('id',$user_id)->first();
         $rules = [
-            'warehouse_id' => ['required', 'digits_between:1,10', Rule::exists('gul_ahmed_pickup_addresses', 'id')],
+            'warehouse_id' => ['required', Rule::exists('gul_ahmed_pickup_addresses', 'warehouse_id')],
             'consignee_city_name' => ['required', 'between:1,100', Rule::exists('gul_ahmed_cities', 'city_name')],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
