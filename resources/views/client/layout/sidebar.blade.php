@@ -113,19 +113,22 @@
                 <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-users"></i>Substitute Accounts</span></a></li>
             @endif
 
-            @if (session('user_type') == 1 || in_array(11, session('permissions')))
+            @if (session('user_type') == 1 || count(array_intersect([11], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
+                        @if(session('user_type') == 1 || in_array(11, session('permissions')))
                         <li><a class="menu-item" href="{{route('cod.settings.air_waybill_printing.index')}}">Air Waybill Information And Print Count</a></li>
-                    </ul>
-                    <ul class="menu-content">
                         <li><a class="menu-item" href="{{route('cod.settings.logo.index')}}">Logo</a></li>
+                        @endif
+                        @if(session('pickup_wise_account'))
+                        <li><a class="menu-item" href="{{route('cod.settings.shipping_information.index')}}">IBAN</a></li>
+                        @endif
                     </ul>
+
                 </li>
             @endif
 
             <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title"><i class="la la-crosshairs"></i>Tracking</span></a></li>
-
 
         </ul>
     </div>

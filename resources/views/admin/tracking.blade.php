@@ -1050,6 +1050,7 @@
 
                 print(id, booking_type_id);
             });
+
             $('#tracking').on('click', '.add_request', function () {
                 id = $(this).attr('id');
                 var tracking = $(this).attr('data-tracking');
