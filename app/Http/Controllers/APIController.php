@@ -1999,7 +1999,7 @@ class APIController extends Controller
                 if (!$user_shipping_info->city->pickup) {
                     return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
                 }
-                $gul_ahmed_city = GulAhmedCities::where('city_name', $request->input('consignee_city_name'));
+                $gul_ahmed_city = GulAhmedCities::where('city_name', $request->input('consignee_city_name'))->first();
                 $consignee_city = City::find($gul_ahmed_city->city_id);
 
                 if (!$consignee_city->status) {
