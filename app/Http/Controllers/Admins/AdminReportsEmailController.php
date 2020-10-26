@@ -1798,15 +1798,14 @@ class AdminReportsEmailController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'oc.id', '=', 'usi.city_id')
             ->join('cities as h', 'h.id', '=', 'oc.hub_id')
-            ->leftjoin('shipments_journey as sj', function($join) {
+            ->join('shipments_journey as sj', function($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id AND verification = 1)'));
             })
             ->select('h.id as hub_id', 'h.name as hub_name', 'oc.id as origin_id', 'oc.name as origin_name', 'sj.shipper_status_id as status', 'shipments.tracking_number as tracking_number', 'usi.vendor as vendor', 'usi.poc as poc', 'usi.phone as phone')
             ->where('shipments.booking_type_id', '!=', 4)
             ->whereNotNull('usi.vendor')
-            ->where('sj.created_at', '>=', $start_date)
-            ->where('sj.created_at', '<=', $end_date)
+            ->whereBetween('sj.created_at', [$start_date, $end_date])
             ->where('shipments.shipper_status_id', 1)
             ->get();
         $hubs = City::where('hub', 1)->where('status', 1)->get();
