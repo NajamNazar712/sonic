@@ -1934,7 +1934,7 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $user_type = User::where('id',$user_id)->first();
         $rules = [
-            'warehouse_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('gul_ahmed_pickup_addresses', 'id')],
+            'warehouse_id' => ['required', 'digits_between:1,10', Rule::exists('gul_ahmed_pickup_addresses', 'id')],
             'consignee_city_name' => ['required', 'between:1,100', Rule::exists('gul_ahmed_cities', 'city_name')],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
@@ -1947,18 +1947,12 @@ class APIController extends Controller
             'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
             'item_description' => ['required', 'between:0,500'],
             'item_quantity' => ['required', 'integer', 'digits_between:1,10', 'between:1,10000'],
-            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10']
+            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+            'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')->where(function($query) use($user_id) {
+            $query->where('user_id', $user_id);
+        })]
         ];
 
-        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
-        if($shipment_pre_book->exists()){
-            $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
-                $query->where('user_id', $user_id);
-            })];
-        }
-        else{
-            $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
-        }
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -1969,6 +1963,7 @@ class APIController extends Controller
         }
         else {
             $service_type_id = 1;
+            $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
             if($shipment_pre_book->exists()){
                 $shipment_pre_book = $shipment_pre_book->first();
                 $length = strlen($shipment_pre_book->prefix);
