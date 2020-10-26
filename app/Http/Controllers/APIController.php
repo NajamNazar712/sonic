@@ -2090,7 +2090,7 @@ class APIController extends Controller
                 $order_id = NULL;
             }
 
-            $package_type = FALSE;
+            $package_type = TRUE;
 
 
             if ($request->filled('special_instructions')) {
