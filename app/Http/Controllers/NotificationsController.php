@@ -5920,18 +5920,23 @@ class NotificationsController extends Controller
                         ->join('v2_pickup_request_not_pick_reasons as npr','npr.id','=','vpra.reason_id')
                         ->leftjoin('sale_person_tags as st','st.user_id','=','u.id')
                         ->join('admins as a','a.id','=','st.admin_id')
-                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper_name','npr.name as reason','a.id','a.name as sales_person','a.email as saleperson_email')
+                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper_name','npr.name as reason','a.id as admin_id','a.name as sales_person','a.email as saleperson_email')
                         ->where('v2_pickup_requests.status_id', 3)
                         ->where('st.status',0)
                         ->whereNotNull('vpra.reason_id')
                         ->wherebetween('v2_pickup_requests.created_at',[$date_from,$date_to])
-                       /* ->groupBy('a.id')*/
+                     /*  ->groupBy('v2_pickup_requests.shipper_id')*/
                         ->get();
 
                     if (count($pickup_requests) > 0) {
-                        foreach ($pickup_requests as $pickup) {
-                            $to = array();
-                            $to[] = $pickup->saleperson_email;
+                        $pickup_data = array();
+
+                       foreach($pickup_requests as $index => $pickup){
+                           $pickup_data[$pickup->admin_id][] = $pickup;
+                       }
+
+                        foreach ($pickup_data as $data) {
+
                             $subject = $notification->subject;
                             $body = $notification->body;
 
@@ -5943,9 +5948,9 @@ class NotificationsController extends Controller
                             $html .= '</tr></thead><tbody>';
 
                             $html .= '<tr>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->requested_date . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->shipper_name . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->reason . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->requested_date . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->shipper_name . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->reason . '</td>';
                             $html .= '</tr>';
                             $html .= '</tbody></table>';
                             if (strpos($body, '[preview]') !== FALSE) {
@@ -5954,8 +5959,10 @@ class NotificationsController extends Controller
                             if (strpos($body, '[sales_person]') !== FALSE) {
                                 $body = str_replace('[sales_person]',$pickup->sales_person , $body);
                             }
+
                             self::email($subject, $body, $to);
                         }
+
                     }
                 }
                 else if($id == 100){
