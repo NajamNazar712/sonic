@@ -3670,24 +3670,18 @@ use Yajra\Datatables\Datatables;
         public function negative_balance_customers_list(Request $request)
         {
             $date = Carbon::now();
-            $from_date = $date->subDays(7)->toDateTimeString();
-            $to_date = Carbon::now()->toDateTimeString();
+            $from_date = $date->subDays(7)->startOfDay()->toDateTimeString();
 
-            $negative = DB::connection('reports')->table('pending_payment_shipments')->leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
-                ->leftjoin('users as u','u.id','=','s.user_id')
-                ->leftjoin('shipments as os', function($join) use($from_date, $to_date){
-                    $join->on('os.user_id','=','s.user_id')
-//                        ->where('shipments.user_id','u.id')
-                        ->whereBetween('os.created_at', [$from_date, $to_date]);
-                })
-                ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'),'os.created_at as duration')
+            $negative = DB::connection('reports')->table('pending_payment_shipments')->join('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
+                ->join('users as u','u.id','=','s.user_id')
+                ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
                 ->where('payable','<',0)
                 ->groupBy('u.id');
 
             $datatable = Datatables::of($negative)
                 ->setRowAttr([
                     'class' => function ($datatable) {
-                        if ($datatable->duration == null) {
+                        if ($datatable->shipment_exist == null) {
                             return 'bg-warning';
                         }
                     }

@@ -35,19 +35,19 @@
 
 									<div class="col ml-auto">
 										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Overall Template</a>
+											<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Overall Template</a>
 										</div>
 										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Regular Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Regular Template</a>
+											<a href="{{ asset('file/Trax Book Regular Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Regular Template</a>
 										</div>
 										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Replacement Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Replacement Template</a>
+											<a href="{{ asset('file/Trax Book Replacement Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Replacement Template</a>
 										</div>
 										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Try And Buy Template</a>
+											<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Try And Buy Template</a>
 										</div>
 										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Reverse Pickup Template</a>
+											<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Reverse Pickup Template</a>
 										</div>
 									</div>
 								</div>

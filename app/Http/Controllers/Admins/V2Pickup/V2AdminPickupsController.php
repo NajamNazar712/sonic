@@ -10,9 +10,12 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
+use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -1577,6 +1580,9 @@ class V2AdminPickupsController extends Controller
                             <td class="color primary"><strong>Contact Person</strong></td>
                             <td class="color primary"><strong>Vendor</strong></td>
                             <td class="color primary"><strong>Contact Number</strong></td>
+                            <td class="color primary"><strong>Sales Person</strong></td>
+                            <td class="color primary"><strong>Person of Contact</strong></td>
+                            <td class="color primary"><strong>Number</strong></td>
                             <td class="color primary"><strong>Pickup Address</strong></td>
                             <td class="color primary"><strong>Bookings</strong></td>
                             <td class="color primary"><strong>Pickup Date</strong></td>
@@ -1592,6 +1598,10 @@ class V2AdminPickupsController extends Controller
 
                 $shipper = $pickup_request->shipper;
                 $pickup_address = $pickup_request->pickup_address;
+                $sales_person = SalePersonTag::join('admins as ad' , 'ad.id' , '=', 'sale_person_tags.admin_id')
+                    ->join('users as us', 'us.id', '=', 'sale_person_tags.user_id')
+                ->select('ad.name','us.phone','us.poc')->first();
+               // dd($sales_person);
                 $color = '';
                 if($pickup_address->vendor != null){
                     $color = 'vendor_pickup_row';
@@ -1604,6 +1614,9 @@ class V2AdminPickupsController extends Controller
                             <td>' . $pickup_address['poc'] . '</td>
                             <td>' . $pickup_address['vendor'] . '</td>
                             <td>' . $pickup_address['phone'] . '</td>
+                            <td>'.$sales_person['name'].'</td>
+                            <td>'.$sales_person['poc'].'</td>
+                            <td>'.$sales_person['phone'].'</td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['booked'] . '</td>
                             <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
@@ -1629,12 +1642,12 @@ class V2AdminPickupsController extends Controller
 
                       <hr>
         ';
-        if(count($reverse_pickup_shipment_ids) > 0){
-            $airway_bill_html = '';
-            $airway_bill_html = $this->print_air_waybill($reverse_pickup_shipment_ids, $rider->name);
-            $html .= $airway_bill_html;
+            if(count($reverse_pickup_shipment_ids) > 0){
+                $airway_bill_html = '';
+                $airway_bill_html = $this->print_air_waybill($reverse_pickup_shipment_ids, $rider->name);
+                $html .= $airway_bill_html;
 //                return response()->json(['status' => 0, 'shipment_ids' => $reverse_pickup_shipment_ids, 'rider_name' => $rider->name]);
-        }
+            }
         }
 
         $html .= '
@@ -2086,17 +2099,11 @@ class V2AdminPickupsController extends Controller
         $pickup_date = $request->pickup_date;
         $rider_id = $request->rider_id;
         if($pickup_date != null && $rider_id != null){
-            $pickup_attempt = V2PickupRequestAttempt::whereDate('attempt_date', $pickup_date)->where('rider_id', $rider_id);
-            if($pickup_attempt->exists()){
-                $pickup_attempt = $pickup_attempt->latest()->first();
-                if($pickup_attempt){
-                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_attempt->pickup_request_id);
-                    if($pickup_note_request->exists()){
-                        $pickup_note_request = $pickup_note_request->first();
-                        $pickup_note_id = $pickup_note_request->pickup_note_id;
-                        return response()->json(['status' => 0, 'pickup_note_id' => $pickup_note_id]);
-                    }
-                    return response()->json(['status' => 1, 'error' => 'Pickup Note not found!']);
+            $pickup_note = V2PickupNote::whereDate('created_at', $pickup_date)->where('rider_id', $rider_id);
+            if($pickup_note->exists()){
+                $pickup_note = $pickup_note->latest()->first();
+                if($pickup_note){
+                    return response()->json(['status' => 0, 'pickup_note_id' => $pickup_note->id]);
                 }
             }
             return response()->json(['status' => 1, 'error' => 'No Pickups found!']);
