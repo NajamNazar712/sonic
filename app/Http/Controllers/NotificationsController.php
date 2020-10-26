@@ -5160,10 +5160,10 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['hub_name'] . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['pending'] . '</td>';
                         $html .= '</tr>';
-                        $html .= '</tbody></table>';
                         $serial++;
                     }
 
+                    $html .= '</tbody></table>';
                     if ($check == true) {
                         if (strpos($body, '[preview]') !== FALSE) {
                             $body = str_replace('[preview]', $html, $body);
@@ -5211,7 +5211,6 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['hub_name'] . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['pending'] . '</td>';
                             $html .= '</tr>';
-                            $html .= '</tbody></table>';
                             $serial++;
                         }
                     }
