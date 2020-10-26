@@ -2293,6 +2293,17 @@ class V2AdminPickupsController extends Controller
                         </tr>
                         </tbody>
                       </table>
+                      <br>
+                      <div>Operation Staff Receiver</div>
+                      <br>
+                      <br>
+                      <div>
+                        Name : __________________________
+                      </div> 
+                      <br>
+                      <div>
+                        Signature : ______________________
+                      </div>           
 
                       <hr>
         ';
@@ -2300,17 +2311,7 @@ class V2AdminPickupsController extends Controller
 
 
         $html .= '
-                    <div>Operation Staff Receiver</div>
-                     <br>
-                     <br>
-                    <div>
-                        Name : ____________________________
-                    </div> 
-                     <br>
-                    <div>
-                        Signature : ______________________
-                    </div>
-                    </div>
+                    
 
                     <script>
                       window.onload = function() {
