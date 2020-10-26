@@ -1807,6 +1807,7 @@ class AdminReportsEmailController extends Controller
             ->whereNotNull('usi.vendor')
             ->where('sj.created_at', '>=', $start_date)
             ->where('sj.created_at', '<=', $end_date)
+            ->where('shipments.shipper_status_id', '!=', DB::raw(1))
             ->get();
         $hubs = City::where('hub', 1)->where('status', 1)->get();
         $zone_shipments = array();
@@ -1814,7 +1815,7 @@ class AdminReportsEmailController extends Controller
         foreach ($hubs as $hub){
             if(count($shipments) > 0){
                 foreach ($shipments as $shipment){
-                    if($shipment->status == 1 || $shipment->status == 2){
+                    if($shipment->status == 1){
                         if($hub->id == $shipment->hub_id){
                             if($shipment->status == 1) {
                                 $hub_shipments[$hub->id][$shipment->origin_id][] = ['tracking_number' => $shipment->tracking_number, 'poc' => $shipment->poc, 'vendor' => $shipment->vendor, 'phone' => $shipment->phone, 'origin_id' => $shipment->origin_id, 'origin_name' => $shipment->origin_name, 'hub_id' => $hub->id, 'hub_name' => $hub->name];
