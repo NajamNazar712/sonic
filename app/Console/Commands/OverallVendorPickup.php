@@ -50,7 +50,7 @@ class OverallVendorPickup extends Command
             else{
                 $cut_off_time = $settings->setting_value . ':00';
             }
-            $start_date = Carbon::yesterday()->subDay(90)->format('Y-m-d');
+            $start_date = Carbon::yesterday()->subDay(1)->format('Y-m-d');
 
             $start_date = $start_date . ' ' . $cut_off_time;
             $end_date = Carbon::yesterday()->format('Y-m-d');
