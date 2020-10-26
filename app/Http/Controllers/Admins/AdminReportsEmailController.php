@@ -1682,8 +1682,7 @@ class AdminReportsEmailController extends Controller
             })
             ->select('h.id as hub_id', 'h.name as hub_name', 'oc.id as origin_id', 'oc.name as origin_name', 'sj.shipper_status_id as status')
             ->where('shipments.booking_type_id', '=', DB::raw(5))
-            ->where('sj.created_at', '>=', $start_date)
-            ->where('sj.created_at', '<=', $end_date)
+            ->whereBetween('sj.created_at', [$start_date, $end_date])
             ->get();
         $hubs = City::where('hub', 1)->where('status', 1)->get();
         $hub_shipments = array();
@@ -1803,10 +1802,9 @@ class AdminReportsEmailController extends Controller
                     ->where('sj.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id AND verification = 1)'));
             })
             ->select('h.id as hub_id', 'h.name as hub_name', 'oc.id as origin_id', 'oc.name as origin_name', 'sj.shipper_status_id as status', 'shipments.tracking_number as tracking_number', 'usi.vendor as vendor', 'usi.poc as poc', 'usi.phone as phone')
-            ->where('shipments.booking_type_id', '!=', 4)
             ->whereNotNull('usi.vendor')
+            ->where('shipments.shipper_status_id', '=', 1)
             ->whereBetween('sj.created_at', [$start_date, $end_date])
-            ->where('shipments.shipper_status_id', 1)
             ->get();
         $hubs = City::where('hub', 1)->where('status', 1)->get();
         $zone_shipments = array();
