@@ -1602,8 +1602,30 @@ class V2AdminPickupsController extends Controller
                     ->join('users as us', 'us.id', '=', 'sale_person_tags.user_id')
                     ->join('shipper_contacts as sc', 'sc.shipper_id', '=', 'us.id')
                     ->where('sale_person_tags.status',0)->where('us.id',$shipper->id)
-                ->select('ad.name','sc.phone_number','sc.poc')->first();
-               // dd($sales_person);
+                ->select('ad.name','sc.phone_number','sc.poc')->get();
+                $poc = $sales_person ->toArray();
+//                dd($poc);
+
+                $pocName="";
+                $phoneNo="";
+                $names="";
+                $i = 0;
+                foreach($poc as  $data)
+                {
+//                    dd($data['poc']);
+                    if($i==0){
+                        $pocName.= ''.$data['poc'];
+                        $phoneNo.=''.$data['phone_number'];
+                        $names=$data['name'];
+                        $i++;
+                    }else{
+                        $pocName.= ','.$data['poc'];
+                        $phoneNo.=','.$data['phone_number'];
+                    }
+
+
+                }
+//                dd($pocName);
                 $color = '';
                 if($pickup_address->vendor != null){
                     $color = 'vendor_pickup_row';
@@ -1616,9 +1638,9 @@ class V2AdminPickupsController extends Controller
                             <td>' . $pickup_address['poc'] . '</td>
                             <td>' . $pickup_address['vendor'] . '</td>
                             <td>' . $pickup_address['phone'] . '</td>
-                            <td>'.$sales_person['name'].'</td>
-                            <td>'.$sales_person['poc'].'</td>
-                            <td>'.$sales_person['phone_number'].'</td>
+                            <td>'.$names.'</td>
+                            <td>'.$pocName.'</td>
+                            <td>'. $phoneNo.'</td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['booked'] . '</td>
                             <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
