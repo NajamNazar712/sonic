@@ -63,6 +63,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\VisionSoftApi',
         'App\Console\Commands\OutstandingSDNReport',
         'App\Console\Commands\TelenorSalesReport',
+        'App\Console\Commands\KeyAccountDashboard',
+        'App\Console\Commands\ReversePickupSummary',
+        'App\Console\Commands\OverallVendorPickup',
         'App\Console\Commands\NotPickedShippersSummary'
 
 
@@ -83,8 +86,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
 //        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
-        $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
         $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
+        $schedule->command('keyaccount:dashboard')->dailyAt('4:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
 
@@ -207,6 +210,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:telenorsalesreport')->dailyAt('09:00');
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
+        $schedule->command('summary:reversepickup')->dailyAt('08:00')->runInBackground();
+        $schedule->command('overall:vendorpickup')->dailyAt('08:00')->runInBackground();
+        $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
     }
 	 /**
      * Register the commands for the application.

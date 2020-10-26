@@ -395,4 +395,8 @@ class UserManagementController extends Controller
 
         return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been updated!']);
     }
+
+
+
+
 }

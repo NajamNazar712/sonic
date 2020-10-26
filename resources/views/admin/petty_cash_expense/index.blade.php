@@ -19,8 +19,23 @@
                             <form id="track_form" class=" mb-1 justify-content-center" novalidate="novalidate">
 
                                 <div class="row mb-2 justify-content-center ">
-                                    <div class="row">
-                                        <div class="col-8">
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                {{-- <input type="text" class="form-control" placeholder="Search Shipper Name" name="shipper_name" id="shipper_name">--}}
+                                                <select name="search_acount_head" id="search_acount_head" class="form-control select2">
+                                                    <option value="">Select Account Head</option>
+                                                    @forelse($petty_cash_account_head as $account_head)
+                                                        <option value="{{ $account_head->id }}">{{ $account_head->name }}</option>
+                                                    @empty
+                                                        <option value="">Account Titles Not Found!</option>
+                                                    @endforelse
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-3">
                                             <div class="form-group">
                                                 {{-- <input type="text" class="form-control" placeholder="Search Shipper Name" name="shipper_name" id="shipper_name">--}}
                                                 <select name="search_acount_title" id="search_acount_title" class="form-control select2">
@@ -33,7 +48,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                    </div>
+
                                     <div class="col-3">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
@@ -41,7 +56,7 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                             </div>
-                                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Expanse From">
+                                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Expense From">
                                         </div>
                                     </div>
                                     <div class="col-3">
@@ -51,7 +66,7 @@
                                             <span class="la la-calendar-o small-calender-icon"></span>
                                         </span>
                                             </div>
-                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Expanse To">
+                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Expense To">
                                         </div>
                                     </div>
                                     <div class="col-3">
@@ -73,7 +88,7 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Account Head</th>
                                     <th class="border-primary border-darken-1">Account Title</th>
-                                    <th class="border-primary border-darken-1">City / Location</th>
+{{--                                    <th class="border-primary border-darken-1">City / Location</th>--}}
                                     <th class="border-primary border-darken-1"> Amount </th>
                                 </tr>
                                 </thead>
@@ -88,9 +103,10 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+{{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">--}}
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 
@@ -140,8 +156,10 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -189,7 +207,7 @@
                             head.push('S. No.');
                             head.push('Account Head');
                             head.push('Account Title');
-                            head.push('City');
+                            // head.push('City');
                             head.push('Amount');
 
                             $.each(result.data, function(index, values) {
@@ -198,7 +216,7 @@
                                 row.push(index + 1);
                                 row.push(values.account_head);
                                 row.push(values.account_title);
-                                row.push(values.city);
+                                // row.push(values.city);
                                 row.push(values.amount);
                                 body.push(row);
                             });
@@ -248,6 +266,7 @@
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
+                    'reset'
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -260,6 +279,7 @@
                 ajax: {
                     url: '{{ route('admin.reports.petty_cash_expense_summary.petty_cash_summary_report') }}',
                     data: function (d) {
+                        d.petty_cash_account_head = $('select[name="search_acount_head"]').val();
                         d.petty_cash_account_titles = $('select[name="search_acount_title"]').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
@@ -271,8 +291,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'account_head', name: 'petty_cash_account_heads.name', class: 'align-middle account_head'},
-                    {data: 'account_title', name: 'petty_cash_account_heads.name', class: 'align-middle account_title'},
-                    {data: 'city', name: 'petty_cash_account_heads.name', class: 'align-middle city'},
+                    {data: 'account_title', name: 'petty_cash_account_titles.name', class: 'align-middle account_title'},
                     {data: 'amount', name: 'petty_cash_statement_details.amount', class: 'align-middle amount'},
                 ],
 
@@ -289,16 +308,16 @@
 
                     };
 
-                    if (api.column(4).data().length){
+                    if (api.column(3).data().length){
                         var totalAmount = api
-                            .column( 4, { page: 'current'} )
+                            .column( 3, { page: 'current'} )
                             .data()
                             .reduce( function (startValue, endValue) {
                                 return intVal(startValue) + intVal(endValue);
                             } ) }
                     else{totalAmount = 0};
 
-                    $( api.column(4).footer() ).html(
+                    $( api.column(3).footer() ).html(
                         '$'+totalAmount,
                         $('#statements_total_amount').text(totalAmount),
 
@@ -338,6 +357,10 @@
 
             $('#track_form #search_acount_title').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Account Title Name',
+                allowClear:true
+            });
+            $('#track_form #search_acount_head').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Account Head',
                 allowClear:true
             });
 
