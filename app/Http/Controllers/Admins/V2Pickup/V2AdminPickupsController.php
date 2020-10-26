@@ -1599,7 +1599,7 @@ class V2AdminPickupsController extends Controller
                 $shipper = $pickup_request->shipper;
                 $pickup_address = $pickup_request->pickup_address;
                 $sales_person = SalePersonTag::join('admins as ad' , 'ad.id' , '=', 'sale_person_tags.admin_id')
-                    ->join('users as us', 'us.id', '=', 'sale_person_tags.user_id')
+                    ->join('users as us', 'us.id', '=', 'sale_person_tags.user_id')->where('sale_person_tags.status',0)->where('us.id',$shipper->id)
                 ->select('ad.name','us.phone','us.poc')->first();
                // dd($sales_person);
                 $color = '';
