@@ -1604,7 +1604,6 @@ class V2AdminPickupsController extends Controller
                     ->where('sale_person_tags.status',0)->where('us.id',$shipper->id)
                 ->select('ad.name','sc.phone_number','sc.poc')->get();
                 $poc = $sales_person ->toArray();
-//                dd($poc);
 
                 $pocName="";
                 $phoneNo="";
@@ -1612,7 +1611,7 @@ class V2AdminPickupsController extends Controller
                 $i = 0;
                 foreach($poc as  $data)
                 {
-//                    dd($data['poc']);
+
                     if($i==0){
                         $pocName.= ''.$data['poc'];
                         $phoneNo.=''.$data['phone_number'];
@@ -1625,7 +1624,6 @@ class V2AdminPickupsController extends Controller
 
 
                 }
-//                dd($pocName);
                 $color = '';
                 if($pickup_address->vendor != null){
                     $color = 'vendor_pickup_row';
