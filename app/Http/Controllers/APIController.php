@@ -1980,7 +1980,7 @@ class APIController extends Controller
             else {
                 $shipment_pre_book = NULL;
             }
-                $warehouse = GulAhmedPickupAddress::find($request->input('warehouse_id'));
+                $warehouse = GulAhmedPickupAddress::where('warehouse_id', ($request->input('warehouse_id')))->first();
                 $pickup_address_id = $warehouse->pickup_address_id;
                 $user_shipping_info = UserShippingInfo::find($pickup_address_id);
 
