@@ -44,10 +44,16 @@ class OverallVendorPickup extends Command
 
         if ($settings->exists()) {
             $settings = $settings->first();
-            $cut_off_time = $settings->setting_value . ':00';
-            $start_date = Carbon::yesterday()->subDay(1)->format('y-m-d');
+            if((int)$settings->setting_value < 10){
+                $cut_off_time = '0' . $settings->setting_value . ':00';
+            }
+            else{
+                $cut_off_time = $settings->setting_value . ':00';
+            }
+            $start_date = Carbon::yesterday()->subDay(90)->format('Y-m-d');
+
             $start_date = $start_date . ' ' . $cut_off_time;
-            $end_date = Carbon::yesterday()->format('y-m-d');
+            $end_date = Carbon::yesterday()->format('Y-m-d');
             $end_date = $end_date . ' ' . $cut_off_time;
             $response = AdminReportsEmailController::overall_pickup_vendor_wise($start_date, $end_date);
         }
