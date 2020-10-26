@@ -2003,11 +2003,11 @@ class APIController extends Controller
                 $consignee_city = City::find($gul_ahmed_city->city_id);
 
                 if (!$consignee_city->status) {
-                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $consignee_city->id]) . ' is deactivated';
                 }
 
                 if (!$consignee_city->zone_id) {
-                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $consignee_city->id]) . ' is deactivated';
                 }
 
                 $pickup_city_id = $user_shipping_info->city_id;
@@ -2039,8 +2039,8 @@ class APIController extends Controller
                     }
                 }
 
-                if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', 1)->where('shipping_mode_id', 1)->exists()) {
-                    return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type Regular and Shipping Mode Overnight']);
+                if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', 1)->where('shipping_mode_id', 1)->exists()) {
+                    return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $consignee_city->id . ' with Service Type Regular and Shipping Mode Overnight']);
                 }
                 $consignee_city_id = $consignee_city->id;
                 $delivery_type_id = 1;
