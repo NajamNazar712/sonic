@@ -2831,9 +2831,13 @@ class NotificationsController extends Controller
                     if ($shipper) {
                         $terms = CRFTermsConditions::where('user_id', $shipper->id)->first();
                         if ($terms) {
+                            $yes = 'To accept terms and conditions:'. PHP_EOL . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]);
+                            $download = 'To download CRF document:'. PHP_EOL . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]);
                             $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
-                            $button = '<div class="row"><button onclick="window.open(' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="width: 100px; height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 25px; font-weight: bold;">Yes</button>';
-                            $link = '<div class="row"><button onclick="window.open(' . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">CRF Download</button>';
+                            $button = $yes;
+                            $link = $download;
+/*                            $button = '<div class="row"><button onclick="window.open(' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="width: 100px; height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 25px; font-weight: bold;">Yes</button>';
+                            $link = '<div class="row"><button onclick="window.open(' . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">CRF Download</button>';*/
                             if (strpos($subject, '[shipper_name]') !== FALSE) {
                                 $subject = str_replace('[shipper_name]', $shipper->name, $subject);
                             }
