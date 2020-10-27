@@ -7902,7 +7902,7 @@ if(session('department_id') == 7){
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.international as international']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7943,7 +7943,12 @@ if(session('department_id') == 7){
                 ';
 
                     if (session('role_id') == 1 || in_array(90, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
+                        if($result->international == 0){
+                            $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
+                        }
+                        else{
+                            $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editinternationalcity" data-toggle="modal" data-target="#editInternationalCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update International City Status</div></button>';
+                        }
                     }
 
                     if (session('role_id') == 1 || in_array(91, session('permissions'))) {
@@ -9295,6 +9300,167 @@ if(session('department_id') == 7){
             return redirect()->back()->with('error', 'Shipper not found!');
         }
         return redirect()->back()->with('error', 'Payment Cycle not selected!');
+    }
+
+
+
+    public function getInternationalCityForm(){
+        $hubs = City::where('hub',1)->where('international', 1)->where('status',1)->get();
+        $zones = Zone::where('international', 1)->get();
+        return view('admin.management.add_international_city_form')->with(['hubs'=>$hubs,'zones' => $zones]);
+    }
+    public function getEditInternationalCityForm($id){
+        $city = City::find($id);
+        if($city->hub == 1){
+            $cityhub = '';
+            $isHub = 1;
+        }else{
+            $cityhub = City::select(['id','name'])->where('id',$city->hub_id)->get();
+            $isHub = 0;
+
+        }
+        $delivery_array = CityDelivery::where('city_id',$city->id)->select(['booking_type_id','shipping_mode_id'])->get();
+        $delivery = array();
+        foreach ($delivery_array as $delivery_details) {
+            $delivery[$delivery_details['booking_type_id']][] = $delivery_details['shipping_mode_id'];
+        }
+
+
+        $hubs = City::where('hub',1)->where('international', 1)->where('status',1)->get();
+        $zones = Zone::where('international', 1)->get();
+        return view('admin.management.edit_international_city_form')->with(['hubs'=>$hubs, 'zones' => $zones,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
+
+    }
+
+    public function updateInternationalCity(Request $request,$id){
+        $city_id = City::where('id',$id)->first();
+        if($request->postType == 'city'){
+            City::where('id',$id)->update([
+                'name'=>$request->cityName,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'zone_id'=>City::find($request->hubs)->zone_id,
+                'pickup'=>0,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+            CityHistory::create([
+                'city_id'=> $id,
+                'hub' => 0,
+                'hub_id'=> $request->hubs,
+                'zone_id'=> City::find($request->hubs)->zone_id,
+                'pickup'=> 0,
+                'status' => $city_id->status,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'updated_by' => Auth::id(),
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+
+            return redirect()->back()->with('success','City updated successfully');
+        }elseif($request->postType == 'hub'){
+            City::where('id',$id)->update([
+                'name'=>$request->cityName,
+                'hub'=>1,
+                'hub_id'=>$id,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>0,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+            CityHistory::create([
+                'city_id'=> $id,
+                'hub'=>1,
+                'hub_id'=>$id,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>0,
+                'status' => $city_id->status,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'updated_by' => Auth::id(),
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+
+            return redirect()->back()->with('success','Hub/city updated successfully');
+        }
+    }
+    //update international city end
+    public function addInternationalCityHub(Request $request){
+        if($request->postType == 'city'){
+            $zone_id = City::find($request->hubs)->zone_id;
+
+            $city = City::create([
+                'name'=>$request->cityName,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'zone_id'=> $zone_id,
+                'pickup'=>0,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'status'=>1,
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL,
+                'international' => 1
+            ]);
+
+            CityHistory::create([
+                'city_id'=> $city->id,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'zone_id'=> $zone_id,
+                'pickup'=>0,
+                'status'=>1,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'updated_by' => Auth::id(),
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+
+            return redirect()->back()->with('success','City added successfully');
+        }elseif($request->postType == 'hub'){
+            $city = City::create([
+                'name'=>$request->cityName,
+                'hub'=>1,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>0,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'status'=>1,
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL,
+                'international' => 1
+            ]);
+
+            CityHistory::create([
+                'city_id'=> $city->id,
+                'hub'=>1,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>0,
+                'status'=>1,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'updated_by' => Auth::id(),
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+            City::where('id',$city->id)->update(['hub_id'=>$city->id]);
+            return redirect()->back()->with('success','Hub city added successfully');
+        }
     }
 }
 

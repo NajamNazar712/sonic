@@ -292,7 +292,7 @@ class APIController extends Controller
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 })],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
-                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('international', 0)],
                 'consignee_name' => ['required', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
@@ -346,7 +346,7 @@ class APIController extends Controller
                 })],
                 'delivery_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
-                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('international', 0)],
                 'consignee_name' => ['required', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
