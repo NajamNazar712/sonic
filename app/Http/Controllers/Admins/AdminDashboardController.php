@@ -9365,7 +9365,7 @@ if(session('department_id') == 7){
             return redirect()->back()->with('success','City updated successfully');
         }elseif($request->postType == 'hub'){
             City::where('id',$id)->update([
-                'name'=>$request->cityName,
+                'name'=>$request->countryName,
                 'hub'=>1,
                 'hub_id'=>$id,
                 'zone_id'=>$request->zone_id,
@@ -9432,7 +9432,7 @@ if(session('department_id') == 7){
             return redirect()->back()->with('success','City added successfully');
         }elseif($request->postType == 'hub'){
             $city = City::create([
-                'name'=>$request->cityName,
+                'name'=>$request->countryName,
                 'hub'=>1,
                 'zone_id'=>$request->zone_id,
                 'pickup'=>0,

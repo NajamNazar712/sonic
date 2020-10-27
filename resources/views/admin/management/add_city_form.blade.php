@@ -1,5 +1,5 @@
 
-<form action="{{route('admin.management.city')}}" method="post" class="mt-2" id="addCityHubForm" novalidate="novalidate">
+<form action="{{route('admin.management.city.form')}}" method="post" class="mt-2" id="addCityHubForm" novalidate="novalidate">
     {{csrf_field()}}
 
     <div class="row mb-2">

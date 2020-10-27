@@ -3,14 +3,14 @@
     {{csrf_field()}}
     <input type="hidden" name="_method" value="PUT">
     <div class="row mb-2">
-        <div class="col @if($city->international == 1)d-none @endif" id="city_name_div">
+        <div class="col @if($city->hub == 1)d-none @endif" id="city_name_div">
             <fieldset class="form-group">
                 <input type="text" class="form-control" name="cityName" value="{{$city->name}}" placeholder="Add City Name" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
         </div>
-        <div class="col @if($city->international == 0)d-none @endif" id="country_name_div">
+        <div class="col @if($city->hub == 0)d-none @endif" id="country_name_div">
             <fieldset class="form-group">
-                <input type="text" class="form-control" name="cityName" value="{{$city->name}}" placeholder="Add Country Name" required data-rule-required="true" data-msg-required="This field is required">
+                <input type="text" class="form-control" name="countryName" value="{{$city->name}}" placeholder="Add Country Name" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
         </div>
         <div class="col-3">
