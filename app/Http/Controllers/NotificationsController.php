@@ -2831,8 +2831,10 @@ class NotificationsController extends Controller
                     if ($shipper) {
                         $terms = CRFTermsConditions::where('user_id', $shipper->id)->first();
                         if ($terms) {
-                            $yes = 'To accept terms and conditions:'. PHP_EOL . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]);
-                            $download = 'To download CRF document:'. PHP_EOL . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]);
+                            $yes_link = '<a href="' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) .'"><b>Yes</b></a>';
+                            $yes = 'To accept terms and conditions:'. PHP_EOL . $yes_link;
+                            $download_link = '<a href="'. route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) .'"></a>';
+                            $download = 'To download CRF document:'. PHP_EOL . $download_link;
                             $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
                             $button = $yes;
                             $link = $download;
