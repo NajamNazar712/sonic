@@ -22,14 +22,14 @@
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sales.targets.update') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="form-group">
-                                            <input id="daterange" type="text" name="daterange" class="form-control" data-msg-required="Date Range is required" data-rule-require="true" required="required" value="" />
+                                            <input id="daterange" type="text" name="daterange" class="form-control" data-msg-required="Date Range is required" data-rule-required="true" required="required" value="" />
                                             <input type="hidden" name="start_date" id="start_date">
                                             <input type="hidden" name="end_date" id="end_date">
                                         </div>
                                         
 
                                         <div class="form-group">
-                                            <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-require="true" required="required">
+                                            <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
                                                 @foreach($sales_person as $person)
                                                     <option value="{{$person->id}}">{{$person->name}}</option>
                                                 @endforeach

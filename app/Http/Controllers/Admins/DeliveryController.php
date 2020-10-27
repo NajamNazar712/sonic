@@ -2997,7 +2997,10 @@ class DeliveryController extends Controller
 //                            <td>Rs ' . number_format($shipment->received_amount) . '</td>
 //                    ';
 //
-                    $total_cod_amount += $shipment->received_amount;
+                    if(!($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1)){
+                        $total_cod_amount += $shipment->received_amount;
+                    }
+
 //                }
 //                else {
 //                    $shipment_details_row_start .= '
