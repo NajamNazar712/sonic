@@ -2155,8 +2155,10 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
 
-                        if (!$pickup_consignee_city->pickup) {
-                            $errors[$row_id]['consignee_city_name'] = 'Pickup is not allowed for City: ' . $pickup_consignee_city->name;
+                        if ($user_id != 7762) {
+                            if (!$pickup_consignee_city->pickup) {
+                                $errors[$row_id]['consignee_city_name'] = 'Pickup is not allowed for City: ' . $pickup_consignee_city->name;
+                            }
                         }
 
                         $pickup_address_id_for_delivery = $row['pickup_address_id'];
@@ -3563,8 +3565,10 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
 
-                        if (!$pickup_consignee_city->pickup) {
-                            $errors[$row_id]['consignee_city_name'] = 'Pickup is not allowed for City: ' . $pickup_consignee_city->name;
+                        if ($user_id != 7762) {
+                            if (!$pickup_consignee_city->pickup) {
+                                $errors[$row_id]['consignee_city_name'] = 'Pickup is not allowed for City: ' . $pickup_consignee_city->name;
+                            }
                         }
 
                         $pickup_address_id_for_delivery = $row['pickup_address_id'];

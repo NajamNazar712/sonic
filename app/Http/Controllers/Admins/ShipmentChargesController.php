@@ -38,7 +38,65 @@ use Carbon\Carbon;
 
 class ShipmentChargesController extends Controller
 {
-    static public function calculate_weight($account_type_id, $user_id, $shipping_mode_id, $same_day_timing_id, $walk_in_delivery_type_id, $weight, $origin_city_id, $origin_city_zone_id, $destination_city_id) {
+    static public function calculate_weight($account_type_id, $user_id, $shipping_mode_id, $same_day_timing_id, $walk_in_delivery_type_id, $weight, $origin_city_id, $origin_city_zone_id, $destination_city_id, $booking_type_id, $amount) {
+        if ($user_id == 7762 && $shipping_mode_id == 1) {
+            if ($origin_city_id == $destination_city_id) {
+                $type_of_charges = 0;
+            }
+            else {
+                $type_of_charges = 1;
+            }
+
+            if ($booking_type_id == 5 || $amount == 0) {
+                if ($type_of_charges == 0) {
+                    $charges = 37.5;
+                }
+                else {
+                    $charges = 50;
+                }
+            }
+            else {
+                if ($type_of_charges == 0) {
+                    $charges = 75;
+                }
+                else {
+                    $charges = 100;
+                }
+            }
+
+            $chargeable_weight = 1;
+
+            if ($weight > 1) {
+                $chargeable_weight = ceil($weight / 0.5) * 0.5;
+
+                $multiplier = ceil(($weight - 1) / 0.5);
+
+                if ($booking_type_id == 5 || $amount == 0) {
+                    if ($type_of_charges == 0) {
+                        $charges += (17.5 * $multiplier);
+                    }
+                    else {
+                        $charges += (22.5 * $multiplier);
+                    }
+                }
+                else {
+                    if ($type_of_charges == 0) {
+                        $charges += (35 * $multiplier);
+                    }
+                    else {
+                        $charges += (45 * $multiplier);
+                    }
+                }
+            }
+
+            $result = array();
+
+            $result['weight_charges'] = $charges;
+            $result['chargeable_weight'] = $chargeable_weight;
+
+            return $result;
+        }
+
         if ($account_type_id == 1) {
             $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('status', 1);
         }
@@ -381,7 +439,7 @@ class ShipmentChargesController extends Controller
     static public function weight($id) {
         $shipment = Shipment::find($id);
 
-        $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id);
+        $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
 
         if ($result) {
             $shipment->weight_charges = $result['weight_charges'];
@@ -750,6 +808,59 @@ class ShipmentChargesController extends Controller
             $replacement_multiplier = ($booking_type_charge->replacement_charges / 100);
 
             $weight = ($shipment->replacement_weight) ? $shipment->replacement_weight : 0.15;
+
+            if ($shipment->user_id == 7762 && $shipment->shipping_mode_id == 1) {
+                if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
+                    $type_of_charges = 0;
+                }
+                else {
+                    $type_of_charges = 1;
+                }
+
+                if ($shipment->amount == 0) {
+                    if ($type_of_charges == 0) {
+                        $charges = 37.5;
+                    }
+                    else {
+                        $charges = 50;
+                    }
+                }
+                else {
+                    if ($type_of_charges == 0) {
+                        $charges = 75;
+                    }
+                    else {
+                        $charges = 100;
+                    }
+                }
+
+                if ($weight > 1) {
+                    $multiplier = ceil(($weight - 1) / 0.5);
+
+                    if ($shipment->amount == 0) {
+                        if ($type_of_charges == 0) {
+                            $charges += (17.5 * $multiplier);
+                        }
+                        else {
+                            $charges += (22.5 * $multiplier);
+                        }
+                    }
+                    else {
+                        if ($type_of_charges == 0) {
+                            $charges += (35 * $multiplier);
+                        }
+                        else {
+                            $charges += (45 * $multiplier);
+                        }
+                    }
+                }
+
+                $shipment->replacement_charges = ($charges * $replacement_multiplier);
+
+                $shipment->save();
+
+                return;
+            }
 
             if ($account_type_id == 1) {
                 $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
