@@ -86,7 +86,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <label for="hub" class="font-weight-bold">Trax Id</label>
                                         <div class="form-group">
-                                            <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID*" data-rule-required="true" data-msg-required="Trax ID  is required" value="{{ $user->trax_id }}">
+                                            <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID*" data-rule-required="true" data-msg-required="Trax ID  is required" value="{{ $user->trax_id }}" data-rule-remote="{{ route('admin.user_management.user_requests.trax_id', ['id' => $user->id]) }}"  data-msg-remote="Id must be unique">
                                         </div>
                                     </div>
 
@@ -256,6 +256,11 @@
                     }
                 });
             });
+        });
+        $('#user_form').on('keypress',function (e) {
+            if(e.keyCode == 13) {
+                e.preventDefault();
+            }
         });
 
     </script>
