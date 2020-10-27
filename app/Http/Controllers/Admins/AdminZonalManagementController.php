@@ -29,7 +29,7 @@ class AdminZonalManagementController extends Controller
     }
 
     public function list(Request $request) {
-        $zones = Zone::select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst', 'zones.status', 'zones.international');
+        $zones = Zone::select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst', 'zones.status', 'zones.business_category_id');
 
         $datatables = Datatables::of($zones)
             ->editColumn('status', function ($zone) {
@@ -41,7 +41,7 @@ class AdminZonalManagementController extends Controller
                 }
             })
             ->addColumn('action', function($zone) {
-                if($zone->international == 0){
+                if($zone->business_category_id == 1){
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 }
                 else{
@@ -224,7 +224,7 @@ class AdminZonalManagementController extends Controller
 
         $zone->name = $request->name;
         $zone->gst = $request->gst;
-        $zone->international = 1;
+        $zone->business_category_id = 2;
 
         $zone->save();
 

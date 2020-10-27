@@ -7902,7 +7902,7 @@ if(session('department_id') == 7){
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.international as international']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7943,7 +7943,7 @@ if(session('department_id') == 7){
                 ';
 
                     if (session('role_id') == 1 || in_array(90, session('permissions'))) {
-                        if($result->international == 0){
+                        if($result->business_category_id == 1){
                             $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
                         }
                         else{
@@ -9305,8 +9305,8 @@ if(session('department_id') == 7){
 
 
     public function getInternationalCityForm(){
-        $hubs = City::where('hub',1)->where('international', 1)->where('status',1)->get();
-        $zones = Zone::where('international', 1)->get();
+        $hubs = City::where('hub',1)->where('business_category_id', 2)->where('status',1)->get();
+        $zones = Zone::where('business_category_id', 2)->get();
         return view('admin.management.add_international_city_form')->with(['hubs'=>$hubs,'zones' => $zones]);
     }
     public function getEditInternationalCityForm($id){
@@ -9326,8 +9326,8 @@ if(session('department_id') == 7){
         }
 
 
-        $hubs = City::where('hub',1)->where('international', 1)->where('status',1)->get();
-        $zones = Zone::where('international', 1)->get();
+        $hubs = City::where('hub',1)->where('business_category_id', 2)->where('status',1)->get();
+        $zones = Zone::where('business_category_id', 2)->get();
         return view('admin.management.edit_international_city_form')->with(['hubs'=>$hubs, 'zones' => $zones,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
 
     }
@@ -9411,7 +9411,7 @@ if(session('department_id') == 7){
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL,
-                'international' => 1
+                'business_category_id' => 2
             ]);
 
             CityHistory::create([
@@ -9442,7 +9442,7 @@ if(session('department_id') == 7){
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL,
-                'international' => 1
+                'business_category_id' => 2
             ]);
 
             CityHistory::create([

@@ -272,8 +272,8 @@ class ShipperShipmentBookController extends Controller
         $booking_types = BookingType::where('id','!=', 4)->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
-        $cities = City::where('pickup', 1)->where('status', 1)->where('international', 0)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::where('status', 1)->where('international', 0)->whereNotNull('zone_id')->orderBy('name')->get();
+        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
@@ -1678,7 +1678,7 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = City::where('status', 1)->where('international', 0)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         $products = Product::all();
 
         $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
@@ -1791,7 +1791,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id);
             })->where('hidden', 0)],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('international', 0)],
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
@@ -2227,10 +2227,10 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
                     else {
-                    $cities = City::where('status', 1)->where('international', 0)->whereNotNull('zone_id')->orderBy('name')->get();
+                    $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                     $booking_types = BookingType::whereNotIn('id', [4])->pluck('booking_type', 'id');
                     $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
-                        $query->where('pickup', 1)->where('international', 0)->where('status', 1)->whereNotNull('zone_id');
+                        $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
                     })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->pluck('id');
                     $products = Product::pluck('product_name', 'id');
 
@@ -2351,8 +2351,8 @@ class ShipperShipmentBookController extends Controller
         $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
-        $cities = City::where('pickup', 1)->where('status', 1)->where('international', 0)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::where('status', 1)->where('international', 0)->whereNotNull('zone_id')->orderBy('name')->get();
+        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
@@ -3074,9 +3074,9 @@ class ShipperShipmentBookController extends Controller
     public function corporate_excel_index() {
         $booking_types = BookingType::whereNotIn('id',[3, 4])->get();
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
-            $query->where('pickup', 1)->where('international', 0)->where('status', 1)->whereNotNull('zone_id');
+            $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = City::where('status', 1)->where('international', 0)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         $products = Product::all();
         $user = User::find(session('user_id'));
         $delivery_types = DeliveryType::all();
@@ -3214,7 +3214,7 @@ class ShipperShipmentBookController extends Controller
                 $query->whereIn('id', [2,3]);
             })],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('international', 0)],
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
@@ -3636,7 +3636,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else {
-                $cities = City::where('status', 1)->where('international', 0)->whereNotNull('zone_id')->orderBy('name')->get();
+                $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                 $booking_types = BookingType::whereNotIn('id', [3, 4])->pluck('booking_type','id');
                 $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                     $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
@@ -3957,9 +3957,9 @@ class ShipperShipmentBookController extends Controller
         $booking_types = BookingType::whereNotIn('id',[4])->get();
         $user = User::find(session('user_id'));
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
-            $query->where('pickup', 1)->where('international', 0)->where('status', 1)->whereNotNull('zone_id');
+            $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = City::where('status', 1)->where('international', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        $cities = City::where('status', 1)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         $products = Product::all();
 
         $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
@@ -4072,7 +4072,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id);
             })->where('hidden', 0)],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('international', 0)],
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
@@ -4508,7 +4508,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else {
-                $cities = City::where('status', 1)->where('international', 0)->whereNotNull('zone_id')->orderBy('name')->get();
+                $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                 $booking_types = BookingType::whereNotIn('id', [4])->pluck('booking_type', 'id');
                 $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                     $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
