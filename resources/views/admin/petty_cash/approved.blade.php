@@ -132,11 +132,12 @@
                     className: 'btn btn-primary adjust',
                     enabled:false,
                     action: function (e, dt, node, config) {
-                        //$('input:hidden[name=statement_id]').val(selected_rows);
-                        if(id){
+                        $('input:hidden[name=statement_ids]').val(selected_rows);
+
+                        if(selected_rows !== ''){
                             swal({
                                 title: 'Are You Sure?',
-                                text: 'Select Yes to adjust petty cash statement!',
+                                text: 'Select Yes to adjust bulk petty cash !',
                                 icon: 'warning',
                                 buttons: {
                                     cancel: {
@@ -158,11 +159,11 @@
                             }).then(function (confirm) {
                                 if (confirm) {
                                     $.ajax({
-                                        url: '{!! route('admin.petty_cash.approved.adjusted') !!}',
+                                        url: '{!! route('admin.petty_cash.approved.bulk_adjusted') !!}',
                                         method: 'POST',
                                         data: {
                                             '_token': '{{ csrf_token() }}',
-                                            'statement_id': id
+                                            'statement_ids': selected_rows
                                         }
                                     }).done(function(data){
                                         if(data.status){
