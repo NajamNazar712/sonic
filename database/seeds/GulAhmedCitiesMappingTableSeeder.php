@@ -292,7 +292,7 @@ class GulAhmedCitiesMappingTableSeeder extends Seeder
             $gul_ahmed_cities->save();
         }
 
-        $user_id = 1317;
+        $user_id = 7828;
 
         \App\Http\Models\GulAhmedPickupAddress::truncate();
         \App\Http\Models\Shipper\UserShippingInfo::where('user_id', $user_id)->where('default_address', 0)->delete();
