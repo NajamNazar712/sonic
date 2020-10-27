@@ -525,9 +525,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/city', 'Admins\AdminDashboardController@cityView')->name('city.index');
         Route::get('/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('city.ajax');
         Route::get('/city/form', 'Admins\AdminDashboardController@getCityForm')->name('city.form');
+        Route::get('/international/city/form', 'Admins\AdminDashboardController@getInternationalCityForm')->name('international.city.form');
         Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
+        Route::get('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditInternationalCityForm')->name('international.city.edit');
         Route::put('/city/{id}/edit/form', 'Admins\AdminDashboardController@updateCity')->name('city.edit');
-        Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
+        Route::put('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@updateInternationalCity')->name('city.edit');
+        Route::post('/international/city', 'Admins\AdminDashboardController@addInternationalCityHub')->name('international.city');
         Route::put('/city/status', 'Admins\AdminDashboardController@CityStatus')->name('city.status');
         Route::get('/city/{id}/status/ajax', 'Admins\AdminDashboardController@CityStatusCheck')->name('city.status.ajax');
         Route::get('', 'Admins\AdminDashboardController@walk_in_city_list')->name('city_list');
@@ -599,11 +602,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('add')->name('add.')->group(function () {
                 Route::get('', 'Admins\AdminZonalManagementController@add_index')->name('index');
                 Route::post('', 'Admins\AdminZonalManagementController@add_store')->name('store');
+                Route::get('/international', 'Admins\AdminZonalManagementController@add_international_index')->name('international.index');
+                Route::post('/international', 'Admins\AdminZonalManagementController@add_international_store')->name('international.store');
             });
 
             Route::prefix('update/{id}')->name('update.')->group(function () {
                 Route::get('', 'Admins\AdminZonalManagementController@update_index')->name('index');
                 Route::post('', 'Admins\AdminZonalManagementController@update_store')->name('store');
+            });
+
+            Route::prefix('update/international/{id}')->name('update.international.')->group(function () {
+                Route::get('', 'Admins\AdminZonalManagementController@update_international_index')->name('index');
+                Route::post('', 'Admins\AdminZonalManagementController@update_international_store')->name('store');
             });
 
             Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');

@@ -130,6 +130,13 @@
 							window.location = '{{ route('admin.management.zonal.add.index') }}';
 						}
 					},
+					{
+						text: 'Add International',
+						className: 'btn btn-primary add_international',
+						action: function (e, dt, node, config) {
+							window.location = '{{ route('admin.management.zonal.add.international.index') }}';
+						}
+					},
 					@endif
 					{
 						extend: 'excel',
@@ -219,6 +226,11 @@
 						var link = '{{ route('admin.management.zonal.update.index', ["id" => 0]) }}';
 
 						window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+					}
+					if ($(this).hasClass('international_edit')) {
+						var international_link = '{{ route('admin.management.zonal.update.international.index', ["id" => 0]) }}';
+
+						window.location = international_link.substr(0, international_link.lastIndexOf('/')) + '/' + id;
 					}
 					if ($(this).hasClass('activate')) {
                         swal({

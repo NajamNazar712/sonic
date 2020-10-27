@@ -13,9 +13,6 @@
                     <div class="card-content">
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
-
-
-
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
@@ -47,11 +44,8 @@
                             <input type="hidden" name="status" id="cstatus">
                             <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Yes</button>
                             <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">Cancel</button>
-
-
                         </form>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -141,6 +135,22 @@
                            if(action === 'addcity'){
                                $.get( "/admin/management/city/form", function( data ) {
                                    $("#addCityDiv").html(data);
+                               });
+                           }
+                       }
+
+                    },{
+                       text: '<i class="la la-map-marker"></i> Add International City',
+                       className: 'btn btn-primary',
+                       enabled: true,
+                       action: function (e, dt, node, config) {
+                            $('#addInternationalCity').modal('show');
+                           var $invoker = $(e.relatedTarget);
+                           var action = 'addinternationalcity';
+
+                           if(action === 'addinternationalcity'){
+                               $.get( "/admin/management/international/city/form", function( data ) {
+                                   $("#addInternationalCityDiv").html(data);
                                });
                            }
                        }
@@ -267,6 +277,17 @@
             }
 
         });
+        $("#addInternationalCity").on("show.bs.modal", function(e) {
+            var $invoker = $(e.relatedTarget);
+            var action = $invoker.attr('rel');
+
+            if(action == 'addinternationalcity'){
+                $.get( "/admin/management/international/city/form", function( data ) {
+                    $("#addInternationalCityDiv").html(data);
+                });
+            }
+
+        });
         $("#editCity").on("show.bs.modal", function(e) {
             var $invoker = $(e.relatedTarget);
             var action = $invoker.attr('rel');
@@ -276,6 +297,18 @@
             if(action == 'editcity'){
                 $.get( "/admin/management/city/"+id+"/edit/form", function( data ) {
                     $("#editCityDiv").html(data);
+                });
+            }
+        });
+        $("#editInternationalCity").on("show.bs.modal", function(e) {
+            var $invoker = $(e.relatedTarget);
+            var action = $invoker.attr('rel');
+            var id = $(e.relatedTarget).data('target-id');
+
+
+            if(action == 'editinternationalcity'){
+                $.get( "/admin/management/international/city/"+id+"/edit/form", function( data ) {
+                    $("#editInternationalCityDiv").html(data);
                 });
             }
         });
