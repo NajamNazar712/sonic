@@ -16,7 +16,7 @@ class CreateInternationalShipmentsTable extends Migration
         Schema::create('international_shipments', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shipment_id')->index();
-            $table->string('international_tracking_number');
+            $table->string('international_tracking_number')->nullable();
             $table->timestamps();
         });
     }
