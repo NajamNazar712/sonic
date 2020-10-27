@@ -50,7 +50,7 @@
                 </li>
             @endif
 
-            @if (session('user_type') == 1)
+            @if (session('user_type') == 1 && session('user_id') != 7762)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-list-ul"></i>Rates</span></a>
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('cod.rates.view.index') }}">View</a></li>
