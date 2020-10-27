@@ -11,6 +11,78 @@
                 <h1 class="mb-1">
                     User Request
                 </h1>
+                <div class="modal fade text-left" id="viewdetails" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDetails"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary white">
+                                <h4 class="modal-title white">View Details </h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="usr" class="font-weight-bold">Name</label>
+                                        <div class="form-group">
+                                            <input type="text" name="name" id="name" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="phone" class="font-weight-bold">Phone</label>
+                                        <div class="form-group">
+                                            <input type="text" name="phone_number" id="phone_number" class="form-control" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="cnic" class="font-weight-bold">CNIC</label>
+                                        <div class="form-group">
+                                            <input type="text" name="cnic" id="cnic" class="form-control" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="email" class="font-weight-bold">Department</label>
+                                        <div class="form-group">
+                                            <input type="text" name="department" id="department" class="form-control" readonly>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="email" class="font-weight-bold">Email</label>
+                                        <div class="form-group">
+                                            <input type="email" name="email" id="email" class="form-control" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="email" class="font-weight-bold">Hub</label>
+                                        <div class="form-group">
+                                            <input type="text" name="default_hub" id="default_hub" class="form-control" readonly>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="designation" class="font-weight-bold">Designation</label>
+                                        <div class="form-group">
+                                            <input type="text" name="designation" id="designation" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="tarx_id" class="font-weight-bold">Trax Id</label>
+                                        <div class="form-group">
+                                            <input type="text" name="trax_id" id="trax_id" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="modal fade text-left" id="AssignHubModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddTierModal"
                      aria-hidden="true">
@@ -201,7 +273,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.user_management.user_requests.list') }}',
                 rowId: 'id',
-                order: [[1, 'asc']],
+                order: [[9, 'desc']],
                 columns: [
                     //{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -218,8 +290,8 @@
                     {data: 'verified_by_hr', name: 'as.name', class: 'align-middle verified_by_hr'},
                     {data: 'verified_by_hr_at', name: 'admin_user_requests.verified_by_hr_at', class: 'align-middle verified_by_hr_at'},
                     {data: 'requested_from_date', name: 'requested_from_date', class: 'align-middle requested_from_date', orderable: false, searchable: false},
-                    {data: 'forwarded_by', name: 'admin_user_requests.forwarded_by', class: 'align-middle forwarded_by', orderable: false, searchable: false},
-                    {data: 'forwarded_at', name: 'admin_user_requests.forwarded_by', class: 'align-middle forwarded_at', orderable: false, searchable: false},
+                    {data: 'forwarded_by', name: 'ac.name', class: 'align-middle forwarded_by', orderable: false, searchable: false},
+                    {data: 'forwarded_at', name: 'admin_user_requests.forwarded_at', class: 'align-middle forwarded_at', orderable: false, searchable: false},
                     {data: 'verified_from_date', name: 'verified_from_date', class: 'align-middle verified_from_date', orderable: false, searchable: false},
                     {data: 'status', name: 'admin_user_requests.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -240,9 +312,9 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '<option value="0">Requested</option>' +
-                        '<option value="1">Verified</option>' +
-                        '<option value="2">Id Added</option>' +
-                        '<option value="3">Forwarded</option>' +
+                        '<option value="1">HR Verified</option>' +
+                        '<option value="2">Admin Verified</option>' +
+                        '<option value="3">Request Completed</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -301,21 +373,43 @@
                         url: '{!! route('admin.user_management.user_requests.forward') !!}',
                         method: 'POST',
                         data: {
-
                             'id': id,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
-                        .done(function (data) {
-                            if (data.status == 1) {
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
-                            }
-                        });
+                    .done(function (data) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                    });
                 }
             });
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+
+                var name = table.row( $(this).parents('tr') ).data().name;
+                var trax_id = table.row( $(this).parents('tr') ).data().trax_id;
+                var email = table.row( $(this).parents('tr') ).data().email;
+                var phone_number = table.row( $(this).parents('tr') ).data().phone_number;
+                var cnic = table.row( $(this).parents('tr') ).data().cnic;
+                var department = table.row( $(this).parents('tr') ).data().department;
+                var designation = table.row( $(this).parents('tr') ).data().designation;
+                var default_hub = table.row( $(this).parents('tr') ).data().default_hub;
+
+                $('#name').val(name);
+                $('#trax_id').val(trax_id);
+                $('#email').val(email);
+                $('#phone_number').val(phone_number);
+                $('#cnic').val(cnic);
+                $('#department').val(department);
+                $('#designation').val(designation);
+                $('#default_hub').val(default_hub);
+
+                if ($(this).hasClass('details')) {
+                    $('#viewdetails').modal('show');
+                }
+            });
+
 
             $( "#assign_hub_form" ).validate({
                 errorClass:"danger",
@@ -338,5 +432,7 @@
                 }
             });
         });
+
+
     </script>
 @endsection

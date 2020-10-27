@@ -35,13 +35,14 @@ class AdminUserRequestController extends Controller
             ->leftjoin('admin_departments as ad','ad.id','=','admin_user_requests.department')
             ->leftjoin('admins as a','a.id','=','admin_user_requests.request_added_by')
             ->leftjoin('admins as as','as.id','=','admin_user_requests.verified_by_hr')
-        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status','admin_user_requests.forwarded_by as forwarded_by','admin_user_requests.forwarded_at as forwarded_at');
+            ->leftjoin('admins as ac','ac.id','=','admin_user_requests.forwarded_by')
+        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status','admin_user_requests.forwarded_at as forwarded_at','ac.name as forwarded_by')->orderBy('admin_user_requests.created_at','desc');
 
-            if(session('role_id') != 1){
+            if(session('role_id') != 1 && session('department_id') != 2){
                 $users->whereIn('admin_user_requests.status',[0,1]);
             };
 
-        if((session('role_id') != 1)){
+        if(session('role_id') != 1 && session('department_id') != 2){
             $users->where('ad.id',session('department_id'));
         }
 
@@ -124,13 +125,13 @@ class AdminUserRequestController extends Controller
                     return 'Requested';
                 }
                 else if($user->status == 1){
-                    return 'Verified';
+                    return 'HR Verified';
                 }
                 else if($user->status == 2){
-                    return 'ID Added';
+                    return 'Admin Verified';
                 }
                 else if($user->status == 3){
-                    return 'Forwarded';
+                    return 'Request Completed';
                 }
             })->addColumn('verified_from_date', function($user){
                 if($user->verified_by_hr_at){
@@ -154,8 +155,8 @@ class AdminUserRequestController extends Controller
             ->addColumn('action', function($user) {
                 $verify = '<button type="button" class="dropdown-item verify"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Verify Info</div></button>';
                 $add_role = '<button type="button" class="dropdown-item addrole"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-user-plus"></i></div><div class="col-9 offset-1">Add Role</div></button>';
-                $forwarded_by = '<button type="button" class="dropdown-item forward"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-user-plus"></i></div><div class="col-9 offset-1">Forward</div></button>';
-                $view_details = '<button type="button" class="dropdown-item details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-user-plus"></i></div><div class="col-9 offset-1">Forward</div></button>';
+                $forwarded_by = '<button type="button" class="dropdown-item forward"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-arrow-circle-right"></i></div><div class="col-9 offset-1">Forward</div></button>';
+                $view_details = '<button type="button" class="dropdown-item details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-file-o"></i></div><div class="col-9 offset-1">View Details</div></button>';
 
                 if(session('role_id') == 1 || (session('department_id') == 2 && $user->status == 0)) {
                     $dropdown = '
@@ -171,7 +172,7 @@ class AdminUserRequestController extends Controller
                     if(session('role_id') == 1 && $user->status == 2) {
                         $dropdown .= $forwarded_by;
                     }
-                    if(session('department_id') == 2 && $user->status == 3) {
+                    if((session('role_id') == 1  && $user->status == 3) || session('department_id') == 2 && $user->status == 3) {
                         $dropdown .= $view_details;
                     }
                     return $dropdown;
@@ -407,8 +408,10 @@ class AdminUserRequestController extends Controller
         $user = AdminUserRequest::find($admin_user);
         $user->forwarded_by = Auth::id();
         $user->forwarded_at = Carbon::now();
-        $user->status = 4;
+        $user->status = 3;
         $user->save();
+
+        return response()->json(['success'=>'Request Forwarded']);
 
   }
 }
