@@ -11,4 +11,8 @@ class AdminInternationalShipmentsController extends Controller
 
         $this->middleware('Permission');
     }
+
+    public function index(){
+
+    }
 }
