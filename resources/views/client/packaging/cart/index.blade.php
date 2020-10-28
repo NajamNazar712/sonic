@@ -140,8 +140,14 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function(form) {
-                    $('#size_ids').val(sizes);
-                    form.submit();
+                    if(sizes.length > 0){
+                        $('#size_ids').val(sizes);
+                        form.submit();
+                    }
+                    else{
+                        var error = 'At least one size should be selected to proceed';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
                 }
             });
         });

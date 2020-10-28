@@ -47,7 +47,7 @@
                                                         <div class="col mt-2 mb-1 align-middle text-center">
                                                             <div class="row justify-content-center">
                                                                 <div class="form-group">
-                                                                    <input type="number" class="form-control text-center" id="quantity_{{$index}}" name="quantity[{{$index}}]" value="" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
+                                                                    <input type="text" class="form-control text-center number" id="quantity_{{$index}}" name="quantity[{{$index}}]" value="" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -184,6 +184,17 @@
                 placeholder: 'City*'
             }).bind('change', function() {
                 $(this).valid();
+            });
+
+            $('.phone_number').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+            
+            $('.number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
             });
             $('#material_request_form').validate({
                 errorClass: 'danger',
