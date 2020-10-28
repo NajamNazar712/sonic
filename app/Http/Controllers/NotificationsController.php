@@ -2861,20 +2861,27 @@ class NotificationsController extends Controller
 
                             /*$regional_manager = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
                                 ->where('admins.role_id', 4)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $sale_person_hub)->select('email')->first();*/
-                            $department_head_email = Admin::where('role_id', 4)->where('status', 1)->select('email')->first();
-
+//                            $department_head_email = Admin::where('role_id', 44)->where('status', 1)->select('email')->first();
                             $cc = array();
+                            $related_admins = Admin::where('role_id', 44)->where('status', 1)->whereHas('hubs', function ($query) use ($sale_person_hub) {
+                                $query->where('hub_id', $sale_person_hub);
+                            });
+                            if ($related_admins->exists()) {
+                                $cc = array_merge($cc, $related_admins->pluck('email')->toArray());
+                            }
+
 
                             if($sale_person_email){
                                 $cc[] = $sale_person_email;
                             }
 
-                            if($department_head_email) {
-                                $cc[] = $department_head_email;
-                            }
+//                            if($department_head_email) {
+//                                $cc[] = $department_head_email;
+//                            }
 
+                            $bcc = array('danish.zahid@trax.pk');
                             $to = $shipper->email;
-                            self::email($subject, $body, $to, $cc);
+                            self::email($subject, $body, $to, $cc, $bcc);
 
                         }
                     }
@@ -3628,6 +3635,7 @@ class NotificationsController extends Controller
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->origin_city->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->city->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($hub_wise_split->shipments) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->ratio . '%</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float)$hub_wise_split->actual_weight, 2, '.', '') . '</td>';
@@ -5646,7 +5654,7 @@ class NotificationsController extends Controller
                 } else if ($id == 85) {
                     $shipments = Shipment::find($reference_1_id);
                     $booking_person = $reference_2_id;
-					$admin = Admin::find($booking_person);
+                    $admin = Admin::find($booking_person);
                     $subject = $notification->subject;
                     $body = $notification->body;
 
@@ -5695,8 +5703,8 @@ class NotificationsController extends Controller
                     $finance = Admin::whereIn('id', [12, 60, 49])->where('status', 1);
 
                     $to = array();
-                    if ($booking_person->email) {
-                        $to[] = $booking_person->email;
+                    if ($admin) {
+                        $to[] = $admin->email;
                     }
 
                     if ($finance->exists()) {
@@ -5842,7 +5850,7 @@ class NotificationsController extends Controller
                 }
                 else if($id == 90){
                     $to = array();
-                    $finance = Admin::whereIn('id', [12, 60,13])->where('status', 1);
+                    $finance = Admin::whereIn('id', [12, 60, 79, 216])->where('status', 1);
                     if ($finance->exists()) {
                         $to = array_merge($to, $finance->pluck('email')->toArray());
                     }
@@ -5876,7 +5884,7 @@ class NotificationsController extends Controller
                     $user = $done_payment->shipper;
                     $payment_id = $done_payment->id;
 
-                    $finance_team = Admin::join('admin_roles','admins.role_id','=','admin_roles.id')->where('admin_roles.department_id', 4)->where('admins.status', 1);
+
                     $sale_person_id = SalePersonTag::where('user_id', $user->id)->where('status', 0)->select('admin_id')->first();
                     if ($sale_person_id) {
                         $sale_person_email = Admin::find($sale_person_id->admin_id)->email;
@@ -5896,13 +5904,11 @@ class NotificationsController extends Controller
                         $to[] = $user->email;
                     }
 
-                    if ($finance_team->exists()) {
-                        $cc = array_merge($cc, $finance_team->pluck('admins.email')->toArray());
-                    }
                     if($sale_person_email){
                         $cc[] = $sale_person_email;
                     }
-
+                    $to[] = 'wajiha.majeed@trax.pk';
+                    $to[] = 'shafay.tariq@trax.pk';
 
                     self::email($subject, $body, $to,$cc);
 

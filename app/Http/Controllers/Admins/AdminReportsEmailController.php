@@ -1386,7 +1386,7 @@ class AdminReportsEmailController extends Controller
                 $total_count = 0;
                 $sdn_data[$hub->id]['name'] = $hub->name;
                 $sdn_data[$hub->id]['count'] = 0;
-                $outstanding_sdn = StationDepositNote::where('hub_id', $hub->id)->whereIn('status', [0,1])->get();
+                $outstanding_sdn = StationDepositNote::where('hub_id', $hub->id)->where('status', 1)->get();
                 foreach ($outstanding_sdn as $sdn) {
                     $start = Carbon::parse($sdn->created_at);
                     $difference = $start->diffInDays($now);

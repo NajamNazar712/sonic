@@ -202,7 +202,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            var total_amount=0;
+            var total_amount = 0;
             	
             // $("#datatable").on('change', '.txtCal', function () {
             //     var calculated_total_sum = 0;

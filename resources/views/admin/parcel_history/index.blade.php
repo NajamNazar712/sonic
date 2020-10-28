@@ -355,7 +355,7 @@
                 }
             });
             $('#track_form').validate({
-                ignore: ":not(:visible),:disabled",
+                ignore: [],
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function (error, element) {

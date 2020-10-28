@@ -17,35 +17,14 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
                             <form id="track_form" class=" mb-1 justify-content-center" novalidate="novalidate">
-
+                                <input type="hidden" name="petty_account_switch" id="petty_account_input" value="head">
                                 <div class="row mb-2 justify-content-center ">
 
                                         <div class="col-3">
-                                            <div class="form-group">
-                                                {{-- <input type="text" class="form-control" placeholder="Search Shipper Name" name="shipper_name" id="shipper_name">--}}
-                                                <select name="search_acount_head" id="search_acount_head" class="form-control select2">
-                                                    <option value="">Select Account Head</option>
-                                                    @forelse($petty_cash_account_head as $account_head)
-                                                        <option value="{{ $account_head->id }}">{{ $account_head->name }}</option>
-                                                    @empty
-                                                        <option value="">Account Titles Not Found!</option>
-                                                    @endforelse
-                                                </select>
-                                            </div>
-                                        </div>
-
-
-                                        <div class="col-3">
-                                            <div class="form-group">
-                                                {{-- <input type="text" class="form-control" placeholder="Search Shipper Name" name="shipper_name" id="shipper_name">--}}
-                                                <select name="search_acount_title" id="search_acount_title" class="form-control select2">
-                                                    <option value="">Select Account Title</option>
-                                                    @forelse($petty_cash_account_title as $account_title)
-                                                        <option value="{{ $account_title->id }}">{{ $account_title->name }}</option>
-                                                    @empty
-                                                        <option value="">Account Titles Not Found!</option>
-                                                    @endforelse
-                                                </select>
+                                            <div class="form-group text-center">
+                                                <label for="petty_account" class="font-medium-2 text-bold-600 mr-1">Heads</label>
+                                                <input type="checkbox" id="petty_account_switch" class="switchery petty_account_switch" data-color="success" data-size="sm" name="petty_account"/>
+                                                <label for="petty_account" class="font-medium-2 text-bold-600 ml-1">Titles</label>
                                             </div>
                                         </div>
 
@@ -86,10 +65,8 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Account Head</th>
-                                    <th class="border-primary border-darken-1">Account Title</th>
-{{--                                    <th class="border-primary border-darken-1">City / Location</th>--}}
-                                    <th class="border-primary border-darken-1"> Amount </th>
+                                    <th class="border-primary border-darken-1">Account Head / Titles</th>
+                                    <th class="border-primary border-darken-1">Amount</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -103,10 +80,8 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
-{{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">--}}
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 
@@ -143,10 +118,6 @@
             text-shadow: none;
         }
 
-        .selectize-control {
-            width: 100%;
-        }
-
     </style>
 @endsection
 @section('js')
@@ -154,45 +125,21 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
         $(document).ready(function () {
-            function print(id) {
-                $.ajax({
-                    url: '{!! route('admin.shipment.receiving_sheet.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
 
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
-
+            var petty_cash_account_switch = document.querySelector('.switchery.petty_account_switch');
+            petty_cash_account_switch.onchange = function () {
+                if(petty_cash_account_switch.checked === true){
+                    $('#petty_account_input').val('title');
+                }else if(petty_cash_account_switch.checked === false){
+                    $('#petty_account_input').val('head');
+                }
+            };
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -205,18 +152,14 @@
                         success: function (result) {
                             head = [];
                             head.push('S. No.');
-                            head.push('Account Head');
-                            head.push('Account Title');
-                            // head.push('City');
+                            head.push('Account Head / Title');
                             head.push('Amount');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.account_head);
-                                row.push(values.account_title);
-                                // row.push(values.city);
+                                row.push(values.name);
                                 row.push(values.amount);
                                 body.push(row);
                             });
@@ -255,7 +198,7 @@
                     }
                 }
             });
-
+            var total_amount = 0;
             var table = $('#datatable').DataTable({
                 scrollX: false, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -269,7 +212,7 @@
                     'reset'
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
+                pageLength: -1,
                 pagingType: 'full_numbers',
                 processing: true,
                 language: {
@@ -279,60 +222,47 @@
                 ajax: {
                     url: '{{ route('admin.reports.petty_cash_expense_summary.petty_cash_summary_report') }}',
                     data: function (d) {
-                        d.petty_cash_account_head = $('select[name="search_acount_head"]').val();
-                        d.petty_cash_account_titles = $('select[name="search_acount_title"]').val();
+                        d.petty_account_switch = $('#petty_account_input').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
 
                     }
                 },
-                rowId: 'title_id',
                 order: [1, 'desc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'account_head', name: 'petty_cash_account_heads.name', class: 'align-middle account_head'},
-                    {data: 'account_title', name: 'petty_cash_account_titles.name', class: 'align-middle account_title'},
-                    {data: 'amount', name: 'petty_cash_statement_details.amount', class: 'align-middle amount'},
+                    {data: 'name', name: 'pca.name', class: 'align-middle account_head_or_title'},
+                    {data: 'amount', name: 'pcsd.amount', class: 'align-middle amount'}
                 ],
 
                 rowCallback: function(row, data, index) {
+
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    var api = this.api();
-                    var intVal = function ( i ) {
-
-                        return typeof i === 'string' ?
-                            i.replace(/[\$,]/g, '')*1 :
-                            typeof i === 'number' ?
-                                i : 0;
-
-                    };
-
-                    if (api.column(3).data().length){
-                        var totalAmount = api
-                            .column( 3, { page: 'current'} )
-                            .data()
-                            .reduce( function (startValue, endValue) {
-                                return intVal(startValue) + intVal(endValue);
-                            } ) }
-                    else{totalAmount = 0};
-
-                    $( api.column(3).footer() ).html(
-                        '$'+totalAmount,
-                        $('#statements_total_amount').text(totalAmount),
-
-                    );
                 },
+                drawCallback: function (settings) {
+                    total_amount = 0;
+                    var api = new $.fn.dataTable.Api( settings );
+                    var sum_data = api.rows().data();
+                    if(sum_data.length > 0){
+                        for(var i=0;i<sum_data.length; i++)
+                        {
+                            total_amount += parseFloat(sum_data[i].amount);
+                        }
+
+                    }
+                    else{
+                        total_amount = 0;
+                    }
+                    $('#statements_total_amount').text(total_amount);
+                },
+
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
-                        '</select>';
-                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -352,24 +282,12 @@
                     });
                     this.api().table().columns.adjust();
                 }
-
             });
-
-            $('#track_form #search_acount_title').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Account Title Name',
-                allowClear:true
-            });
-            $('#track_form #search_acount_head').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Account Head',
-                allowClear:true
-            });
-
 
             $('#track_form').bind('submit', function (e) {
                 e.preventDefault();
-                $('#statements_total_amount').text('0'),
-
-                    table.draw();
+                $('#statements_total_amount').text(0);
+                table.draw();
             });
 
         });

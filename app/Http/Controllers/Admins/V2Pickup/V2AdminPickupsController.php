@@ -1894,6 +1894,11 @@ class V2AdminPickupsController extends Controller
         if ($pickup_request_assigned_shipment->exists()) {
             $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
 
+            $shipment = Shipment::find($shipment_id);
+            if($shipment->warehouse_order_status == 10){
+                return false;
+            }
+
             $pickup_request = $pickup_request_assigned_shipment->pickup_request;
 
             $bookings = $pickup_request->booked - 1;
