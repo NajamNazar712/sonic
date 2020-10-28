@@ -106,13 +106,13 @@ class AdminUserRequestController extends Controller
                 $forwarded_by = '<button type="button" class="dropdown-item forward"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-arrow-circle-right"></i></div><div class="col-9 offset-1">Forward</div></button>';
                 $view_details = '<button type="button" class="dropdown-item details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-file-o"></i></div><div class="col-9 offset-1">View Details</div></button>';
 
-                if(session('role_id') == 1 || (session('department_id') == 2)) {
+                if(session('role_id') == 1 || ((session('department_id') == 2) && ($user->status == 0 || $user->status == 3 ))) {
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
 
-                    if ($user->status == 0) {
+                    if ((session('department_id') == 2 && $user->status == 0) || (session('role_id') == 1 && $user->status == 0)) {
                         $dropdown .= $verify;
                     }
                     if (session('role_id') == 1 && $user->status == 1) {

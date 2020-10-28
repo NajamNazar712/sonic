@@ -49,7 +49,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <label for="tarx_id" class="font-weight-bold">Password</label>
                                         <div class="form-group">
-                                            <input type="text" name="password" id="password" class="form-control" placeholder="Password*" data-rule-required="true" data-msg-required="Password is required" >
+                                            <input type="password" name="password" id="password" class="form-control" placeholder="Password*" data-rule-required="true" data-msg-required="Password is required" >
                                         </div>
                                     </div>
 
