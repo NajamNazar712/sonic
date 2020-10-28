@@ -1123,7 +1123,7 @@ class AdminReportsEmailController extends Controller
 
         $serial_overall = 0;
         $outstanding_shipments_array_overall['header'] = ['S. No.', 'Tracking Number', 'Consignee', 'Address', 'Destination', 'Hub', 'Account No.', 'Shipper', 'Service Type', 'Amount', 'Recovery Status', 'Current Status', 'Payment Status', 'Operation Status Date/Time', 'Verification Status Date/Time', 'Rider Name', 'Remarks', 'DNCC', 'SDN', 'Aging'];
-        $outstanding_shipments_array_overall[] = ['S. No.', 'Tracking Number', 'Consignee', 'Address', 'Destination', 'Hub', 'Account No.', 'Shipper', 'Service Type', 'Amount', 'Recovery Status', 'Current Status', 'Payment Status', 'Operation Status Date/Time', 'Verification Status Date/Time', 'Rider Name', 'Remarks', 'DNCC', 'SDN', 'Aging'];
+        $outstanding_shipments_array_overall[] = ['S. No.' => '', 'Tracking Number' => '', 'Consignee' => '', 'Address' => '', 'Destination' => '', 'Hub' => '', 'Account No.' => '', 'Shipper' => '', 'Service Type' => '', 'Amount' => '', 'Recovery Status' => '', 'Current Status' => '', 'Payment Status' => '', 'Operation Status Date/Time' => '', 'Verification Status Date/Time' => '', 'Rider Name' => '', 'Remarks' => '', 'DNCC' => '', 'SDN' => '', 'Aging' => ''];
 
         $hubs = City::where('hub', 1)->where('status', 1)->get();
         foreach ($hubs as $hub){
