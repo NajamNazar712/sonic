@@ -14,10 +14,10 @@ class UpdateCitiesForInternationlBitTable extends Migration
     public function up()
     {
         Schema::table('cities', function (Blueprint $table) {
-            $table->integer('international')->default(0);
+            $table->tinyInteger('business_category_id')->default(1);
         });
         Schema::table('zones', function (Blueprint $table) {
-            $table->integer('international')->default(0);
+            $table->tinyInteger('business_category_id')->default(1);
         });
     }
 
@@ -29,10 +29,10 @@ class UpdateCitiesForInternationlBitTable extends Migration
     public function down()
     {
         Schema::table('cities', function (Blueprint $table) {
-            $table->dropColumn('international');
+            $table->dropColumn('business_category_id');
         });
         Schema::table('zones', function (Blueprint $table) {
-            $table->dropColumn('international');
+            $table->dropColumn('business_category_id');
         });
     }
 }
