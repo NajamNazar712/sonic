@@ -7,21 +7,21 @@ use App\Http\Models\Admin\GlobalSettings;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class ReversePickupSummary extends Command
+class OverallVendorPickup extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'summary:reversepickup';
+    protected $signature = 'overall:vendorpickup';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Reverse Pickup Summary';
+    protected $description = 'Overall Vendors Pickup Shipments';
 
     /**
      * Create a new command instance.
@@ -51,10 +51,11 @@ class ReversePickupSummary extends Command
                 $cut_off_time = $settings->setting_value . ':00';
             }
             $start_date = Carbon::yesterday()->subDay(1)->format('Y-m-d');
+
             $start_date = $start_date . ' ' . $cut_off_time;
             $end_date = Carbon::yesterday()->format('Y-m-d');
             $end_date = $end_date . ' ' . $cut_off_time;
-            $response = AdminReportsEmailController::reverse_pickup_summary($start_date, $end_date);
+            $response = AdminReportsEmailController::overall_pickup_vendor_wise($start_date, $end_date);
         }
     }
 }
