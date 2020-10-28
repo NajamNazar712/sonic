@@ -264,11 +264,9 @@ class AdminUserRequestController extends Controller
             }
         }
         else {
-            AdminUserRequestHub::where('admin_user_request_id', $id)->delete();
+            AdminUserRequestHub::where('admin_user_requests_id', $id)->delete();
         }
-
             return redirect()->route('admin.user_management.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been verified!']);
-
     }
 
     public function user_email(Request $request) {
