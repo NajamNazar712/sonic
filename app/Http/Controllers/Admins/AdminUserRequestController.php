@@ -37,7 +37,7 @@ class AdminUserRequestController extends Controller
             ->leftjoin('admins as a','a.id','=','admin_user_requests.request_added_by')
             ->leftjoin('admins as as','as.id','=','admin_user_requests.verified_by_hr')
             ->leftjoin('admins as ac','ac.id','=','admin_user_requests.forwarded_by')
-        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status','admin_user_requests.forwarded_at as forwarded_at','ac.name as forwarded_by')->orderBy('admin_user_requests.created_at','desc');
+        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status','admin_user_requests.forwarded_at','ac.name as forwarded_by')->orderBy('admin_user_requests.created_at','desc');
 
             if(session('role_id') != 1 && session('department_id') != 2){
                 $users->whereIn('admin_user_requests.status',[0,1]);
@@ -48,60 +48,6 @@ class AdminUserRequestController extends Controller
         }
 
         $datatables = Datatables::of($users)
-            ->editColumn('verified_by_hr_at', function($user) {
-                if($user->verified_by_hr_at == null){
-                    return '-';
-                }
-                else{
-                    return $user->verified_by_hr_at;
-                }
-            })
-            ->editColumn('trax_id', function ($user) {
-                if($user->trax_id == null){
-                    return '-';
-                }
-                else{
-                    return $user->trax_id;
-                }
-            })
-            ->editColumn('verified_by_hr', function ($user) {
-                if($user->verified_by_hr == null){
-                    return '-';
-                }
-                else{
-                    return $user->verified_by_hr;
-                }
-            })
-            ->editColumn('request_created_at', function ($user) {
-                if($user->request_created_at == null){
-                    return '-';
-                }
-                else{
-                    return $user->request_created_at;
-                }
-            }) ->editColumn('forwarded_by', function ($user) {
-                if($user->forwarded_by == null){
-                    return '-';
-                }
-                else{
-                    return $user->forwarded_by;
-                }
-            }) ->editColumn('forwarded_at', function ($user) {
-                if($user->forwarded_at == null){
-                    return '-';
-                }
-                else{
-                    return $user->forwarded_at;
-                }
-            })
-            ->editColumn('admin', function ($user) {
-                if($user->admin == null){
-                    return '-';
-                }
-                else{
-                    return $user->admin;
-                }
-            })
             ->addColumn('requested_from_date', function($user){
                 if($user->request_created_at){
                     Carbon::setWeekendDays([
