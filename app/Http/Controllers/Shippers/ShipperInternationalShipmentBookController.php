@@ -145,8 +145,9 @@ class ShipperInternationalShipmentBookController extends Controller
         $payment_mode_id = $request->input('payment_mode');
         $try_and_buy_charges = NULL;
         $pieces_quantity = $request->pieces_quantity;
+        $business_category_id = 2;
 
-        $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection);
+        $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id);
         if(session('user_type') == 2){
             $substitute_user_shipment = new SubstituteUserShipment();
             $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -157,7 +158,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $international_shipment = new InternationalShipment();
         $international_shipment->shipment_id = $shipment_id;
         $international_shipment->save();
-        
+
         ShipperShipmentBookController::add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
         if(Session::has('prefix')){
             $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $request->order_id);
