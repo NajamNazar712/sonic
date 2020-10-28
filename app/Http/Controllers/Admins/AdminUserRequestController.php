@@ -23,6 +23,7 @@ class AdminUserRequestController extends Controller
         $this->middleware('Permission');
     }
     public function user_requests_index(){
+        //dd(session('role_id'));
         $hubs=City::select('id','name')->where('hub',1)->get();
         $departments = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
             ->join('admin_departments as ad','ad.id','=','ar.department_id')
@@ -133,13 +134,14 @@ class AdminUserRequestController extends Controller
                 else if($user->status == 3){
                     return 'Request Completed';
                 }
-            })->addColumn('verified_from_date', function($user){
+            })
+            ->addColumn('verified_from_date', function($user){
                 if($user->verified_by_hr_at){
                     Carbon::setWeekendDays([
                         Carbon::SUNDAY,
                     ]);
                     $verified_date = Carbon::parse($user->verified_by_hr_at);
-                    $forwarded_date = Carbon::parse($user->verified_by_hr_at);
+                    $forwarded_date = Carbon::parse($user->forwarded_at);
                     $days = $verified_date->diffInDays($forwarded_date);
                     if($days <= 0){
                         return '-';
@@ -158,21 +160,22 @@ class AdminUserRequestController extends Controller
                 $forwarded_by = '<button type="button" class="dropdown-item forward"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-arrow-circle-right"></i></div><div class="col-9 offset-1">Forward</div></button>';
                 $view_details = '<button type="button" class="dropdown-item details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-file-o"></i></div><div class="col-9 offset-1">View Details</div></button>';
 
-                if(session('role_id') == 1 || (session('department_id') == 2 && $user->status == 0)) {
+                if(session('role_id') == 1 || (session('department_id') == 2)) {
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
-                    if($user->status == 0){
+
+                    if ($user->status == 0) {
                         $dropdown .= $verify;
                     }
-                    if(session('role_id') == 1 && $user->status == 1) {
+                    if (session('role_id') == 1 && $user->status == 1) {
                         $dropdown .= $add_role;
                     }
-                    if(session('role_id') == 1 && $user->status == 2) {
+                    if (session('role_id') == 1 && $user->status == 2) {
                         $dropdown .= $forwarded_by;
                     }
-                    if((session('role_id') == 1  && $user->status == 3) || session('department_id') == 2 && $user->status == 3) {
+                    if ((session('role_id') == 1 && $user->status == 3) || session('department_id') == 2 && $user->status == 3) {
                         $dropdown .= $view_details;
                     }
                     return $dropdown;

@@ -137,7 +137,7 @@
                                     <th class="border-primary border-darken-1">Requested From Days (TAT)</th>
                                     <th class="border-primary border-darken-1">Forwarded By</th>
                                     <th class="border-primary border-darken-1">Forwarded At</th>
-                                    <th class="border-primary border-darken-1">(TAT)</th>
+                                    <th class="border-primary border-darken-1">Verified From Date(TAT)</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -212,7 +212,7 @@
                             head.push('Requested From Date (TAT)');
                             head.push('Forwarded By');
                             head.push('Forwarded At');
-                            head.push(' Verified From Forwarded (TAT)');
+                            head.push('Verified From Date (TAT)');
                             head.push('Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -232,7 +232,7 @@
                                 row.push(values.launched_to_date);
                                 row.push(values.forwarded_by);
                                 row.push(values.forwarded_at);
-                                row.push(values.forwarded_tat);
+                                row.push(values.verified_from_date);
                                 row.push(values.status);
 
                                 body.push(row);
