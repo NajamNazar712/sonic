@@ -2207,6 +2207,7 @@ class ShipperShipmentBookController extends Controller
                                 else{
                                     $row['prefix'] = NULL;
                                 }
+                                $row['business_category_id'] = 1;
 
                                 if ($user_id != 3324) {
                                     dispatch(new ProcessShipmentBookingDB($row));
@@ -3616,6 +3617,7 @@ class ShipperShipmentBookController extends Controller
                             else{
                                 $row['substitute_user_id'] = null;
                             }
+                            $row['business_category_id'] = 1;
                             if ($user_id != 3324) {
                                 dispatch(new ProcessShipmentBookingDB($row));
                             }

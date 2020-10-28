@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
 use App\http\Models\ShipmentOrderDate;
 use App\Http\Models\Shipper\User;
@@ -175,6 +176,12 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
         }
         else{
             $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+        }
+
+        if($this->booking['business_category_id'] == 2){
+            $international_shipment = new InternationalShipment();
+            $international_shipment->shipment_id = $shipment_id;
+            $international_shipment->save();
         }
 
         if($this->booking['order_date'] != null){
