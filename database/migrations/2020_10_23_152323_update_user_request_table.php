@@ -31,7 +31,11 @@ class UpdateUserRequestTable extends Migration
     public function down()
     {
         Schema::table('admin_user_requests', function (Blueprint $table) {
-           //
+           $table->dropColumn('forwarded_at');
+           $table->dropColumn('forwarded_by');
+            $table->string('email')->change();
+            $table->string('phone_number')->change();
+            $table->string('cnic')->change();
         });
     }
 }
