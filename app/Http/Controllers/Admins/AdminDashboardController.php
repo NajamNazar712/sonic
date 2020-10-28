@@ -8360,7 +8360,7 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRouteView(){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         return view('admin.management.add_route_form')->with('cities',$city);
     }
     public function addRouteDetails(Request $request){
@@ -8513,7 +8513,7 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRiderView(){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
     }
@@ -8571,7 +8571,7 @@ if(session('department_id') == 7){
 
     }
     public function editRiderView($id){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
