@@ -125,6 +125,7 @@
                 }
             } );
             var selected_rows = [];
+
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
@@ -132,9 +133,14 @@
                     className: 'btn btn-primary adjust',
                     enabled:false,
                     action: function (e, dt, node, config) {
+
                         $('input:hidden[name=statement_ids]').val(selected_rows);
 
-                        if(selected_rows !== ''){
+                        if(selected_rows.length === 0){
+                            table.button('.adjust').disable();
+                            return false;
+                        }
+                        else if(selected_rows !== ''){
                             swal({
                                 title: 'Are You Sure?',
                                 text: 'Select Yes to adjust bulk petty cash !',
@@ -178,6 +184,7 @@
                         }else{
                             var error = 'Statement ID Not Found, Please Try again!';
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            table.button('.adjust').disable();
                         }
                     }
                 },{
@@ -304,7 +311,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') ||  $(header).is('.action') ) {
+                        if ($(header).is('.serial_number') ||  $(header).is('.action') || $(header).is('.select-checkbox') ) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -333,6 +340,27 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.adjust').enable();
+                }
+                else {
+                    table.button('.adjust').disable();
+                }
+            });
+
             $('body').on('click','button.paid',function () {
                 var id = $(this).parents('tr').attr('id');
                 if(id){
