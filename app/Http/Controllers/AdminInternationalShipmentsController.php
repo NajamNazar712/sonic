@@ -13,6 +13,6 @@ class AdminInternationalShipmentsController extends Controller
     }
 
     public function index(){
-
+        
     }
 }
