@@ -173,10 +173,13 @@
                                         }
                                     }).done(function(data){
                                         if(data.status){
+                                            table.rows().deselect();
+                                            selected_rows = [];
+                                            table.button('.adjust').disable();
                                             table.draw(true);
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
                                         }
+
                                     });
                                 }
                             });
@@ -289,7 +292,7 @@
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-                    if (data.status != 'Adjusted') {
+                    if (data.status === 'Finance Approved') {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.id, selected_rows) !== -1) {
@@ -399,6 +402,7 @@
                                 if(data.status){
                                     table.draw(true);
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
 
                                 }
                             });
