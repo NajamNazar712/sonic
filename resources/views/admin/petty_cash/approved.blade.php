@@ -315,7 +315,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') ||  $(header).is('.action') || $(header).is('.select-checkbox') ) {
+                        if ($(header).is('.serial_number') ||  $(header).is('.action') || $(header).is('.select') ) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
