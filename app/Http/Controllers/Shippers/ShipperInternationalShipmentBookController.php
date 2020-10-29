@@ -337,7 +337,7 @@ class ShipperInternationalShipmentBookController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
         }
-        
+
         if (isset($spreadsheet)) {
             if (count($spreadsheet[0]) == 22){
                 $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'postal_code', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'amount', 19 => 'payment_mode_id', 20 => 'charges_mode_id', 21 => 'pieces_quantity'];

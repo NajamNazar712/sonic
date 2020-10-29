@@ -698,6 +698,7 @@ class AdminTrackingController extends Controller
 
                     $details['order_information']['instructions'] = $shipment->special_instructions;
                     $details['order_information']['pieces'] = $shipment->pieces;
+                    $details['order_information']['business_category'] = $shipment->business_category->name;
                     foreach ($shipment->shipment_journey as $journey) {
                         $journey_details = array();
 
