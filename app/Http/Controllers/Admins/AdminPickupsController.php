@@ -97,12 +97,13 @@ class AdminPickupsController extends Controller
                                           if($existing_shipment->booking_type_id == 3){
                                               $try_and_buy = TRUE;
                                           }
-                                          if(($vendor == FALSE) && ($existing_shipment->pickup_address->vendor != NULL)){
-                                              $vendor = TRUE;
-                                          }
                                           if($existing_shipment->booking_type_id == 5){
                                               $reverse_pickup = TRUE;
                                           }
+                                          if(($vendor == FALSE) && ($existing_shipment->pickup_address->vendor != NULL)){
+                                              $vendor = TRUE;
+                                          }
+
                                       }
                                   }
                               }
