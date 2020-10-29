@@ -2331,6 +2331,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit_info')->name('edit');
             Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
         });
+        Route::prefix('rates')->name('rates.')->group(function () {
+            Route::prefix('add')->name('add.')->group(function () {
+                Route::get('{id}','Admins\AdminInternationalRatesController@add_rates_index')->name('index');
+            });
+        });
     });
 });
 
