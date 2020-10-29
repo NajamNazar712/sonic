@@ -57,6 +57,7 @@
                                                     <td><input type="text" name="form[{{$no}}][consignee_name]" class="form-control text" value="{{$ro['consignee_name']}}" readonly="readonly"></td>
                                                     <td><textarea type="text" name="form[{{$no}}][consignee_address]" class="form-control text" readonly="readonly">{{$ro['consignee_address']}}</textarea></td>
                                                     <td><font color="red">{{$blacklist_errors[$key+2]['msg']}}</font><input type="text" name="form[{{$no}}][consignee_phone_number_1]" class="form-control phone" value="{{$ro['consignee_phone_number_1']}}" readonly="readonly"><span class="danger">High Return Ratio for Consignee</span></td>
+                                                    <input type="hidden" name="form[{{$no}}][postal_code]" value="{{$ro['postal_code']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_2]" value="{{$ro['consignee_phone_number_2']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
                                                     <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
@@ -77,6 +78,7 @@
                                                     <input type="hidden" name="form[{{$no}}][pickup_address_id]" value="{{$ro['pickup_address_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][information_display]" value="{{$ro['information_display']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_city_name]" value="{{$ro['consignee_city_name']}}">
+                                                    <input type="hidden" name="form[{{$no}}][postal_code]" value="{{$ro['postal_code']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_name]" value="{{$ro['consignee_name']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_address]" value="{{$ro['consignee_address']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_1]" value="{{$ro['consignee_phone_number_1']}}">

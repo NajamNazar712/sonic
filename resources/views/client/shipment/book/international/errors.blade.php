@@ -23,6 +23,7 @@
                                 <th>Pickup Address ID</th>
                                 <th>Show Information on Air Waybill (Optional)</th>
                                 <th>Consignee City Name</th>
+                                <th>Postal Code</th>
                                 <th>Consignee Name</th>
                                 <th>Consignee Address</th>
                                 <th>Consignee Phone Number 1 (03000000000)</th>
@@ -70,6 +71,11 @@
                                     <td>{!! Form::select('form[' . $no . '][consignee_city_name]',$cities ,null,['class' => 'form-control is-invalid consignee_city_name select2','id'=>'consignee_city_name','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['consignee_city_name']}}</font></td>
                                     @else
                                     <td>{!! Form::text('form[' . $no . '][consignee_city_name]', $ro['consignee_city_name'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['postal_code']))
+                                    <td>{!! Form::select('form[' . $no . '][postal_code]',$cities ,null,['class' => 'form-control is-invalid postal_code select2','id'=>'postal_code','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['postal_code']}}</font></td>
+                                    @else
+                                    <td>{!! Form::text('form[' . $no . '][postal_code]', $ro['postal_code'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['consignee_name']))
                                     <td>{!! Form::text('form[' . $no . '][consignee_name]', $ro['consignee_name'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['consignee_name']}}</font></td>

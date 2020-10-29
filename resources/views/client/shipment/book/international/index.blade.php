@@ -88,6 +88,9 @@
 
                                         </div>
 
+                                        <div class="form-group">
+                                            <input type="text" name="postal_code" class="form-control postal_code" placeholder="Postal Code*" data-rule-required="true" data-msg-required="Postal Code is required">
+                                        </div>
 
                                         @if($air_waybill != null)
                                             <div id="info_display" class="form-group text-center p-1 border border-light rounded">
@@ -863,6 +866,12 @@
                 'autoGroup': true,
                 'min': 1,
                 'max': 100000
+            });
+
+            $('.postal_code').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
             });
 
             $('.weight').inputmask({
