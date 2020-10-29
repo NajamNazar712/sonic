@@ -847,8 +847,7 @@
                 }
             });
 
-            $('.phone_number').inputmask(
-                "Regex", { regex: "[+|0][0-9]*"});
+            $('.phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
 
             $(this).find('.quantity').TouchSpin({
                 min: 1,

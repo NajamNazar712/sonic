@@ -88,7 +88,7 @@
                                     <td>{!! Form::textarea('form[' . $no . '][consignee_address]', $ro['consignee_address'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20, 'readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['consignee_phone_number_1']))
-                                    <td>{!! Form::text('form[' . $no . '][consignee_phone_number_1]', $ro['consignee_phone_number_1'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['consignee_phone_number_1']}}</font></td>
+                                    <td>{!! Form::text('form[' . $no . '][consignee_phone_number_1]', $ro['consignee_phone_number_1'],['class' => 'form-control is-invalid phone_number','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['consignee_phone_number_1']}}</font></td>
                                     @else
                                     <td>{!! Form::text('form[' . $no . '][consignee_phone_number_1]', $ro['consignee_phone_number_1'],['class' => 'form-control','style'=>'width:auto','readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -261,6 +261,7 @@
                 placeholder: 'Charges Mode'
             });
 
+            $('.phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
             var rowCount = $("#tbl td").closest("tr").length;
             if(rowCount == 1){
                 $('.cancel_shipment').addClass('d-none');
