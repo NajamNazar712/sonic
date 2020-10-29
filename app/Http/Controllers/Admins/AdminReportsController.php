@@ -6786,7 +6786,6 @@ use Yajra\Datatables\Datatables;
                $to = $request->get('search_date_to');
                $datatable->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
            }
-
             return $datatable->make(true);
         }
     }

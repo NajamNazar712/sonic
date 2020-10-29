@@ -193,13 +193,15 @@
             var search_date_to = $('#track_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_to').pickadate('picker').get('select'));
+                        $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_from').pickadate('picker').get('select'));
                     }
                 }
             });
