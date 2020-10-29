@@ -28,10 +28,10 @@
 
         </div>
     </div>
-    <div class="row mb-2" id="hub_list_div" >
+    <div class="row mb-2" id="international_hub_list_div" >
         <div class="col-6">
             <fieldset class="form-group">
-                <select name="hubs" id="hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                <select name="hubs" id="international_hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
 
                     @foreach($hubs as $hub)
                         <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
@@ -41,10 +41,10 @@
         </div>
     </div>
 
-    <div class="row mb-2 d-none" id="zone_selection">
+    <div class="row mb-2 d-none" id="international_zone_selection">
         <div class="col-6">
             <fieldset class="form-group">
-                <select name="zone_id" id="zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                <select name="zone_id" id="international_zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
                     @foreach($zones as $zone)
                         <option value="{{ $zone->id }}">{{ $zone->name }}</option>
                     @endforeach
@@ -88,13 +88,13 @@
             increaseArea: '20%' // optional
         });
 
-        $('#hub_list').prepend('<option value="" selected></option>').select2({
+        $('#international_hub_list').prepend('<option value="" selected></option>').select2({
             placeholder: 'Select Hub',
             dropdownParent: $("#addInternationalCity")
         });
 
 
-        $('#zone').prepend('<option value="" selected></option>').select2({
+        $('#international_zone').prepend('<option value="" selected></option>').select2({
             placeholder: 'Zone',
             dropdownParent: $("#addInternationalCity"),
             width:'100%'
@@ -104,21 +104,21 @@
             var rtype = $(this).attr('rel');
             if(rtype == 'city'){
                 $('#city_type').val('city');
-                if($('#hub_list_div').is(':hidden')){
-                    // $('#hub_list_div').css('display','block');
-                    $('#hub_list_div').fadeIn("slow");
+                if($('#international_hub_list_div').is(':hidden')){
+                    // $('#international_hub_list_div').css('display','block');
+                    $('#international_hub_list_div').fadeIn("slow");
 
-                    $('#zone_selection').addClass('d-none');
+                    $('#international_zone_selection').addClass('d-none');
                     $('#country_name_div').addClass('d-none');
                     $('#city_name_div').removeClass('d-none');
                 }
             }else if(rtype == 'hub'){
                 $('#city_type').val('hub');
 
-                if(!$('#hub_list_div').is(':hidden')){
-                    $('#hub_list_div').fadeOut("slow");
+                if(!$('#international_hub_list_div').is(':hidden')){
+                    $('#international_hub_list_div').fadeOut("slow");
 
-                    $('#zone_selection').removeClass('d-none');
+                    $('#international_zone_selection').removeClass('d-none');
                     $('#country_name_div').removeClass('d-none');
                     $('#city_name_div').addClass('d-none');
                 }

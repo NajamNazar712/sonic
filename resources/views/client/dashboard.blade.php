@@ -52,6 +52,7 @@
                                         <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S No.</th>
                                         <th class="border-primary border-darken-1">Tracking No.</th>
+                                        <th class="border-primary border-darken-1">Business Category</th>
                                         <th class="border-primary border-darken-1">Order ID</th>
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">Booked By</th>
@@ -794,7 +795,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[16, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {
                         data: 'id',
@@ -817,6 +818,7 @@
                         }
                     },
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
                     {data: 'booked_by', name: 'shipments.booked_by', class: 'align-middle booked_by'},
@@ -872,6 +874,7 @@
                     var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+                    var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
                     var user_select = '<select name="user_select" id="user_select" class="select2 form-control">' +
                         '<option value="1">Main User</option>' +
                         '<option value="2">Substitute User</option>' +
@@ -891,6 +894,11 @@
                                 }).wrap(td);
                         } else if ($(header).is('.payment_status')) {
                             $(payment_select).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }  else if ($(header).is('.business_category')) {
+                            $(business_category).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -992,11 +1000,23 @@
 
                         return obj;
                     });
-
                     $("#payment_select").prepend('<option value="" selected></option>').select2({
                         data: data4,
                         placeholder: "Select Payment",
                         width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data5 = $.map({!! $business_categories !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+                    $("#business_category").prepend('<option value="" selected></option>').select2({
+                        data: data5,
+                        placeholder: "Select Business Category",
+                        width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });

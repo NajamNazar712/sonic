@@ -182,6 +182,7 @@ class ProcessShipmentBookingDB implements ShouldQueue
         if($this->booking['business_category_id'] == 2){
             $international_shipment = new InternationalShipment();
             $international_shipment->shipment_id = $shipment_id;
+            $international_shipment->postal_code = $this->booking['postal_code'];
             $international_shipment->save();
         }
 

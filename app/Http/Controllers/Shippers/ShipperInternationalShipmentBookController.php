@@ -56,8 +56,8 @@ class ShipperInternationalShipmentBookController extends Controller
         else{
             $air_waybill = null;
         }
-
-        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill]);
+        $countries = City::where('hub', 1)->where('status', 1)->where('business_category_id', 2)->select(['id', 'name'])->get();
+        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'countries' => $countries]);
     }
 
     public function store(Request $request) {
@@ -157,6 +157,7 @@ class ShipperInternationalShipmentBookController extends Controller
 
         $international_shipment = new InternationalShipment();
         $international_shipment->shipment_id = $shipment_id;
+        $international_shipment->postal_code = $request->input('postal_code');
         $international_shipment->save();
 
         ShipperShipmentBookController::add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
@@ -253,6 +254,7 @@ class ShipperInternationalShipmentBookController extends Controller
             'pickup_address_id' => 'Pickup Address ID',
             'information_display' => 'Information Display',
             'consignee_city_name' => 'Consignee City Name',
+            'postal_code' => 'Postal Code',
             'consignee_name' => 'Consignee Name',
             'consignee_address' => 'Consignee Address',
             'consignee_phone_number_1' => 'Consignee Phone Number 1',
@@ -293,10 +295,10 @@ class ShipperInternationalShipmentBookController extends Controller
 
             'consignee_city_name.exists' => 'Given :attribute is of Invalid Name.',
 
-            'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+            'phone_number.regex' => ':attribute format is Invalid.',
 
-            'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
-            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+            'consignee_phone_number_1.regex' => ':attribute format is Invalid',
+            'consignee_phone_number_2.regex' => ':attribute format is Invalid'
         ];
 
         $rules = [
@@ -305,10 +307,11 @@ class ShipperInternationalShipmentBookController extends Controller
             })->where('hidden', 0)],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 2)->where('hub',0)],
+            'postal_code' => ['required', 'between:1,10'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
-            'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
+            'consignee_phone_number_1' => ['required', 'regex:/^[+|0][0-9]/'],
+            'consignee_phone_number_2' => ['nullable', 'regex:/^[+|0][0-9]/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],
@@ -335,9 +338,10 @@ class ShipperInternationalShipmentBookController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
         }
+
         if (isset($spreadsheet)) {
             if (count($spreadsheet[0]) == 22){
-                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'self_collection', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'amount', 19 => 'payment_mode_id', 20 => 'charges_mode_id', 21 => 'pieces_quantity'];
+                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'postal_code', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'amount', 19 => 'payment_mode_id', 20 => 'charges_mode_id', 21 => 'pieces_quantity'];
             }
             else{
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');

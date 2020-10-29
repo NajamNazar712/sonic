@@ -23,10 +23,11 @@
                                 <th>Pickup Address ID</th>
                                 <th>Show Information on Air Waybill (Optional)</th>
                                 <th>Consignee City Name</th>
+                                <th>Postal Code</th>
                                 <th>Consignee Name</th>
                                 <th>Consignee Address</th>
-                                <th>Consignee Phone Number 1 (03000000000)</th>
-                                <th>Consignee Phone Number 2 (03000000000)</th>
+                                <th>Consignee Phone Number 1</th>
+                                <th>Consignee Phone Number 2</th>
                                 <th>Consignee Email Address</th>
                                 <th>Self Collection</th>
                                 <th>Order ID</th>
@@ -71,6 +72,11 @@
                                     @else
                                     <td>{!! Form::text('form[' . $no . '][consignee_city_name]', $ro['consignee_city_name'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                 @endif
+                                @if(isset($errors[$no]['postal_code']))
+                                    <td>{!! Form::text('form[' . $no . '][postal_code]', $ro['postal_code'],['class' => 'form-control is-invalid postal_code','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['postal_code']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][postal_code]', $ro['postal_code'],['class' => 'form-control','style'=>'width:auto','readonly' => 'readonly']) !!}</td>
+                                @endif
                                 @if(isset($errors[$no]['consignee_name']))
                                     <td>{!! Form::text('form[' . $no . '][consignee_name]', $ro['consignee_name'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['consignee_name']}}</font></td>
                                     @else
@@ -82,7 +88,7 @@
                                     <td>{!! Form::textarea('form[' . $no . '][consignee_address]', $ro['consignee_address'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20, 'readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['consignee_phone_number_1']))
-                                    <td>{!! Form::text('form[' . $no . '][consignee_phone_number_1]', $ro['consignee_phone_number_1'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['consignee_phone_number_1']}}</font></td>
+                                    <td>{!! Form::text('form[' . $no . '][consignee_phone_number_1]', $ro['consignee_phone_number_1'],['class' => 'form-control is-invalid phone_number','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['consignee_phone_number_1']}}</font></td>
                                     @else
                                     <td>{!! Form::text('form[' . $no . '][consignee_phone_number_1]', $ro['consignee_phone_number_1'],['class' => 'form-control','style'=>'width:auto','readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -255,6 +261,13 @@
                 placeholder: 'Charges Mode'
             });
 
+            $('.phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
+
+            $('.postal_code').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             var rowCount = $("#tbl td").closest("tr").length;
             if(rowCount == 1){
                 $('.cancel_shipment').addClass('d-none');

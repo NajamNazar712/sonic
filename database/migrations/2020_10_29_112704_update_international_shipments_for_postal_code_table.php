@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateInternationalShipmentsForPostalCode extends Migration
+class UpdateInternationalShipmentsForPostalCodeTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class UpdateInternationalShipmentsForPostalCode extends Migration
     public function up()
     {
         Schema::table('international_shipments', function (Blueprint $table) {
-            $table->string('postal_code')->nullable();
+            $table->bigInteger('postal_code');
         });
     }
 
