@@ -30,7 +30,7 @@
                                             <th>Consignee City Name</th>
                                             <th>Consignee Name</th>
                                             <th>Consignee Address</th>
-                                            <th>Consignee Phone Number 1 (03000000000)</th>
+                                            <th>Consignee Phone Number 1</th>
                                             <th>Order ID</th>
                                             <th>Order Date (YYYY-MM-DD)</th>
                                             <th>Item Product Type ID</th>

@@ -26,8 +26,8 @@
                                 <th>Postal Code</th>
                                 <th>Consignee Name</th>
                                 <th>Consignee Address</th>
-                                <th>Consignee Phone Number 1 (03000000000)</th>
-                                <th>Consignee Phone Number 2 (03000000000)</th>
+                                <th>Consignee Phone Number 1</th>
+                                <th>Consignee Phone Number 2</th>
                                 <th>Consignee Email Address</th>
                                 <th>Self Collection</th>
                                 <th>Order ID</th>
