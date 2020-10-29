@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1">Hub Name</th>
                                     <th class="border-primary border-darken-1">Hub Code</th>
                                     <th class="border-primary border-darken-1">Zone</th>
+                                    <th class="border-primary border-darken-1">Businees Category</th>
                                     <th class="border-primary border-darken-1">GC Area</th>
                                     <th class="border-primary border-darken-1">Attempt Tat</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -86,6 +87,7 @@
                             head.push('Hub Name');
                             head.push('Hub Code');
                             head.push('Zone');
+                            head.push('Business Category');
                             head.push('GC Area');
                             head.push('Attempt Tat');
                             head.push('Status');
@@ -103,6 +105,7 @@
                                 row.push(values.hub);
                                 row.push(values.hub_id);
                                 row.push(values.zone);
+                                row.push(values.business_category);
                                 row.push(values.gc_area);
                                 row.push(values.attempt_tat);
                                 row.push(values.status);
@@ -188,6 +191,7 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
+                    {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
                     {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},
                     {data: 'attempt_tat', name: 'cities.attempt_tat', class: 'align-middle attempt_tat'},
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},
@@ -217,6 +221,7 @@
                        '<option value="0">No</option>' +
                        '<option value="1">Yes</option>' +
                        '</select>';
+                   var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
                    this.api().columns().every(function(column_id) {
                        var column = this;
                        var header = column.header();
@@ -233,6 +238,11 @@
                                .on( 'change', function () {
                                    column.search($(this).val(), false, false, true).draw();
                                } ).wrap(td);
+                       }else if($(header).is('.business_category')){
+                           $(business_category).appendTo($(search))
+                               .on( 'change', function () {
+                                   column.search($(this).val(), false, false, true).draw();
+                               }).wrap(td);
                        }
                        else {
                            var current = $(input).appendTo($(search)).on('change', function() {
@@ -252,6 +262,19 @@
                    });
                    $("#gc_area_select").prepend('<option value="" selected></option>').select2({
                        placeholder: "Select GC Area",
+                       width:'100%',
+                       containerCssClass: 'select-xs',
+                       dropdownCssClass: 'form-control-sm p-0'
+                   });
+                   var data = $.map({!! $business_categories !!}, function (obj) {
+                       obj.id = obj.id;
+                       obj.text = obj.name;
+
+                       return obj;
+                   });
+                   $("#business_category").prepend('<option value="" selected></option>').select2({
+                       data: data,
+                       placeholder: "Select Business Category",
                        width:'100%',
                        containerCssClass: 'select-xs',
                        dropdownCssClass: 'form-control-sm p-0'

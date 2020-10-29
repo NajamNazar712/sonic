@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\BusinessCategory;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
@@ -25,11 +26,13 @@ class AdminZonalManagementController extends Controller
     }
 
     public function index() {
-        return view('admin.management.zonal.index');
+        $business_categories = BusinessCategory::all();
+        return view('admin.management.zonal.index')->with(['business_categories' => $business_categories]);
     }
 
     public function list(Request $request) {
-        $zones = Zone::select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst', 'zones.status', 'zones.business_category_id');
+        $zones = Zone::leftjoin('business_categories as bc', 'bc.id', '=', 'zones.business_category_id')
+            ->select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst', 'zones.status', 'zones.business_category_id', 'bc.name as business_category');
 
         $datatables = Datatables::of($zones)
             ->editColumn('status', function ($zone) {
