@@ -651,6 +651,9 @@
                     @if (session('role_id') == 1 || in_array(389, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.trax_directory.index') }}">Trax Directory</a></li>
                     @endif
+                    @if (session('role_id') == 1 || in_array(398, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.international.tracking_upload.index') }}">International Tracking Upload</a></li>
+                    @endif
                 </ul>
             </li>
 

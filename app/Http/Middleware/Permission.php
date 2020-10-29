@@ -784,6 +784,9 @@ class Permission
             'open_parcel_history.list' => 392,
             'open_parcel_history.submit' => 392,
             'open_parcel_history.info' => 392,
+
+            'international.tracking_upload.index' => 398,
+            'international.tracking_upload.list' => 398
         ],
 
         'shipper' => [
