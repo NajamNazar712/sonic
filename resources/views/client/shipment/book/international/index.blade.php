@@ -573,7 +573,7 @@
                 $('#consignee_city option').remove();
                 $('#consignee_city').prepend('<option value="" selected="selected"></option>');
                 $.each(consignee_cities, function(index, consignee_city) {
-                    if(consignee_city.hub_id === id){
+                    if(consignee_city.hub_id == id){
                         $('#consignee_city').append('<option value="' + consignee_city.id + '">' + consignee_city.name + '</option>');
                     }
                 });
