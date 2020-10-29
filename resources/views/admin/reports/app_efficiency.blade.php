@@ -51,7 +51,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Address</th>
-                       {{-- <th class="border-primary border-darken-1">Status</th>--}}
+                        <th class="border-primary border-darken-1">Status</th>
                     </tr>
                     </thead>
                 </table>
@@ -165,6 +165,7 @@
                                 row.push(values.shipper_name);
                                 row.push(values.vendor);
                                 row.push(values.address);
+                                row.push(values.status);
                                 body.push(row);
                             });
                         },
@@ -241,6 +242,7 @@
                     {data: 'shipper_name', name: 'u.name', class: 'text_center align-middle shipper_name'},
                     {data: 'vendor', name: 'usi.vendor', class: 'text_center align-middle vendor'},
                     {data: 'address', name: 'usi.pickup_address', class: 'text_center align-middle address'},
+                    {data: 'status', name: 'vprs.id', class: 'text_center align-middle status'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -251,16 +253,26 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
+
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="1">Requested</option>' +
+                        '<option value="2">Picked</option>' +
+                        '<option value="3">Not Picked</option>' +
+                        '<option value="4">Cancelled</option>' +
                         '</select>';
-                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.action') || $(header).is('.serial_number')) {
                             $(td).appendTo($(search));
+                        }
+                        else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -271,6 +283,12 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
