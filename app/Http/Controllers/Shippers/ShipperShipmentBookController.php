@@ -116,7 +116,7 @@ class ShipperShipmentBookController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id) {
 
 
         $shipment = new Shipment();
@@ -153,6 +153,7 @@ class ShipperShipmentBookController extends Controller
         $shipment->try_and_buy_fees = $try_and_buy_charges;
         $shipment->booked_by = session('user_type');
         $shipment->pieces = $pieces;
+        $shipment->business_category_id = $business_category_id;
 
         $shipment->save();
 
@@ -536,8 +537,9 @@ class ShipperShipmentBookController extends Controller
                     if($service_type_id == 1){
                         $pieces_quantity = $request->pieces_quantity;
                     }
+                    $business_category_id = 1;
 
-                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection);
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id);
                     if(session('user_type') == 2){
                         $substitute_user_shipment = new SubstituteUserShipment();
                         $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -2207,6 +2209,7 @@ class ShipperShipmentBookController extends Controller
                                 else{
                                     $row['prefix'] = NULL;
                                 }
+                                $row['business_category_id'] = 1;
 
                                 if ($user_id != 3324) {
                                     dispatch(new ProcessShipmentBookingDB($row));
@@ -3616,6 +3619,7 @@ class ShipperShipmentBookController extends Controller
                             else{
                                 $row['substitute_user_id'] = null;
                             }
+                            $row['business_category_id'] = 1;
                             if ($user_id != 3324) {
                                 dispatch(new ProcessShipmentBookingDB($row));
                             }

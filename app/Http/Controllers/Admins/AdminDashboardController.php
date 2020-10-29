@@ -14,6 +14,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\AverageShipmentCycle;
+use App\Http\Models\BusinessCategory;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CityHistory;
@@ -7891,7 +7892,8 @@ if(session('department_id') == 7){
 //        return $uri_tail;
 //        $hubs = City::where('hub',1)->get();
 //        return $hubs[0]->id;
-        return view('admin.management.city_management');
+        $business_categories = BusinessCategory::all();
+        return view('admin.management.city_management')->with(['business_categories' => $business_categories]);
     }
     public function cityListAjax(){
         $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
@@ -7901,8 +7903,9 @@ if(session('department_id') == 7){
                         DB::raw('(select max(created_at) from city_histories where city_histories.city_id = cities.id)'));
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
+            ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7975,8 +7978,8 @@ if(session('department_id') == 7){
     }
 
     public function getCityForm(){
-        $hubs = City::where('hub',1)->where('status',1)->get();
-        $zones = Zone::all();
+        $hubs = City::where('hub',1)->where('business_categor_id', 1)->where('status',1)->get();
+        $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id','!=',4)->get();
         return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking]);
@@ -7998,8 +8001,8 @@ if(session('department_id') == 7){
         }
 
 
-        $hubs = City::where('hub',1)->where('status',1)->get();
-        $zones = Zone::all();
+        $hubs = City::where('hub',1)->where('business_categor_id', 1)->where('status',1)->get();
+        $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id','!=',4)->get();
         $walk_in_city = WalkInCities::where('city_id',$city['id'])->get();
@@ -8360,7 +8363,7 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRouteView(){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         return view('admin.management.add_route_form')->with('cities',$city);
     }
     public function addRouteDetails(Request $request){
@@ -8513,7 +8516,7 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRiderView(){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
     }
@@ -8571,7 +8574,7 @@ if(session('department_id') == 7){
 
     }
     public function editRiderView($id){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();

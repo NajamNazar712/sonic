@@ -2235,7 +2235,7 @@ class AdminPickupsController extends Controller
             $city[] = City::find($city_filter)->id;
             $all_cities[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('pickup', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('pickup', 1)->pluck('id')->toArray();
             $all_cities = City::where('status',1)->pluck('id')->toArray();
         }
         $data = array();
@@ -2402,7 +2402,7 @@ class AdminPickupsController extends Controller
         if($city_filter){
             $city[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('pickup', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('pickup', 1)->pluck('id')->toArray();
         }
 
         $shipments = DB::connection('reports')->table('shipments')->join('user_shipping_infos AS usib', 'shipments.pickup_address_id', '=', 'usib.id')
@@ -2422,7 +2422,7 @@ class AdminPickupsController extends Controller
         if($city_filter){
             $city[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('pickup', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('pickup', 1)->pluck('id')->toArray();
         }
         $shipments = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
                             $query->from('user_shipping_infos')
@@ -2450,7 +2450,7 @@ class AdminPickupsController extends Controller
         if($city_filter){
             $city[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('status', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('status', 1)->pluck('id')->toArray();
         }
         $shipments = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($from, $to) {
                            $query->from('shipments_journey')
@@ -2470,7 +2470,7 @@ class AdminPickupsController extends Controller
         if($city_filter){
             $city[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('status', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('status', 1)->pluck('id')->toArray();
         }
         $shipments = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($from, $to) {
                            $query->from('shipments_journey')
