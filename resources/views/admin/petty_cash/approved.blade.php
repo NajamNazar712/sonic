@@ -173,10 +173,13 @@
                                         }
                                     }).done(function(data){
                                         if(data.status){
+                                            table.rows().deselect();
+                                            selected_rows = [];
+                                            table.button('.adjust').disable();
                                             table.draw(true);
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
                                         }
+
                                     });
                                 }
                             });
@@ -264,7 +267,7 @@
                 rowId: 'statement_id',
                 order: [2, 'desc'],
                 columns: [
-                    {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
@@ -285,16 +288,17 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                   /* var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);*/
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }
 
+                    if (data.status === 'Finance Approved') {
+                        $('td:eq(0)', row).addClass('select-checkbox');
+
+                        if ($.inArray(data.id, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
+                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -311,7 +315,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') ||  $(header).is('.action') || $(header).is('.select-checkbox') ) {
+                        if ($(header).is('.serial_number') ||  $(header).is('.action') || $(header).is('.select') ) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -398,6 +402,7 @@
                                 if(data.status){
                                     table.draw(true);
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
 
                                 }
                             });
