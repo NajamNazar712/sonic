@@ -126,6 +126,10 @@
                                         </div>
 
                                         <div class="form-group">
+                                            <input type="text" name="postal_code" class="form-control postal_code" placeholder="Postal Code*" data-rule-required="true" data-msg-required="Postal Code is required" data-rule-maxlength="10" data-msg-maxlength="Postal Code can be maximum 10 digits">
+                                        </div>
+
+                                        <div class="form-group">
                                             <input type="text" name="consignee_name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-maxlength="100" data-msg-maxlength="Name can be maximum 100 characters">
                                         </div>
 
