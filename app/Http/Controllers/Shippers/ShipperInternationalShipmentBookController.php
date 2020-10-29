@@ -44,7 +44,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->get();
+        $consignee_cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->groupBy('hub_iZZZd')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
@@ -56,8 +56,8 @@ class ShipperInternationalShipmentBookController extends Controller
         else{
             $air_waybill = null;
         }
-
-        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill]);
+        $countries = City::where('hub', 1)->where('business_category_id', 2)->select(['id', 'name'])->get();
+        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'countries' => $countries]);
     }
 
     public function store(Request $request) {
@@ -297,8 +297,8 @@ class ShipperInternationalShipmentBookController extends Controller
 
             'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
-            'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
-            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+            'consignee_phone_number_1.regex' => ':attribute format is Invalid',
+            'consignee_phone_number_2.regex' => ':attribute format is Invalid'
         ];
 
         $rules = [
@@ -309,8 +309,8 @@ class ShipperInternationalShipmentBookController extends Controller
             'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 2)->where('hub',0)],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
-            'consignee_phone_number_1' => ['required'],
-            'consignee_phone_number_2' => ['nullable'],
+            'consignee_phone_number_1' => ['required', 'regex:/^[+|0][0-9]$/'],
+            'consignee_phone_number_2' => ['nullable', 'regex:/^[+|0][0-9]$/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],

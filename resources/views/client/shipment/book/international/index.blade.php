@@ -88,10 +88,6 @@
 
                                         </div>
 
-                                        <div class="form-group">
-                                            <input type="text" name="postal_code" class="form-control postal_code" placeholder="Postal Code*" data-rule-required="true" data-msg-required="Postal Code is required">
-                                        </div>
-
                                         @if($air_waybill != null)
                                             <div id="info_display" class="form-group text-center p-1 border border-light rounded">
                                                 <label class="d-block">Show Information on Air Waybill</label>
@@ -118,10 +114,14 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
-                                                @foreach($consignee_cities as $city)
-                                                    <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                            <select name="country" class="select2" id="country" data-rule-required="true" data-msg-required="City is required">
+                                                @foreach($countries as $country)
+                                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
                                                 @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
                                             </select>
                                         </div>
 
@@ -143,13 +143,6 @@
 
                                         <div class="form-group">
                                             <input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
-                                        </div>
-
-
-
-                                        <div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
-                                            <label class="d-block">Self Collection</label>
-                                            <input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
                                         </div>
                                     </div>
 
@@ -362,7 +355,8 @@
     <script>
 
         $(document).ready(function() {
-
+            var consignee_cities = @json($consignee_cities);
+            console.log(consignee_cities);
             var order_date = $('#order_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -565,6 +559,20 @@
                 placeholder: 'City*'
             }).bind('change', function() {
                 $(this).valid();
+            });
+            $('#country').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Country*'
+            }).bind('change', function() {
+                $(this).valid();
+                var id = parseInt($(this).val());
+                $('#consignee_city option').remove();
+                $('#consignee_city').prepend('<option value="" selected="selected"></option>');
+                $.each(consignee_cities, function(index, consignee_city) {
+                    if(consignee_city.hub_id === id){
+                        $('#consignee_city').append('<option value="' + consignee_city.id + '">' + consignee_city.name + '</option>');
+                    }
+                });
             });
             $('#product_type').select2({
                 width: '100%',
@@ -834,12 +842,9 @@
                     }
                 }
             });
-            
-            $('.phone_number').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
+
+            $('.phone_number').inputmask(
+                "Regex", { regex: "[+|0][0-9]*"});
 
             $(this).find('.quantity').TouchSpin({
                 min: 1,
