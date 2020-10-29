@@ -7978,7 +7978,7 @@ if(session('department_id') == 7){
     }
 
     public function getCityForm(){
-        $hubs = City::where('hub',1)->where('business_categor_id', 1)->where('status',1)->get();
+        $hubs = City::where('hub',1)->where('business_category_id', 1)->where('status',1)->get();
         $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id','!=',4)->get();
@@ -8001,7 +8001,7 @@ if(session('department_id') == 7){
         }
 
 
-        $hubs = City::where('hub',1)->where('business_categor_id', 1)->where('status',1)->get();
+        $hubs = City::where('hub',1)->where('business_category_id', 1)->where('status',1)->get();
         $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id','!=',4)->get();
