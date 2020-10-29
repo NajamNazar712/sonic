@@ -628,7 +628,8 @@ class AdminPackagingMaterialController extends Controller
             $order_process->save();
 
             PackagingMaterialRequest::where('id', $request_details->id)->update([
-                'tracking_number' => $new_tracking_number
+                'tracking_number' => $new_tracking_number,
+                'shipment_id' => $shipment->id
             ]);
 
 
