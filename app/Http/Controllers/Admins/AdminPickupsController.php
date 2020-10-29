@@ -70,6 +70,7 @@ class AdminPickupsController extends Controller
                   $try_and_buy = FALSE;
                   $vendor = FALSE;
                   $allow = FALSE;
+                  $reverse_pickup = FALSE;
                   if ($pickup_request->exists()) {
                       $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
                       if(!V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->exists()){
@@ -99,6 +100,9 @@ class AdminPickupsController extends Controller
                                           if(($vendor == FALSE) && ($existing_shipment->pickup_address->vendor != NULL)){
                                               $vendor = TRUE;
                                           }
+                                          if($existing_shipment->booking_type_id == 5){
+                                              $reverse_pickup = TRUE;
+                                          }
                                       }
                                   }
                               }
@@ -124,6 +128,9 @@ class AdminPickupsController extends Controller
                       }
                       if($vendor){
                           $pickup_request->vendor = 1;
+                      }
+                      if($reverse_pickup){
+                          $pickup_request->reverse_pickup = 1;
                       }
                       $pickup_request->save();
 
