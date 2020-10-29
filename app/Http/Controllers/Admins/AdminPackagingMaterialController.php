@@ -1005,7 +1005,6 @@ class AdminPackagingMaterialController extends Controller
 
         $shipment->amount = $amount;
         $shipment->payment_mode_id = $payment_mode_id;
-        $shipment->charges_mode_id = 1;
         $shipment->shipper_status_id = $shipper_status_id;
         $shipment->consignee_status_id = $consignee_status_id;
 
