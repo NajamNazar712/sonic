@@ -826,9 +826,13 @@
                         @if (session('role_id') == 1 || in_array(345, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.daily_monthly_adjustment.index') }}">Daily/Month Adjustment Report</a></li>
                         @endif
-                            @if (session('role_id') == 1 || in_array(395, session('permissions')))
-                                <li><a class="menu-item" href="{{ route('admin.reports.petty_cash_expense_summary.index') }}">Petty Cash Expense Summary Report</a></li>
-                            @endif
+                        @if (session('role_id') == 1 || in_array(395, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.petty_cash_expense_summary.index') }}">Petty Cash Expense Summary Report</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(397, session('permissions')))
+                          <li><a class="menu-item" href="{{ route('admin.reports.app_efficiency.index') }}">App Efficiency Report</a></li>
+                        @endif
+
                     </ul>
                 </li>
             @endif
