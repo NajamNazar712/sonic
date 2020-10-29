@@ -16,6 +16,8 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\StationRecoveryReportDeposit;
 use App\Http\Models\Shipment;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\V2Pickup\V2RiderPickupShipment;
 use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
@@ -6761,6 +6763,30 @@ use Yajra\Datatables\Datatables;
                     $to = $request->get('search_date_to');
                     $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from,$to]);
                 }
+            return $datatable->make(true);
+        }
+
+        public function app_efficiency_index(){
+            return view('admin.reports.app_efficiency');
+        }
+        public function app_efficiency_list(Request $request){
+
+           $v2_rider_pickups = V2RiderPickup::join('v2_pickup_requests as vpr','vpr.id', '=' ,'v2_rider_pickups.pickup_request_id')
+               ->join('riders as r','r.id','=','vpr.current_rider_id')
+               ->join('user_shipping_infos as usi','usi.id','=','vpr.pickup_address_id')
+               ->join('users as u','u.id','=','usi.user_id')
+               ->join('cities as c','c.id','=','vpr.city_id')
+               ->join('cities as ci','c.id','=','ci.hub_id')
+               ->join('v2_pickup_request_statuses as vprs','vprs.id','=','vpr.status_id')
+               ->select('v2_rider_pickups.pickup_request_id as request_id','v2_rider_pickups.pickup_note_id as note_id','u.name as shipper_name','r.name as rider','usi.vendor as vendor','usi.pickup_address as address','c.name as city','ci.name as hub','v2_rider_pickups.created_at','vprs.name as status');
+
+           $datatable = Datatables::of($v2_rider_pickups);
+           if($request->get('search_date_from') && $request->get('search_date_to')){
+               $from = $request->get('search_date_from');
+               $to = $request->get('search_date_to');
+               $datatable->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
+           }
+
             return $datatable->make(true);
         }
     }
