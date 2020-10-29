@@ -56,7 +56,7 @@ class ShipperInternationalShipmentBookController extends Controller
         else{
             $air_waybill = null;
         }
-        $countries = City::where('hub', 1)->where('business_category_id', 2)->select(['id', 'name'])->get();
+        $countries = City::where('hub', 1)->where('status', 1)->where('business_category_id', 2)->select(['id', 'name'])->get();
         return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'countries' => $countries]);
     }
 
