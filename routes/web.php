@@ -2321,5 +2321,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 	Route::prefix('trax_directory')->name('trax_directory.')->group(function () {
         Route::get('', 'Admins\AdminTraxDirectory@index')->name('index');
         Route::get('list', 'Admins\AdminTraxDirectory@list')->name('list');
-    });});
+    });
+
+	Route::prefix('international')->name('international.')->group(function(){
+        Route::prefix('tracking_upload')->name('tracking_upload.')->group(function () {
+            Route::get('', 'Admins\AdminInternationalShipmentsController@tracking_upload_index')->name('index');
+            Route::get('list', 'Admins\AdminInternationalShipmentsController@tracking_upload_list')->name('list');
+            Route::post('store', 'Admins\AdminInternationalShipmentsController@tracking_upload_store')->name('store');
+            Route::get('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit_info')->name('edit');
+            Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
+        });
+    });
+});
 

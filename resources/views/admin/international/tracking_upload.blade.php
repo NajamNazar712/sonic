@@ -1,0 +1,280 @@
+@extends('admin.layout.master')
+
+@section('title', 'International Tracking Upload')
+
+@section('content')
+
+    <h1 class="mb-1">
+        International Tracking Upload
+    </h1>
+
+    <div class="card">
+        <div class="card-content">
+            <div class="card-body">
+                @include('client.inc.messages')
+
+                <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('admin.international.tracking_upload.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                    {{ csrf_field() }}
+
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col">
+                            <div class="form-group">
+                                <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="form-group text-left">
+                                <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+                            </div>
+                        </div>
+
+                        <div class="col ml-auto">
+                            <div class="form-group text-right">
+                                <a href="{{ asset('file/International Tracking Upload Template.xlsx') }}?v=28_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                    <thead>
+                    <tr role="row" class="bg-primary white">
+                        <th class="border-primary border-darken-1"></th>
+                        <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Third Party Tracking Number</th>
+                        <th class="border-primary border-darken-1">Postal Code</th>
+                        <th class="border-primary border-darken-1"></th>
+                    </tr>
+                    </thead>
+                </table>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="EditTrackingModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditTrackingModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Edit International Tracking</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="edit_tracking_form" action="{{ route('admin.international.tracking_upload.edit') }}" method="POST" novalidate="novalidate">
+                    @csrf
+                    <input type="hidden" name="international_shipment_id" id="edit_shipment_id">
+                    <div class="modal-body p-3">
+                        <div class="form-group">
+                            <label class="label" for="tracking_number">Tracking Number</label>
+                            <input type="text" name="tracking_number" id="edit_tracking_number" class="form-control" data-rule-required="true" data-msg-required="Tracking No. is required">
+                        </div>
+                        <div class="form-group">
+                            <label class="label" for="tracking_number">International Tracking Number</label>
+                            <input type="text"  class="form-control" name="international_tracking_number" id="edit_international_tracking_number" data-rule-required="true" data-msg-required="Internatioanl Tracking No. is required">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="edit_tracking_btn" type="submit" class="btn btn-info">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+@endsection
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
+@endsection
+
+@section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#edit_tracking_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+            $('body').on('change','#edit_international_tracking_number',function() {
+                $(this).val($(this).val().trim());
+            });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.international.tracking_upload.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Tracking No.');
+                            head.push('International Tracking No.');
+                            head.push('Postal Code');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.international_tracking_number);
+                                row.push(values.postal_code);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+            var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons:[{
+                    extend: 'excel',
+                    title: 'International Shipments Tracking',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                },'reset'],
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: true,
+                scrollY:'500px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                ajax: '{{ route('admin.international.tracking_upload.list') }}',
+                rowId: 'shipment_id',
+                order: [1, 'desc'],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'international_tracking_number', name: 'international_shipments.international_tracking_number', class: 'align-middle international_tracking_number'},
+                    {data: 'postal_code', name: 'international_shipments.postal_code', class: 'align-middle postal_code'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                            $(td).appendTo($(search));
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                    this.api().table().columns.adjust();
+                }
+            });
+
+            $('#tracking_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your shipment(s) are being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+            $('#datatable tbody').on('click', 'tr td.action button', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    if($(this).hasClass('remove')){
+
+                        $.ajax({
+                            url: '{!! route('admin.international.tracking_upload.edit') !!}',
+                            data: {
+                                'shipment_id': id
+                            }
+                        }).done(function(data) {
+                            if(data.status == 0){
+                                $('#edit_tracking_number').val(data.details.tracking_number);
+                                $('#edit_international_tracking_number').val(data.details.international_tracking_number);
+                                $('#edit_shipment_id').val(data.details.id);
+                                $('#EditTrackingModal').modal('show');
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                }
+
+            });
+
+            $('#edit_tracking_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Tracking Number is being edited!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+        });
+    </script>
+@endsection
