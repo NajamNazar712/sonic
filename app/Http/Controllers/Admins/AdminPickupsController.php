@@ -130,7 +130,7 @@ class AdminPickupsController extends Controller
                       if($vendor){
                           $pickup_request->vendor = 1;
                       }
-                      if($reverse_pickup){
+                      if($shipment->booking_type_id == 5){
                           $pickup_request->reverse_pickup = 1;
                       }
                       $pickup_request->save();
