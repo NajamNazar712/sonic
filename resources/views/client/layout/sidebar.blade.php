@@ -17,8 +17,10 @@
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
                             @endif
+                            @if(session('user_type') == 1 && session('international_rates') == 1)
                             <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>
                             <li><a class="menu-item" href="{{ route('cod.shipment.book.international.excel_index') }}">International Excel Sheet</a></li>
+                            @endif
                         @endif
                         </ul>
                         </li>
