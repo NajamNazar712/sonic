@@ -29,7 +29,7 @@ class AdminInternationalRatesController extends Controller
         if($id){
             $user = User::find($id);
             if($user){
-                $cities = City::where('business_category_id', 2)->select('id', 'name')->get();
+                $cities = City::where('hub', 1)->where('business_category_id', 2)->select('id', 'name')->get();
 
                 return view('admin.international.rates.add_rates')->with(['cities' => $cities, 'shipper' => $user]);
             }
@@ -39,7 +39,7 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function add_rates_submit(Request $request){
-        
+
         $shipper_id = $request->shipper_id;
         $box_ids = $request->box_ids;
         if(count($box_ids) == 0){
@@ -210,5 +210,28 @@ class AdminInternationalRatesController extends Controller
         }
         return redirect()->back()->with('success', 'Rates added successfully!');
 
+    }
+
+    public function view_rates_index($id){
+        $shipper_id = $id;
+        if($shipper_id){
+            $intl_user = InternationalUsersInformation::where('user_id', $shipper_id);
+            if($intl_user->exists()){
+                $user = User::find($shipper_id);
+                $intl_rate_status = InternationalRatesStatus::where('user_id', $shipper_id)->get();
+                $intl_hubs = InternationalRatesHub::all()->where('user_id', $shipper_id)->groupBy('box_id');
+                $weight_charges = InternationalRatesWeightCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
+                $cash_charges = InternationalRatesCashHandlingCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
+                $insurance_charges = InternationalRatesInsuranceCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
+                $return_charges = InternationalRatesReturnCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
+                $discount_charges = InternationalRatesDiscountCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
+                $rate_remarks = InternationalRatesRemark::where('user_id', $shipper_id)->orderBy('created_at','desc')->get();
+                $cities = City::where('business_category_id', 2)->select('id', 'name')->get();
+
+                return view('admin.international.rates.view_rates')->with(['cities' => $cities, 'shipper' => $user, 'rate_statuses' => $intl_rate_status, 'hubs' => $intl_hubs, 'weight_charges' => $weight_charges, 'cash_handling_charges' => $cash_charges, 'insurance_charges' => $insurance_charges, 'return_charges' => $return_charges, 'discount_charges' => $discount_charges,'rate_remarks' => $rate_remarks]);
+            }
+            return redirect()->back()->with('error', 'No User Found!');
+        }
+        return redirect()->back()->with('error', 'No data found!');
     }
 }
