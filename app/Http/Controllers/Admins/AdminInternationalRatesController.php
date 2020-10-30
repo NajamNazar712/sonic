@@ -39,7 +39,7 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function add_rates_submit(Request $request){
-
+        return $request;
         $shipper_id = $request->shipper_id;
         $box_ids = $request->box_ids;
         if(count($box_ids) == 0){

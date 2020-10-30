@@ -26,315 +26,318 @@
                         <input type="hidden" name="shipper_id" value="{{$shipper->id}}">
                         <div class="card-content">
                             <div class="box_parent_div">
-                                <div class="card-header border-success">
-                                    <input type="hidden" name="box_ids[]" value="1">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h3 class="display-inline card-title lead success">International Rates 1</h3>
+                                <div class="parent_box_div_1">
+                                    <div class="card-header border-success">
+                                        <input type="hidden" name="box_ids[]" value="1">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h3 class="display-inline card-title lead success">International Rates 1</h3>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="card border-success">
-                                    <div class="card-content">
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <h3>Add Hubs</h3>
-                                                </div>
-                                                <div class="col-6">
-                                                    <div class="form-group card border-success p-2">
-                                                        <select name="hubs[1][]" id="select_box_1" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                                            @foreach($cities as $city)
-                                                                <option value="{{$city->id}}">{{$city->name}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div id="wa_rows_div_1">
+                                    <div class="card border-success">
+                                        <div class="card-content">
+                                            <div class="card-body">
                                                 <div class="row">
-                                                    <div class="col-md-2">
-                                                        <h3 class="card-title">Weight Charges</h3>
+                                                    <div class="col-2">
+                                                        <h3>Add Hubs</h3>
                                                     </div>
-
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col text-center">
-                                                        <label class="card-title">Range Up</label>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <label class="card-title">Range Down</label>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <label class="card-title">Weight Addition</label>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <label class="card-title">KG Range</label>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <label class="card-title">Local Charges</label>
-                                                    </div>
-                                                    <div class="col-1 text-center">
-                                                    </div>
-                                                </div>
-
-                                                <div class="row" id="wa_row_1">
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_up[1][1]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_down[1][1]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" class="switchery wa_switch" data-color="success" data-size="sm" name="wa_switch[1][1]"/>
+                                                    <div class="col-6">
+                                                        <div class="form-group card border-success p-2">
+                                                            <select name="hubs[1][]" id="select_box_1" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                                                @foreach($cities as $city)
+                                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
-                                                    <div class="col-2 text-center">
+                                                </div>
+                                                <div id="wa_rows_div_1">
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <h3 class="card-title">Weight Charges</h3>
+                                                        </div>
 
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[1][1]" data-rule-required="true" data-msg-required="This field is required">
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Up</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Down</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Weight Addition</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">KG Range</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Local Charges</label>
+                                                        </div>
+                                                        <div class="col-1 text-center">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row" id="wa_row_1">
+                                                        <div class="col text-center">
+                                                            <fieldset class="form-group">
+                                                                <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_up[1][1]">
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col text-center">
+
+                                                            <fieldset class="form-group">
+                                                                <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_down[1][1]">
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col text-center">
+
+                                                            <div class="form-group " style="padding-top: 8px;">
+                                                                <input type="checkbox" class="switchery wa_switch" data-color="success" data-size="sm" name="wa_switch[1][1]"/>
                                                             </div>
-                                                        </fieldset>
+                                                        </div>
+                                                        <div class="col-2 text-center">
+
+                                                            <fieldset style="padding-top: 5px;">
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[1][1]" data-rule-required="true" data-msg-required="This field is required">
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <fieldset class="form-group">
+                                                                <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="local_charges[1][1]">
+                                                            </fieldset>
+                                                        </div>
+
+                                                        <div class="col-1">
+                                                        </div>
+
                                                     </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="local_charges[1][1]">
-                                                        </fieldset>
-                                                    </div>
 
-                                                    <div class="col-1">
-                                                    </div>
-
+                                                </div>{{--weight addition div--}}
+                                                <div>
+                                                    <button type="button" class="btn btn-outline-success mr-1 wa_btn_1" title="Add more slabs"><i class="la la-plus"></i></button>
                                                 </div>
 
-                                            </div>{{--weight addition div--}}
-                                            <div>
-                                                <button type="button" class="btn btn-outline-success mr-1 wa_btn_1" title="Add more slabs"><i class="la la-plus"></i></button>
-                                            </div>
-
-                                            <hr>
-                                            <div class="row">
-                                                <div class="col-md-2">
-                                                    <h3 class="card-title">Cash Handling Charges</h3>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <div class="form-group ">
-                                                        <input type="checkbox" name="cash_handling_switch_1" class="switchery cash_handling_switch" data-color="success" data-size="sm" checked/>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <h3 class="card-title">Cash Handling Charges</h3>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group ">
+                                                            <input type="checkbox" name="cash_handling_switch_1" class="switchery cash_handling_switch" data-color="success" data-size="sm" checked/>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-2 text-center">
-                                                    <label class="card-title">Range Up</label>
-                                                </div>
-                                                <div class="col-md-2 text-center">
-                                                    <label class="card-title">Range Down</label>
-                                                </div>
-                                                <div class="col-md-2 text-center">
-                                                    <label class="card-title">Charges</label>
-                                                </div>
-                                            </div>
-
-                                            <div class="cash-handling-div-1 slabs">
-
                                                 <div class="row">
                                                     <div class="col-md-2 text-center">
-                                                        <fieldset class="form-group">
-                                                            <input name="cash_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
-                                                        </fieldset>
+                                                        <label class="card-title">Range Up</label>
                                                     </div>
                                                     <div class="col-md-2 text-center">
-                                                        <fieldset class="form-group">
-                                                            <input name="cash_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
-                                                        </fieldset>
+                                                        <label class="card-title">Range Down</label>
                                                     </div>
-
                                                     <div class="col-md-2 text-center">
-                                                        <fieldset class="form-group">
-                                                            <input name="cash_charges[1][1]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required">
-                                                        </fieldset>
-                                                    </div>
-
-                                                    <div class="col">
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-                                            <div class="cash-handling-btn">
-                                                <button type="button" class="btn btn-outline-success mr-1 add_more_cash_slabs_1" title="Add more slabs" ><i class="la la-plus"></i></button>
-                                            </div>
-                                            <hr>
-
-                                            <div class="row">
-                                                <div class="col-md-2">
-                                                    <h3 class="card-title">Insurance Charges</h3>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <div class="form-group ">
-                                                        <input type="checkbox" name="insurance_charges_switch_1" class="switchery insurance_charges_switch" data-color="success" data-size="sm" checked/>
+                                                        <label class="card-title">Charges</label>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-2 text-center">
-                                                    <label class="card-title">Range Up</label>
+
+                                                <div class="cash-handling-div-1 slabs">
+
+                                                    <div class="row">
+                                                        <div class="col-md-2 text-center">
+                                                            <fieldset class="form-group">
+                                                                <input name="cash_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-md-2 text-center">
+                                                            <fieldset class="form-group">
+                                                                <input name="cash_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                            </fieldset>
+                                                        </div>
+
+                                                        <div class="col-md-2 text-center">
+                                                            <fieldset class="form-group">
+                                                                <input name="cash_charges[1][1]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required">
+                                                            </fieldset>
+                                                        </div>
+
+                                                        <div class="col">
+                                                        </div>
+
+                                                    </div>
+
                                                 </div>
-                                                <div class="col-md-2 text-center">
-                                                    <label class="card-title">Range Down</label>
+                                                <div class="cash-handling-btn">
+                                                    <button type="button" class="btn btn-outline-success mr-1 add_more_cash_slabs_1" title="Add more slabs" ><i class="la la-plus"></i></button>
                                                 </div>
-                                                <div class="col-md-2 text-center">
-                                                    <label class="card-title">Charges</label>
-                                                </div>
-                                            </div>
-                                            <div class="insurance-charges-div-1 slabs">
+                                                <hr>
 
                                                 <div class="row">
+                                                    <div class="col-md-2">
+                                                        <h3 class="card-title">Insurance Charges</h3>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group ">
+                                                            <input type="checkbox" name="insurance_charges_switch_1" class="switchery insurance_charges_switch" data-color="success" data-size="sm" checked/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
                                                     <div class="col-md-2 text-center">
+                                                        <label class="card-title">Range Up</label>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <label class="card-title">Range Down</label>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <label class="card-title">Charges</label>
+                                                    </div>
+                                                </div>
+                                                <div class="insurance-charges-div-1 slabs">
+
+                                                    <div class="row">
+                                                        <div class="col-md-2 text-center">
+                                                            <fieldset class="form-group">
+                                                                <input name="ins_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-md-2 text-center">
+                                                            <fieldset class="form-group">
+                                                                <input name="ins_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                            </fieldset>
+                                                        </div>
+
+                                                        <div class="col-md-2 text-center">
+                                                            <fieldset class="form-group">
+                                                                <input name="ins_charges[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent">
+                                                            </fieldset>
+                                                        </div>
+
+                                                        <div class="col">
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                                <div class="insurance-charges-btn">
+                                                    <button type="button" class="btn btn-outline-success mr-1 add_more_ins_slabs_1" title="Add more slabs"><i class="la la-plus"></i></button>
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <h3 class="card-title">Return Charges</h3>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group ">
+                                                            <input type="checkbox" name="return_charges_switch_1" class="switchery return_charges_switch" data-color="success" data-size="sm" checked/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row return-charges-div-1">
+
+                                                    <div class="col-3 text-center">
+                                                        <label class="card-title">Local Charges</label>
                                                         <fieldset class="form-group">
-                                                            <input name="ins_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_1">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col-md-2 text-center">
-                                                        <fieldset class="form-group">
-                                                            <input name="ins_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
-                                                        </fieldset>
-                                                    </div>
-
-                                                    <div class="col-md-2 text-center">
-                                                        <fieldset class="form-group">
-                                                            <input name="ins_charges[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent">
-                                                        </fieldset>
-                                                    </div>
-
-                                                    <div class="col">
-                                                    </div>
-
                                                 </div>
-
-                                            </div>
-                                            <div class="insurance-charges-btn">
-                                                <button type="button" class="btn btn-outline-success mr-1 add_more_ins_slabs_1" title="Add more slabs"><i class="la la-plus"></i></button>
-                                            </div>
-                                            <hr>
-                                            <div class="row">
-                                                <div class="col-md-2">
-                                                    <h3 class="card-title">Return Charges</h3>
+                                                <hr>
+                                                <div class="">
+                                                    <h3 class="card-title">Discount Rates</h3>
                                                 </div>
-                                                <div class="col-md-2">
-                                                    <div class="form-group ">
-                                                        <input type="checkbox" name="return_charges_switch_1" class="switchery return_charges_switch" data-color="success" data-size="sm" checked/>
+                                                <div class="row mt-1">
+                                                    <div class="col-md-6">
+                                                        <label class="">Title</label>
+                                                        <div class='form-group'>
+                                                            <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" disabled name="discount_title_1"/>
+                                                        </div>
+
                                                     </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row return-charges-div-1">
-
-                                                <div class="col-3 text-center">
-                                                    <label class="card-title">Local Charges</label>
-                                                    <fieldset class="form-group">
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_1">
-                                                    </fieldset>
-                                                </div>
-                                            </div>
-                                            <hr>
-                                            <div class="">
-                                                <h3 class="card-title">Discount Rates</h3>
-                                            </div>
-                                            <div class="row mt-1">
-                                                <div class="col-md-6">
-                                                    <label class="">Title</label>
-                                                    <div class='form-group'>
-                                                        <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" disabled name="discount_title_1"/>
-                                                    </div>
-
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="">Apply [to - from]</label>
-                                                    <div class='input-group form-group'>
-                                                        <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" disabled name="daterange_1"/>
-                                                        <div class="input-group-append">
+                                                    <div class="col-md-6">
+                                                        <label class="">Apply [to - from]</label>
+                                                        <div class='input-group form-group'>
+                                                            <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" disabled name="daterange_1"/>
+                                                            <div class="input-group-append">
                                                             <span class="input-group-text">
                                                               <span class="la la-calendar"></span>
                                                             </span>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col text-center">
-                                                    <fieldset>
-                                                        <div class="input-group input-group-sm form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text" id="">Weight</span>
                                                             </div>
-                                                            <div class="input-group-prepend">
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <fieldset>
+                                                            <div class="input-group input-group-sm form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text" id="">Weight</span>
+                                                                </div>
+                                                                <div class="input-group-prepend">
                                                               <span class="input-group-text">
                                                                 <input type="checkbox" class="switchery discount_switch_1" name="discount_weight_switch_1" data-size="xs" />
                                                               </span>
+                                                                </div>
+                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_weight_1" disabled>
                                                             </div>
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_weight_1" disabled>
-                                                        </div>
-                                                    </fieldset>
-                                                </div>
-                                                <div class="col text-center">
-                                                    <fieldset>
-                                                        <div class="input-group input-group-sm form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text" id="">Cash</span>
-                                                            </div>
-                                                            <div class="input-group-prepend">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset>
+                                                            <div class="input-group input-group-sm form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text" id="">Cash</span>
+                                                                </div>
+                                                                <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
                                                                 <input type="checkbox" name="discount_cash_switch_1" class="switchery discount_switch_1" data-size="xs" />
                                                               </span>
+                                                                </div>
+                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_cash_1" disabled>
                                                             </div>
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_cash_1" disabled>
-                                                        </div>
-                                                    </fieldset>
-                                                </div>
-                                                <div class="col text-center">
-                                                    <fieldset>
-                                                        <div class="input-group input-group-sm form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text" id="">Insurance</span>
-                                                            </div>
-                                                            <div class="input-group-prepend">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset>
+                                                            <div class="input-group input-group-sm form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text" id="">Insurance</span>
+                                                                </div>
+                                                                <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
                                                                 <input type="checkbox" name="discount_insurance_switch_1" class="switchery discount_switch_1" data-size="xs" />
                                                               </span>
+                                                                </div>
+                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_insurance_1" disabled>
                                                             </div>
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_insurance_1" disabled>
-                                                        </div>
-                                                    </fieldset>
-                                                </div>
-                                                <div class="col text-center">
-                                                    <fieldset>
-                                                        <div class="input-group input-group-sm form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text" id="">Return</span>
-                                                            </div>
-                                                            <div class="input-group-prepend">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset>
+                                                            <div class="input-group input-group-sm form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text" id="">Return</span>
+                                                                </div>
+                                                                <div class="input-group-prepend">
                                                               <span class="input-group-text">
                                                                 <input type="checkbox"  class="switchery discount_switch_1" data-size="xs" name="discount_return_switch_1"/>
                                                               </span>
+                                                                </div>
+                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_return_1" disabled>
                                                             </div>
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_return_1" disabled>
-                                                        </div>
-                                                    </fieldset>
+                                                        </fieldset>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
 
                             <div class="form-group text-center">
@@ -707,6 +710,9 @@
             });
 
             $('#add_more_rates_hubs').on('click', function () {
+                // $('.parent_box_div_'+box_no).find('input').prop('disabled', true);
+                // $('.parent_box_div_'+box_no).find('select').prop('disabled', true);
+                $('.parent_box_div_'+box_no).find('button').prop('disabled', true);
                 box_no++;
                 var box_div = '<div class="parent_box_div_'+ box_no +'"><div class="card-header border-success">\n' +
                     '                                    <input type="hidden" value="'+ box_no +'" name="box_ids[]">\n' +
@@ -1288,16 +1294,20 @@
             });
             $('body').on('click', 'span.rate_box_close', function(){
                 var box = $(this).attr('box');
-                console.log($('.parent_box_div_'+box))
                 $('.parent_box_div_'+box).remove();
             });
             $( "#ratesAdditionForm" ).validate({
+                ignore: ":not(:visible),:disabled",
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
                 submitHandler: function(form) {
                         $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
                         swal({
                             title: 'Please Wait!',
                             text: 'Your rates are being added!',
