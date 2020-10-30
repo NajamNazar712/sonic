@@ -21,7 +21,6 @@ class CreateInternationalRatesDiscountChargesTable extends Migration
             $table->decimal('cash',8,2)->nullable();
             $table->decimal('insurance',8,2)->nullable();
             $table->decimal('return',8,2)->nullable();
-            $table->decimal('packaging',8,2)->nullable();
             $table->timestamp('to')->nullable();
             $table->timestamp('from')->nullable();
             $table->string('title')->nullable();

@@ -2334,6 +2334,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rates')->name('rates.')->group(function () {
             Route::prefix('add')->name('add.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@add_rates_index')->name('index');
+                Route::post('submit','Admins\AdminInternationalRatesController@add_rates_submit')->name('submit');
             });
         });
     });
