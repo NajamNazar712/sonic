@@ -2336,6 +2336,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@add_rates_index')->name('index');
                 Route::post('submit','Admins\AdminInternationalRatesController@add_rates_submit')->name('submit');
             });
+            Route::prefix('edit')->name('edit.')->group(function () {
+                Route::get('{id}','Admins\AdminInternationalRatesController@edit_rates_index')->name('index');
+                Route::post('submit','Admins\AdminInternationalRatesController@edit_rates_submit')->name('submit');
+                Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
+            });
         });
     });
 });
