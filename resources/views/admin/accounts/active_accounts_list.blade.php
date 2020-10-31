@@ -679,7 +679,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks') || $(header).is('.rate_status') || $(header).is('.duplicate') ) {
+                    if ($(header).is('.select') || $(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks') || $(header).is('.rate_status') || $(header).is('.duplicate') || $(header).is('.international_rate_status') || $(header).is('.international_rejected_reason')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
