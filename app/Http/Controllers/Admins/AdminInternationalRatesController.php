@@ -145,8 +145,8 @@ class AdminInternationalRatesController extends Controller
                     $intl_cash_handling->user_id = $shipper_id;
                     $intl_cash_handling->box_id = $box_id;
                     $intl_cash_handling->range_up = $cash_handling;
-                    $intl_cash_handling->range_down = $request->cash_range_down[$box_id][$index];
-                    $intl_cash_handling->charges = $request->cash_charges[$box_id][$index];
+                    $intl_cash_handling->range_down = $request->cash_range_down[$box_id][$cash_index];
+                    $intl_cash_handling->charges = $request->cash_charges[$box_id][$cash_index];
                     $intl_cash_handling->save();
                 }
             }
@@ -157,8 +157,8 @@ class AdminInternationalRatesController extends Controller
                     $intl_ins->user_id = $shipper_id;
                     $intl_ins->box_id = $box_id;
                     $intl_ins->range_up = $insurance;
-                    $intl_ins->range_down = $request->ins_range_down[$box_id][$index];
-                    $intl_ins->charges = $request->ins_charges[$box_id][$index];
+                    $intl_ins->range_down = $request->ins_range_down[$box_id][$ins_index];
+                    $intl_ins->charges = $request->ins_charges[$box_id][$ins_index];
                     $intl_ins->save();
                 }
             }
@@ -187,7 +187,7 @@ class AdminInternationalRatesController extends Controller
                 $discount_cash = $request->input('discount_cash_'.$box_id);
             }
             if($request->has($discount_insurance_key)){
-                $discount_insurence = $request->input('discount_insurance_'.$box_id);
+                $discount_insurance = $request->input('discount_insurance_'.$box_id);
             }
             if($request->has($discount_return_key)){
                 $discount_return = $request->input('discount_return_'.$box_id);
@@ -563,8 +563,8 @@ class AdminInternationalRatesController extends Controller
                         $intl_cash_handling->user_id = $shipper_id;
                         $intl_cash_handling->box_id = $box_id;
                         $intl_cash_handling->range_up = $cash_handling;
-                        $intl_cash_handling->range_down = $request->cash_range_down[$box_id][$index];
-                        $intl_cash_handling->charges = $request->cash_charges[$box_id][$index];
+                        $intl_cash_handling->range_down = $request->cash_range_down[$box_id][$cash_index];
+                        $intl_cash_handling->charges = $request->cash_charges[$box_id][$cash_index];
                         $intl_cash_handling->save();
                     }
                 }
@@ -575,8 +575,8 @@ class AdminInternationalRatesController extends Controller
                         $intl_ins->user_id = $shipper_id;
                         $intl_ins->box_id = $box_id;
                         $intl_ins->range_up = $insurance;
-                        $intl_ins->range_down = $request->ins_range_down[$box_id][$index];
-                        $intl_ins->charges = $request->ins_charges[$box_id][$index];
+                        $intl_ins->range_down = $request->ins_range_down[$box_id][$ins_index];
+                        $intl_ins->charges = $request->ins_charges[$box_id][$ins_index];
                         $intl_ins->save();
                     }
                 }
