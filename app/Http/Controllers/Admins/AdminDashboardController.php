@@ -7168,7 +7168,8 @@ if(session('department_id') == 7){
                    ->where('spt.status','=',0);
            })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7315,6 +7316,28 @@ if(session('department_id') == 7){
                     return $count;
                 }
             })
+            ->editColumn('international_rate_status',function ($users){
+                if($users->international_rate_status != null){
+                    if($users->international_rate_status == 1){
+                        return "Approved";
+                    }elseif($users->international_rate_status == 2){
+                        return "Requested";
+                    }
+                    else{
+                        return "Rejected";
+                    }
+                }
+                else{
+                    return "International Rates are not set";
+                }
+            })
+            ->editColumn('international_rejected_reason',function ($users){
+                if($users->international_rejected_reason != null && $users->international_rate_status == 3){
+                    return $users->international_rejected_reason;
+                }else{
+                    return "-";
+                }
+            })
             ->addColumn("action", function ($result) {
                 if(in_array($result->id, session('tagged_shippers'))){
                     $multiple_sale_check = true;
@@ -7399,7 +7422,9 @@ if(session('department_id') == 7){
                 }
                 if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
-                }else{
+                }
+                else{
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
                 }
 
