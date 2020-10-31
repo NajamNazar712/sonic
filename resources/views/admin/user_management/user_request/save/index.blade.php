@@ -46,7 +46,12 @@
                                             <input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Email must be unique" value="{{ $user->email }}" >
                                         </div>
                                     </div>
-
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                        <label for="tarx_id" class="font-weight-bold">Password</label>
+                                        <div class="form-group">
+                                            <input type="password" name="password" id="password" class="form-control" placeholder="Password*" data-rule-required="true" data-msg-required="Password is required" >
+                                        </div>
+                                    </div>
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <label for="department" class="font-weight-bold">Department</label>
@@ -84,15 +89,9 @@
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                        <label for="tarx_id" class="font-weight-bold">Trax Id</label>
+                                        <label for="hub" class="font-weight-bold">Trax Id</label>
                                         <div class="form-group">
-                                            <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID*" data-rule-required="true" data-msg-required="Trax Id is required" value="{{ $user->trax_id }}" >
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                        <label for="tarx_id" class="font-weight-bold">Password</label>
-                                        <div class="form-group">
-                                            <input type="text" name="password" id="password" class="form-control" placeholder="Password*" data-rule-required="true" data-msg-required="Password is required" >
+                                            <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID*" data-rule-required="true" data-msg-required="Trax ID  is required" value="{{ $user->trax_id }}" data-rule-remote="{{ route('admin.user_management.user_requests.trax_id', ['id' => $user->id]) }}"  data-msg-remote="Id must be unique">
                                         </div>
                                     </div>
 
@@ -274,6 +273,11 @@
                     }
                 });
             });
+        });
+        $('#user_form').on('keypress',function (e) {
+            if(e.keyCode == 13) {
+                e.preventDefault();
+            }
         });
 
     </script>

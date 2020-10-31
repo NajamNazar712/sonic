@@ -501,8 +501,10 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id]) . ' is deactivated';
                 }
 
-                if (!$pickup_consignee_city->pickup) {
-                    return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $pickup_consignee_city->city_id]);
+                if ($user_id != 7762) {
+                  if (!$pickup_consignee_city->pickup) {
+                      return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $pickup_consignee_city->city_id]);
+                  }
                 }
 
                 $pickup_address_id_for_delivery = $request->input('pickup_address_id');
@@ -1637,7 +1639,7 @@ class APIController extends Controller
 
         $information['charges'] = array();
 
-        $calculation = ShipmentChargesController::calculate_weight($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('same_day_timing_id'), NULL, $request->input('estimated_weight'), $origin_city->id, $origin_city->zone_id, $destination_city->id);
+        $calculation = ShipmentChargesController::calculate_weight($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('same_day_timing_id'), NULL, $request->input('estimated_weight'), $origin_city->id, $origin_city->zone_id, $destination_city->id, 1, 0);
 
         if ($calculation) {
           $information['charges']['weight'] = $calculation['weight_charges'];

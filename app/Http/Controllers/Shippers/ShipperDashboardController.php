@@ -308,8 +308,8 @@ class ShipperDashboardController extends Controller
                 $shipment = $shipment->first();
 
                 if ($shipment->shipper_status_id == 1) {
-                    if($shipment->warehouse_order_status == 10){
-                        return response()->json(['status' => 0,'error' => 'Shipment is already pending for picklist therefore can\'t cancel!']);
+                    if($shipment->warehouse == 1){
+                        return response()->json(['status' => 0,'error' => 'Warehouse Shipment can not be cancelled from Sonic!']);
                     }
                     //Consolidated Shipments
                     $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
@@ -399,7 +399,7 @@ class ShipperDashboardController extends Controller
                 $shipment = $shipment->first();
 
                 if ($shipment->shipper_status_id == 1) {
-                    if($shipment->warehouse_order_status == 10){
+                    if($shipment->warehouse == 1){
                         continue;
                     }
                     //Consolidated Shipments
