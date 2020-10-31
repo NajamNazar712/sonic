@@ -112,10 +112,8 @@ class V2AdminPickupsController extends Controller
             })
 
             ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
-            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper',
-                'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' ,
-                'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider',
-                'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked','vpa.created_at as assigned_date')
+
+            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' ,'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked','vpa.created_at as assigned_date','v2_pickup_requests.reverse_pickup')
             ->whereNotIn('v2_pickup_requests.status_id', [2,4]);
 
         if (session('role_id') != 1) {
@@ -129,6 +127,9 @@ class V2AdminPickupsController extends Controller
         $datatables = Datatables::of($pickup_requests)
             ->setRowAttr([
                 'class' => function ($pickup_request) use ($today) {
+                    if($pickup_request->reverse_pickup == 1){
+                        return 'reverse_pickup_row';
+                    }
                     if ($pickup_request->vendor != null) {
                         return 'vendor_row';
                     }
@@ -1600,8 +1601,30 @@ class V2AdminPickupsController extends Controller
                 $pickup_address = $pickup_request->pickup_address;
                 $sales_person = SalePersonTag::join('admins as ad' , 'ad.id' , '=', 'sale_person_tags.admin_id')
                     ->join('users as us', 'us.id', '=', 'sale_person_tags.user_id')
-                ->select('ad.name','us.phone','us.poc')->first();
-               // dd($sales_person);
+                    ->join('shipper_contacts as sc', 'sc.shipper_id', '=', 'us.id')
+                    ->where('sale_person_tags.status',0)->where('us.id',$shipper->id)
+                ->select('ad.name','sc.phone_number','sc.poc')->get();
+                $poc = $sales_person ->toArray();
+
+                $pocName="";
+                $phoneNo="";
+                $names="";
+                $i = 0;
+                foreach($poc as  $data)
+                {
+
+                    if($i==0){
+                        $pocName.= ''.$data['poc'];
+                        $phoneNo.=''.$data['phone_number'];
+                        $names=$data['name'];
+                        $i++;
+                    }else{
+                        $pocName.= ','.$data['poc'];
+                        $phoneNo.=','.$data['phone_number'];
+                    }
+
+
+                }
                 $color = '';
                 if($pickup_address->vendor != null){
                     $color = 'vendor_pickup_row';
@@ -1614,9 +1637,9 @@ class V2AdminPickupsController extends Controller
                             <td>' . $pickup_address['poc'] . '</td>
                             <td>' . $pickup_address['vendor'] . '</td>
                             <td>' . $pickup_address['phone'] . '</td>
-                            <td>'.$sales_person['name'].'</td>
-                            <td>'.$sales_person['poc'].'</td>
-                            <td>'.$sales_person['phone'].'</td>
+                            <td>'.$names.'</td>
+                            <td>'.$pocName.'</td>
+                            <td>'. $phoneNo.'</td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['booked'] . '</td>
                             <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
