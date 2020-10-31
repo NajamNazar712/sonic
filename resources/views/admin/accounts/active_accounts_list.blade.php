@@ -81,6 +81,8 @@
                                         <th class="border-primary border-darken-1">Documents Status</th>
                                         <th class="border-primary border-darken-1">Documents Rejection Reason</th>
                                         <th class="border-primary border-darken-1">Duplicate</th>
+                                        <th class="border-primary border-darken-1">Intl Rate Status</th>
+                                        <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -288,6 +290,8 @@
                         head.push('Account Disable Remarks');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
+                        head.push('Intl Rates Status');
+                        head.push('Intl Rates Status Remarks');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -316,6 +320,8 @@
                             row.push(values.disable_remarks);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
+                            row.push(values.international_rate_status);
+                            row.push(values.international_rejected_reason);
 
                             body.push(row);
                         });
@@ -637,6 +643,8 @@
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
+                {data: 'international_rate_status', name: 'international_rate_status', class: 'align-middle international_rate_status', orderable: false, searchable: false},
+                {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {

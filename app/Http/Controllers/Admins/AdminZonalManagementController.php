@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\BusinessCategory;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
@@ -25,11 +26,13 @@ class AdminZonalManagementController extends Controller
     }
 
     public function index() {
-        return view('admin.management.zonal.index');
+        $business_categories = BusinessCategory::all();
+        return view('admin.management.zonal.index')->with(['business_categories' => $business_categories]);
     }
 
     public function list(Request $request) {
-        $zones = Zone::select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst', 'zones.status');
+        $zones = Zone::leftjoin('business_categories as bc', 'bc.id', '=', 'zones.business_category_id')
+            ->select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst', 'zones.status', 'zones.business_category_id', 'bc.name as business_category');
 
         $datatables = Datatables::of($zones)
             ->editColumn('status', function ($zone) {
@@ -41,7 +44,12 @@ class AdminZonalManagementController extends Controller
                 }
             })
             ->addColumn('action', function($zone) {
-                $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                if($zone->business_category_id == 1){
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }
+                else{
+                    $edit_button = '<button type="button" class="dropdown-item international_edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }
                 $active = '<button type="button" class="dropdown-item activate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Activate Zone</div></button>';
                 $inactive = '<button type="button" class="dropdown-item deactivate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Deactivate Zone</div></button>';
                 $view_cities_button = '<button type="button" class="dropdown-item view_cities"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Cities</div></button>';
@@ -205,5 +213,42 @@ class AdminZonalManagementController extends Controller
         else{
             return response()->json(['status' => 0, 'error' => 'Invalid Zone selected!']);
         }
+    }
+
+
+    public function add_international_index() {
+        $cities = City::where('status', 1)->get();
+
+        return view('admin.management.zonal.add.international_index')->with('cities', $cities);
+    }
+
+    public function add_international_store(Request $request) {
+        $zone = New Zone();
+
+        $zone->name = $request->name;
+        $zone->gst = $request->gst;
+        $zone->business_category_id = 2;
+
+        $zone->save();
+
+        return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been added!']);
+    }
+
+    public function update_international_index($id) {
+        $cities = City::where('status', 1)->get();
+        $zone = Zone::find($id);
+
+        return view('admin.management.zonal.update.international_index')->with(['cities' => $cities, 'zone' => $zone]);
+    }
+
+    public function update_international_store(Request $request, $id) {
+        $zone = Zone::find($id);
+
+        $zone->name = $request->name;
+        $zone->gst = $request->gst;
+
+        $zone->save();
+
+        return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been updated!']);
     }
 }

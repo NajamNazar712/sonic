@@ -70,6 +70,7 @@ class AdminPickupsController extends Controller
                   $try_and_buy = FALSE;
                   $vendor = FALSE;
                   $allow = FALSE;
+                  $reverse_pickup = FALSE;
                   if ($pickup_request->exists()) {
                       $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
                       if(!V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->exists()){
@@ -96,9 +97,13 @@ class AdminPickupsController extends Controller
                                           if($existing_shipment->booking_type_id == 3){
                                               $try_and_buy = TRUE;
                                           }
+                                          if($existing_shipment->booking_type_id == 5){
+                                              $reverse_pickup = TRUE;
+                                          }
                                           if(($vendor == FALSE) && ($existing_shipment->pickup_address->vendor != NULL)){
                                               $vendor = TRUE;
                                           }
+
                                       }
                                   }
                               }
@@ -124,6 +129,9 @@ class AdminPickupsController extends Controller
                       }
                       if($vendor){
                           $pickup_request->vendor = 1;
+                      }
+                      if($shipment->booking_type_id == 5){
+                          $pickup_request->reverse_pickup = 1;
                       }
                       $pickup_request->save();
 
@@ -2235,7 +2243,7 @@ class AdminPickupsController extends Controller
             $city[] = City::find($city_filter)->id;
             $all_cities[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('pickup', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('pickup', 1)->pluck('id')->toArray();
             $all_cities = City::where('status',1)->pluck('id')->toArray();
         }
         $data = array();
@@ -2402,7 +2410,7 @@ class AdminPickupsController extends Controller
         if($city_filter){
             $city[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('pickup', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('pickup', 1)->pluck('id')->toArray();
         }
 
         $shipments = DB::connection('reports')->table('shipments')->join('user_shipping_infos AS usib', 'shipments.pickup_address_id', '=', 'usib.id')
@@ -2422,7 +2430,7 @@ class AdminPickupsController extends Controller
         if($city_filter){
             $city[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('pickup', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('pickup', 1)->pluck('id')->toArray();
         }
         $shipments = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
                             $query->from('user_shipping_infos')
@@ -2450,7 +2458,7 @@ class AdminPickupsController extends Controller
         if($city_filter){
             $city[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('status', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('status', 1)->pluck('id')->toArray();
         }
         $shipments = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($from, $to) {
                            $query->from('shipments_journey')
@@ -2470,7 +2478,7 @@ class AdminPickupsController extends Controller
         if($city_filter){
             $city[] = City::find($city_filter)->id;
         }else{
-            $city = City::where('status', 1)->pluck('id')->toArray();
+            $city = City::where('business_category_id', 1)->where('status', 1)->pluck('id')->toArray();
         }
         $shipments = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($from, $to) {
                            $query->from('shipments_journey')

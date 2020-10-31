@@ -108,4 +108,8 @@ class Shipment extends Model
     public function open_parcel_shipment(){
         return $this->hasOne('App\Http\Models\OpenParcelHistory');
     }
+
+    public function business_category() {
+        return $this->belongsTo('App\Http\Models\BusinessCategory');
+    }
 }

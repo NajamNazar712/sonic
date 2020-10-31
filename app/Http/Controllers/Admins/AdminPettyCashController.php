@@ -871,6 +871,22 @@ class AdminPettyCashController extends Controller
         }
     }
 
+    public function approved_petty_cash_statements_bulk_adjusted(Request $request)
+    {
+        foreach ($request->statement_ids as $statement_id) {
+            if ($statement_id) {
+                $petty_details = PettyCashStatement::find($statement_id);
+                if ($petty_details) {
+                    if ($petty_details->status == 3) {
+                        $petty_details->status = 5;
+                        $petty_details->save();
+                    }
+                }
+            }
+        }
+        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Successfully Adjust!']);
+    }
+
     public function statement_print(Request $request){
         $statement_id = $request->id;
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();

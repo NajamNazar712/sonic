@@ -14,6 +14,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\AverageShipmentCycle;
+use App\Http\Models\BusinessCategory;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CityHistory;
@@ -25,6 +26,7 @@ use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DuplicateUser;
+use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\Operataions\OperationForecast;
@@ -7166,7 +7168,8 @@ if(session('department_id') == 7){
                    ->where('spt.status','=',0);
            })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7313,6 +7316,28 @@ if(session('department_id') == 7){
                     return $count;
                 }
             })
+            ->editColumn('international_rate_status',function ($users){
+                if($users->international_rate_status != null){
+                    if($users->international_rate_status == 1){
+                        return "Approved";
+                    }elseif($users->international_rate_status == 2){
+                        return "Requested";
+                    }
+                    else{
+                        return "Rejected";
+                    }
+                }
+                else{
+                    return "International Rates are not set";
+                }
+            })
+            ->editColumn('international_rejected_reason',function ($users){
+                if($users->international_rejected_reason != null && $users->international_rate_status == 3){
+                    return $users->international_rejected_reason;
+                }else{
+                    return "-";
+                }
+            })
             ->addColumn("action", function ($result) {
                 if(in_array($result->id, session('tagged_shippers'))){
                     $multiple_sale_check = true;
@@ -7395,6 +7420,14 @@ if(session('department_id') == 7){
                 if(session('role_id') == 1 || in_array(365, session('permissions'))){
                     $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
                 }
+                if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                }
+                else{
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                }
+
                 $dropdown .= '
                     </div>
                   </div>
@@ -7891,7 +7924,8 @@ if(session('department_id') == 7){
 //        return $uri_tail;
 //        $hubs = City::where('hub',1)->get();
 //        return $hubs[0]->id;
-        return view('admin.management.city_management');
+        $business_categories = BusinessCategory::all();
+        return view('admin.management.city_management')->with(['business_categories' => $business_categories]);
     }
     public function cityListAjax(){
         $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
@@ -7901,8 +7935,9 @@ if(session('department_id') == 7){
                         DB::raw('(select max(created_at) from city_histories where city_histories.city_id = cities.id)'));
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
+            ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7943,7 +7978,12 @@ if(session('department_id') == 7){
                 ';
 
                     if (session('role_id') == 1 || in_array(90, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
+                        if($result->business_category_id == 1){
+                            $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
+                        }
+                        else{
+                            $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editinternationalcity" data-toggle="modal" data-target="#editInternationalCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update International City Status</div></button>';
+                        }
                     }
 
                     if (session('role_id') == 1 || in_array(91, session('permissions'))) {
@@ -7970,8 +8010,8 @@ if(session('department_id') == 7){
     }
 
     public function getCityForm(){
-        $hubs = City::where('hub',1)->where('status',1)->get();
-        $zones = Zone::all();
+        $hubs = City::where('hub',1)->where('business_category_id', 1)->where('status',1)->get();
+        $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id','!=',4)->get();
         return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking]);
@@ -7993,8 +8033,8 @@ if(session('department_id') == 7){
         }
 
 
-        $hubs = City::where('hub',1)->where('status',1)->get();
-        $zones = Zone::all();
+        $hubs = City::where('hub',1)->where('business_category_id', 1)->where('status',1)->get();
+        $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id','!=',4)->get();
         $walk_in_city = WalkInCities::where('city_id',$city['id'])->get();
@@ -8355,7 +8395,7 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRouteView(){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         return view('admin.management.add_route_form')->with('cities',$city);
     }
     public function addRouteDetails(Request $request){
@@ -8508,7 +8548,7 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRiderView(){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
     }
@@ -8566,7 +8606,7 @@ if(session('department_id') == 7){
 
     }
     public function editRiderView($id){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
@@ -9295,6 +9335,167 @@ if(session('department_id') == 7){
             return redirect()->back()->with('error', 'Shipper not found!');
         }
         return redirect()->back()->with('error', 'Payment Cycle not selected!');
+    }
+
+
+
+    public function getInternationalCityForm(){
+        $hubs = City::where('hub',1)->where('business_category_id', 2)->where('status',1)->get();
+        $zones = Zone::where('business_category_id', 2)->get();
+        return view('admin.management.add_international_city_form')->with(['hubs'=>$hubs,'zones' => $zones]);
+    }
+    public function getEditInternationalCityForm($id){
+        $city = City::find($id);
+        if($city->hub == 1){
+            $cityhub = '';
+            $isHub = 1;
+        }else{
+            $cityhub = City::select(['id','name'])->where('id',$city->hub_id)->get();
+            $isHub = 0;
+
+        }
+        $delivery_array = CityDelivery::where('city_id',$city->id)->select(['booking_type_id','shipping_mode_id'])->get();
+        $delivery = array();
+        foreach ($delivery_array as $delivery_details) {
+            $delivery[$delivery_details['booking_type_id']][] = $delivery_details['shipping_mode_id'];
+        }
+
+
+        $hubs = City::where('hub',1)->where('business_category_id', 2)->where('status',1)->get();
+        $zones = Zone::where('business_category_id', 2)->get();
+        return view('admin.management.edit_international_city_form')->with(['hubs'=>$hubs, 'zones' => $zones,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
+
+    }
+
+    public function updateInternationalCity(Request $request,$id){
+        $city_id = City::where('id',$id)->first();
+        if($request->postType == 'city'){
+            City::where('id',$id)->update([
+                'name'=>$request->cityName,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'zone_id'=>City::find($request->hubs)->zone_id,
+                'pickup'=>0,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+            CityHistory::create([
+                'city_id'=> $id,
+                'hub' => 0,
+                'hub_id'=> $request->hubs,
+                'zone_id'=> City::find($request->hubs)->zone_id,
+                'pickup'=> 0,
+                'status' => $city_id->status,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'updated_by' => Auth::id(),
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+
+            return redirect()->back()->with('success','City updated successfully');
+        }elseif($request->postType == 'hub'){
+            City::where('id',$id)->update([
+                'name'=>$request->countryName,
+                'hub'=>1,
+                'hub_id'=>$id,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>0,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+            CityHistory::create([
+                'city_id'=> $id,
+                'hub'=>1,
+                'hub_id'=>$id,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>0,
+                'status' => $city_id->status,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'updated_by' => Auth::id(),
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+
+            return redirect()->back()->with('success','Hub/city updated successfully');
+        }
+    }
+    //update international city end
+    public function addInternationalCityHub(Request $request){
+        if($request->postType == 'city'){
+            $zone_id = City::find($request->hubs)->zone_id;
+
+            $city = City::create([
+                'name'=>$request->cityName,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'zone_id'=> $zone_id,
+                'pickup'=>0,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'status'=>1,
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL,
+                'business_category_id' => 2
+            ]);
+
+            CityHistory::create([
+                'city_id'=> $city->id,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'zone_id'=> $zone_id,
+                'pickup'=>0,
+                'status'=>1,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'updated_by' => Auth::id(),
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+
+            return redirect()->back()->with('success','City added successfully');
+        }elseif($request->postType == 'hub'){
+            $city = City::create([
+                'name'=>$request->countryName,
+                'hub'=>1,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>0,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'status'=>1,
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL,
+                'business_category_id' => 2
+            ]);
+
+            CityHistory::create([
+                'city_id'=> $city->id,
+                'hub'=>1,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>0,
+                'status'=>1,
+                'gc_area'=>0,
+                'attempt_tat'=>$request->attempt_tat,
+                'updated_by' => Auth::id(),
+                'location_latitude' => NULL,
+                'location_longitude' => NULL,
+                'address' => NULL
+            ]);
+            City::where('id',$city->id)->update(['hub_id'=>$city->id]);
+            return redirect()->back()->with('success','Hub city added successfully');
+        }
     }
 }
 

@@ -110,6 +110,15 @@
                         </div>
 
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_business_category" id="search_business_category" class="form-control select2">
+                                @foreach($business_categories as $bc)
+                                    <option value="{{$bc->id}}">{{$bc->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -137,6 +146,7 @@
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Description</th>
+                        <th class="border-primary border-darken-1">International Tracking No.</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Chargeable Weight</th>
@@ -250,6 +260,11 @@
                 placeholder: 'Select Sales Person',
                 allowClear:true
             });
+            $('#search_business_category').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Business Category',
+                allowClear:true
+            });
            /* $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipper',
                 width:'100%',
@@ -361,6 +376,7 @@
                             head.push('Shipping Mode');
                             head.push('Category');
                             head.push('Description');
+                            head.push('International Tracking No.');
                             head.push('Collection Amount');
                             head.push('Actual Weight');
                             head.push('Chargeable Weight');
@@ -406,6 +422,7 @@
                                 row.push(values.shipping_mode);
                                 row.push(values.category);
                                 row.push(values.description);
+                                row.push(values.international_tracking_number);
                                 row.push(values.p_collection_amount);
                                 row.push(values.actual_weight);
                                 row.push(values.chargeable_weight);
@@ -473,6 +490,7 @@
                         d.search_status = $('#search_status').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_business_category = $('#search_business_category').val();
                     }
                 },
                 order: [[10, 'desc']],
@@ -497,6 +515,7 @@
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
                     { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
                     { data:'description' ,name: 'si.description', class: 'align-middle description'},
+                    { data:'international_tracking_number' ,name: 'ibs.international_tracking_number', class: 'align-middle international_tracking_number'},
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle chargeable_weight'},
