@@ -454,6 +454,7 @@ class Permission
             'reports.daily_monthly_adjustment.list' => 373,
             'reports.daily_monthly_adjustment.summary_list' => 373,
             'reports.petty_cash_expense_summary.index' => 395,
+            'reports.app_efficiency.index' => 397,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

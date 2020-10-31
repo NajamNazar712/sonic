@@ -1426,6 +1426,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_list')->name('list');
             Route::post('paid', 'Admins\AdminPettyCashController@approved_petty_cash_statements_paid')->name('paid');
             Route::post('adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_adjusted')->name('adjusted');
+            Route::post('bulk_adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_bulk_adjusted')->name('bulk_adjusted');
         });
         Route::prefix('rejected')->name('rejected.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@rejected_petty_cash_statements_index')->name('index');
@@ -1753,6 +1754,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('petty_cash_expense_summary')->name('petty_cash_expense_summary.')->group(function (){
             Route::get('', 'Admins\PettyCashExpenseSummaryReport@index')->name('index');
             Route::get('petty_cash_summary_report', 'Admins\PettyCashExpenseSummaryReport@pettyCashSummaryReportProcess')->name('petty_cash_summary_report');
+        });
+        Route::prefix('app_efficiency')->name('app_efficiency.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@app_efficiency_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@app_efficiency_list')->name('app_efficiency_list');
         });
     });
 
