@@ -25,10 +25,10 @@
                         @csrf
                         <input type="hidden" name="shipper_id" id="shipper_id" value="{{$shipper->id}}">
                         <div class="card-content">
-                            <div>
-
-                                <div class="box_parent_div">
-                                    @foreach($rate_statuses as $index => $rate_status)
+                            @foreach($rate_statuses as $index => $rate_status)
+                                <div>
+                                    <div class="box_parent_div">
+                                        <div class="parent_box_div_{{$rate_status->box_id}}">
                                         <div class="card-header border-success">
                                             <input type="hidden" name="box_ids[]" value="{{$rate_status->box_id}}">
                                             <div class="row">
@@ -540,9 +540,11 @@
                                                 @endif
                                             </div>
                                         </div>
-                                    @endforeach
+                                    </div>
                                 </div>
-                            </div>
+                                </div>
+                                </div>
+                            @endforeach
 
                             <div class="form-group text-center">
                                 <button id="add_more_rates_hubs" type="button" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Add Rates and Hub</button>
