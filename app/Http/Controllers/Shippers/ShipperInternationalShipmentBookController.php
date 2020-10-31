@@ -45,7 +45,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::join('international_rates_hubs as irh', 'irh.hub_id', '=', 'cities.hub_id')->where('irh.user_id', session('user_id'))->where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->get();
+        $consignee_cities = City::join('international_rates_hubs as irh', 'irh.hub_id', '=', 'cities.hub_id')->where('irh.user_id', session('user_id'))->where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->select('cities.id', 'cities.name', 'cities.hub_id')->get();
         $products = Product::orderBy('product_name')->get();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
