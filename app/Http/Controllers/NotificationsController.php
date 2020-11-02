@@ -4463,6 +4463,7 @@ class NotificationsController extends Controller
                                 ->where('s.user_id', $user->id)
                                 ->where('shipments_journey.shipper_status_id', 17)
                                 ->where('shipments_journey.created_at', '>=', $date)
+                                ->where('s.warehouse', 0)
                                 ->groupBy('s.id')
                                 ->get();
                             if (count($shipment_cancel) > 0) {
