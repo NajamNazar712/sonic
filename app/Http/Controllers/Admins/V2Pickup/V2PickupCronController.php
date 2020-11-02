@@ -38,6 +38,15 @@ class V2PickupCronController extends Controller
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
             foreach ($pickup_requests as $pickup_request) {
+                $pickup_request_shipments = $pickup_request->pickup_request_shipments->pluck('shipment_id')->toArray();
+                $cancelled_shipments_count = Shipment::whereIn('id', $pickup_request_shipments)->where('shipper_status_id', 17)->count();
+
+                if ($cancelled_shipments_count == $pickup_request->booked) {
+                    $pickup_request->status_id = 4;
+                    $pickup_request->save();
+                    continue;
+                }
+
                 $now = Carbon::now();
                 if($pickup_request->status_id != 3){
                     $pickup_request->status_id = 3;

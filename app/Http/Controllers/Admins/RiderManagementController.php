@@ -114,7 +114,7 @@ class RiderManagementController extends Controller
     }
 
     public function addRiderView(){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
     }
@@ -191,7 +191,7 @@ class RiderManagementController extends Controller
         return response()->json($route);
     }
     public function editRiderView($id){
-        $city = City::select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();

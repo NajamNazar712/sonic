@@ -2852,7 +2852,6 @@ class DeliveryController extends Controller
                 } else {
                     $delivery_note_data = DeliveryNote::find($delivery_note_id);
                     $delivery_note_data->last_updated_at = $current_time;
-                    $delivery_note_data->status_updated_at = $current_time;
                     $delivery_note_data->updated_by = Auth::id();
                     $delivery_note_data->save();
                     return redirect()->back()->with('success', 'Delivery Note updated successfully!');
@@ -2997,7 +2996,10 @@ class DeliveryController extends Controller
 //                            <td>Rs ' . number_format($shipment->received_amount) . '</td>
 //                    ';
 //
-                    $total_cod_amount += $shipment->received_amount;
+                    if(!($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1)){
+                        $total_cod_amount += $shipment->received_amount;
+                    }
+
 //                }
 //                else {
 //                    $shipment_details_row_start .= '

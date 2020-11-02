@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
@@ -50,7 +51,9 @@ class AdminParcelHistoryController extends Controller
     }
     public function index(Request $request){
         $riders = Rider::get();
-        $admins = Admin::get();
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
+            ->select('a.id as id', 'a.name as name')
+            ->whereNotIn('admin_roles.department_id', [1])->get();
         return view('admin.parcel_history.index')->with(['riders' => $riders, 'admins' => $admins]);
     }
 
@@ -64,6 +67,9 @@ class AdminParcelHistoryController extends Controller
             ->editColumn('tracking_number_link', function ($open_parcel) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$open_parcel->tracking_number' class='tracking' target='_blank'>$open_parcel->tracking_number</a></u>";
+            })
+            ->editColumn('user_mode', function($open_parcel) {
+            return ($open_parcel->user_mode == 1) ? 'Rider' : 'Admin';
             })
             ->editColumn('user', function($open_parcel) {
             return ($open_parcel->user_mode == 1) ? $open_parcel->rider_name : $open_parcel->admin_name;

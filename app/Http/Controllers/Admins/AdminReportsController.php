@@ -16,6 +16,8 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\StationRecoveryReportDeposit;
 use App\Http\Models\Shipment;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\V2Pickup\V2RiderPickupShipment;
 use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
@@ -3137,7 +3139,9 @@ use Yajra\Datatables\Datatables;
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
             $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
             $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
-            return view('admin.reports.overall_sales')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses, 'sales_persons' => $sales_persons]);
+
+            $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
+            return view('admin.reports.overall_sales')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories]);
         }
         public function overall_sales_list(Request $request){
                 $from = $request->get('search_date_from');
@@ -3207,7 +3211,9 @@ use Yajra\Datatables\Datatables;
                         ->where('is.id','=',
                             DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id)'));
                 })
-    			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges')
+                ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
+                ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
+    			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges','bc.name as business_shipment_type','ibs.international_tracking_number')
                 ->whereNotIn('shipments.shipper_status_id',[1,17])
                 ->whereBetween('sj.created_at', [$from,$to]);
     //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
@@ -3402,11 +3408,9 @@ use Yajra\Datatables\Datatables;
             if($status = $request->get('search_status')){
                 $datatable->where('ss.id', '=', $status);
             }
-            // if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            //     $from = $request->get('search_date_from');
-            //     $to = $request->get('search_date_to');
-            //     $datatable->whereBetween('sj.created_at', [$from,$to]);
-            // }
+            if($search_business_category = $request->get('search_business_category')){
+                $datatable->where('shipments.business_category_id', '=', $search_business_category);
+            }
             return $datatable->make(true);
         }
 
@@ -3670,24 +3674,18 @@ use Yajra\Datatables\Datatables;
         public function negative_balance_customers_list(Request $request)
         {
             $date = Carbon::now();
-            $from_date = $date->subDays(7)->toDateTimeString();
-            $to_date = Carbon::now()->toDateTimeString();
+            $from_date = $date->subDays(7)->startOfDay()->toDateTimeString();
 
-            $negative = DB::connection('reports')->table('pending_payment_shipments')->leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
-                ->leftjoin('users as u','u.id','=','s.user_id')
-                ->leftjoin('shipments as os', function($join) use($from_date, $to_date){
-                    $join->on('os.user_id','=','s.user_id')
-//                        ->where('shipments.user_id','u.id')
-                        ->whereBetween('os.created_at', [$from_date, $to_date]);
-                })
-                ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'),'os.created_at as duration')
+            $negative = DB::connection('reports')->table('pending_payment_shipments')->join('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
+                ->join('users as u','u.id','=','s.user_id')
+                ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
                 ->where('payable','<',0)
                 ->groupBy('u.id');
 
             $datatable = Datatables::of($negative)
                 ->setRowAttr([
                     'class' => function ($datatable) {
-                        if ($datatable->duration == null) {
+                        if ($datatable->shipment_exist == null) {
                             return 'bg-warning';
                         }
                     }
@@ -6767,6 +6765,29 @@ use Yajra\Datatables\Datatables;
                     $to = $request->get('search_date_to');
                     $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from,$to]);
                 }
+            return $datatable->make(true);
+        }
+
+        public function app_efficiency_index(){
+            return view('admin.reports.app_efficiency');
+        }
+        public function app_efficiency_list(Request $request){
+
+           $v2_rider_pickups = V2RiderPickup::join('v2_pickup_requests as vpr','vpr.id', '=' ,'v2_rider_pickups.pickup_request_id')
+               ->join('riders as r','r.id','=','vpr.current_rider_id')
+               ->join('user_shipping_infos as usi','usi.id','=','vpr.pickup_address_id')
+               ->join('users as u','u.id','=','usi.user_id')
+               ->join('cities as c','c.id','=','vpr.city_id')
+               ->join('cities as ci','c.id','=','ci.hub_id')
+               ->join('v2_pickup_request_statuses as vprs','vprs.id','=','vpr.status_id')
+               ->select('v2_rider_pickups.pickup_request_id as request_id','v2_rider_pickups.pickup_note_id as note_id','u.name as shipper_name','r.name as rider','usi.vendor as vendor','usi.pickup_address as address','c.name as city','ci.name as hub','v2_rider_pickups.created_at','vprs.name as status');
+
+           $datatable = Datatables::of($v2_rider_pickups);
+           if($request->get('search_date_from') && $request->get('search_date_to')){
+               $from = $request->get('search_date_from');
+               $to = $request->get('search_date_to');
+               $datatable->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
+           }
             return $datatable->make(true);
         }
     }

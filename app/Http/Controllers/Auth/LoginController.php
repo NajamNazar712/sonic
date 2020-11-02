@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
@@ -186,6 +187,11 @@ class LoginController extends Controller
             session(['prefix' => $shipment_pre_book->prefix]);
         }
         session(['packaging_charges_check' => $packaging_charges_check]);
+
+        $international_rate_status = InternationalUsersInformation::where('user_id', $user->id)->where('status', 1);
+        if($international_rate_status->exists()){
+            session(['international_rates' => TRUE]);
+        }
         return redirect()->route('cod.welcome');
     }
 

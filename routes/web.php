@@ -83,6 +83,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@corporate_excel_index')->name('index');
                 Route::post('', 'Shippers\ShipperShipmentBookController@corporate_excel_store')->name('store');
             });
+            Route::prefix('international')->name('international.')->group(function () {
+                Route::get('', 'Shippers\ShipperInternationalShipmentBookController@index')->name('index');
+                Route::post('', 'Shippers\ShipperInternationalShipmentBookController@store')->name('store');
+                Route::prefix('excel')->name('excel_')->group(function () {
+                    Route::get('', 'Shippers\ShipperInternationalShipmentBookController@excel_index')->name('index');
+                    Route::post('', 'Shippers\ShipperInternationalShipmentBookController@excel_store')->name('store');
+                });
+            });
         });
 
         Route::resource('book', 'Shippers\ShipperShipmentBookController');
@@ -525,9 +533,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/city', 'Admins\AdminDashboardController@cityView')->name('city.index');
         Route::get('/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('city.ajax');
         Route::get('/city/form', 'Admins\AdminDashboardController@getCityForm')->name('city.form');
+        Route::get('/international/city/form', 'Admins\AdminDashboardController@getInternationalCityForm')->name('international.city.form');
         Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
+        Route::get('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditInternationalCityForm')->name('international.city.edit');
         Route::put('/city/{id}/edit/form', 'Admins\AdminDashboardController@updateCity')->name('city.edit');
-        Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
+        Route::put('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@updateInternationalCity')->name('city.edit');
+        Route::post('/international/city', 'Admins\AdminDashboardController@addInternationalCityHub')->name('international.city');
         Route::put('/city/status', 'Admins\AdminDashboardController@CityStatus')->name('city.status');
         Route::get('/city/{id}/status/ajax', 'Admins\AdminDashboardController@CityStatusCheck')->name('city.status.ajax');
         Route::get('', 'Admins\AdminDashboardController@walk_in_city_list')->name('city_list');
@@ -599,11 +610,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('add')->name('add.')->group(function () {
                 Route::get('', 'Admins\AdminZonalManagementController@add_index')->name('index');
                 Route::post('', 'Admins\AdminZonalManagementController@add_store')->name('store');
+                Route::get('/international', 'Admins\AdminZonalManagementController@add_international_index')->name('international.index');
+                Route::post('/international', 'Admins\AdminZonalManagementController@add_international_store')->name('international.store');
             });
 
             Route::prefix('update/{id}')->name('update.')->group(function () {
                 Route::get('', 'Admins\AdminZonalManagementController@update_index')->name('index');
                 Route::post('', 'Admins\AdminZonalManagementController@update_store')->name('store');
+            });
+
+            Route::prefix('update/international/{id}')->name('update.international.')->group(function () {
+                Route::get('', 'Admins\AdminZonalManagementController@update_international_index')->name('index');
+                Route::post('', 'Admins\AdminZonalManagementController@update_international_store')->name('store');
             });
 
             Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
@@ -1265,7 +1283,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminUserRequestController@user_save_index')->name('index');
                 Route::post('', 'Admins\AdminUserRequestController@user_save')->name('store');
             });
-
+            Route::post('forward', 'Admins\AdminUserRequestController@forward')->name('forward');
         });
 
     });
@@ -1408,6 +1426,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_list')->name('list');
             Route::post('paid', 'Admins\AdminPettyCashController@approved_petty_cash_statements_paid')->name('paid');
             Route::post('adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_adjusted')->name('adjusted');
+            Route::post('bulk_adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_bulk_adjusted')->name('bulk_adjusted');
         });
         Route::prefix('rejected')->name('rejected.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@rejected_petty_cash_statements_index')->name('index');
@@ -1735,6 +1754,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('petty_cash_expense_summary')->name('petty_cash_expense_summary.')->group(function (){
             Route::get('', 'Admins\PettyCashExpenseSummaryReport@index')->name('index');
             Route::get('petty_cash_summary_report', 'Admins\PettyCashExpenseSummaryReport@pettyCashSummaryReportProcess')->name('petty_cash_summary_report');
+        });
+        Route::prefix('app_efficiency')->name('app_efficiency.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@app_efficiency_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@app_efficiency_list')->name('app_efficiency_list');
         });
     });
 
@@ -2303,5 +2326,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
 	Route::prefix('trax_directory')->name('trax_directory.')->group(function () {
         Route::get('', 'Admins\AdminTraxDirectory@index')->name('index');
         Route::get('list', 'Admins\AdminTraxDirectory@list')->name('list');
-    });});
+    });
+
+	Route::prefix('international')->name('international.')->group(function(){
+        Route::prefix('tracking_upload')->name('tracking_upload.')->group(function () {
+            Route::get('', 'Admins\AdminInternationalShipmentsController@tracking_upload_index')->name('index');
+            Route::get('list', 'Admins\AdminInternationalShipmentsController@tracking_upload_list')->name('list');
+            Route::post('store', 'Admins\AdminInternationalShipmentsController@tracking_upload_store')->name('store');
+            Route::get('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit_info')->name('edit');
+            Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
+        });
+        Route::prefix('rates')->name('rates.')->group(function () {
+            Route::prefix('add')->name('add.')->group(function () {
+                Route::get('{id}','Admins\AdminInternationalRatesController@add_rates_index')->name('index');
+                Route::post('submit','Admins\AdminInternationalRatesController@add_rates_submit')->name('submit');
+            });
+
+			Route::prefix('edit')->name('edit.')->group(function () {
+                Route::get('{id}','Admins\AdminInternationalRatesController@edit_rates_index')->name('index');
+                Route::post('submit','Admins\AdminInternationalRatesController@edit_rates_submit')->name('submit');
+                Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
+            });
+
+            Route::prefix('view')->name('view.')->group(function () {
+                Route::get('{id}','Admins\AdminInternationalRatesController@view_rates_index')->name('index');
+            });
+        });
+    });
+});
 
