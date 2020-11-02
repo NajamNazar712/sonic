@@ -25,10 +25,9 @@
                         @csrf
                         <input type="hidden" name="shipper_id" id="shipper_id" value="{{$shipper->id}}">
                         <div class="card-content">
-                            @foreach($rate_statuses as $index => $rate_status)
-                                <div>
-                                    <div class="box_parent_div">
-                                        <div class="parent_box_div_{{$rate_status->box_id}}">
+                            <div class="box_parent_div">
+                                @foreach($rate_statuses as $index => $rate_status)
+                                    <div class="parent_box_div_{{$rate_status->box_id}}">
                                         <div class="card-header border-success">
                                             <input type="hidden" name="box_ids[]" value="{{$rate_status->box_id}}">
                                             <div class="row">
@@ -36,11 +35,11 @@
                                                     @php
                                                         $count = $index + 1;
                                                     @endphp
-                                                    <h3 class="display-inline card-title lead success">International Rates {{$rate_status->box_id}}</h3>
+                                                    <h3 class="display-inline card-title lead success">International Rates {{$count}}</h3>
                                                 </div>
                                                 @if($rate_status->box_id != 1)
                                                     <div class="col-md-6 text-right">
-                                                        <span class="btn btn-danger rounded btn-sm-width rate_box_close" box="{{$rate_status->box_id}}">
+                                                        <span class="btn btn-danger rounded btn-sm-width rate_box_close_{{$rate_status->box_id}}" box="{{$rate_status->box_id}}">
                                                             <i class="ft-trash"></i>
                                                         </span>
                                                     </div>
@@ -50,347 +49,431 @@
                                         <div class="card border-success">
                                             <div class="card-content">
                                                 <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-2">
-                                                            <h3>Add Hubs</h3>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <div class="form-group card border-success p-2">
-                                                                <select name="hubs[{{$rate_status->box_id}}][]" id="select_box_{{$rate_status->box_id}}" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                                                    @foreach($cities as $city)
-                                                                        <option value="{{$city->id}}">{{$city->name}}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
+                                                <div class="row">
+                                                    <div class="col-2">
+                                                        <h3>Add Hubs</h3>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-group card border-success p-2">
+                                                            <select name="hubs[{{$rate_status->box_id}}][]" id="select_box_{{$rate_status->box_id}}" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                                                @foreach($cities as $city)
+                                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
-                                                    <div id="wa_rows_div_{{$count}}">
-                                                        <div class="row">
-                                                            <div class="col-md-2">
-                                                                <h3 class="card-title">Weight Charges</h3>
-                                                            </div>
-
+                                                </div>
+                                                <div id="wa_rows_div_{{$count}}">
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <h3 class="card-title">Weight Charges</h3>
                                                         </div>
-                                                        <div class="row">
-                                                            <div class="col text-center">
-                                                                <label class="card-title">Range Up</label>
-                                                            </div>
-                                                            <div class="col text-center">
-                                                                <label class="card-title">Range Down</label>
-                                                            </div>
-                                                            <div class="col text-center">
-                                                                <label class="card-title">Weight Addition</label>
-                                                            </div>
-                                                            <div class="col text-center">
-                                                                <label class="card-title">KG Range</label>
-                                                            </div>
-                                                            <div class="col text-center">
-                                                                <label class="card-title">Local Charges</label>
-                                                            </div>
-                                                            <div class="col-1 text-center">
-                                                            </div>
+
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Up</label>
                                                         </div>
-                                                        @if(isset($weight_charges))
-                                                            @php
-                                                                $w_index = 1;
-                                                            @endphp
-                                                            @foreach($weight_charges as $weight_charge)
-                                                                <div class="row" id="wa_row_{{$rate_status->box_id}}">
-                                                                    @if($weight_charge->box_id == $rate_status->box_id)
-                                                                        <div class="col text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_up[{{$rate_status->box_id}}][{{$w_index}}]" value="{{$weight_charge->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col text-center">
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Down</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Weight Addition</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">KG Range</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Local Charges</label>
+                                                        </div>
+                                                        <div class="col-1 text-center">
+                                                        </div>
+                                                    </div>
+                                                    @if(isset($weight_charges))
+                                                        @php
+                                                            $w_index = 1;
+                                                        @endphp
+                                                        @foreach($weight_charges as $weight_charge)
+                                                            <div class="row" id="wa_row_{{$rate_status->box_id}}">
+                                                                @if($weight_charge->box_id == $rate_status->box_id)
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_up[{{$rate_status->box_id}}][{{$w_index}}]" value="{{$weight_charge->range_up}}">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
 
-                                                                            <fieldset class="form-group">
-                                                                                <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_down[{{$rate_status->box_id}}][{{$w_index}}]" value="{{$weight_charge->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_down[{{$rate_status->box_id}}][{{$w_index}}]" value="{{$weight_charge->range_down}}">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
 
-                                                                            <div class="form-group " style="padding-top: 8px;">
-                                                                                <input type="checkbox" class="switchery wa_switch" data-color="success" data-size="sm" name="wa_switch[{{$rate_status->box_id}}][{{$w_index}}]" {{ ($weight_charge->weight_addition == 1) ? 'checked' : '' }}>
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" class="switchery wa_switch" data-color="success" data-size="sm" name="wa_switch[{{$rate_status->box_id}}][{{$w_index}}]" {{ ($weight_charge->weight_addition == 1) ? 'checked' : '' }}>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-2 text-center">
+
+                                                                        <fieldset style="padding-top: 5px;">
+                                                                            <div class="input-group input-group-sm form-group">
+                                                                                <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[{{$rate_status->box_id}}][{{$w_index}}]" data-rule-required="true" data-msg-required="This field is required" value="{{$weight_charge->spkg}}">
                                                                             </div>
-                                                                        </div>
-                                                                        <div class="col-2 text-center">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="local_charges[{{$rate_status->box_id}}][{{$w_index}}]" value="{{$weight_charge->local_charges}}">
+                                                                        </fieldset>
+                                                                    </div>
 
-                                                                            <fieldset style="padding-top: 5px;">
-                                                                                <div class="input-group input-group-sm form-group">
-                                                                                    <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[{{$rate_status->box_id}}][{{$w_index}}]" data-rule-required="true" data-msg-required="This field is required" value="{{$weight_charge->spkg}}">
-                                                                                </div>
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="local_charges[{{$rate_status->box_id}}][{{$w_index}}]" value="{{$weight_charge->local_charges}}">
-                                                                            </fieldset>
-                                                                        </div>
+                                                                    <div class="col-1">
+                                                                    </div>
+                                                                    @php
+                                                                        $w_index++;
+                                                                    @endphp
+                                                                @endif
+                                                            </div>
+                                                        @endforeach
+                                                    @endif
 
-                                                                        <div class="col-1">
-                                                                        </div>
-                                                                        @php
-                                                                            $w_index++;
-                                                                        @endphp
-                                                                    @endif
+                                                </div>{{--weight addition div--}}
+                                                <div>
+                                                    <button type="button" class="btn btn-outline-success mr-1 wa_btn_{{$rate_status->box_id}}" title="Add more slabs"><i class="la la-plus"></i></button>
+                                                </div>
+
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <h3 class="card-title">Cash Handling Charges</h3>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group ">
+                                                            <input type="checkbox" name="cash_handling_switch_{{$rate_status->box_id}}" id="cash_handling_switch_{{$rate_status->box_id}}" class="switchery cash_handling_switch_{{$rate_status->box_id}}" data-color="success" data-size="sm" {{ ($rate_status->cash_handling_charges == 1) ? 'checked' : '' }}/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-2 text-center">
+                                                        <label class="card-title">Range Up</label>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <label class="card-title">Range Down</label>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <label class="card-title">Charges</label>
+                                                    </div>
+                                                </div>
+
+                                                @if(isset($cash_handling_charges))
+                                                    @php
+                                                        $ch_index = 1;
+                                                    @endphp
+                                                    <div class="cash-handling-div-{{$rate_status->box_id}} slabs">
+                                                        @foreach($cash_handling_charges as $cash_handling_charge)
+                                                            @if($cash_handling_charge->box_id == $rate_status->box_id)
+                                                                <div class="row">
+                                                                    <div class="col-md-2 text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input name="cash_range_up[{{$rate_status->box_id}}][{{$ch_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{$cash_handling_charge->range_up}}">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col-md-2 text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input name="cash_range_down[{{$rate_status->box_id}}][{{$ch_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{$cash_handling_charge->range_down}}">
+                                                                        </fieldset>
+                                                                    </div>
+
+                                                                    <div class="col-md-2 text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input name="cash_charges[{{$rate_status->box_id}}][{{$ch_index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash_handling_charge->charges}}">
+                                                                        </fieldset>
+                                                                    </div>
+
+                                                                    <div class="col">
+                                                                    </div>
                                                                 </div>
-                                                            @endforeach
+                                                                @php
+                                                                    $ch_index++;
+                                                                @endphp
+                                                            @endif
+                                                        @endforeach
+                                                        @if($ch_index == 1)
+                                                            <div class="row">
+                                                                <div class="col-md-2 text-center">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="cash_range_up[{{$rate_status->box_id}}][{{$ch_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col-md-2 text-center">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="cash_range_down[{{$rate_status->box_id}}][{{$ch_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2 text-center">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="cash_charges[{{$rate_status->box_id}}][{{$ch_index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required">
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col">
+                                                                </div>
+                                                            </div>
                                                         @endif
-
-                                                    </div>{{--weight addition div--}}
-                                                    <div>
-                                                        <button type="button" class="btn btn-outline-success mr-1 wa_btn_{{$rate_status->box_id}}" title="Add more slabs"><i class="la la-plus"></i></button>
                                                     </div>
+                                                @endif
+                                                <div class="cash-handling-btn">
+                                                    <button type="button" class="btn btn-outline-success mr-1 add_more_cash_slabs_{{$rate_status->box_id}}" title="Add more slabs" ><i class="la la-plus"></i></button>
+                                                </div>
+                                                <hr>
 
-                                                    <hr>
-                                                    <div class="row">
-                                                        <div class="col-md-2">
-                                                            <h3 class="card-title">Cash Handling Charges</h3>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <div class="form-group ">
-                                                                <input type="checkbox" name="cash_handling_switch_{{$rate_status->box_id}}" class="switchery cash_handling_switch" data-color="success" data-size="sm" {{ ($rate_status->cash_handling_charges == 1) ? 'checked' : '' }}/>
-                                                            </div>
-                                                        </div>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <h3 class="card-title">Insurance Charges</h3>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-md-2 text-center">
-                                                            <label class="card-title">Range Up</label>
-                                                        </div>
-                                                        <div class="col-md-2 text-center">
-                                                            <label class="card-title">Range Down</label>
-                                                        </div>
-                                                        <div class="col-md-2 text-center">
-                                                            <label class="card-title">Charges</label>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group ">
+                                                            <input type="checkbox" name="insurance_charges_switch_{{$rate_status->box_id}}" id="insurance_charges_switch_{{$rate_status->box_id}}" class="switchery insurance_charges_switch_{{$rate_status->box_id}}" data-color="success" data-size="sm" {{ ($rate_status->insurance_charges == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-2 text-center">
+                                                        <label class="card-title">Range Up</label>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <label class="card-title">Range Down</label>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <label class="card-title">Charges</label>
+                                                    </div>
+                                                </div>
 
-                                                    @if(isset($cash_handling_charges))
-                                                        @php
-                                                            $ch_index = 1;
-                                                        @endphp
-                                                        <div class="cash-handling-div-{{$rate_status->box_id}} slabs">
-                                                            @foreach($cash_handling_charges as $cash_handling_charge)
-                                                                @if($cash_handling_charge->box_id == $rate_status->box_id)
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="cash_range_up[{{$rate_status->box_id}}][{{$ch_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{$cash_handling_charge->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="cash_range_down[{{$rate_status->box_id}}][{{$ch_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{$cash_handling_charge->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="cash_charges[{{$rate_status->box_id}}][{{$ch_index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash_handling_charge->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-
-                                                                        <div class="col">
-                                                                        </div>
-                                                                    </div>
-                                                                    @php
-                                                                        $ch_index++;
-                                                                    @endphp
-                                                                @endif
-                                                            @endforeach
-                                                            @if($ch_index == 1)
+                                                @if(isset($insurance_charges))
+                                                    @php
+                                                        $in_index = 1;
+                                                    @endphp
+                                                    <div class="insurance-charges-div-{{$rate_status->box_id}} slabs">
+                                                        @foreach($insurance_charges as $insurance_charge)
+                                                            @if($insurance_charge->box_id == $rate_status->box_id)
                                                                 <div class="row">
                                                                     <div class="col-md-2 text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input name="cash_range_up[{{$rate_status->box_id}}][{{$ch_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                                            <input name="ins_range_up[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{$insurance_charge->range_up}}">
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-md-2 text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input name="cash_range_down[{{$rate_status->box_id}}][{{$ch_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                                            <input name="ins_range_down[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{$insurance_charge->range_down}}">
                                                                         </fieldset>
                                                                     </div>
 
                                                                     <div class="col-md-2 text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input name="cash_charges[{{$rate_status->box_id}}][{{$ch_index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required">
+                                                                            <input name="ins_charges[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent" value="{{$insurance_charge->charges}}">
                                                                         </fieldset>
                                                                     </div>
 
                                                                     <div class="col">
                                                                     </div>
+
                                                                 </div>
+
+                                                                @php
+                                                                    $in_index++;
+                                                                @endphp
                                                             @endif
-                                                        </div>
-                                                    @endif
-                                                    <div class="cash-handling-btn">
-                                                        <button type="button" class="btn btn-outline-success mr-1 add_more_cash_slabs_{{$rate_status->box_id}}" title="Add more slabs" ><i class="la la-plus"></i></button>
-                                                    </div>
-                                                    <hr>
+                                                        @endforeach
+                                                        @if($in_index == 1)
+                                                            <div class="row">
+                                                                <div class="col-md-2 text-center">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="ins_range_up[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col-md-2 text-center">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="ins_range_down[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
+                                                                    </fieldset>
+                                                                </div>
 
-                                                    <div class="row">
-                                                        <div class="col-md-2">
-                                                            <h3 class="card-title">Insurance Charges</h3>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <div class="form-group ">
-                                                                <input type="checkbox" name="insurance_charges_switch_{{$rate_status->box_id}}" class="switchery insurance_charges_switch" data-color="success" data-size="sm" {{ ($rate_status->insurance_charges == 1) ? 'checked' : '' }}/>
+                                                                <div class="col-md-2 text-center">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="ins_charges[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent">
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col">
+                                                                </div>
                                                             </div>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                                <div class="insurance-charges-btn">
+                                                    <button type="button" class="btn btn-outline-success mr-1 add_more_ins_slabs_{{$rate_status->box_id}}" title="Add more slabs"><i class="la la-plus"></i></button>
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <h3 class="card-title">Return Charges</h3>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group ">
+                                                            <input type="checkbox" name="return_charges_switch_{{$rate_status->box_id}}" id="return_charges_switch_{{$rate_status->box_id}}" class="switchery return_charges_switch_{{$rate_status->box_id}}" data-color="success" data-size="sm" {{ ($rate_status->return_charges == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-md-2 text-center">
-                                                            <label class="card-title">Range Up</label>
-                                                        </div>
-                                                        <div class="col-md-2 text-center">
-                                                            <label class="card-title">Range Down</label>
-                                                        </div>
-                                                        <div class="col-md-2 text-center">
-                                                            <label class="card-title">Charges</label>
-                                                        </div>
-                                                    </div>
+                                                </div>
 
-                                                    @if(isset($insurance_charges))
+                                                @if(isset($return_charges))
+                                                    <div class="row return-charges-div-{{$rate_status->box_id}}">
                                                         @php
-                                                            $in_index = 1;
+                                                            $return_check = false;
                                                         @endphp
-                                                        <div class="insurance-charges-div-{{$rate_status->box_id}} slabs">
-                                                            @foreach($insurance_charges as $insurance_charge)
-                                                                @if($insurance_charge->box_id == $rate_status->box_id)
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="ins_range_up[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{$insurance_charge->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="ins_range_down[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{$insurance_charge->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="ins_charges[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent" value="{{$insurance_charge->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-
-                                                                        <div class="col">
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                    @php
-                                                                        $in_index++;
-                                                                    @endphp
-                                                                @endif
-                                                            @endforeach
-                                                            @if($in_index == 1)
-                                                                <div class="row">
-                                                                    <div class="col-md-2 text-center">
-                                                                        <fieldset class="form-group">
-                                                                            <input name="ins_range_up[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
-                                                                        </fieldset>
-                                                                    </div>
-                                                                    <div class="col-md-2 text-center">
-                                                                        <fieldset class="form-group">
-                                                                            <input name="ins_range_down[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
-                                                                        </fieldset>
-                                                                    </div>
-
-                                                                    <div class="col-md-2 text-center">
-                                                                        <fieldset class="form-group">
-                                                                            <input name="ins_charges[{{$rate_status->box_id}}][{{$in_index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent">
-                                                                        </fieldset>
-                                                                    </div>
-
-                                                                    <div class="col">
-                                                                    </div>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                    @endif
-                                                    <div class="insurance-charges-btn">
-                                                        <button type="button" class="btn btn-outline-success mr-1 add_more_ins_slabs_{{$rate_status->box_id}}" title="Add more slabs"><i class="la la-plus"></i></button>
-                                                    </div>
-                                                    <hr>
-                                                    <div class="row">
-                                                        <div class="col-md-2">
-                                                            <h3 class="card-title">Return Charges</h3>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <div class="form-group ">
-                                                                <input type="checkbox" name="return_charges_switch_{{$rate_status->box_id}}" class="switchery return_charges_switch" data-color="success" data-size="sm" {{ ($rate_status->return_charges == 1) ? 'checked' : '' }}/>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    @if(isset($return_charges))
-                                                        <div class="row return-charges-div-{{$rate_status->box_id}}">
-                                                            @php
-                                                                $return_check = false;
-                                                            @endphp
-                                                            @foreach($return_charges as $return_charge)
-                                                                @if($return_charge->box_id == $rate_status->box_id)
-                                                                    <div class="col-3 text-center">
-                                                                        <label class="card-title">Local Charges</label>
-                                                                        <fieldset class="form-group">
-                                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_{{$rate_status->box_id}}" value="{{$return_charge->local}}">
-                                                                        </fieldset>
-                                                                    </div>
-                                                                    @php
-                                                                        $return_check = true;
-                                                                    @endphp
-                                                                @endif
-                                                            @endforeach
-                                                            @if($return_check = false)
+                                                        @foreach($return_charges as $return_charge)
+                                                            @if($return_charge->box_id == $rate_status->box_id)
                                                                 <div class="col-3 text-center">
                                                                     <label class="card-title">Local Charges</label>
                                                                     <fieldset class="form-group">
-                                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_{{$rate_status->box_id}}">
+                                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_{{$rate_status->box_id}}" value="{{$return_charge->local}}">
                                                                     </fieldset>
                                                                 </div>
+                                                                @php
+                                                                    $return_check = true;
+                                                                @endphp
                                                             @endif
-                                                        </div>
-                                                    @else
-                                                        <div class="row return-charges-div-{{$rate_status->box_id}}">
+                                                        @endforeach
+                                                        @if($return_check = false)
                                                             <div class="col-3 text-center">
                                                                 <label class="card-title">Local Charges</label>
                                                                 <fieldset class="form-group">
                                                                     <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_{{$rate_status->box_id}}">
                                                                 </fieldset>
                                                             </div>
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    <div class="row return-charges-div-{{$rate_status->box_id}}">
+                                                        <div class="col-3 text-center">
+                                                            <label class="card-title">Local Charges</label>
+                                                            <fieldset class="form-group">
+                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_{{$rate_status->box_id}}">
+                                                            </fieldset>
                                                         </div>
-                                                    @endif
-                                                </div>
+                                                    </div>
+                                                @endif
+                                            </div>
                                                 <hr>
                                                 <div class="col">
-                                                    <div class="">
-                                                        <h3 class="card-title">Discount Rates</h3>
-                                                    </div>
-                                                    @if(isset($discount_charges[$rate_status->box_id]))
-                                                        <div class="row mt-1">
-                                                            <div class="col-md-6">
-                                                                <label class="">Title</label>
-                                                                <div class='form-group'>
-                                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" name="discount_title_{{$rate_status->box_id}}" value="{{$discount_charges[$rate_status->box_id]['title']}}">
-                                                                </div>
-
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="">Apply [to - from]</label>
-                                                                <div class='input-group form-group'>
-                                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" name="daterange_{{$rate_status->box_id}}" value="{{$discount_charges[$rate_status->box_id]['date']}}/>
-                                                                    <div class="input-group-append">
-                                                                    <span class="input-group-text">
-                                                                      <span class="la la-calendar"></span>
-                                                                    </span>
-                                                                </div>
+                                                <div class="">
+                                                    <h3 class="card-title">Discount Rates</h3>
+                                                </div>
+                                                @if(isset($discount_charges[$rate_status->box_id]))
+                                                    <div class="row mt-1">
+                                                        <div class="col-md-6">
+                                                            <label class="">Title</label>
+                                                            <div class='form-group'>
+                                                                <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" name="discount_title_{{$rate_status->box_id}}" value="{{$discount_charges[$rate_status->box_id]['title']}}">
                                                             </div>
 
                                                         </div>
-                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label class="">Apply [to - from]</label>
+                                                            <div class='input-group form-group'>
+                                                                <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" name="daterange_{{$rate_status->box_id}}" value="{{$discount_charges[$rate_status->box_id]['date']}}/>
+                                                                <div class="input-group-append">
+                                                                <span class="input-group-text">
+                                                                  <span class="la la-calendar"></span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                <div class="row">
+                                                <div class="col text-center">
+                                                    <fieldset>
+                                                        <div class="input-group input-group-sm form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text" id="">Weight</span>
+                                                            </div>
+                                                            <div class="input-group-prepend">
+                                                                  <span class="input-group-text">
+                                                                    <input type="checkbox" class="switchery discount_switch_{{$rate_status->box_id}}" name="discount_weight_switch_{{$rate_status->box_id}}" id="discount_weight_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['weight'] != null) ? 'checked' : '' }}/>
+                                                                  </span>
+                                                            </div>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_weight_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['weight'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['weight']}}">
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <fieldset>
+                                                        <div class="input-group input-group-sm form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text" id="">Cash</span>
+                                                            </div>
+                                                            <div class="input-group-prepend">
+                                                                  <span class="input-group-text" id="">
+                                                                    <input type="checkbox" name="discount_cash_switch_{{$rate_status->box_id}}" id="discount_cash_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['cash'] != null) ? 'checked' : '' }}/>
+                                                                  </span>
+                                                            </div>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_cash_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['cash'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['cash']}}">
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <fieldset>
+                                                        <div class="input-group input-group-sm form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text" id="">Insurance</span>
+                                                            </div>
+                                                            <div class="input-group-prepend">
+                                                                  <span class="input-group-text" id="">
+                                                                    <input type="checkbox" name="discount_insurance_switch_{{$rate_status->box_id}}" id="discount_insurance_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['insurance'] != null) ? 'checked' : '' }}/>
+                                                                  </span>
+                                                            </div>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_insurance_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['insurance'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['insurance']}}">
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <fieldset>
+                                                        <div class="input-group input-group-sm form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text" id="">Return</span>
+                                                            </div>
+                                                            <div class="input-group-prepend">
+                                                                  <span class="input-group-text">
+                                                                    <input type="checkbox"  class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" name="discount_return_switch_{{$rate_status->box_id}}" id="discount_return_switch_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['return'] != null) ? 'checked' : '' }}/>
+                                                                  </span>
+                                                            </div>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_return_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['return'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['return']}}">
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+                                            </div>
+                                            @else
+                                                <div class="row mt-1">
+                                                    <div class="col-md-6">
+                                                        <label class="">Title</label>
+                                                        <div class='form-group'>
+                                                            <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" disabled name="discount_title_{{$rate_status->box_id}}">
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="">Apply [to - from]</label>
+                                                        <div class='input-group form-group'>
+                                                            <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" disabled name="daterange_{{$rate_status->box_id}}"/>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">
+                                                                  <span class="la la-calendar"></span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="row">
                                                     <div class="col text-center">
                                                         <fieldset>
                                                             <div class="input-group input-group-sm form-group">
@@ -398,11 +481,11 @@
                                                                     <span class="input-group-text" id="">Weight</span>
                                                                 </div>
                                                                 <div class="input-group-prepend">
-                                                                      <span class="input-group-text">
-                                                                        <input type="checkbox" class="switchery discount_switch_{{$rate_status->box_id}}" name="discount_weight_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['weight'] != null) ? 'checked' : '' }}/>
-                                                                      </span>
+                                                                  <span class="input-group-text">
+                                                                    <input type="checkbox" class="switchery discount_switch_{{$rate_status->box_id}}" name="discount_weight_switch_{{$rate_status->box_id}}" id="discount_weight_switch_{{$rate_status->box_id}}" data-size="xs" />
+                                                                  </span>
                                                                 </div>
-                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_weight_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['weight'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['weight']}}">
+                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_weight_{{$rate_status->box_id}}" disabled>
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -413,11 +496,11 @@
                                                                     <span class="input-group-text" id="">Cash</span>
                                                                 </div>
                                                                 <div class="input-group-prepend">
-                                                                      <span class="input-group-text" id="">
-                                                                        <input type="checkbox" name="discount_cash_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['cash'] != null) ? 'checked' : '' }}/>
-                                                                      </span>
+                                                                  <span class="input-group-text" id="">
+                                                                    <input type="checkbox" name="discount_cash_switch_{{$rate_status->box_id}}" id="discount_cash_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" />
+                                                                  </span>
                                                                 </div>
-                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_cash_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['cash'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['cash']}}">
+                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_cash_{{$rate_status->box_id}}" disabled>
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -428,11 +511,11 @@
                                                                     <span class="input-group-text" id="">Insurance</span>
                                                                 </div>
                                                                 <div class="input-group-prepend">
-                                                                      <span class="input-group-text" id="">
-                                                                        <input type="checkbox" name="discount_insurance_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['insurance'] != null) ? 'checked' : '' }}/>
-                                                                      </span>
+                                                                  <span class="input-group-text" id="">
+                                                                    <input type="checkbox" name="discount_insurance_switch_{{$rate_status->box_id}}" id="discount_insurance_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" />
+                                                                  </span>
                                                                 </div>
-                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_insurance_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['insurance'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['insurance']}}">
+                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_insurance_{{$rate_status->box_id}}" disabled>
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -443,108 +526,22 @@
                                                                     <span class="input-group-text" id="">Return</span>
                                                                 </div>
                                                                 <div class="input-group-prepend">
-                                                                      <span class="input-group-text">
-                                                                        <input type="checkbox"  class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" name="discount_return_switch_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['return'] != null) ? 'checked' : '' }}/>
-                                                                      </span>
+                                                                  <span class="input-group-text">
+                                                                    <input type="checkbox"  class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" name="discount_return_switch_{{$rate_status->box_id}}" id="discount_return_switch_{{$rate_status->box_id}}"/>
+                                                                  </span>
                                                                 </div>
-                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_return_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['return'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['return']}}">
+                                                                <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_return_{{$rate_status->box_id}}" disabled>
                                                             </div>
                                                         </fieldset>
                                                     </div>
                                                 </div>
-
-                                                @else
-                                                    <div class="row mt-1">
-                                                        <div class="col-md-6">
-                                                            <label class="">Title</label>
-                                                            <div class='form-group'>
-                                                                <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" disabled name="discount_title_{{$rate_status->box_id}}">
-                                                            </div>
-
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="">Apply [to - from]</label>
-                                                            <div class='input-group form-group'>
-                                                                <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" disabled name="daterange_{{$rate_status->box_id}}"/>
-                                                                <div class="input-group-append">
-                                                                    <span class="input-group-text">
-                                                                      <span class="la la-calendar"></span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col text-center">
-                                                            <fieldset>
-                                                                <div class="input-group input-group-sm form-group">
-                                                                    <div class="input-group-prepend">
-                                                                        <span class="input-group-text" id="">Weight</span>
-                                                                    </div>
-                                                                    <div class="input-group-prepend">
-                                                                      <span class="input-group-text">
-                                                                        <input type="checkbox" class="switchery discount_switch_{{$rate_status->box_id}}" name="discount_weight_switch_{{$rate_status->box_id}}" data-size="xs" />
-                                                                      </span>
-                                                                    </div>
-                                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_weight_{{$rate_status->box_id}}" disabled>
-                                                                </div>
-                                                            </fieldset>
-                                                        </div>
-                                                        <div class="col text-center">
-                                                            <fieldset>
-                                                                <div class="input-group input-group-sm form-group">
-                                                                    <div class="input-group-prepend">
-                                                                        <span class="input-group-text" id="">Cash</span>
-                                                                    </div>
-                                                                    <div class="input-group-prepend">
-                                                                      <span class="input-group-text" id="">
-                                                                        <input type="checkbox" name="discount_cash_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" />
-                                                                      </span>
-                                                                    </div>
-                                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_cash_{{$rate_status->box_id}}" disabled>
-                                                                </div>
-                                                            </fieldset>
-                                                        </div>
-                                                        <div class="col text-center">
-                                                            <fieldset>
-                                                                <div class="input-group input-group-sm form-group">
-                                                                    <div class="input-group-prepend">
-                                                                        <span class="input-group-text" id="">Insurance</span>
-                                                                    </div>
-                                                                    <div class="input-group-prepend">
-                                                                      <span class="input-group-text" id="">
-                                                                        <input type="checkbox" name="discount_insurance_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" />
-                                                                      </span>
-                                                                    </div>
-                                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_insurance_{{$rate_status->box_id}}" disabled>
-                                                                </div>
-                                                            </fieldset>
-                                                        </div>
-                                                        <div class="col text-center">
-                                                            <fieldset>
-                                                                <div class="input-group input-group-sm form-group">
-                                                                    <div class="input-group-prepend">
-                                                                        <span class="input-group-text" id="">Return</span>
-                                                                    </div>
-                                                                    <div class="input-group-prepend">
-                                                                      <span class="input-group-text">
-                                                                        <input type="checkbox"  class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" name="discount_return_switch_{{$rate_status->box_id}}"/>
-                                                                      </span>
-                                                                    </div>
-                                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_return_{{$rate_status->box_id}}" disabled>
-                                                                </div>
-                                                            </fieldset>
-                                                        </div>
-                                                    </div>
-                                                @endif
+                                            @endif
+                                        </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
 
                             <div class="form-group text-center">
                                 <button id="add_more_rates_hubs" type="button" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Add Rates and Hub</button>
@@ -680,10 +677,6 @@
                 regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
             });
 
-            var cashhandlingswitch = document.querySelector('.switchery.cash_handling_switch');
-            var insuranceChargesSwitch = document.querySelector('.switchery.insurance_charges_switch');
-            var returnChargesSwitch = document.querySelector('.switchery.return_charges_switch');
-
             $('.wa_switch').on('change',function(){
                 var wid = $(this).attr('name');
                 var wswitch = document.querySelector('input[name="'+ wid +'"]');
@@ -737,12 +730,15 @@
             });
 
             var box_no = box_id;
-            console.log(box_no);
+            var new_count = {{$count}}
             var wa_rows = @json($w_index);
             var cash_count = @json($ch_index);
             var ins_count = @json($in_index);
 
             @foreach($rate_statuses as $rate_status)
+            {{--var cashhandlingswitch = document.querySelector('.switchery.cash_handling_switch_{{$rate_status->box_id}}');--}}
+            {{--var insuranceChargesSwitch = document.querySelector('.switchery.insurance_charges_switch_{{$rate_status->box_id}}');--}}
+            {{--var returnChargesSwitch = document.querySelector('.switchery.return_charges_switch_{{$rate_status->box_id}}');--}}
                 $('body').on('click','button.wa_btn_{{$rate_status->box_id}}',function () {
                     let html = '<div class="row" id="wa_row_'+ {{$rate_status->box_id}} +'_'+ wa_rows +'">\n' +
                         '                                                    <div class="col text-center">\n' +
@@ -835,7 +831,7 @@
                         '                                                    <fieldset class="form-group">\n' +
                         '                                                        <input name="cash_charges['+ {{$rate_status->box_id}} +']['+cash_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent validated"></fieldset></div><div class="col">\n' +
                         '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 weight_close"><i class="ft-x"></i></span></div></div>';
-                    $('.cash-handling-div-1').append(htmdiv);
+                    $('.cash-handling-div-{{$rate_status->box_id}}').append(htmdiv);
                     masks();
                     $("#cash_handle_'+ {{$rate_status->box_id}} +'_"+cash_count+" .validated").each(function(){
                         $( this ).rules( "add", {
@@ -879,76 +875,86 @@
                     ins_count++;
                 });
 
-                cashhandlingswitch.onchange = function () {
-                    if(cashhandlingswitch.checked === true){
+                $('#cash_handling_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    console.log($(this).is(":checked"));
+                    console.log(1);
+                    if($(this).is(":checked") === true){
                         $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',false);
                         $('.cash-handling-btn-{{$rate_status->box_id}}').find('button').prop('disabled',false);
-                    }else if(cashhandlingswitch.checked === false){
+                    }else if($(this).is(":checked") === false){
                         $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
                         $('.cash-handling-btn-{{$rate_status->box_id}}').find('button').prop('disabled',true);
 
                     }
-                };
+                });
 
                 // InsuranceOvernight
-                insuranceChargesSwitch.onchange = function () {
-                    if(insuranceChargesSwitch.checked === true){
+                $('#insurance_charges_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    if($(this).is(":checked") === true){
                         $('.insurance-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',false);
                         $('.insurance-charges-btn-{{$rate_status->box_id}}').find('button').prop('disabled',false);
-                    }else if(insuranceChargesSwitch.checked === false){
+                    }else if($(this).is(":checked") === false){
                         $('.insurance-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
                         $('.insurance-charges-btn-{{$rate_status->box_id}}').find('button').prop('disabled',true);
 
                     }
-                };
+                });
 
                 // Return Overnight
-                returnChargesSwitch.onchange = function () {
-                    if(returnChargesSwitch.checked === true){
+                $('#return_charges_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    if($(this).is(":checked") === true){
                         $('.return-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',false);
-                    }else if(returnChargesSwitch.checked === false){
+                    }else if($(this).is(":checked") === false){
                         $('.return-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
-
                     }
-                };
+                });
 
                 //for discounts Overnight
-                var ondiscountSwitch = Array.prototype.slice.call(document.querySelectorAll('.discount_switch_{{$rate_status->box_id}}'));
+                {{--var ondiscountSwitch = Array.prototype.slice.call(document.querySelectorAll('.discount_switch_{{$rate_status->box_id}}'));--}}
 
 
-                ondiscountSwitch[0].onchange = function () {
-                    ONdiscount(ondiscountSwitch[0]);
-                };
-                ondiscountSwitch[1].onchange = function () {
-                    ONdiscount(ondiscountSwitch[1]);
-                };
-                ondiscountSwitch[2].onchange = function () {
-                    ONdiscount(ondiscountSwitch[2]);
-                };
-                ondiscountSwitch[3].onchange = function () {
-                    ONdiscount(ondiscountSwitch[3]);
-                };
+                $('#discount_weight_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    ONdiscount{{$rate_status->box_id}}($(this));
+                });
+                $('#discount_cash_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    ONdiscount{{$rate_status->box_id}}($(this));
+                });
+                $('#discount_insurance_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    ONdiscount{{$rate_status->box_id}}($(this));
+                });
+                $('#discount_return_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    ONdiscount{{$rate_status->box_id}}($(this));
+                });
 
-                function ONdiscount(eve) {
-                    if(eve.checked === true){
-
+                function ONdiscount{{$rate_status->box_id}}(eve) {
+                    console.log({{$rate_status->box_id}});
+                    if(eve.is(":checked") === true){
                         $(eve).parent().parent().next().prop('disabled',false);
                         $('input[name="discount_title_'+ {{$rate_status->box_id}} +'"]').prop('disabled',false);
                         $('input[name="daterange_'+ {{$rate_status->box_id}} +'"]').prop('disabled',false);
 
-                    }else if(eve.checked === false){
+                    }else if(eve.is(":checked") === false){
                         $(eve).parent().parent().next().prop('disabled',true);
 
-                        if(ondiscountSwitch[0].checked === true || ondiscountSwitch[1].checked === true || ondiscountSwitch[2].checked === true || ondiscountSwitch[3].checked === true){
+                        if($('#discount_weight_switch_{{$rate_status->box_id}}').is(":checked") === true || $('#discount_cash_switch_{{$rate_status->box_id}}').is(":checked") === true || $('#discount_insurance_switch_{{$rate_status->box_id}}').is(":checked") === true || $('#discount_return_switch_{{$rate_status->box_id}}').is(":checked") === true){
+                            console.log(false);
                             $('input[name="discount_title_'+ {{$rate_status->box_id}} + '"]').prop('disabled',false);
                             $('input[name="daterange_' + {{$rate_status->box_id}} + '"]').prop('disabled',false);
                         }else{
+                            console.log(true);
                             $('input[name="discount_title_' + {{$rate_status->box_id}} + '"]').prop('disabled',true);
                             $('input[name="daterange_' + {{$rate_status->box_id}} + '"]').prop('disabled',true);
                         }
 
                     }
                 }
+
+            var old_box_no = {{$rate_status->box_id}} - 1;
+            $('.rate_box_close_'+ old_box_no).parent().remove();
+            $('body').on('click', 'span.rate_box_close_{{$rate_status->box_id}}', function(){
+                var box = $(this).attr('box');
+                $('.parent_box_div_'+box).remove();
+            });
             @endforeach
 
             var cities = @json($cities);
@@ -960,14 +966,15 @@
 
             $('#add_more_rates_hubs').on('click', function () {
                 box_no++;
+                new_count++;
                 var box_div = '<div class="parent_box_div_'+ box_no +'"><div class="card-header border-success">\n' +
                     '                                    <input type="hidden" value="'+ box_no +'" name="box_ids[]">\n' +
                     '                                    <div class="row">\n' +
                     '                                        <div class="col-md-6">\n' +
-                    '                                            <h3 class="display-inline card-title lead success">International Rates '+ box_no +'</h3>\n' +
+                    '                                            <h3 class="display-inline card-title lead success">International Rates '+ new_count +'</h3>\n' +
                     '                                        </div>\n' +
                     '                                        <div class="col-md-6 text-right">\n' +
-                    '                                            <span class="btn btn-danger rounded btn-sm-width rate_box_close" box="'+ box_no +'"><i class="ft-trash"></i></span>\n' +
+                    '                                            <span class="btn btn-danger rounded btn-sm-width rate_box_close_'+ box_no +'" box="'+ box_no +'"><i class="ft-trash"></i></span>\n' +
                     '                                        </div>\n' +
                     '                                    </div>\n' +
                     '                                </div>\n' +
@@ -1533,17 +1540,16 @@
                     });
                     dynamic_ins_count++;
                 });
-
-
+                var old_box_no = box_no - 1;
+                $('.rate_box_close_'+ old_box_no).parent().remove();
+                $('body').on('click', 'span.rate_box_close_'+ box_no, function(){
+                    var box = $(this).attr('box');
+                    $('.parent_box_div_'+box).remove();
+                });
 
             });
             $('body').on('change', '#rate_remarks', function () {
                 $(this).val($(this).val().trim());
-            });
-            $('body').on('click', 'span.rate_box_close', function(){
-                var box = $(this).attr('box');
-                console.log($('.parent_box_div_'+box))
-                $('.parent_box_div_'+box).remove();
             });
             $('#accountRejectActiveSubmit').click(function() {
                 $('#RejectRatesModal').modal('show');
